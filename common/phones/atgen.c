@@ -217,7 +217,7 @@ static GSM_Error SoftReset(GSM_Data *data, GSM_Statemachine *state)
 
 	sprintf(req, "ATZ\r");
 	if (SM_SendMessage(state, 4, GOP_Init, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, GOP_Init);
+	return SM_BlockNoRetry(state, data, GOP_Init);
 }
 
 
@@ -227,7 +227,7 @@ static GSM_Error SetEcho(GSM_Data *data, GSM_Statemachine *state)
 
 	sprintf(req, "ATE1\r");
 	if (SM_SendMessage(state, 5, GOP_Init, req) != GE_NONE) return GE_NOTREADY;
-	return SM_Block(state, data, GOP_Init);
+	return SM_BlockNoRetry(state, data, GOP_Init);
 }
 
 
@@ -279,7 +279,7 @@ GSM_Error AT_SetMemoryType(GSM_MemoryType mt, GSM_Statemachine *state)
 		if (ret != GE_NONE)
 			return GE_NOTREADY;
 		GSM_DataClear(&data);
-		ret = SM_Block(state, &data, GOP_Init);
+		ret = SM_BlockNoRetry(state, &data, GOP_Init);
 		if (ret == GE_NONE)
 			memorytype = mt;
 	}
@@ -335,7 +335,7 @@ static GSM_Error SetCharset(GSM_Statemachine *state)
 		GSM_DataClear(&data);
 		*charsets = '\0';
 		data.Model = charsets;
-		ret = SM_Block(state, &data, GOPAT_GetCharset);
+		ret = SM_BlockNoRetry(state, &data, GOPAT_GetCharset);
 		if (ret != GE_NONE) {
 			*charsets = '\0';
 		}
@@ -346,7 +346,7 @@ static GSM_Error SetCharset(GSM_Statemachine *state)
 			if (ret != GE_NONE)
 				return GE_NOTREADY;
 			GSM_DataClear(&data);
-			ret = SM_Block(state, &data, GOP_Init);
+			ret = SM_BlockNoRetry(state, &data, GOP_Init);
 			if (ret == GE_NONE)
 				atcharset = CHARUCS2;
 		}
@@ -364,7 +364,7 @@ static GSM_Error SetCharset(GSM_Statemachine *state)
 				if (ret != GE_NONE)
 					return GE_NOTREADY;
 				GSM_DataClear(&data);
-				ret = SM_Block(state, &data, GOP_Init);
+				ret = SM_BlockNoRetry(state, &data, GOP_Init);
 				if (ret == GE_NONE)
 					atcharset = CHARHEXGSM;
 			} else {
@@ -373,7 +373,7 @@ static GSM_Error SetCharset(GSM_Statemachine *state)
 				if (ret != GE_NONE)
 					return GE_NOTREADY;
 				GSM_DataClear(&data);
-				ret = SM_Block(state, &data, GOP_Init);
+				ret = SM_BlockNoRetry(state, &data, GOP_Init);
 				if (ret == GE_NONE)
 					atcharset = CHARGSM;
 			}
@@ -401,7 +401,7 @@ static GSM_Error AT_GetCharset(GSM_Data *data, GSM_Statemachine *state)
 	ret = SM_SendMessage(state, 9, GOPAT_GetCharset, req);
 	if (ret != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOPAT_GetCharset);
+	return SM_BlockNoRetry(state, data, GOPAT_GetCharset);
 }
 
 
@@ -427,7 +427,7 @@ static GSM_Error AT_GetModel(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "AT+CGMM\r");
 	if (SM_SendMessage(state, 8, GOP_Identify, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_Identify);
+	return SM_BlockNoRetry(state, data, GOP_Identify);
 }
 
 
@@ -438,7 +438,7 @@ static GSM_Error AT_GetManufacturer(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "AT+CGMI\r");
 	if (SM_SendMessage(state, 8, GOP_Identify, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_Identify);
+	return SM_BlockNoRetry(state, data, GOP_Identify);
 }
 
 
@@ -449,7 +449,7 @@ static GSM_Error AT_GetRevision(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "AT+CGMR\r");
 	if (SM_SendMessage(state, 8, GOP_Identify, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_Identify);
+	return SM_BlockNoRetry(state, data, GOP_Identify);
 }
 
 
@@ -460,7 +460,7 @@ static GSM_Error AT_GetIMEI(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "AT+CGSN\r");
 	if (SM_SendMessage(state, 8, GOP_Identify, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_Identify);
+	return SM_BlockNoRetry(state, data, GOP_Identify);
 }
 
 
@@ -473,7 +473,7 @@ static GSM_Error AT_GetBattery(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "AT+CBC\r");
 	if (SM_SendMessage(state, 7, GOP_GetBatteryLevel, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_GetBatteryLevel);
+	return SM_BlockNoRetry(state, data, GOP_GetBatteryLevel);
 }
 
 
@@ -484,7 +484,7 @@ static GSM_Error AT_GetRFLevel(GSM_Data *data,  GSM_Statemachine *state)
 	sprintf(req, "AT+CSQ\r");
 	if (SM_SendMessage(state, 7, GOP_GetRFLevel, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_GetRFLevel);
+	return SM_BlockNoRetry(state, data, GOP_GetRFLevel);
 }
 
 
@@ -499,13 +499,13 @@ static GSM_Error AT_GetMemoryStatus(GSM_Data *data,  GSM_Statemachine *state)
 	sprintf(req, "AT+CPBS?\r");
 	if (SM_SendMessage(state, 9, GOP_GetMemoryStatus, req) != GE_NONE)
 		return GE_NOTREADY;
-	ret = SM_Block(state, data, GOP_GetMemoryStatus);
+	ret = SM_BlockNoRetry(state, data, GOP_GetMemoryStatus);
 	if (ret != GE_UNKNOWN)
 		return ret;
 	sprintf(req, "AT+CPBR=?\r");
 	if (SM_SendMessage(state, 10, GOP_GetMemoryStatus, req) != GE_NONE)
 		return GE_NOTREADY;
-	ret = SM_Block(state, data, GOP_GetMemoryStatus);
+	ret = SM_BlockNoRetry(state, data, GOP_GetMemoryStatus);
 	return ret;
 }
 
@@ -524,7 +524,7 @@ static GSM_Error AT_ReadPhonebook(GSM_Data *data,  GSM_Statemachine *state)
 	sprintf(req, "AT+CPBR=%d\r", data->PhonebookEntry->Location);
 	if (SM_SendMessage(state, strlen(req), GOP_ReadPhonebook, req) != GE_NONE)
 		return GE_NOTREADY;
-	ret = SM_Block(state, data, GOP_ReadPhonebook);
+	ret = SM_BlockNoRetry(state, data, GOP_ReadPhonebook);
 	return ret;
 }
 
@@ -578,7 +578,7 @@ static GSM_Error AT_SetPDUMode(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "AT+CMGF=0\r");
 	if (SM_SendMessage(state, 10, GOPAT_SetPDUMode, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOPAT_SetPDUMode);
+	return SM_BlockNoRetry(state, data, GOPAT_SetPDUMode);
 }
 
 static GSM_Error AT_SendSMS(GSM_Data *data, GSM_Statemachine *state)
@@ -658,7 +658,7 @@ static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)
 	dprintf("%s", req);
 	if (SM_SendMessage(state, strlen(req), GOP_GetSMS, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_GetSMS);
+	return SM_BlockNoRetry(state, data, GOP_GetSMS);
 }
 
 /* FIXME
@@ -674,7 +674,7 @@ static GSM_Error AT_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	if (SM_SendMessage(state, strlen(req), GOP_DeleteSMS, req) != GE_NONE)
  		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_DeleteSMS);
+	return SM_BlockNoRetry(state, data, GOP_DeleteSMS);
 */
 }
 
@@ -689,7 +689,7 @@ static GSM_Error AT_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "AT+CSCA?\r");
  	if (SM_SendMessage(state, 9, GOP_GetSMSCenter, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_GetSMSCenter);
+	return SM_BlockNoRetry(state, data, GOP_GetSMSCenter);
 }
 
 
@@ -699,7 +699,7 @@ static GSM_Error AT_GetSecurityCodeStatus(GSM_Data *data, GSM_Statemachine *stat
 	sprintf(req, "AT+CPIN?\r");
  	if (SM_SendMessage(state, 9, GOP_GetSecurityCodeStatus, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_GetSecurityCodeStatus);
+	return SM_BlockNoRetry(state, data, GOP_GetSecurityCodeStatus);
 }
 
 
@@ -714,7 +714,7 @@ static GSM_Error AT_EnterSecurityCode(GSM_Data *data, GSM_Statemachine *state)
 	sprintf(req, "AT+CPIN=\"%s\"\r", data->SecurityCode->Code);
  	if (SM_SendMessage(state, strlen(req), GOP_EnterSecurityCode, req) != GE_NONE)
 		return GE_NOTREADY;
-	return SM_Block(state, data, GOP_EnterSecurityCode);
+	return SM_BlockNoRetry(state, data, GOP_EnterSecurityCode);
 }
 
 
