@@ -25,6 +25,8 @@
                                                   (Marcus Godehardt)
     o rfcomm channel has uint8_t type              (Marcel Holtmann)
     o fix string -> bdaddr_t conversion in cfgreader     (Pawel Kot)
+    o use socket interface when the bluetooth in configured in
+      the .gnokiirc and tty interface otherwise          (Pawel Kot)
  * statemachine changes
     o allow sm_block and friends to be used not only directly after
       sm_message_send but also with sm_reset in between, which sets

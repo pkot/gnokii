@@ -77,7 +77,7 @@ static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 	return true;
 }
 
-static bool at2fbus_serial_open(struct gn_statemachine *state)
+static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_type type)
 {
 	unsigned char init_char = 0x55;
 	unsigned char end_init_char = 0xc1;
@@ -85,7 +85,7 @@ static bool at2fbus_serial_open(struct gn_statemachine *state)
 	unsigned char buffer[255];
 
 	/* Open device. */
-	if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
+	if (!device_open(state->config.port_device, false, false, false, type, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -555,7 +555,7 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 			connection = fbus_serial_open(1 - attempt, state);
 			break;
 		case 2:
-			connection = at2fbus_serial_open(state);
+			connection = at2fbus_serial_open(state, GN_CT_Serial);
 			break;
 		default:
 			break;
@@ -567,7 +567,7 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 	case GN_CT_DLR3P:
 		switch (attempt) {
 		case 0:
-			connection = at2fbus_serial_open(state);
+			connection = at2fbus_serial_open(state, GN_CT_Serial);
 			break;
 		case 1:
 			connection = fbus_serial_open(1, state);
@@ -577,7 +577,11 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 		}
 		break;
 	case GN_CT_Bluetooth:
-		connection = at2fbus_serial_open(state);
+		/* If there's no valid configuration in the .gnokiirc, try
+		 * to connect over tty interface */
+		if (!bacmp(BDADDR_ANY, &state->config.bt_address))
+			state->config.connection_type = GN_CT_Serial;
+		connection = at2fbus_serial_open(state, state->config.connection_type);
 		break;
 	default:
 		break;

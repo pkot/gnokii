@@ -224,7 +224,11 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 		}
 		break;
 	case GN_CT_Bluetooth:
-		if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
+		/* If there's no valid configuration in the .gnokiirc, try
+		 * to connect over tty interface */
+		if (!bacmp(BDADDR_ANY, &state->config.bt_address))
+			state->config.connection_type = GN_CT_Serial;
+		if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
 			error = GN_ERR_FAILED;
 			goto err;
 		}
