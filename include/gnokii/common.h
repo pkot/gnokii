@@ -71,6 +71,30 @@ typedef enum {
 	GMT_MT, /* combined ME and SIM phonebook */
 	GMT_TA, /* for compatibility only: TA=computer memory */
 	GMT_CB, /* Currently selected memory */
+	GMT_IN, /* Inbox for folder aware phones */
+	GMT_OU, /* Outbox  */
+	GMT_AR, /* Archive */
+	GMT_TE, /* Templates */
+	GMT_F1, /* 1st CUSTOM FOLDER */
+	GMT_F2,
+	GMT_F3,
+	GMT_F4,
+	GMT_F5,
+	GMT_F6,
+	GMT_F7,
+	GMT_F8,
+	GMT_F9,
+	GMT_F10,
+	GMT_F11,
+	GMT_F12,
+	GMT_F13,
+	GMT_F14,
+	GMT_F15,
+	GMT_F16,
+	GMT_F17,
+	GMT_F18,
+	GMT_F19,
+	GMT_F20, /* 20th CUSTOM FOLDER */
 	GMT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions). */
 } GSM_MemoryType;
 
