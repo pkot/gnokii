@@ -31,35 +31,53 @@
 #ifndef _gnokii_gsm_call_h
 #define _gnokii_gsm_call_h
 
-#include "gsm-common.h"
-#include "gsm-data.h"
+#include "gsm-error.h"
+
+typedef enum {
+	GN_CALL_VoiceCall,		/* Voice call */
+	GN_CALL_NonDigitalDataCall,	/* Data call on non digital line */
+	GN_CALL_DigitalDataCall		/* Data call on digital line */
+} gn_call_type;
+
+typedef enum {
+	GN_CALL_Never,			/* Never send my number */
+	GN_CALL_Always,			/* Always send my number */
+	GN_CALL_Default			/* Use the network default settings */
+} gn_call_send_number;
 
 typedef enum {
 	GN_CALL_Idle,
 	GN_CALL_Ringing,
 	GN_CALL_Dialing,
-	GN_CALL_Established,
-	GN_CALL_Held
+	GN_CALL_Incoming,		/* Incoming call */
+	GN_CALL_LocalHangup,		/* Local end terminated the call */
+	GN_CALL_RemoteHangup,		/* Remote end terminated the call */
+	GN_CALL_Established,		/* Remote end answered the call */
+	GN_CALL_Held,			/* Call placed on hold */
+	GN_CALL_Resumed			/* Held call resumed */
 } gn_call_status;
 
 typedef struct {
-	GSM_Statemachine *state;
-	int CallID;
-	gn_call_status Status;
-	GSM_CallType Type;
-	char RemoteNumber[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1];
-	char RemoteName[GSM_MAX_PHONEBOOK_NAME_LENGTH + 1];
-	struct timeval StartTime;
-	struct timeval AnswerTime;
-	bool LocalOriginated;
+	gn_call_type type;
+	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1];
+	char name[GN_PHONEBOOK_NAME_MAX_LENGTH + 1];
+	gn_call_send_number send_number;
+	int call_id;
+} gn_call_info;
+
+/* Call functions and structs */
+typedef struct {
+	struct gn_statemachine *state;
+	int call_id;
+	gn_call_status status;
+	gn_call_type type;
+	char remote_number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1];
+	char remote_name[GN_PHONEBOOK_NAME_MAX_LENGTH + 1];
+	struct timeval start_time;
+	struct timeval answer_time;
+	bool local_originated;
 } gn_call;
 
 #define	GN_CALL_MAX_PARALLEL 2
-
-API void gn_call_notifier(gn_call_status call_status, GSM_CallInfo *call_info, GSM_Statemachine *state);
-API gn_error gn_call_dial(int *call_id, GSM_Data *data, GSM_Statemachine *state);
-API gn_error gn_call_answer(int call_id);
-API gn_error gn_call_cancel(int call_id);
-API gn_call *gn_call_get_active(int call_id);
 
 #endif /* _gnokii_gsm_call_h */
