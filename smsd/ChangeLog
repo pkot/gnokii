@@ -1,3 +1,6 @@
+* Sun Jul 07 2002 Jan Derfinak <ja@mail.upjs.sk>
+- Fixed sms's sending to reflect changes in gnokii code.
+
 * Fri Jun 28 2002 Jan Derfinak <ja@mail.upjs.sk>
 - Fixed sms's receiving to reflect changes in gnokii code.
 - Sms's sending still don't work.

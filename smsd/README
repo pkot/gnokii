@@ -85,3 +85,11 @@ SMSD shares gnokii's runtime configuration file and libgnokii.
 
 					Jan Derfinak <ja@mail.upjs.sk>
 					14 Februar 2002
+
+
+
+In some distributions of MySQL you need to link zlib with smsd or db module.
+Please add '-lz' to Makefile if smsd cannot load libmysql.so.
+
+					Jan Derfinak <ja@mail.upjs.sk>
+					07 Jul 2002

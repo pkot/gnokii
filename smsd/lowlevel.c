@@ -290,9 +290,25 @@ static gint A_SendSMSMessage (gpointer data)
   if (d)
   {
     pthread_mutex_lock (&sendSMSMutex);
-    GSM_DataClear(&dt);
+    GSM_DataClear (&dt);
+    if (!d->sms->SMSC.Number[0])
+    {
+      dt.MessageCenter = calloc (1, sizeof (SMS_MessageCenter));
+      dt.MessageCenter->No = 1;
+      if (SM_Functions (GOP_GetSMSCenter, &dt, &sm) == GE_NONE)
+      {
+        strcpy (d->sms->SMSC.Number, dt.MessageCenter->SMSC.Number);
+        d->sms->SMSC.Type = dt.MessageCenter->SMSC.Type;
+      }
+      free (dt.MessageCenter);
+    }
+    
+    if (!d->sms->SMSC.Type)
+      d->sms->SMSC.Type = SMS_Unknown;
+      
+    GSM_DataClear (&dt);
     dt.SMS = d->sms;
-    error = d->status = SendSMS ( &dt, &sm);
+    error = d->status = SendSMS (&dt, &sm);
     pthread_cond_signal (&sendSMSCond);
     pthread_mutex_unlock (&sendSMSMutex);
   }

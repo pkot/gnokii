@@ -37,7 +37,7 @@ smsd: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/libgnokii.so
 
 # PostgreSQL support
 libpq.so: smsd.h pq.c
-	gcc -g -DXDEBUG -shared -o libpq.so `glib-config --cflags` -I../include \
+	gcc -shared -o libpq.so `glib-config --cflags` -I../include \
         -I/usr/include/pgsql pq.c `glib-config --libs` -lpq
 
 # MySQL support

@@ -151,12 +151,12 @@ void DB_Look (void)
   {
     GSM_API_SMS sms;
 
-    memset (&sms, 0, sizeof (GSM_API_SMS));
     DefaultSubmitSMS (&sms);    
+    memset (&sms.Remote.Number, 0, sizeof (sms.Remote.Number));
     sms.DeliveryReport = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
-    strncpy (sms.Remote.Number, row[1], MAX_BCD_STRING_LENGTH + 1);
-    sms.Remote.Number[MAX_BCD_STRING_LENGTH] = '\0';
+    strncpy (sms.Remote.Number, row[1], sizeof (sms.Remote.Number) - 1);
+    sms.Remote.Number[sizeof(sms.Remote.Number) - 1] = '\0';
     if (sms.Remote.Number[0] == '+')
       sms.Remote.Type = SMS_International;
     else
@@ -164,6 +164,9 @@ void DB_Look (void)
     
     strncpy (sms.UserData[0].u.Text, row[2], GSM_MAX_SMS_LENGTH + 1);
     sms.UserData[0].u.Text[GSM_MAX_SMS_LENGTH] = '\0';
+    sms.UserData[0].Length = strlen (sms.UserData[0].u.Text);
+    sms.UserData[0].Type = SMS_PlainText;
+    sms.UserData[1].Type = SMS_NoData;
 
 #ifdef XDEBUG
     g_print ("%s, %s\n", sms.Remote.Number, sms.UserData[0].u.Text);
@@ -173,7 +176,7 @@ void DB_Look (void)
     do
     {
       error = WriteSMS (&sms);
-      sleep (2);
+      sleep (1);
     }
     while ((error == GE_TIMEOUT || error == GE_SMSSENDFAILED) && numError++ < 3);
 
