@@ -1307,7 +1307,7 @@ static int setlogo(int argc, char *argv[])
 {
 	GSM_Bitmap bitmap,oldbit;
 	GSM_NetworkInfo NetworkInfo;
-	GSM_Error error = GE_INTERNALERROR;
+	GSM_Error error = GE_NOTSUPPORTED;
   
 	bool ok = true;
 	int i;
@@ -1977,7 +1977,7 @@ static int getprofile(int argc, char *argv[])
 	int max_profiles;
 	int start, stop, i;
 	GSM_Profile profile;
-	GSM_Error error = GE_INTERNALERROR;
+	GSM_Error error = GE_NOTSUPPORTED;
   
 	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
 	char model[64];
@@ -2136,7 +2136,7 @@ static int getmemory(int argc, char *argv[])
 static int writephonebook(int argc, char *args[])
 {
 	GSM_PhonebookEntry entry;
-	GSM_Error error = GE_INTERNALERROR;
+	GSM_Error error = GE_NOTSUPPORTED;
 	char *memory_type_string;
 	int line_count=0;
 	int subentry;
@@ -2486,7 +2486,7 @@ static int pmon(void)
 static int sendringtone(int argc, char *argv[])
 {
 	GSM_Ringtone ringtone;
-	GSM_Error error = GE_INTERNALERROR;
+	GSM_Error error = GE_NOTSUPPORTED;
 
 	if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
 		fprintf(stdout, _("Failed to load ringtone.\n"));
@@ -2508,7 +2508,7 @@ static int sendringtone(int argc, char *argv[])
 static int setringtone(int argc, char *argv[])
 {
 	GSM_Ringtone ringtone;
-	GSM_Error error = GE_INTERNALERROR;
+	GSM_Error error = GE_NOTSUPPORTED;
 
 	if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
 		fprintf(stdout, _("Failed to load ringtone.\n"));
