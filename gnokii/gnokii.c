@@ -6,8 +6,8 @@
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-  Copyright (C) 2001       Pavel Machek
+  Copyright (C) 1999-2000  Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2001-2002  Pavel Machek
   Copyright (C) 2001-2002  Pawe³ Kot
   Copyright (C) 2002       BORBELY Zoltan
 
@@ -369,6 +369,7 @@ static int sendsms(int argc, char *argv[])
 		{ "smscno",  required_argument, NULL, '2'},
 		{ "long",    required_argument, NULL, '3'},
 		{ "picture", required_argument, NULL, '4'},
+		{ "8bit",    0,                 NULL, '8'},
 		{ NULL,      0,                 NULL, 0}
 	};
 
@@ -456,19 +457,23 @@ static int sendsms(int argc, char *argv[])
 		case 'v':
 			SMS.Validity.u.Relative = atoi(optarg);
 			break;
+		case '8':
+			SMS.DCS.u.General.Alphabet = SMS_8bit;
+			input_len = GSM_MAX_8BIT_SMS_LENGTH;
+			break;
 		default:
 			usage(); /* Would be better to have an sendsms_usage() here. */
 		}
 	}
 
 	/* Get message text from stdin. */
-	chars_read = fread(message_buffer, 1, input_len, stdin);
+	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
 
 	if (chars_read == 0) {
 		fprintf(stderr, _("Couldn't read from stdin!\n"));
 		return -1;
 	} else if (chars_read > input_len || chars_read > sizeof(SMS.UserData[0].u.Text) - 1) {
-		fprintf(stderr, _("Input too long!\n"));
+		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, input_len);
 		return -1;
 	}
 
@@ -591,21 +596,14 @@ static int savesms(int argc, char *argv[])
 	}
 
 	fprintf(stdout,_("please enter sms text. end your input with <cr><control-D>:"));
-
 	chars_read = fread(message_buffer, 1, input_len, stdin);
-
 	fprintf(stdout,_("storing sms"));
-
 	if (chars_read == 0) {
-
 		fprintf(stderr, _("Couldn't read from stdin!\n"));
 		return -1;
-
 	} else if (chars_read > input_len || chars_read > sizeof(SMS.UserData[0].u.Text) - 1) {
-
 		fprintf(stderr, _("Input too long!\n"));
 		return -1;
-
 	}
 
 	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
