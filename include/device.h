@@ -56,6 +56,7 @@ int device_select(struct timeval *timeout);
 #  include "devices/unixserial.h"
 #  include "devices/unixirda.h"
 #  include "devices/tekram.h"
+#  include "devices/tcp.h"
 #else
 #  include "devices/winserial.h"
 #endif

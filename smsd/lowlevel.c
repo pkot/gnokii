@@ -127,6 +127,8 @@ static GSM_Error fbusinit (bool enable_monitoring)
 
   if (!strcmp(smsdConfig.connection, "infrared"))
     connection = GCT_Infrared;
+  if (!strcmp(smsdConfig.connection, "tcp"))
+    connection = GCT_TCP;
 
   /* Initialise the code for the GSM interface. */     
 

@@ -23,7 +23,8 @@ ifdef WIN32
 	OBJS += winserial.o
 else
 	OBJS += unixserial.o \
-	        unixirda.o
+	        unixirda.o \
+		tcp.o
 endif
 
 all: DEVICES.o

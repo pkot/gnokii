@@ -119,9 +119,10 @@ int main(int argc, char *argv[])
 		DebugMode = false;
 	}
 
-	if (!strcmp(Connection, "infrared")) {
+	if (!strcmp(Connection, "infrared"))
 		connection = GCT_Infrared;
-	}
+	if (!strcmp(Connection, "tcp"))
+		connection = GCT_TCP;
 
 	GTerminateThread = false;
 

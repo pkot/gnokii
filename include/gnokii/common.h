@@ -44,7 +44,8 @@ typedef enum {
 	GCT_DAU9P,     /* Serial connection using DAU9P cable; use only with 6210/7110 if you want faster initialization */
 	GCT_Infrared, /* Infrared connection. */
 	GCT_Tekram,   /* Tekram Ir-Dongle */
-	GCT_Irda
+	GCT_Irda,
+	GCT_TCP,      /* TCP network connection */
 } GSM_ConnectionType;
 
 /* Maximum length of device name for serial port */

@@ -61,6 +61,9 @@ int device_open(const char *file, int with_odd_parity, int with_async, int with_
 	case GCT_Irda:
 		device_portfd = irda_open();
 		break;
+	case GCT_TCP:
+		device_portfd = tcp_opendevice(file, with_async);
+		break;
 #endif
 	default:
 		break;
@@ -84,6 +87,9 @@ void device_close(void)
 	case GCT_Irda:
 		irda_close(device_portfd);
 		break;
+	case GCT_TCP:
+		tcp_close(device_portfd);
+		break;
 #endif
 	default:
 		break;
@@ -106,8 +112,8 @@ void device_setdtrrts(int dtr, int rts)
 		break;
 #ifndef WIN32
 	case GCT_Tekram:
-		break;
 	case GCT_Irda:
+	case GCT_TCP:
 		break;
 #endif
 	default:
@@ -129,6 +135,7 @@ void device_changespeed(int speed)
 		tekram_changespeed(device_portfd, speed);
 		break;
 	case GCT_Irda:
+	case GCT_TCP:
 		break;
 #endif
 	default:
@@ -145,10 +152,13 @@ size_t device_read(__ptr_t buf, size_t nbytes)
 		break;
 #ifndef WIN32
 	case GCT_Tekram:
-		return (tekram_read(device_portfd, buf, nbytes));
+		return tekram_read(device_portfd, buf, nbytes);
 		break;
 	case GCT_Irda:
 		return irda_read(device_portfd, buf, nbytes);
+		break;
+	case GCT_TCP:
+		return tcp_read(device_portfd, buf, nbytes);
 		break;
 #endif
 	default:
@@ -166,10 +176,13 @@ size_t device_write(const __ptr_t buf, size_t n)
 		break;
 #ifndef WIN32
 	case GCT_Tekram:
-		return (tekram_write(device_portfd, buf, n));
+		return tekram_write(device_portfd, buf, n);
 		break;
 	case GCT_Irda:
 		return irda_write(device_portfd, buf, n);
+		break;
+	case GCT_TCP:
+		return tcp_write(device_portfd, buf, n);
 		break;
 #endif
 	default:
@@ -191,6 +204,9 @@ int device_select(struct timeval *timeout)
 		break;
 	case GCT_Irda:
 		return irda_select(device_portfd, timeout);
+		break;
+	case GCT_TCP:
+		return tcp_select(device_portfd, timeout);
 		break;
 #endif
 	default:
