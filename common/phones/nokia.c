@@ -198,6 +198,7 @@ GSM_Error PNOK_IncomingCallDivert(int messagetype, unsigned char *message, int l
 GSM_Error PNOK_FBUS_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
+	GSM_Error error;
 
 	memset(req + 6, 0, 249);
 	memcpy(req + 6, data->RawSMS->MessageCenter, 12);
@@ -216,5 +217,8 @@ GSM_Error PNOK_FBUS_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	memcpy(req + 42, data->RawSMS->UserData, data->RawSMS->UserDataLength);
 	dprintf("Sending SMS...(%d)\n", 42 + data->RawSMS->UserDataLength);
 	if (SM_SendMessage(state, 42 + data->RawSMS->UserDataLength, PNOK_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetryTimeout(state, data, PNOK_MSG_SMS, 100);
+	do {
+		error = SM_BlockNoRetryTimeout(state, data, PNOK_MSG_SMS, state->Link.SMSTimeout);
+	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
+	return error;
 }

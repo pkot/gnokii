@@ -961,6 +961,7 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
 				  0x00, 0x00, 0x00, 0x55, 0x55}; /* What's this? */
+	GSM_Error error;
 
 	memset(req + 9, 0, 244);
 	req[9] = 0x01; /* one big block */
@@ -1014,7 +1015,10 @@ static GSM_Error P6510_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Sending SMS...(%d)\n", 46 + data->RawSMS->UserDataLength);
 	if (SM_SendMessage(state, 46 + data->RawSMS->UserDataLength, P6510_MSG_SMS, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, 100);
+	do {
+		error = SM_BlockNoRetryTimeout(state, data, P6510_MSG_SMS, state->Link.SMSTimeout);
+	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
+	return error;
 }
 
 /**********************/

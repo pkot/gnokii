@@ -74,3 +74,13 @@ require_dcd = 1
 [connect_script]
 TELEPHONE = 12345678
 [disconnect_script]
+
+# When sending SMS you can experience timeouts. This is the feature of the
+# overloaded SMSCs. The phones waits for the response from the SMSC confirming
+# that it received the short message. When the SMSC is DoSed with many requests
+# it will take more time to get the response. Adjust it to your needs. The
+# value is given in seconds to wait. Defaults to 10 seconds. Set to 0 to wait
+# forever.
+[sms]
+timeout = 10
+

@@ -644,7 +644,10 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	req[length * 2 + 1] = 0;
 	dprintf("Sending frame: %s\n", req);
 	if (SM_SendMessage(state, strlen(req), GOP_SendSMS, req) != GE_NONE) return GE_NOTREADY;
-	return SM_BlockNoRetry(state, data, GOP_SendSMS);
+	do {
+		error = SM_BlockNoRetryTimeout(state, data, GOP_SendSMS, state->Link.SMSTimeout);
+	} while (!state->Link.SMSTimeout && error == GE_TIMEOUT);
+	return error;
 }
 
 static GSM_Error AT_GetSMS(GSM_Data *data, GSM_Statemachine *state)

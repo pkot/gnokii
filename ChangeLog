@@ -40,6 +40,9 @@
  * Cleanups in the error handling system: simplify and decrease
    the ammount of the available return codes -- we don't need
    them all in this form in fact                          (Pawel Kot)
+ * libsms changes:
+    o allow to define SMS send timeout in the config file,
+      defaults to 10 seconds                              (Pawel Kot)
 
 0.4.0
 =====

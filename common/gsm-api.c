@@ -41,6 +41,7 @@
 
 #include "misc.h"
 #include "gsm-common.h"
+#include "cfgreader.h"
 #include "data/rlp-common.h"
 #include "gsm-statemachine.h"
 #include "phones/nk6510.h"
@@ -121,9 +122,13 @@ static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel,
 API GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_ConnectionType connection, void (*rlp_callback)(RLP_F96Frame *frame), GSM_Statemachine *sm)
 {
 	GSM_Error ret;
+	char *sms_timeout;
 
 	sm->Link.ConnectionType = connection;
 	sm->Link.InitLength = atoi(initlength);
+	sms_timeout = CFG_Get(CFG_Info, "sms", "timeout");
+	if (!sms_timeout) sm->Link.SMSTimeout = 100;
+	else sm->Link.SMSTimeout = atoi(sms_timeout) * 10;
 	memset(&sm->Link.PortDevice, 0, sizeof(sm->Link.PortDevice));
 	strncpy(sm->Link.PortDevice, device, sizeof(sm->Link.PortDevice) - 1);
 

@@ -91,9 +91,11 @@ typedef struct {
 /* A structure to hold information about the particular link */
 /* The link comes 'under' the phone */
 typedef struct {
-	char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];   /* The port device */
-	int InitLength;        /* Number of chars sent to sync the serial port */
-	GSM_ConnectionType ConnectionType;   /* Connection type, serial, ir etc */
+	char PortDevice[GSM_MAX_DEVICE_NAME_LENGTH]; /* The port device */
+	int InitLength;                              /* Number of chars sent to sync the serial port */
+	unsigned int SMSTimeout;                     /* SMS timeout: how many seconds should we wait
+							for the SMSC response. Defaults to 10 seconds */
+	GSM_ConnectionType ConnectionType;           /* Connection type, serial, ir etc */
 
 	/* A regularly called loop function */
 	/* timeout can be used to make the function block or not */
