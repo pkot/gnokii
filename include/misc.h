@@ -27,5 +27,7 @@
 	#define		bool	int
 #endif
 
+	/* For GNU gettext */
+#define _(x)	gettext(x)
 
 #endif	/* __misc_h */

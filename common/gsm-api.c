@@ -19,6 +19,7 @@
 
 #include	<stdio.h>
 #include	<string.h>
+#include	<libintl.h>
 
 #include	"misc.h"
 #include	"gsm-common.h"
@@ -87,3 +88,4 @@ GSM_Error	GSM_Initialise(char *model, char *device, bool enable_monitoring)
 	   GSM_Error code.  For example, passed GE_UNKNOWNMODEL it would
 	   return a pointer to the static string "Unknown Model!" */
 
+/* PJ: Will be great :-) */

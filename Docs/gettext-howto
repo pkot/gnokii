@@ -1,0 +1,44 @@
+1. how to make .po file?
+
+	xgettext -a -k_ -s -v -d gnokii *.h *.c
+
+xgettext is from GNU gettext
+
+-a means extract all strings
+
+-k_ Character `_' is used to mark translatable strings
+
+-s output is sorted and without duplicates
+
+-v verbose
+
+-d `gnokii' domain, output file is gnokii.po
+
+If the .po file already exist you should use tupdate - see gettext
+documentation how to do it.
+
+2. how to make .mo file?
+
+	msgfmt -o gnokii.mo -v gnokii-czech.po 
+
+3. move the .mo file to /usr/share/locale/<your locale>/LC_MESSAGES/gnokii.mo 
+
+I'm from Czech republic, so I did (well, I did not, but if you would like to
+localize gnokii, you should :-):
+
+	xgettext -a -k_ -s -v -d gnokii *.h *.c
+	cp gnokii.po gnokii-czech.po
+	<translating messages in gnokii-czech.po>
+	msgfmt -o gnokii.mo -v gnokii-czech.po
+	mv gnokii.mo /usr/share/locale/cs_CZ/LC_MESSAGES/gnokii.mo
+
+And now:
+
+SnowWhite:/tmp/gnokii$ export LC_MESSAGES=cs_CZ
+SnowWhite:/tmp/gnokii$ ./gnokii --version
+GNOKII Version 0.2.3 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>
+        Kompilace: 19:09:02 Mar 13 1999 pro model 6110 na portu /dev/ttyS0 
+SnowWhite:/tmp/gnokii$ 
+
+The second line is in czech language :-) There are some problems - for
+example with "Mar" which is substitute by the C preprocessor.

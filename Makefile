@@ -7,29 +7,58 @@
 CC = gcc
 
 #
+# Model of the mobile phone
+#
+
+MODEL=-DMODEL="\"3810\""
+
+#
+# For Nokia 6110/5110 uncomment the next line
+#
+
+#MODEL=-DMODEL="\"6110\""
+
+#
+# Serial port for communication
+#
+
+PORT=-DPORT="\"/dev/ttyS0\""
+
+#
+# For COM2 port uncomment the next line
+#
+
+# PORT=-DPORT="\"/dev/ttyS1\""
+
+
+#
 # For more information about threads see the comp.programming.threads FAQ
 # http://www.serpentine.com/~bos/threads-faq/
 #
 
+#
 # Set up compilation/linking flags for Linux.
+#
 
-CFLAGS = -D_REENTRANT -Wall -g -O0
+CFLAGS = -D_REENTRANT -Wall -g -O0 ${MODEL} ${PORT}
 LDFLAGS = -lpthread
 
 #
 # For FreeBSD uncomment the following lines
 #
 
-# CFLAGS= -D_THREAD_SAFE -Wall -g -O2
+# CFLAGS= -D_THREAD_SAFE -Wall -g -O2  ${MODEL} ${PORT}
 # LDFLAGS= -pthread
 
 GNOKII_OBJS = gnokii.o gsm-api.o fbus-3810.o fbus-6110.o
+
+
+################## Nothing interesting after this line ##################
 
 # Build executable
 all: gnokii
 
 gnokii: $(GNOKII_OBJS)
-
 
 # Misc targets
 clean:

@@ -21,6 +21,7 @@
 
 #include	<termios.h>
 #include	<stdio.h>
+#include	<libintl.h>
 #include	<unistd.h>
 #include	<fcntl.h>
 #include	<ctype.h>
@@ -240,7 +241,7 @@ bool		FB61_OpenSerial(void)
 	PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
 	if (PortFD < 0) {
-		perror("Couldn't open FB61 device: ");
+		perror(_("Couldn't open FB61 device: "));
 		return (false);
 	}
 

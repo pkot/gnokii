@@ -11,6 +11,7 @@
 
 #include	<termios.h>
 #include	<stdio.h>
+#include	<libintl.h>
 #include	<stdlib.h>
 #include	<unistd.h>
 #include	<fcntl.h>
@@ -33,14 +34,14 @@ void	getsms(char *argv[]);
 void	sendsms(char *argv[]);
 
 
-	/**** Change these to suit your setup! ****/
-#define		MODEL	"3810"
-#define		PORT	"/dev/ttyS0"
-
 	/* Main function - handles command line args then passes to 
 	   separate function accordingly. */
 int	main(int argc, char *argv[])
 {
+
+		/* For GNU gettext */
+	textdomain("gnokii");
+
 		/* Handle command line arguments. */
 	if (argc == 1 || strcmp(argv[1], "--help") == 0) {
 		usage();
@@ -49,8 +50,8 @@ int	main(int argc, char *argv[])
 
 		/* Display version,  copyright and build information. */
 	if (strcmp(argv[1], "--version") == 0) {
-		fprintf(stdout, "GNOKII Version 0.2.3 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n");
-		fprintf(stdout, "       Built %s %s for %s on %s \n", __TIME__, __DATE__, MODEL, PORT);
+		fprintf(stdout, _("GNOKII Version 0.2.3 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"));
+		fprintf(stdout, _("       Built %s %s for %s on %s \n"), __TIME__, __DATE__, MODEL, PORT);
 		exit (0);
 	}
 
@@ -96,13 +97,13 @@ void	sendsms(char *argv[])
 	chars_read = fread(message_buffer, 1, 160, stdin);
 
 	if (chars_read == 0) {
-		fprintf(stderr, "Couldn't read from stdin!\n");	
+		fprintf(stderr, _("Couldn't read from stdin!\n"));	
 		exit (1);
 	}
 		/*  Null terminate. */
 	message_buffer[chars_read] = 0x00;	
 
-	fprintf(stdout, "Sending SMS to %s via message centre %s\n", argv[2], argv[3]);
+	fprintf(stdout, _("Sending SMS to %s via message centre %s\n"), argv[2], argv[3]);
 
 		/* Initialise the GSM interface. */     
 	fbusinit(true);
@@ -112,22 +113,23 @@ void	sendsms(char *argv[])
 
 		/* Report success. */
 	if (error == GE_SMSSENDOK) {
-		fprintf(stdout, "SMS Send OK.  Result code 0x%02x\n", c1);
+		fprintf(stdout, _("SMS Send OK. Result code  0x%02x\n"), c1);
 		GSM->Terminate();
 		exit(0);
 	}
 
 	if (error == GE_NOTIMPLEMENTED) {
-		fprintf(stderr, "Function not implemented in %s model!\n", MODEL);
+		fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
 		GSM->Terminate();
 		exit(-1);
 	}
 
 		/* ...or failure, lookup GE_ codes in fbus.h */
-	fprintf (stderr, "SMS Send failed, gnokii error code was %d, network returned 0x%02x 0x%02x\n", error, c1, c2);
+	fprintf (stderr, _("SMS Send failed, gnokii error code was %d, network returned 0x%02x 0x%02x\n"), error, c1, c2);
 
+	/* PJ: This should be moved somewhere under 3810... */
 	if (c1 == 0x65 && c2 == 0x15) {
-		fprintf(stderr, "0x65 0x15 means SMS sending not enabled by network (probably...)\n");
+		fprintf(stderr, _("0x65 0x15 means SMS sending not enabled by network (probably...)\n"));
 	}
 
 	GSM->Terminate();
@@ -156,7 +158,7 @@ void	getsms(char *argv[])
 			memory_type_string = "sim";
 		}
 		else {
-			fprintf(stderr, "Unknown memory type %s!\n", argv[2]);
+			fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
 			exit (-1);
 		}
 	}
@@ -174,23 +176,23 @@ void	getsms(char *argv[])
 
 		if (error == GE_NONE) {
 
-			fprintf(stdout, "SMS %s %d Unknown bytes: %02x %02x %02x %02x %02x %02x Length: %d\n", memory_type_string, count, message.Unk2, message.Unk3, message.Unk4, message.Unk5, message.Unk9, message.UnkEnd, message.Length);
+			fprintf(stdout, _("SMS %s %d Unknown bytes: %02x %02x %02x %02x %02x %02x Length: %d\n"), memory_type_string, count, message.Unk2, message.Unk3, message.Unk4, message.Unk5, message.Unk9, message.UnkEnd, message.Length);
 
-			fprintf(stdout, "Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n", message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCentre);
+			fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"), message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCentre);
 
 
-			fprintf(stdout, "Text: %s\n\n", message.MessageText); 
+			fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
 
 		}
 		else {
 
 			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, "Function not implemented in %s model!\n", MODEL);
+				fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
 				GSM->Terminate();
 				exit(-1);	
 			}
 
-			fprintf(stdout, "GetSMS %s %d failed!(%d)\n\n", memory_type_string, count, error);
+			fprintf(stdout, _("GetSMS %s %d failed!(%d)\n\n"), memory_type_string, count, error);
 		}
 	}
 
@@ -203,7 +205,7 @@ static volatile bool shutdown = false;
 static void interrupted(int sig)
 {
     signal(sig, SIG_IGN);
-    fprintf(stdout, "Interrupted\n");
+    fprintf(stdout, _("Interrupted\n"));
     shutdown = true;
 }
 
@@ -213,8 +215,8 @@ void	monitormode(void)
 {
 	signal(SIGINT, interrupted);
 
-	fprintf (stdout, "Monitor mode...\n");
-	fprintf (stdout, "Initialising GSM interface...\n");
+	fprintf (stdout, _("Monitor mode...\n"));
+	fprintf (stdout, _("Initialising GSM interface...\n"));
 
 		/* Initialise the code for the GSM interface. */     
 	fbusinit(true);
@@ -255,7 +257,7 @@ void	getphonebook(char *argv[])
 			memory_type_string = "sim";
 		}
 		else {
-			fprintf(stderr, "Unknown memory type %s!\n", argv[2]);
+			fprintf(stderr, _("Unknown memory type %s!\n"), argv[2]);
 			exit (-1);
 		}
 	}
@@ -274,12 +276,12 @@ void	getphonebook(char *argv[])
 		else {
 
 			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, "Function not implemented in %s model!\n", MODEL);
+				fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
 				GSM->Terminate();
 				exit(-1);
 			}
 
-			fprintf(stdout, "%s|%d|Bad location or other error!\n", memory_type_string, count);
+			fprintf(stdout, _("%s|%d|Bad location or other error!\n"), memory_type_string, count);
 		}
 	}
 	
@@ -337,12 +339,12 @@ void	writephonebook(void)
 				memory_type = GMT_SIM;
 			}
 			else {
-				fprintf(stderr, "Format problem on line %d [%s]\n", line_count, line_buffer);
+				fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, line_buffer);
 			}
 		}
 
 		if (sscanf(line_buffer + 4, "%d|", &entry_number) != 1) {
-			fprintf(stderr, "Format problem on line %d [%s]\n", line_count, line_buffer);
+			fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, line_buffer);
 		} 
 		else {
 			separator_count = 0;
@@ -386,17 +388,17 @@ void	writephonebook(void)
 		error_code = GSM->WritePhonebookLocation(memory_type, entry_number, &entry);
 
 		if (error_code == GE_NONE) {
-			fprintf (stdout, "Write Succeeded: memory type:%s, loc:%d, name: %s, number: %s\n", memory_type_string, entry_number, entry.Name, entry.Number);
+			fprintf (stdout, _("Write Succeeded: memory type:%s, loc:%d, name: %s, number: %s\n"), memory_type_string, entry_number, entry.Name, entry.Number);
 		}
 		else {
 
 			if (error == GE_NOTIMPLEMENTED) {
-				fprintf(stderr, "Function not implemented in %s model!\n", MODEL);
+				fprintf(stderr, _("Function not implemented in %s model!\n"), MODEL);
 				GSM->Terminate();
 				exit(-1);
 			}
 
-			fprintf (stdout, "Write FAILED(%d): memory type:%s, loc:%d, name: %s, number: %s\n", error_code, memory_type_string, entry_number, entry.Name, entry.Number);
+			fprintf (stdout, _("Write FAILED(%d): memory type:%s, loc:%d, name: %s, number: %s\n"), error_code, memory_type_string, entry_number, entry.Name, entry.Number);
 		}
 	}
 
@@ -407,6 +409,8 @@ void	writephonebook(void)
 
 void	usage(void)
 {
+
+  /* PJ: Uff, this should be one string -> easy gettextization :-) */
 	fprintf(stdout, "usage: gnokii {--help|--monitor|--version}\n");
 	fprintf(stdout, "       gnokii [--getphonebook] [memory type] [start] [end]\n");
 	fprintf(stdout, "       gnokii [--writephonebook]\n");
@@ -449,7 +453,7 @@ void	fbusinit(bool enable_monitoring)
 	error = GSM_Initialise(MODEL, PORT, enable_monitoring);
 
 	if (error != GE_NONE) {
-		fprintf(stderr, "GSM/fbus init failed! (Unknown model ?).  Quitting. \n");
+		fprintf(stderr, _("GSM/fbus init failed! (Unknown model ?).  Quitting. \n"));
 		exit (-1);
 	}
 
@@ -463,7 +467,7 @@ void	fbusinit(bool enable_monitoring)
 	}
 
 	if (GSM_LinkOK == false) {
-		fprintf (stderr, "Hmmm... GSM_LinkOK never went true.  Quitting. \n");
+		fprintf (stderr, _("Hmmm... GSM_LinkOK never went true.  Quitting. \n"));
 		exit (-1);
 	}
 }

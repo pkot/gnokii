@@ -21,6 +21,7 @@
 
 #include	<termios.h>
 #include	<stdio.h>
+#include	<libintl.h>
 #include	<unistd.h>
 #include	<fcntl.h>
 #include	<ctype.h>
@@ -409,7 +410,7 @@ GSM_Error	FB38_SendSMSMessage(char *message_centre, char *destination, char *tex
 			DisableKeepalive = false;
 			return(CurrentSMSMessageError);
 		}
-		fprintf(stderr, "SMS Send attempt failed, trying again (%d)\n", retry_count);
+		fprintf(stderr, _("SMS Send attempt failed, trying again (%d)\n"), retry_count);
 			/* Got a retry response so try again! */
 		retry_count --;
 
@@ -530,7 +531,7 @@ bool		FB38_OpenSerial(void)
 	PortFD = open (PortDevice, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
 	if (PortFD < 0) {
-		perror("Couldn't open FB38 device: ");
+		perror(_("Couldn't open FB38 device: "));
 		return (false);
 	}
 
@@ -592,7 +593,7 @@ void	FB38_RX_StateMachine(char rx_byte)
 
 				/* Seen 0x55, restart at 0x04 */
 				if (EnableMonitoringOutput == true) {
-					fprintf(stdout, "restarting.\n");
+					fprintf(stdout, _("restarting.\n"));
 				}
 
 				RX_State = FB38_RX_Sync;
@@ -640,7 +641,7 @@ void	FB38_RX_StateMachine(char rx_byte)
 					}
 						/* Checksum didn't match so ignore. */
 					else {
-						fprintf(stderr, "CS Fail %02x != %02x", MessageCSum, CalculatedCSum);
+						fprintf(stderr, _("CS Fail %02x != %02x"), MessageCSum, CalculatedCSum);
 						FB38_RX_DisplayMessage();
 						fflush(stderr);
 						RX_State = FB38_RX_Sync;
@@ -721,7 +722,7 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 			/* 0x15 messages are sent by the phone in response to the
 			   init sequence sent so we don't acknowledge them! */
 		case 0x15:	if (EnableMonitoringOutput == true) {
-						fprintf(stdout, "0x15 Registration Response 0x%02x\n", MessageBuffer[1]);
+						fprintf(stdout, _("0x15 Registration Response 0x%02x\n"), MessageBuffer[1]);
 					}
 					DisableKeepalive = false;
 					break;
@@ -735,7 +736,7 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 			   Go figure :) */ 
 		case 0x16:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					if (EnableMonitoringOutput == true) {
-						fprintf(stdout, "0x16 Registration Response 0x%02x 0x%02x\n", MessageBuffer[1], MessageBuffer[2]);
+						fprintf(stdout, _("0x16 Registration Response 0x%02x 0x%02x\n"), MessageBuffer[1], MessageBuffer[2]);
 					}
 					break;
 
@@ -850,7 +851,7 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 			   correctly. */
 		case 0x48:	FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					if (EnableMonitoringOutput == true) {
-						fprintf(stdout, "PIN [possibly] entered.\n");
+						fprintf(stdout, _("PIN [possibly] entered.\n"));
 					}
 					break;
 
@@ -859,7 +860,7 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 		case 0x49:	DisableKeepalive = true;
 					FB38_TX_SendStandardAcknowledge(MessageBuffer[0]);
 					if (EnableMonitoringOutput == true) {
-						fprintf(stdout, "Phone powering off...");
+						fprintf(stdout, _("Phone powering off..."));
 						fflush(stdout);
 					}
 
@@ -871,7 +872,7 @@ enum FB38_RX_States		FB38_RX_DispatchMessage(void)
 			   Phone also appears to refuse to send any of that message type
 			   again until an init sequence is done again. */
 		default:	if (FB38_TX_SendStandardAcknowledge(MessageBuffer[0]) != true) {
-						fprintf(stderr, "Standard Ack write failed!");
+						fprintf(stderr, _("Standard Ack write failed!"));
 					}
 						/* Now display unknown message to user. */
 		 			FB38_RX_DisplayMessage();
@@ -897,12 +898,12 @@ void	FB38_RX_DisplayMessage(void)
 	}
 	
 	line_count = 0;
-	fprintf(stdout, "Unknown: ");
+	fprintf(stdout, _("Unknown: "));
 
-	fprintf(stdout, "Msg Type: %02x ", MessageBuffer[0]);
-	fprintf(stdout, "Msg Len: %02x ", MessageLength);
-	fprintf(stdout, "Sequence Number: %02x ", MessageBuffer[1]);
-	fprintf(stdout, "Checksum: %02x \n   ", MessageCSum);
+	fprintf(stdout, _("Msg Type: %02x "), MessageBuffer[0]);
+	fprintf(stdout, _("Msg Len: %02x "), MessageLength);
+	fprintf(stdout, _("Sequence Number: %02x "), MessageBuffer[1]);
+	fprintf(stdout, _("Checksum: %02x \n   "), MessageCSum);
 
 	for (count = 2; count < MessageLength; count ++) {
 		if (isprint(MessageBuffer[count])) {
@@ -960,7 +961,7 @@ void 	FB38_TX_Send0x4aMessage(void)
 	FB38_TX_UpdateSequenceNumber();
 	
 	if (FB38_TX_SendMessage(0, 0x4a, RequestSequenceNumber, NULL) != true) {
-		fprintf(stderr, "0x4a Write failed!");	
+		fprintf(stderr, _("0x4a Write failed!"));	
 	}
 }
 
@@ -970,7 +971,7 @@ void 	FB38_TX_Send0x3fMessage(void)
 	FB38_TX_UpdateSequenceNumber();
 	
 	if (FB38_TX_SendMessage(0, 0x3f, RequestSequenceNumber, NULL) != true) {
-		fprintf(stderr, "0x3f Write failed!");	
+		fprintf(stderr, _("0x3f Write failed!"));	
 	}
 }
 
@@ -1006,7 +1007,7 @@ int		FB38_TX_Send0x42_WriteMemoryLocation(u8 memory_area, u8 location, char *lab
 		/* Update sequence number and send to phone. */
 	FB38_TX_UpdateSequenceNumber();
 	if (FB38_TX_SendMessage(message_length, 0x42, RequestSequenceNumber, message) != true) {
-		fprintf(stderr, "Set Mem Loc Write failed!");	
+		fprintf(stderr, _("Set Mem Loc Write failed!"));	
 		return (-1);
 	}
 
@@ -1030,7 +1031,7 @@ void 	FB38_TX_Send0x43_RequestMemoryLocation(u8 memory_area, u8 location)
 	message[1] = location;
 
 	if (FB38_TX_SendMessage(2, 0x43, RequestSequenceNumber, message) != true) {
-		fprintf(stderr, "Request Mem Loc Write failed!");	
+		fprintf(stderr, _("Request Mem Loc Write failed!"));	
 	}
 
 }
@@ -1074,7 +1075,7 @@ void	FB38_TX_Send0x23_SendSMSHeader(char *message_centre, char *destination, u8 
 	memcpy (message + 13 + message_centre_length, destination, destination_length);
 
 	if (FB38_TX_SendMessage(13 + message_centre_length + destination_length, 0x23, RequestSequenceNumber, message) != true) {
-		fprintf(stderr, "Send SMS header failed!");	
+		fprintf(stderr, _("Send SMS header failed!"));	
 	}
 
 
@@ -1101,7 +1102,7 @@ void	FB38_TX_Send0x27_SendSMSMessageText(u8 block_number, u8 block_length, char 
 	memcpy (message + 1, text, block_length);
 
 	if (FB38_TX_SendMessage(1 + block_length, 0x27, RequestSequenceNumber, message) != true) {
-		fprintf(stderr, "Send SMS block %d  failed!", block_number);	
+		fprintf(stderr, _("Send SMS block %d failed!"), block_number);	
 	}
 
 
@@ -1124,7 +1125,7 @@ void 	FB38_TX_Send0x25_RequestSMSMemoryLocation(u8 memory_type, u8 location)
 	message[1] = location;
 
 	if (FB38_TX_SendMessage(2, 0x25, RequestSequenceNumber, message) != true) {
-		fprintf(stderr, "Request SMS Mem Loc Write failed!");	
+		fprintf(stderr, _("Request SMS Mem Loc Write failed!"));	
 	}
 
 }
@@ -1142,7 +1143,7 @@ void	FB38_TX_Send0x15Message(u8 sequence_number)
 	u8		message[20] = {0x02, 0x01, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x55, 0x63, 0xa8, 0x00, 0x00, 0x07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80};
 
 	if (FB38_TX_SendMessage(20, 0x15, sequence_number, message) != true) {
-		fprintf(stderr, "0x15 Write failed!");	
+		fprintf(stderr, _("0x15 Write failed!"));	
 	}
 }
 
@@ -1196,7 +1197,7 @@ void	FB38_RX_Handle0x0b_IncomingCall(void)
 
 		/* First, acknowledge message. */
 	if (FB38_TX_SendMessage(0, 0x0b, MessageBuffer[1] - 0x08, NULL) != true) {
-		fprintf(stderr, "Write failed!");
+		fprintf(stderr, _("Write failed!"));
 	}
 
 		/* Get info out of message.  At present, first three bytes are unknown
@@ -1213,12 +1214,9 @@ void	FB38_RX_Handle0x0b_IncomingCall(void)
 	}
 
 		/* Now display incoming call message. */
-	fprintf(stdout, "Incoming call - status %02x %02x %02x, Number ", MessageBuffer[2], MessageBuffer[3], MessageBuffer[4]);
+	fprintf(stdout, _("Incoming call - status %02x %02x %02x, Number %s.\n"), MessageBuffer[2], MessageBuffer[3], MessageBuffer[4], buffer);
 
-	fprintf(stdout, "%s.\n", buffer);
 	fflush (stdout);
-	
-		
 }
 
 	/* 0x27 messages are a little unusual when sent by the phone in that
@@ -1240,7 +1238,7 @@ void	FB38_RX_Handle0x27_SMSMessageText(void)
 
 		/* It wasn't so acknowledge it. */
 	if (FB38_TX_SendStandardAcknowledge(0x27) != true) {
-		fprintf(stderr, "0x27 Write failed!");	
+		fprintf(stderr, _("0x27 Write failed!"));	
 	}
 
 		/* If this is the first block, reset remaining_length. */
@@ -1274,7 +1272,7 @@ void	FB38_RX_Handle0x4b_Status(void)
 {
 		/* First, send acknowledge. */
 	if (FB38_TX_SendStandardAcknowledge(0x4b) != true) {
-		fprintf(stderr, "0x4b Write failed!");	
+		fprintf(stderr, _("0x4b Write failed!"));	
 	}
 
 		/* There are three data bytes in the status message, two have been
@@ -1288,7 +1286,7 @@ void	FB38_RX_Handle0x4b_Status(void)
 		return;
 	}
 
-	fprintf(stdout, "Status: RF %02x, Batt %02x, Connection Status %02x.\n", MessageBuffer[3], MessageBuffer[4], MessageBuffer[2]);
+	fprintf(stdout, _("Status: RF %02x, Batt %02x, Connection Status %02x.\n"), MessageBuffer[3], MessageBuffer[4], MessageBuffer[2]);
 
 }
 
@@ -1296,14 +1294,14 @@ void	FB38_RX_Handle0x10_EndOfOutgoingCall(void)
 {
 		/* As usual, acknowledge first. */
 	if (FB38_TX_SendMessage(0, 0x10, MessageBuffer[1] - 0x08, NULL) != true) {
-		fprintf(stderr, "0x10 Write failed!");
+		fprintf(stderr, _("0x10 Write failed!"));
 	}
 
 	if (EnableMonitoringOutput == false) {
 		return;
 	}
 
-	fprintf(stdout, "Outgoing call terminated (0x10 message).\n");
+	fprintf(stdout, _("Outgoing call terminated (0x10 message).\n"));
 	fflush(stdout);
 
 }
@@ -1312,14 +1310,14 @@ void	FB38_RX_Handle0x11_EndOfIncomingCall(void)
 {
 		/* As usual, acknowledge first. */
 	if (FB38_TX_SendMessage(0, 0x11, MessageBuffer[1] - 0x08, NULL) != true) {
-		fprintf(stderr, "Write failed!");
+		fprintf(stderr, _("Write failed!"));
 	}
 
 	if (EnableMonitoringOutput == false) {
 		return;
 	}
 
-	fprintf(stdout, "Incoming call terminated.\n");
+	fprintf(stdout, _("Incoming call terminated.\n"));
 	fflush(stdout);
 
 }
@@ -1328,14 +1326,14 @@ void	FB38_RX_Handle0x12_EndOfOutgoingCall(void)
 {
 		/* As usual, acknowledge first. */
 	if (FB38_TX_SendMessage(0, 0x12, MessageBuffer[1] - 0x08, NULL) != true) {
-		fprintf(stderr, "Write failed!");
+		fprintf(stderr, _("Write failed!"));
 	}
 
 	if (EnableMonitoringOutput == false) {
 		return;
 	}
 
-	fprintf(stdout, "Outgoing call terminated (0x12 message).\n");
+	fprintf(stdout, _("Outgoing call terminated (0x12 message).\n"));
 	fflush(stdout);
 
 }
@@ -1344,14 +1342,14 @@ void	FB38_RX_Handle0x0d_IncomingCallAnswered(void)
 {
 		/* As usual, acknowledge first. */
 	if (FB38_TX_SendMessage(0, 0x0d, MessageBuffer[1] - 0x08, NULL) != true) {
-		fprintf(stderr, "Write failed!");
+		fprintf(stderr, _("Write failed!"));
 	}
 
 	if (EnableMonitoringOutput == false) {
 		return;
 	}
 
-	fprintf(stdout, "Incoming call answered.\n");
+	fprintf(stdout, _("Incoming call answered.\n"));
 	fflush(stdout);
 
 }
@@ -1360,14 +1358,14 @@ void	FB38_RX_Handle0x0e_OutgoingCallAnswered(void)
 {
 		/* As usual, acknowledge first. */
 	if (FB38_TX_SendMessage(0, 0x0e, MessageBuffer[1] - 0x08, NULL) != true) {
-		fprintf(stderr, "Write failed!");
+		fprintf(stderr, _("Write failed!"));
 	}
 
 	if (EnableMonitoringOutput == false) {
 		return;
 	}
 
-	fprintf(stdout, "Outgoing call answered - status bytes %02x %02x %02x.\n", MessageBuffer[2], MessageBuffer[3], MessageBuffer[4]);
+	fprintf(stdout, _("Outgoing call answered - status bytes %02x %02x %02x.\n"), MessageBuffer[2], MessageBuffer[3], MessageBuffer[4]);
 	fflush(stdout);
 
 }
@@ -1382,7 +1380,7 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 
 		/* Acknowlege. */
 	if (FB38_TX_SendStandardAcknowledge(0x2c) != true) {
-		fprintf(stderr, "0x2c Write failed!");
+		fprintf(stderr, _("0x2c Write failed!"));
 	}
 
 		/* Set CurrentSMSMessageBodyLength for use by 0x27 code. */
@@ -1461,7 +1459,7 @@ void	FB38_RX_Handle0x30_IncomingSMSNotification(void)
 	u8		unk_end;				/* Unknown byte at end of message */
 
 	if (FB38_TX_SendStandardAcknowledge(0x30) != true) {
-		fprintf(stderr, "Write failed!");
+		fprintf(stderr, _("Write failed!"));
 	}
 
 		/* Extract data from message. */
@@ -1503,9 +1501,9 @@ void	FB38_RX_Handle0x30_IncomingSMSNotification(void)
 		return;
 	}
 
-	fprintf(stdout, "Incoming SMS %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n",
+	fprintf(stdout, _("Incoming SMS %d/%d/%d %d:%02d:%02d Sender: %s Msg Centre: %s\n"),
 			year, month, day, hour, minute, second, sender, message_centre);
-	fprintf(stdout, "   Msg Length %d, Msg number %d,  Unknown bytes: %02x %02x %02x %02x %02x %02x\n", 
+	fprintf(stdout, _("   Msg Length %d, Msg number %d,  Unknown bytes: %02x %02x %02x %02x %02x %02x\n"), 
 			message_body_length, msg_number, unk0, unk2, unk3, unk4, unk9, unk_end);
 	fflush(stdout);
 }
@@ -1522,7 +1520,7 @@ void	FB38_RX_Handle0x46_MemoryLocationData(void)
 
 		/* As usual, acknowledge first. */
 	if (FB38_TX_SendMessage(0, 0x46, MessageBuffer[1] - 0x08, NULL) != true) {
-		fprintf(stderr, "Write failed!");
+		fprintf(stderr, _("Write failed!"));
 	}
 
 		/* Get/Calculate label and number length. */
@@ -1581,7 +1579,7 @@ void	FB38_RX_Handle0x41_SMSMessageCentreData(void)
 	
 		/* As usual, acknowledge first. */
 	if (!FB38_TX_SendStandardAcknowledge(0x41)) {
-		fprintf(stderr, "Write failed!");
+		fprintf(stderr, _("Write failed!"));
 	}
 
 		/* Get Message Centre number length, which is byte 13 in message. */
@@ -1593,16 +1591,16 @@ void	FB38_RX_Handle0x41_SMSMessageCentreData(void)
 		return;
 	}
 
-	fprintf(stdout, "SMS Message Centre Data status bytes =");
+	fprintf(stdout, _("SMS Message Centre Data status bytes ="));
 	for (count = 0; count < 12; count ++) {
 		fprintf(stdout, "0x%02x ", MessageBuffer[2 + count]);
 	}
 
 	if (centre_number_length == 0) {
-		fprintf(stdout, "Number field emtpy.");
+		fprintf(stdout, _("Number field emtpy."));
 	}
 	else {
-		fprintf(stdout, "Number: ");
+		fprintf(stdout, _("Number: "));
 		for (count = 0; count < centre_number_length; count ++) {
 			fprintf(stdout, "%c", MessageBuffer[14 + count]);
 		}
