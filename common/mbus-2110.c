@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.34  2001-02-21 19:56:58  chris
+  Revision 1.35  2001-02-25 19:15:33  machek
+  Fixed udelay() to work w.r.t. signals.
+
+  Revision 1.34  2001/02/21 19:56:58  chris
   More fiddling with the directory layout
 
   Revision 1.33  2001/02/20 21:30:28  machek
@@ -142,21 +145,23 @@ static volatile unsigned char SMSData[256];
 
 static long long LastChar = 0;
 
-long long
+static long long
 GetTime(void)
 {
 	struct timeval tv;
 
 	gettimeofday(&tv, NULL);
-	return tv.tv_sec * 1000000 + tv.tv_usec;
+	return (long long) tv.tv_sec * 1000000 + tv.tv_usec;
 }
 
-void
+static void
 Wait(long long from, int msec)
 {
 	while (GetTime() < from + ((long long) msec)*1000)
 		usleep(5000);
 }
+
+#define usleep(x) do { Wait(GetTime(), x/1000); } while (0)
 
 /* Checksum calculation */
 static u8
@@ -211,8 +216,7 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	if( !EchoOK ) {
 		int i;
 		fprintf(stderr, "no echo?!");
-		for (i=0; i<100; i++)
-			usleep(10000);	/* Collision, wait; perhaps it goes away */
+		usleep(1000000);
 		return (GE_TIMEOUT);
 	}
 	return (GE_NONE);
@@ -344,11 +348,7 @@ GetSMSMessage(GSM_SMSMessage *m)
 	m->MessageCenter.No = 0;
 	strcpy(m->MessageCenter.Name, "(unknown)");
 	m->UDHType = GSM_NoUDH;
-
-	fprintf(stderr, "(spurious?");
-	usleep(1000000);
-	fprintf(stderr, "(okay)");
-
+	usleep(300000);		/* If phone lost our ack, it might retransmit data */
 	return (GE_NONE);
 }
 
