@@ -230,9 +230,14 @@ get IMEI, model and revision.
 .TP 
 .BR "\-\-entersecuritycode {\fIPIN\fP|\fIPIN2\fP|\fIPUK\fP|\fIPUK2\fP}"
 asks for the code and sends it to the phone.
-.TP 
+.TP
 .BR "\-\-getsecuritycodestatus"
 show if a security code is needed.
+.TP
+.BR "\-\-getlocksinfo"
+show information about the (sim)locks of the phone:
+the lock data, whether a lock is open or closed, whether it is a user or
+factory lock and the number of unlock attempts.
 
 .SH "DIAGNOSTICS"
 Various error messages are printed to standard error.  The exit code

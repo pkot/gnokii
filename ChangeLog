@@ -34,6 +34,7 @@
       incoming/deleted messages                        (Ulrich Hopp)
  * documentation updates
     o new Estonian translation                       (Hans Motshärg)
+    o man page update for gnokii --getlocksinfo     (Bertrik Sikken)
  * gnokii updates
     o --getnetworkinfo displays the LAC and cell id fields as
       a zero padded four digit hex number           (BORBELY Zoltan)
