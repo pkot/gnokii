@@ -32,7 +32,8 @@ OBJS =	cfgreader.o \
 	gsm-error.o \
 	gsm-statemachine.o \
 	compat.o \
-	snprintf.o
+	snprintf.o \
+	nokia-decoding.o
 
 ifdef NO_SHARED
 GNOKII_LIB=libgnokii.a
