@@ -1160,24 +1160,6 @@ static GSM_Error DecodeSMSHeader(unsigned char *message, GSM_SMSMessage *SMS)
 		}
 	}
 
-	/* Remote number */
-	if (llayout.RemoteNumber > -1) {
-		if (llayout.IsRemoteNumberCoded) {
-			if (message[llayout.RemoteNumber] == 0x00) llayout.MessageCenter -= 4;
-				/* FIXME Is this an ugly hack or correct? */
-				/* at least it works with 6210, 6510 and 6110 with the message I tested */
-			message[llayout.RemoteNumber] = (message[llayout.RemoteNumber] + 1) / 2 + 1;
-			strcpy(SMS->RemoteNumber.number, GetBCDNumber(message + llayout.RemoteNumber));
-			dprintf("\tRemote number (recipient or sender): %s\n", SMS->RemoteNumber.number);
-		} else {
-			/* SMS struct should be zeroed for now, so there's no
-			 * need to add an extra '\0' at the end of the string */
-			strncpy(SMS->RemoteNumber.number,
-				message + 1 + llayout.RemoteNumber,
-				message[llayout.RemoteNumber] < GSM_MAX_SMS_CENTER_LENGTH ? message[llayout.RemoteNumber] : GSM_MAX_SMS_CENTER_LENGTH);
-		}
-	}
-
 	/* Short Message Center */
 	if (llayout.MessageCenter > -1) {
 		if (llayout.IsMessageCenterCoded) {
@@ -1244,12 +1226,14 @@ static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int M
 		/* This is incredible. Nokia violates it's own format in 6210 */
 		/* Indicate that it is Multipart Message. Remove it if not needed */
 		if ((message[llayout.UserData] == 0x48) && (message[llayout.UserData + 1] == 0x1c)) {
+			dprintf("First picture then text!\n");
 			SMS->UDH_No = 1;
 			SMS->UDH[0].Type = SMS_MultipartMessage;
 			/* First part is a Picture */
 			SMS->UserData[0].Type = SMS_BitmapData;
 			GSM_ReadSMSBitmap(SMS_Picture, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
 			GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
+
 			size = MessageLength - llayout.UserData - 4 - SMS->UserData[0].u.Bitmap.size;
 			SMS->Length = message[llayout.UserData + 4 + SMS->UserData[0].u.Bitmap.size];
 			/* Second part is a text */
@@ -1259,6 +1243,7 @@ static GSM_Error DecodePDUSMS(unsigned char *message, GSM_SMSMessage *SMS, int M
 				   SMS->Length, size, 0, SMS->DCS);
 			SMS->UserData[1].u.Text[SMS->Length] = 0;
 		} else {
+			dprintf("First text then picture!\n");
 			/* First part is a text */
 			SMS->UDH_No = 1;
 			SMS->UserData[1].Type = SMS_PlainText;
