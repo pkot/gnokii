@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1-pre2
+VERSION = 0.3.1-pre3
 
 #
 # Compiler to use.

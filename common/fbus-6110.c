@@ -1689,6 +1689,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
   int i, tmp, count, offset;
   unsigned char output[160];
+  unsigned char SMSText[256];
 
 #ifdef DEBUG
   FB61_RX_DisplayMessage();
@@ -2396,7 +2397,14 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       printf(_("Message: the rest of the SMS message received.\n"));
 #endif DEBUG
 
-      tmp=UnpackEightBitsToSeven(MessageLength-2, CurrentSMSMessage->Length-CurrentSMSPointer, MessageBuffer, output);
+      for (i=0; i<MessageLength-2;i++) {
+        SMSText[CurrentSMSPointer+i] = MessageBuffer[i];
+      }
+
+      tmp=UnpackEightBitsToSeven(CurrentSMSPointer+MessageLength-2,
+                                 CurrentSMSMessage->Length,
+                                 SMSText,
+                                 output);
 
       for (i=0; i<tmp;i++) {
 
@@ -2404,7 +2412,7 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
         printf("%c", GSM_Default_Alphabet[output[i]]);
 #endif DEBUG
 
-        CurrentSMSMessage->MessageText[CurrentSMSPointer+i]=GSM_Default_Alphabet[output[i]];
+        CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
       }
 
       CurrentSMSMessage->MessageText[CurrentSMSMessage->Length]=0;
@@ -2561,14 +2569,21 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
       if (CurrentSMSMessage->Type != GST_DR) {
 
         CurrentSMSMessage->Length=MessageBuffer[19+offset];
-        tmp=UnpackEightBitsToSeven(MessageLength-39-offset-2, CurrentSMSMessage->Length, MessageBuffer+39+offset, output);
-        for (i=0; i<tmp;i++) {
+        if (MessageBuffer[MessageLength-2] > 0x01) {
+          tmp = MessageLength-39-offset-2;
+          for (i=0; i<tmp;i++) {
+            SMSText[i] = (MessageBuffer+39+offset)[i];
+          }
+        } else {
+          tmp=UnpackEightBitsToSeven(MessageLength-39-offset-2, CurrentSMSMessage->Length, MessageBuffer+39+offset, output);
+          for (i=0; i<tmp;i++) {
 
 #ifdef DEBUG
-          printf("%c", GSM_Default_Alphabet[output[i]]);
+            printf("%c", GSM_Default_Alphabet[output[i]]);
 #endif DEBUG
 
-	  CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
+	    CurrentSMSMessage->MessageText[i]=GSM_Default_Alphabet[output[i]];
+	  }
 	}
       } else { /* CurrentSMSMessage->Type == SM_DR (Delivery Report) */
 
