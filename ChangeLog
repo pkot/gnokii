@@ -23,6 +23,8 @@
     o allow sm_block and friends to be used not only directly after
       sm_message_send but also with sm_reset in between, which sets
       the state to GN_SM_Initialised                 (Osma Suominen)
+ * gnokii updates
+    o set number type in sendringtone()           (Anton V.Dorofeev)
 
 0.5.0pre7
 =========
