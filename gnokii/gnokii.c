@@ -52,7 +52,7 @@
 #include "gnokii.h"
 #include "gsm-filetypes.h"
 
-char *Model;      /* Model from .gnokiirc file. */
+char *model;      /* Model from .gnokiirc file. */
 char *Port;       /* Serial port from .gnokiirc file */
 char *Initlength; /* Init length from .gnokiirc file */
 char *Connection; /* Connection type from .gnokiirc file */
@@ -207,7 +207,7 @@ int version(void)
   fprintf(stdout, _("GNOKII Version %s\n"
 "Copyright (C) Hugh Blemings <hugh@linuxcare.com>, 1999\n"
 "Copyright (C) Pavel Janík ml. <Pavel.Janik@linux.cz>, 1999\n"
-"Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, Model, Port);
+"Built %s %s for %s on %s \n"), VERSION, __TIME__, __DATE__, model, Port);
 
   return 0;
 }
@@ -236,7 +236,7 @@ int usage(void)
 "          gnokii --getalarm\n"
 "          gnokii --dialvoice number\n"
 "          gnokii --dialdata number\n"
-"          gnokii --getcalendarnote index\n"
+"          gnokii --getcalendarnote index [-v]\n"
 "          gnokii --writecalendarnote\n"
 "          gnokii --deletecalendarnote index\n"
 "          gnokii --getdisplaystatus\n"
@@ -314,7 +314,8 @@ int usage(void)
 
 "          --dialdata        initiate data call.\n\n"
 
-"          --getcalendarnote get the note with number [index] from calendar.\n\n"
+"          --getcalendarnote get the note with number index from calendar.\n"
+"                             [-v] - output in vCalendar 1.0 format\n\n"
 
 "          --writecalendarnote write the note to calendar.\n\n"
 
@@ -357,7 +358,7 @@ void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
     
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(Model, Port, Initlength, connection, rlp_handler);
+  error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
@@ -551,7 +552,7 @@ int main(int argc, char *argv[])
     { OPT_SETALARM,          2, 2, 0 },
     { OPT_DIALVOICE,         1, 1, 0 },
     { OPT_DIALDATA,          1, 1, 0 },
-    { OPT_GETCALENDARNOTE,   1, 1, 0 },
+    { OPT_GETCALENDARNOTE,   1, 2, 0 },
     { OPT_DELCALENDARNOTE,   1, 1, 0 },
     { OPT_GETMEMORY,         3, 3, 0 },
     { OPT_GETSPEEDDIAL,      1, 1, 0 },
@@ -702,7 +703,7 @@ int main(int argc, char *argv[])
 
     case OPT_GETCALENDARNOTE:
 
-      rc = getcalendarnote(optarg);
+      rc = getcalendarnote(nargc, nargv);
       break;
 
     case OPT_DELCALENDARNOTE:
@@ -1277,7 +1278,7 @@ int getsms(char *argv[])
 
     case GE_NOTIMPLEMENTED:
 
-      fprintf(stderr, _("Function not implemented in %s model!\n"), Model);
+      fprintf(stderr, _("Function not implemented in %s model!\n"), model);
       GSM->Terminate();
       return -1;	
 
@@ -1388,7 +1389,7 @@ int deletesms(char *argv[])
       fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);
     else {
       if (error == GE_NOTIMPLEMENTED) {
-	fprintf(stderr, _("Function not implemented in %s model!\n"), Model);
+	fprintf(stderr, _("Function not implemented in %s model!\n"), model);
 	GSM->Terminate();
 	return -1;	
       }
@@ -1454,7 +1455,7 @@ int entersecuritycode(char *type)
   else if (test == GE_NONE)
     fprintf(stdout, _("Code ok.\n"));
   else if (test == GE_NOTIMPLEMENTED)
-    fprintf(stdout, _("Not implemented.\n"));
+    fprintf(stderr, _("Function not implemented in %s model!\n"), model);
   else
     fprintf(stdout, _("Other error.\n"));
 
@@ -1707,17 +1708,71 @@ int setlogo(char *argv[])
 
 /* Calendar notes receiving. */
 
-int getcalendarnote(char *Index)
+int getcalendarnote(int argc, char *argv[])
 {
-
   GSM_CalendarNote CalendarNote;
+  int i;
+  bool vCal=false;
 
-  CalendarNote.Location=atoi(Index);
+  struct option options[] = {
+             { "vCard",    optional_argument, NULL, '1'},
+             { NULL,      0,                 NULL, 0}
+  };
+
+  optarg = NULL;
+  optind = 0;
+  CalendarNote.Location=atoi(argv[0]);
+
+  while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
+    switch (i) {       
+      case 'v':
+        vCal=true;
+        break;
+      default:
+        usage(); // Would be better to have an calendar_usage() here.
+        return -1;
+    }
+  }
 
   fbusinit(NULL);
 
   if (GSM->GetCalendarNote(&CalendarNote) == GE_NONE) {
 
+    if (vCal) {
+        fprintf(stdout, _("BEGIN:VCALENDAR\n"));
+        fprintf(stdout, _("VERSION:1.0\n"));
+        fprintf(stdout, _("BEGIN:VEVENT\n"));
+        fprintf(stdout, _("CATEGORIES:"));
+        switch (CalendarNote.Type) {
+         case GCN_REMINDER:
+           fprintf(stdout, _("MISCELLANEOUS\n"));
+           break;
+         case GCN_CALL:
+           fprintf(stdout, _("PHONE CALL\n"));
+           break;
+         case GCN_MEETING:
+           fprintf(stdout, _("MEETING\n"));
+           break;
+         case GCN_BIRTHDAY:
+           fprintf(stdout, _("SPECIAL OCCASION\n"));
+           break;
+         default:
+           fprintf(stdout, _("UNKNOWN\n"));
+           break;
+        }
+        fprintf(stdout, _("SUMMARY:%s\n"),CalendarNote.Text);
+        fprintf(stdout, _("DTSTART:%04d%02d%02dT%02d%02d%02d\n"), CalendarNote.Time.Year,
+           CalendarNote.Time.Month, CalendarNote.Time.Day, CalendarNote.Time.Hour,
+           CalendarNote.Time.Minute, CalendarNote.Time.Second);
+        if (CalendarNote.Alarm.Year!=0) {
+           fprintf(stdout, _("DALARM:%04d%02d%02dT%02d%02d%02d\n"), CalendarNote.Alarm.Year,
+              CalendarNote.Alarm.Month, CalendarNote.Alarm.Day, CalendarNote.Alarm.Hour,
+              CalendarNote.Alarm.Minute, CalendarNote.Alarm.Second);
+        }
+        fprintf(stdout, _("END:VEVENT\n"));
+        fprintf(stdout, _("END:VCALENDAR\n"));
+
+    } else {  /* not vCal */
 	fprintf(stdout, _("   Type of the note: "));
 
 	switch (CalendarNote.Type) {
@@ -1765,7 +1820,7 @@ int getcalendarnote(char *Index)
 
         if (CalendarNote.Type == GCN_CALL)
           fprintf(stdout, _("   Phone: %s\n"), CalendarNote.Phone);
-
+    }
   }
   else {
     fprintf(stderr, _("The calendar note can not be read\n"));
@@ -2125,7 +2180,7 @@ int getmemory(char *argv[])
       fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
     else {
       if (error == GE_NOTIMPLEMENTED) {
-	fprintf(stderr, _("Function not implemented in %s model!\n"), Model);
+	fprintf(stderr, _("Function not implemented in %s model!\n"), model);
 	GSM->Terminate();
 	return -1;
       }
@@ -2311,9 +2366,9 @@ void readconfig(void)
     if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
       fprintf(stderr, _("error opening %s, using default config\n"), rcfile);
 
-  Model = CFG_Get(cfg_info, "global", "model");
-  if (!Model)
-    Model = DefaultModel;
+  model = CFG_Get(cfg_info, "global", "model");
+  if (!model)
+    model = DefaultModel;
 
   Port = CFG_Get(cfg_info, "global", "port");
   if (!Port)
@@ -2517,7 +2572,7 @@ int pmon()
 
   /* Initialise the code for the GSM interface. */     
 
-  error = GSM_Initialise(Model, Port, Initlength, connection, RLP_DisplayF96Frame);
+  error = GSM_Initialise(model, Port, Initlength, connection, RLP_DisplayF96Frame);
 
   if (error != GE_NONE) {
     fprintf(stderr, _("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));

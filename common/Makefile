@@ -15,6 +15,8 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
+CFLAGS += $(PTHREAD_CFLAGS)
+
 OBJS =	cfgreader.o \
 	device.o \
 	fbus-3810.o \

@@ -17,6 +17,10 @@ CFLAGS += -DXVERSION=\"$(XVERSION)\" \
 LDFLAGS += $(PTHREAD_LIBS) \
 	   $(GTK_LIBS) 
 
+ifdef XPM_LIBS
+    LDFLAGS += $(XPM_LIBS)
+endif
+
 OBJS = 	xgnokii.o \
 	xgnokii_common.o \
 	xgnokii_contacts.o \

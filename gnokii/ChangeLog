@@ -18,3 +18,10 @@
 * Sun Mar  5 14:02:38 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - Date of SMSC response fixed (Gary Reuter)
 
+* Mon Mar  6 22:41:38 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- Second definition of Model renamed. First one is in COMMON.o (Manfred
+  Jonsson)
+- securitycode error updated (Manfred Jonsson)
+
+* Fri Mar 10 00:04:16 CET 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- vCal support (Gary Reuter)

@@ -20,7 +20,7 @@
 #include <io.h>
 #include <memory.h>
 
-#include "winserial.h"
+#include <win32/winserial.h>
 
 #define sleep(x) Sleep((x) * 1000)
 #define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
