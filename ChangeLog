@@ -25,6 +25,8 @@
     o handle argument correctness to getphonebook       (Pawel Kot)
     o gnokii --help didn't show the real --writephonbook usage
                                                         (Pawel Kot)
+    o gnokii --writephonebook for multiple addresses was
+      interrupted on the first error                    (Pawel Kot)
 
 0.5.7
 =====

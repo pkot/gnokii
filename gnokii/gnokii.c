@@ -3371,6 +3371,8 @@ static int writephonebook(int argc, char *args[])
 
 	/* Go through data from stdin. */
 	while (1) {
+		error = GN_ERR_NONE;
+
 		memset(&entry, 0, sizeof(gn_phonebook_entry));
 		entry.memory_type = default_mt;
 		entry.location = default_location;
