@@ -186,4 +186,10 @@ typedef enum {
 #define NK7110_SUBSEC_ENABLE_EXTENDED_CMDS 0x64	/* Enable extended commands */
 #define NK7110_SUBSEC_NETMONITOR	0x7e	/* Netmonitor */
 
+typedef struct {
+	bool new_sms;	/* Do we have a new SMS? */
+	int ll_memtype;
+	int ll_location;
+} nk7110_driver_instance;
+
 #endif  /* _gnokii_phones_nk7110_h */

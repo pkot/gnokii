@@ -7,6 +7,8 @@
     o portability fixes for OpenBSD                 (BORBELY Zoltan)
     o F_SETOWN disabled for OpenBSD                      (Pawel Kot)
     o u8 removed from gn_ringtone_pack                (Helge Deller)
+ * nk7110 driver updates
+    o get rid of global variables                   (Ladislav Michl)
 
 0.5.0rc2
 ========
@@ -17,7 +19,7 @@
     o don't use u8 type in the exported headers          (Pawel Kot)
     o add string.h to mgnokiidev                  (Troy Korjuslommi)
     o mention exiting Docs/Bugs and not Docs/Reporting-HOWTO when
-      coming into troubel                             (Helge Deller)
+      coming into trouble                             (Helge Deller)
     o Nokia 3650 information                             (Pawel Kot)
  * statemachine updates
     o fix u16/unsigned int mixing problems in the statemachine

@@ -50,6 +50,9 @@
 
 #include "gnokii-internal.h"
 
+#define DRVINSTANCE(s) ((nk7110_driver_instance *)((s)->driver.driver_instance))
+#define FREE(p) do { free(p); (p) = NULL; } while (0)
+
 #define SEND_MESSAGE_BLOCK(type, length) \
 do { \
 	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
@@ -119,25 +122,19 @@ static gn_error NK7110_IncomingKeypress(int messagetype, unsigned char *message,
 
 static int get_memory_type(gn_memory_type memory_type);
 
-/* Some globals */
-
-static bool sms_loop = false; /* Are we in infinite SMS reading loop? */
-static bool new_sms  = false; /* Do we have a new SMS? */
-static int ll_memtype, ll_location;
-
 static gn_incoming_function_type nk7110_incoming_functions[] = {
-	{ NK7110_MSG_FOLDER,	NK7110_IncomingFolder },
-	{ NK7110_MSG_SMS,	NK7110_IncomingSMS },
-	{ NK7110_MSG_PHONEBOOK,	NK7110_IncomingPhonebook },
-	{ NK7110_MSG_NETSTATUS,	NK7110_IncomingNetwork },
-	{ NK7110_MSG_CALENDAR,	NK7110_IncomingCalendar },
-	{ NK7110_MSG_BATTERY,	NK7110_IncomingBattLevel },
-	{ NK7110_MSG_CLOCK,	NK7110_IncomingClock },
-	{ NK7110_MSG_IDENTITY,	NK7110_IncomingIdentify },
-	{ NK7110_MSG_STLOGO,	NK7110_IncomingStartup },
-	{ NK7110_MSG_DIVERT,	pnok_call_divert_incoming },
-	{ NK7110_MSG_SECURITY,	NK7110_IncomingSecurity },
-	{ NK7110_MSG_WAP,	NK7110_IncomingWAP },
+	{ NK7110_MSG_FOLDER,		NK7110_IncomingFolder },
+	{ NK7110_MSG_SMS,		NK7110_IncomingSMS },
+	{ NK7110_MSG_PHONEBOOK,		NK7110_IncomingPhonebook },
+	{ NK7110_MSG_NETSTATUS,		NK7110_IncomingNetwork },
+	{ NK7110_MSG_CALENDAR,		NK7110_IncomingCalendar },
+	{ NK7110_MSG_BATTERY,		NK7110_IncomingBattLevel },
+	{ NK7110_MSG_CLOCK,		NK7110_IncomingClock },
+	{ NK7110_MSG_IDENTITY,		NK7110_IncomingIdentify },
+	{ NK7110_MSG_STLOGO,		NK7110_IncomingStartup },
+	{ NK7110_MSG_DIVERT,		pnok_call_divert_incoming },
+	{ NK7110_MSG_SECURITY,		NK7110_IncomingSecurity },
+	{ NK7110_MSG_WAP,		NK7110_IncomingWAP },
 	{ NK7110_MSG_KEYPRESS_RESP,	NK7110_IncomingKeypress },
 	{ 0, NULL }
 };
@@ -147,19 +144,19 @@ gn_driver driver_nokia_7110 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"7110|6210|6250|7190",      /* Supported models */
-		7,                     /* Max RF Level */
-		0,                     /* Min RF Level */
-		GN_RF_Percentage,        /* RF level units */
-		7,                     /* Max Battery Level */
-		0,                     /* Min Battery Level */
-		GN_BU_Percentage,        /* Battery level units */
-		GN_DT_DateTime,          /* Have date/time support */
-		GN_DT_TimeOnly,	       /* Alarm supports time only */
-		1,                     /* Alarms available - FIXME */
-		60, 96,                /* Startup logo size - 7110 is fixed at init */
-		21, 78,                /* Op logo size */
-		14, 72                 /* Caller logo size */
+		"7110|6210|6250|7190",	/* Supported models */
+		7,			/* Max RF Level */
+		0,			/* Min RF Level */
+		GN_RF_Percentage,	/* RF level units */
+		7,			/* Max Battery Level */
+		0,			/* Min Battery Level */
+		GN_BU_Percentage,	/* Battery level units */
+		GN_DT_DateTime,		/* Have date/time support */
+		GN_DT_TimeOnly,		/* Alarm supports time only */
+		1,			/* Alarms available - FIXME */
+		60, 96,			/* Startup logo size - 7110 is fixed at init */
+		21, 78,			/* Op logo size */
+		14, 72			/* Caller logo size */
 	},
 	NK7110_Functions,
 	NULL
@@ -168,10 +165,13 @@ gn_driver driver_nokia_7110 = {
 /* FIXME - a little macro would help here... */
 static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
+	if (!DRVINSTANCE(state) && op != GN_OP_Init) return GN_ERR_INTERNALERROR;
+
 	switch (op) {
 	case GN_OP_Init:
 		return NK7110_Initialise(state);
 	case GN_OP_Terminate:
+		FREE(DRVINSTANCE(state));
 		return pgen_terminate(data, state);
 	case GN_OP_GetModel:
 		return NK7110_GetModel(data, state);
@@ -220,12 +220,12 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 	case GN_OP_OnSMS:
 		/* Register notify when running for the first time */
 		if (data->on_sms) {
-			new_sms = true;
+			DRVINSTANCE(state)->new_sms = true;
 			return GN_ERR_NONE; /* FIXME NK7110_GetIncomingSMS(data, state); */
 		}
 		break;
 	case GN_OP_PollSMS:
-		if (new_sms) return GN_ERR_NONE; /* FIXME NK7110_GetIncomingSMS(data, state); */
+		if (DRVINSTANCE(state)->new_sms) return GN_ERR_NONE; /* FIXME NK7110_GetIncomingSMS(data, state); */
 		break;
 	case GN_OP_SendSMS:
 		return NK7110_SendSMS(data, state);
@@ -289,6 +289,9 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_nokia_7110, sizeof(gn_driver));
 
+	if (!(DRVINSTANCE(state) = calloc(1, sizeof(nk7110_driver_instance))))
+		return GN_ERR_INTERNALERROR;
+
 	dprintf("Connecting\n");
 	while (!connected) {
 		if (attempt > 2) break;
@@ -315,6 +318,7 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 			err = m2bus_initialise(state);
 			break;
 		default:
+			FREE(DRVINSTANCE(state));
 			return GN_ERR_NOTSUPPORTED;
 		}
 
@@ -331,7 +335,10 @@ static gn_error NK7110_Initialise(struct gn_statemachine *state)
 		if (state->driver.functions(GN_OP_GetModel, &data, state) == GN_ERR_NONE)
 			connected = true;
 	}
-	if (!connected) return err;
+	if (!connected) {
+		FREE(DRVINSTANCE(state));
+		return err;
+	}
 	/* Check for 7110 and alter the startup logo size */
 	if (strcmp(model, "NSE-5") == 0) {
 		state->driver.phone.startup_logo_height = 65;
@@ -562,7 +569,9 @@ static gn_error SetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 	if ((data->bitmap->width != state->driver.phone.operator_logo_width) ||
 	    (data->bitmap->height != state->driver.phone.operator_logo_height)) {
 		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",
-			state->driver.phone.operator_logo_height, state->driver.phone.operator_logo_width, data->bitmap->height, data->bitmap->width);
+			state->driver.phone.operator_logo_height,
+			state->driver.phone.operator_logo_width,
+			data->bitmap->height, data->bitmap->width);
 		return GN_ERR_INVALIDSIZE;
 	}
 
@@ -596,6 +605,7 @@ static gn_error GetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 /*****************************/
 static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
+	nk7110_driver_instance *drvinst = DRVINSTANCE(state);
 	unsigned char *blockstart;
 	unsigned char blocks;
 	unsigned char subblockcount;
@@ -645,8 +655,9 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 				return GN_ERR_NOTIMPLEMENTED;
 			}
 		}
-		if (ll_memtype != memtype || ll_location != location) {
-			dprintf("skipping entry: ll_memtype: %d, memtype: %d, ll_location: %d, location: %d\n", ll_memtype, memtype, ll_location, location);
+		if (drvinst->ll_memtype != memtype || drvinst->ll_location != location) {
+			dprintf("skipping entry: ll_memtype: %d, memtype: %d, ll_location: %d, location: %d\n",
+				drvinst->ll_memtype, memtype, drvinst->ll_location, location);
 			return GN_ERR_UNSOLICITED;
 		}
 		dprintf("Received phonebook info\n");
@@ -686,14 +697,15 @@ static gn_error NK7110_GetMemoryStatus(gn_data *data, struct gn_statemachine *st
 
 static gn_error GetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 {
+	nk7110_driver_instance *drvinst = DRVINSTANCE(state);
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
 				  0x00, 0x10 , /* memory type */
 				  0x00, 0x00,  /* location */
 				  0x00, 0x00};
 
 	req[11] = GNOKII_MIN(data->bitmap->number + 1, GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER);
-	ll_memtype = 0x10;
-	ll_location = req[11];
+	drvinst->ll_memtype = 0x10;
+	drvinst->ll_location = req[11];
 	dprintf("Getting caller(%d) logo...\n", req[11]);
 	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 14);
 }
@@ -763,8 +775,8 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 static gn_error NK7110_DeletePhonebookLocation(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0f, 0x00, 0x01, 0x04, 0x00, 0x00, 0x0c, 0x01, 0xff,
-				  0x00, 0x00,  /* location */
-				  0x00,  /* memory type */
+				  0x00, 0x00,	/* location */
+				  0x00,		/* memory type */
 				  0x00, 0x00, 0x00};
 	gn_phonebook_entry *entry;
 
@@ -781,8 +793,8 @@ static gn_error NK7110_DeletePhonebookLocation(gn_data *data, struct gn_statemac
 static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
-				  0x00, 0x00,  /* memory type */
-				  0x00, 0x00,  /* location */
+				  0x00, 0x00,	/* memory type */
+				  0x00, 0x00,	/* location */
 				  0x00, 0x00, 0x00, 0x00};
 
 	char string[500];
@@ -856,32 +868,37 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 
 static gn_error NK7110_ReadPhonebookLL(gn_data *data, struct gn_statemachine *state)
 {
+	nk7110_driver_instance *drvinst = DRVINSTANCE(state);
 	unsigned char req[2000] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
 				   0x00, 0x00, /* memory type; was: 0x02, 0x05 */
 				   0x00, 0x00, /* location */
 				   0x00, 0x00};
 
-	dprintf("Reading phonebook location (%d)\n", ll_location);
+	dprintf("Reading phonebook location (%d)\n", drvinst->ll_location);
 
-	req[9] = ll_memtype;
-	req[10] = ll_location >> 8;
-	req[11] = ll_location & 0xff;
+	req[9] = drvinst->ll_memtype;
+	req[10] = drvinst->ll_location >> 8;
+	req[11] = drvinst->ll_location & 0xff;
 
 	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 14);
 }
 
 static gn_error NK7110_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
-	ll_memtype = get_memory_type(data->phonebook_entry->memory_type);
-	ll_location = data->phonebook_entry->location;
+	nk7110_driver_instance *drvinst = DRVINSTANCE(state);
+
+	drvinst->ll_memtype = get_memory_type(data->phonebook_entry->memory_type);
+	drvinst->ll_location = data->phonebook_entry->location;
 
 	return NK7110_ReadPhonebookLL(data, state);
 }
 
 static gn_error NK7110_GetSpeedDial(gn_data *data, struct gn_statemachine *state)
 {
-	ll_memtype = NK7110_MEMORY_SPEEDDIALS;
-	ll_location = data->speed_dial->number;
+	nk7110_driver_instance *drvinst = DRVINSTANCE(state);
+
+	drvinst->ll_memtype = NK7110_MEMORY_SPEEDDIALS;
+	drvinst->ll_location = data->speed_dial->number;
 
 	return NK7110_ReadPhonebookLL(data, state);
 }
@@ -1328,7 +1345,7 @@ static gn_error NK7110_SaveSMS(gn_data *data, struct gn_statemachine *state)
 /*****************************/
 static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	gn_error	e = GN_ERR_NONE;
+	gn_error e = GN_ERR_NONE;
 
 	if (!data) return GN_ERR_INTERNALERROR;
 
@@ -1384,7 +1401,7 @@ static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int 
 	case 0x11:
 		dprintf("SMS received\n");
 		/* We got here the whole SMS */
-		new_sms = true;
+		DRVINSTANCE(state)->new_sms = true;
 		break;
 
 	case NK7110_SUBSMS_SMS_RCVD: /* 0x10 */
@@ -1442,7 +1459,7 @@ static gn_error NK7110_SendSMS(gn_data *data, struct gn_statemachine *state)
 /**********************************/
 static gn_error NK7110_IncomingClock(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	gn_error	e = GN_ERR_NONE;
+	gn_error e = GN_ERR_NONE;
 
 	if (!data) return GN_ERR_INTERNALERROR;
 	switch (message[3]) {
@@ -1497,8 +1514,8 @@ static gn_error NK7110_GetClock(char req_type, gn_data *data, struct gn_statemac
 /**********************************/
 static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	gn_error			e = GN_ERR_NONE;
-	int				i, year;
+	gn_error e = GN_ERR_NONE;
+	int i, year;
 
 	if (!data || !data->calnote) return GN_ERR_INTERNALERROR;
 
@@ -1853,8 +1870,6 @@ static gn_error NK7110_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 6);
 }
 
-
-
 #if 0
 static gn_error NK7110_DialVoice(char *Number)
 {
@@ -1895,7 +1910,6 @@ static gn_error NK7110_IncomingStartup(int messagetype, unsigned char *message, 
 	/*
 	  01 13 00 ed 1c 00 39 35 32 37 32 00
 	  01 13 00 ed 15 00 00 00 00 04 c0 02 00 3c c0 03
-
 	*/
 	switch (message[4]) {
 	case 0x02:
@@ -1953,7 +1967,6 @@ static gn_error SetStartupBitmap(gn_data *data, struct gn_statemachine *state)
 				   0xc0, 0x04, 0x03, 0x00 };
 	int count = 21;
 
-
 	if ((data->bitmap->width != state->driver.phone.startup_logo_width) ||
 	    (data->bitmap->height != state->driver.phone.startup_logo_height)) {
 
@@ -1986,7 +1999,6 @@ static gn_error NK7110_IncomingSecurity(int messagetype, unsigned char *message,
 /*****************/
 /****** WAP ******/
 /*****************/
-
 static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int string_length, pos, pad = 0;
@@ -2590,5 +2602,5 @@ static int get_memory_type(gn_memory_type memory_type)
 		result = NK7110_MEMORY_XX;
 		break;
 	}
-	return (result);
+	return result;
 }
