@@ -34,9 +34,9 @@
 #include "gsm-error.h"
 
 typedef enum {
-	GN_CALL_VoiceCall,		/* Voice call */
-	GN_CALL_NonDigitalDataCall,	/* Data call on non digital line */
-	GN_CALL_DigitalDataCall		/* Data call on digital line */
+	GN_CALL_Voice,		/* Voice call */
+	GN_CALL_NonDigitalData,	/* Data call on non digital line */
+	GN_CALL_DigitalData	/* Data call on digital line */
 } gn_call_type;
 
 typedef enum {
