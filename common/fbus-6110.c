@@ -127,7 +127,10 @@ GSM_Functions FB61_Functions = {
   FB61_SendRLPFrame,
   FB61_CancelCall,
   FB61_EnableDisplayOutput,
-  FB61_DisableDisplayOutput
+  FB61_DisableDisplayOutput,
+  FB61_EnableCellBroadcast,
+  FB61_DisableCellBroadcast,
+  FB61_ReadCellBroadcast
 };
 
 /* Mobile phone information */
@@ -281,6 +284,9 @@ GSM_Profile        *CurrentProfile;
 GSM_Error          CurrentProfileError;
 
 GSM_Error          CurrentDisplayOutputError;
+
+GSM_CBMessage      *CurrentCBMessage;
+GSM_Error          CurrentCBError;
 
 unsigned char      IMEI[FB61_MAX_IMEI_LENGTH];
 unsigned char      Revision[FB61_MAX_REVISION_LENGTH];
@@ -2240,6 +2246,88 @@ GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *SMS, int data_size)
   return (CurrentSMSMessageError);
 }
 
+
+/* Enable and disable Cell Broadcasting */
+
+GSM_Error FB61_EnableCellBroadcast(void)
+{
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x20,
+                         0x01, 0x01, 0x00, 0x00, 0x01, 0x01};
+  int timeout=10;
+
+  CurrentCBError = GE_BUSY;
+
+#ifdef DEBUG
+  fprintf (stdout,"Enabling CB\n");
+#endif
+
+  CurrentCBMessage = (GSM_CBMessage *)malloc(sizeof (GSM_CBMessage));
+  CurrentCBMessage->Channel = 0;
+  CurrentCBMessage->New = false;
+  strcpy (CurrentCBMessage->Message,"");
+
+  FB61_TX_SendMessage(10, 0x02, req);
+
+  /* Wait for timeout or other error.  */
+  while (timeout != 0 && CurrentCBError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (GE_NONE);
+ }
+
+
+GSM_Error FB61_DisableCellBroadcast(void)
+{
+
+/* Should work, but not tested fully */
+
+  unsigned char req[] = {FB61_FRAME_HEADER, 0x20,
+                         0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /*VERIFY*/
+  int timeout=10;
+
+  CurrentCBError = GE_BUSY;
+
+  FB61_TX_SendMessage(10, 0x02, req);
+
+  /* Wait for timeout or other error.  */
+  while (timeout != 0 && CurrentCBError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (GE_NONE);
+ }
+
+GSM_Error FB61_ReadCellBroadcast(GSM_CBMessage *Message)
+{
+#ifdef DEBUG
+   fprintf(stdout,"Reading CB\n");
+#endif
+
+  if (CurrentCBMessage != NULL) 
+   {
+    if (CurrentCBMessage->New == true)
+     {
+#ifdef DEBUG
+  fprintf(stdout,"New CB received\n");
+#endif
+      Message->Channel = CurrentCBMessage->Channel;
+      strcpy(Message->Message,CurrentCBMessage->Message);
+      CurrentCBMessage->New = false;
+      return (GE_NONE);
+     }
+   }
+  return (GE_NONEWCBRECEIVED);
+}
+
 /* Send a bitmap or welcome-note */
 
 GSM_Error FB61_SetBitmap(GSM_Bitmap *Bitmap) {
@@ -2893,6 +2981,35 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
       break;
 
+    case 0x21:
+#ifdef DEBUG
+      fprintf(stdout, _("Message: Cell Broadcast enabled/disabled successfully.\n")); fflush (stdout);
+#endif
+
+      CurrentCBError = GE_NONE;
+      break;
+
+    case 0x23:
+      CurrentCBMessage->Channel = MessageBuffer[7];
+      CurrentCBMessage->New = true;
+      tmp=UnpackEightBitsToSeven(0, 82, 82, MessageBuffer+10, output);
+
+#ifdef DEBUG
+      fprintf(stdout, _("Message: CB received.\n")); fflush (stdout);
+
+      fprintf(stdout, _("Message: channel number %i\n"),MessageBuffer[7]); fflush (
+stdout);
+      for (i=0; i<tmp;i++)
+        fprintf(stdout, "%c", GSM_Default_Alphabet[output[i]]);
+
+      fprintf(stdout, "\n");
+#endif
+      for (i=0; i<tmp; i++)
+        CurrentCBMessage->Message[i] = GSM_Default_Alphabet[output[i]];
+
+      break;
+
+  
     case 0x31:
 
 #ifdef DEBUG

@@ -90,7 +90,12 @@ GSM_Functions			MB61_Functions = {
 		MB61_GetProfile,
 		MB61_SetProfile,
 		MB61_SendRLPFrame,
-        MB61_CancelCall
+        MB61_CancelCall,
+		MB61_EnableDisplayOutput,
+		MB61_DisableDisplayOutput,
+		MB61_EnableCellBroadcast,
+		MB61_DisableCellBroadcast,
+		MB61_ReadCellBroadcast
 };
 
 	/* FIXME - these are guesses only... */
@@ -513,6 +518,32 @@ GSM_Error	MB61_GetProfile(GSM_Profile *Profile)
 }
 
 GSM_Error	MB61_SetProfile(GSM_Profile *Profile)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+
+GSM_Error   MB61_EnableDisplayOutput()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB61_DisableDisplayOutput()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB61_EnableCellBroadcast()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB61_DisableCellBroadcast()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB61_ReadCellBroadcast(GSM_CBMessage *Message)
 {
     return (GE_NOTIMPLEMENTED);
 }

@@ -96,6 +96,12 @@ GSM_Error	MB61_SetProfile(GSM_Profile *Profile);
 bool  		MB61_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 GSM_Error	MB61_CancelCall(void);
 
+GSM_Error 	MB61_EnableDisplayOutput();
+GSM_Error 	MB61_DisableDisplayOutput();
+
+GSM_Error 	MB61_EnableCellBroadcast ();
+GSM_Error 	MB61_DisableCellBroadcast(void);
+GSM_Error 	MB61_ReadCellBroadcast (GSM_CBMessage *Message);
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __mbus_6160_c isn't 
 	   defined. */

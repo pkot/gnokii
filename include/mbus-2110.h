@@ -96,6 +96,12 @@ GSM_Error	MB21_SetProfile(GSM_Profile *Profile);
 bool  		MB21_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 GSM_Error	MB21_CancelCall(void);
 
+GSM_Error 	MB21_EnableDisplayOutput();
+GSM_Error 	MB21_DisableDisplayOutput();
+
+GSM_Error 	MB21_EnableCellBroadcast ();
+GSM_Error 	MB21_DisableCellBroadcast(void);
+GSM_Error 	MB21_ReadCellBroadcast (GSM_CBMessage *Message);
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __mbus_2110_c isn't 
 	   defined. */

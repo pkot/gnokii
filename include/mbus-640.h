@@ -95,6 +95,12 @@ GSM_Error	MB640_SetProfile(GSM_Profile *Profile);
 bool  		MB640_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx);
 GSM_Error	MB640_CancelCall(void);
 
+GSM_Error 	MB640_EnableDisplayOutput();
+GSM_Error 	MB640_DisableDisplayOutput();
+
+GSM_Error 	MB640_EnableCellBroadcast ();
+GSM_Error 	MB640_DisableCellBroadcast(void);
+GSM_Error 	MB640_ReadCellBroadcast (GSM_CBMessage *Message);
 	/* All defines and prototypes from here down are specific to 
 	   this model and so are #ifdef out if __mbus_640_c isn't 
 	   defined. */

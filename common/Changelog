@@ -93,3 +93,7 @@
 
 * Sat Jun 17 16:36:00 BST 2000 Brian Candler <B.Candler@pobox.com>
 - fixes to RLP
+
+* Thu Jun 17 19:33:33 AEST 2000 Mark Looi <m.looi@qut.edu.au>
+- 6110 cell broadcast code in.  new operator in Australia - one.tel
+

@@ -109,7 +109,12 @@ GSM_Functions           FB38_Functions = {
         FB38_GetProfile,
         FB38_SetProfile,
         FB38_SendRLPFrame,
-        FB38_CancelCall
+        FB38_CancelCall,
+	FB38_EnableDisplayOutput,
+	FB38_DisableDisplayOutput,
+	FB38_EnableCellBroadcast,
+	FB38_DisableCellBroadcast,
+	FB38_ReadCellBroadcast
 };
 
 GSM_Information         FB38_Information = {
@@ -1082,6 +1087,31 @@ GSM_Error   FB38_GetProfile(GSM_Profile *Profile)
 }
 
 GSM_Error   FB38_SetProfile(GSM_Profile *Profile)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_EnableDisplayOutput()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_DisableDisplayOutput()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_EnableCellBroadcast()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_DisableCellBroadcast()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   FB38_ReadCellBroadcast(GSM_CBMessage *Message)
 {
     return (GE_NOTIMPLEMENTED);
 }

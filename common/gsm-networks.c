@@ -329,6 +329,7 @@ GSM_Network GSM_Networks[] =
   { "505 01", "MobileNet" },
   { "505 02", "OPTUS" },
   { "505 03", "VODAFONE" },
+  { "505 08", "One.Tel" },
   { "510 01", "SATELINDO" },
   { "510 10", "TELKOMSEL" },
   { "510 11", "Excelcom" },

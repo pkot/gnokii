@@ -96,6 +96,13 @@ GSM_Error   FB38_Reset(unsigned char type);
 GSM_Error   FB38_GetProfile(GSM_Profile *Profile);
 GSM_Error   FB38_SetProfile(GSM_Profile *Profile);
 
+GSM_Error   FB38_EnableDisplayOutput();
+GSM_Error   FB38_DisableDisplayOutput();
+
+GSM_Error   FB38_EnableCellBroadcast ();
+GSM_Error   FB38_DisableCellBroadcast(void);
+GSM_Error   FB38_ReadCellBroadcast (GSM_CBMessage *Message);
+
     /* All defines and prototypes from here down are specific to 
        this model and so are #ifdef out if __fbus_3810_c isn't 
        defined. */

@@ -201,6 +201,10 @@ GSM_Error FB61_SendRingTone(GSM_Ringtone *ringtone, char *dest);
 GSM_Error FB61_EnableDisplayOutput();
 GSM_Error FB61_DisableDisplayOutput();
 
+GSM_Error FB61_EnableCellBroadcast ();
+GSM_Error FB61_DisableCellBroadcast(void);
+GSM_Error FB61_ReadCellBroadcast (GSM_CBMessage *Message);
+
 GSM_Error FB61_SendDTMF(char *String);
 
 GSM_Error FB61_Reset(unsigned char type);

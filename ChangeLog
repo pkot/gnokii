@@ -80,3 +80,6 @@
   getopt_long function.
 - Code modified to compile under Solaris 8. (But gnokii still don't work due
   limitation in SUN serial port.
+
+* Thu Jun 22 19:17:37 AEST 2000 Mark Looi <m.looi@qut.edu.au>
+- Cell broadcast code for 6110 implemented.

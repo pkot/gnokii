@@ -85,7 +85,13 @@ GSM_Functions			MB21_Functions = {
 		MB21_GetProfile,
 		MB21_SetProfile,
 		MB21_SendRLPFrame,
-	    MB21_CancelCall
+	    MB21_CancelCall,
+		MB21_EnableDisplayOutput,
+		MB21_DisableDisplayOutput,
+		MB21_EnableCellBroadcast,
+		MB21_DisableCellBroadcast,
+		MB21_ReadCellBroadcast
+
 };
 
 	/* FIXME - these are guesses only... */
@@ -364,6 +370,31 @@ GSM_Error	MB21_GetProfile(GSM_Profile *Profile)
 }
 
 GSM_Error	MB21_SetProfile(GSM_Profile *Profile)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB21_EnableDisplayOutput()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB21_DisableDisplayOutput()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB21_EnableCellBroadcast()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB21_DisableCellBroadcast()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB21_ReadCellBroadcast(GSM_CBMessage *Message)
 {
     return (GE_NOTIMPLEMENTED);
 }

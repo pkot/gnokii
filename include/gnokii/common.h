@@ -85,6 +85,8 @@ typedef enum {
 #define GSM_MAX_DESTINATION_LENGTH (40)
 #define GSM_MAX_SMS_LENGTH         (160)
 
+#define GSM_MAX_CB_MESSAGE         (160)
+
 /* The maximum length of an uncompressed concatenated short message is
    255 * 153 = 39015 default alphabet characters */
 #define GSM_MAX_CONCATENATED_SMS_LENGTH	(39015)
@@ -143,6 +145,15 @@ typedef struct {
   GSM_SMSMessageValidity Validity;           /* Validity of SMS Message. */
   char Number[GSM_MAX_SMS_CENTER_LENGTH];    /* Number of the SMSC. */
 } GSM_MessageCenter;
+
+/* Define datatype for Cell Broadcast message */
+typedef struct {
+  int Channel;                                      /* channel number */
+  char Message[GSM_MAX_CB_MESSAGE + 1];
+  int New;
+} GSM_CBMessage;
+
+
 
 /* Definition of security codes. */
 
@@ -376,6 +387,7 @@ typedef enum {
   GE_SMSSENDFAILED,         /* SMS send fail. */
   GE_SMSWAITING,            /* Waiting for the next part of SMS. */
   GE_SMSTOOLONG,            /* SMS message too long. */
+  GE_NONEWCBRECEIVED,       /* Attempt to read CB when no new CB received */
   GE_INTERNALERROR,         /* Problem occured internal to model specific code. */
   GE_BUSY,                  /* Command is still being executed. */
   GE_UNKNOWN,               /* Unknown error - well better than nothing!! */
@@ -609,6 +621,12 @@ typedef struct {
   GSM_Error (*EnableDisplayOutput) ();
   
   GSM_Error (*DisableDisplayOutput) ();
+ 
+  GSM_Error (*EnableCellBroadcast) ();
+
+  GSM_Error (*DisableCellBroadcast) ();
+
+  GSM_Error (*ReadCellBroadcast) ( GSM_CBMessage *Message );
 
 } GSM_Functions;
 

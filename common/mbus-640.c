@@ -95,7 +95,12 @@ GSM_Functions			MB640_Functions = {
 		MB640_GetProfile,
 		MB640_SetProfile,
 		MB640_SendRLPFrame,
-        MB640_CancelCall
+        MB640_CancelCall,
+		MB640_EnableDisplayOutput,
+		MB640_DisableDisplayOutput,
+		MB640_EnableCellBroadcast,
+		MB640_DisableCellBroadcast,
+		MB640_ReadCellBroadcast
 };
 
 	/* FIXME - these are guesses only... */
@@ -749,6 +754,32 @@ GSM_Error	MB640_GetProfile(GSM_Profile *Profile)
 }
 
 GSM_Error	MB640_SetProfile(GSM_Profile *Profile)
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+
+GSM_Error   MB640_EnableDisplayOutput()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB640_DisableDisplayOutput()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB640_EnableCellBroadcast()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB640_DisableCellBroadcast()
+{
+    return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error   MB640_ReadCellBroadcast(GSM_CBMessage *Message)
 {
     return (GE_NOTIMPLEMENTED);
 }
