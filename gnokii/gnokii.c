@@ -4470,7 +4470,7 @@ int main(int argc, char *argv[])
 	short_version();
 
 	/* Read config file */
-	if (gn_readconfig(&model, &Port, &Initlength, &Connection, &BinDir) < 0) {
+	if (gn_cfg_readconfig(&model, &Port, &Initlength, &Connection, &BinDir) < 0) {
 		exit(1);
 	}
 

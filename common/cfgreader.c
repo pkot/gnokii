@@ -269,8 +269,8 @@ char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key,
 	return NULL;
 }
 
-API int gn_readconfig(char **model, char **port, char **initlength,
-		      char **connection, char **bindir)
+API int gn_cfg_readconfig(char **model, char **port, char **initlength,
+			  char **connection, char **bindir)
 {
 	char *homedir;
 	char rcfile[200];

@@ -57,7 +57,7 @@ extern API struct gn_cfg_header *gn_cfg_info;
 
 /* Functions */
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
-API int gn_readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
+API int gn_cfg_readconfig(char **model, char **port, char **initlength, char **connection, char **bindir);
 
 /*
  * Exported things
