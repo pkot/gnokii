@@ -246,7 +246,7 @@ void	ATEM_ReadSMS(int number, GSM_MemoryType type)
 			return;
 		}
 	}
-	snprintf(line, 250, "\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\r", message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCenter);
+	snprintf(line, 250, "\n\rDate/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n\r", message.Time.Day, message.Time.Month, message.Time.Year, message.Time.Hour, message.Time.Minute, message.Time.Second, message.Sender, message.MessageCenter);
 	ATEM_StringOut(line);
 	snprintf(line, 250, "Text: %s\n\r", message.MessageText);
 	ATEM_StringOut(line);

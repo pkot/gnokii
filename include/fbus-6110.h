@@ -133,7 +133,8 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry);
 
 GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status);
 GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status);
-
+GSM_Error FB61_GetSMSCenter(GSM_MessageCenter *MessageCenter);
+  
 GSM_Error FB61_GetSMSMessage(int location, GSM_SMSMessage *message);
 GSM_Error FB61_DeleteSMSMessage(int location, GSM_SMSMessage *message);
 GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *message);

@@ -73,6 +73,22 @@ typedef enum {
 #define GSM_MAX_DESTINATION_LENGTH (40)
 #define GSM_MAX_SMS_LENGTH         (160)
 
+/* Define datatype for SMS Message Type */
+
+typedef enum {
+  GST_MO, /* Mobile Originated (MO) message - Outbox message */
+  GST_MT, /* Mobile Terminated (MT) message - Inbox message */
+  GST_DR, /* Delivery Report */
+  GST_UN  /* Unknown */
+} GSM_SMSMessageType;
+
+/* Datatype for SMS status */
+
+typedef enum {
+  GSS_SENTREAD = true,    /* Sent or read message */
+  GSS_NOTSENTREAD = false /* Not sent or not read message */
+} GSM_SMSMessageStatus;
+
 /* Define datatype for SMS Message Center */
 
 typedef struct {
@@ -81,20 +97,38 @@ typedef struct {
   char Number[GSM_MAX_SMS_CENTER_LENGTH]; /* Number of the SMSC */
 } GSM_MessageCenter;
 
+/* Structure used for passing dates/times to date/time functions such as
+   GSM_GetTime and GSM_GetAlarm etc. */
+
+typedef struct {
+  bool AlarmEnabled; /* Is the alarm set? */
+  int Year;          /* The complete year specification - e.g. 1999. Y2K :-) */
+  int Month;	     /* January = 1 */
+  int Day;
+  int Hour;
+  int Minute;
+  int Second;
+  int Timezone;      /* The difference between local time and GMT */
+} GSM_DateTime;
+
 /* Define datatype for SMS messages, used for getting SMS messages from the
    phones memory. */
 
 typedef struct {
-  int Year, Month, Day;	                    /* Date of reception of messages. */
-  int Hour, Minute, Second;                 /* Time of reception of messages. */
+  GSM_DateTime Time;	                    /* Date of reception/response of messages. */
   int Length;                               /* Length of the SMS message. */
   int Validity;                             /* Validity Period of the SMS message. */
   char MessageText[GSM_MAX_SMS_LENGTH + 1]; /* Room for null term. */
-  char MessageCenter[GSM_MAX_SMS_CENTER_LENGTH + 1]; /* SMS Center. */
+  GSM_MessageCenter MessageCenter;          /* SMS Center. */
   char Sender[GSM_MAX_SENDER_LENGTH + 1];   /* Sender of the SMS message. */
   char Destination[GSM_MAX_DESTINATION_LENGTH + 1]; /* Destination of the message. */
   int MessageNumber;                        /* Location in the memory. */
   GSM_MemoryType MemoryType;                /* Type of memory message is stored in. */
+  GSM_SMSMessageType Type;                  /* Type of the SMS message */
+  GSM_SMSMessageStatus Status;              /* Status of the SMS message */
+  int Class;                                /* Class Message: 0, 1, 2, 3 or none; see GSM 03.38 */
+  bool EightBit;                            /* Indicates whether SMS contains 8 bit data or not */
+  bool Compression;                         /* Indicates whether SMS contains compressed data or not */
 } GSM_SMSMessage;
 
 /* This structure is used to get the current network status */
@@ -151,19 +185,6 @@ typedef enum {
   GDT_DateOnly, /* The mobile phone supports only date. */
   GDT_DateTime  /* Wonderful phone - it supports date and time. */
 } GSM_DateTimeSupport;
-
-/* Structure used for passing dates/times to date/time functions such as
-   GSM_GetTime and GSM_GetAlarm etc. */
-
-typedef struct {
-  bool AlarmEnabled; /* Is the alarm set? */
-  int Year;          /* The complete year specification - e.g. 1999. Y2K :-) */
-  int Month;	     /* January = 1 */
-  int Day;
-  int Hour;
-  int Minute;
-  int Second;
-} GSM_DateTime;
 
 /* Define enums for RF units.  GRF_CSQ asks for units in form used
    in AT+CSQ command as defined by GSM 07.07 */
@@ -275,6 +296,8 @@ typedef struct {
   GSM_Error (*GetMemoryStatus)( GSM_MemoryStatus *Status);
 
   GSM_Error (*GetSMSStatus)( GSM_SMSStatus *Status);
+
+  GSM_Error (*GetSMSCenter)( GSM_MessageCenter *MessageCenter );
 
   GSM_Error (*GetSMSMessage)( int location, GSM_SMSMessage *message );
 

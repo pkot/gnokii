@@ -47,7 +47,8 @@ GSM_Functions			FB38_Functions = {
 		FB38_WritePhonebookLocation,
 		FB38_GetMemoryStatus,
 		FB38_GetSMSStatus,
-		FB38_GetSMSMessage,
+		FB38_GetSMSCenter,
+  		FB38_GetSMSMessage,
 		FB38_DeleteSMSMessage,
 		FB38_SendSMSMessage,
 		FB38_GetRFLevel,
@@ -405,6 +406,23 @@ GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS)
 		return GE_NOLINK;
 	}
 
+/* FIXME: Hugh, please check this and implement necessary... Hmm, as I'm
+   looking at it it can not run as is :-)) */
+
+		/* Get SMSC number */
+	/* When FB38_GetSMSCenter function will appear uncomment following
+	   lines */
+/*
+	if (SMS->MessageCenter.No) {
+		error = FB38_GetSMSCenter(&SMS->MessageCenter);
+		if (error != GE_NONE)
+			return error;
+	}
+*/
+
+	
+	fprintf(stdout, _("Sending SMS to %s via message center %s\n"), SMS->Destination, SMS->MessageCenter.Number);
+
 		/* Get and check total length, */
 	text_length = strlen(SMS->MessageText);
 
@@ -430,7 +448,7 @@ GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS)
 		DisableKeepalive = true;
 
 			/* Send header */
-		FB38_TX_Send0x23_SendSMSHeader(SMS->MessageCenter, SMS->Destination, text_length);
+		FB38_TX_Send0x23_SendSMSHeader(SMS->MessageCenter.Number, SMS->Destination, text_length);
 
 		timeout = 20; 	/* 2 seconds for command to complete */
 
@@ -720,6 +738,10 @@ GSM_Error	FB38_GetSMSStatus(GSM_SMSStatus *Status)
 	return (GE_NOTIMPLEMENTED);
 }
 
+GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter)
+{
+	return (GE_NOTIMPLEMENTED);
+}
 
 GSM_Error	FB38_GetPowerSource(GSM_PowerSource *source)
 {
@@ -1834,12 +1856,12 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 		   nibbles of each byte in reverse order.  Thus day 28 would be
 		   encoded as 0x82 */
 
-	CurrentSMSMessage->Year = (MessageBuffer[8] >> 4) + (10 * (MessageBuffer[8] & 0x0f)); 
-	CurrentSMSMessage->Month = (MessageBuffer[9] >> 4) + (10 * (MessageBuffer[9] & 0x0f)); 
-	CurrentSMSMessage->Day = (MessageBuffer[10] >> 4) + (10 * (MessageBuffer[10] & 0x0f)); 
-	CurrentSMSMessage->Hour = (MessageBuffer[11] >> 4) + (10 * (MessageBuffer[11] & 0x0f)); 
-	CurrentSMSMessage->Minute = (MessageBuffer[12] >> 4) + (10 * (MessageBuffer[12] & 0x0f)); 
-	CurrentSMSMessage->Second = (MessageBuffer[13] >> 4) + (10 * (MessageBuffer[13] & 0x0f)); 
+	CurrentSMSMessage->Time.Year = (MessageBuffer[8] >> 4) + (10 * (MessageBuffer[8] & 0x0f)); 
+	CurrentSMSMessage->Time.Month = (MessageBuffer[9] >> 4) + (10 * (MessageBuffer[9] & 0x0f)); 
+	CurrentSMSMessage->Time.Day = (MessageBuffer[10] >> 4) + (10 * (MessageBuffer[10] & 0x0f)); 
+	CurrentSMSMessage->Time.Hour = (MessageBuffer[11] >> 4) + (10 * (MessageBuffer[11] & 0x0f)); 
+	CurrentSMSMessage->Time.Minute = (MessageBuffer[12] >> 4) + (10 * (MessageBuffer[12] & 0x0f)); 
+	CurrentSMSMessage->Time.Second = (MessageBuffer[13] >> 4) + (10 * (MessageBuffer[13] & 0x0f)); 
 
 		/* Now get sender and message center information. */
 	message_center_length = MessageBuffer[16];
@@ -1856,8 +1878,8 @@ void	FB38_RX_Handle0x2c_SMSHeader(void)
 
 		/* Now copy to strings... Note they are in reverse order to
 		   0x30 message*/
-	memcpy(CurrentSMSMessage->MessageCenter, MessageBuffer + 17, message_center_length);
-	CurrentSMSMessage->MessageCenter[message_center_length] = 0;	/* Ensure null terminated. */
+	memcpy(CurrentSMSMessage->MessageCenter.Number, MessageBuffer + 17, message_center_length);
+	CurrentSMSMessage->MessageCenter.Number[message_center_length] = 0;	/* Ensure null terminated. */
 	
 	strncpy(CurrentSMSMessage->Sender, MessageBuffer + 18 + message_center_length, sender_length);
 	CurrentSMSMessage->Sender[sender_length] = 0;

@@ -28,6 +28,7 @@
 #include <sys/types.h>
 #include <sys/time.h>
 #include <string.h>
+#include <getopt.h>
 
 #include "misc.h"
 #include "gsm-common.h"
@@ -42,7 +43,8 @@ void getmemory(char *argv[]);
 void writephonebook(void);
 void getsms(char *argv[]);
 void deletesms(char *argv[]);
-void sendsms(char *argv[]);
+void sendsms(int argc, char *argv[]);
+void getsmsc(char *argv[]);
 void setdatetime(char *argv[]);
 void getdatetime(void);
 void setalarm(char *argv[]);
@@ -85,7 +87,9 @@ void usage(void)
           gnokii [--writephonebook]
           gnokii [--getsms] [memory type] [start] [end]
           gnokii [--deletesms] [memory type] [start] [end]
-          gnokii [--sendsms] [destination] [message center]
+          gnokii [--sendsms] [destination] [--smsc message_center_number |
+                  --smscno message_center_index] [-r] [-C n] 
+          gnokii [--getsmsc] [message_center_number]
           gnokii [--setdatetime] [YYYY] [MM] [DD] [HH] [MM]
           gnokii [--getdatetime]
           gnokii [--setalarm] [HH] [MM]
@@ -119,9 +123,18 @@ void usage(void)
                             starting at entry [start] and ending at [end].
 
           --sendsms         sends an SMS message to [destination] via
-                            [message center].  Message text is taken from
-                            stdin.  This function has had limited testing
-                            and may not work at all on your network.
+                            [message_center_number] or SMSC number taken from
+                            phone memory from address [message_center_index].
+                            If this argument is ommited SMSC number is taken
+                            from phone memory from location 1. Message text
+                            is taken from stdin.  This function has had
+                            limited testing and may not work at all on your
+                            network. Meaning of other optional parameters:
+                             [-r] - request for delivery report
+                             [-C n] - Class Message n, where n can be 0..3
+
+          --getsmsc         show the SMSC number from location
+                            [message_center_number].
 
           --setdatetime     set the date and the time of the phone.
 
@@ -314,8 +327,12 @@ int main(int argc, char *argv[])
   /* Send sms message mode. */
   if (argc == 4 && strcmp(argv[1], "--sendsms") == 0)
     sendsms(argv);
-  
-  /* Foogle function - insert you own function calls here 
+
+  /* Get smsc number mode. */
+  if (argc == 3 && strcmp(argv[1], "--getsmsc") == 0)
+    getsmsc(argv);
+
+    /* Foogle function - insert you own function calls here 
      when testing stuff.  This is for the developer/hackers
      convenience only :) */
   if (strcmp(argv[1], "--foogle") == 0) {
@@ -329,13 +346,21 @@ int main(int argc, char *argv[])
 }
 
 /* Send  SMS messages. */
-void sendsms(char *argv[])
+void sendsms(int argc, char *argv[])
 {
 
   GSM_SMSMessage SMS;
   GSM_Error error;
   char message_buffer[200];	
   int chars_read;
+  int i;
+
+  struct option options[] = {
+             { "sendsms", required_argument, NULL, '1'},
+             { "smsc",    required_argument, NULL, '2'},
+             { "smscno",  required_argument, NULL, '3'},
+             { NULL,      0,                 NULL, 0}
+  };
 
   /* Get message text from stdin. */
 
@@ -350,19 +375,86 @@ void sendsms(char *argv[])
 
   message_buffer[chars_read] = 0x00;	
 
-  fprintf(stdout, _("Sending SMS to %s via message center %s\n"), argv[2], argv[3]);
+  /* Default settings:
+      - no delivery report
+      - no Class Message
+      - no compression
+      - 7 bit data
+      - SMSC no. 1
+  */
+
+  SMS.Type = GST_MO;
+  SMS.Class = -1;
+  SMS.Compression = false;
+  SMS.EightBit = false;
+  SMS.MessageCenter.No = 1;
+
+  SMS.Validity = 4320; /* 4320 minutes == 72 hours */
+
+  while ((i = getopt_long(argc, argv, "r8cC:", options, NULL)) != EOF) {
+    switch (i) {
+
+      case '1': /* Remote number */
+        strcpy(SMS.Destination,argv[2]);
+        break;
+
+      case '2': /* SMSC number */
+        SMS.MessageCenter.No = 0;
+        strcpy(SMS.MessageCenter.Number,optarg);
+        break;
+
+      case '3': /* SMSC number index in phone memory */
+        SMS.MessageCenter.No = atoi(optarg);
+        if (SMS.MessageCenter.No < 1 || SMS.MessageCenter.No > 5) {
+          usage();
+          exit(-1);
+        }
+        break;
+
+      case 'r': /* request for delivery report */
+        SMS.Type = GST_DR;
+        break;
+
+      case 'C': /* class Message */
+
+        switch (*optarg) {
+
+          case '0':
+            SMS.Class = 0;
+            break;
+
+          case '1':
+            SMS.Class = 1;
+            break;
+
+          case '2':
+            SMS.Class = 2;
+            break;
+
+          case '3':
+            SMS.Class = 3;
+            break;
+
+          default:
+            usage();
+            exit(-1);
+
+        }
+        break;
+
+      default:
+        usage();
+        exit(-1);
+    }
+  }
 
   /* Initialise the GSM interface. */     
 
   fbusinit(true);
 
-  /* Send the message. */
-
-  SMS.Validity = 4320; /* 4320 minutes == 72 hours */
-
-  strcpy (SMS.Destination, argv[2]);
-  strcpy (SMS.MessageCenter, argv[3]);
   strcpy (SMS.MessageText, message_buffer);
+
+  /* Send the message. */
 
   error = GSM->SendSMSMessage(&SMS);
 
@@ -372,7 +464,27 @@ void sendsms(char *argv[])
     fprintf(stdout, _("SMS Send failed (error=%d)\n"), error);
 
   GSM->Terminate();
-  exit(-1);
+  exit(0);
+}
+
+/* Get SMSC number */
+
+void getsmsc(char *argv[])
+{
+
+  GSM_MessageCenter MessageCenter;
+  
+  MessageCenter.No=atoi(argv[2]);
+
+  fbusinit(false);
+
+  if (GSM->GetSMSCenter(&MessageCenter) == GE_NONE)
+    fprintf(stdout, _("%d. SMS center number is %s\n"), MessageCenter.No, MessageCenter.Number);
+  else
+    fprintf(stdout, _("SMS center can not be found :-(\n"));
+
+  GSM->Terminate();
+  exit(0);
 }
 
 /* Get SMS messages. */
@@ -461,9 +573,87 @@ void getsms(char *argv[])
 
     case GE_NONE:
 
-      fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d Sender: %s Msg Center: %s\n"), message.Day, message.Month, message.Year, message.Hour, message.Minute, message.Second, message.Sender, message.MessageCenter);
+      switch (message.Type) {
 
-      fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
+        case GST_MO:
+
+          fprintf(stdout, _("%d. Outbox Message "), message.MessageNumber);
+
+          if (message.Status)
+            fprintf(stdout, _("(sent)\n"));
+          else
+            fprintf(stdout, _("(not sent)\n"));
+
+          fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
+
+          break;
+
+        case GST_DR:
+
+          fprintf(stdout, _("%d. Delivery Report "), message.MessageNumber);
+          if (message.Status)
+            fprintf(stdout, _("(read)\n"));
+          else
+            fprintf(stdout, _("(not read)\n"));
+
+          fprintf(stdout, _("Sending date/time: %d/%d/%d %d:%02d:%02d GMT"), \
+                  message.Time.Day, message.Time.Month, message.Time.Year, \
+                  message.Time.Hour, message.Time.Minute, message.Time.Second);
+
+          if (message.Time.Timezone) {
+            if (message.Time.Timezone > 0)
+              fprintf(stdout,_("+%dh"), message.Time.Timezone);
+            else
+              fprintf(stdout,_("%d"), message.Time.Timezone);
+          }
+
+          fprintf(stdout, _("\n"));
+
+          fprintf(stdout, _("Response date/time: %d/%d/%d %d:%02d:%02d GMT"), \
+                  message.Time.Day, message.Time.Month, message.Time.Year, \
+                  message.Time.Hour, message.Time.Minute, message.Time.Second);
+
+          if (message.Time.Timezone) {
+            if (message.Time.Timezone > 0)
+              fprintf(stdout,_("+%dh"),message.Time.Timezone);
+            else
+              fprintf(stdout,_("%d"),message.Time.Timezone);
+          }
+
+          fprintf(stdout, _("\n"));
+
+          fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
+          fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
+
+          break;
+
+        default:
+
+          fprintf(stdout, _("%d. Inbox Message "), message.MessageNumber);
+
+          if (message.Status)
+            fprintf(stdout, _("(read)\n"));
+          else
+            fprintf(stdout, _("(not read)\n"));
+
+          fprintf(stdout, _("Date/time: %d/%d/%d %d:%02d:%02d GMT"), \
+                  message.Time.Day, message.Time.Month, message.Time.Year, \
+                  message.Time.Hour, message.Time.Minute, message.Time.Second);
+
+          if (message.Time.Timezone) {
+            if (message.Time.Timezone > 0)
+              fprintf(stdout,_("+%dh"),message.Time.Timezone);
+            else
+              fprintf(stdout,_("%d"),message.Time.Timezone);
+          }
+
+          fprintf(stdout, _("\n"));
+
+          fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.Sender, message.MessageCenter.Number);
+          fprintf(stdout, _("Text: %s\n\n"), message.MessageText); 
+
+          break;
+      }
 
       break;
 
@@ -473,17 +663,17 @@ void getsms(char *argv[])
       GSM->Terminate();
       exit(-1);	
 
-    case GE_INVALIDMEMORYTYPE:     
+    case GE_INVALIDSMSLOCATION:
 
-      fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
-      GSM->Terminate();
-      exit(-1);	
+      fprintf(stderr, _("Invalid location: %s %d\n"), memory_type_string, count);
+      
+      break;
 
-     case GE_EMPTYSMSLOCATION:
+    case GE_EMPTYSMSLOCATION:
 
-       fprintf(stderr, _("SMS location %s %d empty.\n"), memory_type_string, count);
+      fprintf(stderr, _("SMS location %s %d empty.\n"), memory_type_string, count);
 
-       break;
+      break;
 
     default:
 
