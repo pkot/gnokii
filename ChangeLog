@@ -14,11 +14,19 @@
  * gnokii updates
     o --showsmsfolderstatus added                  (BORBELY Zoltan)
     o folder id display fix in --deletesmsfolder   (BORBELY Zoltan)
+    o escape semicolons from phonebook fields in the csv output
+                                                        (Pawel Kot)
  * libgnokii updates
     o understand escaped semicolon in the phonebook csv input
                                                         (Pawel Kot)
     o allow to write empty name and empty number for the phonebook
                                                         (Pawel Kot)
+ * xgnokii updates
+    o escape semicolons from phonebook fields in the csv output
+                                                        (Pawel Kot)
+    o generate the same output with phonebook export as gnokii
+                                                        (Pawel Kot)
+    o accept long phonebook lines (import and export)   (Pawel Kot)
 
 0.6.1
 =====
