@@ -64,6 +64,11 @@ static gn_link *glink;
 static struct gn_statemachine *statemachine;
 static fbus_link flink;		/* FBUS specific stuff, internal to this file */
 
+#ifndef WIN32
+#  define	IR_MODE(l) ((l)->connection_type == GN_CT_Infrared || (l)->connection_type == GN_CT_Tekram)
+#else
+#  define	IR_MODE(l) ((l)->connection_type == GN_CT_Infrared)
+#endif
 
 /*--------------------------------------------*/
 
@@ -130,7 +135,7 @@ static bool fbus_ir_open(void)
 	unsigned char connect_seq[] = { FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02 };
 	unsigned int count, retry;
 
-	if (!device_open(glink->port_device, false, false, false, GN_CT_Infrared)) {
+	if (!device_open(glink->port_device, false, false, false, glink->connection_type)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -409,7 +414,7 @@ int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 * buffer)
 
 	/* Now construct the message header. */
 
-	if (glink->connection_type == GN_CT_Infrared)
+	if (IR_MODE(glink))
 		out_buffer[current++] = FBUS_IR_FRAME_ID;	/* Start of the IR frame indicator */
 	else			/* connection_type == GN_CT_Serial */
 		out_buffer[current++] = FBUS_FRAME_ID;	/* Start of the frame indicator */
@@ -551,6 +556,9 @@ gn_error fbus_initialise(gn_link *newlink, struct gn_statemachine *state, int tr
 
 	switch (glink->connection_type) {
 	case GN_CT_Infrared:
+#ifndef WIN32
+	case GN_CT_Tekram:
+#endif
 		if (!fbus_ir_open())
 			return GN_ERR_FAILED;
 		break;
