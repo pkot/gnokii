@@ -15,6 +15,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include <ctype.h>
 
 #include "xgnokii_cfg.h"
@@ -31,7 +32,7 @@ ConfigEntry config[] = {
  {"",          NULL}
 };
 
-static void GetDefaultValues()
+static void GetDefaultValues ()
 {
   xgnokiiConfig.user.name = g_strdup ("");
   xgnokiiConfig.user.title = g_strdup ("");
@@ -42,7 +43,7 @@ static void GetDefaultValues()
   xgnokiiConfig.user.address = g_strdup ("");
 }
 
-void GUI_ReadXConfig()
+void GUI_ReadXConfig ()
 {
   FILE *file;
   gchar *line;
@@ -52,46 +53,52 @@ void GUI_ReadXConfig()
   register gint len;
   register gint i;
   
-  GetDefaultValues();
+  GetDefaultValues ();
   
-  if ((homedir = getenv("HOME")) == NULL)
+#ifdef WIN32
+  homedir = getenv("HOMEDRIVE");
+  g_strconcat(homedir, getenv("HOMEPATH"), NULL);
+  rcfile=g_strconcat(homedir, "\\_xgnokiirc", NULL);
+#else
+  if ((homedir = getenv ("HOME")) == NULL)
   {
-    g_print("WARNING: Can't find HOME enviroment variable!\n");
+    g_print (_("WARNING: Can't find HOME enviroment variable!\n"));
     return;
   }
   
   if ((rcfile = g_strconcat (homedir, "/.xgnokiirc", NULL)) == NULL)
   {
-    g_print("WARNING: Can't allocate memory for config reading!\n");
+    g_print (_("WARNING: Can't allocate memory for config reading!\n"));
     return;
   }
+#endif
     
   if ((file = fopen (rcfile, "r")) == NULL)
   {
-    g_free(rcfile);
+    g_free (rcfile);
     return;
   }
   
-  g_free(rcfile);
+  g_free (rcfile);
   
-  if ((line = (char *) g_malloc(255)) == NULL)
+  if ((line = (char *) g_malloc (255)) == NULL)
   {
-    g_print("WARNING: Can't allocate memory for config reading!\n");
-    fclose(file);
+    g_print (_("WARNING: Can't allocate memory for config reading!\n"));
+    fclose (file);
     return;
   }
   
-  while (fgets(line, 255, file) != NULL)
+  while (fgets (line, 255, file) != NULL)
   {
     current = line;
     
     /* Strip leading, trailing whitespace */
     
-    while(isspace(*current))
+    while (isspace (*current))
       current++;
     
-    while((strlen(current) > 0) && isspace(current[strlen(current) - 1]))
-      current[strlen(current) - 1] = '\0';
+    while ((strlen (current) > 0) && isspace (current[strlen (current) - 1]))
+      current[strlen (current) - 1] = '\0';
       
     /* Ignore blank lines and comments */
             
@@ -101,18 +108,18 @@ void GUI_ReadXConfig()
     i = 0;
     while (*config[i].key != '\0')
     {
-      len = strlen(config[i].key);
+      len = strlen (config[i].key);
       if (g_strncasecmp (config[i].key, current, len) == 0)
       {
         current += len;
-        while(isspace(*current))
+        while (isspace (*current))
           current++;
         if (*current == '=')
         {
           current++;
-          while(isspace(*current))
+          while(isspace (*current))
             current++;
-          g_free(*config[i].value);
+          g_free (*config[i].value);
           if (i == 3 || i == 4)
             *config[i].value = g_strndup (current, max_phonebook_number_length);
           else
@@ -123,11 +130,11 @@ void GUI_ReadXConfig()
     }
   }
   
-  fclose(file);
-  g_free(line);
+  fclose (file);
+  g_free (line);
 }
 
-gint GUI_SaveXConfig()
+gint GUI_SaveXConfig ()
 {
   FILE *file;
   gchar *line;
@@ -135,39 +142,39 @@ gint GUI_SaveXConfig()
   gchar *rcfile;
   register gint i;
   
-  if ((homedir = getenv("HOME")) == NULL)
+  if ((homedir = getenv ("HOME")) == NULL)
   {
-    g_print("ERROR: Can't find HOME enviroment variable!\n");
-    return(1);
+    g_print (_("ERROR: Can't find HOME enviroment variable!\n"));
+    return (1);
   }
   
   if ((rcfile = g_strconcat (homedir, "/.xgnokiirc", NULL)) == NULL)
   {
-    g_print("ERROR: Can't allocate memory for config writing!\n");
-    return(2);
+    g_print (_("ERROR: Can't allocate memory for config writing!\n"));
+    return (2);
   }
     
   if ((file = fopen (rcfile, "w")) == NULL)
   {
-    g_print("ERROR: Can't open file %s for writing!\n", rcfile);
-    g_free(rcfile);
-    return(3);
+    g_print (_("ERROR: Can't open file %s for writing!\n"), rcfile);
+    g_free (rcfile);
+    return (3);
   }
   
-  g_free(rcfile);
+  g_free (rcfile);
   
   i = 0;
   while (*config[i].key != '\0')
   {
     if ((line = g_strdup_printf ("%s = %s\n", config[i].key, *config[i].value)) == NULL)
     {
-      g_print ("ERROR: Can't allocate memory for config writing!\n");
+      g_print (_("ERROR: Can't allocate memory for config writing!\n"));
       fclose (file);
       return (2);
     }
-    if (fputs ( line, file) == EOF)
+    if (fputs (line, file) == EOF)
     {
-      g_print ("ERROR: Can't write file config file!\n");
+      g_print (_("ERROR: Can't write file config file!\n"));
       g_free (line);
       fclose (file);
       return (4);

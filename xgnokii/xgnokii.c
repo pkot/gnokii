@@ -14,7 +14,19 @@
 */
 
 #include <stdio.h>   /* for printf */
-#include <unistd.h>  /* for usleep */
+
+#ifndef WIN32
+# include <unistd.h>  /* for usleep */
+#else
+# include <windows.h>
+# include "../win32/winserial.h"
+# define WRITEPHONE(a, b, c) WriteCommBlock(b, c)
+# undef IN
+# undef OUT
+# define sleep(x) Sleep((x) * 1000)
+# define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))
+#endif
+
 #include <stdlib.h>  /* for malloc */
 #include <string.h>  /* for strtok */
 #include <gdk/gdkkeysyms.h>
@@ -208,7 +220,7 @@ void GUI_DrawSMSReceived(GtkWidget *data) {
   gdk_draw_string(Pixmap,
 		  Font,
 		  GTK_WIDGET(data)->style->fg_gc[GTK_STATE_NORMAL],
-		  33, 25, "Short Message received");
+		  33, 25, _("Short Message received"));
 }
 
 gint GUI_Update(gpointer data) {
@@ -333,7 +345,7 @@ static void RefreshUserStatus()
     configDialogData.user.max -= 4;
   if (GTK_ENTRY (configDialogData.user.fax)->text_length > 0)
     configDialogData.user.max -= 4;
-  g_snprintf( buf, 8, "%d/%d", configDialogData.user.used, configDialogData.user.max);
+  g_snprintf (buf, 8, "%d/%d", configDialogData.user.used, configDialogData.user.max);
   gtk_label_set_text (GTK_LABEL (configDialogData.user.status), buf);
 }
 
@@ -406,8 +418,8 @@ static void GUI_ShowOptions()
     if (GSM->GetSMSCenter(&MessageCenter) != GE_NONE)
       break;
     
-    g_snprintf( buf, MAX_SMS_SET_LENGTH + 1, "Set %d", i);
-    item = gtk_menu_item_new_with_label(buf);
+    g_snprintf (buf, MAX_SMS_SET_LENGTH + 1, _("Set %d"), i);
+    item = gtk_menu_item_new_with_label (buf);
     gtk_signal_connect (GTK_OBJECT (item), "activate",
                         GTK_SIGNAL_FUNC(SetActiveSMSSet),
                         (gpointer) (i - 1));
@@ -592,71 +604,71 @@ void optionsSaveCallback( GtkWidget *widget, gpointer data )
   optionsApplyCallback (widget, data);
   if (GUI_SaveXConfig())
   {
-    gtk_label_set_text(GTK_LABEL(errorDialog.text), "Error writing configuration file!");
-    gtk_widget_show(errorDialog.dialog);
+    gtk_label_set_text (GTK_LABEL(errorDialog.text), _("Error writing configuration file!"));
+    gtk_widget_show (errorDialog.dialog);
   }
 }
 
 
-GtkWidget *GUI_CreateMenu()
+GtkWidget *GUI_CreateMenu ()
 {
   GtkWidget *menu, *menu_items;
   
-  menu = gtk_menu_new();
+  menu = gtk_menu_new ();
   
-  menu_items = gtk_menu_item_new_with_label("Contacts");
-  gtk_menu_append(GTK_MENU (menu), menu_items);
-  gtk_signal_connect_object(GTK_OBJECT(menu_items), "activate",
-      GTK_SIGNAL_FUNC(GUI_ShowContacts), NULL);
-  gtk_widget_show(menu_items);
+  menu_items = gtk_menu_item_new_with_label (_("Contacts"));
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowContacts), NULL);
+  gtk_widget_show (menu_items);
 
-  menu_items = gtk_menu_item_new_with_label("SMS");
-  gtk_menu_append(GTK_MENU (menu), menu_items);
-  gtk_signal_connect_object(GTK_OBJECT(menu_items), "activate",
-      GTK_SIGNAL_FUNC(GUI_ShowSMS), NULL);
-  gtk_widget_show(menu_items);
+  menu_items = gtk_menu_item_new_with_label (_("SMS"));
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowSMS), NULL);
+  gtk_widget_show (menu_items);
 /*  
-  menu_items = gtk_menu_item_new_with_label("Business Cards");
-  gtk_menu_append(GTK_MENU (menu), menu_items);
-  gtk_signal_connect_object(GTK_OBJECT(menu_items), "activate",
-      GTK_SIGNAL_FUNC(GUI_ShowCards), NULL);
-  gtk_widget_show(menu_items);
+  menu_items = gtk_menu_item_new_with_label (_("Business Cards"));
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
+                             GTK_SIGNAL_FUNC (GUI_ShowCards), NULL);
+  gtk_widget_show (menu_items);
 */  
-  menu_items = gtk_menu_item_new();
-  gtk_menu_append(GTK_MENU (menu), menu_items);
-  gtk_widget_show(menu_items);
+  menu_items = gtk_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_widget_show (menu_items);
   
-  menu_items = gtk_menu_item_new_with_label("Options");
-  gtk_menu_append(GTK_MENU (menu), menu_items);
-  gtk_signal_connect_object(GTK_OBJECT(menu_items), "activate",
-      GTK_SIGNAL_FUNC(GUI_ShowOptions), NULL);
-  gtk_widget_show(menu_items);
+  menu_items = gtk_menu_item_new_with_label (_("Options"));
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
+                             GTK_SIGNAL_FUNC(GUI_ShowOptions), NULL);
+  gtk_widget_show (menu_items);
   
-  menu_items = gtk_menu_item_new();
-  gtk_menu_append(GTK_MENU (menu), menu_items);
-  gtk_widget_show(menu_items);
+  menu_items = gtk_menu_item_new ();
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_widget_show (menu_items);
   
-  menu_items = gtk_menu_item_new_with_label("About");
-  gtk_menu_append(GTK_MENU (menu), menu_items);
-  gtk_signal_connect_object(GTK_OBJECT(menu_items), "activate",
-      GTK_SIGNAL_FUNC(GUI_ShowAbout), NULL);
-  gtk_widget_show(menu_items);
+  menu_items = gtk_menu_item_new_with_label (_("About"));
+  gtk_menu_append (GTK_MENU (menu), menu_items);
+  gtk_signal_connect_object (GTK_OBJECT(menu_items), "activate",
+                             GTK_SIGNAL_FUNC(GUI_ShowAbout), NULL);
+  gtk_widget_show (menu_items);
   
   return menu;
 }
 
-GtkWidget *GUI_CreateAboutDialog()
+GtkWidget *GUI_CreateAboutDialog ()
 {
   GtkWidget *dialog;
   GtkWidget *button, *hbox, *label;
   gchar buf[200];
   
-  dialog = gtk_dialog_new();
-  gtk_window_set_title (GTK_WINDOW (dialog), "About");
+  dialog = gtk_dialog_new ();
+  gtk_window_set_title (GTK_WINDOW (dialog), _("About"));
   gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
   gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
                       GTK_SIGNAL_FUNC (DeleteEvent), NULL);
-  button = gtk_button_new_with_label ("Ok");
+  button = gtk_button_new_with_label (_("Ok"));
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
                       button, TRUE, FALSE, 5);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -669,10 +681,10 @@ GtkWidget *GUI_CreateAboutDialog()
   gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), hbox);
   gtk_widget_show (hbox);
   
-  g_snprintf(buf, 200, "xgnokii version: %s\ngnokii version: %s\n
-Copyright (C) 1999 Pavel Janík ml.,\nHugh Blemings & Jan Derfinak\n", XVERSION, VERSION);
+  g_snprintf (buf, 200, _("xgnokii version: %s\ngnokii version: %s\n\n\
+Copyright (C) 1999 Pavel Janík ml.,\nHugh Blemings & Jan Derfinak\n"), XVERSION, VERSION);
   label = gtk_label_new ((gchar *) buf);
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
+  gtk_box_pack_start (GTK_BOX(hbox), label, FALSE, FALSE, 0);
   gtk_widget_show (label);
   
   return dialog;
@@ -782,12 +794,12 @@ GtkWidget *GUI_CreateOptionsDialog()
   GtkAdjustment *adj;
   
   dialog = gtk_dialog_new();
-  gtk_window_set_title (GTK_WINDOW (dialog), "Options");
+  gtk_window_set_title (GTK_WINDOW (dialog), _("Options"));
   gtk_container_set_border_width (GTK_CONTAINER (dialog), 10);
   gtk_signal_connect (GTK_OBJECT (dialog), "delete_event",
                       GTK_SIGNAL_FUNC (OptionsDeleteEvent), NULL);
   
-  button = gtk_button_new_with_label ("Apply");
+  button = gtk_button_new_with_label (_("Apply"));
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
                       button, TRUE, TRUE, 10);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -796,14 +808,14 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_widget_grab_default (button);
   gtk_widget_show (button);
   
-  button = gtk_button_new_with_label ("Save");
+  button = gtk_button_new_with_label (_("Save"));
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
                       button, TRUE, TRUE, 10);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
                       GTK_SIGNAL_FUNC (optionsSaveCallback), (gpointer)dialog);
   gtk_widget_show (button);
   
-  button = gtk_button_new_with_label ("Close");
+  button = gtk_button_new_with_label (_("Close"));
   gtk_box_pack_start (GTK_BOX (GTK_DIALOG (dialog)->action_area),
                       button, TRUE, TRUE, 10);
   gtk_signal_connect (GTK_OBJECT (button), "clicked",
@@ -812,148 +824,148 @@ GtkWidget *GUI_CreateOptionsDialog()
 
   gtk_container_set_border_width (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), 5);
    
-  notebook = gtk_notebook_new();
+  notebook = gtk_notebook_new ();
   gtk_notebook_set_tab_pos (GTK_NOTEBOOK (notebook), GTK_POS_TOP);
   gtk_container_add (GTK_CONTAINER (GTK_DIALOG (dialog)->vbox), notebook);
   gtk_widget_show(notebook);
   
   /***  Connection notebook  ***/
-  frame = gtk_frame_new ("Phone and connection type");
+  frame = gtk_frame_new (_("Phone and connection type"));
   gtk_widget_show (frame);
   
   vbox = gtk_vbox_new( FALSE, 0);
   gtk_container_add (GTK_CONTAINER (frame), vbox);
-  gtk_widget_show(vbox);
+  gtk_widget_show (vbox);
 
-  label = gtk_label_new("Connection");
-  gtk_notebook_append_page( GTK_NOTEBOOK (notebook), frame, label);
+  label = gtk_label_new (_("Connection"));
+  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), frame, label);
   
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (vbox), hbox);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Port:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Port:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
-  configDialogData.connection.port = gtk_entry_new_with_max_length(10);
+  configDialogData.connection.port = gtk_entry_new_with_max_length (10);
 
-  gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.port, FALSE, FALSE, 2);
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.port, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.port);
   
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (vbox), hbox);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Model:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Model:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
-  configDialogData.connection.model = gtk_entry_new_with_max_length(5);
-  gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.model, FALSE, FALSE, 2);
+  configDialogData.connection.model = gtk_entry_new_with_max_length (5);
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.model, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.model);
   
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (vbox), hbox);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Init length:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Init length:"));
+  gtk_box_pack_start (GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
-  configDialogData.connection.init = gtk_entry_new_with_max_length(100);
-  gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.init, FALSE, FALSE, 2);
+  configDialogData.connection.init = gtk_entry_new_with_max_length (100);
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.init, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.init);
   
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (vbox), hbox);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Bindir:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Bindir:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
-  configDialogData.connection.bindir = gtk_entry_new_with_max_length(100);
-  gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.bindir, FALSE, FALSE, 2);
+  configDialogData.connection.bindir = gtk_entry_new_with_max_length (100);
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.bindir, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.bindir);
 
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (vbox), hbox);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Connection:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Connection:"));
+  gtk_box_pack_start (GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
 
-  configDialogData.connection.infrared = gtk_radio_button_new_with_label (NULL, "infrared");
+  configDialogData.connection.infrared = gtk_radio_button_new_with_label (NULL, _("infrared"));
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.infrared, TRUE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.infrared);
-  configDialogData.connection.serial = gtk_radio_button_new_with_label( 
-            gtk_radio_button_group (GTK_RADIO_BUTTON (configDialogData.connection.infrared)), "serial");
-  gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.serial, TRUE, FALSE, 2);
+  configDialogData.connection.serial = gtk_radio_button_new_with_label ( 
+            gtk_radio_button_group (GTK_RADIO_BUTTON (configDialogData.connection.infrared)), _("serial"));
+  gtk_box_pack_end (GTK_BOX (hbox), configDialogData.connection.serial, TRUE, FALSE, 2);
   gtk_widget_show (configDialogData.connection.serial);
   
   /***  Alarm notebook  ***/
   
   xgnokiiConfig.alarmSupported = TRUE;
   
-  frame = gtk_frame_new ("Alarm setting");
+  frame = gtk_frame_new (_("Alarm setting"));
   gtk_widget_show (frame);
   
   vbox = gtk_vbox_new( FALSE, 0);
   gtk_container_add (GTK_CONTAINER (frame), vbox);
   gtk_widget_show(vbox);
 
-  label = gtk_label_new("Alarm");
+  label = gtk_label_new (_("Alarm"));
   gtk_notebook_append_page( GTK_NOTEBOOK (notebook), frame, label);
   
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 5);
   gtk_widget_show (hbox);
   
-  configDialogData.alarm.alarmSwitch = gtk_check_button_new_with_label("Alarm");
+  configDialogData.alarm.alarmSwitch = gtk_check_button_new_with_label (_("Alarm"));
   gtk_box_pack_start(GTK_BOX(hbox), configDialogData.alarm.alarmSwitch, FALSE, FALSE, 10);
   gtk_widget_show(configDialogData.alarm.alarmSwitch);
   
-  adj = (GtkAdjustment *) gtk_adjustment_new(0.0, 0.0, 23.0, 1.0, 4.0, 0.0);
+  adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 0.0, 23.0, 1.0, 4.0, 0.0);
   configDialogData.alarm.alarmHour = gtk_spin_button_new (adj, 0, 0);
-  gtk_spin_button_set_wrap(GTK_SPIN_BUTTON (configDialogData.alarm.alarmHour), TRUE);
-  gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (configDialogData.alarm.alarmHour), TRUE);
-  gtk_box_pack_start(GTK_BOX (hbox), configDialogData.alarm.alarmHour, FALSE, FALSE, 0);
-  gtk_widget_show(configDialogData.alarm.alarmHour);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (configDialogData.alarm.alarmHour), TRUE);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (configDialogData.alarm.alarmHour), TRUE);
+  gtk_box_pack_start (GTK_BOX (hbox), configDialogData.alarm.alarmHour, FALSE, FALSE, 0);
+  gtk_widget_show (configDialogData.alarm.alarmHour);
   
   label = gtk_label_new (":");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-  gtk_widget_show(label);
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
+  gtk_widget_show (label);
   
-  adj = (GtkAdjustment *) gtk_adjustment_new(0.0, 0.0, 59.0, 1.0, 10.0, 0.0);
+  adj = (GtkAdjustment *) gtk_adjustment_new (0.0, 0.0, 59.0, 1.0, 10.0, 0.0);
   configDialogData.alarm.alarmMin = gtk_spin_button_new (adj, 0, 0);
-  gtk_spin_button_set_wrap(GTK_SPIN_BUTTON (configDialogData.alarm.alarmMin), TRUE);
-  gtk_spin_button_set_numeric(GTK_SPIN_BUTTON (configDialogData.alarm.alarmMin), TRUE);
-  gtk_box_pack_start(GTK_BOX (hbox), configDialogData.alarm.alarmMin, FALSE, FALSE, 0);
-  gtk_widget_show(configDialogData.alarm.alarmMin);
+  gtk_spin_button_set_wrap (GTK_SPIN_BUTTON (configDialogData.alarm.alarmMin), TRUE);
+  gtk_spin_button_set_numeric (GTK_SPIN_BUTTON (configDialogData.alarm.alarmMin), TRUE);
+  gtk_box_pack_start (GTK_BOX (hbox), configDialogData.alarm.alarmMin, FALSE, FALSE, 0);
+  gtk_widget_show (configDialogData.alarm.alarmMin);
 
   /***  SMS notebook     ***/
   
-  frame = gtk_frame_new ("Short Message Service");
+  frame = gtk_frame_new (_("Short Message Service"));
   gtk_widget_show (frame);
   
-  vbox = gtk_vbox_new( FALSE, 0);
+  vbox = gtk_vbox_new (FALSE, 0);
   gtk_container_add (GTK_CONTAINER (frame), vbox);
-  gtk_widget_show(vbox);
+  gtk_widget_show (vbox);
 
-  label = gtk_label_new("SMS");
-  gtk_notebook_append_page( GTK_NOTEBOOK (notebook), frame, label);
+  label = gtk_label_new (_("SMS"));
+  gtk_notebook_append_page (GTK_NOTEBOOK (notebook), frame, label);
   
   hbox = gtk_hbox_new (FALSE, 0);
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 9);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Set's name:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Set's name:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
-  configDialogData.sms.set = gtk_option_menu_new();
+  configDialogData.sms.set = gtk_option_menu_new ();
   gtk_widget_set_usize (configDialogData.sms.set, 100, 28);
   
   
@@ -964,11 +976,11 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 9);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Message Centre Number:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Message Centre Number:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
-  configDialogData.sms.number = gtk_entry_new_with_max_length(GSM_MAX_SMS_CENTER_LENGTH);
+  configDialogData.sms.number = gtk_entry_new_with_max_length (GSM_MAX_SMS_CENTER_LENGTH);
   gtk_widget_set_usize (configDialogData.sms.number, 100, 22);
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.sms.number, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.sms.number);
@@ -977,43 +989,43 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 9);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Sending Format:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Sending Format:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
-  configDialogData.sms.format = gtk_option_menu_new();
-  menu = gtk_menu_new();
+  configDialogData.sms.format = gtk_option_menu_new ();
+  menu = gtk_menu_new ();
   gtk_widget_set_usize (configDialogData.sms.format, 100, 28);
   
-  item = gtk_menu_item_new_with_label ("Text");
+  item = gtk_menu_item_new_with_label (_("Text"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetFormat),
                       (gpointer) SMSFormat_Text);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  item = gtk_menu_item_new_with_label ("Fax");
+  item = gtk_menu_item_new_with_label (_("Fax"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetFormat),
                       (gpointer) SMSFormat_Fax);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  item = gtk_menu_item_new_with_label ("Paging");
+  item = gtk_menu_item_new_with_label (_("Paging"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetFormat),
                       (gpointer) SMSFormat_Paging);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  item = gtk_menu_item_new_with_label ("E-Mail");
+  item = gtk_menu_item_new_with_label (_("E-Mail"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetFormat),
                       (gpointer) SMSFormat_E_Mail);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  gtk_option_menu_set_menu(GTK_OPTION_MENU (configDialogData.sms.format), menu);
+  gtk_option_menu_set_menu (GTK_OPTION_MENU (configDialogData.sms.format), menu);
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.sms.format, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.sms.format);
   
@@ -1021,69 +1033,69 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 9);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Validity Period:");
-  gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+  label = gtk_label_new (_("Validity Period:"));
+  gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
-  configDialogData.sms.validity = gtk_option_menu_new();
-  menu = gtk_menu_new();
+  configDialogData.sms.validity = gtk_option_menu_new ();
+  menu = gtk_menu_new ();
   gtk_widget_set_usize (configDialogData.sms.validity, 100, 28);
   
-  item = gtk_menu_item_new_with_label ("Max. Time");
+  item = gtk_menu_item_new_with_label (_("Max. Time"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetValidity),
                       (gpointer) SMSValidity_Max);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  item = gtk_menu_item_new_with_label ("1 h");
+  item = gtk_menu_item_new_with_label (_("1 h"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetValidity),
                       (gpointer) SMSValidity_1h);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  item = gtk_menu_item_new_with_label ("6 h");
+  item = gtk_menu_item_new_with_label (_("6 h"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetValidity),
                       (gpointer) SMSValidity_6h);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  item = gtk_menu_item_new_with_label ("24 h");
+  item = gtk_menu_item_new_with_label (_("24 h"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetValidity),
                       (gpointer) SMSValidity_24h);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  item = gtk_menu_item_new_with_label ("72 h");
+  item = gtk_menu_item_new_with_label (_("72 h"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetValidity),
                       (gpointer) SMSValidity_72h);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  item = gtk_menu_item_new_with_label ("1 week");
+  item = gtk_menu_item_new_with_label (_("1 week"));
   gtk_signal_connect (GTK_OBJECT (item), "activate",
                       GTK_SIGNAL_FUNC(SetValidity),
                       (gpointer) SMSValidity_1week);
   gtk_widget_show (item);
   gtk_menu_append (GTK_MENU (menu), item);
   
-  gtk_option_menu_set_menu(GTK_OPTION_MENU (configDialogData.sms.validity), menu);
+  gtk_option_menu_set_menu (GTK_OPTION_MENU (configDialogData.sms.validity), menu);
   gtk_box_pack_end (GTK_BOX (hbox), configDialogData.sms.validity, FALSE, FALSE, 2);
   gtk_widget_show (configDialogData.sms.validity);
   
   /***  Business notebook  ***/
-  frame = gtk_frame_new ("Business Card");
+  frame = gtk_frame_new (_("Business Card"));
   gtk_widget_show (frame);
   
   vbox = gtk_vbox_new( FALSE, 0);
   gtk_container_add (GTK_CONTAINER (frame), vbox);
   gtk_widget_show(vbox);
   
-  label = gtk_label_new("User");
+  label = gtk_label_new(_("User"));
   gtk_notebook_append_page( GTK_NOTEBOOK (notebook), frame, label);
 
   hbox = gtk_hbox_new (FALSE, 0);
@@ -1100,7 +1112,7 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Name:");
+  label = gtk_label_new (_("Name:"));
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
@@ -1125,7 +1137,7 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Title:");
+  label = gtk_label_new (_("Title:"));
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
@@ -1150,7 +1162,7 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Company:");
+  label = gtk_label_new (_("Company:"));
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
@@ -1175,7 +1187,7 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Telephone:");
+  label = gtk_label_new (_("Telephone:"));
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
@@ -1199,7 +1211,7 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Fax:");
+  label = gtk_label_new (_("Fax:"));
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
@@ -1223,7 +1235,7 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("E-Mail:");
+  label = gtk_label_new (_("E-Mail:"));
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
@@ -1248,7 +1260,7 @@ GtkWidget *GUI_CreateOptionsDialog()
   gtk_box_pack_start (GTK_BOX (vbox), hbox, FALSE, FALSE, 2);
   gtk_widget_show (hbox);
   
-  label = gtk_label_new ("Address:");
+  label = gtk_label_new (_("Address:"));
   gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
   gtk_widget_show (label);
   
@@ -1273,14 +1285,14 @@ GtkWidget *GUI_CreateOptionsDialog()
   /***  Groups notebook  ***/
   if (xgnokiiConfig.callerGroupsSupported)
   {
-    frame = gtk_frame_new ("Groups names");
+    frame = gtk_frame_new (_("Groups names"));
     gtk_widget_show (frame);
   
-    vbox = gtk_vbox_new( FALSE, 0);
+    vbox = gtk_vbox_new (FALSE, 0);
     gtk_container_add (GTK_CONTAINER (frame), vbox);
-    gtk_widget_show(vbox);
+    gtk_widget_show (vbox);
 
-    label = gtk_label_new("Groups");
+    label = gtk_label_new (_("Groups"));
     gtk_notebook_append_page( GTK_NOTEBOOK (notebook), frame, label);
     
     for ( i = 0; i < 6; i++)
@@ -1289,14 +1301,14 @@ GtkWidget *GUI_CreateOptionsDialog()
       gtk_box_pack_start (GTK_BOX (vbox), hbox, TRUE, TRUE, 3);
       gtk_widget_show (hbox);
     
-      g_snprintf( labelBuffer, 10, "Group %d:", i + 1);
+      g_snprintf (labelBuffer, 10, _("Group %d:"), i + 1);
       label = gtk_label_new (labelBuffer);
-      gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+      gtk_box_pack_start (GTK_BOX (hbox), label, FALSE, FALSE, 2);
       gtk_widget_show (label);
     
-      configDialogData.groups[i] = gtk_entry_new_with_max_length(MAX_CALLER_GROUP_LENGTH);
+      configDialogData.groups[i] = gtk_entry_new_with_max_length (MAX_CALLER_GROUP_LENGTH);
 
-      gtk_box_pack_end(GTK_BOX(hbox), configDialogData.groups[i], FALSE, FALSE, 2);
+      gtk_box_pack_end (GTK_BOX (hbox), configDialogData.groups[i], FALSE, FALSE, 2);
       gtk_widget_show (configDialogData.groups[i]);
     }
   }
@@ -1305,12 +1317,12 @@ GtkWidget *GUI_CreateOptionsDialog()
   return dialog;
 }
 
-GtkWidget *GUI_CreateCardWindow()
+GtkWidget *GUI_CreateCardWindow ()
 {
   GtkWidget *window;
   
-  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_window_set_title (GTK_WINDOW (window), "Busines Cards");
+  window = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+  gtk_window_set_title (GTK_WINDOW (window), _("Busines Cards"));
   gtk_container_set_border_width (GTK_CONTAINER (window), 10);
   gtk_signal_connect (GTK_OBJECT (window), "delete_event",
                       GTK_SIGNAL_FUNC (DeleteEvent), NULL);
@@ -1318,25 +1330,25 @@ GtkWidget *GUI_CreateCardWindow()
   return window;
 }
   
-void GUI_TopLevelWindow() {
+void GUI_TopLevelWindow () {
 
   GtkWidget *drawing_area;
   GdkBitmap *mask;
   GtkStyle *style;
   GdkGC *gc;
 
-  GUI_MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  GUI_MainWindow = gtk_window_new (GTK_WINDOW_TOPLEVEL);
   gtk_widget_realize (GUI_MainWindow);
 
-  BackgroundPixmap = gdk_pixmap_create_from_xpm_d(GUI_MainWindow->window,&mask, &GUI_MainWindow->style->white, (gchar **) XPM_background);
+  BackgroundPixmap = gdk_pixmap_create_from_xpm_d (GUI_MainWindow->window,&mask, &GUI_MainWindow->style->white, (gchar **) XPM_background);
 
-  SMSPixmap = gdk_pixmap_create_from_xpm_d(GUI_MainWindow->window,&mask, &GUI_MainWindow->style->white, (gchar **) XPM_sms);
+  SMSPixmap = gdk_pixmap_create_from_xpm_d (GUI_MainWindow->window,&mask, &GUI_MainWindow->style->white, (gchar **) XPM_sms);
 
-  AlarmPixmap = gdk_pixmap_create_from_xpm_d(GUI_MainWindow->window,&mask, &GUI_MainWindow->style->white, (gchar **) XPM_alarm);
+  AlarmPixmap = gdk_pixmap_create_from_xpm_d (GUI_MainWindow->window,&mask, &GUI_MainWindow->style->white, (gchar **) XPM_alarm);
 
-  Pixmap = gdk_pixmap_create_from_xpm_d(GUI_MainWindow->window,&mask, &GUI_MainWindow->style->white, (gchar **) XPM_background);
+  Pixmap = gdk_pixmap_create_from_xpm_d (GUI_MainWindow->window,&mask, &GUI_MainWindow->style->white, (gchar **) XPM_background);
 
-  style = gtk_widget_get_default_style();
+  style = gtk_widget_get_default_style ();
   gc = style->black_gc;
 
   /* Create the drawing area */
@@ -1355,36 +1367,36 @@ void GUI_TopLevelWindow() {
 			 | GDK_BUTTON_PRESS_MASK);
 
   gtk_drawing_area_size (GTK_DRAWING_AREA (drawing_area), 261, 96);
-  gtk_container_add(GTK_CONTAINER(GUI_MainWindow), drawing_area);
+  gtk_container_add (GTK_CONTAINER(GUI_MainWindow), drawing_area);
 
-  gdk_draw_pixmap(drawing_area->window,
-		  drawing_area->style->fg_gc[GTK_WIDGET_STATE (drawing_area)],
-		  Pixmap,
-		  0, 0,
-		  0, 0,
-		  261, 96);
+  gdk_draw_pixmap (drawing_area->window,
+		   drawing_area->style->fg_gc[GTK_WIDGET_STATE (drawing_area)],
+		   Pixmap,
+		   0, 0,
+		   0, 0,
+		   261, 96);
 
-  gtk_widget_shape_combine_mask(GUI_MainWindow, mask, 0, 0);
+  gtk_widget_shape_combine_mask (GUI_MainWindow, mask, 0, 0);
   
   gtk_signal_connect (GTK_OBJECT (GUI_MainWindow), "destroy",
                       GTK_SIGNAL_FUNC(gtk_main_quit),
                       NULL);
                       
-  GUI_Menu = GUI_CreateMenu();
-  GUI_OptionsDialog = GUI_CreateOptionsDialog();
-  GUI_AboutDialog = GUI_CreateAboutDialog();
-  GUI_CreateSMSWindow();
-  GUI_CreateContactsWindow();
-  GUI_CardWindow = GUI_CreateCardWindow();
-  CreateErrorDialog(&errorDialog, GUI_MainWindow);
+  GUI_Menu = GUI_CreateMenu ();
+  GUI_OptionsDialog = GUI_CreateOptionsDialog ();
+  GUI_AboutDialog = GUI_CreateAboutDialog ();
+  GUI_CreateSMSWindow ();
+  GUI_CreateContactsWindow ();
+  GUI_CardWindow = GUI_CreateCardWindow ();
+  CreateErrorDialog (&errorDialog, GUI_MainWindow);
   
-  gtk_widget_show_all(GUI_MainWindow);
-  GUI_Refresh();
+  gtk_widget_show_all (GUI_MainWindow);
+  GUI_Refresh ();
 
-  gtk_timeout_add(1800, (GtkFunction) GUI_Update, GUI_MainWindow);
+  gtk_timeout_add (1800, (GtkFunction) GUI_Update, GUI_MainWindow);
 }
 
-void GUI_SplashScreen() {
+void GUI_SplashScreen () {
 
   GtkWidget *pixmap, *fixed;
   GdkPixmap *gdk_pixmap;
@@ -1435,18 +1447,31 @@ void GUI_ReadConfig(void)
 {
 
   struct CFG_Header *cfg_info;
-  char *homedir;
-  char rcfile[200];
+  gchar *homedir;
+  gchar *rcfile;
 
-  homedir = getenv("HOME");
-
-  strncpy(rcfile, homedir, 200);
-  strncat(rcfile, "/.gnokiirc", 200);
-
+#ifdef WIN32
+  homedir = getenv("HOMEDRIVE");
+  g_strconcat(homedir, getenv("HOMEPATH"), NULL);
+  rcfile=g_strconcat(homedir, "\\_gnokiirc", NULL);
+#else
+  if ((homedir = getenv ("HOME")) == NULL)
+  {
+    g_print (_("WARNING: Can't find HOME enviroment variable!\n"));
+  }
+  else if ((rcfile = g_strconcat (homedir, "/.gnokiirc", NULL)) == NULL)
+  {
+    g_print (_("WARNING: Can't allocate memory for config reading!\n"));
+    exit (-1);
+  }
+#endif
+  
   if ((cfg_info = CFG_ReadFile("/etc/gnokiirc")) == NULL)
     if ((cfg_info = CFG_ReadFile(rcfile)) == NULL)
-      fprintf(stderr, "error opening %s, using default config\n", rcfile);
-
+      fprintf(stderr, _("error opening %s, using default config\n"), rcfile);
+  
+  g_free (rcfile);
+  
   xgnokiiConfig.model = CFG_Get(cfg_info, "global", "model");
   if (xgnokiiConfig.model == NULL)
     xgnokiiConfig.model = DefaultModel;
@@ -1468,6 +1493,7 @@ void GUI_ReadConfig(void)
     if (xgnokiiConfig.bindir == NULL)
         xgnokiiConfig.bindir = DefaultBindir;
         
+#ifndef WIN32
   if (strstr(FB38_Information.Models, xgnokiiConfig.model) != NULL)
   {
     xgnokiiConfig.callerGroupsSupported = FALSE;
@@ -1476,16 +1502,18 @@ void GUI_ReadConfig(void)
     max_phonebook_sim_name_length = 10;
     max_phonebook_sim_number_length = 30;
   }
-  else if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL)
+  else 
+#endif
+  if (strstr(FB61_Information.Models, xgnokiiConfig.model) != NULL)
   {
     xgnokiiConfig.callerGroupsSupported = TRUE;
     /* FIX ME: Can I read this from phone? */
-    xgnokiiConfig.callerGroups[0] = g_strndup( "Familly", MAX_CALLER_GROUP_LENGTH); 
-    xgnokiiConfig.callerGroups[1] = g_strndup( "VIP", MAX_CALLER_GROUP_LENGTH);
-    xgnokiiConfig.callerGroups[2] = g_strndup( "Friends", MAX_CALLER_GROUP_LENGTH);
-    xgnokiiConfig.callerGroups[3] = g_strndup( "Colleagues", MAX_CALLER_GROUP_LENGTH);
-    xgnokiiConfig.callerGroups[4] = g_strndup( "Other", MAX_CALLER_GROUP_LENGTH);
-    xgnokiiConfig.callerGroups[5] = g_strndup( "No group", MAX_CALLER_GROUP_LENGTH);
+    xgnokiiConfig.callerGroups[0] = g_strndup( _("Familly"), MAX_CALLER_GROUP_LENGTH); 
+    xgnokiiConfig.callerGroups[1] = g_strndup( _("VIP"), MAX_CALLER_GROUP_LENGTH);
+    xgnokiiConfig.callerGroups[2] = g_strndup( _("Friends"), MAX_CALLER_GROUP_LENGTH);
+    xgnokiiConfig.callerGroups[3] = g_strndup( _("Colleagues"), MAX_CALLER_GROUP_LENGTH);
+    xgnokiiConfig.callerGroups[4] = g_strndup( _("Other"), MAX_CALLER_GROUP_LENGTH);
+    xgnokiiConfig.callerGroups[5] = g_strndup( _("No group"), MAX_CALLER_GROUP_LENGTH);
     max_phonebook_name_length = FB61_MAX_PHONEBOOK_NAME_LENGTH;
     max_phonebook_number_length = FB61_MAX_PHONEBOOK_NUMBER_LENGTH;
     max_phonebook_sim_name_length = 14;
@@ -1503,6 +1531,10 @@ void GUI_ReadConfig(void)
 
 int main (int argc, char *argv[])
 {
+
+#ifdef GNOKII_GETTEXT
+  textdomain("xgnokii");
+#endif
 
   gtk_init (&argc, &argv);
 

@@ -1,3 +1,12 @@
+xgnokii-19991110
+- Added support for gettext() and messages catalogs.
+- Added Win32 support. (Acquadro Daniele <acquadro.daniele@logicasiel.it>)
+Changes in Contacts window:
+- Fixed bug when Save to phone haven't work in the case we just import 
+  contacts from file and haven't read they from phone before.
+- Fixed bug when empty contacts in phone have been not cleared when we have
+  import contacts from file and then we have save they into phone.
+
 xgnokii-19991010
 Changes in Options window:
 - Added User information edit window (needed for Business Card).
@@ -13,7 +22,7 @@ Changes in Options window:
 Changes in Contacts window:
 - Added Voice dial function.
 - Allowed sort order changing by clicking on titles.
-- Removed bug, when contacts in SIM card was not removed from phone, when
+- Removed bug, when contacts in SIM card were not removed from phone, when
   deleted in xgnokii.
 
 xgnokii-19990915

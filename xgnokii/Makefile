@@ -1,4 +1,4 @@
-XVERSION = 19991010
+XVERSION = 19991110
 BIN = ../bin
 LN = /bin/ln
 

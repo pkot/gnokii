@@ -16,7 +16,12 @@
 ** Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
 */
 
-#include <unistd.h>
+
+
+#ifndef WIN32
+# include <unistd.h>
+#endif
+
 #include <string.h>
 #include <gtk/gtk.h>
 #include "../misc.h"
