@@ -13,6 +13,8 @@
                                                      (BORBELY Zoltan)
     o fixes for receiving SMSCenter data -- accept every value
     for message value                                     (Pawel Kot)
+    o EnterChar fixes                                (BORBELY Zoltan)
+    o Key functions commented                        (BORBELY Zoltan)
  * gnokii updates
     o --keysequence updated to the new API           (BORBELY Zoltan)
     o --enterchar implemented                        (BORBELY Zoltan)
@@ -21,6 +23,9 @@
  * Docs updates
     o copy-and-paste call diverts from 6110 protocol to 7110
     protocol description                                  (Pawel Kot)
+ * Cleanup in the dumping code                            (Pawel Kot)
+ * Won't repeat everything ttwwiiccee if compiled with --enable-debug
+                                                     (BORBELY Zoltan)
 
 0.4.0pre14
 ==========

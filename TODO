@@ -1,5 +1,5 @@
 0.4.0 THINGS:
 
- - port all 6110 functionality from the old structure
+ - working datacall
  - stable libsms
  - working xgnokii

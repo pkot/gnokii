@@ -2955,6 +2955,15 @@ static GSM_Error BuildKeytable(GSM_Statemachine *state)
 	GSM_Data data;
 	int i;
 
+	/*
+	 * This function builds a table, where the index is the character
+	 * code to type, the value is the key code and the repeat count
+	 * to press this key. The GSM_KEY_NONE means this character cannot
+	 * be represented, the GSM_KEY_ASTERISK key means special symbols.
+	 * We just initialise the table here, it will be filled by the
+	 * IncomingKey() function which will be called as the result of
+	 * this message which we send here.
+	 */
 	for (i = 0; i < 256; i++) {
 		Keytable[i].Key = GSM_KEY_NONE;
 		Keytable[i].Repeat = 0;
@@ -2990,15 +2999,42 @@ static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state)
 	GSM_Error error;
 	int i, r;
 
+	/*
+	 * Beware! Horrible kludge here. Try to write some sms manually with
+	 * characters in different case and insert some symbols too. This
+	 * function just "emulates" this process.
+	 */
+
 	if (isupper(data->Character)) {
+		/*
+		 * the table contains only lowercase characters and symbols,
+		 * so we must translate into lowercase.
+		 */
 		i = tolower(data->Character);
 		if (Keytable[i].Key == GSM_KEY_NONE) return GE_UNKNOWN;
-	} else {
+	} else if (islower(data->Character)) {
+		/*
+		 * Ok, the character in proper case, but the phone in upper
+		 * case mode (default). We must switch it into lowercase.
+		 * We just have to press the hash key.
+		 */
 		i = data->Character;
 		if (Keytable[i].Key == GSM_KEY_NONE) return GE_UNKNOWN;
 		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GE_NONE) return error;
+	} else {
+		/*
+		 * This is a special character (number, space, symbol) which
+		 * represents themself.
+		 */
+		i = data->Character;
+		if (Keytable[i].Key == GSM_KEY_NONE) return GE_UNKNOWN;
 	}
 	if (Keytable[i].Key == GSM_KEY_ASTERISK) {
+		/*
+		 * This is a special symbol character, so we have to press
+		 * the asterisk key, the down key the repeat count minus one
+		 * times and finish with the ok (menu) key.
+		 */
 		if ((error = PressKey(state, GSM_KEY_ASTERISK, 0)) != GE_NONE) return error;
 		key = GSM_KEY_DOWN;
 		r = 1;
@@ -3013,11 +3049,24 @@ static GSM_Error EnterChar(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	if (islower(data->Character)) {
+		/*
+		 * This was a lowercase character. We must press the hash
+		 * key again to go back to uppercase mode. We might store
+		 * the lowercase/uppercase state, but it's much simpler.
+		 */
 		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GE_NONE) return error;
 	}
 	else if (key == GSM_KEY_DOWN) {
+		/* This was a symbol character, press the menu key to finish */
 		if ((error = PressKey(state, GSM_KEY_MENU, 0)) != GE_NONE) return error;
 	} else {
+		/*
+		 * Ok, the requested character is ready. But don't forget if
+		 * we press the same key after it in a hurry it will toggle
+		 * this char again! (Pressing key 2 will result "A", but if
+		 * you press the key 2 again it will be "B".) Pressing the
+		 * hash key is an easy workaround for it.
+		 */
 		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GE_NONE) return error;
 		if ((error = PressKey(state, GSM_KEY_HASH, 0)) != GE_NONE) return error;
 	}
@@ -3038,6 +3087,14 @@ static GSM_Error IncomingKey(int messagetype, unsigned char *message, int length
 
 	/* Get key assignments */
 	case 0x41:
+		/*
+		 * This message contains the string of characters for each
+		 * phone key. We will simply parse it and build a reverse
+		 * translation table. The last string is a special case. It
+		 * contains the available symbols which isn't represented on
+		 * the keyboard directly, you can choose from the menu when
+		 * you press the asterisk key (think about sms writeing).
+		 */
 		pos = message + 4;
 		if (ParseKey(State, GSM_KEY_1, &pos)) return GE_UNHANDLEDFRAME;
 		if (ParseKey(State, GSM_KEY_2, &pos)) return GE_UNHANDLEDFRAME;

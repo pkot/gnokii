@@ -159,8 +159,10 @@ void GSM_WriteErrorLog(const char *fmt, ...)
 	if (GSM_ELogHandler) {
 		GSM_ELogHandler(fmt, ap);
 	} else {
+#ifndef	DEBUG
 		vfprintf(stderr, fmt, ap);
 		fflush(stderr);
+#endif
 	}
 
 	va_end(ap);
