@@ -37,7 +37,7 @@
 #ifndef WIN32
 #  include "devices/unixserial.h"
 #else
-#  include "winserial.h"
+#  include "devices/winserial.h"
 #endif
 
 #include "devices/tekram.h"
