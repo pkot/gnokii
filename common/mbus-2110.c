@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.28  2001-01-29 17:14:42  chris
+  Revision 1.29  2001-01-31 11:46:50  machek
+  Comment out SendSMSMessage to kill warning.
+
+  Revision 1.28  2001/01/29 17:14:42  chris
   dprintf now in misc.h (and fiddling with 7110 code)
 
   Revision 1.27  2001/01/23 18:58:51  machek
@@ -329,6 +332,7 @@ GetSMSMessage(GSM_SMSMessage *m)
 	return (GE_NONE);
 }
 
+#if 0
 static GSM_Error
 SendSMSMessage(GSM_SMSMessage *m)
 {
@@ -348,6 +352,7 @@ SendSMSMessage(GSM_SMSMessage *m)
 	}
 	return (GE_NONE);
 }
+#endif
 
 static GSM_Error	DeleteSMSMessage(GSM_SMSMessage *message)
 {
