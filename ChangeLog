@@ -51,6 +51,9 @@
       are attempted to be saved in the number            (Pawel Kot)
  * Documentation updates
     o add missing manual pages for executables           (Pawel Kot)
+ * libgnokii changes
+    o fix vCal support; there can be multiple whitechars between
+      key and colon                                      (Pawel Kot)
 
 0.5.2
 =====
