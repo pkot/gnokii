@@ -53,8 +53,7 @@
 #include <locale.h>
 #endif
 
-/* Turn on prototypes */
-#define __gnokii_c_
+
 #include "gnokii.h"
 
 #include "gsm-sms.h"
@@ -66,6 +65,50 @@
 #include "gsm-bitmaps.h"
 #include "gsm-ringtones.h"
 #include "gsm-statemachine.h"
+
+typedef enum {
+	OPT_HELP,
+	OPT_VERSION,
+	OPT_MONITOR,
+	OPT_ENTERSECURITYCODE,
+	OPT_GETSECURITYCODESTATUS,
+	OPT_SETDATETIME,
+	OPT_GETDATETIME,
+	OPT_SETALARM,
+	OPT_GETALARM,
+	OPT_DIALVOICE,
+	OPT_GETCALENDARNOTE,
+	OPT_WRITECALENDARNOTE,
+	OPT_DELCALENDARNOTE,
+	OPT_GETDISPLAYSTATUS,
+	OPT_GETMEMORY,
+	OPT_WRITEPHONEBOOK,
+	OPT_GETSPEEDDIAL,
+	OPT_SETSPEEDDIAL,
+	OPT_GETSMS,
+	OPT_DELETESMS,
+	OPT_SENDSMS,
+	OPT_SAVESMS,
+	OPT_SENDLOGO,
+	OPT_SENDRINGTONE,
+	OPT_GETSMSC,
+	OPT_GETWELCOMENOTE,
+	OPT_SETWELCOMENOTE,
+	OPT_PMON,
+	OPT_NETMONITOR,
+	OPT_IDENTIFY,
+	OPT_SENDDTMF,
+	OPT_RESET,
+	OPT_SETLOGO,
+	OPT_GETLOGO,
+	OPT_VIEWLOGO,
+	OPT_SETRINGTONE,
+	OPT_GETPROFILE,
+	OPT_DISPLAYOUTPUT,
+	OPT_KEYPRESS,
+	OPT_DIVERT,
+	OPT_FOOGLE
+} opt_index;
 
 static char *model;      /* Model from .gnokiirc file. */
 static char *Port;       /* Serial port from .gnokiirc file */
@@ -1264,7 +1307,7 @@ static int setlogo(int argc, char *argv[])
 {
 	GSM_Bitmap bitmap,oldbit;
 	GSM_NetworkInfo NetworkInfo;
-	GSM_Error error;
+	GSM_Error error = GE_INTERNALERROR;
   
 	bool ok = true;
 	int i;
@@ -1934,7 +1977,7 @@ static int getprofile(int argc, char *argv[])
 	int max_profiles;
 	int start, stop, i;
 	GSM_Profile profile;
-	GSM_Error error;
+	GSM_Error error = GE_INTERNALERROR;
   
 	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
 	char model[64];
@@ -2093,7 +2136,7 @@ static int getmemory(int argc, char *argv[])
 static int writephonebook(int argc, char *args[])
 {
 	GSM_PhonebookEntry entry;
-	GSM_Error error;
+	GSM_Error error = GE_INTERNALERROR;
 	char *memory_type_string;
 	int line_count=0;
 	int subentry;
@@ -2443,7 +2486,7 @@ static int pmon(void)
 static int sendringtone(int argc, char *argv[])
 {
 	GSM_Ringtone ringtone;
-	GSM_Error error;
+	GSM_Error error = GE_INTERNALERROR;
 
 	if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
 		fprintf(stdout, _("Failed to load ringtone.\n"));
@@ -2465,7 +2508,7 @@ static int sendringtone(int argc, char *argv[])
 static int setringtone(int argc, char *argv[])
 {
 	GSM_Ringtone ringtone;
-	GSM_Error error;
+	GSM_Error error = GE_INTERNALERROR;
 
 	if (GSM_ReadRingtoneFile(argv[0], &ringtone)) {
 		fprintf(stdout, _("Failed to load ringtone.\n"));
