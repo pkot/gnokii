@@ -76,6 +76,7 @@
  o introduce new connection type DLR3P, you can use it when you
    know that you have DLR3 or DLR3P cable -- you will get then
    faster initialization                                  (Pawel Kot)
+ o Strongly suggest to do make install after make         (Pawel Kot)
 
 0.4.1
 =====

@@ -46,6 +46,13 @@ all: $(DIRS)
 		done \
 	fi
 	@echo "done"
+	@echo "##########################################"
+	@echo "###"
+	@echo "### It is strongly recommended to run:"
+	@echo "### make install
+	@echo "### now. Otherwise gnokii may not work."
+	@echo "###"
+	@echo "##########################################"
 
 dummy:
 
