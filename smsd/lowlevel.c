@@ -87,18 +87,21 @@ inline static PhoneEvent *RemoveEvent (void)
 
 static GSM_Error InitModelInf (void)
 {
-  GSM_Data data;
+  GSM_Data *data;
   GSM_Error error;
   char model[64], rev[64], manufacturer[64];
 
-  GSM_DataClear (&data);
-  data.Manufacturer = manufacturer;
-  data.Model = model;
-  data.Revision = rev;
+  data = calloc (1,sizeof(GSM_Data));
+  data->Manufacturer = manufacturer;
+  data->Model = model;
+  data->Revision = rev;
                           
-  error = SM_Functions (GOP_GetModel, &data, &sm);
+  error = SM_Functions (GOP_GetModel, data, &sm);
   if (error != GE_NONE)
+  {
+    free (data);
     return error;
+  }
     
   g_free (phoneMonitor.phone.model);
   phoneMonitor.phone.version = g_strdup (model);
@@ -117,6 +120,7 @@ static GSM_Error InitModelInf (void)
   g_print ("Revision: %s\n", phoneMonitor.phone.revision);
 #endif
 
+  free (data);
   return (GE_NONE);
 }
 
@@ -291,31 +295,32 @@ static gint A_SendSMSMessage (gpointer data)
 {
   D_SMSMessage *d = (D_SMSMessage *) data;
   GSM_Error error;
-  GSM_Data dt;
+  GSM_Data *dt;
 
   error = d->status = GE_UNKNOWN;
   if (d)
   {
     pthread_mutex_lock (&sendSMSMutex);
-    GSM_DataClear (&dt);
+    dt = calloc (1, sizeof (GSM_Data));
     if (!d->sms->SMSC.Number[0])
     {
-      dt.MessageCenter = calloc (1, sizeof (SMS_MessageCenter));
-      dt.MessageCenter->No = 1;
-      if (SM_Functions (GOP_GetSMSCenter, &dt, &sm) == GE_NONE)
+      dt->MessageCenter = calloc (1, sizeof (SMS_MessageCenter));
+      dt->MessageCenter->No = 1;
+      if (SM_Functions (GOP_GetSMSCenter, dt, &sm) == GE_NONE)
       {
-        strcpy (d->sms->SMSC.Number, dt.MessageCenter->SMSC.Number);
-        d->sms->SMSC.Type = dt.MessageCenter->SMSC.Type;
+        strcpy (d->sms->SMSC.Number, dt->MessageCenter->SMSC.Number);
+        d->sms->SMSC.Type = dt->MessageCenter->SMSC.Type;
       }
-      free (dt.MessageCenter);
+      free (dt->MessageCenter);
     }
     
     if (!d->sms->SMSC.Type)
       d->sms->SMSC.Type = SMS_Unknown;
       
-    GSM_DataClear (&dt);
-    dt.SMS = d->sms;
-    error = d->status = gn_sms_send (&dt, &sm);
+    GSM_DataClear (dt);
+    dt->SMS = d->sms;
+    error = d->status = gn_sms_send (dt, &sm);
+    free (dt);
     pthread_cond_signal (&sendSMSCond);
     pthread_mutex_unlock (&sendSMSMutex);
   }
@@ -329,23 +334,24 @@ static gint A_SendSMSMessage (gpointer data)
 
 static gint A_DeleteSMSMessage (gpointer data)
 {
-  GSM_Data dt;
+  GSM_Data *dt;
   GSM_Error error = GE_UNKNOWN;
   SMS_Folder SMSFolder;
   SMS_FolderList SMSFolderList;
 
-  GSM_DataClear(&dt);
-  dt.SMS = (GSM_API_SMS *) data;
+  dt = calloc (1, sizeof (GSM_Data));
+  dt->SMS = (GSM_API_SMS *) data;
   SMSFolder.FolderID = 0;
-  dt.SMSFolder = &SMSFolder;
-  dt.SMSFolderList = &SMSFolderList;
-  if (dt.SMS)
+  dt->SMSFolder = &SMSFolder;
+  dt->SMSFolderList = &SMSFolderList;
+  if (dt->SMS)
   {
-    error = gn_sms_delete (&dt, &sm);
+    error = gn_sms_delete (dt, &sm);
 //    I don't use copy, I don't need free message.
 //    g_free (sms);
   }
 
+  free (dt);
   return (error);
 }
 
@@ -366,20 +372,23 @@ gint (*DoAction[])(gpointer) = {
 
 void *Connect (void *a)
 {
-  GSM_Data data;
+  GSM_Data *data;
   SMS_Status SMSStatus = {0, 0, 0, 0};
   SMS_Folder SMSFolder;
   PhoneEvent *event;
   GSM_Error error;
 
-  GSM_DataClear(&data);
+  data = calloc (1, sizeof (GSM_Data));
   
 # ifdef XDEBUG
   g_print ("Initializing connection...\n");
 # endif
 
   if (fbusinit (true) != GE_NONE)
+  {
+    free (data);
     exit (1);
+  }
 
 # ifdef XDEBUG
   g_print ("Phone connected. Starting monitoring...\n");
@@ -391,9 +400,9 @@ void *Connect (void *a)
 
     if (phoneMonitor.supported & PM_FOLDERS)
     {
-      data.SMSFolder = &SMSFolder;
+      data->SMSFolder = &SMSFolder;
       SMSFolder.FolderID = GMT_IN;
-      if ((error = SM_Functions (GOP_GetSMSFolderStatus, &data, &sm)) == GE_NONE)
+      if ((error = SM_Functions (GOP_GetSMSFolderStatus, data, &sm)) == GE_NONE)
       {
         if (phoneMonitor.sms.number != SMSFolder.Number)
         {
@@ -406,8 +415,8 @@ void *Connect (void *a)
     }
     else
     {
-      data.SMSStatus = &SMSStatus;
-      if ((error = SM_Functions (GOP_GetSMSStatus, &data, &sm)) == GE_NONE)
+      data->SMSStatus = &SMSStatus;
+      if ((error = SM_Functions (GOP_GetSMSStatus, data, &sm)) == GE_NONE)
       {
         if (phoneMonitor.sms.unRead != SMSStatus.Unread ||
             phoneMonitor.sms.number != SMSStatus.Number)
@@ -434,4 +443,6 @@ void *Connect (void *a)
     
     sleep (1);
   }
+  
+  free (data);
 }
