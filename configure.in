@@ -285,9 +285,9 @@ AC_CHECK_HEADER(getopt.h, ,
       [CFLAGS="$CFLAGS -I../getopt"])
 
 AC_ARG_WITH(gnugetopt,
-   [  --with-getopt=DIR       specifies the getopt library location directory],
+   [  --with-gnugetopt=DIR       specifies the getopt library location directory],
    [ if test x$withval=yes; then
-        AC_MSG_WARN(Usage is: --with-getopt=DIR) 
+        AC_MSG_WARN(Usage is: --with-gnugetopt=DIR) 
      else
         GETOPT_LIBS="-L$withval"
      fi
