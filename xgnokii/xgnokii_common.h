@@ -17,7 +17,7 @@
 #define XGNOKII_COMMON_H
 
 #include <gtk/gtk.h>
-#include <malloc.h>  /* for size_t */
+#include <stdlib.h>  /* for size_t */
 
 typedef struct {
   gchar *model;
