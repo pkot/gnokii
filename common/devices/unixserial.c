@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.6  2001-03-21 23:36:04  chris
+  Revision 1.7  2001-07-03 00:03:36  pkot
+  Small fixes to let gnokii compile and work under solaris (thanks to Artur Kubiak)
+
+  Revision 1.6  2001/03/21 23:36:04  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -135,7 +138,7 @@ int serial_opendevice(__const char *__file, int __with_odd_parity, int __with_as
 
   /* Allow process/thread to receive SIGIO */
 
-#if !defined(__bsdi__)
+#if !defined(__unices__)
   retcode=fcntl(fd, F_SETOWN, getpid());
   if (retcode == -1){
     perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");

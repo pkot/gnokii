@@ -22,10 +22,22 @@
  *
  ********************************************************************/
 
+/*
+ * $Id$
+ *
+ * GNOKII modifications:
+ *
+ * $Log$
+ * Revision 1.2  2001-07-03 00:03:37  pkot
+ * Small fixes to let gnokii compile and work under solaris (thanks to Artur Kubiak)
+ *
+ */
+
 #ifndef IRDA_H
 #define IRDA_H
 
 #include <sys/types.h>
+#include <stdint.h>
 
 /* Hint bit positions for first hint byte */
 #define HINT_PNP         0x01
@@ -108,22 +120,22 @@ enum {
 
 struct sockaddr_irda {
 	sa_family_t   sir_family;   /* AF_IRDA */
-	u_int8_t      sir_lsap_sel; /* LSAP selector */
-	u_int32_t     sir_addr;     /* Device address */
+	uint8_t      sir_lsap_sel; /* LSAP selector */
+	uint32_t     sir_addr;     /* Device address */
 	char          sir_name[25]; /* Usually <service>:IrDA:TinyTP */
 };
 
 struct irda_device_info {
-	u_int32_t     saddr;    /* Address of local interface */
-	u_int32_t     daddr;    /* Address of remote device */
+	uint32_t     saddr;    /* Address of local interface */
+	uint32_t     daddr;    /* Address of remote device */
 	char          info[22]; /* Description */
-	u_int8_t      charset;  /* Charset used for description */
-	u_int8_t      hints[2]; /* Hint bits */
+	uint8_t      charset;  /* Charset used for description */
+	uint8_t      hints[2]; /* Hint bits */
 };
 
 struct irda_device_list {
-       u_int32_t len;
-       struct irda_device_info dev[1];
+	uint32_t len;
+	struct irda_device_info dev[1];
 };
 
 struct irda_ias_set {
@@ -142,7 +154,7 @@ struct irda_ias_set {
 			unsigned char string[IAS_MAX_STRING];
 		} irda_attrib_string;
 	} attribute;
-        u_int32_t       daddr;
+        uint32_t       daddr;
 
 };
 
@@ -163,13 +175,13 @@ struct irda_ias_set {
 
 /* IrDA quality of service information (must not exceed 16 bytes) */
 struct if_irda_qos {
-	u_int32_t baudrate;
-	u_int16_t data_size;
-	u_int16_t window_size;
-	u_int16_t min_turn_time;
-	u_int16_t max_turn_time;
-	u_int8_t  add_bofs;
-	u_int8_t  link_disc;
+	uint32_t baudrate;
+	uint16_t data_size;
+	uint16_t window_size;
+	uint16_t min_turn_time;
+	uint16_t max_turn_time;
+	uint8_t  add_bofs;
+	uint8_t  link_disc;
 };
 
 /* For setting RTS and DTR lines of a dongle */
@@ -203,7 +215,3 @@ struct if_irda_req {
 #define ifr_rts       ifr_ifru.ifru_line.rts
 
 #endif /* IRDA_H */
-
-
-
-

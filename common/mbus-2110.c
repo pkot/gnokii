@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
   
   $Log$
-  Revision 1.37  2001-03-05 08:02:16  machek
+  Revision 1.38  2001-07-03 00:03:36  pkot
+  Small fixes to let gnokii compile and work under solaris (thanks to Artur Kubiak)
+
+  Revision 1.37  2001/03/05 08:02:16  machek
   Added few static-s.
 
   Revision 1.36  2001/02/27 22:16:25  machek
@@ -87,6 +90,10 @@
 #include <string.h>
 #include <pthread.h>
 #include <errno.h>
+
+#if __unices__
+#  include <sys/file.h>
+#endif
 
 #undef DEBUG
 #include "misc.h"
