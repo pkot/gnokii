@@ -74,6 +74,13 @@
  * build system changes
     o use NLS detection from autoconf/automake macros
                                  (Pawel Kot, Mariusz Mazur, PLD Team)
+    o fixed configure.in to not generate warning on AC_PROG_CC
+                                                      (Mariusz Mazur)
+    o workaround for Red Hat 7.3 gettext which is sligthly different
+      then other distribution gettext                 (Mariusz Mazur)
+    o Slovenian translation fixed; no I don't know Slovenian at
+      all ;-), just fixed "number of format specifications in
+      'msgid' and 'msgstr' does not match" error          (Pawel Kot)
  * ppm2nokia script added                              (Vidar Madsen)
 
 0.4.3
