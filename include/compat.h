@@ -40,7 +40,9 @@
 #endif
 
 #ifdef HAVE_STDARG_H
-#  include <stdarg.h>
+#  ifndef _VA_LIST
+#    include <stdarg.h>
+#  endif
 #endif
 
 #ifdef HAVE_STRINGS_H

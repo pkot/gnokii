@@ -69,6 +69,7 @@
 #include <sys/uio.h>
 #include <sys/param.h>
 
+#include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
 #include "data/at-emulator.h"
