@@ -15,6 +15,9 @@
     o switch black and white in bmp handling                 (Polik)
     o read BMP with --viewlogo as operator logo and fix segfault
       on --viewlogo with BMP                             (Pawel Kot)
+ * nk6510 driver updates
+    o handle correctly the case when incorrect phonebook entry
+      was attempted to write to the phone                (Pawel Kot)
 
 0.5.0rc1
 ========

@@ -1441,6 +1441,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 	case 0x10:
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
+			case 0x33: return GN_ERR_WRONGDATAFORMAT;
 			case 0x34: return GN_ERR_INVALIDLOCATION;
 			default:   return GN_ERR_UNHANDLEDFRAME;
 			}
