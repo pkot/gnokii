@@ -27,14 +27,13 @@
   This file provides an API for accessing functions via fbus.
   See README for more details on supported mobile phones.
 
-  The various routines are called FB3110_(whatever).
+  The various routines are called fb3110_(whatever).
 
 */
 
-#ifndef __links_fbus_3110_h
-#define __links_fbus_3110_h
+#ifndef _gnokii_links_fbus_3110_h
+#define _gnokii_links_fbus_3110_h
 
-#include <time.h>
 #include "gsm-statemachine.h"
 #include "config.h"
 #include "compat.h"
@@ -43,10 +42,10 @@
 #  include <sys/types.h>
 #endif
 
-#define FB3110_MAX_FRAME_LENGTH 256
-#define FB3110_MAX_MESSAGE_TYPES 128
-#define FB3110_MAX_TRANSMIT_LENGTH 256
-#define FB3110_MAX_CONTENT_LENGTH 120
+#define FB3110_FRAME_MAX_LENGTH		256
+#define FB3110_MESSAGE_MAX_TYPES	128
+#define FB3110_TRANSMIT_MAX_LENGTH	256
+#define FB3110_CONTENT_MAX_LENGTH	120
 
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
    phones.  This may have to become a phone dependant parameter... */
@@ -55,35 +54,34 @@
 
 /* States for receive code. */
 
-enum FB3110_RX_States {
+enum fb3110_rx_states {
 	FB3110_RX_Sync,
 	FB3110_RX_Discarding,
 	FB3110_RX_GetLength,
 	FB3110_RX_GetMessage
 };
 
-
 typedef struct{
-	int Checksum;
-	int BufferCount;
-	enum FB3110_RX_States State;
-	int FrameType;
-	int FrameLength;
-	char Buffer[FB3110_MAX_FRAME_LENGTH];
-} FB3110_IncomingFrame;
+	int checksum;
+	int buffer_count;
+	enum fb3110_rx_states state;
+	int frame_type;
+	int frame_len;
+	char buffer[FB3110_FRAME_MAX_LENGTH];
+} fb3110_incoming_frame;
 
 typedef struct {
 	u16 message_length;
 	u8 message_type;
 	u8 *buffer;
-} FB3110_OutgoingMessage;
+} fb3110_outgoing_message;
 
 
 typedef struct{
-	FB3110_IncomingFrame i;
-	u8 RequestSequenceNumber;
-} FB3110_Link;
+	fb3110_incoming_frame i;
+	u8 request_sequence_number;
+} fb3110_link;
 
-gn_error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
+gn_error fb31110_initialise(gn_link *newlink, struct gn_statemachine *state);
 
-#endif   /* #ifndef __links_fbus_3110_h */
+#endif   /* #ifndef _gnokii_links_fbus_3110_h */

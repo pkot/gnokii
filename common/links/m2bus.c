@@ -29,7 +29,7 @@
   This file provides an API for accessing functions via m2bus.
   See README for more details on supported mobile phones.
 
-  The various routines are called M2BUS_(whatever).
+  The various routines are called m2bus_(whatever).
 
 */
 
@@ -48,29 +48,30 @@
 #include "gsm-networks.h"
 #include "gsm-statemachine.h"
 #include "device.h"
-
 #include "links/m2bus.h"
 
-static void M2BUS_RX_StateMachine(unsigned char rx_byte);
-static gn_error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
-static int M2BUS_TX_SendAck(u8 message_seq);
+#include "gnokii-internal.h"
+
+static void m2bus_rx_statemachine(unsigned char rx_byte);
+static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned char *message);
+static int m2bus_tx_send_ack(u8 message_seq);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
 
 /* Some globals */
 
-static GSM_Link *glink;
-static GSM_Statemachine *statemachine;
-static M2BUS_Link flink;	/* M2BUS specific stuff, internal to this file */
+static gn_link *glink;
+static struct gn_statemachine *statemachine;
+static m2bus_link flink;	/* M2BUS specific stuff, internal to this file */
 
 
 /*--------------------------------------------*/
 
-static bool M2BUS_OpenSerial(void)
+static bool m2bus_serial_open(void)
 {
 	/* Open device. */
-	if (!device_open(glink->PortDevice, true, false, false, GCT_Serial)) {
+	if (!device_open(glink->port_device, true, false, false, GN_CT_Serial)) {
 		perror(_("Couldn't open M2BUS device"));
 		return false;
 	}
@@ -81,119 +82,25 @@ static bool M2BUS_OpenSerial(void)
 	 * for the interface to work. Base time value is units of 50ms it
 	 * seems.
 	 */
-
-#if 0
-	/* Default state */
-	device_setdtrrts(0, 1);
-	sleep(1);
-
-	/* RTS low for 250ms */
-	device_setdtrrts(0, 0);
-	usleep(250000);
-
-	/* RTS high, DTR high for 50ms */
-	device_setdtrrts(1, 1);
-	usleep(50000);
-
-	/* RTS low, DTR high for 50ms */
-	device_setdtrrts(1, 0);
-	usleep(50000);
-
-	/* RTS high, DTR high for 50ms */
-	device_setdtrrts(1, 1);
-	usleep(50000);
-
-	/* RTS low, DTR high for 50ms */
-	device_setdtrrts(1, 0);
-	usleep(50000);
-
-	/* RTS low, DTR low for 50ms */
-	device_setdtrrts(0, 0);
-	usleep(50000);
-
-	/* RTS low, DTR high for 50ms */
-	device_setdtrrts(1, 0);
-	usleep(50000);
-
-	/* RTS high, DTR high for 50ms */
-	device_setdtrrts(1, 1);
-	usleep(50000);
-
-	/* RTS low, DTR low for 50ms */
-	device_setdtrrts(0, 0);
-	usleep(50000);
-
-	/* leave RTS high, DTR low for duration of session. */
-	device_setdtrrts(0, 1);
-#endif
-
 	device_setdtrrts(0, 1);
 
 	return true;
 }
 
 
-#if 0
-static bool FBUS_OpenIR(void)
-{
-	struct timeval timeout;
-	unsigned char init_char = 0x55;
-	unsigned char end_init_char = 0xc1;
-	unsigned char connect_seq[] = { FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02 };
-	unsigned int count, retry;
-
-	if (!device_open(glink->PortDevice, false, false, false, GCT_Infrared)) {
-		perror(_("Couldn't open FBUS device"));
-		return false;
-	}
-
-	/* clearing the RTS bit and setting the DTR bit */
-	device_setdtrrts(1, 0);
-
-	for (retry = 0; retry < 5; retry++) {
-		dprintf("IR init, retry=%d\n", retry);
-
-		device_changespeed(9600);
-
-		for (count = 0; count < 32; count++) {
-			device_write(&init_char, 1);
-		}
-		device_write(&end_init_char, 1);
-		usleep(100000);
-
-		device_changespeed(115200);
-
-		FBUS_SendMessage(7, 0x02, connect_seq);
-
-		/* Wait for 1 sec. */
-		timeout.tv_sec	= 1;
-		timeout.tv_usec	= 0;
-
-		if (device_select(&timeout)) {
-			dprintf("IR init succeeded\n");
-			return(true);
-		}
-	}
-
-	return (false);
-}
-#endif
-
-
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
-
-static void M2BUS_RX_StateMachine(unsigned char rx_byte)
+static void m2bus_rx_statemachine(unsigned char rx_byte)
 {
 	struct timeval time_diff;
-	M2BUS_IncomingMessage *i = &flink.i;
+	m2bus_incoming_message *i = &flink.i;
 
 #if 0
 	dprintf("rx_byte: %02x, state: %d\n", rx_byte, i->state);
 #endif
 
 	/* XOR the byte with the current checksum */
-	i->Checksum ^= rx_byte;
+	i->checksum ^= rx_byte;
 
 	switch (i->state) {
 
@@ -215,10 +122,10 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 		/* else fall through to... */
 
 	case M2BUS_RX_Sync:
-		if (glink->ConnectionType == GCT_Infrared) {
+		if (glink->connection_type == GN_CT_Infrared) {
 			if (rx_byte == M2BUS_IR_FRAME_ID) {
 				/* Initialize checksums. */
-				i->Checksum = M2BUS_IR_FRAME_ID;
+				i->checksum = M2BUS_IR_FRAME_ID;
 				i->state = M2BUS_RX_GetDestination;
 			} else {
 				/* Lost frame sync */
@@ -226,10 +133,10 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 				gettimeofday(&i->time_last, NULL);
 			}
 
-		} else {	/* glink->ConnectionType == GCT_Serial */
+		} else {	/* glink->connection_type == GN_CT_Serial */
 			if (rx_byte == M2BUS_FRAME_ID) {
 				/* Initialize checksums. */
-				i->Checksum = M2BUS_FRAME_ID;
+				i->checksum = M2BUS_FRAME_ID;
 				i->state = M2BUS_RX_GetDestination;
 			} else {
 				/* Lost frame sync */
@@ -242,7 +149,7 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 
 	case M2BUS_RX_GetDestination:
 
-		i->MessageDestination = rx_byte;
+		i->message_destination = rx_byte;
 		i->state = M2BUS_RX_GetSource;
 
 		/*
@@ -264,14 +171,14 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 
 	case M2BUS_RX_GetSource:
 
-		i->MessageSource = rx_byte;
+		i->message_source = rx_byte;
 		i->state = M2BUS_RX_GetType;
 
-		if (i->MessageDestination == M2BUS_DEVICE_PC && rx_byte != M2BUS_DEVICE_PHONE) {
+		if (i->message_destination == M2BUS_DEVICE_PC && rx_byte != M2BUS_DEVICE_PHONE) {
 			i->state = M2BUS_RX_Sync;
 			dprintf("The m2bus stream is out of sync - expected source=PHONE, got %2x\n", rx_byte);
 		}
-		else if (i->MessageDestination == M2BUS_DEVICE_PHONE && rx_byte != M2BUS_DEVICE_PC) {
+		else if (i->message_destination == M2BUS_DEVICE_PHONE && rx_byte != M2BUS_DEVICE_PC) {
 			i->state = M2BUS_RX_Sync;
 			dprintf("The m2bus stream is out of sync - expected source=PC, got %2x\n", rx_byte);
 		}
@@ -280,12 +187,12 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 
 	case M2BUS_RX_GetType:
 
-		i->MessageType = rx_byte;
+		i->message_type = rx_byte;
 		if (rx_byte == 0x7f) {
-			i->MessageLength = 0;
+			i->message_length = 0;
 			i->state = M2BUS_RX_GetMessage;
-			i->BufferCount = 0;
-			if ((i->MessageBuffer = malloc(2)) == NULL) {
+			i->buffer_count = 0;
+			if ((i->message_buffer = malloc(2)) == NULL) {
 				dprintf("M2BUS: receive buffer allocation failed, requested %d bytes.\n", 2);
 				i->state = M2BUS_RX_Sync;
 			}
@@ -295,18 +202,18 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 
 	case M2BUS_RX_GetLength1:
 
-		i->MessageLength = rx_byte << 8;
+		i->message_length = rx_byte << 8;
 		i->state = M2BUS_RX_GetLength2;
 
 		break;
 
 	case M2BUS_RX_GetLength2:
 
-		i->MessageLength += rx_byte;
+		i->message_length += rx_byte;
 		i->state = M2BUS_RX_GetMessage;
-		i->BufferCount = 0;
-		if ((i->MessageBuffer = malloc(i->MessageLength + 2)) == NULL) {
-			dprintf("M2BUS: receive buffer allocation failed, requested %d bytes.\n", i->MessageLength + 2);
+		i->buffer_count = 0;
+		if ((i->message_buffer = malloc(i->message_length + 2)) == NULL) {
+			dprintf("M2BUS: receive buffer allocation failed, requested %d bytes.\n", i->message_length + 2);
 			i->state = M2BUS_RX_Sync;
 		}
 
@@ -314,36 +221,36 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 
 	case M2BUS_RX_GetMessage:
 
-		i->MessageBuffer[i->BufferCount++] = rx_byte;
+		i->message_buffer[i->buffer_count++] = rx_byte;
 
 		/* If this is the last byte, it's the checksum. */
 
-		if (i->BufferCount == i->MessageLength + 2) {
+		if (i->buffer_count == i->message_length + 2) {
 			/* Is the checksum correct? */
-			if (i->Checksum == 0x00) {
+			if (i->checksum == 0x00) {
 
 				/* Deal with exceptions to the rules - acks and rlp.. */
 
-				if (i->MessageDestination != M2BUS_DEVICE_PC) {
+				if (i->message_destination != M2BUS_DEVICE_PC) {
 					/* echo */
-				} else if (i->MessageType == 0x7f) {
-					dprintf("[Received Ack, seq: %2x]\n", i->MessageBuffer[0]);
+				} else if (i->message_type == 0x7f) {
+					dprintf("[Received Ack, seq: %2x]\n", i->message_buffer[0]);
 
 				} else {	/* Normal message type */
 
 					/* Send an ack (for all for now) */
 
-					M2BUS_TX_SendAck(i->MessageBuffer[i->MessageLength]);
+					m2bus_tx_send_ack(i->message_buffer[i->message_length]);
 
 					/* Finally dispatch if ready */
 
-					SM_IncomingFunction(statemachine, i->MessageType, i->MessageBuffer, i->MessageLength);
+					sm_incoming_function(statemachine, i->message_type, i->message_buffer, i->message_length);
 				}
 			} else {
 				dprintf("M2BUS: Bad checksum!\n");
 			}
-			free(i->MessageBuffer);
-			i->MessageBuffer = NULL;
+			free(i->message_buffer);
+			i->message_buffer = NULL;
 			i->state = M2BUS_RX_Sync;
 		}
 		break;
@@ -354,7 +261,7 @@ static void M2BUS_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static gn_error M2BUS_Loop(struct timeval *timeout)
+static gn_error m2bus_loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -363,7 +270,7 @@ static gn_error M2BUS_Loop(struct timeval *timeout)
 	if (res > 0) {
 		res = device_read(buffer, sizeof(buffer));
 		for (count = 0; count < res; count++)
-			M2BUS_RX_StateMachine(buffer[count]);
+			m2bus_rx_statemachine(buffer[count]);
 	} else
 		return GN_ERR_TIMEOUT;
 
@@ -375,7 +282,7 @@ static gn_error M2BUS_Loop(struct timeval *timeout)
 }
 
 
-static void M2BUS_WaitforIdle(int timeout, bool reset)
+static void m2bus_wait_for_idle(int timeout, bool reset)
 {
 	int n, prev;
 
@@ -399,7 +306,7 @@ static void M2BUS_WaitforIdle(int timeout, bool reset)
 	   (0x1f) and other values according the value specified when called.
 	   Calculates checksum and then sends the lot down the pipe... */
 
-static gn_error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
+static gn_error m2bus_send_message(u16 messagesize, u8 messagetype, unsigned char *message)
 {
 	u8 *out_buffer;
 	int count, i = 0;
@@ -433,9 +340,9 @@ static gn_error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char
 		/* Now construct the message header. */
 
 		i = 0;
-		if (glink->ConnectionType == GCT_Infrared)
+		if (glink->connection_type == GN_CT_Infrared)
 			out_buffer[i++] = M2BUS_IR_FRAME_ID;	/* Start of the IR frame indicator */
-		else			/* ConnectionType == GCT_Serial */
+		else			/* connection_type == GN_CT_Serial */
 			out_buffer[i++] = M2BUS_FRAME_ID;	/* Start of the frame indicator */
 
 		out_buffer[i++] = M2BUS_DEVICE_PHONE;	/* Destination */
@@ -453,9 +360,9 @@ static gn_error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char
 			i += messagesize;
 		}
 
-		out_buffer[i++] = flink.RequestSequenceNumber++;
-		if (flink.RequestSequenceNumber > 63)
-			flink.RequestSequenceNumber = 2;
+		out_buffer[i++] = flink.request_sequence_number++;
+		if (flink.request_sequence_number > 63)
+			flink.request_sequence_number = 2;
 
 		/* Now calculate checksums over entire message and append to message. */
 
@@ -478,7 +385,7 @@ static gn_error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char
 	dprintf("\n");
 #endif
 
-	M2BUS_WaitforIdle(5000, true);
+	m2bus_wait_for_idle(5000, true);
 
 	if (device_write(out_buffer, i) != i) {
 		free(out_buffer);
@@ -493,15 +400,15 @@ static gn_error M2BUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char
 
 
 
-static int M2BUS_TX_SendAck(u8 message_seq)
+static int m2bus_tx_send_ack(u8 message_seq)
 {
 	u8 out_buffer[6];
 
 	dprintf("[Sending Ack, seq: %x]\n", message_seq);
 
-	if (glink->ConnectionType == GCT_Infrared)
+	if (glink->connection_type == GN_CT_Infrared)
 		out_buffer[0] = M2BUS_IR_FRAME_ID;/* Start of the IR frame indicator */
-	else			/* ConnectionType == GCT_Serial */
+	else			/* connection_type == GN_CT_Serial */
 		out_buffer[0] = M2BUS_FRAME_ID;	/* Start of the frame indicator */
 
 	out_buffer[1] = M2BUS_DEVICE_PHONE;	/* Destination */
@@ -515,7 +422,7 @@ static int M2BUS_TX_SendAck(u8 message_seq)
 
 	out_buffer[5] = out_buffer[0] ^ out_buffer[1] ^ out_buffer[2] ^ out_buffer[3] ^ out_buffer[4];
 
-	M2BUS_WaitforIdle(2000, false);
+	m2bus_wait_for_idle(2000, false);
 
 	if (device_write(out_buffer, 6) != 6)
 		return GN_ERR_INTERNALERROR;
@@ -530,25 +437,25 @@ static int M2BUS_TX_SendAck(u8 message_seq)
 /* newlink is actually part of state - but the link code should not anything about state */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-gn_error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
+gn_error m2bus_initialise(gn_link *newlink, struct gn_statemachine *state)
 {
 	/* 'Copy in' the global structures */
 	glink = newlink;
 	statemachine = state;
 
 	/* Fill in the link functions */
-	glink->Loop = M2BUS_Loop;
-	glink->SendMessage = M2BUS_SendMessage;
+	glink->loop = m2bus_loop;
+	glink->send_message = m2bus_send_message;
 
 	/* Start up the link */
 	memset(&flink, 0, sizeof(flink));
-	flink.RequestSequenceNumber = 2;
+	flink.request_sequence_number = 2;
 	flink.i.state = M2BUS_RX_Sync;
 
-	if (glink->ConnectionType == GCT_Infrared) {
+	if (glink->connection_type == GN_CT_Infrared) {
 		return GN_ERR_FAILED;
-	} else {		/* ConnectionType == GCT_Serial */
-		if (!M2BUS_OpenSerial())
+	} else {		/* connection_type == GN_CT_Serial */
+		if (!m2bus_serial_open())
 			return GN_ERR_FAILED;
 	}
 

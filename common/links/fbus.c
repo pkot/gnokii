@@ -47,35 +47,31 @@
 #include "gsm-networks.h"
 #include "gsm-statemachine.h"
 #include "device.h"
-
 #include "links/fbus.h"
 
-static void FBUS_RX_StateMachine(unsigned char rx_byte);
-static gn_error FBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
-static int FBUS_TX_SendAck(u8 message_type, u8 message_seq);
+#include "gnokii-internal.h"
+
+static void fbus_rx_statemachine(unsigned char rx_byte);
+static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message);
+static int fbus_tx_send_ack(u8 message_type, u8 message_seq);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
 
 /* Some globals */
 
-static GSM_Link *glink;
-static GSM_Statemachine *statemachine;
-static FBUS_Link flink;		/* FBUS specific stuff, internal to this file */
+static gn_link *glink;
+static struct gn_statemachine *statemachine;
+static fbus_link flink;		/* FBUS specific stuff, internal to this file */
 
-#ifndef WIN32
-#  define	IR_MODE(l) ((l)->ConnectionType == GCT_Infrared || (l)->ConnectionType == GCT_Tekram)
-#else
-#  define	IR_MODE(l) ((l)->ConnectionType == GCT_Infrared)
-#endif
 
 /*--------------------------------------------*/
 
-static bool FBUS_OpenSerial(bool dlr3)
+static bool fbus_serial_open(bool dlr3)
 {
 	if (dlr3) dlr3 = 1;
 	/* Open device. */
-	if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
+	if (!device_open(glink->port_device, false, false, false, GN_CT_Serial)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -87,7 +83,7 @@ static bool FBUS_OpenSerial(bool dlr3)
 	return true;
 }
 
-static bool AT2FBUS_OpenSerial()
+static bool at2fbus_serial_open()
 {
 	unsigned char init_char = 0x55;
 	unsigned char end_init_char = 0xc1;
@@ -95,7 +91,7 @@ static bool AT2FBUS_OpenSerial()
 	unsigned char buffer[255];
  
 	/* Open device. */
-	if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
+	if (!device_open(glink->port_device, false, false, false, GN_CT_Serial)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -126,7 +122,7 @@ static bool AT2FBUS_OpenSerial()
 	return true;
 }
 
-static bool FBUS_OpenIR(void)
+static bool fbus_ir_open(void)
 {
 	struct timeval timeout;
 	unsigned char init_char = 0x55;
@@ -134,7 +130,7 @@ static bool FBUS_OpenIR(void)
 	unsigned char connect_seq[] = { FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02 };
 	unsigned int count, retry;
 
-	if (!device_open(glink->PortDevice, false, false, false, glink->ConnectionType)) {
+	if (!device_open(glink->port_device, false, false, false, GN_CT_Infrared)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -155,7 +151,7 @@ static bool FBUS_OpenIR(void)
 
 		device_changespeed(115200);
 
-		FBUS_SendMessage(7, 0x02, connect_seq);
+		fbus_send_message(7, 0x02, connect_seq);
 
 		/* Wait for 1 sec. */
 		timeout.tv_sec	= 1;
@@ -174,18 +170,17 @@ static bool FBUS_OpenIR(void)
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
-static void FBUS_RX_StateMachine(unsigned char rx_byte)
+static void fbus_rx_statemachine(unsigned char rx_byte)
 {
 	struct timeval time_diff;
-	FBUS_IncomingFrame *i = &flink.i;
+	fbus_incoming_frame *i = &flink.i;
 	int frm_num, seq_num;
-	FBUS_IncomingMessage *m;
+	fbus_incoming_message *m;
 
 	/* XOR the byte with the current checksum */
-	i->checksum[i->BufferCount & 1] ^= rx_byte;
+	i->checksum[i->buffer_count & 1] ^= rx_byte;
 
 	switch (i->state) {
-
 		/* Messages from the phone start with an 0x1e (cable) or 0x1c (IR).
 		   We use this to "synchronise" with the incoming data stream. However,
 		   if we see something else, we assume we have lost sync and we require
@@ -204,7 +199,7 @@ static void FBUS_RX_StateMachine(unsigned char rx_byte)
 		/* else fall through to... */
 
 	case FBUS_RX_Sync:
-		if (IR_MODE(glink)) {
+		if (glink->connection_type == GN_CT_Infrared) {
 			if (rx_byte == FBUS_IR_FRAME_ID) {
 				/* Initialize checksums. */
 				i->checksum[0] = FBUS_IR_FRAME_ID;
@@ -233,7 +228,7 @@ static void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 	case FBUS_RX_GetDestination:
 
-		i->MessageDestination = rx_byte;
+		i->message_destination = rx_byte;
 		i->state = FBUS_RX_GetSource;
 
 		/* When there is a checksum error and things get out of sync we have to manage to resync */
@@ -250,7 +245,7 @@ static void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 	case FBUS_RX_GetSource:
 
-		i->MessageSource = rx_byte;
+		i->message_source = rx_byte;
 		i->state = FBUS_RX_GetType;
 
 		/* Source should be 0x00 */
@@ -264,104 +259,105 @@ static void FBUS_RX_StateMachine(unsigned char rx_byte)
 
 	case FBUS_RX_GetType:
 
-		i->MessageType = rx_byte;
+		i->message_type = rx_byte;
 		i->state = FBUS_RX_GetLength1;
 
 		break;
 
 	case FBUS_RX_GetLength1:
 
-		i->FrameLength = rx_byte << 8;
+		i->frame_length = rx_byte << 8;
 		i->state = FBUS_RX_GetLength2;
 
 		break;
 
 	case FBUS_RX_GetLength2:
 
-		i->FrameLength = i->FrameLength + rx_byte;
+		i->frame_length = i->frame_length + rx_byte;
 		i->state = FBUS_RX_GetMessage;
-		i->BufferCount = 0;
+		i->buffer_count = 0;
 
 		break;
 
 	case FBUS_RX_GetMessage:
 
-		if (i->BufferCount >= FBUS_MAX_FRAME_LENGTH) {
+		if (i->buffer_count >= FBUS_FRAME_MAX_LENGTH) {
 			dprintf("FBUS: Message buffer overun - resetting\n");
 			i->state = FBUS_RX_Sync;
 			break;
 		}
 
-		i->MessageBuffer[i->BufferCount] = rx_byte;
-		i->BufferCount++;
+		i->message_buffer[i->buffer_count] = rx_byte;
+		i->buffer_count++;
 
 		/* If this is the last byte, it's the checksum. */
 
-		if (i->BufferCount == i->FrameLength + (i->FrameLength % 2) + 2) {
+		if (i->buffer_count == i->frame_length + (i->frame_length % 2) + 2) {
 			/* Is the checksum correct? */
 			if (i->checksum[0] == i->checksum[1]) {
 
 				/* Deal with exceptions to the rules - acks and rlp.. */
 
-				if (i->MessageType == 0x7f) {
+				if (i->message_type == 0x7f) {
 					dprintf("[Received Ack of type %02x, seq: %2x]\n",
-						i->MessageBuffer[0],(unsigned char) i->MessageBuffer[1]);
+						i->message_buffer[0], (unsigned char) i->message_buffer[1]);
 
-				} else if (i->MessageType == 0xf1) {
-					SM_IncomingFunction(statemachine, i->MessageType, i->MessageBuffer, i->FrameLength - 2);
+				} else if (i->message_type == 0xf1) {
+					sm_incoming_function(statemachine, i->message_type,
+							     i->message_buffer, i->frame_length - 2);
 				} else {	/* Normal message type */
 
 					/* Add data to the relevant Message buffer */
 					/* having checked the sequence number */
 
-					m = &flink.messages[i->MessageType];
+					m = &flink.messages[i->message_type];
 
-					frm_num = i->MessageBuffer[i->FrameLength - 2];
-					seq_num = i->MessageBuffer[i->FrameLength - 1];
+					frm_num = i->message_buffer[i->frame_length - 2];
+					seq_num = i->message_buffer[i->frame_length - 1];
 
 
 					/* 0x40 in the sequence number indicates first frame of a message */
 
 					if ((seq_num & 0x40) == 0x40) {
 						/* Fiddle around and malloc some memory */
-						m->MessageLength = 0;
-						m->FramesToGo = frm_num;
-						if (m->Malloced != 0) {
-							free(m->MessageBuffer);
-							m->Malloced = 0;
-							m->MessageBuffer = NULL;
+						m->message_length = 0;
+						m->frames_to_go = frm_num;
+						if (m->malloced != 0) {
+							free(m->message_buffer);
+							m->malloced = 0;
+							m->message_buffer = NULL;
 						}
-						m->Malloced = frm_num * m->MessageLength;
-						m->MessageBuffer = (char *) malloc(m->Malloced);
+						m->malloced = frm_num * m->message_length;
+						m->message_buffer = (char *) malloc(m->malloced);
 
-					} else if (m->FramesToGo != frm_num) {
+					} else if (m->frames_to_go != frm_num) {
 						dprintf("Missed a frame in a multiframe message.\n");
 						/* FIXME - we should make sure we don't ack the rest etc */
 					}
 
-					if (m->Malloced < m->MessageLength + i->FrameLength) {
-						m->Malloced = m->MessageLength + i->FrameLength;
-						m->MessageBuffer = (char *) realloc(m->MessageBuffer, m->Malloced);
+					if (m->malloced < m->message_length + i->frame_length) {
+						m->malloced = m->message_length + i->frame_length;
+						m->message_buffer = (char *) realloc(m->message_buffer, m->malloced);
 					}
 
-					memcpy(m->MessageBuffer + m->MessageLength, i->MessageBuffer,
-					       i->FrameLength - 2);
+					memcpy(m->message_buffer + m->message_length, i->message_buffer,
+					       i->frame_length - 2);
 
-					m->MessageLength += i->FrameLength - 2;
+					m->message_length += i->frame_length - 2;
 
-					m->FramesToGo--;
+					m->frames_to_go--;
 
 					/* Send an ack (for all for now) */
 
-					FBUS_TX_SendAck(i->MessageType, seq_num & 0x0f);
+					fbus_tx_send_ack(i->message_type, seq_num & 0x0f);
 
 					/* Finally dispatch if ready */
 
-					if (m->FramesToGo == 0) {
-						SM_IncomingFunction(statemachine, i->MessageType, m->MessageBuffer, m->MessageLength);
-						free(m->MessageBuffer);
-						m->MessageBuffer = NULL;
-						m->Malloced = 0;
+					if (m->frames_to_go == 0) {
+						sm_incoming_function(statemachine, i->message_type, m->message_buffer, m->message_length);
+						free(m->message_buffer);
+						m->message_buffer = NULL;
+						m->malloced = 0;
 					}
 				}
 			} else {
@@ -377,7 +373,7 @@ static void FBUS_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static gn_error FBUS_Loop(struct timeval *timeout)
+static gn_error fbus_loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -386,7 +382,7 @@ static gn_error FBUS_Loop(struct timeval *timeout)
 	if (res > 0) {
 		res = device_read(buffer, 255);
 		for (count = 0; count < res; count++)
-			FBUS_RX_StateMachine(buffer[count]);
+			fbus_rx_statemachine(buffer[count]);
 	} else
 		return GN_ERR_TIMEOUT;
 
@@ -403,9 +399,9 @@ static gn_error FBUS_Loop(struct timeval *timeout)
 	   (0x1e) and other values according the value specified when called.
 	   Calculates checksum and then sends the lot down the pipe... */
 
-int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 * buffer)
+int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 * buffer)
 {
-	u8 out_buffer[FBUS_MAX_TRANSMIT_LENGTH + 5];
+	u8 out_buffer[FBUS_TRANSMIT_MAX_LENGTH + 5];
 	int count, current = 0;
 	unsigned char checksum;
 
@@ -413,9 +409,9 @@ int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 * buffer)
 
 	/* Now construct the message header. */
 
-	if (IR_MODE(glink))
+	if (glink->connection_type == GN_CT_Infrared)
 		out_buffer[current++] = FBUS_IR_FRAME_ID;	/* Start of the IR frame indicator */
-	else			/* ConnectionType == GCT_Serial */
+	else			/* connection_type == GN_CT_Serial */
 		out_buffer[current++] = FBUS_FRAME_ID;	/* Start of the frame indicator */
 
 	out_buffer[current++] = FBUS_DEVICE_PHONE;	/* Destination */
@@ -468,54 +464,54 @@ int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 * buffer)
 /* Main function to send an fbus message */
 /* Splits up the message into frames if necessary */
 
-static gn_error FBUS_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
+static gn_error fbus_send_message(u16 messagesize, u8 messagetype, unsigned char *message)
 {
-	u8 seqnum, frame_buffer[FBUS_MAX_CONTENT_LENGTH + 2];
+	u8 seqnum, frame_buffer[FBUS_CONTENT_MAX_LENGTH + 2];
 	u8 nom, lml;		/* number of messages, last message len */
 	int i;
 
-	seqnum = 0x40 + flink.RequestSequenceNumber;
-	flink.RequestSequenceNumber =
-	    (flink.RequestSequenceNumber + 1) & 0x07;
+	seqnum = 0x40 + flink.request_sequence_number;
+	flink.request_sequence_number =
+	    (flink.request_sequence_number + 1) & 0x07;
 
-	if (messagesize > FBUS_MAX_CONTENT_LENGTH) {
+	if (messagesize > FBUS_CONTENT_MAX_LENGTH) {
 
-		nom = (messagesize + FBUS_MAX_CONTENT_LENGTH - 1)
-		    / FBUS_MAX_CONTENT_LENGTH;
-		lml = messagesize - ((nom - 1) * FBUS_MAX_CONTENT_LENGTH);
+		nom = (messagesize + FBUS_CONTENT_MAX_LENGTH - 1)
+		    / FBUS_CONTENT_MAX_LENGTH;
+		lml = messagesize - ((nom - 1) * FBUS_CONTENT_MAX_LENGTH);
 
 		for (i = 0; i < nom - 1; i++) {
 
-			memcpy(frame_buffer, message + (i * FBUS_MAX_CONTENT_LENGTH),
-			       FBUS_MAX_CONTENT_LENGTH);
-			frame_buffer[FBUS_MAX_CONTENT_LENGTH] = nom - i;
-			frame_buffer[FBUS_MAX_CONTENT_LENGTH + 1] = seqnum;
+			memcpy(frame_buffer, message + (i * FBUS_CONTENT_MAX_LENGTH),
+			       FBUS_CONTENT_MAX_LENGTH);
+			frame_buffer[FBUS_CONTENT_MAX_LENGTH] = nom - i;
+			frame_buffer[FBUS_CONTENT_MAX_LENGTH + 1] = seqnum;
 
-			FBUS_TX_SendFrame(FBUS_MAX_CONTENT_LENGTH + 2,
+			fbus_tx_send_frame(FBUS_CONTENT_MAX_LENGTH + 2,
 					  messagetype, frame_buffer);
 
-			seqnum = flink.RequestSequenceNumber;
-			flink.RequestSequenceNumber = (flink.RequestSequenceNumber + 1) & 0x07;
+			seqnum = flink.request_sequence_number;
+			flink.request_sequence_number = (flink.request_sequence_number + 1) & 0x07;
 		}
 
-		memcpy(frame_buffer, message + ((nom - 1) * FBUS_MAX_CONTENT_LENGTH), lml);
+		memcpy(frame_buffer, message + ((nom - 1) * FBUS_CONTENT_MAX_LENGTH), lml);
 		frame_buffer[lml] = 0x01;
 		frame_buffer[lml + 1] = seqnum;
-		FBUS_TX_SendFrame(lml + 2, messagetype, frame_buffer);
+		fbus_tx_send_frame(lml + 2, messagetype, frame_buffer);
 
 	} else {
 
 		memcpy(frame_buffer, message, messagesize);
 		frame_buffer[messagesize] = 0x01;
 		frame_buffer[messagesize + 1] = seqnum;
-		FBUS_TX_SendFrame(messagesize + 2, messagetype,
+		fbus_tx_send_frame(messagesize + 2, messagetype,
 				  frame_buffer);
 	}
 	return GN_ERR_NONE;
 }
 
 
-static int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
+static int fbus_tx_send_ack(u8 message_type, u8 message_seq)
 {
 	unsigned char request[2];
 
@@ -524,7 +520,7 @@ static int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
 
 	dprintf("[Sending Ack of type %02x, seq: %x]\n",message_type, message_seq);
 
-	return FBUS_TX_SendFrame(2, 0x7f, request);
+	return fbus_tx_send_frame(2, 0x7f, request);
 }
 
 
@@ -532,7 +528,7 @@ static int FBUS_TX_SendAck(u8 message_type, u8 message_seq)
 /* newlink is actually part of state - but the link code should not anything about state */
 /* state is only passed around to allow for muliple state machines (one day...) */
 
-gn_error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
+gn_error fbus_initialise(gn_link *newlink, struct gn_statemachine *state, int try)
 {
 	unsigned char init_char = 0x55;
 	int count;
@@ -543,49 +539,46 @@ gn_error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
 	statemachine = state;
 
 	/* Fill in the link functions */
-	glink->Loop = &FBUS_Loop;
-	glink->SendMessage = &FBUS_SendMessage;
+	glink->loop = &fbus_loop;
+	glink->send_message = &fbus_send_message;
 
 	/* Check for a valid init length */
-	if (glink->InitLength == 0)
-		glink->InitLength = 250;
+	if (glink->init_length == 0)
+		glink->init_length = 250;
 
 	/* Start up the link */
-	flink.RequestSequenceNumber = 0;
+	flink.request_sequence_number = 0;
 
-	switch (glink->ConnectionType) {
-	case GCT_Infrared:
-#ifndef WIN32
-	case GCT_Tekram:
-#endif
-		if (!FBUS_OpenIR())
+	switch (glink->connection_type) {
+	case GN_CT_Infrared:
+		if (!fbus_ir_open())
 			return GN_ERR_FAILED;
 		break;
-	case GCT_Serial:
+	case GN_CT_Serial:
 		switch (try) {
 		case 0:
 		case 1:
-			err = FBUS_OpenSerial(1 - try);
+			err = fbus_serial_open(1 - try);
 			break;
 		case 2:
-			err = AT2FBUS_OpenSerial();
+			err = at2fbus_serial_open();
 			break;
 		default:
 			return GN_ERR_FAILED;
 		}
 		if (!err) return GN_ERR_FAILED;
 		break;
-	case GCT_DAU9P:
-		if (!FBUS_OpenSerial(0))
+	case GN_CT_DAU9P:
+		if (!fbus_serial_open(0))
 			return GN_ERR_FAILED;
 		break;
-	case GCT_DLR3P:
+	case GN_CT_DLR3P:
 		switch (try) {
 		case 0:
-			err = AT2FBUS_OpenSerial();
+			err = at2fbus_serial_open();
 			break;
 		case 1:
-			err = FBUS_OpenSerial(1);
+			err = fbus_serial_open(1);
 			break;
 		default:
 			return GN_ERR_FAILED;
@@ -600,19 +593,19 @@ gn_error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try)
 	   empirical. */
 	/* I believe that we need/can do this for any phone to get the UART synced */
 
-	for (count = 0; count < glink->InitLength; count++) {
+	for (count = 0; count < glink->init_length; count++) {
 		usleep(100);
 		device_write(&init_char, 1);
 	}
 
 	/* Init variables */
 	flink.i.state = FBUS_RX_Sync;
-	flink.i.BufferCount = 0;
-	for (count = 0; count < FBUS_MAX_MESSAGE_TYPES; count++) {
-		flink.messages[count].Malloced = 0;
-		flink.messages[count].FramesToGo = 0;
-		flink.messages[count].MessageLength = 0;
-		flink.messages[count].MessageBuffer = NULL;
+	flink.i.buffer_count = 0;
+	for (count = 0; count < FBUS_MESSAGE_MAX_TYPES; count++) {
+		flink.messages[count].malloced = 0;
+		flink.messages[count].frames_to_go = 0;
+		flink.messages[count].message_length = 0;
+		flink.messages[count].message_buffer = NULL;
 	}
 
 	return GN_ERR_NONE;

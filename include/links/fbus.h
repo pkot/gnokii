@@ -32,23 +32,25 @@
 
 */
 
-#ifndef __links_fbus_h
-#define __links_fbus_h
+#ifndef _gnokii_links_fbus_h
+#define _gnokii_links_fbus_h
 
 #include <time.h>
-#include "config.h"
-#include "compat.h"
-
 #ifdef WIN32
 #  include <sys/types.h>
 #endif
 
-#include "fbus-common.h"
+#include "config.h"
+#include "compat.h"
 
-#define FBUS_MAX_FRAME_LENGTH 256
-#define FBUS_MAX_MESSAGE_TYPES 256
-#define FBUS_MAX_TRANSMIT_LENGTH 256
-#define FBUS_MAX_CONTENT_LENGTH 120
+#include "fbus-common.h"
+#include "gsm-statemachine.h"
+#include "gsm-data.h"
+
+#define FBUS_FRAME_MAX_LENGTH    256
+#define FBUS_MESSAGE_MAX_TYPES   256
+#define FBUS_TRANSMIT_MAX_LENGTH 256
+#define FBUS_CONTENT_MAX_LENGTH  120
 
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
    phones.  This may have to become a phone dependant parameter... */
@@ -63,41 +65,41 @@
 
 #define FBUS_FRAME_HEADER 0x00, 0x01, 0x00
 
-typedef struct{
+typedef struct {
 	int checksum[2];
-	int BufferCount;
+	int buffer_count;
 	struct timeval time_now;
 	struct timeval time_last;
-	enum FBUS_RX_States state;
-	int MessageSource;
-	int MessageDestination;
-	int MessageType;
-	int FrameLength;
-	u8 MessageBuffer[FBUS_MAX_FRAME_LENGTH];
-} FBUS_IncomingFrame;
+	enum fbus_rx_state state;
+	int message_source;
+	int message_destination;
+	int message_type;
+	int frame_length;
+	u8 message_buffer[FBUS_FRAME_MAX_LENGTH];
+} fbus_incoming_frame;
 
-typedef struct{
-	int MessageLength;
-	unsigned char *MessageBuffer;
-	char FramesToGo;
-	int Malloced;
-} FBUS_IncomingMessage;
+typedef struct {
+	int message_length;
+	unsigned char *message_buffer;
+	char frames_to_go;
+	int malloced;
+} fbus_incoming_message;
 
 typedef struct {
 	u16 message_length;
 	u8 message_type;
 	u8 *buffer;
-} FBUS_OutgoingMessage;
+} fbus_outgoing_message;
 
 
-typedef struct{
-	FBUS_IncomingFrame i;
-	FBUS_IncomingMessage messages[FBUS_MAX_MESSAGE_TYPES];
-	u8 RequestSequenceNumber;
-} FBUS_Link;
+typedef struct {
+	fbus_incoming_frame i;
+	fbus_incoming_message messages[FBUS_MESSAGE_MAX_TYPES];
+	u8 request_sequence_number;
+} fbus_link;
 
-gn_error FBUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state, int try);
+gn_error fbus_initialise(gn_link *newlink, struct gn_statemachine *state, int try);
 
-int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
+int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer);
 
-#endif   /* #ifndef __links_fbus_h */
+#endif /* #ifndef _gnokii_links_fbus_h */

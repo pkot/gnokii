@@ -27,7 +27,7 @@
   This file provides an API for accessing functions via fbus.
   See README for more details on supported mobile phones.
 
-  The various routines are called FBUS_(whatever).
+  The various routines are called fb3110_(whatever).
 
 */
 
@@ -41,21 +41,17 @@
 
 #include "config.h"
 #include "misc.h"
-#include "gsm-common.h"
-#include "gsm-ringtones.h"
-#include "gsm-networks.h"
-#include "gsm-statemachine.h"
-
+#include "gnokii-internal.h"
 #include "device.h"
 
 #include "links/fbus-3110.h"
 
-static bool FB3110_OpenSerial(void);
-static void FB3110_RX_StateMachine(unsigned char rx_byte);
-static gn_error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
-static gn_error FB3110_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
-static void FB3110_TX_SendAck(u8 *message, int length);
-static void FB3110_UpdateSequenceNumber(void);
+static bool fb3110_serial_open(void);
+static void fb3110_rx_state_machine(unsigned char rx_byte);
+static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer);
+static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message);
+static void fb3110_tx_ack_send(u8 *message, int length);
+static void fb3110_sequence_number_update(void);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -63,17 +59,17 @@ static void FB3110_UpdateSequenceNumber(void);
 
 /* Some globals */
 
-static GSM_Link *glink;
-static GSM_Statemachine *statemachine;
-static FB3110_Link flink;		/* FBUS specific stuff, internal to this file */
+static gn_link *glink;
+static struct gn_statemachine *statemachine;
+static fb3110_link flink;	/* FBUS specific stuff, internal to this file */
 
 
 /*--------------------------------------------*/
 
-static bool FB3110_OpenSerial(void)
+static bool fb3110_serial_open(void)
 {
 	/* Open device. */
-	if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
+	if (!device_open(glink->port_device, false, false, false, GN_CT_Serial)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -83,15 +79,16 @@ static bool FB3110_OpenSerial(void)
 }
 
 
-/* RX_State machine for receive handling.  Called once for each character
-   received from the phone. */
-
-static void FB3110_RX_StateMachine(unsigned char rx_byte)
+/* 
+ * RX_State machine for receive handling.
+ * Called once for each character received from the phone.
+ */
+static void fb3110_rx_state_machine(unsigned char rx_byte)
 {
-	FB3110_IncomingFrame *i = &flink.i;
+	fb3110_incoming_frame *i = &flink.i;
 	int count;
 
-	switch (i->State) {
+	switch (i->state) {
 
 	/* Phone is currently off.  Wait for 0x55 before
 	   restarting */
@@ -100,7 +97,7 @@ static void FB3110_RX_StateMachine(unsigned char rx_byte)
 			break;
 
 		/* Seen 0x55, restart at 0x04 */
-		i->State = FB3110_RX_Sync;
+		i->state = FB3110_RX_Sync;
 
 		dprintf("restarting.\n");
 
@@ -112,70 +109,71 @@ static void FB3110_RX_StateMachine(unsigned char rx_byte)
 	   stream. */
 	case FB3110_RX_Sync:
 		if (rx_byte == 0x04 || rx_byte == 0x03) {
-			i->FrameType = rx_byte;
-			i->Checksum = rx_byte;
-			i->State = FB3110_RX_GetLength;
+			i->frame_type = rx_byte;
+			i->checksum = rx_byte;
+			i->state = FB3110_RX_GetLength;
 		}
 		break;
 
 	/* Next byte is the length of the message including
 	   the message type byte but not including the checksum. */
 	case FB3110_RX_GetLength:
-		i->FrameLength = rx_byte;
-		i->BufferCount = 0;
-		i->Checksum ^= rx_byte;
-		i->State = FB3110_RX_GetMessage;
+		i->frame_len = rx_byte;
+		i->buffer_count = 0;
+		i->checksum ^= rx_byte;
+		i->state = FB3110_RX_GetMessage;
 		break;
 
 	/* Get each byte of the message.  We deliberately
 	   get one too many bytes so we get the checksum
 	   here as well. */
 	case FB3110_RX_GetMessage:
-		i->Buffer[i->BufferCount] = rx_byte;
-		i->BufferCount++;
+		i->buffer[i->buffer_count] = rx_byte;
+		i->buffer_count++;
 
-		if (i->BufferCount > FB3110_MAX_FRAME_LENGTH) {
+		if (i->buffer_count > FB3110_FRAME_MAX_LENGTH) {
 			dprintf("FBUS: Message buffer overun - resetting\n");
-			i->State = FB3110_RX_Sync;
+			i->state = FB3110_RX_Sync;
 			break;
 		}
 
 		/* If this is the last byte, it's the checksum. */
-		if (i->BufferCount > i->FrameLength) {
+		if (i->buffer_count > i->frame_len) {
 
 			/* Is the checksum correct? */
-			if (rx_byte == i->Checksum) {
+			if (rx_byte == i->checksum) {
 
-				if (i->FrameType == 0x03) {
+				if (i->frame_type == 0x03) {
 					/* FIXME: modify Buffer[0] to code FAX frame types */
 				}
 
-				dprintf("--> %02x:%02x:", i->FrameType, i->FrameLength);
-				for (count = 0; count < i->BufferCount; count++)
-					dprintf("%02hhx:", i->Buffer[count]);
+				dprintf("--> %02x:%02x:", i->frame_type, i->frame+len);
+				for (count = 0; count < i->buffer_count; count++)
+					dprintf("%02hhx:", i->buffer[count]);
 				dprintf("\n");
 				/* Transfer message to state machine */
-				SM_IncomingFunction(statemachine, i->Buffer[0], i->Buffer, i->FrameLength);
+				sm_incoming_function(statemachine, i->buffer[0], i->buffer, i->frame_len);
 
 				/* Send an ack */
-				FB3110_TX_SendAck(i->Buffer, i->FrameLength);
+				fb3110_tx_ack_send(i->buffer, i->frame_len);
 
 			} else {
 				/* Checksum didn't match so ignore. */
 				dprintf("Bad checksum!\n");
 			}
-			i->State = FB3110_RX_Sync;
+			i->state = FB3110_RX_Sync;
 		}
-		i->Checksum ^= rx_byte;
+		i->checksum ^= rx_byte;
 		break;
 	}
 }
 
 
-/* This is the main loop function which must be called regularly */
-/* timeout can be used to make it 'busy' or not */
-
-static gn_error FB3110_Loop(struct timeval *timeout)
+/* 
+ * This is the main loop function which must be called regularly
+ * timeout can be used to make it 'busy' or not 
+ */
+static gn_error fb3110_loop(struct timeval *timeout)
 {
 	unsigned char buffer[255];
 	int count, res;
@@ -184,7 +182,7 @@ static gn_error FB3110_Loop(struct timeval *timeout)
 	if (res > 0) {
 		res = device_read(buffer, 255);
 		for (count = 0; count < res; count++)
-			FB3110_RX_StateMachine(buffer[count]);
+			fb3110_rx_state_machine(buffer[count]);
 	} else
 		return GN_ERR_TIMEOUT;
 
@@ -197,22 +195,22 @@ static gn_error FB3110_Loop(struct timeval *timeout)
 
 
 
-/* Prepares the message header and sends it, prepends the
-   message start byte (0x01) and other values according
-   the value specified when called.  Calculates checksum
-   and then sends the lot down the pipe... */
-
-static gn_error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 sequence_byte, u8 * buffer)
+/* 
+ * Prepares the message header and sends it, prepends the message start
+ * byte (0x01) and other values according the value specified when called.
+ * Calculates checksum and then sends the lot down the pipe... 
+ */
+static gn_error fb3110_tx_frame_send(u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer)
 {
 
-	u8 out_buffer[FB3110_MAX_TRANSMIT_LENGTH];
+	u8 out_buffer[FB3110_TRANSMIT_MAX_LENGTH];
 	int count, current = 0;
 	unsigned char checksum;
 
 	/* Check message isn't too long, once the necessary
 	   header and trailer bytes are included. */
-	if ((message_length + 5) > FB3110_MAX_TRANSMIT_LENGTH) {
-		fprintf(stderr, _("FB3110_TX_SendFrame - message too long!\n"));
+	if ((message_length + 5) > FB3110_TRANSMIT_MAX_LENGTH) {
+		fprintf(stderr, _("fb3110_tx_frame_send - message too long!\n"));
 		return GN_ERR_INTERNALERROR;
 	}
 
@@ -248,25 +246,26 @@ static gn_error FB3110_TX_SendFrame(u8 message_length, u8 message_type, u8 seque
 }
 
 
-/* Main function to send an fbus message */
-
-static gn_error FB3110_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message)
+/* 
+ * Main function to send an fbus message 
+ */
+static gn_error fb3110_message_send(u16 messagesize, u8 messagetype, unsigned char *message)
 {
 	u8 seqnum;
 
-	FB3110_UpdateSequenceNumber();
-	seqnum = flink.RequestSequenceNumber;
+	fb3110_sequence_number_update();
+	seqnum = flink.request_sequence_number;
 
-	return FB3110_TX_SendFrame(messagesize, messagetype, seqnum, message);
+	return fb3110_tx_frame_send(messagesize, messagetype, seqnum, message);
 }
 
 
-/* Sends the "standard" acknowledge message back to the phone in
-   response to a message it sent automatically or in response to
-   a command sent to it.  The ack. algorithm isn't 100% understood
-   at this time. */
-
-static void FB3110_TX_SendAck(u8 *message, int length)
+/* 
+ * Sends the "standard" acknowledge message back to the phone in response to
+ * a message it sent automatically or in response to a command sent to it.
+ * The ack algorithm isn't 100% understood at this time. 
+ */
+static void fb3110_tx_ack_send(u8 *message, int length)
 {
 	u8 t = message[0];
 
@@ -316,7 +315,7 @@ static void FB3110_TX_SendAck(u8 *message, int length)
 		/* Standard acknowledge seems to be to return an empty message
 		   with the sequence number set to equal the sequence number
 		   sent minus 0x08. */
-		if (FB3110_TX_SendFrame(0, t, (message[1] & 0x1f) - 0x08, NULL) != GN_ERR_NONE)
+		if (fb3110_tx_frame_send(0, t, (message[1] & 0x1f) - 0x08, NULL))
 			dprintf("Failed to acknowledge message type %02x.\n", t);
 		else
 			dprintf("Acknowledged message type %02x.\n", t);
@@ -324,11 +323,13 @@ static void FB3110_TX_SendAck(u8 *message, int length)
 }
 
 
-/* Initialise variables and start the link */
-/* newlink is actually part of state - but the link code should not anything about state */
-/* state is only passed around to allow for muliple state machines (one day...) */
-
-gn_error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
+/* 
+ * Initialise variables and start the link
+ * newlink is actually part of state - but the link code should not
+ * anything about state. State is only passed around to allow for
+ * muliple state machines (one day...)
+ */
+gn_error fb3110_initialise(gn_link *newlink, struct gn_statemachine *state)
 {
 	unsigned char init_char = 0x55;
 	unsigned char count;
@@ -341,44 +342,43 @@ gn_error FB3110_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	statemachine = state;
 
 	/* Fill in the link functions */
-	glink->Loop = &FB3110_Loop;
-	glink->SendMessage = &FB3110_SendMessage;
+	glink->loop = &fb3110_loop;
+	glink->send_message = &fb3110_message_send;
 
 	/* Check for a valid init length */
-	if (glink->InitLength == 0)
-		glink->InitLength = 100;
+	if (glink->init_length == 0)
+		glink->init_length = 100;
 
 	/* Start up the link */
 
-	flink.RequestSequenceNumber = 0x10;
+	flink.request_sequence_number = 0x10;
 
-	if (!FB3110_OpenSerial()) return GN_ERR_FAILED;
+	if (!fb3110_serial_open()) return GN_ERR_FAILED;
 
 	/* Send init string to phone, this is a bunch of 0x55 characters.
 	   Timing is empirical. I believe that we need/can do this for any
 	   phone to get the UART synced */
-	for (count = 0; count < glink->InitLength; count++) {
+	for (count = 0; count < glink->init_length; count++) {
 		usleep(1000);
 		device_write(&init_char, 1);
 	}
 
 	/* Init variables */
-	flink.i.State = FB3110_RX_Sync;
+	flink.i.state = FB3110_RX_Sync;
 
 	return GN_ERR_NONE;
 }
 
 
-/* Any command we originate must have a unique SequenceNumber.
-   Observation to date suggests that these values startx at 0x10
-   and cycle up to 0x17 before repeating again.  Perhaps more
-   accurately, the numbers cycle 0,1,2,3..7 with bit 4 of the byte
-   premanently set. */
-
-static void FB3110_UpdateSequenceNumber(void)
+/* Any command we originate must have a unique SequenceNumber. Observation to
+ * date suggests that these values startx at 0x10 and cycle up to 0x17
+ * before repeating again. Perhaps more accurately, the numbers cycle
+ * 0,1,2,3..7 with bit 4 of the byte premanently set. 
+ */
+static void fb3110_sequence_number_update(void)
 {
-	flink.RequestSequenceNumber++;
+	flink.request_sequence_number++;
 
-	if (flink.RequestSequenceNumber > 0x17 || flink.RequestSequenceNumber < 0x10)
-		flink.RequestSequenceNumber = 0x10;
+	if (flink.request_sequence_number > 0x17 || flink.request_sequence_number < 0x10)
+		flink.request_sequence_number = 0x10;
 }

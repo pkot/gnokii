@@ -28,29 +28,31 @@
   This file provides an API for accessing functions via fbus over irda.
   See README for more details on supported mobile phones.
 
-  The various routines are called PHONET_(whatever).
+  The various routines are called phonet_(whatever).
 
 */
 
-/* System header files */
+#include "config.h"
 
+#ifdef HAVE_IRDA
+
+/* System header files */
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
 
 /* Various header file */
-
-#include "config.h"
 #include "misc.h"
 #include "gsm-common.h"
 #include "gsm-ringtones.h"
 #include "gsm-networks.h"
 #include "device.h"
-
 #include "links/fbus-phonet.h"
 
-static void PHONET_RX_StateMachine(unsigned char rx_byte);
-static gn_error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message);
+#include "gnokii-internal.h"
+
+static void phonet_rx_statemachine(unsigned char rx_byte);
+static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message);
 
 /* FIXME - pass device_* the link stuff?? */
 /* FIXME - win32 stuff! */
@@ -58,19 +60,19 @@ static gn_error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 
 /* Some globals */
 
-static GSM_Link *glink;
-static GSM_Statemachine *statemachine;
-static PHONET_IncomingMessage imessage;
+static gn_link *glink;
+static struct gn_statemachine *statemachine;
+static phonet_incoming_message imessage;
 
 
 /*--------------------------------------------*/
 
-static bool PHONET_Open()
+static bool phonet_open()
 {
 	int result;
 
 	/* Open device. */
-	result = device_open(glink->PortDevice, false, false, false, GCT_Irda);
+	result = device_open(glink->port_device, false, false, false, GN_CT_Irda);
 
 	if (!result) {
 		perror(_("Couldn't open PHONET device"));
@@ -83,9 +85,9 @@ static bool PHONET_Open()
 /* RX_State machine for receive handling.  Called once for each character
    received from the phone. */
 
-static void PHONET_RX_StateMachine(unsigned char rx_byte)
+static void phonet_rx_statemachine(unsigned char rx_byte)
 {
-	PHONET_IncomingMessage *i = &imessage;
+	phonet_incoming_message *i = &imessage;
 
 	switch (i->state) {
 
@@ -97,7 +99,7 @@ static void PHONET_RX_StateMachine(unsigned char rx_byte)
 
 	case FBUS_RX_GetDestination:
 
-		i->MessageDestination = rx_byte;
+		i->message_destination = rx_byte;
 		i->state = FBUS_RX_GetSource;
 
 		if (rx_byte != 0x0c) {
@@ -108,7 +110,7 @@ static void PHONET_RX_StateMachine(unsigned char rx_byte)
 
 	case FBUS_RX_GetSource:
 
-		i->MessageSource = rx_byte;
+		i->message_source = rx_byte;
 		i->state = FBUS_RX_GetType;
 
 		/* Source should be 0x00 */
@@ -122,32 +124,32 @@ static void PHONET_RX_StateMachine(unsigned char rx_byte)
 
 	case FBUS_RX_GetType:
 
-		i->MessageType = rx_byte;
+		i->message_type = rx_byte;
 		i->state = FBUS_RX_GetLength1;
 
 		break;
 
 	case FBUS_RX_GetLength1:
 
-		i->MessageLength = rx_byte << 8;
+		i->message_length = rx_byte << 8;
 		i->state = FBUS_RX_GetLength2;
 
 		break;
 
 	case FBUS_RX_GetLength2:
 
-		i->MessageLength = i->MessageLength + rx_byte;
+		i->message_length = i->message_length + rx_byte;
 		i->state = FBUS_RX_GetMessage;
-		i->BufferCount=0;
+		i->buffer_count=0;
 
 		break;
 
 	case FBUS_RX_GetMessage:
 
-		i->MessageBuffer[i->BufferCount] = rx_byte;
-		i->BufferCount++;
+		i->message_buffer[i->buffer_count] = rx_byte;
+		i->buffer_count++;
 
-		if (i->BufferCount > PHONET_MAX_FRAME_LENGTH) {
+		if (i->buffer_count > PHONET_FRAME_MAX_LENGTH) {
 			dprintf("PHONET: Message buffer overun - resetting\n");
 			i->state = FBUS_RX_Sync;
 			break;
@@ -155,8 +157,8 @@ static void PHONET_RX_StateMachine(unsigned char rx_byte)
 
 		/* Is that it? */
 
-		if (i->BufferCount == i->MessageLength) {
-			SM_IncomingFunction(statemachine, i->MessageType, i->MessageBuffer, i->MessageLength);
+		if (i->buffer_count == i->message_length) {
+			sm_incoming_function(statemachine, i->message_type, i->message_buffer, i->message_length);
 			i->state = FBUS_RX_Sync;
 		}
 		break;
@@ -170,7 +172,7 @@ static void PHONET_RX_StateMachine(unsigned char rx_byte)
 /* This is the main loop function which must be called regularly */
 /* timeout can be used to make it 'busy' or not */
 
-static gn_error PHONET_Loop(struct timeval *timeout)
+static gn_error phonet_loop(struct timeval *timeout)
 {
 	gn_error	error = GN_ERR_INTERNALERROR;
 	unsigned char	buffer[255];
@@ -181,7 +183,7 @@ static gn_error PHONET_Loop(struct timeval *timeout)
 	if (res > 0) {
 		res = device_read(buffer, 255);
 		for (count = 0; count < res; count++) {
-			PHONET_RX_StateMachine(buffer[count]);
+			phonet_rx_statemachine(buffer[count]);
 		}
 		if (res > 0) {
 			error = GN_ERR_NONE;	/* This traps errors from device_read */
@@ -195,9 +197,9 @@ static gn_error PHONET_Loop(struct timeval *timeout)
 
 /* Main function to send an fbus message */
 
-static gn_error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned char *message) {
+static gn_error phonet_send_message(u16 messagesize, u8 messagetype, unsigned char *message) {
 
-	u8 out_buffer[PHONET_MAX_TRANSMIT_LENGTH + 5];
+	u8 out_buffer[PHONET_TRANSMIT_MAX_LENGTH + 5];
 	int current = 0;
 	int total, sent;
 
@@ -240,7 +242,7 @@ static gn_error PHONET_SendMessage(u16 messagesize, u8 messagetype, unsigned cha
 
 /* Initialise variables and start the link */
 
-gn_error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
+gn_error phonet_initialise(gn_link *newlink, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_FAILED;
 
@@ -249,18 +251,27 @@ gn_error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state)
 	statemachine = state;
 
 	/* Fill in the link functions */
-	glink->Loop = &PHONET_Loop;
-	glink->SendMessage = &PHONET_SendMessage;
+	glink->loop = &phonet_loop;
+	glink->send_message = &phonet_send_message;
 
-	if ((glink->ConnectionType == GCT_Infrared) || (glink->ConnectionType == GCT_Irda)) {
-		if (PHONET_Open() == true) {
+	if ((glink->connection_type == GN_CT_Infrared) || (glink->connection_type == GN_CT_Irda)) {
+		if (phonet_open() == true) {
 			error = GN_ERR_NONE;
 
 			/* Init variables */
 			imessage.state = FBUS_RX_Sync;
-			imessage.BufferCount = 0;
+			imessage.buffer_count = 0;
 		}
 	}
 
 	return error;
 }
+
+#else /* HAVE_IRDA */
+
+gn_error phonet_initialise(gn_link *newlink, struct gn_statemachine *state)
+{
+	return GN_ERR_NOTSUPPORTED;
+}
+
+#endif /* HAVE_IRDA */

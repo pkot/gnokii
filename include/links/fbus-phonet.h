@@ -30,29 +30,28 @@
 
 */
 
-#ifndef __links_fbus_phonet_h
-#define __links_fbus_phonet_h
+#ifndef _gnokii_links_fbus_phonet_h
+#define _gnokii_links_fbus_phonet_h
 
 #include "fbus-common.h"
 
-#define PHONET_MAX_FRAME_LENGTH    1010
-#define PHONET_MAX_TRANSMIT_LENGTH 1010
-#define PHONET_MAX_CONTENT_LENGTH  1000
+#define PHONET_FRAME_MAX_LENGTH    1010
+#define PHONET_TRANSMIT_MAX_LENGTH 1010
+#define PHONET_CONTENT_MAX_LENGTH  1000
 
 /* This byte is at the beginning of all GSM Frames sent over PhoNet. */
 #define FBUS_PHONET_FRAME_ID 0x14
 
-gn_error PHONET_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
+gn_error phonet_initialise(gn_link *newlink, struct gn_statemachine *state);
 
 typedef struct {
-	int BufferCount;
-	enum FBUS_RX_States state;
-	int MessageSource;
-	int MessageDestination;
-	int MessageType;
-	int MessageLength;
-	char MessageBuffer[PHONET_MAX_FRAME_LENGTH];
-} PHONET_IncomingMessage;
+	int buffer_count;
+	enum fbus_rx_state state;
+	int message_source;
+	int message_destination;
+	int message_type;
+	int message_length;
+	char message_buffer[PHONET_FRAME_MAX_LENGTH];
+} phonet_incoming_message;
 
-
-#endif   /* #ifndef __links_fbus_phonet_h */
+#endif   /* #ifndef _gnokii_links_fbus_phonet_h */

@@ -33,12 +33,14 @@
 
 */
 
-#ifndef __links_m2bus_h
-#define __links_m2bus_h
+#ifndef _gnokii_links_m2bus_h
+#define _gnokii_links_m2bus_h
 
 #include <time.h>
 #include "config.h"
 #include "compat.h"
+
+#include "gsm-data.h"
 
 #ifdef WIN32
 #  include <sys/types.h>
@@ -58,7 +60,7 @@
 #define M2BUS_DEVICE_PC 0x1d
 
 
-enum M2BUS_RX_States {
+enum m2bus_rx_state {
     	M2BUS_RX_Sync,
 	M2BUS_RX_Discarding,
 	M2BUS_RX_GetDestination,
@@ -69,26 +71,26 @@ enum M2BUS_RX_States {
 	M2BUS_RX_GetMessage
 };
 
-typedef struct{
-	enum M2BUS_RX_States state;
-	int BufferCount;
+typedef struct {
+	enum m2bus_rx_state state;
+	int buffer_count;
 	struct timeval time_now;
 	struct timeval time_last;
-	int MessageSource;
-	int MessageDestination;
-	int MessageType;
-	int MessageLength;
-	unsigned char Checksum;
-	unsigned char *MessageBuffer;
-} M2BUS_IncomingMessage;
+	int message_source;
+	int message_destination;
+	int message_type;
+	int message_length;
+	unsigned char checksum;
+	unsigned char *message_buffer;
+} m2bus_incoming_message;
 
 
 typedef struct{
-	M2BUS_IncomingMessage i;
-	u8 RequestSequenceNumber;
-} M2BUS_Link;
+	m2bus_incoming_message i;
+	u8 request_sequence_number;
+} m2bus_link;
 
 
-gn_error M2BUS_Initialise(GSM_Link *newlink, GSM_Statemachine *state);
+gn_error m2bus_initialise(gn_link *newlink, struct gn_statemachine *state);
 
-#endif   /* #ifndef __links_m2bus_h */
+#endif   /* #ifndef _gnokii_links_m2bus_h */

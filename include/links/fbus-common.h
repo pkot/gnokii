@@ -29,8 +29,8 @@
 
 */
 
-#ifndef __links_fbus_common_h
-#define __links_fbus_common_h
+#ifndef _gnokii_links_fbus_common_h
+#define _gnokii_links_fbus_common_h
 
 #include "gsm-statemachine.h"
 
@@ -41,8 +41,7 @@
 #define FBUS_DEVICE_PC 0x0c
 
 /* States for receive code. */
-
-enum FBUS_RX_States {
+enum fbus_rx_state {
 	FBUS_RX_Sync,
 	FBUS_RX_Discarding,
 	FBUS_RX_GetDestination,
@@ -53,4 +52,4 @@ enum FBUS_RX_States {
 	FBUS_RX_GetMessage
 };
 
-#endif /* __links_fbus_common_h */
+#endif /* _gnokii_links_fbus_common_h */
