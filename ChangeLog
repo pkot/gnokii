@@ -1,5 +1,10 @@
 0.4.0pre21 (not released yet)
 ==========
+ * code fixes:
+    o added filelocking for gnokiid xgnokii smsd and fixed for gnokii
+    o added Terminate to GOP functions
+    o moved atexit from unixserial to application level
+                                                    (Manfred Jonsson)
  * xgnokii fixes:
     o lockup during the phonebook reading fixed      (BORBELY Zoltan)
  * gnokii updates:
