@@ -292,7 +292,7 @@ if test $ac_cv_have_sockaddr_rfcomm = yes; then
 	AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH,[],[Compile on FreeBSD])
 	USE_BLUETOOTH="yes"
 	AC_CHECK_LIB(bluetooth, bt_aton,
-		    [LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the `bt_aton' function.])])
+		    [LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the \`bt_aton' function.])])
 fi
 
 
