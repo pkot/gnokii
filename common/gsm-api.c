@@ -97,18 +97,22 @@ API GSM_Information *gn_gsm_info;
    user must have write permission to the device. */
 static GSM_Error register_phone(GSM_Phone *phone, char *model, char *setupmodel, GSM_Statemachine *sm)
 {
-	GSM_Data data;
+	GSM_Data *data = NULL;
 	GSM_Data *p_data;
+	GSM_Error error = GE_UNKNOWNMODEL;
+
 	if (setupmodel) {
-		GSM_DataClear(&data);
-		data.Model = setupmodel;
-		p_data = &data;
+		data = calloc(1, sizeof(GSM_Data));
+		data->Model = setupmodel;
+		p_data = data;
 	} else {
 		p_data = NULL;
 	}
 	if (strstr(phone->Info.Models, model) != NULL)
-		return phone->Functions(GOP_Init, p_data, sm);
-	return GE_UNKNOWNMODEL;
+		error = phone->Functions(GOP_Init, p_data, sm);
+
+	if (data) free(data);
+	return error;
 }
 
 #define REGISTER_PHONE(x, y) { \

@@ -82,6 +82,9 @@
       all ;-), just fixed "number of format specifications in
       'msgid' and 'msgstr' does not match" error          (Pawel Kot)
  * ppm2nokia script added                              (Vidar Madsen)
+ * FreeBSD compatibility fixes: FBSD does not like local variables
+   with the type of large size; we convert these variables to the
+   pointers and alloc them dynamically.     (Jan Derfinak, Pawel Kot)
 
 0.4.3
 =====
