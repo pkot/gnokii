@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2002 Markus Plail
-  Copyright (C) 2002 Pawe³ Kot
+  Copyright (C) 2002-2004 Pawe³ Kot
 
   This file provides functions specific to the 6510 series.
   See README for more details on supported mobile phones.
@@ -463,13 +463,16 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 		if (state->driver.functions(GN_OP_GetModel, &data, state) == GN_ERR_NONE)
 			connected = true;
 
-		/* Refuse to work on 6100 */
-		if (!strncmp(data.model, "NPL-2", 5)) {
+		/* Refuse to work on 6100 only on Linux with IrDA connection */
+#ifdef __linux__
+		if (!strncmp(data.model, "NPL-2", 5) && (state->config.connection_type == GN_CT_Irda || state->config.connection_type == GN_CT_Infrared)) {
 			fprintf(stderr, _("Sorry, this function is known to break your phone (Nokia 6100). Refusing to\n"
 					  "do it. You may try to use AT driver. If you are brave enough to test the\n"
-					  "driver anyway, please contact developers at gnokii-users@nongnu.org\n"));
+					  "driver anyway, please contact developers at gnokii-users@nongnu.org.\n"
+					  "See also http://thread.gmane.org/gmane.linux.drivers.gnokii/3195"));
 			return GN_ERR_NOTIMPLEMENTED;
 		}
+#endif
 
 		/* Change the defaults for Nokia 8310 */
 		if (!strncmp(data.model, "NHM-7", 5)) {
