@@ -20,6 +20,8 @@
 #define         __fbus_6110_ringtones_h
 
 #include <stdio.h>
+#include <string.h>
+
 #include "misc.h"
 #include "gsm-common.h"
 #include "fbus-6110.h"

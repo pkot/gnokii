@@ -46,7 +46,7 @@ BOOL SetupConnection();
 //---------------------------------------------------------------------------
 
 OVERLAPPED osWrite, osRead;
-HANDLE hPhone, hThread;
+HANDLE hPhone, hThread, hKAThread;
 BOOL   isConnected;
 DWORD  ThreadID, KAThreadID;
 
@@ -103,11 +103,13 @@ BOOL OpenConnection(char *szPort, sigcallback fn, keepalive ka)
 
 	// Create a secondary thread to issue keepAlive packets
 
-	if (NULL == CreateThread((LPSECURITY_ATTRIBUTES) NULL,
-				  0,
-				  (LPTHREAD_START_ROUTINE) KeepAliveProc,
-				  (LPVOID) ka,
-				  0, &KAThreadID)) {
+	hKAThread = CreateThread((LPSECURITY_ATTRIBUTES) NULL,
+				0,
+				(LPTHREAD_START_ROUTINE) KeepAliveProc,
+				(LPVOID) ka,
+				0, &KAThreadID );
+	if (!hKAThread)
+	{
 	    isConnected = FALSE;
 	    CloseHandle(hPhone);
 	    return FALSE;
@@ -116,12 +118,13 @@ BOOL OpenConnection(char *szPort, sigcallback fn, keepalive ka)
 	// Create a secondary thread
 	// to watch for an event.
 
-	if (NULL == (hCommWatchThread =
-		     CreateThread((LPSECURITY_ATTRIBUTES) NULL,
+	hCommWatchThread = CreateThread((LPSECURITY_ATTRIBUTES) NULL,
 				  0,
 				  (LPTHREAD_START_ROUTINE) CommWatchProc,
 				  (LPVOID) fn,
-				  0, &dwThreadID))) {
+				  0, &dwThreadID);
+	if (!hCommWatchThread)
+	{
 	    isConnected = FALSE;
 	    CloseHandle(hPhone);
 	    fRetVal = FALSE;
@@ -208,8 +211,11 @@ BOOL CloseConnection()
 
     // block until keepalive thread terminates (should wake it really)
 
+    WaitForSingleObject( hKAThread, INFINITE );
+#ifdef _NEVER_SAY_NEVER_AGAIN_
     while (KAThreadID != 0)
-	;
+		Sleep(250);
+#endif
 
     // disable event notification and wait for thread
     // to halt
@@ -218,8 +224,11 @@ BOOL CloseConnection()
 
     // block until thread has been halted
 
+    WaitForSingleObject( hThread, INFINITE );
+#ifdef _NEVER_SAY_NEVER_AGAIN_
     while(ThreadID != 0)
-	;
+		Sleep(250);
+#endif
 
     // drop DTR
 

@@ -1,13 +1,13 @@
 #
 # Makefile for the GNOKII tool suite.
 #
-# Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+# Copyright (C) 1999,2000 Hugh Blemings & Pavel Janík ml.
 
 #
 # Version number of the package.
 #
 
-VERSION = 0.3.2_pre1
+VERSION = 0.3.2_pre2
 
 #
 # Compiler to use.
