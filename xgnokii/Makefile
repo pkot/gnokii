@@ -64,27 +64,27 @@ install: all
 	  $(FIND) . -type d \! -path "*CVS*" \
 	       -exec $(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help/{} \; ; \
 	  $(FIND) . -type f \! -path "*CVS*" \
-	       -exec $(INSTALL) -m 0444 {} $(DESTDIR)$(xgnokii_libdir)/help/{} \; \
+	       -exec $(INSTALL_DATA) -m 0444 {} $(DESTDIR)$(xgnokii_libdir)/help/{} \; \
 	)
-	$(INSTALL) -m 0444 ../Docs/CREDITS $(DESTDIR)$(xgnokii_libdir)/help/en_US
-	$(INSTALL) -m 0444 ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
+	$(INSTALL_DATA) -m 0444 ../Docs/CREDITS $(DESTDIR)$(xgnokii_libdir)/help/en_US
+	$(INSTALL_DATA) -m 0444 ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	$(INSTALL) -m 0444 ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
+	$(INSTALL_DATA) -m 0444 ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
 	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
 	 rm -f C ; ln -sf en_US C; \
 	 rm -f POSIX ; ln -sf en_US POSIX)
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/5110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_6210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_3310.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_5110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_3210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_6250.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_7110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/5110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_6210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_3310.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_5110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_3210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_6250.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_7110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
 
 install-strip: all
 	$(INSTALL) -d $(DESTDIR)$(xbindir)
@@ -94,27 +94,27 @@ install-strip: all
 	  $(FIND) . -type d \! -path "*CVS*" \
 	       -exec $(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help/{} \; ; \
 	  $(FIND) . -type f \! -path "*CVS*" \
-	       -exec $(INSTALL) -m 0444 {} $(DESTDIR)$(xgnokii_libdir)/help/{} \; \
+	       -exec $(INSTALL_DATA) -m 0444 {} $(DESTDIR)$(xgnokii_libdir)/help/{} \; \
 	)
-	$(INSTALL) -m 0444 ../Docs/CREDITS $(DESTDIR)$(xgnokii_libdir)/help/en_US
-	$(INSTALL) -m 0444 ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
+	$(INSTALL_DATA) -m 0444 ../Docs/CREDITS $(DESTDIR)$(xgnokii_libdir)/help/en_US
+	$(INSTALL_DATA) -m 0444 ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	$(INSTALL) -m 0444 ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
+	$(INSTALL_DATA) -m 0444 ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
 	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
 	 rm -f C ; ln -sf en_US C; \
 	 rm -f POSIX; ln -sf en_US POSIX)
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/5110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_6210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_3310.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_5110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_3210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_6250.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
-	$(INSTALL) -m 0444 xpm/Preview_7110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/5110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_6110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_6150.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_6210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_3310.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_5110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_3210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_6250.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL_DATA) -m 0444 xpm/Preview_7110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
 	@echo "done"
 
 install-suid: all
