@@ -1612,7 +1612,7 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 					j = strlen(entry->SubEntries[i].data.Number);
 					EncodeUnicode((string + 5), entry->SubEntries[i].data.Number, j);
 					string[i * 2 + 1] = 0;
-					string[4] = j + 2;
+					string[4] = j * 2;
 					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
 				} 
 		req[17] = block - 1;
