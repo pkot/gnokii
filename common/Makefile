@@ -77,8 +77,8 @@ distclean:
 	$(RM) vcal.c
 
 install:
-	$(INSTALL) -d $(DESTDIR)/$(libdir)
-	$(INSTALL) libgnokii.so $(DESTDIR)/$(libdir)
+	$(INSTALL) -d $(DESTDIR)$(libdir)
+	$(INSTALL) libgnokii.so $(DESTDIR)$(libdir)
 	@echo
 
 install-strip: install

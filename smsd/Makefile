@@ -62,10 +62,10 @@ clean:
 	$(RM) $(OBJS) *~ depend smsd *.so core*
 
 install: all
-	$(INSTALL) -d $(DESTDIR)/$(bindir)
-	$(INSTALL) -m 755 -s smsd $(DESTDIR)/$(bindir)
-	$(INSTALL) -d $(DESTDIR)/${prefix}/share/smsd
-	$(INSTALL) lib*.so $(DESTDIR)/${prefix}/share/smsd
+	$(INSTALL) -d $(DESTDIR)$(bindir)
+	$(INSTALL) -m 755 -s smsd $(DESTDIR)$(bindir)
+	$(INSTALL) -d $(DESTDIR)${prefix}/share/smsd
+	$(INSTALL) lib*.so $(DESTDIR)${prefix}/share/smsd
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

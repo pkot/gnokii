@@ -87,6 +87,7 @@
       'msgid' and 'msgstr' does not match" error          (Pawel Kot)
     o build irda support only where the irda support is working
       (only Linux systems?)                               (Pawel Kot)
+    o avoid using // in the install paths                 (Pawel Kot)
  * ppm2nokia script added                              (Vidar Madsen)
  * FreeBSD compatibility fixes: FBSD does not like local variables
    with the type of large size; we convert these variables to the

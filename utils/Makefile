@@ -19,21 +19,21 @@ clean:
 	$(RM) $(OBJS) *~ depend mgnokiidev *.exe core *.bak
 
 install-generic:
-	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(INSTALL) todologo $(DESTDIR)/$(bindir)
-	$(INSTALL) ppm2nokia $(DESTDIR)/$(bindir)
+	$(INSTALL) -d $(DESTDIR)$(sbindir)
+	$(INSTALL) todologo $(DESTDIR)$(bindir)
+	$(INSTALL) ppm2nokia $(DESTDIR)$(bindir)
 
 install: install-generic
-	$(INSTALL) mgnokiidev $(DESTDIR)/$(sbindir)
+	$(INSTALL) mgnokiidev $(DESTDIR)$(sbindir)
 
 install-strip: install-generic
-	$(INSTALL) -s mgnokiidev $(DESTDIR)/$(sbindir)
+	$(INSTALL) -s mgnokiidev $(DESTDIR)$(sbindir)
 
 install-suid: install-generic
-	$(INSTALL) -o root -g gnokii -m 4750 mgnokiidev $(DESTDIR)/$(sbindir)
+	$(INSTALL) -o root -g gnokii -m 4750 mgnokiidev $(DESTDIR)$(sbindir)
 
 install-ss: install-generic
-	$(INSTALL) -o root -g gnokii -m 4750 -s mgnokiidev $(DESTDIR)/$(sbindir)
+	$(INSTALL) -o root -g gnokii -m 4750 -s mgnokiidev $(DESTDIR)$(sbindir)
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend
