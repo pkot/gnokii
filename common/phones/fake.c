@@ -130,6 +130,7 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, char* cmd)
 
 static GSM_Error Pfake_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
+	printf("Doing operation #%d\n", op);
 	switch (op) {
 	case GOP_Init:
 		return Pfake_Initialise(state);
