@@ -53,6 +53,8 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_Pointer) {
 			if (data->phonebook_entry)
 				subentry = &data->phonebook_entry->subentries[subblock_count];
+			else
+				dprintf("ERROR: no subentry allocated\n");
 		}
  
 
@@ -103,6 +105,10 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 		case GN_PHONEBOOK_ENTRY_URL:
 		case GN_PHONEBOOK_ENTRY_Postal:
 		case GN_PHONEBOOK_ENTRY_Note:
+			if (!subentry) {
+				dprintf("ERROR!!!");
+				break;
+			}
 			subentry->entry_type  = blockstart[0];
 			subentry->number_type = 0;
 			subentry->id          = blockstart[4];
@@ -113,6 +119,10 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			data->phonebook_entry->subentries_count++;
 			break;
 		case GN_PHONEBOOK_ENTRY_Number:
+			if (!subentry) {
+				dprintf("ERROR!!!");
+				break;
+			}
 			subentry->entry_type  = blockstart[0];
 			subentry->number_type = blockstart[5];
 			subentry->id          = blockstart[4];
@@ -134,6 +144,10 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			}
 			break;
 		case GN_PHONEBOOK_ENTRY_Date:
+			if (!subentry) {
+				dprintf("ERROR!!!");
+				break;
+			}
 			subentry->entry_type       = blockstart[0];
 			subentry->number_type      = blockstart[5];
 			subentry->id		   = blockstart[4];

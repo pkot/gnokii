@@ -16,6 +16,8 @@
     o uninitalised stack variable in IdentifyPhone (BORBELY Zoltan)
  * libgnokii updates
     o fix memory leaks reported by valgrind             (Pawel Kot)
+    o try to avoid segfault with large phonebook reading
+                                                        (Pawel Kot)
 
 0.5.8
 =====
