@@ -2313,6 +2313,9 @@ static bool LocaleHelpExists(gchar *help_locale)
 	gchar *file;
 	struct stat buf;
 
+	if (!help_locale)
+		return false;
+
 	file = g_strdup_printf("/%s/help/%s", xgnokiiConfig.xgnokiidir, help_locale);
 	if (stat(file, &buf) == 0)
 		retval = true;
@@ -2363,8 +2366,9 @@ static void ReadConfig(void)
 	if (!LocaleHelpExists(xgnokiiConfig.help_locale)) {
 		char *pos = strchr(xgnokiiConfig.locale, '.');
 		g_free(xgnokiiConfig.help_locale);
-		xgnokiiConfig.help_locale = g_strndup(xgnokiiConfig.locale,
-						pos - xgnokiiConfig.locale);
+		if (pos)
+			xgnokiiConfig.help_locale = g_strndup(xgnokiiConfig.locale,
+							      pos - xgnokiiConfig.locale);
 		if (!LocaleHelpExists(xgnokiiConfig.help_locale)) {
 			g_free(xgnokiiConfig.help_locale);
 			xgnokiiConfig.help_locale = g_strdup("en_US");
