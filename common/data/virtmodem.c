@@ -60,11 +60,8 @@
 
 #include "misc.h"
 #include "gnokii.h"
-#include "gnokii/common.h"
 #include "data/at-emulator.h"
 #include "data/datapump.h"
-#include "gnokii/virtmodem.h"
-#include "gnokii/rlp-common.h"
 #include "device.h"
 
 /* Defines */

@@ -44,10 +44,7 @@
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
-#include "gnokii/common.h"
-#include "gnokii/ringtones.h"
-#include "gnokii/networks.h"
-#include "gnokii/statemachine.h"
+#include "gnokii.h"
 #include "device.h"
 #include "links/m2bus.h"
 

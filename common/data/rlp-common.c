@@ -37,9 +37,10 @@
 #include <ctype.h>
 #include <stdlib.h>
 
-#include "gnokii/rlp-common.h"
+#include "config.h"
+#include "compat.h"
+#include "gnokii.h"
 #include "data/rlp-crc24.h"
-#include "gnokii/common.h" /* For GSM error and RLP send function. */
 #include "misc.h" /* For u8, u32 etc. */
 
 #ifdef WIN32

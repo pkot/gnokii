@@ -34,7 +34,6 @@
 
 #include "misc.h"
 #include "gnokii.h"
-#include "gnokii/error.h"
 
 #define USECOMM      /* yes, we need the COMM API */
 

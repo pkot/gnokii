@@ -42,15 +42,10 @@
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
-#include "gnokii/statemachine.h"
-#include "gnokii/common.h"
-#include "gnokii/ringtones.h"
-#include "gnokii/networks.h"
+#include "gnokii.h"
 #include "device.h"
 #include "links/fbus-phonet.h"
-
 #include "gnokii-internal.h"
-#include "gnokii.h"
 
 #ifdef HAVE_IRDA
 

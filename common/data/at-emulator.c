@@ -48,12 +48,8 @@
 
 #include "config.h"
 #include "misc.h"
-#include "gnokii/data.h"
 #include "gnokii.h"
-#include "gnokii/sms.h"
-#include "gnokii/call.h"
 #include "data/at-emulator.h"
-#include "gnokii/virtmodem.h"
 #include "data/datapump.h"
 
 #define MAX_LINE_LENGTH 256
