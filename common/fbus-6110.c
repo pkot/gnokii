@@ -2568,8 +2568,12 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 
     case 0x02:
       /* This may mean sequence number of 'just made' call - CK */
+#ifdef DEBUG
+      fprintf(stdout, _("Message: Call message, type 0x02:"));
+      fprintf(stdout, _("   Exact meaning not known yet, sorry :-(\n"));
+#endif /* DEBUG */
 
-      /* FIXME-Chris: do we really to fall through to 0x03? */
+      break;
 
     case 0x03:
     
@@ -4640,12 +4644,33 @@ void FB61_RX_StateMachine(char rx_byte) {
     MessageDestination=rx_byte;
     RX_State = FB61_RX_GetSource;
 
+    /* When there is a checksum error and things get out of sync we have to manage to resync */
+    /* If doing a data call at the time, finding a 0x1e etc is really quite likely in the data stream */
+    /* Then all sorts of horrible things happen because the packet length etc is wrong... */
+    /* Therefore we test here for a destination of 0x0c and return to the top if it is not */
+    
+    if (rx_byte!=0x0c) {
+      RX_State=FB61_RX_Sync;
+#ifdef DEBUG
+      fprintf(stdout,"The fbus stream is out of sync - expected 0x0c, got %2x\n",rx_byte);
+#endif
+    }
+
     break;
 
   case FB61_RX_GetSource:
 
     MessageSource=rx_byte;
     RX_State = FB61_RX_GetType;
+
+    /* Source should be 0x00 */
+    
+    if (rx_byte!=0x00)  {
+      RX_State=FB61_RX_Sync;
+#ifdef DEBUG
+      fprintf(stdout,"The fbus stream is out of sync - expected 0x00, got %2x\n",rx_byte);
+#endif
+    }
 
     break;
 
@@ -4688,6 +4713,15 @@ void FB61_RX_StateMachine(char rx_byte) {
 
     MessageBuffer[BufferCount] = rx_byte;
     BufferCount ++;
+    
+    if (BufferCount>FB61_MAX_RECEIVE_LENGTH*6) {
+#ifdef DEBUG
+      fprintf(stdout, "FB61: Message buffer overun - resetting\n");
+#endif
+      RX_Multiple=false;
+      RX_State = FB61_RX_Sync;
+      break;
+    }
 
     /* If this is the last byte, it's the checksum. */
 
@@ -4711,11 +4745,15 @@ void FB61_RX_StateMachine(char rx_byte) {
         FB61_RX_DispatchMessage();
 
       }
-
+      else {
 #ifdef DEBUG
-      else
 	fprintf(stdout, _("Bad checksum!\n"));
 #endif /* DEBUG */
+
+	/* Just to be sure! */
+
+	RX_Multiple=false;
+      }
 
       RX_State = FB61_RX_Sync;
     }
