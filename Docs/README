@@ -1,6 +1,6 @@
                               - G N O K I I -
                (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-                  Last update 3 April 2000  Version 0.3.2
+                  Last update 20 May 2000    Version 0.3.2
 
 - Contents - 			   
 
@@ -96,6 +96,16 @@ used by gnokiid to create on demand a symbolic link between
 modem interface.  It's operation is transparent under normal
 usage as gnokiid takes care of calling it when required.
 
+You should be aware of a minor security hole in mgnokiidev -
+members of the 'gnokii' group may be able to use it as a way
+to access pseudottys in use by other users on the system.  If
+you are the only user on your system, or you trust anyone that
+you put into group gnokii you have no problem.  If this isn't 
+the case contact one of the authors who will try and suggest
+a workaround.  It is expected that this problem will be fixed
+in the next release of gnokii.
+
+
 - 3.0  Notes for specific model phones -
   
 Please see the README-3810 file for notes specific to the
@@ -136,7 +146,7 @@ running the following as root.
 rpm -i gnokii-0.3.2-i386.rpm
 
 If you are using a Debian based system, you can use dpackage
-to do the installation (FIXME - is this correct ?)
+to do the installation.
 
 - 6.0 Configuration -
 
@@ -145,6 +155,11 @@ sample.gnokiirc file from the Docs directory to your home
 directory and name it .gnokiirc  Using your favorite editor
 ensure that the settings are correct for your system, the sample
 file has details of the various options available.
+
+If you used a pre-built version of gnokii (.rpm, .deb etc) it
+may have installed a /etc/gnokiirc file.  If it has, the 
+settings in this file with have precedence over those in 
+your home directory.
 
 Note that you will need read/write permissions on whatever
 serial port you specify in .gnokiirc.  You can now use gnokii
@@ -163,6 +178,8 @@ DataCalls-QuickStart.
 - 7.0 Known Bugs -
 
 Review the bugs section in the README for your series of phone.
+
+Note the possible security hole in mgnokiidev discussed above.
 
 
 - 8.0 Gnokii and Perl -
@@ -330,7 +347,7 @@ to recognise those who have helped so far!
 
 
 - 15.0 Release Notes -
-200005xx Version 0.3.2
+20000520 Version 0.3.2
 We have data calls and autoconf.  Nuff said :)
 
 19991222 Version 0.3.1

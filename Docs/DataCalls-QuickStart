@@ -16,9 +16,13 @@ e.g.
    chown root:gnokii /usr/local/sbin/mgnokiidev
    chmod 4750 /usr/local/sbin/mgnokiidev
 
-(2) Create /etc/gnokiirc
+(2) Create /etc/gnokiirc or ~/.gnokiirc
 
    cp Docs/sample.gnokiirc /etc/gnokiirc
+   
+   or
+   
+   cp Docs/sample.gnokiirc ~/.gnokiirc
 
    Edit to suit; in my case:
 
@@ -39,10 +43,11 @@ e.g.
    the phone.  If you're using a 3810 series phone you won't see anything
    on the phones LCD.
 
-   [I run gnokiid as root; it will probably work for another user who is
-    in group gnokii, as long as the serial port is accessible to that
-    user as well.  It's not recommended that you run gnokiid as root
-    permanently however!]
+   I run gnokiid as root; it will probably work for another user who is
+   in group gnokii, as long as the serial port is accessible to that
+   user as well.  It's not recommended that you run gnokiid as root
+   permanently however - it is better to put yourself in group gnokii
+
 
 (4) Use /dev/gnokii as a modem:
 
@@ -67,3 +72,6 @@ XXXX.demon.co.uk	demon-gnokii	<yourpassword>
     continue to work, but this is early code and you may find you have to
     Ctrl-C and restart gnokiid (especially if the phone says the terminal
     connection has been lost)
+    
+(6) As gnokiid is still under development, ensure your data call has
+    hung up by checking your phone display at the end of the call.

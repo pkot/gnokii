@@ -19,18 +19,16 @@
 - remove default MODEL and PORT, use config files only and bug the user if
   /etc/gnokiirc or ~/.gnokiirc is not found
 - move VERSION, DEBUG, SECURITY and USE_NLS to config.h
-- 6160 support (is this useful: http://www.venia.net/tdma/? - yes it was - HAB)
+- 6160 support (is this useful: http://www.venia.net/tdma/? - yes it was -HAB)
   Please email Hugh before delving into x160 support.
-- 7110 support (plain AT commands)
+- 7110 support (fbus and/or plain AT commands)
 - integrate xlogos into xgnokii
-- other mobile phones (?)
 - incoming RLP calls (will anyone actually use this ?)
 - other mobile phones (Ericsson, Siemens?)
-- incoming RLP calls
 - getsecuritycode patch (I have it in ~/ so if there is anyone interested...)
 - international characters in SMS messages and phonebooks - see the mailing
   list messages in archive
-- Bussines card sending via SMS (I do not know if it is already implemented or
+- Business card sending via SMS (I do not know if it is already implemented or
   not)
 - if GNU getopt is not available in the system, use compile getopt from
   source tree (move it from win32/)
