@@ -534,10 +534,10 @@ int main(int argc, char *argv[])
     // Resets the phone
     { "reset",              optional_argument, NULL, OPT_RESET },
 
-    /* Set logo */
+    // Set logo
     { "setlogo",            optional_argument, NULL, OPT_SETLOGO },
 
-    /* Get logo */
+    // Get logo
     { "getlogo",            required_argument, NULL, OPT_GETLOGO },
 
 #ifndef WIN32
@@ -2664,7 +2664,7 @@ int sendringtone(int argc, char *argv[])
       - set UserDataHeaderIndicator
   */
 
-  SMS.Type = GST_MO;
+  SMS.Type = GST_DR;
   SMS.Class = 1;
   SMS.Compression = false;
   SMS.EightBit = true;
