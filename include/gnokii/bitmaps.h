@@ -33,19 +33,19 @@
 
 #include "gsm-error.h"
 
-/* Bitmap types. Keep this in sync with headers[] in gsm-sms.c. */
+/* Bitmap types. These do *not* corespond to headers[] in gsm-sms.c. */
 
 typedef enum {
 	GSM_None = 0,
-	GSM_StartupLogo,
+	GSM_StartupLogo = 50,
 	GSM_PictureImage,
 	GSM_OperatorLogo,
 	GSM_CallerLogo,
 	GSM_WelcomeNoteText,
 	GSM_DealerNoteText,
 	GSM_NewOperatorLogo,
-	GSM_EMSPicture = 13,
-	GSM_EMSAnimation = 14,
+	GSM_EMSPicture,
+	GSM_EMSAnimation,
 } GSM_Bitmap_Types;
 
 #define GSM_MAX_BITMAP_SIZE 864
