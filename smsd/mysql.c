@@ -1,6 +1,6 @@
 /*
 
-  S M S D
+  MYSQL.C 
 
   A Linux/Unix GUI for Nokia mobile phones.
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
@@ -8,6 +8,8 @@
 
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
+  This file is a module to smsd for MySQL db server.
+  
   $Id$
   
 */
@@ -18,36 +20,29 @@
 #include "smsd.h"
 #include "gsm-sms.h"
 
-static MYSQL *mysqlIn, *sockIn = NULL;
-static MYSQL *mysqlOut, *sockOut = NULL;
+static MYSQL mysqlIn;
+static MYSQL mysqlOut;
 
 void DB_Bye (void)
 {
-  if (sockIn)
-    mysql_close (sockIn);
-
-  if (sockOut)
-    mysql_close (sockOut);
+    mysql_close (&mysqlIn);
+    mysql_close (&mysqlOut);
 }
 
 
 gint DB_ConnectInbox (DBConfig connect)
 {
-  mysql_init (mysqlIn);
-  sockIn = mysql_connect (mysqlIn, connect.host, connect.user, connect.password);
-
-  if (!sockIn)
+  mysql_init (&mysqlIn);
+  if (!mysql_real_connect (&mysqlIn,
+                           connect.host[0] != '\0' ? connect.host : NULL,
+                           connect.user[0] != '\0' ? connect.user : NULL,
+                           connect.password[0] != '\0' ? connect.password : NULL,
+                           connect.db, 0, NULL, 0))
   {
-     g_print (_("Connection to host '%s' failed.\n"), connect.host);
+     g_print (_("Connection to database '%s' on host '%s' failed.\n"),
+              connect.db, connect.host);
+     g_print (_("Error: %s\n"), mysql_error (&mysqlIn));
      return (1);
-  }
-
-  if (mysql_select_db (sockIn, connect.db))
-  {
-    g_print (_("Couldn't select database %s!\n"), connect.db);
-    g_print (_("Error: %s\n"), mysql_error (sockIn));
-    mysql_close (sockIn);
-    return (1);
   }
 
   return (0);
@@ -56,21 +51,17 @@ gint DB_ConnectInbox (DBConfig connect)
 
 gint DB_ConnectOutbox (DBConfig connect)
 {
-  mysql_init (mysqlOut);
-  sockOut = mysql_connect (mysqlOut, connect.host, connect.user, connect.password);
-
-  if (!sockOut)
+  mysql_init (&mysqlOut);
+  if (!mysql_real_connect (&mysqlOut,
+                           connect.host[0] != '\0' ? connect.host : NULL,
+                           connect.user[0] != '\0' ? connect.user : NULL,
+                           connect.password[0] != '\0' ? connect.password : NULL,
+                           connect.db, 0, NULL, 0))
   {
-     g_print (_("Connection to host '%s' failed.\n"), connect.host);
+     g_print (_("Connection to database '%s' on host '%s' failed.\n"),
+              connect.db, connect.host);
+     g_print (_("Error: %s\n"), mysql_error (&mysqlIn));
      return (1);
-  }
-
-  if (mysql_select_db (sockOut, connect.db))
-  {
-    g_print (_("Couldn't select database %s!\n"), connect.db);
-    g_print (_("Error: %s\n"), mysql_error (sockOut));
-    mysql_close (sockOut);
-    return (1);
   }
 
   return (0);
@@ -81,25 +72,34 @@ gint DB_InsertSMS (const GSM_SMSMessage * const data)
 {
   GString *buf;
   gchar *text;
-    
+  gint l;
+
+/* MySQL has own escape function.    
   text = strEscape (data->UserData[0].u.Text);
+*/
+  
+  text = g_malloc (strlen (data->UserData[0].u.Text) * 2 + 1);
+  mysql_real_escape_string (&mysqlIn, text, data->UserData[0].u.Text, strlen (data->UserData[0].u.Text));
   
   buf = g_string_sized_new (256);
-  g_string_sprintf (buf, "INSERT INTO inbox (number, smsdate, insertdate, \
+  g_string_sprintf (buf, "INSERT INTO inbox (number, smsdate, \
                     text, processed) VALUES ('%s', \
-                    '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', 'f')",
+                    '%04d-%02d-%02d %02d:%02d:%02d', '%s', '0')",
                     data->RemoteNumber.number, data->Time.Year, data->Time.Month,
                     data->Time.Day, data->Time.Hour, data->Time.Minute,
                     data->Time.Second, text);
   g_free (text);
-  
-  if (mysql_query (sockIn, buf->str))
+
+  if (mysql_real_query (&mysqlIn, buf->str, buf->len))
   {
+    g_print (_("%d: INSERT INTO inbox failed.\n"), __LINE__);
+    g_print (_("Error: %s\n"), mysql_error (&mysqlIn));
     g_string_free(buf, TRUE);
     return (1);
   }
   
-  g_string_free(buf, TRUE);    
+  g_string_free(buf, TRUE);
+  
   return (0);
 }
 
@@ -109,26 +109,26 @@ void DB_Look (void)
   GString *buf;
   MYSQL_RES *res1;
   MYSQL_ROW row;
-  gint numError,error;
-  gchar status;
+  gint numError, error;
+  gint status;
 
   buf = g_string_sized_new (128);
 
   g_string_sprintf (buf, "SELECT id, number, text, error FROM outbox \
-                          WHERE processed='f' AND error < 5");
+                          WHERE processed='0' AND error < '5'");
 
-  if (mysql_query (sockOut, buf->str))
+  if (mysql_real_query (&mysqlOut, buf->str, buf->len))
   {
-    g_print ("%s\n", mysql_error (sockOut));
-    g_print ("%d: SELECT FROM command failed\n", __LINE__);
+    g_print (_("%d: SELECT FROM outbox command failed.\n"), __LINE__);
+    g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
     g_string_free (buf, TRUE);
     return;
   }
 
-  if (!(res1 = mysql_store_result (sockOut)))
+  if (!(res1 = mysql_store_result (&mysqlOut)))
   {
-    g_print ("%s\n", mysql_error(sockOut));
-    g_print ("%d: Store Mysql Result Failed\n", __LINE__);
+    g_print (_("%d: Store Mysql Result Failed.\n"), __LINE__);
+    g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
     g_string_free (buf, TRUE);
     return;
   }
@@ -163,16 +163,16 @@ void DB_Look (void)
     g_print ("%s, %s\n", sms.RemoteNumber.number, sms.UserData[0].u.Text);
 #endif
     
-    status = 't';
+    status = '1';
     error = WriteSMS (&sms);
     if (error == 4 || error == 19)
     {
-      if (numError > 0)
+      if (numError > 0)  /* change this for retrying */
         numError = error;
       else
       {
         numError++;
-        status = 'f';
+        status = '0';
       }
     }
     else
@@ -180,18 +180,19 @@ void DB_Look (void)
       
     if (error != 0)
     {
-      g_string_sprintf (buf, "UPDATE outbox SET processed='%c', error='%i' WHERE id='%s'",
+      g_string_sprintf (buf, "UPDATE outbox SET processed='%d', error='%i', \
+                             processed_date=NULL WHERE id='%s'",
                         status, error, row[0]);
                         
-      if (mysql_query (sockOut, buf->str))
+      if (mysql_real_query (&mysqlOut, buf->str, buf->len))
       {
-        g_print ("%s\n", mysql_error (sockOut));
-        g_print ("%d: UPDATE command failed\n", __LINE__);
+        g_print (_("%d: UPDATE command failed.\n"), __LINE__);
+        g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
       }
     }
   }
 
   mysql_free_result (res1);
 
-  g_string_free(buf, TRUE);
+  g_string_free (buf, TRUE);
 }

@@ -147,9 +147,15 @@ gint LoadDB (void)
 
 static void Usage (gchar *p)
 {
-  g_print ("\nUsage:  %s [options]\n"
-           "            -d, --db     DBconnectInfo\n"
-           "            -h, --help\n", p);
+  g_print (_("\nUsage:  %s [options]\n"
+             "            -u, --user db_username\n" 
+             "            -p, --password db_password\n" 
+             "            -d, --db db_name\n" 
+             "            -c, --host db_hostname\n" 
+             "            -r, --reports\n" 
+             "            -m, --module db_module (pq, mysql)\n" 
+             "            -l, --libdir path_to_db_module\n" 
+             "            -h, --help\n"), p);
 }
 
 
