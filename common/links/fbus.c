@@ -84,41 +84,41 @@ static bool FBUS_OpenSerial(bool dlr3)
 
 static bool AT2FBUS_OpenSerial()
 {
-        unsigned char init_char = 0x55;
-        unsigned char end_init_char = 0xc1;
-        int count, res;
-        unsigned char buffer[255];
+	unsigned char init_char = 0x55;
+	unsigned char end_init_char = 0xc1;
+	int count, res;
+	unsigned char buffer[255];
  
-        /* Open device. */
-        if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
-                perror(_("Couldn't open FBUS device"));
-                return false;
-        }
+	/* Open device. */
+	if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
+		perror(_("Couldn't open FBUS device"));
+		return false;
+	}
  
-        device_setdtrrts(0, 0);
-        sleep(1);
-        device_setdtrrts(1, 1);
-        device_changespeed(19200);
-        sleep(1);
-        device_write("AT\r", 3);
-        sleep(1);
+	device_setdtrrts(0, 0);
+	sleep(1);
+	device_setdtrrts(1, 1);
+	device_changespeed(19200);
+	sleep(1);
+	device_write("AT\r", 3);
+	sleep(1);
 	res = device_read(buffer, 255);
-        device_write("AT&F\r", 5);
-        usleep(100000);
+	device_write("AT&F\r", 5);
+	usleep(100000);
 	res = device_read(buffer, 255);
-        device_write("AT*NOKIAFBUS\r", 13);
-        usleep(100000);
+	device_write("AT*NOKIAFBUS\r", 13);
+	usleep(100000);
 	res = device_read(buffer, 255);
  
-        device_changespeed(115200);
+	device_changespeed(115200);
  
-        for (count = 0; count < 32; count++) {
-                device_write(&init_char, 1);
-        }
-        device_write(&end_init_char, 1);
-        usleep(1000000);
+	for (count = 0; count < 32; count++) {
+		device_write(&init_char, 1);
+	}
+	device_write(&end_init_char, 1);
+	usleep(1000000);
  
-        return (true);
+	return (true);
 }
 
 static bool FBUS_OpenIR(void)
