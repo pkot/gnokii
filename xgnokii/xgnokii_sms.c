@@ -78,8 +78,10 @@ void SMS_FetchSMSMessages()
          SMSMessage = (GSM_SMSMessage *)g_malloc(sizeof(GSM_SMSMessage));
          
          SMSMessage->MemoryType = GMT_SM;
+
+         SMSMessage->Location = i;
          
-         SMSError = GSM->GetSMSMessage (i, SMSMessage);
+         SMSError = GSM->GetSMSMessage (SMSMessage);
          
          if (SMSError != GE_NONE && SMSError != GE_EMPTYSMSLOCATION)
          {

@@ -42,6 +42,8 @@ void monitormode(void);
 void enterpin(void);
 void getmemory(char *argv[]);
 void writephonebook(void);
+void getspeeddial(char *argv[]);
+void setspeeddial(char *argv[]);
 void getsms(char *argv[]);
 void deletesms(char *argv[]);
 void sendsms(int argc, char *argv[]);
@@ -89,6 +91,8 @@ void usage(void)
   fprintf(stdout, _("   usage: gnokii {--help|--monitor|--version}
           gnokii [--getmemory] [memory type] [start] [end]
           gnokii [--writephonebook]
+          gnokii [--getspeeddial] [number]
+          gnokii [--setspeeddial] [number] [memory type] [location]
           gnokii [--getsms] [memory type] [start] [end]
           gnokii [--deletesms] [memory type] [start] [end]
           gnokii [--sendsms] [destination] [--smsc message_center_number |
@@ -121,6 +125,10 @@ void usage(void)
           --writephonebook  reads data from stdin and writes to phonebook.
                             Uses the same format as provided by the output of
                             the getphonebook command.
+
+          --getspeeddial    reads speed dial from the specified location.
+          
+          --setspeeddial    specify speed dial.
 
           --getsms          gets SMS messages from specified memory type
                             starting at entry [start] and ending at [end].
@@ -272,70 +280,57 @@ int main(int argc, char *argv[])
 
   /* Enter monitor mode. */
 
-  if (strcmp(argv[1], "--monitor") == 0) {
+  if (strcmp(argv[1], "--monitor") == 0)
     monitormode();
-  }
 
   /* Enter pin. */
 
-  if (strcmp(argv[1], "--enterpin") == 0) {
+  if (strcmp(argv[1], "--enterpin") == 0)
     enterpin();
-  }
 
   /* Set Date and Time. */
-  if (strcmp(argv[1], "--setdatetime") == 0 && (argc==7 || argc==2)) {
+  if (strcmp(argv[1], "--setdatetime") == 0 && (argc==7 || argc==2))
     setdatetime(argc, argv);
-  }
 
   /* Get date/time mode. */
-  if (strcmp(argv[1], "--getdatetime") == 0) {
+  if (strcmp(argv[1], "--getdatetime") == 0)
     getdatetime();
-  }
 
   /* Set Alarm. */
-  if (strcmp(argv[1], "--setalarm") == 0 && argc==4) {
+  if (strcmp(argv[1], "--setalarm") == 0 && argc==4)
     setalarm(argv);
-  }
 
   /* Get alarm mode. */
-  if (strcmp(argv[1], "--getalarm") == 0) {
+  if (strcmp(argv[1], "--getalarm") == 0)
     getalarm();
-  }
 
   /* Voice call mode. */
-  if (strcmp(argv[1], "--dialvoice") == 0) {
+  if (strcmp(argv[1], "--dialvoice") == 0)
     dialvoice(argv);
-  }
 
   /* Data call mode. */
-  if (strcmp(argv[1], "--dialdata") == 0) {
+  if (strcmp(argv[1], "--dialdata") == 0)
     dialdata(argv);
-  }
 
   /* Send operator log mode. */
-  if (strcmp(argv[1], "--sendoplogo") == 0) {
+  if (strcmp(argv[1], "--sendoplogo") == 0)
     sendoplogo(argv);
-  }
 
   /* Send CL icon mode. */
-  if (strcmp(argv[1], "--sendclicon") == 0) {
+  if (strcmp(argv[1], "--sendclicon") == 0)
     sendclicon(argv);
-  }
 
   /* Get calendar note mode. */
-  if (argc == 3 && strcmp(argv[1], "--getcalendarnote") == 0) {
+  if (argc == 3 && strcmp(argv[1], "--getcalendarnote") == 0)
     getcalendarnote(argv);
-  }
 
   /* Write calendar note mode. */
-  if (strcmp(argv[1], "--writecalendarnote") == 0) {
+  if (strcmp(argv[1], "--writecalendarnote") == 0)
     writecalendarnote(argv);
-  }
 
   /* Delete calendar note mode. */
-  if (argc == 3 && strcmp(argv[1], "--deletecalendarnote") == 0) {
+  if (argc == 3 && strcmp(argv[1], "--deletecalendarnote") == 0)
     deletecalendarnote(argv);
-  }
 
   /* Get memory command. */
   if (argc == 5 && strcmp(argv[1], "--getmemory") == 0)
@@ -344,6 +339,14 @@ int main(int argc, char *argv[])
   /* Write phonebook command. */
   if (strcmp(argv[1], "--writephonebook") == 0)
     writephonebook();
+
+  /* Get speed dial. */
+  if (argc == 3 && strcmp(argv[1], "--getspeeddial") == 0)
+    getspeeddial(argv);
+
+  /* Set speed dial. */
+  if (argc == 5 && strcmp(argv[1], "--setspeeddial") == 0)
+    setspeeddial(argv);
 
   /* Get sms message mode. */
   if (argc == 5 && strcmp(argv[1], "--getsms") == 0)
@@ -598,8 +601,10 @@ void getsms(char *argv[])
   /* Now retrieve the requested entries. */
 
   for (count = start_message; count <= end_message; count ++) {
+
+    message.Location = count;
 	
-    error = GSM->GetSMSMessage(count, &message);
+    error = GSM->GetSMSMessage(&message);
 
     switch (error) {
 
@@ -793,7 +798,9 @@ void deletesms(char *argv[])
 
   for (count = start_message; count <= end_message; count ++) {
 
-    error = GSM->DeleteSMSMessage(count, &message);
+    message.Location = count;
+
+    error = GSM->DeleteSMSMessage(&message);
 
     if (error == GE_NONE)
       fprintf(stdout, _("Deleted SMS %s %d\n"), memory_type_string, count);
@@ -1009,7 +1016,7 @@ void writecalendarnote(char *argv[])
   fbusinit(false);
 
   if (GSM->WriteCalendarNote(&CalendarNote) == GE_NONE) {
-    fprintf(stdout, _("Succesfully written!"));
+    fprintf(stdout, _("Succesfully written!\n"));
   }
 
   GSM->Terminate();
@@ -1038,7 +1045,6 @@ void deletecalendarnote(char *argv[])
   GSM->Terminate();
   exit(0);
 }
-
 
 void setdatetime(int argc, char *argv[])
 {
@@ -1304,10 +1310,12 @@ void getmemory(char *argv[])
 
   for (count = start_entry; count <= end_entry; count ++) {
 
-    error=GSM->GetMemoryLocation(count, &entry);
+    entry.Location=count;
+
+    error=GSM->GetMemoryLocation(&entry);
  
     if (error == GE_NONE)
-      fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, count, entry.Group);
+      fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
     else {
       if (error == GE_NOTIMPLEMENTED) {
 	fprintf(stderr, _("Function not implemented in %s model!\n"), Model);
@@ -1353,7 +1361,6 @@ void writephonebook(void)
   GSM_PhonebookEntry entry;
   GSM_Error error;
   char *memory_type_string;
-  int entry_number;
   int line_count=0;
 
   char Line[100], BackLine[100];
@@ -1390,19 +1397,69 @@ void writephonebook(void)
 	fprintf(stderr, _("Format problem on line %d [%s]\n"), line_count, BackLine);
     }
 
-    ptr=strtok(NULL, ";"); entry_number=atoi(ptr);
+    ptr=strtok(NULL, ";"); entry.Location=atoi(ptr);
 
     ptr=strtok(NULL, ";"); entry.Group=atoi(ptr);
 
     /* Do write and report success/failure. */
 
-    error = GSM->WritePhonebookLocation(entry_number, &entry);
+    error = GSM->WritePhonebookLocation(&entry);
 
     if (error == GE_NONE)
-      fprintf (stdout, _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), memory_type_string, entry_number, entry.Name, entry.Number);
+      fprintf (stdout, _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), memory_type_string, entry.Location, entry.Name, entry.Number);
     else
-      fprintf (stdout, _("Write FAILED(%d): memory type: %s, loc: %d, name: %s, number: %s\n"), error, memory_type_string, entry_number, entry.Name, entry.Number);
+      fprintf (stdout, _("Write FAILED(%d): memory type: %s, loc: %d, name: %s, number: %s\n"), error, memory_type_string, entry.Location, entry.Name, entry.Number);
 
+  }
+
+  GSM->Terminate();
+  exit(0);
+}
+
+void getspeeddial(char *argv[]) {
+
+  GSM_SpeedDial entry;
+
+  entry.Location = atoi (argv[2]);
+
+  fbusinit(false);
+
+  if (GSM->GetSpeedDial(&entry)==GE_NONE) {
+    fprintf(stdout, _("SpeedDial nr. %d: %d:%d\n"), entry.Location, entry.MemoryType, entry.Number);
+  }
+
+  GSM->Terminate();
+  exit(0);
+}
+
+void setspeeddial(char *argv[]) {
+
+  GSM_SpeedDial entry;
+
+  char *memory_type_string;
+
+  /* Handle command line args that set type, start and end locations. */
+
+  if (strcmp(argv[3], "ME") == 0) {
+    entry.MemoryType = 0x02;
+    memory_type_string = "ME";
+  }
+  else if (strcmp(argv[3], "SM") == 0) {
+    entry.MemoryType = 0x03;
+    memory_type_string = "SM";
+  }
+  else {
+    fprintf(stderr, _("Unknown memory type %s!\n"), argv[3]);
+    exit (-1);
+  }
+
+  entry.Number = atoi(argv[2]);
+  entry.Location = atoi(argv[4]);
+
+  fbusinit(false);
+
+  if (GSM->SetSpeedDial(&entry) == GE_NONE) {
+    fprintf(stdout, _("Succesfully written!\n"));
   }
 
   GSM->Terminate();

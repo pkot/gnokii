@@ -46,6 +46,8 @@ GSM_Functions			FB38_Functions = {
 		FB38_Terminate,
 		FB38_GetMemoryLocation,
 		FB38_WritePhonebookLocation,
+		FB38_GetSpeedDial,
+		FB38_SetSpeedDial,
 		FB38_GetMemoryStatus,
 		FB38_GetSMSStatus,
 		FB38_GetSMSCenter,
@@ -205,7 +207,7 @@ void		FB38_Terminate(void)
 	/* Routine to get specifed phone book location.  Designed to 
 	   be called by application.  Will block until location is
 	   retrieved or a timeout/error occurs. */
-GSM_Error	FB38_GetMemoryLocation(int location, GSM_PhonebookEntry *entry)
+GSM_Error	FB38_GetMemoryLocation(GSM_PhonebookEntry *entry)
 {
 	int		memory_area;
 	int		timeout;
@@ -235,7 +237,7 @@ GSM_Error	FB38_GetMemoryLocation(int location, GSM_PhonebookEntry *entry)
 	}
 
 		/* Send request */
- 	FB38_TX_Send0x43_RequestMemoryLocation(memory_area, location);
+ 	FB38_TX_Send0x43_RequestMemoryLocation(memory_area, entry->Location);
 	
 		/* Wait for timeout or other error. */
 	while (timeout != 0 && CurrentPhonebookError == GE_BUSY) {
@@ -253,7 +255,7 @@ GSM_Error	FB38_GetMemoryLocation(int location, GSM_PhonebookEntry *entry)
 	/* Routine to write phonebook location in phone. Designed to 
 	   be called by application code.  Will block until location
 	   is written or timeout occurs.  */
-GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
+GSM_Error	FB38_WritePhonebookLocation(GSM_PhonebookEntry *entry)
 {
 
 	int		memory_area;
@@ -297,7 +299,7 @@ GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 	}
 
 		/* Send message. */
- 	if (FB38_TX_Send0x42_WriteMemoryLocation(memory_area, location, entry->Name, entry->Number) != 0) {
+ 	if (FB38_TX_Send0x42_WriteMemoryLocation(memory_area, entry->Location, entry->Name, entry->Number) != 0) {
 		return (GE_INTERNALERROR);
 	}
 
@@ -312,7 +314,17 @@ GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
 	return (CurrentPhonebookError);
 }
 
-GSM_Error	FB38_GetSMSMessage(int location, GSM_SMSMessage *message)
+GSM_Error	FB38_GetSpeedDial(GSM_SpeedDial *entry)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_SetSpeedDial(GSM_SpeedDial *entry)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	FB38_GetSMSMessage(GSM_SMSMessage *message)
 {
 	int		timeout;
 	int		memory_area;
@@ -342,7 +354,7 @@ GSM_Error	FB38_GetSMSMessage(int location, GSM_SMSMessage *message)
 	}
 
 		/* Send request */
-	FB38_TX_Send0x25_RequestSMSMemoryLocation(memory_area, location);
+	FB38_TX_Send0x25_RequestSMSMemoryLocation(memory_area, message->Location);
 
 		/* Wait for timeout or other error. */
 	while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
@@ -357,7 +369,7 @@ GSM_Error	FB38_GetSMSMessage(int location, GSM_SMSMessage *message)
 	return(CurrentSMSMessageError);
 }
 
-GSM_Error	FB38_DeleteSMSMessage(int location, GSM_SMSMessage *message)
+GSM_Error	FB38_DeleteSMSMessage(GSM_SMSMessage *message)
 {
 	int		timeout;
 	int		memory_area;
@@ -387,7 +399,7 @@ GSM_Error	FB38_DeleteSMSMessage(int location, GSM_SMSMessage *message)
 	}
 
 		/* Send request */
-	FB38_TX_Send0x26_DeleteSMSMemoryLocation(memory_area, location);
+	FB38_TX_Send0x26_DeleteSMSMemoryLocation(memory_area, message->Location);
 
 		/* Wait for timeout or other error. */
 	while (timeout != 0 && CurrentSMSMessageError == GE_BUSY) {
@@ -1112,6 +1124,7 @@ enum FB38_RX_States		FB38_RX_HandleRLPMessage(void)
 
 		/* If monitoring output is disabled, don't display anything. */
 	if (EnableMonitoringOutput == false) {
+                /* PJ: FIXME we should return something (enum FB38_RX_States). */
 		return;
 	}
 	

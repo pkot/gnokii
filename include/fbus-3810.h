@@ -29,19 +29,23 @@ void		FB38_Terminate(void);
 
 int		FB38_GetMemoryType(GSM_MemoryType memory_type);
 
-GSM_Error	FB38_GetMemoryLocation(int location, GSM_PhonebookEntry *entry);
+GSM_Error	FB38_GetMemoryLocation(GSM_PhonebookEntry *entry);
 
-GSM_Error	FB38_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry);
+GSM_Error	FB38_WritePhonebookLocation(GSM_PhonebookEntry *entry);
+
+GSM_Error	FB38_GetSpeedDial(GSM_SpeedDial *entry);
+
+GSM_Error	FB38_SetSpeedDial(GSM_SpeedDial *entry);
 
 GSM_Error	FB38_GetMemoryStatus(GSM_MemoryStatus *Status);
 
 GSM_Error	FB38_GetSMSStatus(GSM_SMSStatus *Status);
-GSM_Error       FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
-GSM_Error	FB38_GetSMSMessage(int location, GSM_SMSMessage *message);
+GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
+GSM_Error	FB38_GetSMSMessage(GSM_SMSMessage *message);
 
 GSM_Error	FB38_GetSMSCenter(GSM_MessageCenter *MessageCenter);
 
-GSM_Error	FB38_DeleteSMSMessage(int location, GSM_SMSMessage *message);
+GSM_Error	FB38_DeleteSMSMessage(GSM_SMSMessage *message);
 
 GSM_Error	FB38_SendSMSMessage(GSM_SMSMessage *SMS);
 

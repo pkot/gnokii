@@ -7,7 +7,7 @@
 # Version number of the package.
 #
 
-VERSION = 0.3.1-pre7
+VERSION = 0.3.1-pre8
 
 #
 # Compiler to use.
@@ -142,6 +142,7 @@ clean:
                xkeyb $(XKEYB_OBJS) \
                mgnokiidev $(MGNOKIIDEV_OBJS) \
                gnokii-${VERSION}.tar.gz
+	@rmdir bin
 	make -C xgnokii clean
 
 dist:	clean

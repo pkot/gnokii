@@ -35,19 +35,23 @@ void		MB21_Terminate(void);
 
 int		MB21_GetMemoryType(GSM_MemoryType memory_type);
 
-GSM_Error	MB21_GetMemoryLocation(int location, GSM_PhonebookEntry *entry);
+GSM_Error	MB21_GetMemoryLocation(GSM_PhonebookEntry *entry);
 
-GSM_Error	MB21_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry);
+GSM_Error	MB21_WritePhonebookLocation(GSM_PhonebookEntry *entry);
+
+GSM_Error	MB21_GetSpeedDial(GSM_SpeedDial *entry);
+
+GSM_Error	MB21_SetSpeedDial(GSM_SpeedDial *entry);
 
 GSM_Error	MB21_GetMemoryStatus(GSM_MemoryStatus *Status);
 
 GSM_Error	MB21_GetSMSStatus(GSM_SMSStatus *Status);
 GSM_Error       MB21_GetSMSCenter(GSM_MessageCenter *MessageCenter);
-GSM_Error	MB21_GetSMSMessage(int location, GSM_SMSMessage *message);
+GSM_Error	MB21_GetSMSMessage(GSM_SMSMessage *message);
 
 GSM_Error	MB21_GetSMSCenter(GSM_MessageCenter *MessageCenter);
 
-GSM_Error	MB21_DeleteSMSMessage(int location, GSM_SMSMessage *message);
+GSM_Error	MB21_DeleteSMSMessage(GSM_SMSMessage *message);
 
 GSM_Error	MB21_SendSMSMessage(GSM_SMSMessage *SMS);
 

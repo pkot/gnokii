@@ -128,16 +128,19 @@ int       FB61_TX_SendAck(u8 message_type, u8 message_seq);
 
 int       FB61_GetMemoryType(GSM_MemoryType memory_type);
 
-GSM_Error FB61_GetMemoryLocation(int location, GSM_PhonebookEntry *entry);
-GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry);
+GSM_Error FB61_GetMemoryLocation(GSM_PhonebookEntry *entry);
+GSM_Error FB61_WritePhonebookLocation(GSM_PhonebookEntry *entry);
+
+GSM_Error FB61_GetSpeedDial(GSM_SpeedDial *entry);
+GSM_Error FB61_SetSpeedDial(GSM_SpeedDial *entry);
 
 GSM_Error FB61_GetMemoryStatus(GSM_MemoryStatus *Status);
 GSM_Error FB61_GetSMSStatus(GSM_SMSStatus *Status);
 GSM_Error FB61_GetSMSCenter(GSM_MessageCenter *MessageCenter);
   
-GSM_Error FB61_GetSMSMessage(int location, GSM_SMSMessage *message);
-GSM_Error FB61_DeleteSMSMessage(int location, GSM_SMSMessage *message);
-GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *message);
+GSM_Error FB61_GetSMSMessage(GSM_SMSMessage *Message);
+GSM_Error FB61_DeleteSMSMessage(GSM_SMSMessage *Message);
+GSM_Error FB61_SendSMSMessage(GSM_SMSMessage *Message);
 
 GSM_Error FB61_GetRFLevel(GSM_RFUnits *units, float *level);
 GSM_Error FB61_GetBatteryLevel(GSM_BatteryUnits *units, float *level);

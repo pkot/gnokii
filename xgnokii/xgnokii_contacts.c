@@ -1278,7 +1278,8 @@ static void SaveContacts()
           pbEntry->entry.Number[0] = '\0';
           pbEntry->entry.Group = 5;
         }
-        error = GSM->WritePhonebookLocation( i + 1, &pbEntry->entry);
+          pbEntry->entry.Location = i+1;
+        error = GSM->WritePhonebookLocation(&pbEntry->entry);
         if (error != GE_NONE)
         {
           g_print("%s: line: %d:Can't write ME memory entry number %d! Error: %d\n",
@@ -1309,7 +1310,8 @@ static void SaveContacts()
           pbEntry->entry.Number[0] = '\0';
           pbEntry->entry.Group = 5;
         }
-        error = GSM->WritePhonebookLocation( i - memoryStatus.MaxME + 1, &pbEntry->entry);
+        pbEntry->entry.Location = i - memoryStatus.MaxME + 1;
+        error = GSM->WritePhonebookLocation(&pbEntry->entry);
         if (error != GE_NONE)
         {
           g_print("%s: line %d:Can't write SM memory entry number %d! Error: %d\n",
@@ -1511,8 +1513,13 @@ Max SIM entries set to 100!\n");
       return;
     }
     pbEntry->entry.MemoryType = GMT_ME;
+
+    /* PJ: FIXME: Jano, please save Location to the entry.Location somewhere
+       and remove every similar line like this in the whole file. It's a bug
+       of me, but I think you are the master of xgnokii now :-) */
+    pbEntry->entry.Location = i;
     
-    if((error = GSM->GetMemoryLocation( i, &pbEntry->entry)) != GE_NONE)
+    if((error = GSM->GetMemoryLocation(&pbEntry->entry)) != GE_NONE)
     {
       gint err_count = 0;
       
@@ -1529,7 +1536,7 @@ Max SIM entries set to 100!\n");
             return;
           }
           sleep(2);
-          error = GSM->GetMemoryLocation( i, &pbEntry->entry);
+          error = GSM->GetMemoryLocation(&pbEntry->entry);
         }
       }
     }
@@ -1555,8 +1562,9 @@ Max SIM entries set to 100!\n");
       return;
     }
     pbEntry->entry.MemoryType = GMT_SM;
-       
-    if((error = GSM->GetMemoryLocation( i, &pbEntry->entry)) != GE_NONE)
+    pbEntry->entry.Location = i;       
+
+    if((error = GSM->GetMemoryLocation( &pbEntry->entry)) != GE_NONE)
     {
       gint err_count = 0;
       
@@ -1573,7 +1581,7 @@ Max SIM entries set to 100!\n");
             return;
           }
           sleep(2);
-          error = GSM->GetMemoryLocation( i, &pbEntry->entry);
+          error = GSM->GetMemoryLocation( &pbEntry->entry);
         }
       }
     }

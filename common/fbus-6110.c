@@ -59,6 +59,8 @@ GSM_Functions FB61_Functions = {
   FB61_Terminate,
   FB61_GetMemoryLocation,
   FB61_WritePhonebookLocation,
+  FB61_GetSpeedDial,
+  FB61_SetSpeedDial,
   FB61_GetMemoryStatus,
   FB61_GetSMSStatus,
   FB61_GetSMSCenter,
@@ -181,6 +183,9 @@ struct termios OldTermios; /* To restore termio on close. */
 		   	   	   
 GSM_PhonebookEntry *CurrentPhonebookEntry;
 GSM_Error          CurrentPhonebookError;
+
+GSM_SpeedDial      *CurrentSpeedDialEntry;
+GSM_Error          CurrentSpeedDialError;
 
 GSM_SMSMessage     *CurrentSMSMessage;
 GSM_Error          CurrentSMSMessageError;
@@ -999,8 +1004,16 @@ GSM_Error FB61_DialVoice(char *Number) {
 
 GSM_Error FB61_DialData(char *Number) {
 
-  unsigned char req[100]={FB61_FRAME_HEADER, 0x01};
-  unsigned char req_end[]={0x01, 0x02, 0x01, 0x05, 0x81, 0x01, 0x00, 0x00, 0x01, 0x02, 0x0a, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x15, 0x63, 0xa8, 0x00, 0x00};
+  unsigned char req[100]  = { FB61_FRAME_HEADER, 0x01 };
+  unsigned char req_end[] = { 0x01,  /* make a data call = type 0x01 */
+                              0x02,0x01,0x05,0x81,0x01,0x00,0x00,0x01,0x02,0x0a,
+                              0x07,0xa2,0x88,0x81,0x21,0x15,0x63,0xa8,0x00,0x00
+                            };
+
+  unsigned char req2[]    = { FB61_FRAME_HEADER, 0x42,0x05,0x01,
+                              0x07,0xa2,0xc8,0x81,0x21,0x15,0x63,0xa8,0x00,0x00,
+                              0x07,0xa3,0xb8,0x81,0x20,0x15,0x63,0x80,0x01,0x60
+                            };
   int i=0;
 
   req[4]=strlen(Number);
@@ -1011,6 +1024,7 @@ GSM_Error FB61_DialData(char *Number) {
   memcpy(req+5+strlen(Number), req_end, 23);
 
   FB61_TX_SendMessage(26+strlen(Number), 0x01, req);
+  FB61_TX_SendMessage(26, 0x01, req2);
 
   return(GE_NONE);
 }
@@ -1243,7 +1257,7 @@ GSM_Error FB61_SetAlarm(int alarm_number, GSM_DateTime *date_time)
    application.  Will block until location is retrieved or a timeout/error
    occurs. */
 
-GSM_Error FB61_GetMemoryLocation(int location, GSM_PhonebookEntry *entry) {
+GSM_Error FB61_GetMemoryLocation(GSM_PhonebookEntry *entry) {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00};
   int timeout=20; /* 2 seconds for command to complete */
@@ -1252,7 +1266,7 @@ GSM_Error FB61_GetMemoryLocation(int location, GSM_PhonebookEntry *entry) {
   CurrentPhonebookError = GE_BUSY;
 
   req[4] = FB61_GetMemoryType(entry->MemoryType);
-  req[5] = location;
+  req[5] = entry->Location;
 
   FB61_TX_SendMessage(7, 0x03, req);
 
@@ -1271,7 +1285,7 @@ GSM_Error FB61_GetMemoryLocation(int location, GSM_PhonebookEntry *entry) {
    application code. Will block until location is written or timeout
    occurs. */
 
-GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
+GSM_Error FB61_WritePhonebookLocation(GSM_PhonebookEntry *entry)
 {
 
   unsigned char req[128] = {FB61_FRAME_HEADER, 0x04, 0x00, 0x00};
@@ -1281,7 +1295,7 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
   CurrentPhonebookError=GE_BUSY;
 
   req[4] = FB61_GetMemoryType(entry->MemoryType);
-  req[5] = location;
+  req[5] = entry->Location;
 
   req[6] = strlen(entry->Name);
 
@@ -1320,7 +1334,65 @@ GSM_Error FB61_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
   return (CurrentPhonebookError);
 }
 
-GSM_Error FB61_GetSMSMessage(int location, GSM_SMSMessage *message)
+GSM_Error FB61_GetSpeedDial(GSM_SpeedDial *entry)
+{
+
+  unsigned char req[] = { FB61_FRAME_HEADER,
+                          0x16,
+                          0x00  /* The number of speed dial. */
+                        };
+  int timeout=20; /* 2 seconds for command to complete */
+
+  CurrentSpeedDialEntry = entry;
+  CurrentSpeedDialError = GE_BUSY;
+
+  req[4] = entry->Location;
+
+  FB61_TX_SendMessage(5, 0x03, req);
+
+  while (timeout != 0 && CurrentSpeedDialError == GE_BUSY) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+
+    usleep (100000);
+  }
+
+  return (CurrentSpeedDialError);
+}
+
+GSM_Error FB61_SetSpeedDial(GSM_SpeedDial *entry)
+{
+
+  unsigned char req[] = { FB61_FRAME_HEADER,
+                          0x19,
+                          0x00, /* Number */
+                          0x00, /* Memory Type */
+                          0x00  /* Location */
+                        };
+  int timeout = 20;
+
+  req[4] = entry->Number;
+  req[5] = entry->MemoryType;
+  req[6] = entry->Location;
+
+  CurrentSpeedDialError = GE_BUSY;
+
+  FB61_TX_SendMessage(7, 0x03, req);
+
+  /* Wait for timeout or other error. */
+  while (timeout != 0 && CurrentSpeedDialError == GE_BUSY ) {
+
+    if (--timeout == 0)
+      return (GE_TIMEOUT);
+                    
+    usleep (100000);
+  }
+
+  return (CurrentSpeedDialError);
+}
+
+GSM_Error FB61_GetSMSMessage(GSM_SMSMessage *message)
 {
 
   unsigned char req[] = { FB61_FRAME_HEADER,
@@ -1336,7 +1408,7 @@ GSM_Error FB61_GetSMSMessage(int location, GSM_SMSMessage *message)
   CurrentSMSMessage = message;
   CurrentSMSMessageError = GE_BUSY;
 
-  req[5] = location;
+  req[5] = message->Location;
 
   /* Send request */
 
@@ -1354,7 +1426,7 @@ GSM_Error FB61_GetSMSMessage(int location, GSM_SMSMessage *message)
   return (CurrentSMSMessageError);
 }
 
-GSM_Error FB61_DeleteSMSMessage(int location, GSM_SMSMessage *message)
+GSM_Error FB61_DeleteSMSMessage(GSM_SMSMessage *message)
 {
 
   unsigned char req[] = {FB61_FRAME_HEADER, 0x0a, 0x02, 0x00};
@@ -1362,7 +1434,7 @@ GSM_Error FB61_DeleteSMSMessage(int location, GSM_SMSMessage *message)
 
   CurrentSMSMessageError = GE_BUSY;
 
-  req[5] = location;
+  req[5] = message->Location;
 
   FB61_TX_SendMessage(6, 0x14, req);
 
@@ -2214,6 +2286,52 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
 #endif DEBUG
 		break;
 	  }
+
+      break;
+
+    case 0x17:
+
+      CurrentSpeedDialEntry->MemoryType = MessageBuffer[4];
+      CurrentSpeedDialEntry->Number = MessageBuffer[5];
+
+#ifdef DEBUG
+      printf(_("Message: Speed dial entry received:\n"));
+      printf(_("   Location: %d\n"), CurrentSpeedDialEntry->Location);
+      printf(_("   MemoryType: %s\n"), FB61_MemoryType_String[CurrentSpeedDialEntry->MemoryType]);
+      printf(_("   Number: %d\n"), CurrentSpeedDialEntry->Number);
+#endif DEBUG
+
+      CurrentSpeedDialError=GE_NONE;
+
+      break;
+
+    case 0x18:
+
+#ifdef DEBUG
+      printf(_("Message: Speed dial entry error\n"));
+#endif DEBUG
+
+      CurrentSpeedDialError=GE_INVALIDSPEEDDIALLOCATION;
+
+      break;
+
+    case 0x1a:
+
+#ifdef DEBUG
+      printf(_("Message: Speed dial entry set.\n"));
+#endif DEBUG
+
+      CurrentSpeedDialError=GE_NONE;
+
+      break;
+
+    case 0x1b:
+
+#ifdef DEBUG
+      printf(_("Message: Speed dial entry setting error.\n"));
+#endif DEBUG
+
+      CurrentSpeedDialError=GE_INVALIDSPEEDDIALLOCATION;
 
       break;
 
@@ -3177,6 +3295,16 @@ enum FB61_RX_States FB61_RX_DispatchMessage(void) {
     printf(_("Message: The phone is powered on - seq 1.\n"));
 #endif DEBUG
 
+    break;
+
+  case 0xf1:
+
+    /* RLP frame received. */
+
+#ifdef DEBUG
+    printf(_("Message: RLP frame received.\n"));
+ #endif DEBUG
+ 
     break;
 
     /* Power on message */

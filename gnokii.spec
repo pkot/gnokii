@@ -22,7 +22,7 @@ mobile phones, released under the GPL.
 
 %build
 make
-strip gnokii gnokiid xgnokii xlogos xkeyb mgnokiidev
+strip gnokii gnokiid bin/xgnokii xlogos xkeyb mgnokiidev
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -33,7 +33,7 @@ mkdir -p $RPM_BUILD_ROOT/usr/bin \
          $RPM_BUILD_ROOT/usr/lib/gnokii
 
 
-cp gnokii gnokiid xgnokii xkeyb xlogos $RPM_BUILD_ROOT/usr/bin
+cp gnokii gnokiid bin/xgnokii xkeyb xlogos $RPM_BUILD_ROOT/usr/bin
 cp mgnokiidev $RPM_BUILD_ROOT/usr/sbin
 cp sample.gnokiirc $RPM_BUILD_ROOT/etc/gnokiirc
 cp pixmaps/6110.xpm pixmaps/6150.xpm $RPM_BUILD_ROOT/usr/lib/gnokii

@@ -132,6 +132,7 @@ typedef struct {
   int Class;                                /* Class Message: 0, 1, 2, 3 or none; see GSM 03.38 */
   bool EightBit;                            /* Indicates whether SMS contains 8 bit data or not */
   bool Compression;                         /* Indicates whether SMS contains compressed data or not */
+  int Location;                             /* Location in the memory. */
 } GSM_SMSMessage;
 
 /* This structure is used to get the current network status */
@@ -177,7 +178,16 @@ typedef struct {
   char Number[GSM_MAX_PHONEBOOK_NUMBER_LENGTH + 1]; /* Number */
   GSM_MemoryType MemoryType;                        /* Type of memory */
   int Group;                                        /* Group */
+  int Location;                                     /* Location */
 } GSM_PhonebookEntry;
+
+/* This define speed dialing entries. */
+
+typedef struct {
+  int Number;                /* Which number is used to dialing? */
+  GSM_MemoryType MemoryType; /* Memory type of the number. */
+  int Location;              /* Location of the number in MemoryType. */
+} GSM_SpeedDial;
 
 /* Define enum used to describe what sort of date/time support is
    available. */
@@ -278,6 +288,7 @@ typedef enum {
   GE_INVALIDSMSLOCATION,    /* Invalid SMS location. */
   GE_INVALIDPHBOOKLOCATION, /* Invalid phonebook location. */
   GE_INVALIDMEMORYTYPE,     /* Invalid type of memory. */
+  GE_INVALIDSPEEDDIALLOCATION, /* Invalid speed dial location. */
   GE_INVALIDCALNOTELOCATION,/* Invalid calendar note location. */
   GE_EMPTYSMSLOCATION,      /* SMS location is empty. */
   GE_PHBOOKNAMETOOLONG,     /* Phonebook name is too long. */
@@ -313,9 +324,13 @@ typedef struct {
 
   void (*Terminate)(void);	
 
-  GSM_Error (*GetMemoryLocation)( int location, GSM_PhonebookEntry *entry );
+  GSM_Error (*GetMemoryLocation)( GSM_PhonebookEntry *entry );
 
-  GSM_Error (*WritePhonebookLocation)( int location, GSM_PhonebookEntry *entry );
+  GSM_Error (*WritePhonebookLocation)( GSM_PhonebookEntry *entry );
+
+  GSM_Error (*GetSpeedDial)( GSM_SpeedDial *entry);
+
+  GSM_Error (*SetSpeedDial)( GSM_SpeedDial *entry);
 
   GSM_Error (*GetMemoryStatus)( GSM_MemoryStatus *Status);
 
@@ -323,11 +338,11 @@ typedef struct {
 
   GSM_Error (*GetSMSCenter)( GSM_MessageCenter *MessageCenter );
 
-  GSM_Error (*GetSMSMessage)( int location, GSM_SMSMessage *message );
+  GSM_Error (*GetSMSMessage)( GSM_SMSMessage *Message );
 
-  GSM_Error (*DeleteSMSMessage)( int location, GSM_SMSMessage *message );
+  GSM_Error (*DeleteSMSMessage)( GSM_SMSMessage *Message );
 
-  GSM_Error (*SendSMSMessage)( GSM_SMSMessage *SMS );
+  GSM_Error (*SendSMSMessage)( GSM_SMSMessage *Message );
 
     /* If units is set to a valid GSM_RFUnits value, the code
        will return level in these units if it is able.  Otherwise

@@ -43,6 +43,8 @@ GSM_Functions			MB21_Functions = {
 		MB21_Terminate,
 		MB21_GetMemoryLocation,
 		MB21_WritePhonebookLocation,
+		MB21_GetSpeedDial,
+		MB21_SetSpeedDial,
 		MB21_GetMemoryStatus,
 		MB21_GetSMSStatus,
 		MB21_GetSMSCenter,
@@ -131,7 +133,7 @@ void		MB21_Terminate(void)
 	/* Routine to get specifed phone book location.  Designed to 
 	   be called by application.  Will block until location is
 	   retrieved or a timeout/error occurs. */
-GSM_Error	MB21_GetMemoryLocation(int location, GSM_PhonebookEntry *entry)
+GSM_Error	MB21_GetMemoryLocation(GSM_PhonebookEntry *entry)
 {
 	return (GE_NOTIMPLEMENTED);
 }
@@ -139,17 +141,27 @@ GSM_Error	MB21_GetMemoryLocation(int location, GSM_PhonebookEntry *entry)
 	/* Routine to write phonebook location in phone. Designed to 
 	   be called by application code.  Will block until location
 	   is written or timeout occurs.  */
-GSM_Error	MB21_WritePhonebookLocation(int location, GSM_PhonebookEntry *entry)
+GSM_Error	MB21_WritePhonebookLocation(GSM_PhonebookEntry *entry)
 {
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	MB21_GetSMSMessage(int location, GSM_SMSMessage *message)
+GSM_Error	MB21_GetSpeedDial(GSM_SpeedDial *entry)
 {
 	return (GE_NOTIMPLEMENTED);
 }
 
-GSM_Error	MB21_DeleteSMSMessage(int location, GSM_SMSMessage *message)
+GSM_Error	MB21_SetSpeedDial(GSM_SpeedDial *entry)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_GetSMSMessage(GSM_SMSMessage *message)
+{
+	return (GE_NOTIMPLEMENTED);
+}
+
+GSM_Error	MB21_DeleteSMSMessage(GSM_SMSMessage *message)
 {
 	return (GE_NOTIMPLEMENTED);
 }

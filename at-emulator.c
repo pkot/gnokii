@@ -232,7 +232,8 @@ void	ATEM_ReadSMS(int number, GSM_MemoryType type)
 	char line[250];
 
 	message.MemoryType = type;
-	error = GSM->GetSMSMessage(number, &message);
+	message.Location = number;
+	error = GSM->GetSMSMessage(&message);
 
 	if (error == GE_EMPTYSMSLOCATION) {
 		snprintf(line, sizeof(line), "\n\rNo message number %d\n\r", SMSNumber);
@@ -256,7 +257,8 @@ void	ATEM_EraseSMS(int number, GSM_MemoryType type)
 {
 	GSM_SMSMessage message;
 	message.MemoryType = type;
-	if (GSM->DeleteSMSMessage(number, &message) == GE_NONE) {
+	message.Location = number;
+	if (GSM->DeleteSMSMessage(&message) == GE_NONE) {
 		ATEM_ModemResult(0);
 	}
    	else {
