@@ -78,6 +78,34 @@ static void SetupReverse()
 	reversed = true;
 }
 
+static bool IsEscapeChar(unsigned char value)
+{
+	return (value == 0x1b);
+}
+
+/*
+ * In GSM specification there are 10 characters in the extension
+ * of the default alphabet. Their values look a bit random, they are
+ * only 10, and probably they will never change, so hardcoding them
+ * here is rather safe.
+ */
+static unsigned char DecodeWithDefaultAlphabetExtension(unsigned char value)
+{
+	switch (value) {
+	case 0x0a: return 0x0c; break; /* from feed */
+	case 0x14: return '^';  break;
+	case 0x28: return '{';  break;
+	case 0x29: return '}';  break;
+	case 0x2f: return '\\'; break;
+	case 0x3c: return '[';  break;
+	case 0x3d: return '~';  break;
+	case 0x3e: return ']';  break;
+	case 0x40: return '|';  break;
+	case 0x65: return 0xa4; break; /* euro */
+	default: return '?';    break; /* invalid character */
+	}
+}
+
 bool IsDefaultAlphabetString(unsigned char *string)
 {
 	unsigned int i, len = strlen(string);
@@ -201,10 +229,15 @@ int Pack7BitCharacters(unsigned int offset, unsigned char *input, unsigned char 
 
 void DecodeAscii(unsigned char* dest, const unsigned char* src, int len)
 {
-	int i;
+	int i, j;
 
-	for (i = 0; i < len; i++)
-		dest[i] = DecodeWithDefaultAlphabet(src[i]);
+	for (i = 0, j = 0; j < len; i++, j++) {
+		if (IsEscapeChar(src[j]))
+			dest[i] = DecodeWithDefaultAlphabetExtension(src[++j]);
+		else
+			dest[i] = DecodeWithDefaultAlphabet(src[j]);
+	}
+	dest[i] = 0;
 	return;
 }
 

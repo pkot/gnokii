@@ -12,6 +12,8 @@
  * bitmap support
     o some cleanups and fixes to make bitmap handling with 6510
       series work                                      (Markus Plail)
+ * libsms updates
+    o support decoding extension of the default alphabet  (Pawel Kot)
 
 0.4.2a
 ======
