@@ -41,6 +41,10 @@
 	   functions supported by this model of phone.  */
 bool					MB640_LinkOK;
 char          PortDevice[GSM_MAX_DEVICE_NAME_LENGTH];
+char          *MB640_Revision = 0,
+              *MB640_RevisionDate = 0,
+              *MB640_Model = 0,
+              MB640_VersionInfo[64];
 
 GSM_Functions			MB640_Functions = {
 		MB640_Initialise,
@@ -172,6 +176,7 @@ GSM_Error   MB640_Initialise(char *port_device, char *initlength,
 	/* ConnectionType is ignored in 640 code. */
   RequestTerminate = false;
 	MB640_LinkOK     = false;
+  memset(MB640_VersionInfo,0,sizeof(MB640_VersionInfo));
   strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 	rtn = pthread_create(&Thread, NULL, (void *) MB640_ThreadLoop, (void *)NULL);
   if(rtn == EAGAIN || rtn == EINVAL)
@@ -439,10 +444,10 @@ GSM_Error	MB640_GetIMEI(char *imei)
 	return (GE_NONE);
 }
 
-GSM_Error	MB640_GetRevision(char *revision)
+GSM_Error MB640_GetVersionInfo()
 {u8   pkt[] = {0, 3, 0};
  int  timeout;
- char *s;
+ char *s = MB640_VersionInfo;
 
   MB640_PacketOK = false;
   MB640_ACKOK    = false;
@@ -457,34 +462,34 @@ GSM_Error	MB640_GetRevision(char *revision)
     usleep(100000);
   }
 
-  strncpy(revision,&PacketData[6],63);
-  revision[63] = 0;
-  for(s = revision; *s; s++) if(*s == 0x0A) *s = ';';
+  strncpy( s, &PacketData[6], sizeof(MB640_VersionInfo) );
 
+  for( MB640_Revision     = s; *s != 0x0A; s++ ) if( !*s ) goto out;
+  *s++ = 0;
+  for( MB640_RevisionDate = s; *s != 0x0A; s++ ) if( !*s ) goto out;
+  *s++ = 0;
+  for( MB640_Model        = s; *s != 0x0A; s++ ) if( !*s ) goto out;
+  *s++ = 0;
+out:
 	return (GE_NONE);
 }
 
+GSM_Error	MB640_GetRevision(char *revision)
+{GSM_Error err = GE_NONE;
+
+  if(!MB640_Revision) err = MB640_GetVersionInfo();
+  if(err == GE_NONE) strncpy(revision, MB640_Revision, 64);
+
+	return err;
+}
+
 GSM_Error	MB640_GetModel(char *model)
-{u8  pkt[] = {0x0f, 0x19, 3, 0, 0x05, 0x39, 0, 0};
- int timeout;
+{GSM_Error err = GE_NONE;
 
-  MB640_PacketOK = false;
-  MB640_ACKOK    = false;
-  timeout        = 3;
-  while(!MB640_PacketOK)
-  {
-    if(!MB640_ACKOK) MB640_SendPacket(pkt, sizeof(pkt));
-    if(!--timeout || RequestTerminate)
-    {
-      return(GE_TIMEOUT);
-    }
-    usleep(100000);
-  }
+  if(!MB640_Model) err = MB640_GetVersionInfo();
+  if(err == GE_NONE) strncpy(model, MB640_Model, 64);
 
-  memcpy(model,&PacketData[14],PacketData[13]);
-  model[PacketData[13]] = 0;
-
-	return (GE_NONE);
+	return err;
 }
 
 /* This function sends to the mobile phone a request for the SMS Center */
