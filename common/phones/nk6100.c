@@ -1743,8 +1743,6 @@ static GSM_Error GetProfile(GSM_Data *data, GSM_Statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x1a, 0x00};
 	GSM_Profile *prof;
 	GSM_Error error;
-	GSM_Data d;
-	char model[GSM_MAX_MODEL_LENGTH];
 	int i;
 
 	if (!data->Profile)
@@ -1762,19 +1760,9 @@ static GSM_Error GetProfile(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	if (prof->DefaultName > -1) {
-		/*
-		 * FIXME: isn't it should be better if we store the manufacturer
-		 *	 and the model in GSM_Phone?
-		 */
-		GSM_DataClear(&d);
-		d.Model = model;
-		if ((error = PhoneInfo2(&d, state)) != GE_NONE) {
-			return error;
-		}
-
 		/* For N5110 */
 		/* FIXME: It should be set for N5130 and 3210 too */
-		if (!strcmp(model, "NSE-1")) {
+		if (!strcmp(DRVINSTANCE(state)->Model, "NSE-1")) {
 			switch (prof->DefaultName) {
 			case 0x00:
 				snprintf(prof->Name, sizeof(prof->Name), _("Personal"));

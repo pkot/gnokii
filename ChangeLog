@@ -25,6 +25,7 @@
     o phone initialisation simplified                (BORBELY Zoltan)
     o GetIMEI and GetRevision should work with phones not
       supporting the 0x64 type message               (BORBELY Zoltan)
+    o GetProfile doesn't call PhoneInfo2 any longer  (BORBELY Zoltan)
  * 7110 series updates:
     o use nokia-decoding                               (Markus Plail)
  * bitmap support
