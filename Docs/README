@@ -1,6 +1,6 @@
                               - G N O K I I -
                (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-                  Last update 20 May 2000    Version 0.3.2
+                  Last update 23 May 2000    Version 0.3.2
 
 - Contents - 			   
 
@@ -47,6 +47,7 @@ bleeding edge releases through CVS and more!
 If you haven't already done so, please indicate your interest in 
 the gnokii project by adding yourself to the user database
 at http://gnokii.org/users
+
 
 - 2.0 About the applications -
   
@@ -112,6 +113,7 @@ Please see the README-3810 file for notes specific to the
 3810/8110 series and README-6110 for notes on the 5110/6110
 series.
 
+
 - 4.0 Installation from source -
 
 gnokii makes use of autoconf/automake which allows you to configure
@@ -136,6 +138,7 @@ make install
 With this done you've built and installed your binaries, and
 should proceed to the configuration section below.
 
+
 - 5.0 Installation of pre-built binaries -
   
 If you downloaded gnokii as a pre-built binary you should install
@@ -148,6 +151,7 @@ rpm -i gnokii-0.3.2-i386.rpm
 If you are using a Debian based system, you can use dpackage
 to do the installation.
 
+
 - 6.0 Configuration -
 
 Once you have installed the binaries, you should copy the
@@ -158,8 +162,8 @@ file has details of the various options available.
 
 If you used a pre-built version of gnokii (.rpm, .deb etc) it
 may have installed a /etc/gnokiirc file.  If it has, the 
-settings in this file with have precedence over those in 
-your home directory.
+settings in this file will be used in the absence of a
+.gnokiirc file in your home directory.
 
 Note that you will need read/write permissions on whatever
 serial port you specify in .gnokiirc.  You can now use gnokii
@@ -173,7 +177,22 @@ available for each model.
 In order to make use of the AT emulator provided by gnokiid
 through /dev/gnokii, you must read the documentation file
 DataCalls-QuickStart.
+ 
+A simple test to confirm that your cable/IR link is working
+is to run gnokii with the --monitor flag e.g.
 
+  foobar$ gnokii --monitor
+  
+This will attempt to connect to your phone and display
+information such as signal strength, battery level  etc.
+      
+If you get an error along the lines of
+	
+  Hmmm... GSM_LinkOK never went true. Quitting.
+	    
+this indicates that gnokii could not communicate with your phone
+for some reason and you will need to do some troubleshooting.
+		                        
 
 - 7.0 Known Bugs -
 
