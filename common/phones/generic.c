@@ -17,7 +17,11 @@
   The various routines are called PGEN_(whatever).
 
   $Log$
-  Revision 1.1  2001-02-21 19:57:07  chris
+  Revision 1.2  2001-03-06 10:39:35  machek
+  Function for printing unknown packets can probably be shared across
+  all phones.
+
+  Revision 1.1  2001/02/21 19:57:07  chris
   More fiddling with the directory layout
 
   Revision 1.1  2001/02/16 14:29:53  chris
@@ -134,4 +138,12 @@ GSM_Error PGEN_CommandResponseReceive(GSM_Link *link, int MessageType, void *Mes
 	return GE_NONE;
 }
 
+/* If we do not support a message type, print out some debugging info */
 
+GSM_Error PGEN_IncomingDefault(int messagetype, unsigned char *buffer, int length)
+{
+	dprintf("Unknown Message received [type (%02x) length (%d): \n\r", messagetype, length);
+	PGEN_DebugMessage(messagetype, buffer, length);
+
+	return GE_NONE;
+}
