@@ -236,6 +236,47 @@ static int IsValidSMSforFolder(gpointer d, gpointer userData)
 }
 
 
+/* This function works only if phoneMonitor.sms.messages.number 
+   ( = data->number) is the number of the SMS in the current folder
+   ( = row + 1, row = 0 is the first row in the SMS list )
+*/
+static void MarkSMSasRead(gpointer d, gpointer userData)
+{
+	gn_sms *data = (gn_sms *) d;
+	gint row = *(gint *) userData;
+#ifdef XDEBUG
+	gchar *dprint_status1;
+#endif
+	gint valid;
+
+	row = row + 1 ; 
+	if ((valid = IsValidSMSforFolder(d, userData))) {
+#ifdef XDEBUG
+		switch (data->status) {
+		case GN_SMS_Read:
+			dprint_status1 = g_strdup(_("read"));
+			break;
+		case GN_SMS_Unread:
+			dprint_status1 = g_strdup(_("unread"));
+			break;
+		case GN_SMS_Sent:
+			dprint_status1 = g_strdup(_("sent"));
+			break;
+		case GN_SMS_Unsent:
+			dprint_status1 = g_strdup(_("not sent"));
+			break;
+		default:
+			dprint_status1 = g_strdup(_("unknown"));
+			break;
+		}
+		dprintf("In MarkSMSasRead : data->status : %s \n", dprint_status1);
+		dprintf("In MarkSMSasRead : data->number : %i row : %i\n", data->number, row);
+#endif
+		if (data->number == row) data->status = GN_SMS_Read;
+	};
+}
+
+
 static void InsertFolderElement(gpointer d, gpointer userData)
 {
 	gn_sms *data = (gn_sms *) d;
@@ -393,8 +434,32 @@ static void ClickEntry(GtkWidget * clist,
 		       gint row, gint column, GdkEventButton * event, gpointer data)
 {
 	gchar *buf;
+	gchar *text1, *text2, *text3;
+	text2 = g_strdup(_("unread"));
+	
+	     /* Mark SMS as read */
 
-	/* FIXME - We must mark SMS as read */
+	if (gtk_clist_get_text(GTK_CLIST(clist), row, 0, &(text1))) {
+		dprintf("*text1: %s *text2: %s \n", text1, text2);
+
+		if (*text1 == *text2) {
+
+			/* Store the read status in phoneMonitor.sms.messages */
+
+			g_slist_foreach(phoneMonitor.sms.messages, (GFunc) MarkSMSasRead, (gpointer) &(row));
+			text3 = g_strdup(_("read"));
+
+			/* Change the status now in the clist window and don't wait for */
+			/* the next refresh command */
+
+			gtk_clist_freeze(GTK_CLIST(clist));
+
+			gtk_clist_set_text(GTK_CLIST(clist), row, 0, text3); 
+
+			gtk_clist_thaw(GTK_CLIST(clist));
+		};
+	};
+	
 	gtk_text_freeze(GTK_TEXT(SMS.smsText));
 
 	gtk_text_set_point(GTK_TEXT(SMS.smsText), 0);
