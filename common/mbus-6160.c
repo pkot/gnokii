@@ -181,11 +181,6 @@ GSM_Error	MB61_GetMemoryLocation(GSM_PhonebookEntry *entry)
 {
     int     timeout;
 
-        /* State machine code writes data to these variables when
-           it comes in. */
-    /*CurrentPhonebookEntry = entry;
-    CurrentPhonebookError = GE_BUSY;*/
-
     if (entry->MemoryType != GMT_ME) {
     	return (GE_INVALIDMEMORYTYPE);
     }
@@ -197,9 +192,27 @@ GSM_Error	MB61_GetMemoryLocation(GSM_PhonebookEntry *entry)
         return GE_NOLINK;
     }
 
-        /* Send request */
-    //FB38_TX_Send0x43_RequestMemoryLocation(memory_area, entry->Location);
-    
+        /* Process depending on model identified */
+	switch (ModelIdentified) {
+
+		case MB61_Model5160:
+			if (entry->Location >= MAX_5160_PHONEBOOK_ENTRIES) {
+				return (GE_INVALIDPHBOOKLOCATION);
+			}
+			MB61_TX_SendPhoneBookRequest(entry->Location);
+			break;
+
+		case MB61_Model6160:
+			if (entry->Location >= MAX_6160_PHONEBOOK_ENTRIES) {
+				return (GE_INVALIDPHBOOKLOCATION);
+			}
+			MB61_TX_SendPhoneBookRequest(entry->Location);
+			break;
+
+		default:
+			return(GE_NOTIMPLEMENTED);
+	}
+				
         /* Wait for timeout or other error. */
     while (timeout != 0/* && CurrentPhonebookError == GE_BUSY*/) {
 
@@ -210,7 +223,7 @@ GSM_Error	MB61_GetMemoryLocation(GSM_PhonebookEntry *entry)
         usleep (100000);
     }
 
-    //return (CurrentPhonebookError);
+    return (GE_NONE);
 }
 
 	/* Routine to write phonebook location in phone. Designed to 
@@ -639,7 +652,7 @@ enum    MB61_RX_States MB61_RX_DispatchMessage(void)
 
 					/* 0xd0 messages are the response to
 					   initialisation requests. */
-				case 0xd0: 	if (ExpectedResponse = MB61_Response_0xD0_Init) {
+				case 0xd0: 	if (ExpectedResponse == MB61_Response_0xD0_Init) {
 								LatestResponse = MB61_Response_0xD0_Init;
 							}
 							break;
@@ -758,6 +771,21 @@ void    MB61_RX_DisplayMessage(void)
 
 }
 
+bool		MB61_TX_SendPhoneBookRequest(u8 entry)
+{
+	u8		message[7] = {0x00, 0x01, 0x1f, 0x01, 0x04, 0x86, 0x01};
+
+	message[6] = entry;
+	
+	MB61_UpdateSequenceNumber();
+	MB61_TX_SendMessage(MSG_ADDR_PHONE, MSG_ADDR_PC, 0x40, RequestSequenceNumber, 7, message);
+
+	//ExpectedResponse = MB61_Response_0x40_PhoneBook;
+
+
+
+	return (true);
+}
 
 void		MB61_TX_SendPhoneIDRequest(void)
 {

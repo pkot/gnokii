@@ -108,6 +108,9 @@ GSM_Error	MB61_CancelCall(void);
 #define		MSG_ADDR_UNKNOWN				(0xf8)
 #define		MSG_ADDR_GLOBAL					(0xff)
 
+#define		MAX_5160_PHONEBOOK_ENTRIES		(100)
+#define		MAX_6160_PHONEBOOK_ENTRIES		(200)
+
     /* States for receive code. */
 enum    MB61_RX_States {MB61_RX_Sync,
                         MB61_RX_GetDestination,
@@ -142,6 +145,7 @@ bool	MB61_TX_SendStandardAcknowledge(u8 sequence_number);
 
 int     MB61_TX_SendMessage(u8 destination, u8 source, u8 command, u8 sequence_byte, int message_length, u8 *buffer);
 void	MB61_TX_SendPhoneIDRequest(void);
+bool	MB61_TX_SendPhoneBookRequest(u8 entry);
 
 bool	MB61_InitialiseLink(void);
 void	MB61_SetExpectedResponse(enum MB61_Responses response);
