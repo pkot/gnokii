@@ -823,7 +823,7 @@ static gn_error sms_get_read(gn_data *data)
 		for (j = 0; j < data->folder_stats[data->sms_folder->folder_id]->used; j++) {		/* and compare them to those alread in list */
 			if (data->sms_folder->locations[i] == data->message_list[j][data->sms_folder->folder_id]->location) found = 1;
 		}
-		if (data->folder_stats[data->sms_folder->folder_id]->used >= GN_SMS_MESSAGE_MAX_NUMBER)
+		if (data->folder_stats[data->sms_folder->folder_id]->used >= GN_SMS_MESSAGE_MAX_NUMBER) {
 			dprintf("Max messages number in folder exceeded (%d)\n", GN_SMS_MESSAGE_MAX_NUMBER);
 			return GN_ERR_MEMORYFULL;
 		}
