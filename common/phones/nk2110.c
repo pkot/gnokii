@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.13  2001-11-09 13:17:11  pkot
+  Revision 1.14  2001-11-09 13:49:12  pkot
+  Pavel! You haven't implemented slave_process() function!
+
+  Revision 1.13  2001/11/09 13:17:11  pkot
   Update 2110 to a new libsms api
 
   Revision 1.12  2001/10/21 22:23:56  machek
@@ -1047,8 +1050,8 @@ static GSM_Error SMS_Slave(GSM_Statemachine *sm)
 				m.MemoryType = GMT_ME;
 				if (GetSMSMessage(&m) != GE_NONE)
 					eprintf("Could not find promissed message?\n");
-				else
-					slave_process(&m, SMSData[2]);
+/*				else
+					slave_process(&m, SMSData[2]);*/
 			}
 			break;
 		default:
