@@ -1,13 +1,12 @@
 gnokiid TODO...
 
-25 June 1999
+27 June 1999
 
-This initial commit of the source files for gnokiid and the AT emulation
-code is just that - an initial commit.  Please don't send patches
-for it yet as there are more holes than not!!
+This is the second commit of the source files for gnokiid and the virtual
+modem code.
 
-The only command supported is ATE - echo on/off, not very exciting
-but it will give a feel for what is to come.
+The only commands supported are ATE - echo on/off and AT+CSQ, not very
+exciting but it will give a feel for what is to come.
 
 There are lots of bugs and holes, most notably both the pty and stdin
 input routines are still cooked so they only generate a signal when
