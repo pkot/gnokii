@@ -91,6 +91,7 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 static GSM_Error Initialise(GSM_Statemachine *state);
 static GSM_Error GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
@@ -184,9 +185,10 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetSpeedDial(data, state);
 	case GOP_SetSpeedDial:
 		return SetSpeedDial(data, state);
+	case GOP_GetImei:
+		return GetIMEI(data, state);
 	case GOP_GetModel:
 	case GOP_GetRevision:
-	case GOP_GetImei:
 	case GOP_GetManufacturer:
 	case GOP_Identify:
 		return Identify(data, state);
@@ -328,7 +330,7 @@ static GSM_Error GetPowersource(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error IncomingPhoneStatus(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
-	float   csq_map[5] = {0, 8, 16, 24, 31};
+	float csq_map[5] = {0, 8, 16, 24, 31};
 
 	switch (message[3]) {
 	/* Phone status */
@@ -630,6 +632,14 @@ static GSM_Error IncomingPhonebook(int messagetype, unsigned char *message, int 
 	return GE_NONE;
 }
 
+static GSM_Error GetIMEI(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
+
+	dprintf("Getting imei...\n");
+	if (SM_SendMessage(state, 4, 0x1b, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x1b);
+}
 
 static GSM_Error Identify(GSM_Data *data, GSM_Statemachine *state)
 {
