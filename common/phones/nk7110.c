@@ -37,238 +37,241 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "misc.h"
+#include "gsm-error.h"
+#include "gsm-statemachine.h"
+#include "gsm-data.h"
+#include "gsm-encoding.h"
 #include "gsm-common.h"
 #include "nokia-decoding.h"
-#include "phones/generic.h"
 #include "phones/nk7110.h"
+#include "phones/generic.h"
+#include "phones/nokia.h"
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
-#include "phones/nokia.h"
-#include "gsm-encoding.h"
+
+#include "gnokii-internal.h"
 #include "gsm-api.h"
 
 #define SEND_MESSAGE_BLOCK(type, length) \
 do { \
-	if (SM_SendMessage(state, length, type, req) != GN_ERR_NONE) return GN_ERR_NOTREADY; \
-	return SM_Block(state, data, type); \
+	if (sm_message_send(state, length, type, req) != GN_ERR_NONE) return GN_ERR_NOTREADY; \
+	return sm_block(state, data, type); \
 } while (0)
 
 #define SEND_MESSAGE_WAITFOR(type, length) \
 do { \
-	if (SM_SendMessage(state, length, type, req) != GN_ERR_NONE) return GN_ERR_NOTREADY; \
-	return SM_WaitFor(state, data, type); \
+	if (sm_message_send(state, length, type, req) != GN_ERR_NONE) return GN_ERR_NOTREADY; \
+	return sm_wait_for(state, data, type); \
 } while (0)
 
 /* Functions prototypes */
-static gn_error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_Initialise(GSM_Statemachine *state);
-static gn_error P7110_GetModel(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetRevision(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetIMEI(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_Identify(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_SaveSMS(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_PollSMS(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_DeleteSMS(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_DeleteSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetPictureList(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press);
+static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_Initialise(struct gn_statemachine *state);
+static gn_error NK7110_GetModel(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetRevision(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetIMEI(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_Identify(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetBatteryLevel(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetRFLevel(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_SetBitmap(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetBitmap(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_ReadPhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetSpeedDial(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetSMSCenter(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetClock(char req_type, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_SendSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_SaveSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetSMSnoValidate(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_PollSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_DeleteSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetPictureList(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetSMSFolders(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetSMSStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetSecurityCode(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press);
 
-static gn_error P7110_DeleteWAPBookmark(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetWAPBookmark(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_WriteWAPBookmark(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_GetWAPSetting(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_ActivateWAPSetting(GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_WriteWAPSetting(GSM_Data *data, GSM_Statemachine *state);
+static gn_error NK7110_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetWAPBookmark(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_WriteWAPBookmark(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_GetWAPSetting(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_ActivateWAPSetting(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *state);
 
-static gn_error P7110_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingStartup(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingSMS(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingFolder(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingWAP(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
-static gn_error P7110_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static gn_error NK7110_IncomingIdentify(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingBattLevel(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingStartup(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingClock(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_IncomingKeypress(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
-static int GetMemoryType(GSM_MemoryType memory_type);
+static int get_memory_type(gn_memory_type memory_type);
 
 /* Some globals */
 
-static bool SMSLoop = false; /* Are we in infinite SMS reading loop? */
-static bool NewSMS  = false; /* Do we have a new SMS? */
+static bool sms_loop = false; /* Are we in infinite SMS reading loop? */
+static bool new_sms  = false; /* Do we have a new SMS? */
 
-static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
-	{ P7110_MSG_FOLDER,	P7110_IncomingFolder },
-	{ P7110_MSG_SMS,	P7110_IncomingSMS },
-	{ P7110_MSG_PHONEBOOK,	P7110_IncomingPhonebook },
-	{ P7110_MSG_NETSTATUS,	P7110_IncomingNetwork },
-	{ P7110_MSG_CALENDAR,	P7110_IncomingCalendar },
-	{ P7110_MSG_BATTERY,	P7110_IncomingBattLevel },
-	{ P7110_MSG_CLOCK,	P7110_IncomingClock },
-	{ P7110_MSG_IDENTITY,	P7110_IncomingIdentify },
-	{ P7110_MSG_STLOGO,	P7110_IncomingStartup },
-	{ P7110_MSG_DIVERT,	PNOK_IncomingCallDivert },
-	{ P7110_MSG_SECURITY,	P7110_IncomingSecurity },
-	{ P7110_MSG_WAP,	P7110_IncomingWAP },
-	{ P7110_MSG_KEYPRESS_RESP,	P7110_IncomingKeypress },
+static gn_incoming_function_type nk7110_incoming_functions[] = {
+	{ NK7110_MSG_FOLDER,	NK7110_IncomingFolder },
+	{ NK7110_MSG_SMS,	NK7110_IncomingSMS },
+	{ NK7110_MSG_PHONEBOOK,	NK7110_IncomingPhonebook },
+	{ NK7110_MSG_NETSTATUS,	NK7110_IncomingNetwork },
+	{ NK7110_MSG_CALENDAR,	NK7110_IncomingCalendar },
+	{ NK7110_MSG_BATTERY,	NK7110_IncomingBattLevel },
+	{ NK7110_MSG_CLOCK,	NK7110_IncomingClock },
+	{ NK7110_MSG_IDENTITY,	NK7110_IncomingIdentify },
+	{ NK7110_MSG_STLOGO,	NK7110_IncomingStartup },
+	{ NK7110_MSG_DIVERT,	pnok_call_divert_incoming },
+	{ NK7110_MSG_SECURITY,	NK7110_IncomingSecurity },
+	{ NK7110_MSG_WAP,	NK7110_IncomingWAP },
+	{ NK7110_MSG_KEYPRESS_RESP,	NK7110_IncomingKeypress },
 	{ 0, NULL }
 };
 
-GSM_Phone phone_nokia_7110 = {
-	P7110_IncomingFunctions,
-	PGEN_IncomingDefault,
+gn_driver phone_nokia_7110 = {
+	nk7110_incoming_functions,
+	pgen_incoming_default,
 	/* Mobile phone information */
 	{
 		"7110|6210|6250|7190",      /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
-		GRF_Percentage,        /* RF level units */
+		GN_RF_Percentage,        /* RF level units */
 		7,                     /* Max Battery Level */
 		0,                     /* Min Battery Level */
-		GBU_Percentage,        /* Battery level units */
-		GDT_DateTime,          /* Have date/time support */
-		GDT_TimeOnly,	       /* Alarm supports time only */
+		GN_BU_Percentage,        /* Battery level units */
+		GN_DT_DateTime,          /* Have date/time support */
+		GN_DT_TimeOnly,	       /* Alarm supports time only */
 		1,                     /* Alarms available - FIXME */
 		60, 96,                /* Startup logo size - 7110 is fixed at init */
 		21, 78,                /* Op logo size */
 		14, 72                 /* Caller logo size */
 	},
-	P7110_Functions,
+	NK7110_Functions,
 	NULL
 };
 
 /* FIXME - a little macro would help here... */
-
-static gn_error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	switch (op) {
-	case GOP_Init:
-		return P7110_Initialise(state);
-	case GOP_Terminate:
-		return PGEN_Terminate(data, state);
-	case GOP_GetModel:
-		return P7110_GetModel(data, state);
-	case GOP_GetRevision:
-		return P7110_GetRevision(data, state);
-	case GOP_GetImei:
-		return P7110_GetIMEI(data, state);
-	case GOP_Identify:
-		return P7110_Identify(data, state);
-	case GOP_GetBatteryLevel:
-		return P7110_GetBatteryLevel(data, state);
-	case GOP_GetRFLevel:
-		return P7110_GetRFLevel(data, state);
-	case GOP_GetMemoryStatus:
-		return P7110_GetMemoryStatus(data, state);
-	case GOP_GetBitmap:
-		return P7110_GetBitmap(data, state);
-	case GOP_SetBitmap:
-		return P7110_SetBitmap(data, state);
-	case GOP_ReadPhonebook:
-		return P7110_ReadPhonebook(data, state);
-	case GOP_WritePhonebook:
-		return P7110_WritePhonebookLocation(data, state);
-	case GOP_GetNetworkInfo:
-		return P7110_GetNetworkInfo(data, state);
-	case GOP_GetSpeedDial:
-		return P7110_GetSpeedDial(data, state);
-	case GOP_GetSMSCenter:
-		return P7110_GetSMSCenter(data, state);
-	case GOP_GetDateTime:
-		return P7110_GetClock(P7110_SUBCLO_GET_DATE, data, state);
-	case GOP_GetAlarm:
-		return P7110_GetClock(P7110_SUBCLO_GET_ALARM, data, state);
-	case GOP_GetCalendarNote:
-		return P7110_GetCalendarNote(data, state);
-	case GOP_WriteCalendarNote:
-		return P7110_WriteCalendarNote(data, state);
-	case GOP_DeleteCalendarNote:
-		return P7110_DeleteCalendarNote(data, state);
-	case GOP_GetSMS:
+	case GN_OP_Init:
+		return NK7110_Initialise(state);
+	case GN_OP_Terminate:
+		return pgen_terminate(data, state);
+	case GN_OP_GetModel:
+		return NK7110_GetModel(data, state);
+	case GN_OP_GetRevision:
+		return NK7110_GetRevision(data, state);
+	case GN_OP_GetImei:
+		return NK7110_GetIMEI(data, state);
+	case GN_OP_Identify:
+		return NK7110_Identify(data, state);
+	case GN_OP_GetBatteryLevel:
+		return NK7110_GetBatteryLevel(data, state);
+	case GN_OP_GetRFLevel:
+		return NK7110_GetRFLevel(data, state);
+	case GN_OP_GetMemoryStatus:
+		return NK7110_GetMemoryStatus(data, state);
+	case GN_OP_GetBitmap:
+		return NK7110_GetBitmap(data, state);
+	case GN_OP_SetBitmap:
+		return NK7110_SetBitmap(data, state);
+	case GN_OP_ReadPhonebook:
+		return NK7110_ReadPhonebook(data, state);
+	case GN_OP_WritePhonebook:
+		return NK7110_WritePhonebookLocation(data, state);
+	case GN_OP_GetNetworkInfo:
+		return NK7110_GetNetworkInfo(data, state);
+	case GN_OP_GetSpeedDial:
+		return NK7110_GetSpeedDial(data, state);
+	case GN_OP_GetSMSCenter:
+		return NK7110_GetSMSCenter(data, state);
+	case GN_OP_GetDateTime:
+		return NK7110_GetClock(NK7110_SUBCLO_GET_DATE, data, state);
+	case GN_OP_GetAlarm:
+		return NK7110_GetClock(NK7110_SUBCLO_GET_ALARM, data, state);
+	case GN_OP_GetCalendarNote:
+		return NK7110_GetCalendarNote(data, state);
+	case GN_OP_WriteCalendarNote:
+		return NK7110_WriteCalendarNote(data, state);
+	case GN_OP_DeleteCalendarNote:
+		return NK7110_DeleteCalendarNote(data, state);
+	case GN_OP_GetSMS:
 		dprintf("Getting SMS (validating)...\n");
-		return P7110_GetSMS(data, state);
-	case GOP_GetSMSnoValidate:
+		return NK7110_GetSMS(data, state);
+	case GN_OP_GetSMSnoValidate:
 		dprintf("Getting SMS (no validating)...\n");
-		return P7110_GetSMSnoValidate(data, state);
-	case GOP_OnSMS:
+		return NK7110_GetSMSnoValidate(data, state);
+	case GN_OP_OnSMS:
 		/* Register notify when running for the first time */
-		if (data->OnSMS) {
-			NewSMS = true;
-			return GN_ERR_NONE; /* FIXME P7110_GetIncomingSMS(data, state); */
+		if (data->on_sms) {
+			new_sms = true;
+			return GN_ERR_NONE; /* FIXME NK7110_GetIncomingSMS(data, state); */
 		}
 		break;
-	case GOP_PollSMS:
-		if (NewSMS) return GN_ERR_NONE; /* FIXME P7110_GetIncomingSMS(data, state); */
+	case GN_OP_PollSMS:
+		if (new_sms) return GN_ERR_NONE; /* FIXME NK7110_GetIncomingSMS(data, state); */
 		break;
-	case GOP_SendSMS:
-		return P7110_SendSMS(data, state);
-	case GOP_SaveSMS:
-		return P7110_SaveSMS(data, state);
-	case GOP_DeleteSMSnoValidate:
-		return P7110_DeleteSMSnoValidate(data, state);
-	case GOP_DeleteSMS:
-		return P7110_DeleteSMS(data, state);
-	case GOP_GetSMSStatus:
-		return P7110_GetSMSStatus(data, state);
-	case GOP_CallDivert:
-		return PNOK_CallDivert(data, state);
-	case GOP_NetMonitor:
-		return PNOK_netmonitor(data, state);
-	case GOP_MakeCall:
-		return PNOK_make_call(data, state);
-	case GOP_AnswerCall:
-		return PNOK_answer_call(data, state);
-	case GOP_CancelCall:
-		return PNOK_cancel_call(data, state);
-	case GOP_GetSecurityCode:
-		return P7110_GetSecurityCode(data, state);
-	case GOP_GetSMSFolders:
-		return P7110_GetSMSFolders(data, state);
-	case GOP_GetSMSFolderStatus:
-		return P7110_GetSMSFolderStatus(data, state);
-	case GOP7110_GetPictureList:
-		return P7110_GetPictureList(data, state);
-	case GOP_DeleteWAPBookmark:
-		return P7110_DeleteWAPBookmark(data, state);
-	case GOP_GetWAPBookmark:
-		return P7110_GetWAPBookmark(data, state);
-	case GOP_WriteWAPBookmark:
-		return P7110_WriteWAPBookmark(data, state);
-	case GOP_GetWAPSetting:
-		return P7110_GetWAPSetting(data, state);
-	case GOP_ActivateWAPSetting:
-		return P7110_ActivateWAPSetting(data, state);
-	case GOP_WriteWAPSetting:
-		return P7110_WriteWAPSetting(data, state);
-	case GOP_PressPhoneKey:
-		return P7110_PressOrReleaseKey(data, state, true);
-	case GOP_ReleasePhoneKey:
-		return P7110_PressOrReleaseKey(data, state, false);
+	case GN_OP_SendSMS:
+		return NK7110_SendSMS(data, state);
+	case GN_OP_SaveSMS:
+		return NK7110_SaveSMS(data, state);
+	case GN_OP_DeleteSMSnoValidate:
+		return NK7110_DeleteSMSnoValidate(data, state);
+	case GN_OP_DeleteSMS:
+		return NK7110_DeleteSMS(data, state);
+	case GN_OP_GetSMSStatus:
+		return NK7110_GetSMSStatus(data, state);
+	case GN_OP_CallDivert:
+		return pnok_call_divert(data, state);
+	case GN_OP_NetMonitor:
+		return pnok_netmonitor(data, state);
+	case GN_OP_MakeCall:
+		return pnok_call_make(data, state);
+	case GN_OP_AnswerCall:
+		return pnok_call_answer(data, state);
+	case GN_OP_CancelCall:
+		return pnok_call_cancel(data, state);
+	case GN_OP_GetSecurityCode:
+		return NK7110_GetSecurityCode(data, state);
+	case GN_OP_GetSMSFolders:
+		return NK7110_GetSMSFolders(data, state);
+	case GN_OP_GetSMSFolderStatus:
+		return NK7110_GetSMSFolderStatus(data, state);
+	case GN_OP_NK7110_GetPictureList:
+		return NK7110_GetPictureList(data, state);
+	case GN_OP_DeleteWAPBookmark:
+		return NK7110_DeleteWAPBookmark(data, state);
+	case GN_OP_GetWAPBookmark:
+		return NK7110_GetWAPBookmark(data, state);
+	case GN_OP_WriteWAPBookmark:
+		return NK7110_WriteWAPBookmark(data, state);
+	case GN_OP_GetWAPSetting:
+		return NK7110_GetWAPSetting(data, state);
+	case GN_OP_ActivateWAPSetting:
+		return NK7110_ActivateWAPSetting(data, state);
+	case GN_OP_WriteWAPSetting:
+		return NK7110_WriteWAPSetting(data, state);
+	case GN_OP_PressPhoneKey:
+		return NK7110_PressOrReleaseKey(data, state, true);
+	case GN_OP_ReleasePhoneKey:
+		return NK7110_PressOrReleaseKey(data, state, false);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -276,37 +279,35 @@ static gn_error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachi
 }
 
 /* Initialise is the only function allowed to 'use' state */
-static gn_error P7110_Initialise(GSM_Statemachine *state)
+static gn_error NK7110_Initialise(struct gn_statemachine *state)
 {
-	GSM_Data data;
+	gn_data data;
 	char model[10];
-	gn_error err;
+	gn_error err = GN_ERR_NONE;
 	bool connected = false;
 	unsigned int try = 0;
 
 	/* Copy in the phone info */
-	memcpy(&(state->Phone), &phone_nokia_7110, sizeof(GSM_Phone));
+	memcpy(&(state->driver), &phone_nokia_7110, sizeof(gn_driver));
 
 	dprintf("Connecting\n");
 	while (!connected) {
 		if (try > 2) break;
-		switch (state->Link.ConnectionType) {
-		case GCT_DAU9P:
+		switch (state->link.connection_type) {
+		case GN_CT_DAU9P:
 			try++;
-		case GCT_DLR3P:
+		case GN_CT_DLR3P:
 			if (try > 1) {
 				try = 3;
 				break;
 			}
-		case GCT_Serial:
-			err = FBUS_Initialise(&(state->Link), state, try++);
+		case GN_CT_Serial:
+			err = fbus_initialise(&(state->link), state, try++);
 			break;
-		case GCT_Infrared:
-#ifdef HAVE_IRDA
-		case GCT_Irda:
-			err = PHONET_Initialise(&(state->Link), state);
+		case GN_CT_Infrared:
+		case GN_CT_Irda:
+			err = phonet_initialise(&(state->link), state);
 			break;
-#endif
 		default:
 			return GN_ERR_NOTSUPPORTED;
 		}
@@ -316,18 +317,18 @@ static gn_error P7110_Initialise(GSM_Statemachine *state)
 			continue;
 		}
 
-		SM_Initialise(state);
+		sm_initialise(state);
 
 		/* Now test the link and get the model */
-		GSM_DataClear(&data);
-		data.Model = model;
-		if (state->Phone.Functions(GOP_GetModel, &data, state) == GN_ERR_NONE)
+		gn_data_clear(&data);
+		data.model = model;
+		if (state->driver.functions(GN_OP_GetModel, &data, state) == GN_ERR_NONE)
 			connected = true;
 	}
 	if (!connected) return err;
 	/* Check for 7110 and alter the startup logo size */
 	if (strcmp(model, "NSE-5") == 0) {
-		state->Phone.Info.StartupLogoH = 65;
+		state->driver.phone.startup_logo_height = 65;
 		dprintf("7110 detected - startup logo height set to 65\n");
 	}
 	return GN_ERR_NONE;
@@ -336,36 +337,36 @@ static gn_error P7110_Initialise(GSM_Statemachine *state)
 /*****************************/
 /********* IDENTIFY **********/
 /*****************************/
-static gn_error P7110_IncomingIdentify(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingIdentify(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch (message[3]) {
 	case 0x02:
-		if (data->Imei) {
+		if (data->imei) {
 			int n;
 			unsigned char *s = strchr(message + 4, '\n');
 
 			if (s) n = s - message - 3;
-			else n = GSM_MAX_IMEI_LENGTH;
-			snprintf(data->Imei, GNOKII_MIN(n, GSM_MAX_IMEI_LENGTH), "%s", message + 4);
-			dprintf("Received imei %s\n", data->Imei);
+			else n = GN_IMEI_MAX_LENGTH;
+			snprintf(data->imei, GNOKII_MIN(n, GN_IMEI_MAX_LENGTH), "%s", message + 4);
+			dprintf("Received imei %s\n", data->imei);
 		}
 		break;
 	case 0x04:
-		if (data->Model) {
+		if (data->model) {
 			int n;
 			unsigned char *s = strchr(message + 22, '\n');
 
-			n = s ? s - message - 21 : GSM_MAX_MODEL_LENGTH;
-			snprintf(data->Model, GNOKII_MIN(n, GSM_MAX_MODEL_LENGTH), "%s", message + 22);
-			dprintf("Received model %s\n",data->Model);
+			n = s ? s - message - 21 : GN_MODEL_MAX_LENGTH;
+			snprintf(data->model, GNOKII_MIN(n, GN_MODEL_MAX_LENGTH), "%s", message + 22);
+			dprintf("Received model %s\n", data->model);
 		}
-		if (data->Revision) {
+		if (data->revision) {
 			int n;
 			unsigned char *s = strchr(message + 7, '\n');
 
-			n = s ? s - message - 6 : GSM_MAX_REVISION_LENGTH;
-			snprintf(data->Revision, GNOKII_MIN(n, GSM_MAX_REVISION_LENGTH), "%s", message + 7);
-			dprintf("Received revision %s\n",data->Revision);
+			n = s ? s - message - 6 : GN_REVISION_MAX_LENGTH;
+			snprintf(data->revision, GNOKII_MIN(n, GN_REVISION_MAX_LENGTH), "%s", message + 7);
+			dprintf("Received revision %s\n", data->revision);
 		}
 		break;
 	default:
@@ -377,59 +378,59 @@ static gn_error P7110_IncomingIdentify(int messagetype, unsigned char *message, 
 
 /* Just as an example.... */
 /* But note that both requests are the same type which isn't very 'proper' */
-static gn_error P7110_Identify(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_Identify(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
 	unsigned char req2[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
 
 	dprintf("Identifying...\n");
-	PNOK_GetManufacturer(data->Manufacturer);
-	if (SM_SendMessage(state, 4, P7110_MSG_IDENTITY, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	if (SM_SendMessage(state, 6, P7110_MSG_IDENTITY, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	SM_WaitFor(state, data, P7110_MSG_IDENTITY);
-	SM_Block(state, data, P7110_MSG_IDENTITY); /* waits for all requests - returns req2 error */
-	SM_GetError(state, P7110_MSG_IDENTITY);
+	pnok_manufacturer_get(data->manufacturer);
+	if (sm_message_send(state, 4, NK7110_MSG_IDENTITY, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(state, 6, NK7110_MSG_IDENTITY, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	sm_wait_for(state, data, NK7110_MSG_IDENTITY);
+	sm_block(state, data, NK7110_MSG_IDENTITY); /* waits for all requests - returns req2 error */
+	sm_error_get(state, NK7110_MSG_IDENTITY);
 
 	/* Check that we are back at state Initialised */
-	if (SM_Loop(state, 0) != Initialised) return GN_ERR_UNKNOWN;
+	if (gn_sm_loop(state, 0) != GN_SM_Initialised) return GN_ERR_UNKNOWN;
 	return GN_ERR_NONE;
 }
 
-static gn_error P7110_GetModel(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetModel(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
 
 	dprintf("Getting model...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_IDENTITY, 6);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_IDENTITY, 6);
 }
 
-static gn_error P7110_GetRevision(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetRevision(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
 
 	dprintf("Getting revision...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_IDENTITY, 6);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_IDENTITY, 6);
 }
 
-static gn_error P7110_GetIMEI(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetIMEI(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01};
 
 	dprintf("Getting imei...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_IDENTITY, 4);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_IDENTITY, 4);
 }
 
 /*****************************/
 /********** BATTERY **********/
 /*****************************/
-static gn_error P7110_IncomingBattLevel(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingBattLevel(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch (message[3]) {
 	case 0x03:
-		if (data->BatteryLevel) {
-			*(data->BatteryUnits) = GBU_Percentage;
-			*(data->BatteryLevel) = message[5];
-			dprintf("Battery level %f\n",*(data->BatteryLevel));
+		if (data->battery_level) {
+			*(data->battery_unit) = GN_BU_Percentage;
+			*(data->battery_level) = message[5];
+			dprintf("Battery level %f\n",*(data->battery_level));
 		}
 		break;
 	default:
@@ -439,18 +440,18 @@ static gn_error P7110_IncomingBattLevel(int messagetype, unsigned char *message,
 	return GN_ERR_NONE;
 }
 
-static gn_error P7110_GetBatteryLevel(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetBatteryLevel(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02};
 
 	dprintf("Getting battery level...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_BATTERY, 4);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_BATTERY, 4);
 }
 
 /*****************************/
 /********** NETWORK **********/
 /*****************************/
-static gn_error P7110_IncomingNetwork(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingNetwork(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char *blockstart;
 	int i;
@@ -462,40 +463,40 @@ static gn_error P7110_IncomingNetwork(int messagetype, unsigned char *message, i
 			switch (blockstart[0]) {
 			case 0x01:  /* Operator details */
 				/* Network code is stored as 0xBA 0xXC 0xED ("ABC DE"). */
-				if (data->NetworkInfo) {
+				if (data->network_info) {
 					/* Is this correct? */
-					data->NetworkInfo->CellID[0] = blockstart[4];
-					data->NetworkInfo->CellID[1] = blockstart[5];
-					data->NetworkInfo->LAC[0] = blockstart[6];
-					data->NetworkInfo->LAC[1] = blockstart[7];
-					data->NetworkInfo->NetworkCode[0] = '0' + (blockstart[8] & 0x0f);
-					data->NetworkInfo->NetworkCode[1] = '0' + (blockstart[8] >> 4);
-					data->NetworkInfo->NetworkCode[2] = '0' + (blockstart[9] & 0x0f);
-					data->NetworkInfo->NetworkCode[3] = ' ';
-					data->NetworkInfo->NetworkCode[4] = '0' + (blockstart[10] & 0x0f);
-					data->NetworkInfo->NetworkCode[5] = '0' + (blockstart[10] >> 4);
-					data->NetworkInfo->NetworkCode[6] = 0;
+					data->network_info->cell_id[0] = blockstart[4];
+					data->network_info->cell_id[1] = blockstart[5];
+					data->network_info->LAC[0] = blockstart[6];
+					data->network_info->LAC[1] = blockstart[7];
+					data->network_info->network_code[0] = '0' + (blockstart[8] & 0x0f);
+					data->network_info->network_code[1] = '0' + (blockstart[8] >> 4);
+					data->network_info->network_code[2] = '0' + (blockstart[9] & 0x0f);
+					data->network_info->network_code[3] = ' ';
+					data->network_info->network_code[4] = '0' + (blockstart[10] & 0x0f);
+					data->network_info->network_code[5] = '0' + (blockstart[10] >> 4);
+					data->network_info->network_code[6] = 0;
 				}
-				if (data->Bitmap) {
-					data->Bitmap->netcode[0] = '0' + (blockstart[8] & 0x0f);
-					data->Bitmap->netcode[1] = '0' + (blockstart[8] >> 4);
-					data->Bitmap->netcode[2] = '0' + (blockstart[9] & 0x0f);
-					data->Bitmap->netcode[3] = ' ';
-					data->Bitmap->netcode[4] = '0' + (blockstart[10] & 0x0f);
-					data->Bitmap->netcode[5] = '0' + (blockstart[10] >> 4);
-					data->Bitmap->netcode[6] = 0;
-					dprintf("Operator %s\n", data->Bitmap->netcode);
+				if (data->bitmap) {
+					data->bitmap->netcode[0] = '0' + (blockstart[8] & 0x0f);
+					data->bitmap->netcode[1] = '0' + (blockstart[8] >> 4);
+					data->bitmap->netcode[2] = '0' + (blockstart[9] & 0x0f);
+					data->bitmap->netcode[3] = ' ';
+					data->bitmap->netcode[4] = '0' + (blockstart[10] & 0x0f);
+					data->bitmap->netcode[5] = '0' + (blockstart[10] >> 4);
+					data->bitmap->netcode[6] = 0;
+					dprintf("Operator %s\n", data->bitmap->netcode);
 				}
 				break;
 			case 0x04: /* Logo */
-				if (data->Bitmap) {
+				if (data->bitmap) {
 					dprintf("Op logo received ok\n");
-					data->Bitmap->type = GN_BMP_OperatorLogo;
-					data->Bitmap->size = blockstart[5]; /* Probably + [4]<<8 */
-					data->Bitmap->height = blockstart[3];
-					data->Bitmap->width = blockstart[2];
-					memcpy(data->Bitmap->bitmap, blockstart + 8, data->Bitmap->size);
-					dprintf("Logo (%dx%d)\n", data->Bitmap->height, data->Bitmap->width);
+					data->bitmap->type = GN_BMP_OperatorLogo;
+					data->bitmap->size = blockstart[5]; /* Probably + [4]<<8 */
+					data->bitmap->height = blockstart[3];
+					data->bitmap->width = blockstart[2];
+					memcpy(data->bitmap->bitmap, blockstart + 8, data->bitmap->size);
+					dprintf("Logo (%dx%d)\n", data->bitmap->height, data->bitmap->width);
 				}
 				break;
 			default:
@@ -506,10 +507,10 @@ static gn_error P7110_IncomingNetwork(int messagetype, unsigned char *message, i
 		}
 		break;
 	case 0x82:
-		if (data->RFLevel) {
-			*(data->RFUnits) = GRF_Percentage;
-			*(data->RFLevel) = message[4];
-			dprintf("RF level %f\n", *(data->RFLevel));
+		if (data->rf_level) {
+			*(data->rf_unit) = GN_RF_Percentage;
+			*(data->rf_level) = message[4];
+			dprintf("RF level %f\n", *(data->rf_level));
 		}
 		break;
 	case 0xa4:
@@ -523,23 +524,23 @@ static gn_error P7110_IncomingNetwork(int messagetype, unsigned char *message, i
 }
 
 
-static gn_error P7110_GetRFLevel(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetRFLevel(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x81};
 
 	dprintf("Getting rf level...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_NETSTATUS, 4);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_NETSTATUS, 4);
 }
 
-static gn_error P7110_GetNetworkInfo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x70};
 
 	dprintf("Getting Network Info...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_NETSTATUS, 4);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_NETSTATUS, 4);
 }
 
-static gn_error SetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[500] = { FBUS_FRAME_HEADER, 0xa3, 0x01,
 				   0x00,              /* logo enabled */
@@ -552,42 +553,42 @@ static gn_error SetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
 				   0x00, 0x00 };
 	int count = 18;
 
-	if ((data->Bitmap->width != state->Phone.Info.OpLogoW) ||
-	    (data->Bitmap->height != state->Phone.Info.OpLogoH)) {
+	if ((data->bitmap->width != state->driver.phone.operator_logo_width) ||
+	    (data->bitmap->height != state->driver.phone.operator_logo_height)) {
 		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n", 
-			state->Phone.Info.OpLogoH, state->Phone.Info.OpLogoW, data->Bitmap->height, data->Bitmap->width);
+			state->driver.phone.operator_logo_height, state->driver.phone.operator_logo_width, data->bitmap->height, data->bitmap->width);
 		return GN_ERR_INVALIDSIZE;
 	}
 
-	if (strcmp(data->Bitmap->netcode, "000 00")) {  /* set logo */
+	if (strcmp(data->bitmap->netcode, "000 00")) {  /* set logo */
 		req[5] = 0x01;      /* Logo enabled */
-		req[6] = ((data->Bitmap->netcode[1] & 0x0f) << 4) | (data->Bitmap->netcode[0] & 0x0f);
-		req[7] = 0xf0 | (data->Bitmap->netcode[2] & 0x0f);
-		req[8] = ((data->Bitmap->netcode[5] & 0x0f) << 4) | (data->Bitmap->netcode[4] & 0x0f);
-		req[11] = 8 + data->Bitmap->size;
-		req[12] = data->Bitmap->width;
-		req[13] = data->Bitmap->height;
-		req[15] = data->Bitmap->size;
-		memcpy(req + count, data->Bitmap->bitmap, data->Bitmap->size);
-		count += data->Bitmap->size;
+		req[6] = ((data->bitmap->netcode[1] & 0x0f) << 4) | (data->bitmap->netcode[0] & 0x0f);
+		req[7] = 0xf0 | (data->bitmap->netcode[2] & 0x0f);
+		req[8] = ((data->bitmap->netcode[5] & 0x0f) << 4) | (data->bitmap->netcode[4] & 0x0f);
+		req[11] = 8 + data->bitmap->size;
+		req[12] = data->bitmap->width;
+		req[13] = data->bitmap->height;
+		req[15] = data->bitmap->size;
+		memcpy(req + count, data->bitmap->bitmap, data->bitmap->size);
+		count += data->bitmap->size;
 	}
 	dprintf("Setting op logo...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_NETSTATUS, count);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_NETSTATUS, count);
 }
 
-static gn_error GetOperatorBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x70};
 
 	dprintf("Getting op logo...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_NETSTATUS, 4);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_NETSTATUS, 4);
 }
 
 
 /*****************************/
 /********* PHONEBOOK *********/
 /*****************************/
-static gn_error P7110_IncomingPhonebook(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char *blockstart;
 	unsigned char blocks;
@@ -595,10 +596,10 @@ static gn_error P7110_IncomingPhonebook(int messagetype, unsigned char *message,
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */
-		if (data->MemoryStatus) {
+		if (data->memory_status) {
 			if (message[5] != 0xff) {
-				data->MemoryStatus->Used = (message[16] << 8) + message[17];
-				data->MemoryStatus->Free = ((message[14] << 8) + message[15]) - data->MemoryStatus->Used;
+				data->memory_status->used = (message[16] << 8) + message[17];
+				data->memory_status->free = ((message[14] << 8) + message[15]) - data->memory_status->used;
 				dprintf("Memory status - location = %d\n", (message[8] << 8) + message[9]);
 			} else {
 				dprintf("Unknown error getting mem status\n");
@@ -607,21 +608,21 @@ static gn_error P7110_IncomingPhonebook(int messagetype, unsigned char *message,
 		}
 		break;
 	case 0x08:  /* Read Memory response */
-		if (data->PhonebookEntry) {
-			data->PhonebookEntry->Empty = true;
-			data->PhonebookEntry->Group = 5; /* no group */
-			data->PhonebookEntry->Name[0] = '\0';
-			data->PhonebookEntry->Number[0] = '\0';
-			data->PhonebookEntry->SubEntriesCount = 0;
-			data->PhonebookEntry->Date.Year = 0;
-			data->PhonebookEntry->Date.Month = 0;
-			data->PhonebookEntry->Date.Day = 0;
-			data->PhonebookEntry->Date.Hour = 0;
-			data->PhonebookEntry->Date.Minute = 0;
-			data->PhonebookEntry->Date.Second = 0;
+		if (data->phonebook_entry) {
+			data->phonebook_entry->empty = true;
+			data->phonebook_entry->caller_group = 5; /* no group */
+			data->phonebook_entry->name[0] = '\0';
+			data->phonebook_entry->number[0] = '\0';
+			data->phonebook_entry->subentries_count = 0;
+			data->phonebook_entry->date.year = 0;
+			data->phonebook_entry->date.month = 0;
+			data->phonebook_entry->date.day = 0;
+			data->phonebook_entry->date.hour = 0;
+			data->phonebook_entry->date.minute = 0;
+			data->phonebook_entry->date.second = 0;
 		}
-		if (data->Bitmap) {
-			data->Bitmap->text[0] = '\0';
+		if (data->bitmap) {
+			data->bitmap->text[0] = '\0';
 		}
 		if (message[6] == 0x0f) { /* not found */
 			switch (message[10]) {
@@ -639,7 +640,7 @@ static gn_error P7110_IncomingPhonebook(int messagetype, unsigned char *message,
 		blocks     = message[17];
 		blockstart = message + 18;
 		subblockcount = 0;
-		return DecodePhonebook(message + 18, length - 17, data, blocks, message[11], 8);
+		return phonebook_decode(message + 18, length - 17, data, blocks, message[11], 8);
 		break;
 	case 0x0c:
 		if (message[6] == 0x0f) {
@@ -660,25 +661,25 @@ static gn_error P7110_IncomingPhonebook(int messagetype, unsigned char *message,
 	return GN_ERR_NONE;
 }
 
-static gn_error P7110_GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03, 0x00, 0x00};
 
 	dprintf("Getting memory status...\n");
-	req[5] = GetMemoryType(data->MemoryStatus->MemoryType);
-	SEND_MESSAGE_BLOCK(P7110_MSG_PHONEBOOK, 6);
+	req[5] = get_memory_type(data->memory_status->memory_type);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 6);
 }
 
-static gn_error GetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
 				  0x00, 0x10 , /* memory type */
 				  0x00, 0x00,  /* location */
 				  0x00, 0x00};
 
-	req[11] = GNOKII_MIN(data->Bitmap->number + 1, GSM_MAX_CALLER_GROUPS);
+	req[11] = GNOKII_MIN(data->bitmap->number + 1, GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER);
 	dprintf("Getting caller(%d) logo...\n", req[11]);
-	SEND_MESSAGE_BLOCK(P7110_MSG_PHONEBOOK, 14);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 14);
 }
 
 static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
@@ -694,7 +695,7 @@ static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
 	return (size + 6);
 }
 
-static gn_error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
 				  0x00, 0x10,  /* memory type */
@@ -704,26 +705,26 @@ static gn_error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	int block, i;
 	unsigned int count = 18;
 
-	if ((data->Bitmap->width != state->Phone.Info.CallerLogoW) ||
-	    (data->Bitmap->height != state->Phone.Info.CallerLogoH)) {
-		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",state->Phone.Info.CallerLogoH, state->Phone.Info.CallerLogoW, data->Bitmap->height, data->Bitmap->width);
+	if ((data->bitmap->width != state->driver.phone.caller_logo_width) ||
+	    (data->bitmap->height != state->driver.phone.caller_logo_height)) {
+		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n",state->driver.phone.caller_logo_height, state->driver.phone.caller_logo_width, data->bitmap->height, data->bitmap->width);
 	    return GN_ERR_INVALIDSIZE;
 	}
 
-	req[13] = data->Bitmap->number + 1;
-	dprintf("Setting caller(%d) bitmap...\n",data->Bitmap->number);
+	req[13] = data->bitmap->number + 1;
+	dprintf("Setting caller(%d) bitmap...\n",data->bitmap->number);
 	block = 1;
 	/* Name */
-	i = strlen(data->Bitmap->text);
-	char_encode_unicode((string + 1), data->Bitmap->text, i);
+	i = strlen(data->bitmap->text);
+	char_encode_unicode((string + 1), data->bitmap->text, i);
 	string[0] = i * 2;
 	count += PackBlock(0x07, i * 2 + 1, block++, string, req + count);
 	/* Ringtone */
-	string[0] = data->Bitmap->ringtone;
+	string[0] = data->bitmap->ringtone;
 	string[1] = 0;
 	count += PackBlock(0x0c, 2, block++, string, req + count);
 	/* Number */
-	string[0] = data->Bitmap->number+1;
+	string[0] = data->bitmap->number+1;
 	string[1] = 0;
 	count += PackBlock(0x1e, 2, block++, string, req + count);
 	/* Logo on/off - assume on for now */
@@ -731,37 +732,37 @@ static gn_error SetCallerBitmap(GSM_Data *data, GSM_Statemachine *state)
 	string[1] = 0;
 	count += PackBlock(0x1c, 2, block++, string, req + count);
 	/* Logo */
-	string[0] = data->Bitmap->width;
-	string[1] = data->Bitmap->height;
+	string[0] = data->bitmap->width;
+	string[1] = data->bitmap->height;
 	string[2] = 0;
 	string[3] = 0;
 	string[4] = 0x7e; /* Size */
-	memcpy(string + 5, data->Bitmap->bitmap, data->Bitmap->size);
-	count += PackBlock(0x1b, data->Bitmap->size + 5, block++, string, req + count);
+	memcpy(string + 5, data->bitmap->bitmap, data->bitmap->size);
+	count += PackBlock(0x1b, data->bitmap->size + 5, block++, string, req + count);
 	req[17] = block - 1;
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_PHONEBOOK, count);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, count);
 }
 
-static gn_error P7110_DeletePhonebookLocation(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_DeletePhonebookLocation(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0f, 0x00, 0x01, 0x04, 0x00, 0x00, 0x0c, 0x01, 0xff,
 				  0x00, 0x00,  /* location */
 				  0x00,  /* memory type */
 				  0x00, 0x00, 0x00};
-	GSM_PhonebookEntry *entry;
+	gn_phonebook_entry *entry;
 
-	if (data->PhonebookEntry) entry = data->PhonebookEntry;
+	if (data->phonebook_entry) entry = data->phonebook_entry;
 	else return GN_ERR_TRYAGAIN;
 	/* Two octets for the memory location */
-	req[12] = (entry->Location >> 8);
-	req[13] = entry->Location & 0xff;
-	req[14] = GetMemoryType(entry->MemoryType);
+	req[12] = (entry->location >> 8);
+	req[13] = entry->location & 0xff;
+	req[14] = get_memory_type(entry->memory_type);
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_PHONEBOOK, 18);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 18);
 }
 
-static gn_error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
 				  0x00, 0x00,  /* memory type */
@@ -771,73 +772,73 @@ static gn_error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *s
 	char string[500];
 	int block, i, j, defaultn;
 	unsigned int count = 18;
-	GSM_PhonebookEntry *entry;
+	gn_phonebook_entry *entry;
 
-	if (data->PhonebookEntry) entry = data->PhonebookEntry;
+	if (data->phonebook_entry) entry = data->phonebook_entry;
 	else return GN_ERR_TRYAGAIN;
 
-	req[11] = GetMemoryType(entry->MemoryType);
+	req[11] = get_memory_type(entry->memory_type);
 	/* Two octets for the memory location */
-	req[12] = (entry->Location >> 8);
-	req[13] = entry->Location & 0xff;
+	req[12] = (entry->location >> 8);
+	req[13] = entry->location & 0xff;
 	block = 1;
-	if ((*(entry->Name)) && (*(entry->Number))) {
+	if ((*(entry->name)) && (*(entry->number))) {
 		/* Name */
-		i = strlen(entry->Name);
-		char_encode_unicode((string + 1), entry->Name, i);
+		i = strlen(entry->name);
+		char_encode_unicode((string + 1), entry->name, i);
 		/* Terminating 0 */
 		string[i * 2 + 1] = 0;
 		/* Length ot the string + length field + terminating 0 */
 		string[0] = (i + 1) * 2;
 		count += PackBlock(0x07, (i + 1) * 2, block++, string, req + count);
 		/* Group */
-		string[0] = entry->Group + 1;
+		string[0] = entry->caller_group + 1;
 		string[1] = 0;
 		count += PackBlock(0x1e, 2, block++, string, req + count);
 		/* Default Number */
 		defaultn = 999;
-		for (i = 0; i < entry->SubEntriesCount; i++)
-			if (entry->SubEntries[i].EntryType == GSM_Number)
-				if (!strcmp(entry->Number, entry->SubEntries[i].data.Number))
+		for (i = 0; i < entry->subentries_count; i++)
+			if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number)
+				if (!strcmp(entry->number, entry->subentries[i].data.number))
 					defaultn = i;
 		if (defaultn < i) {
-			string[0] = entry->SubEntries[defaultn].NumberType;
+			string[0] = entry->subentries[defaultn].number_type;
 			string[1] = string[2] = string[3] = 0;
-			j = strlen(entry->SubEntries[defaultn].data.Number);
-			char_encode_unicode((string + 5), entry->SubEntries[defaultn].data.Number, j);
+			j = strlen(entry->subentries[defaultn].data.number);
+			char_encode_unicode((string + 5), entry->subentries[defaultn].data.number, j);
 			string[j * 2 + 1] = 0;
 			string[4] = j * 2;
 			count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
 		}
 		/* Rest of the numbers */
-		for (i = 0; i < entry->SubEntriesCount; i++)
-			if (entry->SubEntries[i].EntryType == GSM_Number) {
+		for (i = 0; i < entry->subentries_count; i++)
+			if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number) {
 				if (i != defaultn) {
-					string[0] = entry->SubEntries[i].NumberType;
+					string[0] = entry->subentries[i].number_type;
 					string[1] = string[2] = string[3] = 0;
-					j = strlen(entry->SubEntries[i].data.Number);
-					char_encode_unicode((string + 5), entry->SubEntries[i].data.Number, j);
+					j = strlen(entry->subentries[i].data.number);
+					char_encode_unicode((string + 5), entry->subentries[i].data.number, j);
 					string[j * 2 + 1] = 0;
 					string[4] = j * 2;
 					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
 				}
 			} else {
-				j = strlen(entry->SubEntries[i].data.Number);
+				j = strlen(entry->subentries[i].data.number);
 				string[0] = j * 2;
-				char_encode_unicode((string + 1), entry->SubEntries[i].data.Number, j);
+				char_encode_unicode((string + 1), entry->subentries[i].data.number, j);
 				string[j * 2 + 1] = 0;
-				count += PackBlock(entry->SubEntries[i].EntryType, j * 2 + 2, block++, string, req + count);
+				count += PackBlock(entry->subentries[i].entry_type, j * 2 + 2, block++, string, req + count);
 			}
 
 		req[17] = block - 1;
-		dprintf("Writing phonebook entry %s...\n",entry->Name);
+		dprintf("Writing phonebook entry %s...\n",entry->name);
 	} else {
-		return P7110_DeletePhonebookLocation(data, state);
+		return NK7110_DeletePhonebookLocation(data, state);
 	}
-	SEND_MESSAGE_BLOCK(P7110_MSG_PHONEBOOK, count);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, count);
 }
 
-static gn_error P7110_ReadPhonebookLL(GSM_Data *data, GSM_Statemachine *state, int memtype, int location)
+static gn_error NK7110_ReadPhonebookLL(gn_data *data, struct gn_statemachine *state, int memtype, int location)
 {
 	unsigned char req[2000] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
 				   0x00, 0x00, /* memory type; was: 0x02, 0x05 */
@@ -850,51 +851,51 @@ static gn_error P7110_ReadPhonebookLL(GSM_Data *data, GSM_Statemachine *state, i
 	req[10] = location >> 8;
 	req[11] = location & 0xff;
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_PHONEBOOK, 14);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 14);
 }
 
-static gn_error P7110_ReadPhonebook(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	int memtype, location;
 
-	memtype = GetMemoryType(data->PhonebookEntry->MemoryType);
-	location = data->PhonebookEntry->Location;
+	memtype = get_memory_type(data->phonebook_entry->memory_type);
+	location = data->phonebook_entry->location;
 
-	return P7110_ReadPhonebookLL(data, state, memtype, location);
+	return NK7110_ReadPhonebookLL(data, state, memtype, location);
 }
 
-static gn_error P7110_GetSpeedDial(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetSpeedDial(gn_data *data, struct gn_statemachine *state)
 {
 	int memtype, location;
 
-	memtype = P7110_MEMORY_SPEEDDIALS;
-	location = data->SpeedDial->Number;
+	memtype = NK7110_MEMORY_SPEEDDIALS;
+	location = data->speed_dial->number;
 
-	return P7110_ReadPhonebookLL(data, state, memtype, location);
+	return NK7110_ReadPhonebookLL(data, state, memtype, location);
 }
 
 /*****************************/
 /********** FOLDER ***********/
 /*****************************/
-static inline unsigned int getdata(SMS_MessageType T, unsigned int a,
+static inline unsigned int get_data(gn_sms_message_type t, unsigned int a,
 				    unsigned int b, unsigned int c,
 				    unsigned int d)
 {
-	switch (T) {
-	case SMS_Deliver:         return a;
-	case SMS_Submit:          return b;
-	case SMS_Delivery_Report: return c;
-	case SMS_Picture:         return d;
-	default:                  return 0;
+	switch (t) {
+	case GN_SMS_MT_Deliver:        return a;
+	case GN_SMS_MT_Submit:         return b;
+	case GN_SMS_MT_DeliveryReport: return c;
+	case GN_SMS_MT_Picture:        return d;
+	default:                       return 0;
 	}
 }
 
 /**
- * P7110_IncomingFolder - handle SMS and folder related messages (0x14 type)
- * @messagetype: message type, 0x14 (P7110_MSG_FOLDER)
+ * NK7110_IncomingFolder - handle SMS and folder related messages (0x14 type)
+ * @messagetype: message type, 0x14 (NK7110_MSG_FOLDER)
  * @message: a pointer to the raw message returned by the statemachine
  * @length: length of the received message
- * @data: GSM_Data structure where the handler saves parsed data
+ * @data: gn_data structure where the handler saves parsed data
  *
  * This function parses all incoming events of the 0x14 type. This type is
  * known as the answer to the SMS and folder relates requests. Subtypes
@@ -909,7 +910,7 @@ static inline unsigned int getdata(SMS_MessageType T, unsigned int a,
  *  o 0xc9 -- unknown command?
  *  o 0xca -- phone not ready?
  */
-static gn_error P7110_IncomingFolder(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned int i, j, T, offset = 47;
 	int nextfolder = 0x10;
@@ -919,7 +920,7 @@ static gn_error P7110_IncomingFolder(int messagetype, unsigned char *message, in
 	/* save sms succeeded */
 	case 0x05:
 		dprintf("Message stored in folder %i at location %i\n", message[4], (message[5] << 8) | message[6]);
-		if (data->RawSMS) data->RawSMS->Number = (message[5] << 8) | message[6];
+		if (data->raw_sms) data->raw_sms->number = (message[5] << 8) | message[6];
 		break;
 	/* save sms failed */
 	case 0x06:
@@ -935,50 +936,49 @@ static gn_error P7110_IncomingFolder(int messagetype, unsigned char *message, in
 			dprintf("\tUnknown reason.\n");
 			return GN_ERR_UNHANDLEDFRAME;
 		}
-	case P7110_SUBSMS_READ_OK: /* GetSMS OK, 0x08 */
+	case NK7110_SUBSMS_READ_OK: /* GetSMS OK, 0x08 */
 		dprintf("Trying to get message # %i from the folder # %i\n", (message[6] << 8) | message[7], message[5]);
-		if (!data->RawSMS) return GN_ERR_INTERNALERROR;
+		if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
-		memset(data->RawSMS, 0, sizeof(GSM_SMSMessage));
-		T = data->RawSMS->Type         = message[8];
-		data->RawSMS->Number           = (message[6] << 8) | message[7];
-		data->RawSMS->MemoryType       = message[5];
-		data->RawSMS->Status           = message[4];
+		memset(data->raw_sms, 0, sizeof(gn_sms));
+		T = data->raw_sms->type         = message[8];
+		data->raw_sms->number           = (message[6] << 8) | message[7];
+		data->raw_sms->memory_type       = message[5];
+		data->raw_sms->status           = message[4];
 
-		data->RawSMS->MoreMessages     = 0;
-		data->RawSMS->ReplyViaSameSMSC = message[21];
-		data->RawSMS->RejectDuplicates = 0;
-		data->RawSMS->Report           = 0;
+		data->raw_sms->more_messages     = 0;
+		data->raw_sms->reply_via_same_smsc = message[21];
+		data->raw_sms->reject_duplicates = 0;
+		data->raw_sms->report           = 0;
 
-		data->RawSMS->Reference        = 0;
-		data->RawSMS->PID              = 0;
-		data->RawSMS->ReportStatus     = 0;
+		data->raw_sms->reference        = 0;
+		data->raw_sms->pid              = 0;
+		data->raw_sms->report_status     = 0;
 
-		if (T != SMS_Submit) {
-			memcpy(data->RawSMS->SMSCTime,      message + getdata(T, 37, 38, 36, 34), 7);
-			memcpy(data->RawSMS->MessageCenter, message + 9,  12);
-			memcpy(data->RawSMS->RemoteNumber,  message + getdata(T, 25, 26, 24, 22), 12);
+		if (T != GN_SMS_MT_Submit) {
+			memcpy(data->raw_sms->smsc_time,      message + get_data(T, 37, 38, 36, 34), 7);
+			memcpy(data->raw_sms->message_center, message + 9,  12);
+			memcpy(data->raw_sms->remote_number,  message + get_data(T, 25, 26, 24, 22), 12);
 		}
-		if (T == SMS_Delivery_Report) memcpy(data->RawSMS->Time, message + 43, 7);
+		if (T == GN_SMS_MT_DeliveryReport) memcpy(data->raw_sms->time, message + 43, 7);
 
-		data->RawSMS->DCS              = message[23];
+		data->raw_sms->dcs              = message[23];
 		/* This is ugly hack. But the picture message format in 6210
 		 * is the real pain in the ass. */
-		if (T == SMS_Picture && (message[47] == 0x48) && (message[48] == 0x1c))
+		if (T == GN_SMS_MT_Picture && (message[47] == 0x48) && (message[48] == 0x1c))
 			/* 47 (User Data offset) + 256 (72 * 28 / 8 + 4) = 303 */
 			offset = 303;
-		data->RawSMS->Length           = message[getdata(T, 24, 25, 0, offset)];
-		if (T == SMS_Picture) data->RawSMS->Length += 256;
-		data->RawSMS->UDHIndicator     = message[getdata(T, 21, 23, 0, 21)];
-		dprintf("UDHIndicator: %02x\n", data->RawSMS->UDHIndicator);
-		memcpy(data->RawSMS->UserData,      message + getdata(T, 44, 45, 0, 47), data->RawSMS->Length);
+		data->raw_sms->length           = message[get_data(T, 24, 25, 0, offset)];
+		if (T == GN_SMS_MT_Picture) data->raw_sms->length += 256;
+		data->raw_sms->udh_indicator     = message[get_data(T, 21, 23, 0, 21)];
+		memcpy(data->raw_sms->user_data,      message + get_data(T, 44, 45, 0, 47), data->raw_sms->length);
 
-		data->RawSMS->UserDataLength = length - getdata(T, 44, 45, 0, 47);
+		data->raw_sms->user_data_length = length - get_data(T, 44, 45, 0, 47);
 
-		data->RawSMS->ValidityIndicator = 0;
-		memcpy(data->RawSMS->Validity,      message, 0);
+		data->raw_sms->validity_indicator = 0;
+		memcpy(data->raw_sms->validity,      message, 0);
 		break;
-	case P7110_SUBSMS_READ_FAIL: /* GetSMS FAIL, 0x09 */
+	case NK7110_SUBSMS_READ_FAIL: /* GetSMS FAIL, 0x09 */
 		dprintf("SMS reading failed:\n");
 		switch (message[4]) {
 		case 0x02:
@@ -992,11 +992,11 @@ static gn_error P7110_IncomingFolder(int messagetype, unsigned char *message, in
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 
-	case P7110_SUBSMS_DELETE_OK: /* DeleteSMS OK, 0x0b */
+	case NK7110_SUBSMS_DELETE_OK: /* DeleteSMS OK, 0x0b */
 		dprintf("SMS deleted\n");
 		break;
 
-	case P7110_SUBSMS_DELETE_FAIL: /* DeleteSMS FAIL, 0x0c */
+	case NK7110_SUBSMS_DELETE_FAIL: /* DeleteSMS FAIL, 0x0c */
 		switch (message[4]) {
 		case 0x02:
 			dprintf("Invalid location\n");
@@ -1006,48 +1006,48 @@ static gn_error P7110_IncomingFolder(int messagetype, unsigned char *message, in
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 
-	case P7110_SUBSMS_SMS_STATUS_OK: /* SMS status received, 0x37 */
+	case NK7110_SUBSMS_SMS_STATUS_OK: /* SMS status received, 0x37 */
 		dprintf("SMS Status received\n");
 		/* FIXME: Don't count messages in fixed locations together with other */
-		data->SMSStatus->Number = ((message[10] << 8) | message[11]) +
+		data->sms_status->number = ((message[10] << 8) | message[11]) +
 					  ((message[14] << 8) | message[15]) +
-					  (data->SMSFolder->Number);
-		data->SMSStatus->Unread = ((message[12] << 8) | message[13]) +
+					  (data->sms_folder->number);
+		data->sms_status->unread = ((message[12] << 8) | message[13]) +
 					  ((message[16] << 8) | message[17]);
 		break;
 
-	case P7110_SUBSMS_FOLDER_STATUS_OK: /* Folder status OK, 0x6C */
+	case NK7110_SUBSMS_FOLDER_STATUS_OK: /* Folder status OK, 0x6C */
 		dprintf("Message: SMS Folder status received\n");
-		if (!data->SMSFolder) return GN_ERR_INTERNALERROR;
-		i = data->SMSFolder->FolderID;
-		memset(data->SMSFolder, 0, sizeof(SMS_Folder));
+		if (!data->sms_folder) return GN_ERR_INTERNALERROR;
+		i = data->sms_folder->folder_id;
+		memset(data->sms_folder, 0, sizeof(gn_sms_folder));
 
-		data->SMSFolder->FolderID = i;
-		data->SMSFolder->Number = (message[4] << 8) | message[5];
+		data->sms_folder->folder_id = i;
+		data->sms_folder->number = (message[4] << 8) | message[5];
 
-		dprintf("Message: Number of Entries: %i\n" , data->SMSFolder->Number);
+		dprintf("Message: Number of Entries: %i\n" , data->sms_folder->number);
 		dprintf("Message: IDs of Entries : ");
-		for (i = 0; i < data->SMSFolder->Number; i++) {
-			data->SMSFolder->Locations[i] = (message[(i * 2) + 6] << 8) | message[(i * 2) + 7];
-			dprintf("%d, ", data->SMSFolder->Locations[i]);
+		for (i = 0; i < data->sms_folder->number; i++) {
+			data->sms_folder->locations[i] = (message[(i * 2) + 6] << 8) | message[(i * 2) + 7];
+			dprintf("%d, ", data->sms_folder->locations[i]);
 		}
 		dprintf("\n");
 		break;
 
-	case P7110_SUBSMS_FOLDER_LIST_OK: /* Folder list OK, 0x7B */
-		if (!data->SMSFolderList) return GN_ERR_INTERNALERROR;
+	case NK7110_SUBSMS_FOLDER_LIST_OK: /* Folder list OK, 0x7B */
+		if (!data->sms_folder_list) return GN_ERR_INTERNALERROR;
 		i = 5;
-		memset(data->SMSFolderList, 0, sizeof(SMS_FolderList));
+		memset(data->sms_folder_list, 0, sizeof(gn_sms_folder_list));
 		dprintf("Message: %d SMS Folders received:\n", message[4]);
 
-		strcpy(data->SMSFolderList->Folder[1].Name, "               ");
-		data->SMSFolderList->Number = message[4];
+		strcpy(data->sms_folder_list->folder[1].name, "               ");
+		data->sms_folder_list->number = message[4];
 
 		for (j = 0; j < message[4]; j++) {
 			int len;
-			strcpy(data->SMSFolderList->Folder[j].Name, "               ");
-			data->SMSFolderList->FolderID[j] = message[i];
-			dprintf("Folder Index: %d", data->SMSFolderList->FolderID[j]);
+			strcpy(data->sms_folder_list->folder[j].name, "               ");
+			data->sms_folder_list->folder_id[j] = message[i];
+			dprintf("Folder Index: %d", data->sms_folder_list->folder_id[j]);
 			i += 2;
 			dprintf("\tFolder name: ");
 			len = 0;
@@ -1060,13 +1060,13 @@ static gn_error P7110_IncomingFolder(int messagetype, unsigned char *message, in
 			nextfolder += 0x08;
 			if (nextfolder == 0x28) nextfolder++;
 			i -= len + 1;
-			char_decode_unicode(data->SMSFolderList->Folder[j].Name, message + i, len);
-			dprintf("%s\n", data->SMSFolderList->Folder[j].Name);
+			char_decode_unicode(data->sms_folder_list->folder[j].name, message + i, len);
+			dprintf("%s\n", data->sms_folder_list->folder[j].name);
 			i += len + 2;
 		}
 		break;
 
-	case P7110_SUBSMS_PICTURE_LIST_OK: /* Picture messages list OK, 0x97 */
+	case NK7110_SUBSMS_PICTURE_LIST_OK: /* Picture messages list OK, 0x97 */
 		dprintf("Getting list of SMS pictures...\n");
 		break;
 
@@ -1086,7 +1086,7 @@ static gn_error P7110_IncomingFolder(int messagetype, unsigned char *message, in
 	return GN_ERR_NONE;
 }
 
-static gn_error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetSMSnoValidate(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x07,
 				0x08, /* FolderID */
@@ -1094,109 +1094,109 @@ static gn_error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
 				0x01, /* Location */
 				0x01, 0x65, 0x01};
 
-	req[4] = GetMemoryType(data->RawSMS->MemoryType);
-	req[5] = (data->RawSMS->Number & 0xff00) >> 8;
-	req[6] = data->RawSMS->Number & 0x00ff;
-	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 10);
+	req[4] = get_memory_type(data->raw_sms->memory_type);
+	req[5] = (data->raw_sms->number & 0xff00) >> 8;
+	req[6] = data->raw_sms->number & 0x00ff;
+	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, 10);
 }
 
-static gn_error ValidateSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
-	/* Handle MemoryType = 0 explicitely, because SMSFolder->FolderID = 0 by default */
-	if (data->RawSMS->MemoryType == 0) return GN_ERR_INVALIDMEMORYTYPE;
+	/* Handle memory_type = 0 explicitely, because sms_folder->folder_id = 0 by default */
+	if (data->raw_sms->memory_type == 0) return GN_ERR_INVALIDMEMORYTYPE;
 
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
-	if ((!data->SMSFolder) || (!data->SMSFolderList))
+	if ((!data->sms_folder) || (!data->sms_folder_list))
 		return GN_ERR_INTERNALERROR;
 
-	if (data->RawSMS->MemoryType != data->SMSFolder->FolderID) {
-		if ((error = P7110_GetSMSFolders(data, state)) != GN_ERR_NONE) return error;
-		if ((GetMemoryType(data->RawSMS->MemoryType) >
-		     data->SMSFolderList->FolderID[data->SMSFolderList->Number - 1]) ||
-		    (data->RawSMS->MemoryType < 12))
+	if (data->raw_sms->memory_type != data->sms_folder->folder_id) {
+		if ((error = NK7110_GetSMSFolders(data, state)) != GN_ERR_NONE) return error;
+		if ((get_memory_type(data->raw_sms->memory_type) >
+		     data->sms_folder_list->folder_id[data->sms_folder_list->number - 1]) ||
+		    (data->raw_sms->memory_type < 12))
 			return GN_ERR_INVALIDMEMORYTYPE;
-		data->SMSFolder->FolderID = data->RawSMS->MemoryType;
-		if ((error = P7110_GetSMSFolderStatus(data, state)) != GN_ERR_NONE) return error;
+		data->sms_folder->folder_id = data->raw_sms->memory_type;
+		if ((error = NK7110_GetSMSFolderStatus(data, state)) != GN_ERR_NONE) return error;
 	}
 
-	if (data->SMSFolder->Number + 2 < data->RawSMS->Number) {
-		if (data->RawSMS->Number > MAX_SMS_MESSAGES)
+	if (data->sms_folder->number + 2 < data->raw_sms->number) {
+		if (data->raw_sms->number > GN_SMS_MESSAGE_MAX_NUMBER)
 			return GN_ERR_INVALIDLOCATION;
 		else
 			return GN_ERR_EMPTYLOCATION;
 	} else {
-		data->RawSMS->Number = data->SMSFolder->Locations[data->RawSMS->Number - 1];
+		data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
 	}
 	return GN_ERR_NONE;
 }
 
 
-static gn_error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetSMS(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
 	error = ValidateSMS(data, state);
 	if (error != GN_ERR_NONE) return error;
 
-	return P7110_GetSMSnoValidate(data, state);
+	return NK7110_GetSMSnoValidate(data, state);
 }
 
 
-static gn_error P7110_DeleteSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x00, 0x01};
 	gn_error error;
 
-	if (!data->RawSMS) return GN_ERR_INTERNALERROR;
-	dprintf("Removing SMS %d\n", data->RawSMS->Number);
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+	dprintf("Removing SMS %d\n", data->raw_sms->number);
 
 	error = ValidateSMS(data, state);
 	if (error != GN_ERR_NONE) return error;
 
-	req[4] = GetMemoryType(data->RawSMS->MemoryType);
-	req[5] = (data->RawSMS->Number & 0xff00) >> 8;
-	req[6] = data->RawSMS->Number & 0x00ff;
-	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 8);
+	req[4] = get_memory_type(data->raw_sms->memory_type);
+	req[5] = (data->raw_sms->number & 0xff00) >> 8;
+	req[6] = data->raw_sms->number & 0x00ff;
+	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, 8);
 }
 
-static gn_error P7110_DeleteSMSnoValidate(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0a, 0x00, 0x00, 0x00, 0x01};
 
-	if (!data->RawSMS) return GN_ERR_INTERNALERROR;
-	dprintf("Removing SMS (no validate) %d\n", data->RawSMS->Number);
+	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+	dprintf("Removing SMS (no validate) %d\n", data->raw_sms->number);
 
-	req[4] = GetMemoryType(data->RawSMS->MemoryType);
-	req[5] = (data->RawSMS->Number & 0xff00) >> 8;
-	req[6] = data->RawSMS->Number & 0x00ff;
-	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 8);
+	req[4] = get_memory_type(data->raw_sms->memory_type);
+	req[5] = (data->raw_sms->number & 0xff00) >> 8;
+	req[6] = data->raw_sms->number & 0x00ff;
+	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, 8);
 }
 
-static gn_error P7110_GetPictureList(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetPictureList(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x96,
 				0x09, /* location */
 				0x0f, 0x07};
 
 	dprintf("Getting picture messages list...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 7);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, 7);
 }
 
-static gn_error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetSMSFolders(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x7a, 0x00, 0x00};
 
 	dprintf("Getting SMS Folders...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 6);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, 6);
 }
 
-static gn_error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x36, 0x64};
-	SMS_Folder status_fld, *old_fld;
+	gn_sms_folder status_fld, *old_fld;
 	gn_error error;
 
 	dprintf("Getting SMS Status...\n");
@@ -1207,86 +1207,81 @@ static gn_error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state)
 	 * does show these messages.
 	 */
 	
-	old_fld = data->SMSFolder;
+	old_fld = data->sms_folder;
 
-	data->SMSFolder = &status_fld;
-	data->SMSFolder->FolderID = GMT_TE;
+	data->sms_folder = &status_fld;
+	data->sms_folder->folder_id = GN_MT_TE;
 
-	error = P7110_GetSMSFolderStatus(data, state);
+	error = NK7110_GetSMSFolderStatus(data, state);
 	if (error != GN_ERR_NONE) goto out;
 
-	error = SM_SendMessage(state, 6, P7110_MSG_FOLDER, req);
+	error = sm_message_send(state, 6, NK7110_MSG_FOLDER, req);
 	if (error != GN_ERR_NONE) goto out;
 
-	error = SM_Block(state, data, P7110_MSG_FOLDER);
+	error = sm_block(state, data, NK7110_MSG_FOLDER);
  out:
-	data->SMSFolder = old_fld;
+	data->sms_folder = old_fld;
 	return error;
 }
 
-static gn_error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x6B,
 			       0x08, /* Folder ID */
 			       0x0F, 0x01};
 	gn_error error;
-	SMS_Folder read;
+	gn_sms_folder read;
 	int i;
 
-	req[4] = GetMemoryType(data->SMSFolder->FolderID);
+	req[4] = get_memory_type(data->sms_folder->folder_id);
 
 	dprintf("Getting SMS Folder (%i) status ...\n", req[4]);
 
-       	if (req[4] == P7110_MEMORY_IN) { /* special case INBOX */
+       	if (req[4] == NK7110_MEMORY_IN) { /* special case INBOX */
 
 		dprintf("Special case INBOX in GetSMSFolderStatus!\n");
 
-		if (SM_SendMessage(state, 7, P7110_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = SM_Block(state, data, P7110_MSG_FOLDER);
+		if (sm_message_send(state, 7, NK7110_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		error = sm_block(state, data, NK7110_MSG_FOLDER);
 		if (error != 0) return error;
 
-		memcpy(&read, data->SMSFolder, sizeof(SMS_Folder));
+		memcpy(&read, data->sms_folder, sizeof(gn_sms_folder));
 
 		req[4] = 0xf8; /* unread messages from INBOX */
-		if (SM_SendMessage(state, 7, P7110_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = SM_Block(state, data, P7110_MSG_FOLDER);
+		if (sm_message_send(state, 7, NK7110_MSG_FOLDER, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		error = sm_block(state, data, NK7110_MSG_FOLDER);
 
-		for (i = 0; i < read.Number; i++) {
-			data->SMSFolder->Locations[data->SMSFolder->Number] = read.Locations[i];
-			data->SMSFolder->Number++;
+		for (i = 0; i < read.number; i++) {
+			data->sms_folder->locations[data->sms_folder->number] = read.locations[i];
+			data->sms_folder->number++;
 		}
 		return GN_ERR_NONE;
 	} 
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 7);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, 7);
 }
 
-static gn_error P7110_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_SaveSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = { FBUS_FRAME_HEADER, 0x04,
 				   0x07,		/* sms state */
 				   0x10,		/* folder */
 				   0x00,0x00,		/* location */
 				   0x00 };		/* type */
-#if 0
-	/* FIXME: we can write a description here */
-	unsigned char req2[200] = { FBUS_FRAME_HEADER, 0x83};
-	gn_error		error;
-#endif
 	int len;
 
 	dprintf("Saving sms\n");
 
-	switch (data->RawSMS->Type) {
-	case SMS_Submit:
-		if (data->RawSMS->Status == SMS_Sent)
+	switch (data->raw_sms->type) {
+	case GN_SMS_MT_Submit:
+		if (data->raw_sms->status == GN_SMS_Sent)
 			req[4] = 0x05; 
 		else
 			req[4] = 0x07; 
 		req[8] = 0x02;
 		break;
-	case SMS_Deliver:
-		if (data->RawSMS->Status == SMS_Sent)
+	case GN_SMS_MT_Deliver:
+		if (data->raw_sms->status == GN_SMS_Sent)
 			req[4] = 0x01;
 		else
 			req[4] = 0x03;
@@ -1298,39 +1293,20 @@ static gn_error P7110_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 		break;
 	}
 
-	if ((data->RawSMS->MemoryType != GMT_ME) && (data->RawSMS->MemoryType != GMT_SM))
-		req[5] = GetMemoryType(data->RawSMS->MemoryType);
+	if ((data->raw_sms->memory_type != GN_MT_ME) && (data->raw_sms->memory_type != GN_MT_SM))
+		req[5] = get_memory_type(data->raw_sms->memory_type);
 	else
-		req[5] = P7110_MEMORY_OU;
+		req[5] = NK7110_MEMORY_OU;
 
-	req[6] = data->RawSMS->Number / 256;
-	req[7] = data->RawSMS->Number % 256;
+	req[6] = data->raw_sms->number / 256;
+	req[7] = data->raw_sms->number % 256;
 
-	if (req[5] == P7110_MEMORY_TE) return GN_ERR_INVALIDLOCATION;
+	if (req[5] == NK7110_MEMORY_TE) return GN_ERR_INVALIDLOCATION;
 
-	len = PNOK_FBUS_EncodeSMS(data, state, req + 9);
+	len = pnok_fbus_sms_encode(data, state, req + 9);
 	len += 9;
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, len);
-
-#if 0
-	if (error == GN_ERR_NONE && strlen(DecodeUnicodeString(sms->Name))!=0) {
-		folder = sms->Folder;
-		sms->Folder = 0;
-		N7110_GetSMSLocation(sms, &folderid, &location);
-		length = 4;
-		NameReq[length++] = folderid;
-		NameReq[length++] = location / 256;
-		NameReq[length++] = location;
-		CopyUnicodeString(NameReq+length, sms->Name);
-		length = length+strlen(DecodeUnicodeString(sms->Name))*2;
-		NameReq[length++] = 0;
-		NameReq[length++] = 0;
-		error=GSM_WaitFor (s, NameReq, length, 0x14, 4, ID_SaveSMSMessage);
-		sms->Folder = folder;
-	}
-	return error;
-#endif
+	SEND_MESSAGE_BLOCK(NK7110_MSG_FOLDER, len);
 }
 
 
@@ -1338,53 +1314,53 @@ static gn_error P7110_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
 /*****************************/
 /***********  S M S  *********/
 /*****************************/
-static gn_error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error	e = GN_ERR_NONE;
 
 	if (!data) return GN_ERR_INTERNALERROR;
 
 	switch (message[3]) {
-	case P7110_SUBSMS_SMSC_RCVD: /* 0x34 */
+	case NK7110_SUBSMS_SMSC_RCVD: /* 0x34 */
 		dprintf("SMSC Received\n");
 		/* FIXME: Implement all these in gsm-sms.c */
-		data->MessageCenter->No = message[4];
-		data->MessageCenter->Format = message[6];
-		data->MessageCenter->Validity = message[8];  /* due to changes in format */
+		data->message_center->id = message[4];
+		data->message_center->format = message[6];
+		data->message_center->validity = message[8];  /* due to changes in format */
 
-		sprintf(data->MessageCenter->Name, "%s", message + 33);
-		data->MessageCenter->DefaultName = -1;	/* FIXME */
+		sprintf(data->message_center->name, "%s", message + 33);
+		data->message_center->default_name = -1;	/* FIXME */
 
 		if (message[9] % 2) message[9]++;
 		message[9] = message[9] / 2 + 1;
 		dprintf("%d\n", message[9]);
-		snprintf(data->MessageCenter->Recipient.Number,
-			 sizeof(data->MessageCenter->Recipient.Number),
+		snprintf(data->message_center->recipient.number,
+			 sizeof(data->message_center->recipient.number),
 			 "%s", char_get_bcd_number(message + 9));
-		data->MessageCenter->Recipient.Type = message[10];
-		snprintf(data->MessageCenter->SMSC.Number,
-			 sizeof(data->MessageCenter->SMSC.Number),
+		data->message_center->recipient.type = message[10];
+		snprintf(data->message_center->smsc.number,
+			 sizeof(data->message_center->smsc.number),
 			 "%s", char_get_bcd_number(message + 21));
-		data->MessageCenter->SMSC.Type = message[22];
+		data->message_center->smsc.type = message[22];
 
-		if (strlen(data->MessageCenter->Recipient.Number) == 0) {
-			sprintf(data->MessageCenter->Recipient.Number, "(none)");
+		if (strlen(data->message_center->recipient.number) == 0) {
+			sprintf(data->message_center->recipient.number, "(none)");
 		}
-		if (strlen(data->MessageCenter->SMSC.Number) == 0) {
-			sprintf(data->MessageCenter->SMSC.Number, "(none)");
+		if (strlen(data->message_center->smsc.number) == 0) {
+			sprintf(data->message_center->smsc.number, "(none)");
 		}
-		if(strlen(data->MessageCenter->Name) == 0) {
-			data->MessageCenter->Name[0] = '\0';
+		if (strlen(data->message_center->name) == 0) {
+			data->message_center->name[0] = '\0';
 		}
 
 		break;
 
-	case P7110_SUBSMS_SEND_OK: /* 0x02 */
+	case NK7110_SUBSMS_SEND_OK: /* 0x02 */
 		dprintf("SMS sent\n");
 		e = GN_ERR_NONE;
 		break;
 
-	case P7110_SUBSMS_SEND_FAIL: /* 0x03 */
+	case NK7110_SUBSMS_SEND_FAIL: /* 0x03 */
 		dprintf("SMS sending failed\n");
 		e = GN_ERR_FAILED;
 		break;
@@ -1396,55 +1372,55 @@ static gn_error P7110_IncomingSMS(int messagetype, unsigned char *message, int l
 	case 0x11:
 		dprintf("SMS received\n");
 		/* We got here the whole SMS */
-		NewSMS = true;
+		new_sms = true;
 		break;
 
-	case P7110_SUBSMS_SMS_RCVD: /* 0x10 */
-	case P7110_SUBSMS_CELLBRD_OK: /* 0x21 */
-	case P7110_SUBSMS_CELLBRD_FAIL: /* 0x22 */
-	case P7110_SUBSMS_READ_CELLBRD: /* 0x23 */
-	case P7110_SUBSMS_SMSC_OK: /* 0x31 */
-	case P7110_SUBSMS_SMSC_FAIL: /* 0x32 */
-	case P7110_SUBSMS_SMSC_RCVFAIL: /* 0x35 */
-		dprintf("Subtype 0x%02x of type 0x%02x (SMS handling) not implemented\n", message[3], P7110_MSG_SMS);
+	case NK7110_SUBSMS_SMS_RCVD: /* 0x10 */
+	case NK7110_SUBSMS_CELLBRD_OK: /* 0x21 */
+	case NK7110_SUBSMS_CELLBRD_FAIL: /* 0x22 */
+	case NK7110_SUBSMS_READ_CELLBRD: /* 0x23 */
+	case NK7110_SUBSMS_SMSC_OK: /* 0x31 */
+	case NK7110_SUBSMS_SMSC_FAIL: /* 0x32 */
+	case NK7110_SUBSMS_SMSC_RCVFAIL: /* 0x35 */
+		dprintf("Subtype 0x%02x of type 0x%02x (SMS handling) not implemented\n", message[3], NK7110_MSG_SMS);
 		return GN_ERR_NOTIMPLEMENTED;
 
 	default:
-		dprintf("Unknown subtype of type 0x%02x (SMS handling): 0x%02x\n", P7110_MSG_SMS, message[3]);
+		dprintf("Unknown subtype of type 0x%02x (SMS handling): 0x%02x\n", NK7110_MSG_SMS, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return e;
 }
 
-static gn_error P7110_GetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, P7110_SUBSMS_GET_SMSC, 0x64, 0x00};
+	unsigned char req[] = {FBUS_FRAME_HEADER, NK7110_SUBSMS_GET_SMSC, 0x64, 0x00};
 
-	req[5] = data->MessageCenter->No;
+	req[5] = data->message_center->id;
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_SMS, 6);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_SMS, 6);
 }
 
-static gn_error P7110_PollSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_PollSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
 	dprintf("Requesting for the notify of the incoming SMS\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_SMS, 8);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_SMS, 8);
 }
 
-static gn_error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_SendSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
 	gn_error error;
 	int len;
 
-	len = PNOK_FBUS_EncodeSMS(data, state, req + 6);
+	len = pnok_fbus_sms_encode(data, state, req + 6);
 	len += 6;
 
-	if (SM_SendMessage(state, len, PNOK_MSG_SMS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(state, len, PNOK_MSG_ID_SMS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
 	do {
-		error = SM_BlockNoRetryTimeout(state, data, PNOK_MSG_SMS, state->Link.SMSTimeout);
-	} while (!state->Link.SMSTimeout && error == GN_ERR_TIMEOUT);
+		error = sm_block_no_retry_timeout(state, data, PNOK_MSG_ID_SMS, state->link.sms_timeout);
+	} while (!state->link.sms_timeout && error == GN_ERR_TIMEOUT);
 
 	return error;
 }
@@ -1452,105 +1428,107 @@ static gn_error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 /**********************************/
 /************* CLOCK **************/
 /**********************************/
-static gn_error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingClock(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error	e = GN_ERR_NONE;
 
-	if (!data || !data->DateTime) return GN_ERR_INTERNALERROR;
+	if (!data) return GN_ERR_INTERNALERROR;
 	switch (message[3]) {
-	case P7110_SUBCLO_DATE_RCVD:
-		data->DateTime->Year = (((unsigned int)message[8]) << 8) + message[9];
-		data->DateTime->Month = message[10];
-		data->DateTime->Day = message[11];
-		data->DateTime->Hour = message[12];
-		data->DateTime->Minute = message[13];
-		data->DateTime->Second = message[14];
+	case NK7110_SUBCLO_DATE_RCVD:
+		if (!data->datetime) return GN_ERR_INTERNALERROR;
+		data->datetime->year = (((unsigned int)message[8]) << 8) + message[9];
+		data->datetime->month = message[10];
+		data->datetime->day = message[11];
+		data->datetime->hour = message[12];
+		data->datetime->minute = message[13];
+		data->datetime->second = message[14];
 
 		break;
-	case P7110_SUBCLO_ALARM_RCVD:
+	case NK7110_SUBCLO_ALARM_RCVD:
+		if (!data->alarm) return GN_ERR_INTERNALERROR;
 		switch(message[8]) {
-		case P7110_ALARM_ENABLED:
-			data->DateTime->AlarmEnabled = 1;
+		case NK7110_ALARM_ENABLED:
+			data->alarm->enabled = true;
 			break;
-		case P7110_ALARM_DISABLED:
-			data->DateTime->AlarmEnabled = 0;
+		case NK7110_ALARM_DISABLED:
+			data->alarm->enabled = false;
 			break;
 		default:
-			data->DateTime->AlarmEnabled = -1;
+			data->alarm->enabled = false;
 			dprintf("Unknown value of alarm enable byte: 0x%02x\n", message[8]);
 			e = GN_ERR_UNKNOWN;
 			break;
 		}
 
-		data->DateTime->Hour = message[9];
-		data->DateTime->Minute = message[10];
+		data->alarm->timestamp.hour = message[9];
+		data->alarm->timestamp.minute = message[10];
 
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x%02x (clock handling): 0x%02x\n", P7110_MSG_CLOCK, message[3]);
+		dprintf("Unknown subtype of type 0x%02x (clock handling): 0x%02x\n", NK7110_MSG_CLOCK, message[3]);
 		e = GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
 	return e;
 }
 
-static gn_error P7110_GetClock(char req_type, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetClock(char req_type, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, req_type};
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_CLOCK, 4);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_CLOCK, 4);
 }
 
 
 /**********************************/
 /*********** CALENDAR *************/
 /**********************************/
-static gn_error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error			e = GN_ERR_NONE;
 	int				i, year;
 
-	if (!data || !data->CalendarNote) return GN_ERR_INTERNALERROR;
+	if (!data || !data->calnote) return GN_ERR_INTERNALERROR;
 
-	year = data->CalendarNote->Time.Year;
-	dprintf("Year: %i\n", data->CalendarNote->Time.Year);
+	year = data->calnote->time.year;
+	dprintf("year: %i\n", data->calnote->time.year);
 	switch (message[3]) {
-	case P7110_SUBCAL_NOTE_RCVD:
-		DecodeCalendar(message, length, data);
+	case NK7110_SUBCAL_NOTE_RCVD:
+		calnote_decode(message, length, data);
 		break;
-	case P7110_SUBCAL_INFO_RCVD:
-		if (!data->CalendarNotesList) return GN_ERR_INTERNALERROR;
+	case NK7110_SUBCAL_INFO_RCVD:
+		if (!data->calnote_list) return GN_ERR_INTERNALERROR;
 		dprintf("Calendar Notes Info received! %i\n", (message[4] << 8) | message[5]);
-		data->CalendarNotesList->Number = (message[4] << 8) + message[5];
+		data->calnote_list->number = (message[4] << 8) + message[5];
 		dprintf("Location of Notes: ");
-		for (i = 0; i < data->CalendarNotesList->Number; i++) {
-			data->CalendarNotesList->Location[i] = (message[8 + 2 * i] << 8) | message[9 + 2 * i];
-			dprintf("%i ", data->CalendarNotesList->Location[i]);
+		for (i = 0; i < data->calnote_list->number; i++) {
+			data->calnote_list->location[i] = (message[8 + 2 * i] << 8) | message[9 + 2 * i];
+			dprintf("%i ", data->calnote_list->location[i]);
 		}
 		dprintf("\n");
 		break;
-	case P7110_SUBCAL_FREEPOS_RCVD:
+	case NK7110_SUBCAL_FREEPOS_RCVD:
 		dprintf("First free position received: %i!\n", (message[4] << 8) | message[5]);
-		data->CalendarNote->Location = (((unsigned int)message[4]) << 8) + message[5];
+		data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
 		break;
-	case P7110_SUBCAL_DEL_NOTE_RESP:
+	case NK7110_SUBCAL_DEL_NOTE_RESP:
 		dprintf("Succesfully deleted calendar note: %i!\n", (message[4] << 8) | message[5]);
 		break;
 
-	case P7110_SUBCAL_ADD_MEETING_RESP:
-	case P7110_SUBCAL_ADD_CALL_RESP:
-	case P7110_SUBCAL_ADD_BIRTHDAY_RESP:
-	case P7110_SUBCAL_ADD_REMINDER_RESP:
+	case NK7110_SUBCAL_ADD_MEETING_RESP:
+	case NK7110_SUBCAL_ADD_CALL_RESP:
+	case NK7110_SUBCAL_ADD_BIRTHDAY_RESP:
+	case NK7110_SUBCAL_ADD_REMINDER_RESP:
 		dprintf("Succesfully written calendar note: %i!\n", (message[4] << 8) | message[5]);
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", P7110_MSG_CALENDAR, message[3]);
+		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", NK7110_MSG_CALENDAR, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return e;
 }
 
-long P7110_GetNoteAlarmDiff(GSM_DateTime *time, GSM_DateTime *alarm)
+long NK7110_GetNoteAlarmDiff(gn_timestamp *time, gn_timestamp *alarm)
 {
 	time_t     t_alarm;
 	time_t     t_time;
@@ -1559,107 +1537,107 @@ long P7110_GetNoteAlarmDiff(GSM_DateTime *time, GSM_DateTime *alarm)
 
 	tzset();
 
-	tm_alarm.tm_year  = alarm->Year-1900;
-	tm_alarm.tm_mon   = alarm->Month-1;
-	tm_alarm.tm_mday  = alarm->Day;
-	tm_alarm.tm_hour  = alarm->Hour;
-	tm_alarm.tm_min   = alarm->Minute;
-	tm_alarm.tm_sec   = alarm->Second;
+	tm_alarm.tm_year  = alarm->year-1900;
+	tm_alarm.tm_mon   = alarm->month-1;
+	tm_alarm.tm_mday  = alarm->day;
+	tm_alarm.tm_hour  = alarm->hour;
+	tm_alarm.tm_min   = alarm->minute;
+	tm_alarm.tm_sec   = alarm->second;
 	tm_alarm.tm_isdst = 0;
 	t_alarm = mktime(&tm_alarm);
 
-	tm_time.tm_year  = time->Year-1900;
-	tm_time.tm_mon   = time->Month-1;
-	tm_time.tm_mday  = time->Day;
-	tm_time.tm_hour  = time->Hour;
-	tm_time.tm_min   = time->Minute;
-	tm_time.tm_sec   = time->Second;
+	tm_time.tm_year  = time->year-1900;
+	tm_time.tm_mon   = time->month-1;
+	tm_time.tm_mday  = time->day;
+	tm_time.tm_hour  = time->hour;
+	tm_time.tm_min   = time->minute;
+	tm_time.tm_sec   = time->second;
 	tm_time.tm_isdst = 0;
 	t_time = mktime(&tm_time);
 
 	dprintf("\tAlarm: %02i-%02i-%04i %02i:%02i:%02i\n",
-		alarm->Day, alarm->Month, alarm->Year,
-		alarm->Hour, alarm->Minute, alarm->Second);
+		alarm->day, alarm->month, alarm->year,
+		alarm->hour, alarm->minute, alarm->second);
 	dprintf("\tDate: %02i-%02i-%04i %02i:%02i:%02i\n",
-		time->Day, time->Month, time->Year,
-		time->Hour, time->Minute, time->Second);
+		time->day, time->month, time->year,
+		time->hour, time->minute, time->second);
 	dprintf("Difference in alarm time is %f\n", difftime(t_time, t_alarm) + 3600);
 
 	return difftime(t_time, t_alarm) + 3600;
 }
 
-static gn_error P7110_FirstCalendarFreePos(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_FirstCalendarFreePos(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x31 };
 
-	SEND_MESSAGE_WAITFOR(P7110_MSG_CALENDAR, 4);
+	SEND_MESSAGE_WAITFOR(NK7110_MSG_CALENDAR, 4);
 }
 
 
-static gn_error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[200] = { FBUS_FRAME_HEADER,
 				   0x01,       /* note type ... */
 				   0x00, 0x00, /* location */
 				   0x00,       /* entry type */
 				   0x00,       /* fixed */
-				   0x00, 0x00, 0x00, 0x00, /* Year(2bytes), Month, Day */
+				   0x00, 0x00, 0x00, 0x00, /* year(2bytes), month, day */
 				   /* here starts block */
 				   0x00, 0x00, 0x00, 0x00,0x00, 0x00}; /* ... depends on note type ... */
 
-	GSM_CalendarNote *CalendarNote;
+	gn_calnote *calnote;
 	int count = 0;
 	long seconds, minutes;
 	gn_error error;
 
-	CalendarNote = data->CalendarNote;
+	calnote = data->calnote;
 
 	/* 6210/7110 needs to seek the first free pos to inhabit with next note */
-	error = P7110_FirstCalendarFreePos(data, state);
+	error = NK7110_FirstCalendarFreePos(data, state);
 	if (error != GN_ERR_NONE) return error;
 
 
 	/* Location */
-	req[4] = CalendarNote->Location >> 8;
-	req[5] = CalendarNote->Location & 0xff;
+	req[4] = calnote->location >> 8;
+	req[5] = calnote->location & 0xff;
 
-	switch (CalendarNote->Type) {
-	case GCN_MEETING:
+	switch (calnote->type) {
+	case GN_CALNOTE_MEETING:
 		req[6] = 0x01;
 		req[3] = 0x01;
 		break;
-	case GCN_CALL:
+	case GN_CALNOTE_CALL:
 		req[6] = 0x02;
 		req[3] = 0x03;
 		break;
-	case GCN_BIRTHDAY:
+	case GN_CALNOTE_BIRTHDAY:
 		req[6] = 0x04;
 		req[3] = 0x05;
 		break;
-	case GCN_REMINDER:
+	case GN_CALNOTE_REMINDER:
 		req[6] = 0x08;
 		req[3] = 0x07;
 		break;
 	}
 
-	req[8]  = CalendarNote->Time.Year >> 8;
-	req[9]  = CalendarNote->Time.Year & 0xff;
-	req[10] = CalendarNote->Time.Month;
-	req[11] = CalendarNote->Time.Day;
+	req[8]  = calnote->time.year >> 8;
+	req[9]  = calnote->time.year & 0xff;
+	req[10] = calnote->time.month;
+	req[11] = calnote->time.day;
 
 	/* From here starts BLOCK */
 	count = 12;
-	switch (CalendarNote->Type) {
+	switch (calnote->type) {
 
-	case GCN_MEETING:
-		req[count++] = CalendarNote->Time.Hour;   /* Field 12 */
-		req[count++] = CalendarNote->Time.Minute; /* Field 13 */
+	case GN_CALNOTE_MEETING:
+		req[count++] = calnote->time.hour;   /* Field 12 */
+		req[count++] = calnote->time.minute; /* Field 13 */
 		/* Alarm .. */
 		req[count++] = 0xff; /* Field 14 */
 		req[count++] = 0xff; /* Field 15 */
-		if (CalendarNote->Alarm.Year) {
-			seconds = P7110_GetNoteAlarmDiff(&CalendarNote->Time,
-							 &CalendarNote->Alarm);
+		if (calnote->alarm.timestamp.year) {
+			seconds = NK7110_GetNoteAlarmDiff(&calnote->time,
+							 &calnote->alarm.timestamp);
 			if (seconds >= 0L) { /* Otherwise it's an error condition.... */
 				minutes = seconds / 60L;
 				count -= 2;
@@ -1668,32 +1646,32 @@ static gn_error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 			}
 		}
 		/* Recurrence */
-		if (CalendarNote->Recurrence >= 8760)
-			CalendarNote->Recurrence = 0xffff; /* setting  1 Year repeat */
-		req[count++] = CalendarNote->Recurrence >> 8;   /* Field 16 */
-		req[count++] = CalendarNote->Recurrence & 0xff; /* Field 17 */
+		if (calnote->recurrence >= 8760)
+			calnote->recurrence = 0xffff; /* setting  1 year repeat */
+		req[count++] = calnote->recurrence >> 8;   /* Field 16 */
+		req[count++] = calnote->recurrence & 0xff; /* Field 17 */
 		/* len of the text */
-		req[count++] = strlen(CalendarNote->Text);    /* Field 18 */
+		req[count++] = strlen(calnote->text);    /* Field 18 */
 		/* fixed 0x00 */
 		req[count++] = 0x00; /* Field 19 */
 
 		/* Text */
 		dprintf("Count before encode = %d\n", count);
-		dprintf("Meeting Text is = \"%s\"\n", CalendarNote->Text);
+		dprintf("Meeting Text is = \"%s\"\n", calnote->text);
 
-		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
-		count = count + 2 * strlen(CalendarNote->Text);
+		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		count = count + 2 * strlen(calnote->text);
 		break;
 
-	case GCN_CALL:
-		req[count++] = CalendarNote->Time.Hour;   /* Field 12 */
-		req[count++] = CalendarNote->Time.Minute; /* Field 13 */
+	case GN_CALNOTE_CALL:
+		req[count++] = calnote->time.hour;   /* Field 12 */
+		req[count++] = calnote->time.minute; /* Field 13 */
 		/* Alarm .. */
 		req[count++] = 0xff; /* Field 14 */
 		req[count++] = 0xff; /* Field 15 */
-		if (CalendarNote->Alarm.Year) {
-			seconds = P7110_GetNoteAlarmDiff(&CalendarNote->Time,
-							&CalendarNote->Alarm);
+		if (calnote->alarm.timestamp.year) {
+			seconds = NK7110_GetNoteAlarmDiff(&calnote->time,
+							&calnote->alarm.timestamp);
 			if (seconds >= 0L) { /* Otherwise it's an error condition.... */
 				minutes = seconds / 60L;
 				count -= 2;
@@ -1702,22 +1680,22 @@ static gn_error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 			}
 		}
 		/* Recurrence */
-		if (CalendarNote->Recurrence >= 8760)
-			CalendarNote->Recurrence = 0xffff; /* setting  1 Year repeat */
-		req[count++] = CalendarNote->Recurrence >> 8;   /* Field 16 */
-		req[count++] = CalendarNote->Recurrence & 0xff; /* Field 17 */
+		if (calnote->recurrence >= 8760)
+			calnote->recurrence = 0xffff; /* setting  1 year repeat */
+		req[count++] = calnote->recurrence >> 8;   /* Field 16 */
+		req[count++] = calnote->recurrence & 0xff; /* Field 17 */
 		/* len of text */
-		req[count++] = strlen(CalendarNote->Text);    /* Field 18 */
+		req[count++] = strlen(calnote->text);    /* Field 18 */
 		/* fixed 0x00 */
-		req[count++] = strlen(CalendarNote->Phone);   /* Field 19 */
+		req[count++] = strlen(calnote->phone_number);   /* Field 19 */
 		/* Text */
-		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 20->N */
-		count += 2 * strlen(CalendarNote->Text);
-		char_encode_unicode(req + count, CalendarNote->Phone, strlen(CalendarNote->Phone)); /* Fields (N+1)->n */
-		count += 2 * strlen(CalendarNote->Phone);
+		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 20->N */
+		count += 2 * strlen(calnote->text);
+		char_encode_unicode(req + count, calnote->phone_number, strlen(calnote->phone_number)); /* Fields (N+1)->n */
+		count += 2 * strlen(calnote->phone_number);
 		break;
 
-	case GCN_BIRTHDAY:
+	case GN_CALNOTE_BIRTHDAY:
 		req[count++] = 0x00; /* Field 12 Fixed */
 		req[count++] = 0x00; /* Field 13 Fixed */
 
@@ -1726,16 +1704,16 @@ static gn_error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 		req[count++] = 0x00; /* Fields 14, 15 */
 		req[count++] = 0xff; /* Field 16 */
 		req[count++] = 0xff; /* Field 17 */
-		if (CalendarNote->Alarm.Year) {
-			/* First I try Time.Year = Alarm.Year. If negative, I increase year by one,
+		if (calnote->alarm.timestamp.year) {
+			/* First I try time.year = alarm.year. If negative, I increase year by one,
 			   but only once! This is because I may have alarm period across
 			   the year border, eg. birthday on 2001-01-10 and alarm on 2000-12-27 */
-			CalendarNote->Time.Year = CalendarNote->Alarm.Year;
-			if ((seconds= P7110_GetNoteAlarmDiff(&CalendarNote->Time,
-							     &CalendarNote->Alarm)) < 0L) {
-				CalendarNote->Time.Year++;
-				seconds = P7110_GetNoteAlarmDiff(&CalendarNote->Time,
-								 &CalendarNote->Alarm);
+			calnote->time.year = calnote->alarm.timestamp.year;
+			if ((seconds= NK7110_GetNoteAlarmDiff(&calnote->time,
+							     &calnote->alarm.timestamp)) < 0L) {
+				calnote->time.year++;
+				seconds = NK7110_GetNoteAlarmDiff(&calnote->time,
+								 &calnote->alarm.timestamp);
 			}
 			if (seconds >= 0L) { /* Otherwise it's an error condition.... */
 				count -= 4;
@@ -1746,31 +1724,31 @@ static gn_error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 			}
 		}	
 
-		req[count++] = 0x00; /* FIXME: CalendarNote->AlarmType; 0x00 tone, 0x01 silent 18 */
+		req[count++] = 0x00; /* FIXME: calnote->AlarmType; 0x00 tone, 0x01 silent 18 */
 
 		/* len of text */
-		req[count++] = strlen(CalendarNote->Text); /* Field 19 */
+		req[count++] = strlen(calnote->text); /* Field 19 */
 
 		/* Text */
 		dprintf("Count before encode = %d\n", count);
 
-		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 22->N */
-		count = count + 2 * strlen(CalendarNote->Text);
+		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 22->N */
+		count = count + 2 * strlen(calnote->text);
 		break;
 
-	case GCN_REMINDER:
+	case GN_CALNOTE_REMINDER:
 		/* Recurrence */
-		if (CalendarNote->Recurrence >= 8760)
-			CalendarNote->Recurrence = 0xffff; /* setting  1 Year repeat */
-		req[count++] = CalendarNote->Recurrence >> 8;   /* Field 12 */
-		req[count++] = CalendarNote->Recurrence & 0xff; /* Field 13 */
+		if (calnote->recurrence >= 8760)
+			calnote->recurrence = 0xffff; /* setting  1 year repeat */
+		req[count++] = calnote->recurrence >> 8;   /* Field 12 */
+		req[count++] = calnote->recurrence & 0xff; /* Field 13 */
 		/* len of text */
-		req[count++] = strlen(CalendarNote->Text);    /* Field 14 */
+		req[count++] = strlen(calnote->text);    /* Field 14 */
 		/* fixed 0x00 */
 		req[count++] = 0x00; /* Field 15 */
 		/* Text */
-		char_encode_unicode(req + count, CalendarNote->Text, strlen(CalendarNote->Text)); /* Fields 16->N */
-		count = count + 2 * strlen(CalendarNote->Text);
+		char_encode_unicode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
+		count = count + 2 * strlen(calnote->text);
 		break;
 	}
 
@@ -1779,35 +1757,35 @@ static gn_error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Count after padding = %d\n", count);
 
-	SEND_MESSAGE_WAITFOR(P7110_MSG_CALENDAR, count);
+	SEND_MESSAGE_WAITFOR(NK7110_MSG_CALENDAR, count);
 }
 
-static gn_error P7110_GetCalendarNotesInfo(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_INFO, 0xff, 0xfe};
+	unsigned char req[] = {FBUS_FRAME_HEADER, NK7110_SUBCAL_GET_INFO, 0xff, 0xfe};
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_CALENDAR, 6);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 6);
 }
 
-static gn_error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error	error = GN_ERR_NOTREADY;
-	unsigned char	req[] = {FBUS_FRAME_HEADER, P7110_SUBCAL_GET_NOTE, 0x00, 0x00};
-	unsigned char	date[] = {FBUS_FRAME_HEADER, P7110_SUBCLO_GET_DATE};
-	GSM_Data	tmpdata;
-	GSM_DateTime	tmptime;
-	GSM_CalendarNotesList list;
+	unsigned char	req[] = {FBUS_FRAME_HEADER, NK7110_SUBCAL_GET_NOTE, 0x00, 0x00};
+	unsigned char	date[] = {FBUS_FRAME_HEADER, NK7110_SUBCLO_GET_DATE};
+	gn_data	tmpdata;
+	gn_timestamp	tmptime;
+	gn_calnote_list list;
 
-	data->CalendarNotesList = &list;
-	tmpdata.DateTime = &tmptime;
-	if ((error = P7110_GetCalendarNotesInfo(data, state)) == GN_ERR_NONE) {
-		if (data->CalendarNote->Location < data->CalendarNotesList->Number + 1 &&
-		    data->CalendarNote->Location > 0) {
-			if (SM_SendMessage(state, 4, P7110_MSG_CLOCK, date) == GN_ERR_NONE) {
-				SM_Block(state, &tmpdata, P7110_MSG_CLOCK);
-				req[4] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] >> 8;
-				req[5] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] & 0xff;
-				data->CalendarNote->Time.Year = tmptime.Year;
+	data->calnote_list = &list;
+	tmpdata.datetime = &tmptime;
+	if ((error = NK7110_GetCalendarNotesInfo(data, state)) == GN_ERR_NONE) {
+		if (data->calnote->location < data->calnote_list->number + 1 &&
+		    data->calnote->location > 0) {
+			if (sm_message_send(state, 4, NK7110_MSG_CLOCK, date) == GN_ERR_NONE) {
+				sm_block(state, &tmpdata, NK7110_MSG_CLOCK);
+				req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+				req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+				data->calnote->time.year = tmptime.year;
 			} else 
 				return GN_ERR_UNKNOWN; /* FIXME */
 		} else 
@@ -1816,34 +1794,34 @@ static gn_error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state)
 	} else 
 		return error;
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_CALENDAR, 6);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 6);
 }
 
-static gn_error P7110_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER,
 				0x0b,      /* delete calendar note */
 				0x00, 0x00}; /*location */
-	GSM_CalendarNotesList list;
+	gn_calnote_list list;
 
-	data->CalendarNotesList = &list;
-	if (P7110_GetCalendarNotesInfo(data, state) == GN_ERR_NONE) {
-		if (data->CalendarNote->Location < data->CalendarNotesList->Number + 1 &&
-		    data->CalendarNote->Location > 0) {
-			req[4] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] << 8;
-			req[5] = data->CalendarNotesList->Location[data->CalendarNote->Location - 1] & 0xff;
+	data->calnote_list = &list;
+	if (NK7110_GetCalendarNotesInfo(data, state) == GN_ERR_NONE) {
+		if (data->calnote->location < data->calnote_list->number + 1 &&
+		    data->calnote->location > 0) {
+			req[4] = data->calnote_list->location[data->calnote->location - 1] << 8;
+			req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
 		} else {
 			return GN_ERR_INVALIDLOCATION;
 		}
 	}
 
-	SEND_MESSAGE_WAITFOR(P7110_MSG_CALENDAR, 6);
+	SEND_MESSAGE_WAITFOR(NK7110_MSG_CALENDAR, 6);
 }
 
 
 
 #if 0
-static gn_error P7110_DialVoice(char *Number)
+static gn_error NK7110_DialVoice(char *Number)
 {
 	/* Doesn't work (yet) */    /* 3 2 1 5 2 30 35 */
 
@@ -1877,7 +1855,7 @@ static gn_error P7110_DialVoice(char *Number)
 /*****************************/
 /********* STARTUP ***********/
 /*****************************/
-static gn_error P7110_IncomingStartup(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingStartup(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	/*
 	  01 13 00 ed 1c 00 39 35 32 37 32 00
@@ -1890,21 +1868,21 @@ static gn_error P7110_IncomingStartup(int messagetype, unsigned char *message, i
 		return GN_ERR_NONE;
 		break;
 	case 0x15:
-		if (data->Bitmap) {
+		if (data->bitmap) {
 			/* I'm sure there are blocks here but never mind! */
-			data->Bitmap->type = GN_BMP_StartupLogo;
-			data->Bitmap->height = message[13];
-			data->Bitmap->width = message[17];
-			data->Bitmap->size = ((data->Bitmap->height / 8) + (data->Bitmap->height % 8 > 0)) * data->Bitmap->width; /* Can't see this coded anywhere */
-			memcpy(data->Bitmap->bitmap, message + 22, data->Bitmap->size);
-			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->Bitmap->height, data->Bitmap->width);
+			data->bitmap->type = GN_BMP_StartupLogo;
+			data->bitmap->height = message[13];
+			data->bitmap->width = message[17];
+			data->bitmap->size = ((data->bitmap->height / 8) + (data->bitmap->height % 8 > 0)) * data->bitmap->width; /* Can't see this coded anywhere */
+			memcpy(data->bitmap->bitmap, message + 22, data->bitmap->size);
+			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->bitmap->height, data->bitmap->width);
 		}
 		return GN_ERR_NONE;
 		break;
 	case 0x1c:
 		dprintf("Succesfully got security code: ");
-		memcpy(data->SecurityCode->Code, message + 6, 5);
-		dprintf("%s \n", data->SecurityCode->Code);
+		memcpy(data->security_code->code, message + 6, 5);
+		dprintf("%s \n", data->security_code->code);
 		return GN_ERR_NONE;
 		break;
 	default:
@@ -1914,24 +1892,24 @@ static gn_error P7110_IncomingStartup(int messagetype, unsigned char *message, i
 	}
 }
 
-static gn_error GetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetStartupBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0xee, 0x15};
 
 	dprintf("Getting startup logo...\n");
-	SEND_MESSAGE_BLOCK(P7110_MSG_STLOGO, 5);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_STLOGO, 5);
 }
 
-static gn_error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetSecurityCode(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER,
 			       0xEE,
 			       0x1c};			/* SecurityCode */
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_STLOGO, 5);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_STLOGO, 5);
 }
 
-static gn_error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetStartupBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[1000] = {FBUS_FRAME_HEADER, 0xec, 0x15, 0x00, 0x00, 0x00, 0x04, 0xc0, 0x02, 0x00,
 				   0x00,           /* Height */
@@ -1941,31 +1919,31 @@ static gn_error SetStartupBitmap(GSM_Data *data, GSM_Statemachine *state)
 	int count = 21;
 
 
-	if ((data->Bitmap->width != state->Phone.Info.StartupLogoW) ||
-	    (data->Bitmap->height != state->Phone.Info.StartupLogoH)) {
+	if ((data->bitmap->width != state->driver.phone.startup_logo_width) ||
+	    (data->bitmap->height != state->driver.phone.startup_logo_height)) {
 
-		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n", state->Phone.Info.StartupLogoH, state->Phone.Info.StartupLogoW, data->Bitmap->height, data->Bitmap->width);
+		dprintf("Invalid image size - expecting (%dx%d) got (%dx%d)\n", state->driver.phone.startup_logo_height, state->driver.phone.startup_logo_width, data->bitmap->height, data->bitmap->width);
 		return GN_ERR_INVALIDSIZE;
 	}
 
-	req[12] = data->Bitmap->height;
-	req[16] = data->Bitmap->width;
-	memcpy(req + count, data->Bitmap->bitmap, data->Bitmap->size);
-	count += data->Bitmap->size;
+	req[12] = data->bitmap->height;
+	req[16] = data->bitmap->width;
+	memcpy(req + count, data->bitmap->bitmap, data->bitmap->size);
+	count += data->bitmap->size;
 	dprintf("Setting startup logo...\n");
 
-	SEND_MESSAGE_BLOCK(P7110_MSG_STLOGO, count);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_STLOGO, count);
 }
 
 /*****************************/
 /********* SECURITY **********/
 /*****************************/
-static gn_error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch(message[2]) {
 	default:
 		dprintf("Unknown security command\n");
-		return PNOK_IncomingSecurity(messagetype, message, length, data, state);
+		return pnok_security_incoming(messagetype, message, length, data, state);
 	}
 	return GN_ERR_NONE;
 }
@@ -1974,7 +1952,7 @@ static gn_error P7110_IncomingSecurity(int messagetype, unsigned char *message, 
 /****** WAP ******/
 /*****************/
 
-static gn_error P7110_IncomingWAP(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int string_length, pos, pad = 0;
 
@@ -2009,21 +1987,21 @@ static gn_error P7110_IncomingWAP(int messagetype, unsigned char *message, int l
 	case 0x10:
 		break;
 	case 0x07:
-		if (!data->WAPBookmark) return GN_ERR_INTERNALERROR;
+		if (!data->wap_bookmark) return GN_ERR_INTERNALERROR;
 		dprintf("WAP bookmark received\n");
 		string_length = message[6] << 1;
 
-		char_decode_unicode(data->WAPBookmark->Name, message + 7, string_length);
-		dprintf("Name: %s\n", data->WAPBookmark->Name);
+		char_decode_unicode(data->wap_bookmark->name, message + 7, string_length);
+		dprintf("Name: %s\n", data->wap_bookmark->name);
 		pos = string_length + 7;
 
 		string_length = message[pos++] << 1;
-		char_decode_unicode(data->WAPBookmark->URL, message + pos, string_length);
-		dprintf("URL: %s\n", data->WAPBookmark->URL);
+		char_decode_unicode(data->wap_bookmark->URL, message + pos, string_length);
+		dprintf("URL: %s\n", data->wap_bookmark->URL);
 		break;
 	case 0x0a:
 		dprintf("WAP bookmark succesfully set!\n");
-		data->WAPBookmark->Location = message[5];
+		data->wap_bookmark->location = message[5];
 		break;
 	case 0x0d:
 		dprintf("WAP bookmark succesfully deleted!\n");
@@ -2032,47 +2010,47 @@ static gn_error P7110_IncomingWAP(int messagetype, unsigned char *message, int l
 		dprintf("WAP setting succesfully activated!\n");
 		break;
 	case 0x16:
-		if (!data->WAPSetting) return GN_ERR_INTERNALERROR;
+		if (!data->wap_setting) return GN_ERR_INTERNALERROR;
 		dprintf("WAP setting received\n");
-		/* If ReadBeforeWrite is set we only want the Successors */
+		/* If ReadBeforeWrite is set we only want the successors */
 
 		string_length = message[4] << 1;
-		if (!data->WAPSetting->ReadBeforeWrite)
-			char_decode_unicode(data->WAPSetting->Name, message + 5, string_length);
-		dprintf("Name: %s\n", data->WAPSetting->Name);
+		if (!data->wap_setting->read_before_write)
+			char_decode_unicode(data->wap_setting->name, message + 5, string_length);
+		dprintf("Name: %s\n", data->wap_setting->name);
 		pos = string_length + 5;
 		if (!(string_length % 4)) pad = 1;
 
 		string_length = message[pos++] << 1;
-		if (!data->WAPSetting->ReadBeforeWrite)
-			char_decode_unicode(data->WAPSetting->Home, message + pos, string_length);
-		dprintf("Home: %s\n", data->WAPSetting->Home);
+		if (!data->wap_setting->read_before_write)
+			char_decode_unicode(data->wap_setting->home, message + pos, string_length);
+		dprintf("Home: %s\n", data->wap_setting->home);
 		pos += string_length;
 
-		if (!data->WAPSetting->ReadBeforeWrite) {
-			data->WAPSetting->Session = message[pos++];
+		if (!data->wap_setting->read_before_write) {
+			data->wap_setting->session = message[pos++];
 			switch (message[pos]) {
 			case 0x06:
-				data->WAPSetting->Bearer = GWP_GSMDATA;
+				data->wap_setting->bearer = GN_WAP_BEARER_GSMDATA;
 				break;
 			case 0x07:
-				data->WAPSetting->Bearer = GWP_SMS;
+				data->wap_setting->bearer = GN_WAP_BEARER_SMS;
 				break;
 			default:
-				data->WAPSetting->Bearer = GWP_USSD;
+				data->wap_setting->bearer = GN_WAP_BEARER_USSD;
 				break;
 			}
 			if (message[pos + 12] == 0x01) 	
-				data->WAPSetting->Security = true;
+				data->wap_setting->security = true;
 			else
-				data->WAPSetting->Security = false;
+				data->wap_setting->security = false;
 		} else
 			pos ++;
 
-		data->WAPSetting->Successors[0] = message[pos + 2];
-		data->WAPSetting->Successors[1] = message[pos + 3];
-		data->WAPSetting->Successors[2] = message[pos + 8];
-		data->WAPSetting->Successors[3] = message[pos + 9];
+		data->wap_setting->successors[0] = message[pos + 2];
+		data->wap_setting->successors[1] = message[pos + 3];
+		data->wap_setting->successors[2] = message[pos + 8];
+		data->wap_setting->successors[3] = message[pos + 9];
 		break;
 	case 0x1c:
 		switch (message[5]) {
@@ -2080,41 +2058,41 @@ static gn_error P7110_IncomingWAP(int messagetype, unsigned char *message, int l
 			dprintf("SMS:\n");
 			pos = 6;
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->WAPSetting->SMSServiceNumber, message + pos, string_length);
-			dprintf("   Service number: %s\n", data->WAPSetting->SMSServiceNumber);
+			char_decode_unicode(data->wap_setting->sms_service_number, message + pos, string_length);
+			dprintf("   Service number: %s\n", data->wap_setting->sms_service_number);
 			pos += string_length;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->WAPSetting->SMSServerNumber, message + pos, string_length);
-			dprintf("   Server number: %s\n", data->WAPSetting->SMSServerNumber);
+			char_decode_unicode(data->wap_setting->sms_server_number, message + pos, string_length);
+			dprintf("   Server number: %s\n", data->wap_setting->sms_server_number);
 			pos += string_length;
 			break;
 		case 0x01:
 			dprintf("GSM data:\n");
 			pos = 6;
-			data->WAPSetting->GSMdataAuthentication = message[pos++];
-			data->WAPSetting->CallType = message[pos++];
-			data->WAPSetting->CallSpeed = message[pos++];
+			data->wap_setting->gsm_data_authentication = message[pos++];
+			data->wap_setting->call_type = message[pos++];
+			data->wap_setting->call_speed = message[pos++];
 			pos++;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->WAPSetting->GSMdataIP, message + pos, string_length);
-			dprintf("   IP: %s\n", data->WAPSetting->GSMdataIP);
+			char_decode_unicode(data->wap_setting->gsm_data_ip, message + pos, string_length);
+			dprintf("   IP: %s\n", data->wap_setting->gsm_data_ip);
 			pos += string_length;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->WAPSetting->Number, message + pos, string_length);
-			dprintf("   Number: %s\n", data->WAPSetting->Number);
+			char_decode_unicode(data->wap_setting->number, message + pos, string_length);
+			dprintf("   Number: %s\n", data->wap_setting->number);
 			pos += string_length;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->WAPSetting->GSMdataUsername, message + pos, string_length);
-			dprintf("   Username: %s\n", data->WAPSetting->GSMdataUsername);
+			char_decode_unicode(data->wap_setting->gsm_data_username, message + pos, string_length);
+			dprintf("   Username: %s\n", data->wap_setting->gsm_data_username);
 			pos += string_length;
 
 			string_length = message[pos++] << 1;
-			char_decode_unicode(data->WAPSetting->GSMdataPassword, message + pos, string_length);
-			dprintf("   Password: %s\n", data->WAPSetting->GSMdataPassword);
+			char_decode_unicode(data->wap_setting->gsm_data_password, message + pos, string_length);
+			dprintf("   Password: %s\n", data->wap_setting->gsm_data_password);
 			pos += string_length;
 			break;
 		default:
@@ -2133,22 +2111,22 @@ static gn_error P7110_IncomingWAP(int messagetype, unsigned char *message, int l
 	return GN_ERR_NONE;
 }
 
-static gn_error SendWAPFrame(GSM_Data *data, GSM_Statemachine *state, int frame)
+static gn_error SendWAPFrame(gn_data *data, struct gn_statemachine *state, int frame)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x00 };
 
 	dprintf("Sending WAP frame\n");
 	req[3] = frame;
-	SEND_MESSAGE_BLOCK(P7110_MSG_WAP, 4);
+	SEND_MESSAGE_BLOCK(NK7110_MSG_WAP, 4);
 }
 
-static gn_error PrepareWAP(GSM_Data *data, GSM_Statemachine *state)
+static gn_error PrepareWAP(gn_data *data, struct gn_statemachine *state)
 {
 	dprintf("Preparing WAP\n");
 	return SendWAPFrame(data, state, 0x00);
 }
 
-static gn_error FinishWAP(GSM_Data *data, GSM_Statemachine *state)
+static gn_error FinishWAP(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
@@ -2182,7 +2160,7 @@ static int PackWAPString(unsigned char *dest, unsigned char *string, int length_
 	return ((length << 1) + length_size);
 }
 
-static gn_error P7110_WriteWAPSetting(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[200] = { FBUS_FRAME_HEADER, 0x18,
 				   0x00 }; 		/* Location */
@@ -2196,7 +2174,7 @@ static gn_error P7110_WriteWAPSetting(GSM_Data *data, GSM_Statemachine *state)
 
 	dprintf("Writing WAP setting\n");
 	memset(req + pos, 0, 200 - pos);
-	req[4] = data->WAPSetting->Location;
+	req[4] = data->wap_setting->location;
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		SendWAPFrame(data, state, 0x03);
@@ -2204,113 +2182,113 @@ static gn_error P7110_WriteWAPSetting(GSM_Data *data, GSM_Statemachine *state)
 	}
 
 	/* First we need to get WAP setting from the location we want to write to
-	   because we need WAPSetting->Successors */
-	req2[4] = data->WAPSetting->Location;
-	data->WAPSetting->ReadBeforeWrite = true;
-	if (SM_SendMessage(state, 5, P7110_MSG_WAP, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_WAP);
+	   because we need wap_setting->successors */
+	req2[4] = data->wap_setting->location;
+	data->wap_setting->read_before_write = true;
+	if (sm_message_send(state, 5, NK7110_MSG_WAP, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	error = sm_block(state, data, NK7110_MSG_WAP);
 	if (error != GN_ERR_NONE) return error;
 
 	/* Name */
-	pos += PackWAPString(req + pos, data->WAPSetting->Name, 1);
+	pos += PackWAPString(req + pos, data->wap_setting->name, 1);
 	/* Home */
-	pos += PackWAPString(req + pos, data->WAPSetting->Home, 1);
+	pos += PackWAPString(req + pos, data->wap_setting->home, 1);
 
-	req[pos++] = data->WAPSetting->Session;
-	req[pos++] = data->WAPSetting->Bearer;
+	req[pos++] = data->wap_setting->session;
+	req[pos++] = data->wap_setting->bearer;
 
 	req[pos++] = 0x0a;
-	if (data->WAPSetting->Security)	req[pos] = 0x01;
+	if (data->wap_setting->security)	req[pos] = 0x01;
 	pos++;
 	memcpy(req + pos, "\x00\x80\x00\x00\x00\x00\x00\x00\x00", 9);
 	pos += 9;
 
-	if (SM_SendMessage(state, pos, P7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (sm_message_send(state, pos, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	error = sm_block(state, data, NK7110_MSG_WAP);
 	if (error != GN_ERR_NONE) return error;
 
 	for (i = 0; i < 4; i++) {
 		pos = 4;
 		memset(req1 + pos, 0, 200 - pos);
 		if (i == 0 || i== 2) {  /* SMS/USSD */
-			req1[pos++] = data->WAPSetting->Successors[i];
+			req1[pos++] = data->wap_setting->successors[i];
 			req1[pos++] = 0x02; 
 			req1[pos++] = 0x00; /* SMS */
 			/* SMS Service */
-			pos += PackWAPString(req1 + pos, data->WAPSetting->SMSServiceNumber, 1);
+			pos += PackWAPString(req1 + pos, data->wap_setting->sms_service_number, 1);
 			/* SMS Server */
-			pos += PackWAPString(req1 + pos, data->WAPSetting->SMSServerNumber, 1);
+			pos += PackWAPString(req1 + pos, data->wap_setting->sms_server_number, 1);
 		} else {  /* GSMdata */
-			req1[pos++] = data->WAPSetting->Successors[i];
+			req1[pos++] = data->wap_setting->successors[i];
 			req1[pos++] = 0x02; 
 			req1[pos++] = 0x01; /* GSMdata */
-			req1[pos++] = data->WAPSetting->GSMdataAuthentication;
-			req1[pos++] = data->WAPSetting->CallType;
-			req1[pos++] = data->WAPSetting->CallSpeed;
+			req1[pos++] = data->wap_setting->gsm_data_authentication;
+			req1[pos++] = data->wap_setting->call_type;
+			req1[pos++] = data->wap_setting->call_speed;
 			req1[pos++] = 0x01;
 			/* IP */
-			pos += PackWAPString(req1 + pos, data->WAPSetting->GSMdataIP, 1);
+			pos += PackWAPString(req1 + pos, data->wap_setting->gsm_data_ip, 1);
 			/* Number */
-			pos += PackWAPString(req1 + pos, data->WAPSetting->Number, 1);
+			pos += PackWAPString(req1 + pos, data->wap_setting->number, 1);
 			/* Username  */
-			pos += PackWAPString(req1 + pos, data->WAPSetting->GSMdataUsername, 1);
+			pos += PackWAPString(req1 + pos, data->wap_setting->gsm_data_username, 1);
 			/* Password */
-			pos += PackWAPString(req1 + pos, data->WAPSetting->GSMdataPassword, 1);
+			pos += PackWAPString(req1 + pos, data->wap_setting->gsm_data_password, 1);
 		}
 		memcpy(req1 + pos, "\x80\x00\x00\x00\x00\x00\x00\x00", 8);
 		pos += 8;
 
-		if (SM_SendMessage(state, pos, P7110_MSG_WAP, req1) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = SM_Block(state, data, P7110_MSG_WAP);
+		if (sm_message_send(state, pos, NK7110_MSG_WAP, req1) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		error = sm_block(state, data, NK7110_MSG_WAP);
 		if (error != GN_ERR_NONE) return error;
 	}
 
 	return FinishWAP(data, state);
 }
 
-static gn_error P7110_DeleteWAPBookmark(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {	FBUS_FRAME_HEADER, 0x0C,
 				0x00, 0x00};		/* Location */
 	gn_error error;
 
 	dprintf("Deleting WAP bookmark\n");
-	req[5] = data->WAPBookmark->Location + 1;
+	req[5] = data->wap_bookmark->location + 1;
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
 		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
 	}
 
-	if (SM_SendMessage(state, 6, P7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (sm_message_send(state, 6, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	error = sm_block(state, data, NK7110_MSG_WAP);
 	if (error != GN_ERR_NONE) return error;
 
 	return FinishWAP(data, state);
 }
 
-static gn_error P7110_GetWAPBookmark(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetWAPBookmark(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x06,
 				0x00, 0x00};		/* Location */
 	gn_error error;
 
 	dprintf("Getting WAP bookmark\n");
-	req[5] = data->WAPBookmark->Location;
+	req[5] = data->wap_bookmark->location;
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
 		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
 	}
 
-	if (SM_SendMessage(state, 6, P7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (sm_message_send(state, 6, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	error = sm_block(state, data, NK7110_MSG_WAP);
 	if (error != GN_ERR_NONE) return error;
 
 	return FinishWAP(data, state);
 }
 
-static gn_error P7110_WriteWAPBookmark(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_WriteWAPBookmark(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[350] = { FBUS_FRAME_HEADER, 0x09,
 				0xFF, 0xFF};		/* Location */
@@ -2324,67 +2302,67 @@ static gn_error P7110_WriteWAPBookmark(GSM_Data *data, GSM_Statemachine *state)
 		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
 	}
 
-	pos += PackWAPString(req + pos, data->WAPBookmark->Name, 1);
-	pos += PackWAPString(req + pos, data->WAPBookmark->URL, 1);
+	pos += PackWAPString(req + pos, data->wap_bookmark->name, 1);
+	pos += PackWAPString(req + pos, data->wap_bookmark->URL, 1);
 
-	if (SM_SendMessage(state, pos, P7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (sm_message_send(state, pos, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	error = sm_block(state, data, NK7110_MSG_WAP);
 	if (error != GN_ERR_NONE) return error;
 
 	return FinishWAP(data, state);
 }
 
-static gn_error P7110_GetWAPSetting(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetWAPSetting(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x15,
-				0x00 };		/* Location */
+				0x00 };		/* location */
 	unsigned char req2[] = { FBUS_FRAME_HEADER, 0x1b,
-				 0x00 };		/* Location */
+				 0x00 };		/* location */
 	gn_error error;
 	int i;
 
 	dprintf("Getting WAP setting\n");
-	if (!data->WAPSetting) return GN_ERR_INTERNALERROR;
+	if (!data->wap_setting) return GN_ERR_INTERNALERROR;
 
-	req[4] = data->WAPSetting->Location;
-	memset(data->WAPSetting, 0, sizeof(GSM_WAPSetting));
-	data->WAPSetting->Location = req[4];
+	req[4] = data->wap_setting->location;
+	memset(data->wap_setting, 0, sizeof(gn_wap_setting));
+	data->wap_setting->location = req[4];
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
 		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
 	}
 
-	if (SM_SendMessage(state, 5, P7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (sm_message_send(state, 5, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	error = sm_block(state, data, NK7110_MSG_WAP);
 	if (error != GN_ERR_NONE) return error;
 
 	for (i = 0; i < 4; i++) {
-		req2[4] = data->WAPSetting->Successors[i];
-		if (SM_SendMessage(state, 5, P7110_MSG_WAP, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-		error = SM_Block(state, data, P7110_MSG_WAP);
+		req2[4] = data->wap_setting->successors[i];
+		if (sm_message_send(state, 5, NK7110_MSG_WAP, req2) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+		error = sm_block(state, data, NK7110_MSG_WAP);
 		if (error != GN_ERR_NONE) return error;
 	}
 	
 	return FinishWAP(data, state);
 }
 
-static gn_error P7110_ActivateWAPSetting(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_ActivateWAPSetting(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x12,
 				0x00 };		/* Location */
 	gn_error error;
 
 	dprintf("Activating WAP setting\n");
-	req[4] = data->WAPSetting->Location;
+	req[4] = data->wap_setting->location;
 
 	if (PrepareWAP(data, state) != GN_ERR_NONE) {
 		FinishWAP(data, state);
 		if ((error = PrepareWAP(data, state)) != GN_ERR_NONE) return error;
 	}
 
-	if (SM_SendMessage(state, 5, P7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (sm_message_send(state, 5, NK7110_MSG_WAP, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	error = sm_block(state, data, NK7110_MSG_WAP);
 	if (error != GN_ERR_NONE) return error;
 
 	return FinishWAP(data, state);
@@ -2393,7 +2371,7 @@ static gn_error P7110_ActivateWAPSetting(GSM_Data *data, GSM_Statemachine *state
 /*****************************/
 /********** KEYPRESS *********/
 /*****************************/
-static gn_error P7110_IncomingKeypress(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_IncomingKeypress(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	switch(message[2]) {
 	case 0x46:
@@ -2409,41 +2387,41 @@ static gn_error P7110_IncomingKeypress(int messagetype, unsigned char *message, 
 	return GN_ERR_NONE;
 }
 
-static gn_error P7110_PressKey(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_PressKey(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x46, 0x00, 0x01,
 			       0x0a};		/* keycode */
 
 	dprintf("Pressing key...\n");
-	req[5] = data->KeyCode;
-	if (SM_SendMessage(state, 6, P7110_MSG_KEYPRESS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, P7110_MSG_KEYPRESS_RESP);
+	req[5] = data->key_code;
+	if (sm_message_send(state, 6, NK7110_MSG_KEYPRESS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, NK7110_MSG_KEYPRESS_RESP);
 }
 
-static gn_error P7110_ReleaseKey(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_ReleaseKey(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x47, 0x00, 0x01, 0x0c};
 
 	dprintf("Releasing key...\n");
-	if (SM_SendMessage(state, 6, P7110_MSG_KEYPRESS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
-	return SM_Block(state, data, P7110_MSG_KEYPRESS_RESP);
+	if (sm_message_send(state, 6, NK7110_MSG_KEYPRESS, req) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	return sm_block(state, data, NK7110_MSG_KEYPRESS_RESP);
 }
 
-static gn_error P7110_PressOrReleaseKey(GSM_Data *data, GSM_Statemachine *state, bool press)
+static gn_error NK7110_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press)
 {
 	if (press) 
-		return P7110_PressKey(data, state);
+		return NK7110_PressKey(data, state);
 	else
-		return P7110_ReleaseKey(data, state);
+		return NK7110_ReleaseKey(data, state);
 }
 
 
 /*****************************/
 /********** OTHERS ***********/
 /*****************************/
-static gn_error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_GetBitmap(gn_data *data, struct gn_statemachine *state)
 {
-	switch(data->Bitmap->type) {
+	switch(data->bitmap->type) {
 	case GN_BMP_CallerLogo:
 		return GetCallerBitmap(data, state);
 	case GN_BMP_StartupLogo:
@@ -2455,9 +2433,9 @@ static gn_error P7110_GetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	}
 }
 
-static gn_error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state)
+static gn_error NK7110_SetBitmap(gn_data *data, struct gn_statemachine *state)
 {
-	switch(data->Bitmap->type) {
+	switch(data->bitmap->type) {
 	case GN_BMP_CallerLogo:
 		return SetCallerBitmap(data, state);
 	case GN_BMP_StartupLogo:
@@ -2469,112 +2447,112 @@ static gn_error P7110_SetBitmap(GSM_Data *data, GSM_Statemachine *state)
 	}
 }
 
-static int GetMemoryType(GSM_MemoryType memory_type)
+static int get_memory_type(gn_memory_type memory_type)
 {
 	int result;
 
 	switch (memory_type) {
-	case GMT_MT:
-		result = P7110_MEMORY_MT;
+	case GN_MT_MT:
+		result = NK7110_MEMORY_MT;
 		break;
-	case GMT_ME:
-		result = P7110_MEMORY_ME;
+	case GN_MT_ME:
+		result = NK7110_MEMORY_ME;
 		break;
-	case GMT_SM:
-		result = P7110_MEMORY_SM;
+	case GN_MT_SM:
+		result = NK7110_MEMORY_SM;
 		break;
-	case GMT_FD:
-		result = P7110_MEMORY_FD;
+	case GN_MT_FD:
+		result = NK7110_MEMORY_FD;
 		break;
-	case GMT_ON:
-		result = P7110_MEMORY_ON;
+	case GN_MT_ON:
+		result = NK7110_MEMORY_ON;
 		break;
-	case GMT_EN:
-		result = P7110_MEMORY_EN;
+	case GN_MT_EN:
+		result = NK7110_MEMORY_EN;
 		break;
-	case GMT_DC:
-		result = P7110_MEMORY_DC;
+	case GN_MT_DC:
+		result = NK7110_MEMORY_DC;
 		break;
-	case GMT_RC:
-		result = P7110_MEMORY_RC;
+	case GN_MT_RC:
+		result = NK7110_MEMORY_RC;
 		break;
-	case GMT_MC:
-		result = P7110_MEMORY_MC;
+	case GN_MT_MC:
+		result = NK7110_MEMORY_MC;
 		break;
-	case GMT_IN:
-		result = P7110_MEMORY_IN;
+	case GN_MT_IN:
+		result = NK7110_MEMORY_IN;
 		break;
-	case GMT_OU:
-		result = P7110_MEMORY_OU;
+	case GN_MT_OU:
+		result = NK7110_MEMORY_OU;
 		break;
-	case GMT_AR:
-		result = P7110_MEMORY_AR;
+	case GN_MT_AR:
+		result = NK7110_MEMORY_AR;
 		break;
-	case GMT_TE:
-		result = P7110_MEMORY_TE;
+	case GN_MT_TE:
+		result = NK7110_MEMORY_TE;
 		break;
-	case GMT_F1:
-		result = P7110_MEMORY_F1;
+	case GN_MT_F1:
+		result = NK7110_MEMORY_F1;
 		break;
-	case GMT_F2:
-		result = P7110_MEMORY_F2;
+	case GN_MT_F2:
+		result = NK7110_MEMORY_F2;
 		break;
-	case GMT_F3:
-		result = P7110_MEMORY_F3;
+	case GN_MT_F3:
+		result = NK7110_MEMORY_F3;
 		break;
-	case GMT_F4:
-		result = P7110_MEMORY_F4;
+	case GN_MT_F4:
+		result = NK7110_MEMORY_F4;
 		break;
-	case GMT_F5:
-		result = P7110_MEMORY_F5;
+	case GN_MT_F5:
+		result = NK7110_MEMORY_F5;
 		break;
-	case GMT_F6:
-		result = P7110_MEMORY_F6;
+	case GN_MT_F6:
+		result = NK7110_MEMORY_F6;
 		break;
-	case GMT_F7:
-		result = P7110_MEMORY_F7;
+	case GN_MT_F7:
+		result = NK7110_MEMORY_F7;
 		break;
-	case GMT_F8:
-		result = P7110_MEMORY_F8;
+	case GN_MT_F8:
+		result = NK7110_MEMORY_F8;
 		break;
-	case GMT_F9:
-		result = P7110_MEMORY_F9;
+	case GN_MT_F9:
+		result = NK7110_MEMORY_F9;
 		break;
-	case GMT_F10:
-		result = P7110_MEMORY_F10;
+	case GN_MT_F10:
+		result = NK7110_MEMORY_F10;
 		break;
-	case GMT_F11:
-		result = P7110_MEMORY_F11;
+	case GN_MT_F11:
+		result = NK7110_MEMORY_F11;
 		break;
-	case GMT_F12:
-		result = P7110_MEMORY_F12;
+	case GN_MT_F12:
+		result = NK7110_MEMORY_F12;
 		break;
-	case GMT_F13:
-		result = P7110_MEMORY_F13;
+	case GN_MT_F13:
+		result = NK7110_MEMORY_F13;
 		break;
-	case GMT_F14:
-		result = P7110_MEMORY_F14;
+	case GN_MT_F14:
+		result = NK7110_MEMORY_F14;
 		break;
-	case GMT_F15:
-		result = P7110_MEMORY_F15;
+	case GN_MT_F15:
+		result = NK7110_MEMORY_F15;
 		break;
-	case GMT_F16:
-		result = P7110_MEMORY_F16;
+	case GN_MT_F16:
+		result = NK7110_MEMORY_F16;
 		break;
-	case GMT_F17:
-		result = P7110_MEMORY_F17;
+	case GN_MT_F17:
+		result = NK7110_MEMORY_F17;
 		break;
-	case GMT_F18:
-		result = P7110_MEMORY_F18;
+	case GN_MT_F18:
+		result = NK7110_MEMORY_F18;
 		break;
-	case GMT_F19:
-		result = P7110_MEMORY_F19;
+	case GN_MT_F19:
+		result = NK7110_MEMORY_F19;
 		break;
-	case GMT_F20:
-		result = P7110_MEMORY_F20;
+	case GN_MT_F20:
+		result = NK7110_MEMORY_F20;
 		break;
 	default:
-		result = P7110_MEMORY_XX;
+		result = NK7110_MEMORY_XX;
 		break;
 	}
 	return (result);

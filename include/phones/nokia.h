@@ -37,7 +37,7 @@
 
 #include "gsm-error.h"
 
-#define	PNOK_MSG_SMS 0x02
+#define	PNOK_MSG_ID_SMS 0x02
 
 gn_error pnok_manufacturer_get(char *manufacturer);
 void pnok_string_decode(unsigned char *dest, size_t max, const unsigned char *src, size_t len);
