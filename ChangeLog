@@ -33,6 +33,8 @@
     o config saving and restoring fixed            (BORBELY Zoltan)
  * 6100 driver updates
     o calendar entry types was mixed    (Pawel Kot, BORBELY Zoltan)
+ o 6510 driver updates
+    o add Nokia 6800 and family support            (Chris de Vidal)
 
 0.6.3
 =====
