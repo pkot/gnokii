@@ -359,22 +359,10 @@ static void busterminate(void)
 static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 {
 	gn_error error;
-	GSM_ConnectionType connection = GCT_Serial;
 	char *aux;
 	static bool atexit_registered = false;
 
 	GSM_DataClear(&data);
-
-	if (!strcasecmp(Connection, "dau9p"))    connection = GCT_DAU9P; /* Use only with 6210/7110 for faster connection with such cable */
-	if (!strcasecmp(Connection, "dlr3p"))    connection = GCT_DLR3P;
-	if (!strcasecmp(Connection, "infrared")) connection = GCT_Infrared;
-#ifdef HAVE_IRDA
-	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
-#endif
-#ifndef WIN32
-	if (!strcasecmp(Connection, "tcp"))      connection = GCT_TCP;
-	if (!strcasecmp(Connection, "tekram"))   connection = GCT_Tekram;
-#endif
 
 	/* register cleanup function */
 	if (!atexit_registered) {
@@ -394,7 +382,7 @@ static void businit(void (*rlp_handler)(RLP_F96Frame *frame))
 	}
 
 	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(model, Port, Initlength, connection, rlp_handler, &State);
+	error = gn_gsm_initialise(model, Port, Initlength, Connection, &State);
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Telephone interface init failed: %s Quitting.\n"), gn_error_print(error));
 		exit(2);
@@ -3774,10 +3762,10 @@ static int reset(char *type)
 static int pmon(void)
 {
 	gn_error error;
-	GSM_ConnectionType connection = GCT_Serial;
+	const char *connection = "serial";
 
 	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(model, Port, Initlength, connection, NULL, &State);
+	error = gn_gsm_initialise(model, Port, Initlength, connection, &State);
 
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));

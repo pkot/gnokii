@@ -217,26 +217,8 @@ static void busterminate(void)
 static gn_error fbusinit(bool enable_monitoring)
 {
 	static gn_error error = GN_ERR_NOLINK;
-	GSM_ConnectionType connection = GCT_Serial;
 	static bool atexit_registered = false;
 	char *aux;
-
-	if (!strcmp(xgnokiiConfig.connection, "infrared"))
-		connection = GCT_Infrared;
-#ifdef HAVE_IRDA
-	if (!strcmp(xgnokiiConfig.connection, "irda"))
-		connection = GCT_Irda;
-#endif
-#ifndef WIN32
-	if (!strcmp(xgnokiiConfig.connection, "tcp"))
-		connection = GCT_TCP;
-	if (!strcmp(xgnokiiConfig.connection, "tekram"))
-		connection = GCT_Tekram;
-#endif
-	if (!strcmp(xgnokiiConfig.connection, "dau9p"))
-		connection = GCT_DAU9P;
-	if (!strcmp(xgnokiiConfig.connection, "dlr3p"))
-		connection = GCT_DLR3P;
 
 	/* register cleanup function */
 	if (!atexit_registered) {
@@ -256,7 +238,7 @@ static gn_error fbusinit(bool enable_monitoring)
 
 	/* Initialise the code for the GSM interface. */
 	error = gn_gsm_initialise(xgnokiiConfig.model, xgnokiiConfig.port,
-				  xgnokiiConfig.initlength, connection, RLP_DisplayF96Frame,
+				  xgnokiiConfig.initlength, xgnokiiConfig.connection,
 				  &statemachine);
 
 #ifdef XDEBUG

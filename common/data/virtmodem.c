@@ -84,7 +84,7 @@ static void VM_CharHandler(void);
 static gn_error VM_GSMInitialise(char *model,
 			   char *port,
 			   char *initlength,
-			   GSM_ConnectionType connection,
+			   const char *connection,
 			   GSM_Statemachine *sm);
 
 /* Global variables */
@@ -104,7 +104,7 @@ static pthread_t Thread;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
-bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType connection, char *bindir, bool debug_mode, bool GSMInit)
+bool VM_Initialise(char *model,char *port, char *initlength, const char *connection, char *bindir, bool debug_mode, bool GSMInit)
 {
 	int rtn;
 
@@ -370,12 +370,12 @@ static void VM_CharHandler(void)
 }
 
 /* Initialise GSM interface, returning gn_error as appropriate  */
-static gn_error VM_GSMInitialise(char *model, char *port, char *initlength, GSM_ConnectionType connection, GSM_Statemachine *sm)
+static gn_error VM_GSMInitialise(char *model, char *port, char *initlength, const char *connection, GSM_Statemachine *sm)
 {
 	gn_error error;
 
 	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(model, port, initlength, connection, RLP_DisplayF96Frame, sm);
+	error = gn_gsm_initialise(model, port, initlength, connection, sm);
 
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("GSM/FBUS init failed!\n"));

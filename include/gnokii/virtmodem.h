@@ -36,7 +36,7 @@
 bool VM_Initialise(char *model,
 		   char *port,
 		   char *initlength,
-		   GSM_ConnectionType connection,
+		   const char *connection,
 		   char *bindir,
 		   bool debug_mode,
 		   bool GSM_Init);

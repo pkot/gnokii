@@ -96,7 +96,6 @@ static void busterminate(void)
 
 int main(int argc, char *argv[])
 {
-	GSM_ConnectionType connection = GCT_Serial;
 	char *aux;
 	static bool atexit_registered = false;
 
@@ -129,13 +128,6 @@ int main(int argc, char *argv[])
 		DebugMode = false;
 	}
 
-	if (!strcmp(Connection, "infrared"))
-		connection = GCT_Infrared;
-	if (!strcmp(Connection, "tcp"))
-		connection = GCT_TCP;
-	if (!strcmp(Connection, "tekram"))
-		connection = GCT_Tekram;
-
 	/* register cleanup function */
 	if (!atexit_registered) {
 		atexit_registered = true;
@@ -154,7 +146,7 @@ int main(int argc, char *argv[])
 
 	GTerminateThread = false;
 
-	if (VM_Initialise(Model, Port, Initlength, connection, BinDir, DebugMode, true) == false) {
+	if (VM_Initialise(Model, Port, Initlength, Connection, BinDir, DebugMode, true) == false) {
 		exit (-1);
 	}
 

@@ -122,14 +122,31 @@ static gn_error register_phone(GSM_Phone *phone, char *model, char *setupmodel, 
 }
 
 API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
-				GSM_ConnectionType connection,
-				void (*rlp_callback)(RLP_F96Frame *frame),
-				GSM_Statemachine *sm)
+				const char *connection, GSM_Statemachine *sm)
 {
 	gn_error ret;
 	char *sms_timeout;
 
-	sm->Link.ConnectionType = connection;
+	if (!strcasecmp(connection, "serial"))
+		sm->Link.ConnectionType = GCT_Serial;
+	else if (!strcasecmp(connection, "dau9p"))
+		sm->Link.ConnectionType = GCT_DAU9P;
+	else if (!strcasecmp(connection, "dlr3p"))
+		sm->Link.ConnectionType = GCT_DLR3P;
+	else if (!strcasecmp(connection, "infrared"))
+		sm->Link.ConnectionType = GCT_Infrared;
+#ifdef HAVE_IRDA
+	else if (!strcasecmp(connection, "irda"))
+		sm->Link.ConnectionType = GCT_Irda;
+#endif
+#ifndef WIN32
+	else if (!strcasecmp(connection, "tcp"))
+		sm->Link.ConnectionType = GCT_TCP;
+	else if (!strcasecmp(connection, "tekram"))
+		sm->Link.ConnectionType = GCT_Tekram;
+#endif
+	else return GN_ERR_NOTSUPPORTED;
+
 	sm->Link.InitLength = atoi(initlength);
 	sms_timeout = gn_cfg_get(gn_cfg_info, "sms", "timeout");
 	if (!sms_timeout) sm->Link.SMSTimeout = 100;

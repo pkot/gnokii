@@ -9,6 +9,8 @@
       places                                              (Pawel Kot)
     o make not exported globals static                    (Pawel Kot)
     o vcard reading/phonebook cleanups		       (Pavel Machek)
+    o gn_gsm_initialise takes the connection as a string, the
+      the unneeded rlp parameter has been removed    (BORBELY Zoltan)
  * 6110 series updates:
     o Nokia 8290 is known to work with the driver             (Roger)
     o fix default number reading with the smsc info       (Pawel Kot)

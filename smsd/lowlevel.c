@@ -135,27 +135,9 @@ static void busterminate(void)
 static gn_error fbusinit (bool enable_monitoring)
 {
   gn_error error = GN_ERR_NOLINK;
-  GSM_ConnectionType connection = GCT_Serial;
   char *aux;
   static bool atexit_registered = false;
   
-
-  if (!strcmp(smsdConfig.connection, "infrared"))
-    connection = GCT_Infrared;
-#ifdef HAVE_IRDA
-  if (!strcmp(smsdConfig.connection, "irda"))
-    connection = GCT_Irda;
-#endif
-  if (!strcmp(smsdConfig.connection, "dau9p"))
-    connection = GCT_DAU9P;
-  if (!strcmp(smsdConfig.connection, "dlr3p"))
-    connection = GCT_DLR3P;
-#ifndef WIN32
-  if (!strcmp(smsdConfig.connection, "tcp"))
-    connection = GCT_TCP;
-  if (!strcmp(smsdConfig.connection, "tekram"))
-    connection = GCT_Tekram;
-#endif
 	/* register cleanup function */
 	if (!atexit_registered) {
 		atexit_registered = true;
@@ -176,7 +158,7 @@ static gn_error fbusinit (bool enable_monitoring)
   /* Initialise the code for the GSM interface. */     
 
   error = gn_gsm_initialise (smsdConfig.model, smsdConfig.port,
-			     smsdConfig.initlength, connection, NULL, &sm);
+			     smsdConfig.initlength, smsdConfig.connection, &sm);
 
 #ifdef XDEBUG
   g_print ("fbusinit: error %d\n", error);
