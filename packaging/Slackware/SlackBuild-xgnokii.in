@@ -7,7 +7,7 @@ CWD=`pwd`
 if [ "$TMP" = "" ]; then
   TMP=/tmp
 fi
-PKG=$TMP/package-gnokii
+PKG=$TMP/package-xgnokii
 
 VERSION=@VERSION@
 ARCH=${ARCH:-i486}
@@ -30,7 +30,8 @@ chown -R root.root .
   --program-prefix="" \
   --program-suffix="" \
   --enable-security \
-  --without-x \
+  --with-x \
+  --with-xgnokiidir=/usr/X11R6 \
   $ARCH-slackware-linux
 make
 # File permissions will be set by doinst.sh
@@ -42,12 +43,12 @@ gzip -9 $PKG/usr/man/man?/*
 mkdir -r $PKG/etc
 cp Docs/sample/gnokiirc $PKG/etc/gnokiirc.new
 mkdir -p $PKG/install
-cat $CWD/slack-desc > $PKG/install/slack-desc
-cat $CDW/doinst.sh > $PKG/install/doinst.sh
+cat $CWD/slack-desc-xgnokii > $PKG/install/slack-desc
+cat $CDW/doinst-xgnokii.sh > $PKG/install/doinst.sh
 
 # Build the package:
 cd $PKG
-makepkg -l y -c n $TMP/gnokii-$VERSION-$ARCH-$BUILD.tgz
+makepkg -l y -c n $TMP/xgnokii-$VERSION-$ARCH-$BUILD.tgz
 
 # Clean up the extra stuff:
 if [ "$1" = "--cleanup" ]; then

@@ -611,6 +611,7 @@ AC_OUTPUT(
    po/Makefile.in
    packaging/RedHat/gnokii.spec
    packaging/Slackware/SlackBuild
+   packaging/Slackware/SlackBuild-xgnokii
    common/gnokii.pc
    )
 

@@ -1,0 +1,8 @@
+xgnokii: xgnokii (Toolset for the mobile phones with graphical frontend)
+xgnokii:
+xgnokii: gnokii is a Linux/Unix tool suite for mobile phones. It provides a
+xgnokii: library to communicate with a phone hiding the communication
+xgnokii: protocol. The library handles SMS, phonebook, calendar, phone calls,
+xgnokii: and other mobile phone capabilities. It supports Nokia, AT-capable,
+xgnokii: or Motorola Timeport phones, as well as Symbian-based phones.
+xgnokii: xgnokii is a X11 gtk1 based frontend to gnokii library.
