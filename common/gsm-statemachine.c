@@ -238,12 +238,19 @@ static gn_error __sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_
 
 		if (s == GN_SM_WaitingForResponse || s == GN_SM_ResponseReceived) break;
 
-		dprintf("SM_Block Retry - %d\n", retry);
-		sm_reset(state);
-		sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
+		if (state->config.sm_retry) {
+			dprintf("SM_Block Retry - %d\n", retry);
+			sm_reset(state);
+			sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
+		} else {
+			/* If we don't want retry, we should exit the loop */
+			dprintf("SM_Block: exiting the retry loop\n");
+			break;
+		}
 	}
 
-	if (s == GN_SM_ResponseReceived) return sm_error_get(waitfor, state);
+	if (s == GN_SM_ResponseReceived)
+		return sm_error_get(waitfor, state);
 
 	timeout.tv_sec = t / 10;
 	timeout.tv_usec = (t % 10) * 100000;
@@ -253,7 +260,8 @@ static gn_error __sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_
 		gettimeofday(&now, NULL);
 	} while (timercmp(&next, &now, >) && (s != GN_SM_ResponseReceived));
 
-	if (s == GN_SM_ResponseReceived) return sm_error_get(waitfor, state);
+	if (s == GN_SM_ResponseReceived)
+		return sm_error_get(waitfor, state);
 
 	sm_reset(state);
 

@@ -390,6 +390,13 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 		return false;
 	}
 
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "sm_retry")))
+		cfg->sm_retry = def->sm_retry;
+	else if (sscanf(val, " %d %c", &cfg->sm_retry, &ch) != 1) {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "sm_retry", val);
+		return false;
+	}
+
 	return true;
 }
 
@@ -489,6 +496,7 @@ API int gn_cfg_file_read(const char *file)
 	strcpy(gn_config_default.connect_script, "");
 	strcpy(gn_config_default.disconnect_script, "");
 	gn_config_default.rfcomm_cn = 1;
+	gn_config_default.sm_retry = 0;
 
 	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default)) {
 		fprintf(stderr, _("No global section in % config file.\n"), file);

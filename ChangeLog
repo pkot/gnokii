@@ -30,6 +30,9 @@
       sample in Docs/sample/gnokiirc                    (Pawel Kot)
  * libgnokii updates
     o add the function to validate the given date       (Pawel Kot)
+    o add optional parameter to disable the retransmission policy;
+      it is disabled by defaults due to the breakage reports caused
+      probably by this policy                           (Pawel Kot)
 
 0.6.4
 =====

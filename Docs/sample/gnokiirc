@@ -75,6 +75,15 @@ serial_baudrate = 19200
 # channel number here. Default value is 1.
 #rfcomm_channel = 1
 
+# There may happen various timeouts during the communication with the phone.
+# This parameter enables the retransmission policy. Ie. if the phone doesn't
+# respond, we send the frame again. This happend mainly with the older
+# phones. You may want to enable it when you see mysterious timeouts.
+# Be very carefull with this option. It is suspected to cause phone breakage
+# with new DCT4 phones (like Nokia 6100). By default it is switched off
+# (sm_retry = 0)
+#sm_retry = 1
+
 # Run the specified script(s) right after opening and initializing the device
 # and before any communucation (right before closing for disconnect_script).
 # You may find handy to use it to connect your modem to SMS Center
