@@ -84,12 +84,17 @@ static gn_error gnapplet_memory_status(gn_data *data, struct gn_statemachine *st
 static gn_error gnapplet_get_network_info(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_get_rf_level(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_get_power_info(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_folder_list(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_folder_status(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_folder_create(gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_sms_folder_delete(gn_data *data, struct gn_statemachine *state);
 
 static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_netinfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_power(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_INFO,		gnapplet_incoming_info },
@@ -97,6 +102,7 @@ static gn_incoming_function_type gnapplet_incoming_functions[] = {
 	{ GNAPPLET_MSG_NETINFO,		gnapplet_incoming_netinfo },
 	{ GNAPPLET_MSG_POWER,		gnapplet_incoming_power },
 	{ GNAPPLET_MSG_DEBUG,		gnapplet_incoming_debug },
+	{ GNAPPLET_MSG_SMS,		gnapplet_incoming_sms },
 	{ 0,				NULL}
 };
 
@@ -156,6 +162,14 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 	case GN_OP_GetBatteryLevel:
 	case GN_OP_GetPowersource:
 		return gnapplet_get_power_info(data, state);
+	case GN_OP_GetSMSFolders:
+		return gnapplet_sms_folder_list(data, state);
+	case GN_OP_GetSMSFolderStatus:
+		return gnapplet_sms_folder_status(data, state);
+	case GN_OP_CreateSMSFolder:
+		return gnapplet_sms_folder_create(data, state);
+	case GN_OP_DeleteSMSFolder:
+		return gnapplet_sms_folder_delete(data, state);
 	default:
 		dprintf("gnapplet unimplemented operation: %d\n", op);
 		return GN_ERR_NOTIMPLEMENTED;
@@ -553,4 +567,115 @@ static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message,
 	}
 
 	return GN_ERR_UNSOLICITED;
+}
+
+
+static gn_error gnapplet_sms_folder_list(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->sms_folder_list) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_FOLDER_LIST_REQ);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
+static gn_error gnapplet_sms_folder_status(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->sms_folder) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_FOLDER_STATUS_REQ);
+	pkt_put_uint16(&pkt, data->sms_folder->folder_id);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
+static gn_error gnapplet_sms_folder_create(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->sms_folder) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_FOLDER_CREATE_REQ);
+	pkt_put_string(&pkt, data->sms_folder->name);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
+static gn_error gnapplet_sms_folder_delete(gn_data *data, struct gn_statemachine *state)
+{
+	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
+	REQUEST_DEF;
+
+	if (!data->sms_folder) return GN_ERR_INTERNALERROR;
+
+	pkt_put_uint16(&pkt, GNAPPLET_MSG_SMS_FOLDER_DELETE_REQ);
+	pkt_put_uint16(&pkt, data->sms_folder->folder_id);
+
+	SEND_MESSAGE_BLOCK(GNAPPLET_MSG_SMS);
+}
+
+
+static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	gn_sms_folder_list *folders;
+	gn_sms_folder *folder;
+	int i;
+	REPLY_DEF;
+
+	switch (code) {
+
+	case GNAPPLET_MSG_SMS_FOLDER_LIST_RESP:
+		if (!(folders = data->sms_folder_list)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		memset(folders, 0, sizeof(gn_sms_folder_list));
+		folders->number = pkt_get_uint16(&pkt);
+		assert(folders->number <= GN_SMS_FOLDER_MAX_NUMBER);
+		for (i = 0; i < folders->number; i++) {
+			folders->folder[i].folder_id = pkt_get_uint16(&pkt);
+			pkt_get_string(folders->folder[i].name, sizeof(folders->folder[i].name), &pkt);
+			folders->folder_id[i] = folders->folder[i].folder_id;
+		}
+		break;
+
+	case GNAPPLET_MSG_SMS_FOLDER_STATUS_RESP:
+		if (!(folder = data->sms_folder)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		folder->folder_id = pkt_get_uint16(&pkt);
+		folder->number = pkt_get_uint32(&pkt);
+		assert(folder->number <= GN_SMS_MESSAGE_MAX_NUMBER);
+		for (i = 0; i < folder->number; i++) {
+			folder->locations[i] = pkt_get_uint32(&pkt);
+		}
+		break;
+
+	case GNAPPLET_MSG_SMS_FOLDER_CREATE_RESP:
+		if (!(folder = data->sms_folder)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		memset(folder, 0, sizeof(gn_sms_folder));
+		folder->folder_id = pkt_get_uint16(&pkt);
+		pkt_get_string(folder->name, sizeof(folder->name), &pkt);
+		break;
+
+	case GNAPPLET_MSG_SMS_FOLDER_DELETE_RESP:
+		if (!(folder = data->sms_folder)) return GN_ERR_INTERNALERROR;
+		if (error != GN_ERR_NONE) return error;
+		memset(folder, 0, sizeof(gn_sms_folder));
+		folder->folder_id = pkt_get_uint16(&pkt);
+		break;
+
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	return GN_ERR_NONE;
 }

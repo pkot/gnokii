@@ -6,6 +6,12 @@
     o use libtool --tag=CXX to be able to build gnokii with distcc
       or ccache (and probably crosscompile with newer autotools)
                                                         (Pawel Kot)
+ * gnapplet series updates
+    o folder management support (list, status, create,
+      delete) support added                        (BORBELY Zoltan)
+ * gnokii updates
+    o --showsmsfolderstatus added                  (BORBELY Zoltan)
+    o folder id display fix in --deletesmsfolder   (BORBELY Zoltan)
 
 0.6.1
 =====

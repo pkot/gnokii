@@ -162,7 +162,8 @@ typedef enum {
 	OPT_GETNETWORKINFO,
 	OPT_GETLOCKSINFO,
 	OPT_GETRINGTONELIST,
-	OPT_DELETERINGTONE
+	OPT_DELETERINGTONE,
+	OPT_SHOWSMSFOLDERSTATUS,
 } opt_index;
 
 static char *bindir;     /* Binaries directory from .gnokiirc file - not used here yet */
@@ -278,6 +279,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --setsmsc\n"
 		     "          gnokii --createsmsfolder name\n"
 		     "          gnokii --deletesmsfolder number\n"
+		     "          gnokii --showsmsfolderstatus\n"
 		     "          gnokii --smsreader\n"
 		     "Phonebook options:\n"
 		     "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
@@ -1166,9 +1168,40 @@ static int deletesmsfolder(char *number)
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 	else 
-		fprintf(stderr, _("Number %i of 'My Folders' successfully deleted!\n"), folder.number);
+		fprintf(stderr, _("Number %i of 'My Folders' successfully deleted!\n"), folder.folder_id);
 	return error;
 }
+
+static int showsmsfolderstatus(void)
+{
+	gn_sms_folder_list folders;
+	gn_data data;
+	gn_error error;
+	int i;
+
+	memset(&folders, 0, sizeof(folders));
+	gn_data_clear(&data);
+	data.sms_folder_list = &folders;
+
+	if ((error = gn_sm_functions(GN_OP_GetSMSFolders, &data, &state)) != GN_ERR_NONE) {
+		fprintf(stderr, _("Cannot list available folders: %s\n"), gn_error_print(error));
+		return error;
+	}
+
+	fprintf(stdout, _("No. Name                             Id #Msg\n"));
+	fprintf(stdout, _("============================================\n"));
+	for (i = 0; i < folders.number; i++) {
+		data.sms_folder = folders.folder + i;
+		if ((error = gn_sm_functions(GN_OP_GetSMSFolderStatus, &data, &state)) != GN_ERR_NONE) {
+			fprintf(stderr, _("Cannot stat folder \"%s\": %s\n"), folders.folder[i].name, gn_error_print(error));
+			return error;
+		}
+		fprintf(stdout, _("%3d %-32s %2u %4u\n"), i, folders.folder[i].name, folders.folder_id[i], folders.folder[i].number);
+	}
+
+	return GN_ERR_NONE;
+}
+
 
 /* Get SMS messages. */
 static int getsms(int argc, char *argv[])
@@ -4921,6 +4954,9 @@ int main(int argc, char *argv[])
 		/* Delete SMS folder mode */
 		{ "deletesmsfolder",    required_argument, NULL, OPT_DELETESMSFOLDER },
 
+		/* Show SMS folder names and its attributes */
+		{ "showsmsfolderstatus",no_argument,       NULL, OPT_SHOWSMSFOLDERSTATUS },
+
 		/* Get SMS message mode */
 		{ "getsms",             required_argument, NULL, OPT_GETSMS },
 
@@ -5254,6 +5290,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_DELETESMSFOLDER:
 			rc = deletesmsfolder(optarg);
+			break;
+		case OPT_SHOWSMSFOLDERSTATUS:
+			rc = showsmsfolderstatus();
 			break;
 		case OPT_GETSMS:
 			rc = getsms(argc, argv);
