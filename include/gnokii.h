@@ -37,6 +37,7 @@
 #include "gsm-call.h"
 #include "gsm-common.h"
 #include "gsm-data.h"
+#include "gsm-networks.h"
 #include "gsm-statemachine.h"
 
 API struct gn_cfg_header *gn_cfg_info;
@@ -74,6 +75,10 @@ API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
 			       const char *connection,
 			       struct gn_statemachine *sm);
 
+/* Ringtones */
+gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone);
+gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone);
+
 /* Bitmaps */
 API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info);
 API void gn_bmp_set_point(gn_bmp *bmp, int x, int y);
@@ -82,6 +87,10 @@ API bool gn_bmp_is_point(gn_bmp *bmp, int x, int y);
 API void gn_bmp_clear(gn_bmp *bmp);
 API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info);
 API void gn_bmp_print(gn_bmp *bitmap, FILE *f);
+API gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info);
+API gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info);
+API int gn_file_text_save(char *filename, char *text, int mode);
+API gn_error gn_file_bitmap_show(char *filename);
 
 /* SMS bitmap functions */
 API int gn_bmp_encode_sms(gn_bmp *bitmap, unsigned char *message);
@@ -114,5 +123,8 @@ API int gn_cfg_readconfig(char **model, char **port, char **initlength, char **c
 
 API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *addon);
 API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
+
+API int gn_vcal_read_file_event(char *filename, gn_calnote *cnote, int number);
+API int gn_vcal_read_file_todo(char *filename, gn_todo *ctodo, int number);
 
 #endif	/* _gnokii_gsm_api_h */

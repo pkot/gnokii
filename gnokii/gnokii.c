@@ -72,18 +72,6 @@
 
 #include "gnokii.h"
 
-#include "gsm-sms.h"
-#include "gsm-common.h"
-#include "gsm-api.h"
-#include "gsm-networks.h"
-#include "cfgreader.h"
-#include "gsm-filetypes.h"
-#include "gsm-bitmaps.h"
-#include "gsm-ringtones.h"
-#include "gsm-statemachine.h"
-#include "gsm-call.h"
-
-#include "gnokii-internal.h"
 #include "gsm-api.h"
 
 #define MAX_INPUT_LINE_LEN 512
@@ -3190,7 +3178,7 @@ static int writephonebook(int argc, char *args[])
 {
 	gn_phonebook_entry entry;
 	gn_error error = GN_ERR_NOTSUPPORTED;
-	char *memory_type_string;
+	char *memory_type_string = NULL;
 	char *line, oline[MAX_INPUT_LINE_LEN];
 	int vcard = 0;
 
