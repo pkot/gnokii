@@ -10,6 +10,12 @@
  * Compability changes:
     o move some parts from misc.{ch} to compat.{ch}      (Pawel Kot)
     o detect ptr_t                                       (Pawel Kot)
+    o replaced AM_GNU_GETTEXT with AM_GNU_GETTEXT([external]) in
+      configure.in                                    (Mariusz Mazur)
+    o support all gettextize versions in the correct manner
+                                                      (Mariusz Mazur)
+    o add po/Makevars                                 (Mariusz Mazur)
+    o few corrections for the po files copyrights         (Pawel Kot)
  * New API for gnokii
     [some of these changes are temporary -- they will allow be to
      better control the changes]
@@ -25,8 +31,6 @@
    gettextize versions                                    (Pawel Kot)
  * Compability changes:
     o sys/filio.h included for FIONREAD              (BORBELY Zoltan)
-    o replaced AM_GNU_GETTEXT with AM_GNU_GETTEXT([external]) in
-      configure.in                                    (Mariusz Mazur)
  * gnokii changes:
     o fix potential segfault in writephonebook()    (Jan de Cuveland)
     o fix warning on architectures where char defaults to unsigned
