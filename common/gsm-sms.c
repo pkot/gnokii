@@ -713,8 +713,8 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 			break;
 		}
 		SMS->Length = strlen(_("Delivered"));
-	} else if (status & 0x40) {
 
+	} else if (status & 0x40) {
 		strcpy(SMS->UserData[0].u.Text, _("Failed"));
 
 		/* more detailed reason only for debug */
@@ -745,6 +745,7 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 				dprintf("Reserved/Specific to SC: %x", status);
 				break;
 			}
+
 		} else {
 			dprintf("Permanent error, SC is not making any more transfer attempts\n");
 			switch (status) {
@@ -784,6 +785,7 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 			}
 		}
 		SMS->Length = strlen(_("Failed"));
+
 	} else if (status & 0x20) {
 		strcpy(SMS->UserData[0].u.Text, _("Pending"));
 
@@ -813,6 +815,7 @@ static GSM_Error SMSStatus(unsigned char status, GSM_SMSMessage *SMS)
 			break;
 		}
 		SMS->Length = strlen(_("Pending"));
+
 	} else {
 		strcpy(SMS->UserData[0].u.Text, _("Unknown"));
 
@@ -877,7 +880,7 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 			SMS->UDH[nr].u.ConcatenatedShortMessage.MaximumNumber   = message[pos + 3];
 			SMS->UDH[nr].u.ConcatenatedShortMessage.CurrentNumber   = message[pos + 4];
 			break;
-		case 0x01: // Special SMS Message Indication
+		case 0x01: /* Special SMS Message Indication */
 			switch (message[pos + 2] & 0x03) {
 			case 0x00:
 				dprintf("Voice Message\n");
@@ -899,9 +902,9 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 			SMS->UDH[nr].u.SpecialSMSMessageIndication.Store = (message[pos + 2] & 0x80) >> 7;
 			SMS->UDH[nr].u.SpecialSMSMessageIndication.MessageCount = message[pos + 3];
 			break;
-		case 0x04: // Application port addression scheme, 8 bit address
+		case 0x04: /* Application port addression scheme, 8 bit address */
 			break;
-		case 0x05: // Application port addression scheme, 16 bit address
+		case 0x05: /* Application port addression scheme, 16 bit address */
 			switch (((0x00ff & message[pos + 2]) << 8) | (0x00ff & message[pos + 3])) {
 			case 0x1581:
 				dprintf("Ringtone\n");
@@ -942,9 +945,9 @@ static GSM_Error DecodeUDH(char *message, GSM_SMSMessage *SMS)
 				break;
 			}
 			break;
-		case 0x06: // SMSC Control Parameters
+		case 0x06: /* SMSC Control Parameters */
 			break;
-		case 0x07: // UDH Source Indicator
+		case 0x07: /* UDH Source Indicator */
 			break;
 		default:
 			dprintf("Not supported UDH\n");

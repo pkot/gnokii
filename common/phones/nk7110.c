@@ -115,7 +115,7 @@ static const SMSMessage_Layout nk7110_delivery_report = {
 	20, true, true,
 	32, 39,
 	 1,  0,
-	10, true
+	19, true
 };
 
 static const SMSMessage_Layout nk7110_picture = {
@@ -1007,6 +1007,7 @@ static GSM_Error P7110_GetIncomingSMS(GSM_Data *data, GSM_Statemachine *state)
 	error = P7110_GetSMSStatus(data, state);
 	if (error != GE_NONE) return error;
 
+	dprintf("Status: %d %d\n", SMSStatus.Number, SMSStatus.Unread);
 	/* Get Inbox folder status */
 	SMSFolder.FolderID = GMT_IN; /* Inbox */
 	error = P7110_GetSMSFolderStatus(data, state);
@@ -1136,6 +1137,7 @@ static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state)
 	return SM_BlockNoRetry(state, data, 0x02);
 }
 
+/* handle messages of type 0x02 (SMS Handling) */
 static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	GSM_Error	e = GE_NONE;
@@ -1183,7 +1185,7 @@ static GSM_Error P7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		break;
 
 	case 0x0e:
-		dprintf("Ack for request on Icoming SMS\n");
+		dprintf("Ack for request on Incoming SMS\n");
 		break;
 
 	case 0x11:

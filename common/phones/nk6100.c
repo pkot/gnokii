@@ -63,7 +63,7 @@ static const SMSMessage_Layout nk6100_delivery_report = {
 	 4, true, true,
 	-1, -1, -1, -1,  2, -1, -1, -1, 18, 17, 16,
 	-1, -1, -1,
-	20, true, true,
+	19, true, true,
 	31, 38,
 	 1,  0,
 	18, true
@@ -1051,13 +1051,13 @@ static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length
 
 		/* Short Message status */
 		if (!data->RawData) {
-			data->RawData = (GSM_RawData *)malloc(sizeof(GSM_RawData));
+			data->RawData = (GSM_RawData *)calloc(sizeof(GSM_RawData), 0);
 		}
 
 		/* Skip the frame header */
 /*		data->RawData->Data = message + nk6100_layout.ReadHeader; */
 		data->RawData->Length = length - nk6100_layout.ReadHeader;
-		data->RawData->Data = malloc(data->RawData->Length);
+		data->RawData->Data = calloc(data->RawData->Length, 0);
 		memcpy(data->RawData->Data, message + nk6100_layout.ReadHeader, data->RawData->Length);
 		dprintf("Everything set. Length: %d\n", data->RawData->Length);
 
