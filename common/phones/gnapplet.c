@@ -449,7 +449,6 @@ static gn_error gnapplet_initialise(struct gn_statemachine *state)
 {
 	gn_error err;
 	gn_data d;
-	int i;
 
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_gnapplet, sizeof(gn_driver));
@@ -760,7 +759,6 @@ static gn_error gnapplet_incoming_netinfo(int messagetype, unsigned char *messag
 {
 	gn_network_info *netinfo;
 	uint16_t cellid, lac;
-	uint32_t strength;
 	REPLY_DEF;
 
 	switch (code) {
@@ -1008,7 +1006,6 @@ static gn_error gnapplet_sms_message_send(gn_data *data, struct gn_statemachine 
 static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *state)
 {
 	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
-	gn_error error;
 	REQUEST_DEF;
 
 	if (!data->message_center) return GN_ERR_INTERNALERROR;

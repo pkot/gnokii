@@ -275,7 +275,6 @@ static gn_error gnbus_send_message(unsigned int messagesize, unsigned char messa
 gn_error gnbus_initialise(struct gn_statemachine *state)
 {
 	int conn_type;
-	gn_error err;
 
 	if (!state)
 		return GN_ERR_FAILED;
