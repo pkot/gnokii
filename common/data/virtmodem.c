@@ -16,7 +16,10 @@
   from/to the GSM handset and the modem data/fax stream.
 
   $Log$
-  Revision 1.3  2001-03-21 23:36:04  chris
+  Revision 1.4  2001-04-14 23:23:43  pkot
+  Fixed problems with grantpt
+
+  Revision 1.3  2001/03/21 23:36:04  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -48,6 +51,12 @@
 
 #include <config.h>
 
+/* This is the right way to include stdlib with __USE_XOPEN defined */
+#ifdef USE_UNIX98PTYS
+# define _XOPEN_SOURCE 500
+# include <features.h>
+#endif
+
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -61,27 +70,6 @@
 #include <sys/poll.h>
 #include <pthread.h>
 #include <unistd.h>
-
-/* This is to avoid warnings for grantpt, unlockpt and ptsname.
-   On my Slackware with glibc 2.2, libc contains these functions,
-   but they are declared in stdlib.h within #ifdef __USE_XOPEN, which
-   is not ebabled by default. Disable it later if it was disabled
-   (just in case). */
-#ifdef USE_UNIX98PTYS
-# define __USE_XOPEN_DEF __USE_XOPEN
-# ifndef __USE_XOPEN
-#  define __USE_XOPEN 1
-# endif
-#endif
-
-#include <stdlib.h>
-
-#ifdef USE_UNIX98PTYS
-# ifndef __USE_XOPEN_DEF
-#  undef __USE_XOPEN
-# endif
-# undef __USE_XOPEN_DEF
-#endif
 
 #include "misc.h"
 #include "gsm-api.h"
