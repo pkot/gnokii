@@ -1453,6 +1453,8 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 	case 0x0c:
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
+			case 0x0f: return GN_ERR_WRONGDATAFORMAT; /* I got this when sending incorrect
+									block (with 0 length) */
 			case 0x3d: return GN_ERR_FAILED;
 			case 0x3e: return GN_ERR_FAILED;
 			case 0x43: return GN_ERR_WRONGDATAFORMAT; /* Probably there are incorrect
