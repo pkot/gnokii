@@ -756,6 +756,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		data->RawSMS->Length           = message[getdata(T, 24, 25, 0, offset)];
 		if (T == SMS_Picture) data->RawSMS->Length += 256;
 		data->RawSMS->UDHIndicator     = message[getdata(T, 21, 22, 0, 21)];
+		dprintf("UDHIndicator: %02x\n", data->RawSMS->UDHIndicator);
 		memcpy(data->RawSMS->UserData,      message + getdata(T, 44, 45, 0, 47), data->RawSMS->Length);
 
 		data->RawSMS->UserDataLength = length - getdata(T, 44, 45, 0, 47);
@@ -1844,6 +1845,7 @@ static GSM_Error P7110_IncomingStartup(int messagetype, unsigned char *message, 
 		dprintf("Succesfully got security code: ");
 		memcpy(data->SecurityCode->Code, message + 6, 5);
 		dprintf("%s \n", data->SecurityCode->Code);
+		return GE_NONE;
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x7a (%d)\n", message[3]);
@@ -2008,11 +2010,11 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 		if (defaultn < i) {
 			string[0] = entry->SubEntries[defaultn].NumberType;
 			string[1] = string[2] = string[3] = 0;
-			i = strlen(entry->SubEntries[defaultn].data.Number);
-			EncodeUnicode((string + 5), entry->SubEntries[defaultn].data.Number, i);
-			string[i * 2 + 1] = 0;
-			string[4] = i * 2;
-			count += PackBlock(0x0b, i * 2 + 6, block++, string, req + count);
+			j = strlen(entry->SubEntries[defaultn].data.Number);
+			EncodeUnicode((string + 5), entry->SubEntries[defaultn].data.Number, j);
+			string[j * 2 + 1] = 0;
+			string[4] = j * 2;
+			count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
 		}
 		/* Rest of the numbers */
 		for (i = 0; i < entry->SubEntriesCount; i++)
@@ -2022,7 +2024,7 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 					string[1] = string[2] = string[3] = 0;
 					j = strlen(entry->SubEntries[i].data.Number);
 					EncodeUnicode((string + 5), entry->SubEntries[i].data.Number, j);
-					string[i * 2 + 1] = 0;
+					string[j * 2 + 1] = 0;
 					string[4] = j * 2;
 					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
 				}
