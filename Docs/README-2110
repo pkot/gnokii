@@ -14,6 +14,16 @@ should work well with any sort of cable.
 - Many. Look at code, needs cleanup, etc. Contact pavel@ucw.cz
   if you want to help.
 
+- When periodically fetching messages, it gets to state where protocol
+  breaks with "bad checksum".
+
 * To-do *
 
-- SMS sending
+- SMS sending.
+
+- Implement collision protocol properly.
+
+- Implement functionanlity such as reading internal A/D convertors and
+  ability to turn on netmon.
+
+
