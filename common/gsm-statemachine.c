@@ -287,6 +287,37 @@ gn_error sm_block_no_retry(int waitfor, gn_data *data, struct gn_statemachine *s
 	return sm_block_no_retry_timeout(waitfor, 100, data, state);
 }
 
+/* Block waiting for an ack, don't wait for a reply message of any sort */
+gn_error sm_block_ack(struct gn_statemachine *state)
+{
+	int retry;
+	gn_state s;
+	gn_error err;
+	struct timeval now, next, timeout;
+
+	s = state->current_state;
+	timeout.tv_sec = 3;
+	timeout.tv_usec = 0;
+	gettimeofday(&now, NULL);
+	for (retry = 0; retry < 2; retry++) {
+		timeradd(&now, &timeout, &next);
+		do {
+			s = gn_sm_loop(1, state);  /* Timeout=100ms */
+			gettimeofday(&now, NULL);
+		} while (timercmp(&next, &now, >) && (s == GN_SM_MessageSent));
+
+		if (s == GN_SM_WaitingForResponse || s == GN_SM_ResponseReceived)
+			return GN_ERR_NONE;
+
+		dprintf("sm_block_ack Retry - %d\n", retry);
+		sm_reset(state);
+		err = sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
+		if (err != GN_ERR_NONE) return err;
+	}
+
+	return GN_ERR_TIMEOUT;
+}
+
 /* Just to do things neatly */
 API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemachine *sm)
 {
