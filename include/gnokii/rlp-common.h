@@ -90,30 +90,30 @@ typedef enum {
 
 /* Frame definition for TCH/F9.6 frame. */
 typedef struct {
-	u8 Header[2];
-	u8 Data[25];
-	u8 FCS[3];
+	unsigned char Header[2];
+	unsigned char Data[25];
+	unsigned char FCS[3];
 } gn_rlp_f96_frame;
 
 /* Header data "split up" for TCH/F9.6 frame. */
 typedef struct {
-	u8            Ns;   /* Send sequence number. */
-	u8            Nr;   /* Receive sequence number. */
-	u8            M;    /* Unumbered frame type. */
-	u8            S;    /* Status. */
-	bool          PF;   /* Poll/Final. */
-	bool          CR;   /* Command/Response. */
+	unsigned char            Ns;   /* Send sequence number. */
+	unsigned char            Nr;   /* Receive sequence number. */
+	unsigned char            M;    /* Unumbered frame type. */
+	unsigned char            S;    /* Status. */
+	int          PF;   /* Poll/Final. */
+	int          CR;   /* Command/Response. */
 	rlp_frame_type Type; /* Frame type. */
 } rlp_f96_header;
 
 
 /* RLP User requests */
 typedef struct {
-	bool Conn_Req;
-	bool Attach_Req;
-	bool Conn_Req_Neg;
-	bool Reset_Resp;
-	bool Disc_Req;
+	int Conn_Req;
+	int Attach_Req;
+	int Conn_Req_Neg;
+	int Reset_Resp;
+	int Disc_Req;
 } rlp_user_request_store;
 
 typedef enum {
@@ -160,17 +160,17 @@ typedef enum {
 
 /* RLP Data */
 typedef struct {
-	u8 Data[25];
+	unsigned char Data[25];
 	rlp_state_variable State;
 } rlp_data;
 
 /* Prototypes for functions. */
 void rlp_f96_frame_display(gn_rlp_f96_frame *frame);
 void rlp_f96_header_decode(gn_rlp_f96_frame *frame, rlp_f96_header *header);
-void rlp_xid_display(u8 *frame);
-void rlp_initialise(bool (*rlp_send_function)(gn_rlp_f96_frame *frame, bool out_dtx), int (*rlp_passup)(rlp_user_inds ind, u8 *buffer, int length));
+void rlp_xid_display(unsigned char *frame);
+void rlp_initialise(int (*rlp_send_function)(gn_rlp_f96_frame *frame, int out_dtx), int (*rlp_passup)(rlp_user_inds ind, unsigned char *buffer, int length));
 void rlp_link_vars_init(void);
-void rlp_user_request_set(rlp_user_requests type, bool value);
+void rlp_user_request_set(rlp_user_requests type, int value);
 void rlp_send(char *buffer, int length);
 
 #endif	/* _gnokii_data_rlp_common_h */

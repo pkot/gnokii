@@ -56,14 +56,14 @@ typedef enum {
 /* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
 
 typedef struct {
-	u8 height;               /* Bitmap height (pixels) */
-	u8 width;                /* Bitmap width (pixels) */
-	u16 size;                /* Bitmap size (bytes) */
+	unsigned char height;    /* Bitmap height (pixels) */
+	unsigned char width;     /* Bitmap width (pixels) */
+	unsigned int size;       /* Bitmap size (bytes) */
 	gn_bmp_types type;       /* Bitmap type */
 	char netcode[7];         /* Network operator code */
 	char text[256];          /* Text used for welcome-note or callergroup name */
 	char dealertext[256];    /* Text used for dealer welcome-note */
-	bool dealerset;          /* Is dealer welcome-note set now ? */
+	int dealerset;          /* Is dealer welcome-note set now ? */
 	unsigned char bitmap[GN_BMP_MAX_SIZE]; /* Actual Bitmap */
 	char number;             /* Caller group number */
 	char ringtone;           /* Ringtone no sent with caller group */

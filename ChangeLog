@@ -1,7 +1,9 @@
 0.5.0pre (not released yet)
- * disable dancall support in 0.5 release           (Ladislav Michl)
  * general updates
     o move include files into their final(?) destination (Pawel Kot)
+    o disable dancall support in 0.5 release        (Ladislav Michl)
+    o supress u8, u16 and bool types in the exported headers
+                                                         (Pawel Kot)
  * Docs updates
     o add dancall.txt                               (Ladislav Michl)
  * SMSD updates

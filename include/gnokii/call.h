@@ -75,7 +75,7 @@ typedef struct {
 	char remote_name[GN_PHONEBOOK_NAME_MAX_LENGTH + 1];
 	struct timeval start_time;
 	struct timeval answer_time;
-	bool local_originated;
+	int local_originated;
 } gn_call;
 
 #define	GN_CALL_MAX_PARALLEL 2

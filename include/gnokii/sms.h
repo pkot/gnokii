@@ -108,7 +108,7 @@ typedef struct {
 			unsigned short current_number;
 		} concatenated_short_message; /* SMS_ConcatenatedMessages */
 		struct {
-			bool store;
+			int store;
 			unsigned short message_count;
 		} special_sms_message_indication; /* GN_SMS_VoiceMessage, GN_SMS_FaxMessage,
 						     GN_SMS_EmailMessage, GN_SMS_OtherMessage */
@@ -169,13 +169,13 @@ typedef struct {
 			 * 3 - Class 2
 			 * 4 - Class 3 */
 			unsigned short m_class;
-			bool compressed;
+			int compressed;
 			gn_sms_dcs_alphabet_type alphabet;
 		} general;
 		struct {
-			bool discard;
+			int discard;
 			gn_sms_dcs_alphabet_type alphabet; /* ucs16 not supported */
-			bool active;
+			int active;
 			gn_sms_dcs_indication_type type;
 		} message_waiting;
 	} u;
@@ -197,8 +197,8 @@ typedef enum {
 } gn_sms_vp_enhanced_type;
 
 typedef struct {
-	bool extension; /* we need to set it to 0 at the moment; FIXME: how to handle `1' here? */
-	bool single_shot;
+	int extension; /* we need to set it to 0 at the moment; FIXME: how to handle `1' here? */
+	int single_shot;
 	gn_sms_vp_enhanced_type type;
 	union {
 		unsigned short relative;
@@ -360,7 +360,7 @@ typedef struct {
 typedef struct {
 	/* General fields */
 	gn_sms_message_type type;           /* Type of the message. */
-	bool delivery_report;               /* Do we request the delivery report? Only for setting. */
+	int delivery_report;               /* Do we request the delivery report? Only for setting. */
 	gn_sms_message_status status;       /* Status of the message read/unread/sent/unsent. */
 	unsigned int validity;              /* Message validity in minutes. Only for setting. */
 	gn_memory_type memory_type  ;       /* Memory type where the message is/should be stored. */
@@ -383,10 +383,10 @@ typedef struct {
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */
 typedef struct {
 	unsigned int type;		/* Message Type Indicator - 2 bits (9.2.3.1) */
-	bool more_messages;		/* More Messages to Send (9.2.3.2) */
-	bool reply_via_same_smsc;	/* Reply Path (9.2.3.17) - `Reply via same centre' in the phone */
-	bool reject_duplicates;		/* Reject Duplicates (9.2.3.25) */
-	bool report;			/* Status Report (9.2.3.4, 9.2.3.5 & 9.2.3.26) - `Delivery reports' in the phone */
+	int more_messages;		/* More Messages to Send (9.2.3.2) */
+	int reply_via_same_smsc;	/* Reply Path (9.2.3.17) - `Reply via same centre' in the phone */
+	int reject_duplicates;		/* Reject Duplicates (9.2.3.25) */
+	int report;			/* Status Report (9.2.3.4, 9.2.3.5 & 9.2.3.26) - `Delivery reports' in the phone */
 
 	unsigned int number;		/* Message Number - 8 bits (9.2.3.18) */
 	unsigned int reference;		/* Message Reference - 8 bit (9.2.3.6) */
@@ -400,7 +400,7 @@ typedef struct {
 
 	unsigned int dcs;		/* Data Coding Scheme (9.2.3.10) */
 	unsigned int length;		/* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
-	bool udh_indicator;
+	int udh_indicator;
 	unsigned char user_data[GN_SMS_LONG_MAX_LENGTH];	/* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
 	int user_data_length;		/* Length of just previous field */
 
@@ -422,7 +422,7 @@ typedef struct {
 	/* Name for SMS folder. */
 	char name[GN_SMS_FOLDER_NAME_MAX_LENGTH];
 	/* if folder contains sender, SMSC number and sending date */
-	bool sms_data;
+	int sms_data;
 	/* locations of SMS messages in that folder (6210 specific) */
 	unsigned int locations[GN_SMS_MESSAGE_MAX_NUMBER];
 	/* number of SMS messages in that folder*/

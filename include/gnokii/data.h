@@ -92,7 +92,7 @@ typedef struct {
 	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info,
 				  struct gn_statemachine *state);
 	gn_rlp_f96_frame *rlp_frame;
-	bool rlp_out_dtx;
+	int rlp_out_dtx;
 	void (*rlp_rx_callback)(gn_rlp_f96_frame *frame);
 	gn_security_code *security_code;
 	const char *dtmf_string;
@@ -125,8 +125,8 @@ typedef struct {
 	int init_length;				/* Number of chars sent to sync the serial port */
 	int serial_baudrate;				/* Baud rate to use */
 	int serial_write_usleep;			/* Inter character delay or <0 to disable */
-	bool hardware_handshake;			/* Select between hardware and software handshake */
-	bool require_dcd;				/* DCD signal check */
+	int hardware_handshake;				/* Select between hardware and software handshake */
+	int require_dcd;				/* DCD signal check */
 	int smsc_timeout;				/* How many seconds should we wait for the SMSC response, defaults to 10 seconds */
 	char connect_script[256];			/* Script to run when device connection established */
 	char disconnect_script[256];			/* Script to run when device connection closed */

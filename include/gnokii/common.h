@@ -200,7 +200,7 @@ typedef struct {
 /* Define datatype for phonebook entry, used for getting/writing phonebook
    entries. */
 typedef struct {
-	bool empty;                                       /* Is this entry empty? */
+	int empty;                                       /* Is this entry empty? */
 	char name[GN_PHONEBOOK_NAME_MAX_LENGTH + 1];      /* Plus 1 for
 							     nullterminator. */
 	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1];  /* Number */
@@ -274,7 +274,7 @@ typedef enum {
 #define GN_CALNOTE_NUMBER_MAX_LENGTH  49
 
 typedef struct {
-	bool enabled; /* Is alarm set ? */
+	int enabled; /* Is alarm set ? */
 	gn_timestamp timestamp;
 } gn_calnote_alarm;
 
@@ -373,7 +373,7 @@ typedef enum {
 } gn_wap_gprs;
 
 typedef struct {
-	bool read_before_write;
+	int read_before_write;
 	int location;
 	int successors[4];
 	char number             [WAP_SETTING_NAME_MAX_LENGTH];
@@ -389,7 +389,7 @@ typedef struct {
 	char sms_service_number [WAP_SETTING_NAME_MAX_LENGTH];
 	char sms_server_number  [WAP_SETTING_NAME_MAX_LENGTH];
 	gn_wap_session session;
-	bool security;
+	int security;
 	gn_wap_bearer bearer;
 	gn_wap_authentication gsm_data_authentication;
 	gn_wap_authentication gprs_authentication;
@@ -512,7 +512,7 @@ typedef struct {
 } gn_call_divert;
 
 typedef struct {
-	bool full; /* indicates if we have full data read */
+	int full; /* indicates if we have full data read */
 	unsigned int length;
 	unsigned char *data;
 } gn_raw_data;
@@ -589,8 +589,8 @@ typedef struct {
 } gn_netmonitor;
 
 typedef struct {
-	bool  userlock;		/* TRUE = user lock, FALSE = factory lock */
-	bool  closed;
+	int  userlock;		/* TRUE = user lock, FALSE = factory lock */
+	int  closed;
 	char  data[12];
 	int   counter;
 } gn_locks_info;
