@@ -1598,8 +1598,8 @@ static int getlogo(int argc, char *argv[])
 
 	/* There is caller group number missing in argument list. */
 	if ((bitmap.type == GSM_CallerLogo) && (argc == 3)) {
-		bitmap.number = argv[2][0] - '0';
-		if ((bitmap.number < 0) || (bitmap.number > 9)) bitmap.number = 0;
+		bitmap.number = (argv[2][0] < '0') ? 0 : argv[2][0] - '0';
+		if (bitmap.number > 9) bitmap.number = 0;
 	}
 
 	if (bitmap.type != GSM_None) {
