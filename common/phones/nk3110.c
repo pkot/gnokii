@@ -723,6 +723,11 @@ static gn_error P3110_IncomingSMSUserData(int messagetype, unsigned char *messag
 	   if so then nothing to do */
 	if (length == 0x02) return GN_ERR_NONE;
 
+	if (!data->raw_sms) {
+		dprintf("Unrequested SMS data frame received, ignoring.\n");
+		return GN_ERR_INTERNALERROR;
+	}
+
 	/* This function may be called several times; it accumulates the
 	 * SMS content in data->raw_sms->user_data.
 	 * DRVINSTANCE(state)->user_data_count is used as a counter. */
@@ -1148,10 +1153,9 @@ static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *message,
 static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req, int ulength, bool save_sms)
 {
 	int pos = 0;
-	unsigned char fo;	/* some magic flags */
 	unsigned char smsc[256], remote[256];
 
-	/* why the heck is this necessary? gsm-sms.c does this too  -Osma Suominen */
+	/* convert length units from decimal digit count to BCD byte count */
 	data->raw_sms->remote_number[0] = (data->raw_sms->remote_number[0] + 1) / 2 + 1;
 
 	/* SMSC and remote number are in BCD format, but the phone wants them
@@ -1160,17 +1164,32 @@ static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsig
 	snprintf(smsc, sizeof(smsc), "%s", char_bcd_number_get(data->raw_sms->message_center));
 	snprintf(remote, sizeof(remote), "%s", char_bcd_number_get(data->raw_sms->remote_number));
 
-	dprintf("smsc:'%s' remote:'%s'", smsc, remote);
+	dprintf("smsc:'%s' remote:'%s'\n", smsc, remote);
 	
 	if (save_sms) { /* make header for saving SMS */
 		req[pos++] = get_memory_type(data->raw_sms->memory_type);
 		req[pos++] = data->raw_sms->status;
 		req[pos++] = 0x01;	/* status byte for "saved SMS" */
 	} else { /* make header for sending SMS */
-		/* the magic "first octet" or FO */
-		fo = 0x31;	/* FO_SUBMIT | FO_VPF_REL | FO_SRR */
-		if (data->raw_sms->udh_indicator)	fo |= 0x40;
-		req[pos++] = fo;
+		/* the magic "first octet" specifying flags */
+		if (data->raw_sms->type != GN_SMS_MT_Deliver)
+			req[pos] = 0x01; /* SMS Submit */
+		else
+			req[pos] = 0x00; /* SMS Deliver */
+		if (data->raw_sms->reply_via_same_smsc)  req[pos] |= 0x80;
+		if (data->raw_sms->reject_duplicates)    req[pos] |= 0x04;
+		if (data->raw_sms->report)               req[pos] |= 0x20;
+		if (data->raw_sms->udh_indicator)        req[pos] |= 0x40;
+		if (data->raw_sms->type != GN_SMS_MT_Deliver) {
+			switch (data->raw_sms->validity_indicator) {
+			case GN_SMS_VP_None: default:   break;
+			case GN_SMS_VP_RelativeFormat:  req[pos] |= 0x10; break;
+			case GN_SMS_VP_AbsoluteFormat:  req[pos] |= 0x18; break;
+			case GN_SMS_VP_EnhancedFormat:  req[pos] |= 0x08; break;
+			}
+		}
+		dprintf("First Octet: %02x\n", req[pos]);
+		pos++;
 	}
 
 	req[pos++] = data->raw_sms->pid;
@@ -1181,13 +1200,8 @@ static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsig
 	 * into the garbage you get in the date bytes when you read a saved
 	 * SMS. So we'll just put validity in here now. */ 
 
-	req[pos++] = 0xff;	/* FIXME Max validity - hardcoded! */
-	req[pos++] = 0x00;
-	req[pos++] = 0x00;
-	req[pos++] = 0x00;
-	req[pos++] = 0x00;
-	req[pos++] = 0x00;
-	req[pos++] = 0x00;
+	memcpy(req + pos, data->raw_sms->validity, 7);
+	pos += 7;
 
 	req[pos++] = ulength;	/* user data length */
 
