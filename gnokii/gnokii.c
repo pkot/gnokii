@@ -3271,6 +3271,12 @@ static int getwapsetting(int argc, char *argv[])
 			case GWP_GPRS: 
 				fprintf(stdout, _("GPRS\n"));
 				break;
+			case GWP_SMS: 
+				fprintf(stdout, _("SMS\n"));
+				break;
+			case GWP_USSD: 
+				fprintf(stdout, _("USSD\n"));
+				break;
 			default: 
 				fprintf(stdout, _("unknown\n"));
 				break;
@@ -3372,6 +3378,9 @@ static int getwapsetting(int argc, char *argv[])
 			fprintf(stdout, _("   IP: %s\n"), WAPSetting.GPRSIP);
 			fprintf(stdout, _("   Username: %s\n"), WAPSetting.GPRSUsername);
 			fprintf(stdout, _("   Password: %s\n"), WAPSetting.GPRSPassword);
+			fprintf(stdout, _("SMS\n"));
+			fprintf(stdout, _("   Service number: %s\n"), WAPSetting.SMSServiceNumber);
+			fprintf(stdout, _("   Server number: %s\n"), WAPSetting.SMSServerNumber);
 		}
 		break;
 	default:

@@ -58,6 +58,7 @@ extern bool P7110_LinkOK;
 #define P7110_MSG_CLOCK		0x19	/* Date & alarm */
 #define P7110_MSG_IDENTITY	0x1b	/* Brief product info */
 #define P7110_MSG_RINGTONE	0x1f	/* Ringtone handling */
+#define P7110_MSG_WAP		0x3f	/* WAP */
 #define P7110_MSG_SECURITY	0x40	/* Security */
 #define P7110_MSG_STLOGO	0x7a	/* Startup logo */
 #define P7110_MSG_VERREQ	0xd1	/* HW&SW version request */

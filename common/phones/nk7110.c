@@ -95,6 +95,13 @@ static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 
+static GSM_Error P7110_DeleteWAPBookmark(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetWAPBookmark(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_WriteWAPBookmark(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetWAPSetting(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_ActivateWAPSetting(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_WriteWAPSetting(GSM_Data *data, GSM_Statemachine *state);
+
 static GSM_Error P7110_IncomingIdentify(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_IncomingNetwork(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state);
@@ -105,6 +112,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *buffer, in
 static GSM_Error P7110_IncomingClock(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_IncomingCalendar(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_IncomingWAP(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -125,6 +133,7 @@ static GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
 	{ P7110_MSG_STLOGO,	P7110_IncomingStartup },
 	{ P7110_MSG_DIVERT,	PNOK_IncomingCallDivert },
 	{ P7110_MSG_SECURITY,	P7110_IncomingSecurity },
+	{ P7110_MSG_WAP,	P7110_IncomingWAP },
 	{ 0, NULL }
 };
 
@@ -236,6 +245,18 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return P7110_GetSMSFolderStatus(data, state);
 	case GOP7110_GetPictureList:
 		return P7110_GetPictureList(data, state);
+	case GOP_DeleteWAPBookmark:
+		return P7110_DeleteWAPBookmark(data, state);
+	case GOP_GetWAPBookmark:
+		return P7110_GetWAPBookmark(data, state);
+	case GOP_WriteWAPBookmark:
+		return P7110_WriteWAPBookmark(data, state);
+	case GOP_GetWAPSetting:
+		return P7110_GetWAPSetting(data, state);
+	case GOP_ActivateWAPSetting:
+		return P7110_ActivateWAPSetting(data, state);
+	case GOP_WriteWAPSetting:
+		return P7110_WriteWAPSetting(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -1960,6 +1981,432 @@ static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_SECURITY, 5);
 }
 
+/*****************/
+/****** WAP ******/
+/*****************/
+
+static GSM_Error P7110_IncomingWAP(int messagetype, unsigned char *message, int length, GSM_Data *data, GSM_Statemachine *state)
+{
+	int string_length, pos, pad = 0;
+
+	switch (message[3]) {
+	case 0x02:
+	case 0x05:
+	case 0x08:
+	case 0x0b:
+	case 0x0e:
+	case 0x11:
+	case 0x14:
+	case 0x17:
+	case 0x1a:
+		switch (message[4]) {
+		case 0x00:
+			dprintf("WAP not activated?\n");
+			return GE_UNKNOWN;
+		case 0x01:
+			dprintf("Security error. Inside WAP bookmarks menu\n");
+			return GE_UNKNOWN;
+		case 0x02:
+			dprintf("Invalid or empty\n");
+			return GE_INVALIDLOCATION;
+		default:
+			dprintf("ERROR: unknown %i\n",message[4]);
+			return GE_UNHANDLEDFRAME;
+		}
+		break;
+	case 0x01:
+	case 0x04:
+	case 0x10:
+		break;
+	case 0x07:
+		if (!data->WAPBookmark) return GE_INTERNALERROR;
+		dprintf("WAP bookmark received\n");
+		string_length = message[6];
+
+		DecodeUnicode(data->WAPBookmark->Name, message + 7, string_length);
+		dprintf("Name: %s\n", data->WAPBookmark->Name);
+		pos = (string_length << 1) + 7;
+
+		string_length = message[pos++];
+		DecodeUnicode(data->WAPBookmark->URL, message + pos, string_length);
+		dprintf("URL: %s\n", data->WAPBookmark->URL);
+		break;
+	case 0x0a:
+		dprintf("WAP bookmark succesfully set!\n");
+		data->WAPBookmark->Location = message[5];
+		break;
+	case 0x0d:
+		dprintf("WAP bookmark succesfully deleted!\n");
+		break;
+	case 0x13:
+		dprintf("WAP setting succesfully activated!\n");
+		break;
+	case 0x16:
+		if (!data->WAPSetting) return GE_INTERNALERROR;
+		dprintf("WAP setting received\n");
+
+		string_length = message[4];
+		DecodeUnicode(data->WAPSetting->Name, message + 5, string_length);
+		dprintf("Name: %s\n", data->WAPSetting->Name);
+		pos = (string_length << 1) + 5;
+		if (!(string_length % 2)) pad = 1;
+
+		string_length = message[pos++];
+		DecodeUnicode(data->WAPSetting->Home, message + pos, string_length);
+		dprintf("Home: %s\n", data->WAPSetting->Home);
+		pos += string_length << 1;
+
+		data->WAPSetting->Session = message[pos++];
+		switch (message[pos]) {
+		case 0x06:
+			data->WAPSetting->Bearer = GWP_GSMDATA;
+			break;
+		case 0x07:
+			data->WAPSetting->Bearer = GWP_SMS;
+			break;
+		default:
+			data->WAPSetting->Bearer = GWP_USSD;
+			break;
+		}
+		data->WAPSetting->Successors[0] = message[pos + 2];
+		data->WAPSetting->Successors[1] = message[pos + 3];
+		data->WAPSetting->Successors[2] = message[pos + 8];
+		data->WAPSetting->Successors[3] = message[pos + 9];
+
+		if (message[pos + 12] == 0x01) 	
+			data->WAPSetting->Security = true;
+		else
+			data->WAPSetting->Security = false;
+		break;
+	case 0x1c:
+		switch (message[5]) {
+		case 0x00:
+			dprintf("SMS:\n");
+			pos = 6;
+			string_length = message[pos++];
+			DecodeUnicode(data->WAPSetting->SMSServiceNumber, message + pos, string_length);
+			dprintf("   Service number: %s\n", data->WAPSetting->SMSServiceNumber);
+			pos += string_length << 1;
+
+			string_length = message[pos++];
+			DecodeUnicode(data->WAPSetting->SMSServerNumber, message + pos, string_length);
+			dprintf("   Server number: %s\n", data->WAPSetting->SMSServerNumber);
+			pos += string_length << 1;
+			break;
+		case 0x01:
+			dprintf("GSM data:\n");
+			pos = 6;
+			data->WAPSetting->GSMdataAuthentication = message[pos++];
+			data->WAPSetting->CallType = message[pos++];
+			pos++;
+			data->WAPSetting->CallSpeed = message[pos++];
+
+			string_length = message[pos++];
+			DecodeUnicode(data->WAPSetting->GSMdataIP, message + pos, string_length);
+			dprintf("   IP: %s\n", data->WAPSetting->GSMdataIP);
+			pos += string_length << 1;
+
+			string_length = message[pos++];
+			DecodeUnicode(data->WAPSetting->Number, message + pos, string_length);
+			dprintf("   Number: %s\n", data->WAPSetting->Number);
+			pos += string_length << 1;
+
+			string_length = message[pos++];
+			DecodeUnicode(data->WAPSetting->GSMdataUsername, message + pos, string_length);
+			dprintf("   Username: %s\n", data->WAPSetting->GSMdataUsername);
+			pos += string_length << 1;
+
+			string_length = message[pos++];
+			DecodeUnicode(data->WAPSetting->GSMdataPassword, message + pos, string_length);
+			dprintf("   Password: %s\n", data->WAPSetting->GSMdataPassword);
+			pos += string_length << 1;
+			break;
+		default:
+			break;
+		}
+		break;
+	case 0x19:
+		dprintf("WAP setting succesfully written!\n");
+		break;
+	default:
+		dprintf("Unknown subtype of type 0x3f (%d)\n", message[3]);
+		return GE_UNHANDLEDFRAME;
+		break;
+	}
+	return GE_NONE;
+}
+
+static GSM_Error SendWAPFrame(GSM_Data *data, GSM_Statemachine *state, int frame)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x00 };
+
+	dprintf("Sending WAP frame\n");
+	req[3] = frame;
+	SEND_MESSAGE_BLOCK(P7110_MSG_WAP, 4);
+}
+
+static GSM_Error PrepareWAP(GSM_Data *data, GSM_Statemachine *state)
+{
+	dprintf("Preparing WAP\n");
+	return SendWAPFrame(data, state, 0x00);
+}
+
+static GSM_Error FinishWAP(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Error error;
+
+	dprintf("Finishing WAP\n");
+
+	error = SendWAPFrame(data, state, 0x03);
+	if (error != GE_NONE) return error;
+
+	error = SendWAPFrame(data, state, 0x00);
+	if (error != GE_NONE) return error;
+
+	error = SendWAPFrame(data, state, 0x0f);
+	if (error != GE_NONE) return error;
+
+	return SendWAPFrame(data, state, 0x03);
+}
+
+static int PackWAPString(unsigned char *dest, unsigned char *string, int length_size)
+{
+	int length;
+	
+	length = strlen(string);
+	if (length_size == 2) {
+		dest[0] = length / 256;
+		dest[1] = length % 256;
+	} else {
+		dest[0] = length % 256;
+	}
+
+	EncodeUnicode(dest + length_size, string, length);
+	return ((length << 1) + length_size);
+}
+
+static GSM_Error P7110_WriteWAPSetting(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[1000] = { FBUS_FRAME_HEADER, 0x18,
+				    0x00 }; 		/* Location */
+	GSM_Error error;
+	int pad = 0, length, pos = 5;
+
+	return GE_NOTIMPLEMENTED;
+	dprintf("Writing WAP setting\n");
+	memset(req + pos, 0, 1000 - pos);
+	req[4] = data->WAPSetting->Location;
+
+	if (PrepareWAP(data, state) != GE_NONE) {
+		SendWAPFrame(data, state, 0x03);
+		if ((error = PrepareWAP(data, state)) != GE_NONE) return error;
+	}
+
+	/* Name */
+	length = strlen(data->WAPSetting->Name);
+	if (!(length % 2)) pad = 1;
+	pos += PackWAPString(req + pos, data->WAPSetting->Name, 1);
+
+	/* Home */
+	length = strlen(data->WAPSetting->Home);
+	if (((length + pad) % 2)) 
+		pad = 2; 
+	else 
+		pad = 0;
+	pos += PackWAPString(req + pos, data->WAPSetting->Home, 2);
+
+	req[pos++] = data->WAPSetting->Session;
+	pos++;
+	if (data->WAPSetting->Security)	req[pos] = 0x01;
+	req[pos++] = data->WAPSetting->Bearer;
+
+	/* How many parts do we send? */
+	req[pos++] = 0x02;
+	pos += pad;
+
+	/* GSM data */
+	memcpy(req + pos, "\x01\x00", 2);
+	pos += 2;
+	length = ((strlen(data->WAPSetting->GSMdataIP) + strlen(data->WAPSetting->GSMdataUsername)
+		   + strlen(data->WAPSetting->GSMdataPassword) + strlen(data->WAPSetting->Number)) << 1) + 18;
+	req[pos++] = length / 256;
+	req[pos++] = length % 256;
+
+	req[pos++] = data->WAPSetting->GSMdataAuthentication;
+	req[pos++] = data->WAPSetting->CallType;
+	pos++;
+	req[pos++] = data->WAPSetting->CallSpeed;
+	req[pos++] = data->WAPSetting->GSMdataLogin;
+	
+	/* IP */
+	pos += PackWAPString(req + pos, data->WAPSetting->GSMdataIP, 1);
+	/* Number */
+	pos += PackWAPString(req + pos, data->WAPSetting->Number, 2);
+	/* Username */
+	pos += PackWAPString(req + pos, data->WAPSetting->GSMdataUsername, 2);
+	/* Password */
+	pos += PackWAPString(req + pos, data->WAPSetting->GSMdataPassword, 2);
+
+	/* Padding */
+	if (length % 2) pos++;
+
+	/* GPRS block */
+	memcpy(req + pos, "\x03\x00", 2);
+	pos += 2;
+	length = ((strlen(data->WAPSetting->GPRSIP) + strlen(data->WAPSetting->GPRSUsername)
+		   + strlen(data->WAPSetting->GPRSPassword) + strlen(data->WAPSetting->AccessPoint)) << 1) + 14;
+	req[pos++] = length / 256;
+	req[pos++] = length % 256;
+
+	req[pos++] = 0x00; // data->WAPSetting->GPRSAuthentication;
+	req[pos++] = data->WAPSetting->GPRSConnection;
+	req[pos++] = data->WAPSetting->GPRSLogin;
+
+	/* Access point */
+	pos += PackWAPString(req + pos, data->WAPSetting->AccessPoint, 1);
+	/* IP */
+	pos += PackWAPString(req + pos, data->WAPSetting->GPRSIP, 2);
+	/* Username */
+	pos += PackWAPString(req + pos, data->WAPSetting->GPRSUsername, 2);
+	/* Password */
+	pos += PackWAPString(req + pos, data->WAPSetting->GPRSPassword, 2);
+
+	/* end of block ? */
+	memcpy(req + pos, "\x80\x00", 2);
+	pos += 2;
+
+	/* no idea what this is about, seems to be some kind of 'end of message */
+	memcpy(req + pos, "\x00\x0c\x07\x6B\x0C\x1E\x00\x00\x00\x55", 10);
+	pos += 10;
+
+	if (SM_SendMessage(state, pos, P7110_MSG_WAP, req) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (error != GE_NONE) return error;
+
+	return FinishWAP(data, state);
+}
+
+static GSM_Error P7110_DeleteWAPBookmark(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = {	FBUS_FRAME_HEADER, 0x0C,
+				0x00, 0x00};		/* Location */
+	GSM_Error error;
+
+	dprintf("Deleting WAP bookmark\n");
+	req[5] = data->WAPBookmark->Location + 1;
+
+	if (PrepareWAP(data, state) != GE_NONE) {
+		FinishWAP(data, state);
+		if ((error = PrepareWAP(data, state)) != GE_NONE) return error;
+	}
+
+	if (SM_SendMessage(state, 6, P7110_MSG_WAP, req) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (error != GE_NONE) return error;
+
+	return FinishWAP(data, state);
+}
+
+static GSM_Error P7110_GetWAPBookmark(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x06,
+				0x00, 0x00};		/* Location */
+	GSM_Error error;
+
+	dprintf("Getting WAP bookmark\n");
+	req[5] = data->WAPBookmark->Location;
+
+	if (PrepareWAP(data, state) != GE_NONE) {
+		FinishWAP(data, state);
+		if ((error = PrepareWAP(data, state)) != GE_NONE) return error;
+	}
+
+	if (SM_SendMessage(state, 6, P7110_MSG_WAP, req) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (error != GE_NONE) return error;
+
+	return FinishWAP(data, state);
+}
+
+static GSM_Error P7110_WriteWAPBookmark(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[350] = { FBUS_FRAME_HEADER, 0x09,
+				0xFF, 0xFF};		/* Location */
+	GSM_Error error;
+	int pos = 6;
+
+	dprintf("Writing WAP bookmark\n");
+
+	if (PrepareWAP(data, state) != GE_NONE) {
+		FinishWAP(data, state);
+		if ((error = PrepareWAP(data, state)) != GE_NONE) return error;
+	}
+
+	pos += PackWAPString(req + pos, data->WAPBookmark->Name, 1);
+	pos += PackWAPString(req + pos, data->WAPBookmark->URL, 1);
+
+	if (SM_SendMessage(state, pos, P7110_MSG_WAP, req) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (error != GE_NONE) return error;
+
+	return FinishWAP(data, state);
+}
+
+static GSM_Error P7110_GetWAPSetting(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x15,
+				0x00 };		/* Location */
+	unsigned char req2[] = { FBUS_FRAME_HEADER, 0x1b,
+				 0x00 };		/* Location */
+	GSM_Error error;
+	int i;
+
+	dprintf("Getting WAP setting\n");
+	if (!data->WAPSetting) return GE_INTERNALERROR;
+
+	req[4] = data->WAPSetting->Location;
+	memset(data->WAPSetting, 0, sizeof(GSM_WAPSetting));
+	data->WAPSetting->Location = req[4];
+
+	if (PrepareWAP(data, state) != GE_NONE) {
+		FinishWAP(data, state);
+		if ((error = PrepareWAP(data, state)) != GE_NONE) return error;
+	}
+
+	if (SM_SendMessage(state, 5, P7110_MSG_WAP, req) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (error != GE_NONE) return error;
+
+	for (i = 0; i < 4; i++) {
+		req2[4] = data->WAPSetting->Successors[i];
+		if (SM_SendMessage(state, 5, P7110_MSG_WAP, req2) != GE_NONE) return GE_NOTREADY;
+		error = SM_Block(state, data, P7110_MSG_WAP);
+		if (error != GE_NONE) return error;
+	}
+	
+	return FinishWAP(data, state);
+}
+
+static GSM_Error P7110_ActivateWAPSetting(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x12,
+				0x00 };		/* Location */
+	GSM_Error error;
+
+	dprintf("Activating WAP setting\n");
+	req[4] = data->WAPSetting->Location;
+
+	if (PrepareWAP(data, state) != GE_NONE) {
+		FinishWAP(data, state);
+		if ((error = PrepareWAP(data, state)) != GE_NONE) return error;
+	}
+
+	if (SM_SendMessage(state, 5, P7110_MSG_WAP, req) != GE_NONE) return GE_NOTREADY;
+	error = SM_Block(state, data, P7110_MSG_WAP);
+	if (error != GE_NONE) return error;
+
+	return FinishWAP(data, state);
+}
 
 /*****************************/
 /********** OTHERS ***********/

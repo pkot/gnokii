@@ -10,6 +10,7 @@
  * 7110 series updates:
     o make ValidateSMS more robust                     (Markus Plail)
     o fix SMSFolder mess                               (Markus Plail)
+    o implement WAP (all but writing settings)         (Markus Plail)
  * Call management subsystem updates:
     o state pointer added to CallNotification        (BORBELY Zoltan)
  * xgnokii updates:
