@@ -1159,7 +1159,7 @@ GSM_Error FB61_GetPowerSource(GSM_PowerSource *source)
 
 GSM_Error FB61_GetDisplayStatus(int *Status) {
 
-  unsigned char req[64]={ FB61_FRAME_HEADER, 0x51 };
+  unsigned char req[4]={ FB61_FRAME_HEADER, 0x51 };
   int timeout=10;
 
   DisplayStatusError=GE_BUSY;
