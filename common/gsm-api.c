@@ -53,76 +53,72 @@
 
 
 #if defined(WIN32) && defined(_USRDLL)
-
 /*	GnokiiDll.cpp : Defines the entry point for the DLL application.
  *	
  *	We don't do anything special here (yet) but the code is needed
  *	in order to create a DLL.
  *
  */
-BOOL APIENTRY DllMain( HANDLE hModule, 
-                       DWORD  ul_reason_for_call, 
-                       LPVOID lpReserved
-					 )
+BOOL APIENTRY DllMain(HANDLE hModule, 
+		      DWORD  ul_reason_for_call, 
+		      LPVOID lpReserved)
 {
 	/*	For now this is enough to satisfy the compiler
 	 *	and linker. Currently no extra code is needed
 	 *	for initializing or deinitializing of the DLL.
 	 */
-
-    switch (ul_reason_for_call)
-	{
-		case DLL_PROCESS_ATTACH:
-		case DLL_THREAD_ATTACH:
-		case DLL_THREAD_DETACH:
-		case DLL_PROCESS_DETACH:
-			break;
-    }
-    return TRUE;
+	switch (ul_reason_for_call) {
+	case DLL_PROCESS_ATTACH:
+	case DLL_THREAD_ATTACH:
+	case DLL_THREAD_DETACH:
+	case DLL_PROCESS_DETACH:
+		break;
+	}
+	return TRUE;
 }
 
 #endif	/* defined(WIN32) && defined(_USRDLL) */
 
-GSM_Statemachine GSM_SM;
-gn_error (*gn_gsm_f)(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
+struct gn_statemachine gn_sm;
+gn_error (*gn_gsm_f)(gn_operation op, gn_data *data, struct gn_statemachine *state);
 
 
-/* Define pointer to the GSM_Information structure used by external code to
+/* Define pointer to the gn_phone structure used by external code to
    obtain information that varies from model to model. This structure is also
    defined in gsm-common.h */
-API GSM_Information *gn_gsm_info;
+API gn_phone *gn_gsm_info;
 
 /* Initialise interface to the phone. Model number should be a string such as
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
-static gn_error register_phone(GSM_Phone *phone, char *model, char *setupmodel, GSM_Statemachine *sm)
+static gn_error register_driver(gn_driver *driver, char *model, char *setupmodel, struct gn_statemachine *sm)
 {
-	GSM_Data *data = NULL;
-	GSM_Data *p_data;
+	gn_data *data = NULL;
+	gn_data *p_data;
 	gn_error error = GN_ERR_UNKNOWNMODEL;
 
 	if (setupmodel) {
-		data = calloc(1, sizeof(GSM_Data));
-		data->Model = setupmodel;
+		data = calloc(1, sizeof(gn_data));
+		data->model = setupmodel;
 		p_data = data;
 	} else {
 		p_data = NULL;
 	}
-	if (strstr(phone->Info.Models, model) != NULL)
-		error = phone->Functions(GOP_Init, p_data, sm);
+	if (strstr(driver->phone.models, model) != NULL)
+		error = driver->functions(GN_OP_Init, p_data, sm);
 
 	if (data) free(data);
 	return error;
 }
 
-#define REGISTER_PHONE(x, y) { \
-	extern GSM_Phone phone_##x; \
-	if ((ret = register_phone(&phone_##x, model, y, sm)) != GN_ERR_UNKNOWNMODEL) \
+#define REGISTER_DRIVER(x, y) { \
+	extern gn_driver driver_##x; \
+	if ((ret = register_driver(&driver_##x, model, y, sm)) != GN_ERR_UNKNOWNMODEL) \
 		return ret; \
 }
 
 API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
-				const char *connection, GSM_Statemachine *sm)
+				const char *connection, struct gn_statemachine *sm)
 {
 	gn_error ret;
 	char *sms_timeout;
@@ -146,27 +142,26 @@ API gn_error gn_gsm_initialise(char *model, char *device, char *initlength,
 		sm->Link.ConnectionType = GCT_Tekram;
 #endif
 	else return GN_ERR_NOTSUPPORTED;
-
-	sm->Link.InitLength = atoi(initlength);
+	sm->link.init_length = atoi(initlength);
 	sms_timeout = gn_cfg_get(gn_cfg_info, "sms", "timeout");
-	if (!sms_timeout) sm->Link.SMSTimeout = 100;
-	else sm->Link.SMSTimeout = atoi(sms_timeout) * 10;
-	memset(&sm->Link.PortDevice, 0, sizeof(sm->Link.PortDevice));
-	strncpy(sm->Link.PortDevice, device, sizeof(sm->Link.PortDevice) - 1);
+	if (!sms_timeout) sm->link.sms_timeout = 100;
+	else sm->link.sms_timeout = atoi(sms_timeout) * 10;
+	memset(&sm->link.port_device, 0, sizeof(sm->link.port_device));
+	strncpy(sm->link.port_device, device, sizeof(sm->link.port_device) - 1);
 
-	REGISTER_PHONE(nokia_7110, NULL);
-	REGISTER_PHONE(nokia_6510, NULL);
-	REGISTER_PHONE(nokia_6100, NULL);
+	REGISTER_DRIVER(nokia_7110, NULL);
+	REGISTER_DRIVER(nokia_6510, NULL);
+	REGISTER_DRIVER(nokia_6100, NULL);
 #if 0
-	REGISTER_PHONE(nokia_3110, NULL);
+	REGISTER_DRIVER(nokia_3110, NULL);
 #ifndef WIN32
-	REGISTER_PHONE(nokia_2110, NULL);
-	REGISTER_PHONE(dancall_2711, NULL);
+	REGISTER_DRIVER(nokia_2110, NULL);
+	REGISTER_DRIVER(dancall_2711, NULL);
 #endif
 #endif
-	REGISTER_PHONE(fake, NULL);
-	REGISTER_PHONE(at, model);
-	REGISTER_PHONE(nokia_6160, NULL);
+	REGISTER_DRIVER(fake, NULL);
+	REGISTER_DRIVER(at, model);
+	REGISTER_DRIVER(nokia_6160, NULL);
 
 	return GN_ERR_UNKNOWNMODEL;
 }
