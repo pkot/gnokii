@@ -57,7 +57,6 @@
 #include "xpm/Tool_filled_rectangle.xpm"
 
 extern GSM_Network GSM_Networks[];
-extern GSM_Statemachine statemachine;
 
 GtkWidget *GUI_LogosWindow;
 
@@ -1174,6 +1173,7 @@ gint LogoTypeEvent(GtkWidget *widget)
 {
 	int clear = 0;
 	g_print("LogoTypeEvent called!\n");
+	g_print("height: %i, width: %i\n", statemachine.Phone.Info.StartupLogoH, statemachine.Phone.Info.StartupLogoW);
 	/* is startupLogo? */
 	/* Resize and clear anyway - CK */
 	if (GTK_TOGGLE_BUTTON(buttonStartup)->active) {
@@ -1689,15 +1689,15 @@ void GUI_ShowLogosWindow (void)
 	GetNetworkInfoEvent(NULL);
 	/* if phone support caller groups, read callerGroups names */
 	if (phoneMonitor.supported & PM_CALLERGROUP) {
-		if (xgnokiiConfig.callerGroups[0] == NULL) {
+		if (xgnokiiConfig.callerGroups[0] == NULL) { 
 			GUI_Refresh(); 
 			GUI_InitCallerGroupsInf ();
 			GUI_RefreshLogosGroupsCombo ();
 		}
-		if (!callersGroupsInitialized) GUI_RefreshLogosGroupsCombo (); 
+		if (!callersGroupsInitialized) GUI_RefreshLogosGroupsCombo ();
 		gtk_widget_show(buttonCaller);
 		gtk_widget_show(callerCombo); 
-	} else {
+	} else { 
 		/* if not supported, hide widget for handling callerGroups */
 		gtk_widget_hide(buttonCaller);
 		gtk_widget_hide(callerCombo); 

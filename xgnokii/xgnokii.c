@@ -229,6 +229,7 @@ void GUI_InitCallerGroupsInf (void)
 			g_free (cg);
 		}
 	}
+
 	CallersGroupsInitialized = TRUE;
 	gtk_widget_hide (infoDialog.dialog);
 	GUIEventSend (GUI_EVENT_CALLERS_GROUPS_CHANGED);
@@ -390,116 +391,98 @@ static void CreateInCallDialog (void)
 
 static gint Update (gpointer data)
 {
-  static gchar lastCallNum[20] = "";
-  static gchar callBuf[80];
-  static gchar timeBuf[10];
-  static gchar *anonym = "anonymous";
-  static struct tm stm;
-  static gint smsNumber = 0;
-  static gint callTimerStart = 0;
-  gint callTimer = 0;
-  time_t t;
-  static gchar *name;
-  static bool outgoing = TRUE;
+	static gchar lastCallNum[20] = "";
+	static gchar callBuf[80];
+	static gchar timeBuf[10];
+	static gchar *anonym = "anonymous";
+	static struct tm stm;
+	static gint callTimerStart = 0;
+	gint callTimer = 0;
+	time_t t;
+	static gchar *name;
+	static bool outgoing = TRUE;
 
 
   /* The number of SMS messages before second */
-  static int smsold=0;
+	static int smsold=0;
 
   /* The number of second for we should display "Short Message Received" message */
-  static int smsreceived=-1;
+	static int smsreceived=-1;
 
-  DrawBackground (data);
+	DrawBackground (data);
 
-  DrawNetwork (data, phoneMonitor.rfLevel);
+	DrawNetwork (data, phoneMonitor.rfLevel);
 
-  DrawBattery (data, phoneMonitor.batteryLevel);
+	DrawBattery (data, phoneMonitor.batteryLevel);
 
-  if (phoneMonitor.alarm)
-    DrawAlarm (data);
+	if (phoneMonitor.alarm) DrawAlarm (data);
     
-  if (phoneMonitor.working)
-    DrawText (data, 25, phoneMonitor.working);
+	if (phoneMonitor.working) DrawText (data, 25, phoneMonitor.working);
 
-  pthread_mutex_lock (&smsMutex);
-  if (phoneMonitor.sms.unRead > 0)
-  {
-    DrawSMS (data);
+	pthread_mutex_lock (&smsMutex);
+	
+	if (phoneMonitor.sms.unRead > 0) {
+		DrawSMS (data);
+		if (phoneMonitor.sms.unRead > smsold && smsold != -1) 
+			smsreceived = 10;  /* The message "Short Message Received" is displayed for 10s */
+	}
 
-    if (phoneMonitor.sms.unRead > smsold && smsold != -1)
-      smsreceived = 10;  /* The message "Short Message Received" is displayed for 10s */
-  }
-  if (smsNumber != phoneMonitor.sms.number)
-    GUIEventSend (GUI_EVENT_SMS_NUMBER_CHANGED);
+	if (phoneMonitor.sms.changed) GUIEventSend (GUI_EVENT_SMS_NUMBER_CHANGED);
+	phoneMonitor.sms.changed = 0;
+	smsold = phoneMonitor.sms.unRead;
 
-  smsold = phoneMonitor.sms.unRead;
+	pthread_mutex_unlock (&smsMutex);
 
-  smsNumber = phoneMonitor.sms.number;
+	if (smsreceived >= 0) {
+		DrawSMSReceived (data);
+		smsreceived--;
+	}
 
-  pthread_mutex_unlock (&smsMutex);
+	pthread_mutex_lock (&callMutex);
+	if (phoneMonitor.call.callInProgress != CS_Idle) {
+		if (phoneMonitor.call.callInProgress == CS_InProgress) {
+			if (!callTimerStart) 
+				callTimerStart = callTimer = time (NULL);
+			else
+				callTimer = time (NULL);
+		}
+		if (phoneMonitor.call.callInProgress == CS_Waiting) {
+			outgoing = FALSE;
 
-  if (smsreceived >= 0)
-  {
-    DrawSMSReceived (data);
-    smsreceived--;
-  }
+			if (*phoneMonitor.call.callNum == '\0')
+				name = anonym;
+			else if (strncmp (phoneMonitor.call.callNum, lastCallNum, 20)) {
+				strncpy (lastCallNum, phoneMonitor.call.callNum, 20);
+				lastCallNum[19] = '\0';
+				name = GUI_GetName (phoneMonitor.call.callNum);
+				if (!name) name = phoneMonitor.call.callNum;
+			}
+		}
+		t = (time_t) difftime (callTimer, callTimerStart);
+		(void) gmtime_r (&t, &stm);
+		strftime (timeBuf, 10, "%T", &stm);
+		if (outgoing)
+			g_snprintf (callBuf, 80, _("Outgoing call in progress:\nTime: %s"), timeBuf);
+		else
+			g_snprintf (callBuf, 80, _("Incomming call from: %s\nTime: %s"), name, timeBuf);
 
-  pthread_mutex_lock (&callMutex);
-  if (phoneMonitor.call.callInProgress != CS_Idle)
-  {
-    if (phoneMonitor.call.callInProgress == CS_InProgress)
-    {
-      if (!callTimerStart)
-        callTimerStart = callTimer = time (NULL);
-      else
-        callTimer = time (NULL);
-    }
+		gtk_label_set_text (GTK_LABEL (inCallDialog.label), callBuf);
+		if (!GTK_WIDGET_VISIBLE (inCallDialog.dialog) && !hiddenCallDialog) 
+			gtk_widget_show (inCallDialog.dialog);
+	} else {
+		callTimerStart = callTimer = 0;
+		*lastCallNum = '\0';
+		outgoing = TRUE;
+		if (GTK_WIDGET_VISIBLE (inCallDialog.dialog)) gtk_widget_hide (inCallDialog.dialog);
+		hiddenCallDialog = 0;
+	}
+	pthread_mutex_unlock (&callMutex);
 
-    if (phoneMonitor.call.callInProgress == CS_Waiting)
-    {
-      outgoing = FALSE;
+	gtk_widget_draw (data,NULL);
 
-      if (*phoneMonitor.call.callNum == '\0')
-        name = anonym;
-      else if (strncmp (phoneMonitor.call.callNum, lastCallNum, 20))
-      {
-        strncpy (lastCallNum, phoneMonitor.call.callNum, 20);
-        lastCallNum[19] = '\0';
-        name = GUI_GetName (phoneMonitor.call.callNum);
-        if (!name)
-          name = phoneMonitor.call.callNum;
-      }
-    }
-    t = (time_t) difftime (callTimer, callTimerStart);
-    (void) gmtime_r (&t, &stm);
-    strftime (timeBuf, 10, "%T", &stm);
-    if (outgoing)
-      g_snprintf (callBuf, 80, _("Outgoing call in progress:\nTime: %s"),
-                  timeBuf);
-    else
-      g_snprintf (callBuf, 80, _("Incomming call from: %s\nTime: %s"),
-                  name, timeBuf);
+	GUIEventSend (GUI_EVENT_NETMON_CHANGED);
 
-    gtk_label_set_text (GTK_LABEL (inCallDialog.label), callBuf);
-    if (!GTK_WIDGET_VISIBLE (inCallDialog.dialog) && !hiddenCallDialog)
-      gtk_widget_show (inCallDialog.dialog);
-  }
-  else
-  {
-    callTimerStart = callTimer = 0;
-    *lastCallNum = '\0';
-    outgoing = TRUE;
-    if (GTK_WIDGET_VISIBLE (inCallDialog.dialog))
-      gtk_widget_hide (inCallDialog.dialog);
-    hiddenCallDialog = 0;
-  }
-  pthread_mutex_unlock (&callMutex);
-
-  gtk_widget_draw (data,NULL);
-
-  GUIEventSend (GUI_EVENT_NETMON_CHANGED);
-
-  return TRUE;
+	return TRUE;
 }
 
 
@@ -2406,25 +2389,25 @@ static void ReadConfig (void)
 int main (int argc, char *argv[])
 {
 #ifdef USE_NLS
-  textdomain("gnokii");
+	textdomain("gnokii");
 #endif
 
-  (void) gtk_set_locale ();
+	(void) gtk_set_locale ();
 
-  gtk_init (&argc, &argv);
+	gtk_init (&argc, &argv);
 
-  /* Show the splash screen. */
+/* Show the splash screen. */
 
-  SplashScreen ();
+	SplashScreen ();
 
-  /* Remove it after a while. */
+/* Remove it after a while. */
 
-  ReadConfig ();
-  TopLevelWindow (); 
+	ReadConfig ();
+ 	TopLevelWindow (); 
 
-  splashRemoveHandler = gtk_timeout_add(5000, (GtkFunction) RemoveSplash, (gpointer) SplashWindow);
+	splashRemoveHandler = gtk_timeout_add(5000, (GtkFunction) RemoveSplash, (gpointer) SplashWindow);
 
-  gtk_main ();
+	gtk_main ();
 
-  return (0);
+	return (0);
 }

@@ -208,7 +208,7 @@ static int IsValidSMSforFolder(gpointer d, gpointer userData)
 	GSM_SMSMessage *data = (GSM_SMSMessage *)d;
 	int folder_idx;
 
-	if (data->MemoryType) {
+	if (phoneMonitor.supported & PM_FOLDERS) {
 		folder_idx = data->MemoryType >> 3;
 		folder_idx--;
 		if (folder_idx == SMS.currentBox) return 1;
@@ -227,7 +227,7 @@ static void InsertFolderElement (gpointer d, gpointer userData)
 	MessagePointers *msgPtrs;
 	SMS_DateTime *dt = NULL;
 	gint valid;
-
+	
 	if ((valid = IsValidSMSforFolder(d, userData))) {
 
 /*		if (data->Type == GST_MT && data->UDHType == GSM_ConcatenatedMessages) {
@@ -263,6 +263,7 @@ static void InsertFolderElement (gpointer d, gpointer userData)
 			dt = &(data->Time);
 		}
 
+
 		if (dt) {
 			if (dt->Timezone)
 				row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d %c%02d00",
@@ -273,6 +274,8 @@ static void InsertFolderElement (gpointer d, gpointer userData)
 				row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d",
 						dt->Day, dt->Month, dt->Year,
 						dt->Hour, dt->Minute, dt->Second);
+		} else {
+			row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d", 01, 01, 0001,	01, 01, 01);
 		}
 
 		row[2] = GUI_GetName(data->RemoteNumber.number);
@@ -284,7 +287,7 @@ static void InsertFolderElement (gpointer d, gpointer userData)
 		gtk_clist_append(GTK_CLIST (SMS.smsClist), row);
 		msgPtrs = (MessagePointers *)g_malloc(sizeof(MessagePointers));
 		msgPtrs->count = msgPtrs->number = 1;
-		msgPtrs->validity = data->Validity.u.Relative;
+		msgPtrs->validity = data->Validity.u.Relative; 
 /*		msgPtrs->class = data->Class; */
 		strcpy(msgPtrs->sender, data->RemoteNumber.number);
 		msgPtrs->msgPtr = (gint *)g_malloc(sizeof(gint));
@@ -298,6 +301,7 @@ static void InsertFolderElement (gpointer d, gpointer userData)
 
 static inline void RefreshFolder(void)
 {
+	dprintf("RefreshFolder\n\n\n\n\n");
 	gtk_clist_freeze(GTK_CLIST(SMS.smsClist));
 
 	gtk_clist_clear(GTK_CLIST(SMS.smsClist));
@@ -364,7 +368,9 @@ static void ClickEntry(GtkWidget      *clist,
 inline void GUI_ShowSMS (void)
 {
 	gint i, j;
-	GUI_InitSMSFolders();
+	GSM_Error error;
+
+	while ((error = GUI_InitSMSFolders()) != GE_NONE) sleep(1);
 	
 	for (i=0; i < foldercount ; i++) {
 		if (i > lastfoldercount - 1) {

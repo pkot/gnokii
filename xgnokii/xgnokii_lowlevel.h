@@ -18,6 +18,7 @@
 #include <pthread.h>
 #include <glib.h>
 #include "gsm-sms.h"
+#include "gsm-statemachine.h"
 
 #define INCALL_NUMBER_LENGTH	20
 #define NETMON_SCREEN_LENGTH	60
@@ -131,34 +132,35 @@ typedef struct {
 } D_NetworkInfo;
 
 typedef struct {
-  gfloat rfLevel;
-  gfloat batteryLevel;
-  GSM_PowerSource powerSource;
-  gchar *working;
-  bool alarm;
-  struct {
-    gchar *model;
-    gchar *imei;
-    gchar *revision;
-    gchar *version;
-  } phone;
-  struct {
-    gint    unRead;
-    gint    number;
-    GSList *messages;
-  } sms;
-  struct {
-    CallState callInProgress;
-    gchar     callNum[INCALL_NUMBER_LENGTH];
-  } call;
-  struct {
-    gint  number;
-    gchar screen[NETMON_SCREEN_LENGTH];
-    gchar screen3[NETMON_SCREEN_LENGTH];
-    gchar screen4[NETMON_SCREEN_LENGTH];
-    gchar screen5[NETMON_SCREEN_LENGTH];
-  } netmonitor;
-  gint supported;
+	gfloat rfLevel;
+	gfloat batteryLevel;
+	GSM_PowerSource powerSource;
+	gchar *working;
+	bool alarm;
+	struct {
+		gchar *model;
+		gchar *imei;
+		gchar *revision;
+		gchar *version;
+	} phone;
+	struct {
+		gint    unRead;
+		gint    number;
+		gint    changed;
+		GSList *messages;
+	} sms;
+	struct {
+		CallState callInProgress;
+		gchar     callNum[INCALL_NUMBER_LENGTH];
+	} call;
+	struct {
+		gint  number;
+		gchar screen[NETMON_SCREEN_LENGTH];
+		gchar screen3[NETMON_SCREEN_LENGTH];
+		gchar screen4[NETMON_SCREEN_LENGTH];
+		gchar screen5[NETMON_SCREEN_LENGTH];
+	} netmonitor;
+	gint supported;
 } PhoneMonitor;
 
 extern pthread_t monitor_th;
@@ -186,8 +188,9 @@ extern pthread_mutex_t setBitmapMutex;
 extern pthread_cond_t  setBitmapCond;
 extern pthread_mutex_t getNetworkInfoMutex;
 extern pthread_cond_t  getNetworkInfoCond;
+extern GSM_Statemachine statemachine;
 extern void GUI_InitPhoneMonitor (void);
 extern void *GUI_Connect (void *a);
 extern void GUI_InsertEvent (PhoneEvent *event);
-extern void GUI_InitSMSFolders (void);
+extern GSM_Error GUI_InitSMSFolders (void);
 #endif
