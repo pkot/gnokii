@@ -942,8 +942,8 @@ msgstr ""
 # msgid "Write Succeeded: memory type:%s, loc:%d, name: %s, number: %s\n"
 # msgstr "Speichern erfolgreich: Speichertyp:%s, Zelle:%d, Name: %s, Nummer %s\n"
 # 
-# msgid "GNOKII Version 0.2.5 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
-# msgstr "GNOKII Version 0.2.5 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
+# msgid "GNOKII Version 0.3.0 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
+# msgstr "GNOKII Version 0.3.0 Copyright (C) Hugh Blemings 1999. <hugh@vsb.com.au>\n"
 # 
 # msgid "SMS Send failed, gnokii error code was %d, network returned 0x%02x 0x%02x\n"
 # msgstr "Senden der SMS-Nachricht fehlgeschlagen, gnokii Fehler-Nummer war %d, Netz antwortete mit 0x%02x 0x%02x\n"
