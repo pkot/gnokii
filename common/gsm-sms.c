@@ -585,7 +585,7 @@ static GSM_Error DecodePDUSMS(GSM_SMSMessage *rawsms, GSM_API_SMS *sms)
 			SMS->UDH[0].Type = SMS_MultipartMessage;
 			/* First part is a Picture */
 			SMS->UserData[0].Type = SMS_BitmapData;
-			GSM_ReadSMSBitmap(GSM_PictureImage, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
+			GSM_ReadSMSBitmap(GSM_PictureMessage, message + llayout.UserData, NULL, &SMS->UserData[0].u.Bitmap);
 			GSM_PrintBitmap(&SMS->UserData[0].u.Bitmap);
 
 			size = MessageLength - llayout.UserData - 4 - SMS->UserData[0].u.Bitmap.size;

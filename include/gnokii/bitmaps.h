@@ -38,7 +38,7 @@
 typedef enum {
 	GSM_None = 0,
 	GSM_StartupLogo = 50,
-	GSM_PictureImage,
+	GSM_PictureMessage,
 	GSM_OperatorLogo,
 	GSM_CallerLogo,
 	GSM_WelcomeNoteText,

@@ -861,7 +861,7 @@ GSM_Error loadnlm (FILE *file, GSM_Bitmap *bitmap)
 		bitmap->type = GSM_StartupLogo;
 		break;
 	case 0x03:
-		bitmap->type = GSM_PictureImage;
+		bitmap->type = GSM_PictureMessage;
 		break;
 	default:
 		return(GE_SUBFORMATNOTSUPPORTED);
@@ -976,7 +976,7 @@ GSM_Error GSM_SaveBitmapFile(char *FileName, GSM_Bitmap *bitmap, GSM_Information
 			case GSM_StartupLogo:
 				savensl(file, bitmap, info);
 				break;
-			case GSM_PictureImage:
+			case GSM_PictureMessage:
 				savenlm(file, bitmap);
 				break;
 			case GSM_WelcomeNoteText:
@@ -1279,7 +1279,7 @@ void savenlm(FILE *file, GSM_Bitmap *bitmap)
 	case GSM_StartupLogo:
 		header[5] = 0x02;
 		break;
-	case GSM_PictureImage:
+	case GSM_PictureMessage:
 		header[5] = 0x03;
 		break;
 	case GSM_WelcomeNoteText:

@@ -61,7 +61,7 @@ API void GSM_SetPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	case GSM_OperatorLogo:
 	case GSM_CallerLogo:   bmp->bitmap[(y*bmp->width+x)/8] |= 1 << (7-((y*bmp->width+x)%8)); break;
 		               /* Testing only! */	
-	case GSM_PictureImage: bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8)); break;
+	case GSM_PictureMessage: bmp->bitmap[9*y + (x/8)] |= 1 << (7-(x%8)); break;
 	}
 }
 
@@ -73,7 +73,7 @@ API void GSM_ClearPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	case GSM_OperatorLogo:
 	case GSM_CallerLogo:   bmp->bitmap[(y*bmp->width+x)/8] &= ~(1 << (7-((y*bmp->width+x)%8))); break;
 		               /* Testing only! */	
-	case GSM_PictureImage: bmp->bitmap[9*y + (x/8)] &= ~(1 << (7-(x%8))); break;
+	case GSM_PictureMessage: bmp->bitmap[9*y + (x/8)] &= ~(1 << (7-(x%8))); break;
 	}
 }
 
@@ -86,7 +86,7 @@ API bool GSM_IsPointBitmap(GSM_Bitmap *bmp, int x, int y)
 	case GSM_CallerLogo:
 		i = (bmp->bitmap[(y*bmp->width+x)/8] & 1 << (7-((y*bmp->width+x)%8)));
 		break;
-	case GSM_PictureImage:
+	case GSM_PictureMessage:
 		i = (bmp->bitmap[9 * y + (x / 8)] & 1 << (7 - (x % 8)));
 		break;
 	case GSM_StartupLogo:
@@ -126,7 +126,7 @@ API void GSM_ResizeBitmap(GSM_Bitmap *bitmap, GSM_Bitmap_Types target, GSM_Infor
 		bitmap->width = info->CallerLogoW;
 		bitmap->height = info->CallerLogoH;
 		break;
-	case GSM_PictureImage:
+	case GSM_PictureMessage:
 		bitmap->width = 72;
 		bitmap->height = 48;
 		break;
@@ -179,7 +179,7 @@ API GSM_Error GSM_ReadSMSBitmap(int type, char *message, char *code, GSM_Bitmap 
 
 	bitmap->type = type;
 	switch (type) {
-	case GSM_PictureImage:
+	case GSM_PictureMessage:
 		offset = 2;
 		break;
 	case GSM_OperatorLogo:
@@ -225,7 +225,7 @@ int GSM_EncodeSMSBitmap(GSM_Bitmap *bitmap, char *message)
 		message[current++] = 0xf0 | (bitmap->netcode[2] & 0x0f);
 		message[current++] = ((bitmap->netcode[5] & 0x0f) << 4) | (bitmap->netcode[4] & 0xf);
 		break;
-	case GSM_PictureImage:
+	case GSM_PictureMessage:
 		dprintf("Picture Image\n");
 		/* Type of multipart message - picture image */
 		message[current++] = 0x02;
