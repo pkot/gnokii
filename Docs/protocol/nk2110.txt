@@ -4,7 +4,8 @@ Assembled by
 	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)
         Pavel Machek <pavel@ucw.cz>
 	... and other members of gnokii mailing list
-            and authors of some WWW pages.
+            and authors of some WWW pages
+	    (http://republika.pl/junk/mbus).
 
 The data provided is for information purposes only. 
 Some of the frames might be hazardous to your phone. Be careful!!! 
