@@ -15,6 +15,15 @@ AC_CONFIG_AUX_DIR(config)
 AC_CANONICAL_SYSTEM
 AC_PREFIX_DEFAULT("/usr/local")
 
+dnl ======================== Checks for programs.
+AC_PROG_CC
+AC_PROG_CPP
+AC_PROG_LEX
+AC_PATH_PROG(RM, rm, no)
+AC_PATH_PROG(FIND, find, no)
+AC_CHECK_PROGS(MAKE, gmake make)
+AC_PROG_INSTALL
+
 dnl ======================== Default setting
 ALL_LINGUAS="cs de et fi nl sk pl it sl"
 AM_GNU_GETTEXT
@@ -31,15 +40,6 @@ else
 	echo '*************************************************'
 	exit 1
 fi
-
-dnl ======================== Checks for programs.
-AC_PROG_CC
-AC_PROG_CPP
-AC_PROG_LEX
-AC_PATH_PROG(RM, rm, no)
-AC_PATH_PROG(FIND, find, no)
-AC_CHECK_PROGS(MAKE, gmake make)
-AC_PROG_INSTALL
 
 dnl Let us have $prefix variable aviable here
 test x"$prefix" = xNONE && prefix="$ac_default_prefix"
