@@ -88,6 +88,7 @@ static GSM_Error P7110_GetPictureList(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolders(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSStatus(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_GetUnreadMessages(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_NetMonitor(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state);
 
@@ -220,14 +221,16 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return PNOK_CallDivert(data, state);
 	case GOP_NetMonitor:
 		return P7110_NetMonitor(data, state);
-	case GOP7110_GetSMSFolders:
+	case GOP_GetSecurityCode:
+		return P7110_GetSecurityCode(data, state);
+	case GOP_GetSMSFolders:
 		return P7110_GetSMSFolders(data, state);
-	case GOP7110_GetSMSFolderStatus:
+	case GOP_GetUnreadMessages:
+		return P7110_GetUnreadMessages(data, state);
+	case GOP_GetSMSFolderStatus:
 		return P7110_GetSMSFolderStatus(data, state);
 	case GOP7110_GetPictureList:
 		return P7110_GetPictureList(data, state);
-	case GOP_GetSecurityCode:
-		return P7110_GetSecurityCode(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -721,7 +724,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 	unsigned int i, j, T, offset = 47;
 	int nextfolder = 0x10;
 
-	/* Message suptype */
+	/* Message subtype */
 	switch (message[3]) {
 	case P7110_SUBSMS_READ_OK: /* GetSMS OK, 0x08 */
 		dprintf("Trying to get message # %i from the folder # %i\n", (message[6] << 8) | message[7], message[5]);
@@ -742,10 +745,12 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 		data->RawSMS->PID              = 0;
 		data->RawSMS->ReportStatus     = 0;
 
-		memcpy(data->RawSMS->SMSCTime,      message + getdata(T, 37, 38, 36, 34), 7);
+		if (T != SMS_Submit) {
+			memcpy(data->RawSMS->SMSCTime,      message + getdata(T, 37, 38, 36, 34), 7);
+			memcpy(data->RawSMS->MessageCenter, message + 9,  12);
+			memcpy(data->RawSMS->RemoteNumber,  message + getdata(T, 25, 26, 24, 22), 12);
+		}
 		if (T == SMS_Delivery_Report) memcpy(data->RawSMS->Time, message + 43, 7);
-		memcpy(data->RawSMS->MessageCenter, message + 9,  12);
-		memcpy(data->RawSMS->RemoteNumber,  message + getdata(T, 25, 26, 24, 22), 12);
 
 		data->RawSMS->DCS              = message[23];
 		/* This is ugly hack. But the picture message format in 6210
@@ -2143,11 +2148,96 @@ static GSM_Error P7110_GetSecurityCode(GSM_Data *data, GSM_Statemachine *state)
 	SEND_MESSAGE_BLOCK(P7110_MSG_STLOGO, 5);
 }
 
-/*
-GSM_Error N7110_GetSecurityCode(GSM_StateMachine *s, char *SecurityCode)
+
+/* Find the fist unread message in given folder statting from the *last position
+ * As a help we have the array of the sorted read locations in 'location' with
+ * no_loc entries. We can easily skip these locations.
+ */
+static GSM_Error FindUnreadSMS(GSM_Data *data, GSM_Statemachine *state, int *last, const unsigned int *locations, unsigned int no_loc)
 {
-	s->Phone.Data.SecurityCode=SecurityCode;
-	dprintf("Getting security code\n");
-	return N7110_GetPhoneSetting(s, ID_GetSecurityCode, 0x1c);
+	GSM_Error error;
+	int i, index = 0;
+
+	dprintf("Starting at %d\n", *last);
+	for (i = *last;; i++) {
+		/* Skip all read messages */
+		while (index < no_loc && locations[index] < i) index++;
+		if (locations[index] == i) continue;
+
+		dprintf("Reading: %d\n", i);
+		memset(data->RawSMS, 0, sizeof(GSM_SMSMessage));
+		data->RawSMS->Number = i;
+		data->RawSMS->MemoryType = GMT_IN;
+		error = P7110_GetSMS(data, state);
+		if (error == GE_EMPTYLOCATION) continue;
+		if (data->RawSMS->Status == SMS_Unread) {
+			dprintf("Got unread %d\n", i);
+			*last = i + 1;
+			return GE_NONE;
+		}
+	}
+	return GE_NONE;
 }
-*/
+
+static void sort(unsigned int *table, unsigned int number)
+{
+	int i, j;
+
+	for (i = 0; i < number; i++) {
+		int min = table[i], no = i;
+		for (j = i; j < number; j++) {
+			if (table[j] < min) {
+				min = table[j];
+				no = j;
+			}
+		}
+		if (no > i) {
+			int aux;
+
+			aux = table[i];
+			table[i] = table[no];
+			table[no] = aux;
+		}
+	}
+}
+
+GSM_Error P7110_GetUnreadMessages(GSM_Data *data, GSM_Statemachine *state)
+{
+	GSM_Error error;
+	GSM_SMSMessage rawsms;
+	int dummy, i, last = 1, current_folder, previous_unread = 0;
+
+	data->RawSMS = &rawsms;
+
+	current_folder = 0;
+
+	dprintf("GetUnreadMessages: Looking for unread (%d)\n", data->SMSStatus->Unread);
+
+	for (i = 0; i < data->FolderStats[current_folder]->Used; i++) {		/* cycle through all saved position */
+		if ((data->MessagesList[i][current_folder]->Type == SMS_NotRead) ||
+		    (data->MessagesList[i][current_folder]->Type == SMS_NotReadHandled)) {	/* add already found new SMS to SMSFolder */
+			data->SMSFolder->Locations[data->SMSFolder->Number] = data->MessagesList[i][current_folder]->Location;
+			data->SMSFolder->Number++;
+			previous_unread++;
+		}
+	}
+	dummy = data->SMSStatus->Unread - previous_unread;
+
+	if (dummy < 1) {
+		return GE_NONE;
+	}
+	dprintf("GetUnreadMessages: sorting... previous unread: %i\n", previous_unread);
+	sort((int *)data->SMSFolder->Locations, data->SMSFolder->Number);
+
+	dprintf("GetUnreadMessages: sorting finished! Trying to get %i unread mails\n",dummy);
+	for (i = 0; i < dummy; i++) {
+		error = FindUnreadSMS(data, state, &last, data->SMSFolder->Locations, data->SMSFolder->Number);
+		dprintf("Found new (unread) message!\n");
+		data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Location = data->RawSMS->Number;
+		data->MessagesList[data->FolderStats[current_folder]->Used][current_folder]->Type = SMS_NotRead;
+		data->FolderStats[current_folder]->Used++;
+		data->FolderStats[current_folder]->Changed++;
+		data->SMSStatus->Changed++;
+	}
+	return GE_NONE;
+}
