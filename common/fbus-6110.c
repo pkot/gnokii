@@ -17,7 +17,10 @@
   and 6110.
 
   $Log$
-  Revision 1.135  2001-08-09 12:34:33  pkot
+  Revision 1.136  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.135  2001/08/09 12:34:33  pkot
   3330 and 6250 support - I have no idea if it does work (mygnokii)
 
   Revision 1.134  2001/06/10 11:24:57  machek
@@ -842,7 +845,7 @@ bool FB61_OpenIR(void)
 
 	/* Open device. */
   
-	result = device_open(PortDevice, false, true, GCT_Infrared);
+	result = device_open(PortDevice, false, true, false, GCT_Infrared);
 
 	if (!result) {
 		perror(_("Couldn't open FB61 infrared device"));
@@ -2196,7 +2199,7 @@ bool FB61_OpenSerial(void)
 
 	/* Open device. */
 
-	result = device_open(PortDevice, false, true, GCT_Serial);
+	result = device_open(PortDevice, false, true, false, GCT_Serial);
 
 	if (!result) {
 		perror(_("Couldn't open FB61 device"));

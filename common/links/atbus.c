@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.2  2001-08-09 11:51:39  pkot
+  Revision 1.3  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.2  2001/08/09 11:51:39  pkot
   Generic AT support updates and cleanup (Manfred Jonsson)
 
   Revision 1.1  2001/07/27 00:02:21  pkot
@@ -136,23 +139,31 @@ GSM_Error ATBUS_Loop(struct timeval *timeout)
 }
 
 
-bool ATBUS_OpenSerial()
+bool ATBUS_OpenSerial(int hw_handshake)
 {
 	int result;
-	result = device_open(glink->PortDevice, false, false, GCT_Serial);
+	result = device_open(glink->PortDevice, false, false, hw_handshake, GCT_Serial);
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
 		return (false);
 	}
 	device_changespeed(19200);
-	device_setdtrrts(1, 0);
+	if (hw_handshake) {
+		device_setdtrrts(0, 1);
+		sleep(1);
+		device_setdtrrts(1, 1);
+		/* make 7110 happy */
+		sleep(1);
+	} else {
+		device_setdtrrts(0, 0);
+	}
 	return (true);
 }
 
 
 /* Initialise variables and start the link */
 
-GSM_Error ATBUS_Initialise(GSM_Statemachine *state)
+GSM_Error ATBUS_Initialise(GSM_Statemachine *state, int hw_handshake)
 {
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
@@ -166,15 +177,12 @@ GSM_Error ATBUS_Initialise(GSM_Statemachine *state)
 	glink->SendMessage = &AT_SendMessage;
 
 	if (glink->ConnectionType == GCT_Serial) {
-		if (!ATBUS_OpenSerial())
+		if (!ATBUS_OpenSerial(hw_handshake))
 			return GE_DEVICEOPENFAILED;
 	} else {
 		fprintf(stderr, "Device not supported by ATBUS");
 		return GE_DEVICEOPENFAILED;
 	}
-
-	/* make 7110 happy */
-	sleep (1);
 
 	return GE_NONE;
 }

@@ -48,7 +48,7 @@ char reply_buf[10240];
 bool CBUS_OpenSerial()
 {
 	int result;
-	result = device_open(glink->PortDevice, false, false, GCT_Serial);
+	result = device_open(glink->PortDevice, false, false, false, GCT_Serial);
 	if (!result) {
 		perror(_("Couldn't open CBUS device"));
 		return (false);

@@ -14,7 +14,10 @@
   phones. See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.2  2001-08-09 11:51:39  pkot
+  Revision 1.3  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.2  2001/08/09 11:51:39  pkot
   Generic AT support updates and cleanup (Manfred Jonsson)
 
   Revision 1.1  2001/07/27 00:02:21  pkot
@@ -55,7 +58,7 @@ GSM_Phone phone_at = {
 	IncomingFunctions,
 	PGEN_IncomingDefault,
 	{
-		"AT|dancall",			/* Supported models */
+		"AT|AT-HW|dancall",			/* Supported models */
 		99,			/* Max RF Level */
 		0,			/* Min RF Level */
 		GRF_CSQ,		/* RF level units */
@@ -391,13 +394,15 @@ static GSM_Error Initialise(GSM_Data *setupdata, GSM_Statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->Phone), &phone_at, sizeof(GSM_Phone));
 
-	dprintf("Initializing AT capable mobile phone ...\n");
+	fprintf(stderr, "Initializing AT capable mobile phone ...\n");
 	switch (state->Link.ConnectionType) {
 	case GCT_Serial:
 		if (!strcmp(setupdata->Model, "dancall"))
 			CBUS_Initialise(state);
+		else if (!strcmp(setupdata->Model, "AT-HW"))
+			ATBUS_Initialise(state, true);
 		else
-			ATBUS_Initialise(state);
+			ATBUS_Initialise(state, false);
 		break;
 	default:
 		return GE_NOTSUPPORTED;

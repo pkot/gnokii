@@ -17,7 +17,10 @@
   The various routines are called PHONET_(whatever).
 
   $Log$
-  Revision 1.7  2001-06-27 23:52:49  pkot
+  Revision 1.8  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.7  2001/06/27 23:52:49  pkot
   7110/6210 updates (Marian Jancar)
 
   Revision 1.6  2001/06/20 21:27:36  pkot
@@ -87,7 +90,7 @@ bool PHONET_Open()
 
 	/* Open device. */
 
-	result = device_open(glink->PortDevice, false, false, GCT_Irda);
+	result = device_open(glink->PortDevice, false, false, false, GCT_Irda);
 
 	if (!result) {
 		perror(_("Couldn't open PHONET device"));

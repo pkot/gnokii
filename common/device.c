@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.9  2001-06-28 00:28:45  pkot
+  Revision 1.10  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.9  2001/06/28 00:28:45  pkot
   Small docs updates (Pawel Kot)
 
   Revision 1.8  2001/02/21 19:56:55  chris
@@ -50,14 +53,14 @@ int device_getfd(void) {
   return device_portfd;
 }
 
-int device_open(__const char *__file, int __with_odd_parity, int __with_async, GSM_ConnectionType device_type) {
+int device_open(__const char *__file, int __with_odd_parity, int __with_async, int __with_hw_handshake, GSM_ConnectionType device_type) {
 
   devicetype=device_type;
 
   switch (devicetype) {
   case GCT_Serial:
   case GCT_Infrared:
-    device_portfd = serial_opendevice(__file, __with_odd_parity, __with_async);
+    device_portfd = serial_opendevice(__file, __with_odd_parity, __with_async, __with_hw_handshake);
     break;
   case GCT_Tekram:
     device_portfd = tekram_open(__file);

@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.7  2001-07-03 00:03:36  pkot
+  Revision 1.8  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.7  2001/07/03 00:03:36  pkot
   Small fixes to let gnokii compile and work under solaris (thanks to Artur Kubiak)
 
   Revision 1.6  2001/03/21 23:36:04  chris
@@ -123,7 +126,7 @@ int serial_close(int __fd) {
 
 /* Open a device with standard options. */
 
-int serial_opendevice(__const char *__file, int __with_odd_parity, int __with_async) {
+int serial_opendevice(__const char *__file, int __with_odd_parity, int __with_async, int __with_hw_handshake) {
 
   int fd;
   int retcode;
@@ -171,6 +174,10 @@ int serial_opendevice(__const char *__file, int __with_odd_parity, int __with_as
   }
   else
     tp.c_iflag = IGNPAR;
+  if (__with_hw_handshake)
+    tp.c_cflag |= CRTSCTS;
+  else
+    tp.c_cflag &= ~CRTSCTS;
 
   tp.c_oflag = 0;
   tp.c_lflag = 0;

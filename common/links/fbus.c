@@ -17,7 +17,10 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.9  2001-05-28 09:25:16  pkot
+  Revision 1.10  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.9  2001/05/28 09:25:16  pkot
   Fixed autodetecting of the cable type in 6110 and 7110 series. DLR-3 is
   tried first now. Seems to work ok with either 6130 or 6210.
 
@@ -115,7 +118,7 @@ bool FBUS_OpenSerial(bool dlr3)
 #ifdef WIN32
 	if (OpenConnection(glink->PortDevice, FBUS_RX_StateMachine, NULL)) {
 #else
-	if (!device_open(glink->PortDevice, false, false, GCT_Serial)) {
+	if (!device_open(glink->PortDevice, false, false, false, GCT_Serial)) {
 #endif
 		perror(_("Couldn't open FBUS device"));
 		return false;

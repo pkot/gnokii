@@ -13,7 +13,10 @@
   This code contains the main part of the 5160/6160 code.
 
   $Log$
-  Revision 1.28  2001-06-28 00:28:45  pkot
+  Revision 1.29  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.28  2001/06/28 00:28:45  pkot
   Small docs updates (Pawel Kot)
 	
 
@@ -1023,7 +1026,7 @@ bool        MB61_OpenSerial(void)
     sigaction (SIGIO, &sig_io, NULL);
 
         /* Open device MBUS uses 9600,O,1  */
-    result = device_open(PortDevice, true, true, GCT_Serial);
+    result = device_open(PortDevice, true, true, false, GCT_Serial);
 
     if (!result) {
         perror(_("Couldn't open MB61 device: "));

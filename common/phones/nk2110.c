@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.10  2001-07-17 22:46:27  pkot
+  Revision 1.11  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.10  2001/07/17 22:46:27  pkot
   Removed warning when compiling with --enable-debug (Pawel Kot)
 
   Revision 1.9  2001/06/17 16:42:59  machek
@@ -728,7 +731,7 @@ bool OpenSerial(void)
 
 	ddprintf(_("Setting MBUS communication with 2110...\n"));
 
-	result = device_open(PortDevice, true, false, GCT_Serial);
+	result = device_open(PortDevice, true, false, false, GCT_Serial);
  	if (!result) { 
 		fprintf(stderr, "Failed to open %s ...\n", PortDevice);
 		return (false);

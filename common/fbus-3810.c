@@ -13,7 +13,10 @@
   This file contains the main code for 3810 support.
 	
   $Log$
-  Revision 1.90  2001-06-28 00:40:56  pkot
+  Revision 1.91  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.90  2001/06/28 00:40:56  pkot
   8bit SMS handling in 3810 series - old structure yet (Tamas Bondar)
 
   Revision 1.89  2001/06/10 11:24:57  machek
@@ -1203,7 +1206,7 @@ bool	FB38_OpenSerial(void)
 
 	/* Open device. */
 
-	result = device_open(PortDevice, false, true, GCT_Serial);
+	result = device_open(PortDevice, false, true, false, GCT_Serial);
 
 	if (!result) {
 		perror(_("Couldn't open FB38 device"));

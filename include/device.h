@@ -13,7 +13,10 @@
   Header file device access code.
 
   $Log$
-  Revision 1.9  2001-06-28 00:28:45  pkot
+  Revision 1.10  2001-08-20 23:27:37  pkot
+  Add hardware shakehand to the link layer (Manfred Jonsson)
+
+  Revision 1.9  2001/06/28 00:28:45  pkot
   Small docs updates (Pawel Kot)
 
 
@@ -28,7 +31,7 @@
 
 int device_getfd(void);
 
-int device_open(__const char *__file, int __with_odd_parity, int __with_async, GSM_ConnectionType device_type);
+int device_open(__const char *__file, int __with_odd_parity, int __with_async, int __with_hw_handshake, GSM_ConnectionType device_type);
 void device_close(void);
 void device_reset(void);
 
