@@ -1,3 +1,22 @@
+/*
+
+   $Id$
+   
+  X G N O K I I
+
+  A Linux/Unix GUI for Nokia mobile phones.
+  Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
+  & Ján Derfiòák <ja@mail.upjs.sk>.
+
+  Released under the terms of the GNU GPL, see file COPYING for more details.
+
+   $Log$
+   Revision 1.7  2001-03-23 08:24:56  ja
+   New preview for 6210 in xgnokii's logos module.
+
+         
+*/
+          
 #include <stdio.h>
 #include <stdlib.h>
 #include <fcntl.h>
@@ -125,15 +144,45 @@ GdkPixmap *GetPreviewPixmap (GtkWidget *widget) {
   GdkBitmap *mask;
   gchar *file;
 
-  switch (previewPixmapNumber) {
-    case 1: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
-                                   "/xpm/Preview_6110.xpm"); 
-            break;
-    default: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
-                                    "/xpm/Preview_6150.xpm"); 
-             previewPixmapNumber = 0;
-             break;       
+  if (previewPixmapNumber == 0)
+  {
+    if (!strcmp (xgnokiiConfig.model, "6110") ||
+        !strcmp (xgnokiiConfig.model, "6120"))
+    {
+      file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                             "/xpm/Preview_6110.xpm");
+      previewPixmapNumber = 1;
+    }
+    else if (!strcmp (xgnokiiConfig.model, "6130") ||
+             !strcmp (xgnokiiConfig.model, "6150") ||
+             !strcmp (xgnokiiConfig.model, "616x") ||
+             !strcmp (xgnokiiConfig.model, "6185") ||
+             !strcmp (xgnokiiConfig.model, "6190"))
+    {
+      file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                             "/xpm/Preview_6150.xpm");
+      previewPixmapNumber = 2;
+    }
+    else
+    {
+      file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                             "/xpm/Preview_6210.xpm");
+      previewPixmapNumber = 3;
+    }
   }
+  else
+    switch (previewPixmapNumber)
+    {
+      case 1: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                                     "/xpm/Preview_6110.xpm"); 
+              break;
+      case 2: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                                     "/xpm/Preview_6150.xpm"); 
+              break;
+      default: file = g_strdup_printf("%s%s",xgnokiiConfig.xgnokiidir,
+                                      "/xpm/Preview_6210.xpm");
+              break;
+    }
 
   pixmap = gdk_pixmap_create_from_xpm(widget->window,&mask,
                                       &widget->style->bg[GTK_STATE_NORMAL],
@@ -595,7 +644,7 @@ void UpdateToolScreen(GtkWidget *widget, int x1, int y1, int x2, int y2) {
  */
 
 gint PreviewAreaButtonPressEvent(GtkWidget *widget, GdkEventButton *event) {
-  previewPixmapNumber++;
+  previewPixmapNumber = (previewPixmapNumber % 3) + 1;
 
   gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
                         previewPixmapWidth,previewPixmapHeight);

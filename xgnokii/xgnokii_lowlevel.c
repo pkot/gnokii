@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.14  2001-03-21 23:36:09  chris
+  Revision 1.15  2001-03-23 08:24:57  ja
+  New preview for 6210 in xgnokii's logos module.
+
+  Revision 1.14  2001/03/21 23:36:09  chris
   Added the statemachine
   This will break gnokii --identify and --monitor except for 6210/7110
 
@@ -740,10 +743,11 @@ static gint A_GetAlarm (gpointer data)
   D_Alarm *a = (D_Alarm *) data;
   GSM_Error error;
 
-  error = a->status = GE_UNKNOWN;
+  error = GE_UNKNOWN;
 
   if (a)
   {
+    a->status = GE_UNKNOWN;
     pthread_mutex_lock (&alarmMutex);
     error = a->status = GSM->GetAlarm (0, &(a->time));
     pthread_cond_signal (&alarmCond);

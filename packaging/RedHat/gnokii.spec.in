@@ -67,7 +67,7 @@ rm -rf ${RPM_BUILD_ROOT}
 /usr/bin/xgnokii
 /usr/bin/xlogos
 /usr/bin/todologo
-/usr/lib/xgnokii
+/usr/share/xgnokii
 
 %changelog
 

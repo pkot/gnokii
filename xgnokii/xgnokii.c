@@ -11,8 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.33  2001-03-19 23:43:47  pkot
-  Solaris/*BSD '#if defined' cleanup
+  Revision 1.34  2001-03-23 08:24:56  ja
+  New preview for 6210 in xgnokii's logos module.
+
+  Revision 1.33  2001/03/19 23:43:47  pkot
+  Solaris/BSD '#if defined' cleanup
 
   Revision 1.32  2001/03/13 01:21:39  pkot
   *BSD updates (Bert Driehuis)
@@ -310,7 +313,6 @@ static inline void DrawBattery (GtkWidget *data, int batterylevel)
 {
   int i;
 
-  g_print ("%d\n", batterylevel);
   if (batterylevel < 0)
     return;
   if (batterylevel > 100)
@@ -435,9 +437,9 @@ static gint Update (gpointer data)
 
   DrawBackground (data);
 
-  DrawNetwork(data, phoneMonitor.rfLevel);
+  DrawNetwork (data, phoneMonitor.rfLevel);
 
-  DrawBattery(data, phoneMonitor.batteryLevel);
+  DrawBattery (data, phoneMonitor.batteryLevel);
 
   if (phoneMonitor.alarm)
     DrawAlarm (data);
