@@ -410,10 +410,41 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 	return true;
 }
 
-API int gn_cfg_read(char **bindir)
+#define MAX_PATH_LEN 200
+API int gn_cfg_read_default(char **bindir)
 {
 	char *homedir;
-	char rcfile[200];
+	char rcfile[MAX_PATH_LEN];
+#ifdef WIN32
+	const char *globalrc = "gnokiirc";
+
+	homedir = getenv("HOMEDRIVE");
+	strncpy(rcfile, homedir ? homedir : "", MAX_PATH_LEN);
+	homedir = getenv("HOMEPATH");
+	strncat(rcfile, homedir ? homedir : "", MAX_PATH_LEN);
+	strncat(rcfile, "\\_gnokiirc", MAX_PATH_LEN);
+#else
+	const char *globalrc = "/etc/gnokiirc";
+
+	homedir = getenv("HOME");
+	if (homedir) strncpy(rcfile, homedir, MAX_PATH_LEN);
+	strncat(rcfile, "/.gnokiirc", MAX_PATH_LEN);
+#endif
+
+	/* Try opening .gnokirc from users home directory first */
+	if (gn_cfg_read(rcfile, bindir)) {
+		/* It failed so try for /etc/gnokiirc */
+		if (cfg_file_read(globalrc)) {
+			/* That failed too so exit */
+			fprintf(stderr, _("Couldn't open %s or %s.\n"), rcfile, globalrc);
+			return -1;
+		}
+	}
+	return 0;
+}
+
+API int gn_cfg_read(char *file, char **bindir)
+{
 	char *default_bindir     = "/usr/local/sbin/";
 	char *val;
 
@@ -423,40 +454,13 @@ API int gn_cfg_read(char **bindir)
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
 
-#ifdef WIN32
-	homedir = getenv("HOMEDRIVE");
-	strncpy(rcfile, homedir ? homedir : "", 200);
-	homedir = getenv("HOMEPATH");
-	strncat(rcfile, homedir ? homedir : "", 200);
-	strncat(rcfile, "\\_gnokiirc", 200);
-#else
-	homedir = getenv("HOME");
-	if (homedir) strncpy(rcfile, homedir, 200);
-	strncat(rcfile, "/.gnokiirc", 200);
-#endif
-
-#ifdef WIN32
-	/* Try opening .gnokirc from users home directory first */
-	if ((gn_cfg_info = cfg_file_read(rcfile)) == NULL) {
-		/* It failed so try for gnokiirc */
-		if ((gn_cfg_info = cfg_file_read("gnokiirc")) == NULL) {
-			/* That failed too so exit */
-			fprintf(stderr, _("Couldn't open %s or gnokiirc. Exiting now...\n"), rcfile);
-			return -1;
-		}
+	/*
+	 * Try opening a given config file
+	 */
+	if ((gn_cfg_info = cfg_file_read(file)) == NULL) {
+		fprintf(stderr, _("Couldn't open %s config file,\n"), file);
+		return -1;
 	}
-#else
-	/* Try opening .gnokirc from users home directory first */
-	if ((gn_cfg_info = cfg_file_read(rcfile)) == NULL) {
-		/* It failed so try for /etc/gnokiirc */
-		if ((gn_cfg_info = cfg_file_read("/etc/gnokiirc")) == NULL) {
-			/* That failed too so exit */
-			fprintf(stderr, _("Couldn't open %s or /etc/gnokiirc. Exiting now...\n"), rcfile);
-			return -1;
-		}
-	}
-#endif
-
 	strcpy(gn_config_default.model, "");
 	strcpy(gn_config_default.port_device, "");
 	gn_config_default.connection_type = GN_CT_Serial;
@@ -470,8 +474,10 @@ API int gn_cfg_read(char **bindir)
 	strcpy(gn_config_default.disconnect_script, "");
 	gn_config_default.rfcomm_cn = 1;
 
-	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default))
+	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default)) {
+		fprintf(stderr, _("No global section in % config file.\n"), file);
 		return -2;
+	}
 
 	/* hack to support [sms] / smsc_timeout parameter */
 	if (gn_config_global.smsc_timeout < 0) {

@@ -1,3 +1,6 @@
+* Sun May  9 2004 Pawel Kot <pkot@bezsensu.pl>
+- gn_cfg_read changed the signature
+
 * Thu Feb 19 2004 BORBELY Zoltan <bozo@andrews.hu>
 - XDEBUG eliminated, using gn_log_xdebug
 

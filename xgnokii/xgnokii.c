@@ -2310,7 +2310,7 @@ static void ReadConfig(void)
 			if ((xgnokiiConfig.locale = getenv("LANG")) == NULL)
 				xgnokiiConfig.locale = "POSIX";
 #endif
-	if (gn_cfg_read(&xgnokiiConfig.bindir) < 0) {
+	if (gn_cfg_read_default(&xgnokiiConfig.bindir) < 0) {
 		exit(-1);
 	}
 	if (!gn_cfg_phone_load("", &statemachine)) exit(-1);

@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
 
 	short_version();
 
-	if (gn_cfg_read(&BinDir) < 0) {
+	if (gn_cfg_read_default(&BinDir) < 0) {
 		exit(-1);
 	}
 	if (!gn_cfg_phone_load("", &temp_state)) exit(-1);

@@ -30,6 +30,8 @@
                                                    (Dmitry Astapov)
     o display rfcomm_channel parameter at startup  (BORBELY Zoltan)
     o fix sms timestamp export/import              (BORBELY Zoltan)
+    o allow to open other config files than /etc/gnokiirc and
+      $HOME/.gnokiirc                                   (Pawel Kot)
  * xgnokii updates
     o escape semicolons from phonebook fields in the csv output
                                                         (Pawel Kot)

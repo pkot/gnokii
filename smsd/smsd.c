@@ -321,7 +321,7 @@ static void ReadConfig (gint argc, gchar *argv[])
     exit (-2);
   }
   
-  if (gn_cfg_read (&smsdConfig.bindir) < 0)
+  if (gn_cfg_read_default(&smsdConfig.bindir) < 0)
     exit (-1);
 }
 
@@ -436,6 +436,7 @@ static void GetSMS (void)
     // Signal arrived.
     
     pthread_mutex_lock (&smsMutex);
+    phoneMonitor.sms.messages = g_slist_reverse(phoneMonitor.sms.messages);
     g_slist_foreach (phoneMonitor.sms.messages, ReadSMS, (gpointer) NULL);
     pthread_mutex_unlock (&smsMutex);
   }

@@ -5205,7 +5205,7 @@ int main(int argc, char *argv[])
 	}
 
 	/* Read config file */
-	if (gn_cfg_read(&bindir) < 0) {
+	if (gn_cfg_read_default(&bindir) < 0) {
 		exit(1);
 	}
 	if (!gn_cfg_phone_load("", &state)) exit(1);
