@@ -120,15 +120,14 @@ void SM_IncomingFunction(GSM_Statemachine *state, u8 messagetype, void *message,
 	}
 }
 
-
 /* This returns the error recorded from the phone function and indicates collection */
 GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 {
 	int c, d;
 	GSM_Error error = GE_NOTREADY;
 	
-	if (state->CurrentState==ResponseReceived) {
-		for(c = 0; c < state->NumReceived; c++)
+	if (state->CurrentState == ResponseReceived) {
+		for (c = 0; c < state->NumReceived; c++)
 			if (state->WaitingFor[c] == messagetype) {
 				error = state->ResponseError[c];
 				for(d = c + 1 ;d < state->NumReceived; d++){
@@ -155,7 +154,6 @@ GSM_Error SM_GetError(GSM_Statemachine *state, unsigned char messagetype)
 /* This does not actually wait! */
 GSM_Error SM_WaitFor(GSM_Statemachine *state, GSM_Data *data, unsigned char messagetype)
 {
-
 	/* If we've received a response, we have to call SM_GetError first */
 	if ((state->CurrentState == Startup) || (state->CurrentState == ResponseReceived))
 		return GE_NOTREADY;

@@ -16,75 +16,6 @@
 
   The various routines are called FBUS_(whatever).
 
-  $Log$
-  Revision 1.14  2001-11-27 12:19:01  pkot
-  Cleanup, indentation, ANSI complaint preprocesor symbols (Jan Kratochvil, me)
-
-  Revision 1.13  2001/11/17 20:14:15  pkot
-  Nasty bug with counting message length. Workaround applied. Needs fixing.
-
-  Revision 1.12  2001/11/15 12:04:05  pkot
-  Faster initialization for 6100 series (don't check for dlr3 cable)
-
-  Revision 1.11  2001/09/09 21:45:49  machek
-  Cleanups from Ladislav Michl <ladis@psi.cz>:
-
-  *) do *not* internationalize debug messages
-
-  *) some whitespace fixes, do not use //
-
-  *) break is unneccessary after return
-
-  Revision 1.10  2001/08/20 23:27:37  pkot
-  Add hardware shakehand to the link layer (Manfred Jonsson)
-
-  Revision 1.9  2001/05/28 09:25:16  pkot
-  Fixed autodetecting of the cable type in 6110 and 7110 series. DLR-3 is
-  tried first now. Seems to work ok with either 6130 or 6210.
-
-  Revision 1.8  2001/05/07 16:24:03  pkot
-  DLR-3P temporary fix. How should I do it better?
-
-  Revision 1.7  2001/03/22 16:17:05  chris
-  Tidy-ups and fixed gnokii/Makefile and gnokii/ChangeLog which I somehow corrupted.
-
-  Revision 1.6  2001/03/21 23:36:05  chris
-  Added the statemachine
-  This will break gnokii --identify and --monitor except for 6210/7110
-
-  Revision 1.5  2001/03/19 23:44:56  pkot
-  DLR3 cable support
-
-  Revision 1.4  2001/03/13 01:24:02  pkot
-  Code cleanup - no warnings during compilation
-
-  Revision 1.3  2001/03/13 01:23:18  pkot
-  Windows updates (Manfred Jonsson)
-
-  Revision 1.2  2001/03/11 11:18:39  machek
-  Made fbus link_dispatch (and fixed minor memory leak)
-
-  Revision 1.1  2001/02/21 19:57:06  chris
-  More fiddling with the directory layout
-
-  Revision 1.1  2001/02/16 14:29:52  chris
-  Restructure of common/.  Fixed a problem in fbus-phonet.c
-  Lots of dprintfs for Marcin
-  Any size xpm can now be loaded (eg for 7110 startup logos)
-  nk7110 code detects 7110/6210 and alters startup logo size to suit
-  Moved Marcin's extended phonebook code into gnokii.c
-
-  Revision 1.3  2001/02/06 21:15:34  chris
-  Preliminary irda support for 7110 etc.  Not well tested!
-
-  Revision 1.2  2001/02/03 23:56:14  chris
-  Start of work on irda support (now we just need fbus-irda.c!)
-  Proper unicode support in 7110 code (from pkot)
-
-  Revision 1.1  2001/01/14 22:46:59  chris
-  Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
-
-
 */
 
 /* System header files */
@@ -447,14 +378,10 @@ int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 * buffer)
 
 	out_buffer[current++] = checksum;
 
-#ifdef DEBUG
-	fprintf(stderr, _("PC: "));
-
+	dprintf("PC: ");
 	for (count = 0; count < current; count++)
-		fprintf(stderr, "%02x:", out_buffer[count]);
-
-	fprintf(stderr, "\n");
-#endif				/* DEBUG */
+		dprintf("%02x:", out_buffer[count]);
+	dprintf("\n");
 
 	/* Send it out... */
 
