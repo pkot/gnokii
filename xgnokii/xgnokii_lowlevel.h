@@ -11,7 +11,12 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.6  2001-01-17 02:54:57  chris
+  Revision 1.7  2001-01-29 15:22:22  machek
+  Use integer as bitfield instead of struct of int:1.
+
+  Be able to read phonebook saved in gnokii format from xgnokii.
+
+  Revision 1.6  2001/01/17 02:54:57  chris
   More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
   I can now edit my phonebook in xgnokii but it is 'work in progress'.
 
@@ -166,17 +171,7 @@ typedef struct {
     gchar screen4[NETMON_SCREEN_LENGTH];
     gchar screen5[NETMON_SCREEN_LENGTH];
   } netmonitor;
-  struct {
-    bool callerGroups:1;
-    bool sms:1;
-    bool netMonitor:1;
-    bool dtmf:1;
-    bool speedDial:1;
-    bool keyboard:1;
-    bool calendar:1;
-    bool data:1;
-    bool extPbk:1;
-  } supported;
+  int supported;
 } PhoneMonitor;
 
 extern pthread_t monitor_th;

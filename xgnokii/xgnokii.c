@@ -11,7 +11,12 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.29  2001-01-15 21:10:20  ja
+  Revision 1.30  2001-01-29 15:22:20  machek
+  Use integer as bitfield instead of struct of int:1.
+
+  Be able to read phonebook saved in gnokii format from xgnokii.
+
+  Revision 1.29  2001/01/15 21:10:20  ja
   Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
 
   Revision 1.28  2000/12/20 11:49:25  ja
@@ -217,7 +222,7 @@ void GUI_InitCallerGroupsInf (void)
   xgnokiiConfig.callerGroups[4] = g_strndup( _("Other"), MAX_CALLER_GROUP_LENGTH);
   xgnokiiConfig.callerGroups[5] = g_strndup( _("No group"), MAX_CALLER_GROUP_LENGTH);
 
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
     for (i = 0; i < 5; i++)
     {
       cg = (D_CallerGroup *) g_malloc (sizeof (D_CallerGroup));
@@ -744,7 +749,7 @@ void GUI_ShowOptions (void)
   g_free (alarm);  
 
   /* SMS */
-  if (phoneMonitor.supported.sms)
+  if (phoneMonitor.supported & PM_SMS)
   {
     gtk_widget_show (sms_option_frame);
     GUI_InitSMSSettings ();
@@ -754,7 +759,7 @@ void GUI_ShowOptions (void)
 
 
   /* BUSINESS CARD */
-  if (phoneMonitor.supported.sms)
+  if (phoneMonitor.supported & PM_SMS)
   {
     gtk_widget_show (user_option_frame);
 
@@ -780,7 +785,7 @@ void GUI_ShowOptions (void)
 
 
   /* Groups */
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
   {
     gtk_widget_show (cg_names_option_frame);
     GUI_InitCallerGroupsInf ();
@@ -791,7 +796,7 @@ void GUI_ShowOptions (void)
     gtk_widget_hide (cg_names_option_frame);
 
   /* Mail */
-  if (phoneMonitor.supported.sms)
+  if (phoneMonitor.supported & PM_SMS)
   {
     gtk_widget_show (mail_option_frame);
     gtk_entry_set_text (GTK_ENTRY (configDialogData.mailbox),
@@ -837,37 +842,37 @@ static void ShowMenu (GdkEventButton *event)
 {
   GdkEventButton *bevent = (GdkEventButton *) event;
 
-  if (phoneMonitor.supported.keyboard)
+  if (phoneMonitor.supported & PM_KEYBOARD)
     gtk_widget_show (xkeyb_menu_item);
   else
     gtk_widget_hide (xkeyb_menu_item);
 
-  if (phoneMonitor.supported.netMonitor)
+  if (phoneMonitor.supported & PM_NETMONITOR)
     gtk_widget_show (netmon_menu_item);
   else
     gtk_widget_hide (netmon_menu_item);
 
-  if (phoneMonitor.supported.sms)
+  if (phoneMonitor.supported & PM_SMS)
     gtk_widget_show (sms_menu_item);
   else
     gtk_widget_hide (sms_menu_item);
 
-  if (phoneMonitor.supported.calendar)
+  if (phoneMonitor.supported & PM_CALENDAR)
     gtk_widget_show (calendar_menu_item);
   else
     gtk_widget_hide (calendar_menu_item);
 
-  if (phoneMonitor.supported.dtmf)
+  if (phoneMonitor.supported & PM_DTMF)
     gtk_widget_show (dtmf_menu_item);
   else
     gtk_widget_hide (dtmf_menu_item);
 
-  if (phoneMonitor.supported.speedDial)
+  if (phoneMonitor.supported & PM_SPEEDDIAL)
     gtk_widget_show (speedDial_menu_item);
   else
     gtk_widget_hide (speedDial_menu_item);
   
-  if (phoneMonitor.supported.data)
+  if (phoneMonitor.supported & PM_DATA)
     gtk_widget_show (data_menu_item);
   else
     gtk_widget_hide (data_menu_item);
@@ -901,7 +906,7 @@ static gint ButtonPressEvent (GtkWidget *widget, GdkEventButton *event)
     else if (event->x >= 190 && event->x <= 210 &&
              event->y >=  70 && event->y <= 85)
     {
-      if (!phoneMonitor.supported.sms)
+      if (!phoneMonitor.supported & PM_SMS)
         phoneMonitor.working = _("SMS not supported!");
       else
         GUI_ShowSMS ();
@@ -909,7 +914,7 @@ static gint ButtonPressEvent (GtkWidget *widget, GdkEventButton *event)
     else if (event->x >= 235 && event->x <= 248 &&
              event->y >=  27 && event->y <= 75) 
     {
-      if (!phoneMonitor.supported.calendar)
+      if (!phoneMonitor.supported & PM_CALENDAR)
         phoneMonitor.working = _("Calendar not supported!");
       else
         GUI_ShowCalendar ();
@@ -960,7 +965,7 @@ static void OptionsApplyCallback (GtkWidget *widget, gpointer data )
   }
 
   /* SMS */
-  if (phoneMonitor.supported.sms)         
+  if (phoneMonitor.supported & PM_SMS)         
   {
     for (i = 0; i < xgnokiiConfig.smsSets; i++)
       xgnokiiConfig.smsSetting[i] = configDialogData.sms.smsSetting[i];
@@ -968,7 +973,7 @@ static void OptionsApplyCallback (GtkWidget *widget, gpointer data )
   }
 
   /* BUSINESS CARD */
-  if (phoneMonitor.supported.sms)
+  if (phoneMonitor.supported & PM_SMS)
   {
     g_free(xgnokiiConfig.user.name);
     xgnokiiConfig.user.name = g_strdup (gtk_entry_get_text(GTK_ENTRY (configDialogData.user.name)));
@@ -987,7 +992,7 @@ static void OptionsApplyCallback (GtkWidget *widget, gpointer data )
   }
 
   /* GROUPS */
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
   {
     for ( i = 0; i < 6; i++)
     {
@@ -1001,7 +1006,7 @@ static void OptionsApplyCallback (GtkWidget *widget, gpointer data )
   }
 
   /* Mail */
-  if (phoneMonitor.supported.sms)         
+  if (phoneMonitor.supported & PM_SMS)         
   {
     g_free(xgnokiiConfig.mailbox);
     xgnokiiConfig.mailbox = g_strdup (gtk_entry_get_text(GTK_ENTRY (configDialogData.mailbox)));
@@ -1033,7 +1038,7 @@ static void OptionsSaveCallback (GtkWidget *widget, gpointer data )
     GUI_InsertEvent (e);
   }
 
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
   {
     cg = (D_CallerGroup *) g_malloc (sizeof (D_CallerGroup));
     cg->number = 0;

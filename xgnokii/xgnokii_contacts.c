@@ -373,7 +373,7 @@ because you save it into SIM memory!"));
     clist_row[2] = "P";
   else
     clist_row[2] = "S";
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
     clist_row[3] = xgnokiiConfig.callerGroups[((EditEntryData*) data)->pbEntry->entry.Group];
   else
     clist_row[3] = "";
@@ -565,7 +565,7 @@ because you save it into SIM memory!"));
     clist_row[2] = "P";
   else
     clist_row[2] = "S";
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
     clist_row[3] = xgnokiiConfig.callerGroups[((EditEntryData*) data)->pbEntry->entry.Group];
   else
     clist_row[3] = "";
@@ -664,7 +664,7 @@ static void OkChangeEntryDialog( GtkWidget *widget, gpointer data)
       clist_row[2] = "P";
     else
       clist_row[2] = "S";
-    if (phoneMonitor.supported.callerGroups)
+    if (phoneMonitor.supported & PM_CALLERGROUP)
       clist_row[3] = xgnokiiConfig.callerGroups[newPbEntry->entry.Group];
     else
       clist_row[3] = "";
@@ -879,7 +879,7 @@ static void CreateEditDialog( EditEntryData *editEntryData, gchar *title,
   gtk_widget_show (editEntryData->number);
 
 
-  if (phoneMonitor.supported.extPbk) {
+  if (phoneMonitor.supported & PM_EXTPBK) {
 
     hbox = gtk_hbox_new (FALSE, 0);
     gtk_container_add (GTK_CONTAINER (GTK_DIALOG (editEntryData->dialog)->vbox), hbox);
@@ -946,7 +946,7 @@ static void EditPbEntry(PhonebookEntry *pbEntry, gint row)
 
   gtk_entry_set_text (GTK_ENTRY (editEditEntryData.number), pbEntry->entry.Number);
 
-  if (phoneMonitor.supported.extPbk) {
+  if (phoneMonitor.supported & PM_EXTPBK) {
     /* Clear the list */
     gtk_list_clear_items(GTK_LIST(GTK_COMBO(editEditEntryData.extended)->list),0,-1);
 
@@ -997,7 +997,7 @@ static void EditPbEntry(PhonebookEntry *pbEntry, gint row)
   gtk_option_menu_set_history( GTK_OPTION_MENU (editEditEntryData.group),
                                pbEntry->entry.Group);
 
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
   {
     gtk_widget_show (editEditEntryData.group);
     gtk_widget_show (editEditEntryData.groupLabel);
@@ -1085,7 +1085,7 @@ void NewPbEntry(PhonebookEntry *pbEntry)
   gtk_option_menu_set_history( GTK_OPTION_MENU (newEditEntryData.group),
                                pbEntry->entry.Group);
 
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
   {
     gtk_widget_show (newEditEntryData.group);
     gtk_widget_show (newEditEntryData.groupLabel);
@@ -1124,7 +1124,7 @@ void DuplicatePbEntry (PhonebookEntry *pbEntry)
   gtk_option_menu_set_history( GTK_OPTION_MENU (duplicateEditEntryData.group),
                                pbEntry->entry.Group);
 
-  if (phoneMonitor.supported.callerGroups)
+  if (phoneMonitor.supported & PM_CALLERGROUP)
   {
     gtk_widget_show (duplicateEditEntryData.group);
     gtk_widget_show (duplicateEditEntryData.groupLabel);
@@ -1848,7 +1848,7 @@ void GUI_RefreshContacts (void)
         row[2] = "P";
       else
         row[2] = "S";
-      if (phoneMonitor.supported.callerGroups)
+      if (phoneMonitor.supported & PM_CALLERGROUP)
         row[3] = xgnokiiConfig.callerGroups[pbEntry->entry.Group];
       else
         row[3] = "";
@@ -2143,7 +2143,7 @@ inline void GUI_ShowContacts (void)
     GUI_Refresh ();
     GUI_InitCallerGroupsInf ();
   }
-  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, phoneMonitor.supported.callerGroups);
+  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, phoneMonitor.supported & PM_CALLERGROUP);
   GUI_RefreshContacts ();
   gtk_widget_show (GUI_ContactsWindow);
 //  if (!contactsMemoryInitialized)
@@ -2359,15 +2359,15 @@ static bool ParseLine (GSM_PhonebookEntry *entry, gint *num, gchar *buf)
   buf = buf + i + 1;
   i = 0;
 
-  if (*buf == 'B')
-    entry->MemoryType = GMT_ME;
-  else if (*buf == 'A')
-    entry->MemoryType = GMT_SM;
+  if (!strncmp(buf, "B;", 2)) { entry->MemoryType = GMT_ME; buf += 2; }
+  else
+  if (!strncmp(buf, "A;", 2)) { entry->MemoryType = GMT_SM; buf += 2; }
+  else
+  if (!strncmp(buf, "ME;", 3)) { entry->MemoryType = GMT_ME; buf += 3; }
+  else
+  if (!strncmp(buf, "SM;", 3)) { entry->MemoryType = GMT_SM; buf += 3; }
   else
     return FALSE;
-  if (buf[1] != ';')
-      return FALSE;
-  buf = buf + 2;
 
   len = strlen (buf);
   while (i < len && i < 4 && buf[i] != ';')
@@ -2867,7 +2867,7 @@ SelectContactData *GUI_SelectContactDialog (void)
   gtk_clist_set_column_width (GTK_CLIST(selectContactData.clist), 1, 115);
   gtk_clist_set_column_width (GTK_CLIST(selectContactData.clist), 3, 70);
   gtk_clist_set_column_justification (GTK_CLIST(selectContactData.clist), 2, GTK_JUSTIFY_CENTER);
-  gtk_clist_set_column_visibility (GTK_CLIST(selectContactData.clist), 3, phoneMonitor.supported.callerGroups);
+  gtk_clist_set_column_visibility (GTK_CLIST(selectContactData.clist), 3, phoneMonitor.supported & PM_CALLERGROUP);
 
   for (i = 0; i < 4; i++)
   {
@@ -2921,7 +2921,7 @@ SelectContactData *GUI_SelectContactDialog (void)
         row[2] = "P";
       else
         row[2] = "S";
-      if (phoneMonitor.supported.callerGroups)
+      if (phoneMonitor.supported & PM_CALLERGROUP)
         row[3] = xgnokiiConfig.callerGroups[pbEntry->entry.Group];
       else
         row[3] = "";
@@ -3117,7 +3117,7 @@ void GUI_CreateContactsWindow (void)
   gtk_clist_set_column_width (GTK_CLIST (clist), 1, 115);
   gtk_clist_set_column_width (GTK_CLIST (clist), 3, 70);
   gtk_clist_set_column_justification (GTK_CLIST (clist), 2, GTK_JUSTIFY_CENTER);
-//  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, phoneMonitor.supported.callerGroups);
+//  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, phoneMonitor.supported & PM_CALLERGROUP);
 
   for (i = 0; i < 4; i++)
   {

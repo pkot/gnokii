@@ -52,7 +52,7 @@ static void UpdateStatus (void)
 
 inline void GUI_ShowData (void)
 {
-  if (!phoneMonitor.supported.data)
+  if (!phoneMonitor.supported & PM_DATA)
     return;
     
   if (TerminateThread)

@@ -843,7 +843,7 @@ void GetLogoEvent(GtkWidget *widget) {
   data->bitmap = &bitmap;
   e->event = Event_GetBitmap;
   e->data = data;
-  if (phoneMonitor.supported.callerGroups) {
+  if (phoneMonitor.supported & PM_CALLERGROUP) {
     for (i = 0;i < 6;i++) 
       if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(callerCombo)->entry)),
                  xgnokiiConfig.callerGroups[i]) == 0) bitmap.number = i; 
@@ -883,7 +883,7 @@ void SetLogoEvent(GtkWidget *widget) {
     /* above condition must be there, because if you launch logos before
      * callerGroups are available, you will see segfault - callerGroups not initialized 
      */
-    if (phoneMonitor.supported.callerGroups) {
+    if (phoneMonitor.supported & PM_CALLERGROUP) {
       for (i = 0;i < 6;i++) 
         if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(callerCombo)->entry)),
                    xgnokiiConfig.callerGroups[i]) == 0) bitmap.number = i; 
@@ -1089,7 +1089,7 @@ gint LogoTypeEvent(GtkWidget *widget) {
   }
 
   /* has phone support for callerGroups? */
-  if (phoneMonitor.supported.callerGroups) {
+  if (phoneMonitor.supported & PM_CALLERGROUP) {
     if (GTK_TOGGLE_BUTTON(buttonCaller)->active && bitmap.type != GSM_CallerLogo) {
       /* previous was startup? clear and draw batteries, signal, ... */      
       if (bitmap.type == GSM_StartupLogo) clear = 1;
@@ -1585,7 +1585,7 @@ void GUI_RefreshLogosGroupsCombo (void) {
 
 void GUI_ShowLogosWindow (void) {
   /* if phone support caller groups, read callerGroups names */
-  if (phoneMonitor.supported.callerGroups) {
+  if (phoneMonitor.supported & PM_CALLERGROUP) {
     if (xgnokiiConfig.callerGroups[0] == NULL) {
       GUI_Refresh(); 
       GUI_InitCallerGroupsInf ();

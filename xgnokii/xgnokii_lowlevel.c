@@ -11,7 +11,12 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.10  2001-01-17 02:54:56  chris
+  Revision 1.11  2001-01-29 15:22:20  machek
+  Use integer as bitfield instead of struct of int:1.
+
+  Be able to read phonebook saved in gnokii format from xgnokii.
+
+  Revision 1.10  2001/01/17 02:54:56  chris
   More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
   I can now edit my phonebook in xgnokii but it is 'work in progress'.
 
@@ -110,15 +115,7 @@ static void InitModelInf (void)
     if (phoneMonitor.phone.model == NULL)
       phoneMonitor.phone.model = g_strdup (_("unknown"));
 
-    phoneMonitor.supported.callerGroups = CallerGroupSupported (buf);
-    phoneMonitor.supported.netMonitor = NetmonitorSupported (buf);
-    phoneMonitor.supported.sms = SMSSupported (buf);
-    phoneMonitor.supported.dtmf = DTMFSupported (buf);
-    phoneMonitor.supported.speedDial = SpeedDialSupported (buf);
-    phoneMonitor.supported.keyboard = KeyboardSupported (buf);
-    phoneMonitor.supported.calendar = CalendarSupported (buf);
-    phoneMonitor.supported.data = DataSupported (buf);
-    phoneMonitor.supported.extPbk = ExtPbkSupported (buf);
+    phoneMonitor.supported = GetPhoneModel(buf)->flags;
   }
 
   i = 0;
@@ -195,14 +192,7 @@ void GUI_InitPhoneMonitor (void)
   phoneMonitor.phone.version = phoneMonitor.phone.model;
   phoneMonitor.phone.revision = g_strdup (_("unknown"));
   phoneMonitor.phone.imei = g_strdup (_("unknown"));
-  phoneMonitor.supported.callerGroups = FALSE;
-  phoneMonitor.supported.netMonitor = FALSE;
-  phoneMonitor.supported.sms = FALSE;
-  phoneMonitor.supported.dtmf = FALSE;
-  phoneMonitor.supported.speedDial = FALSE;
-  phoneMonitor.supported.keyboard = FALSE;
-  phoneMonitor.supported.calendar = FALSE;
-  phoneMonitor.supported.data = FALSE;
+  phoneMonitor.supported = 0;
   phoneMonitor.rfLevel = phoneMonitor.batteryLevel = -1;
   phoneMonitor.powerSource = GPS_BATTERY;
   phoneMonitor.working = NULL;
