@@ -55,6 +55,10 @@
 #  include <stdint.h>
 #endif
 
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+
 /*
  * The following ifdef block is the standard way of creating macros which make
  * exporting from a DLL simpler. All files within this DLL are compiled with 

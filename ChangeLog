@@ -1,3 +1,8 @@
+0.5.0 (not released yet)
+ * general updates
+    o include <sys/types.h> in compat.h -- should cleanup
+      compilation on some systems (eg OpenBSD)           (Pawel Kot)
+
 0.5.0rc3
 ========
  * general updates
