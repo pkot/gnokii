@@ -156,7 +156,7 @@ gn_country countries[] = {
 
 gn_network networks[] = {
 	{ "202 01", "Cosmote" },
-	{ "202 05", "PANAFON" },
+	{ "202 05", "Vodafone (PANAFON)" },
 	{ "202 10", "TELESTET" },
 	{ "204 04", "Vodafone" },
 	{ "204 08", "KPN Mobile" },
