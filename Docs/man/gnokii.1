@@ -1,16 +1,16 @@
-.TH "gnokii" "1" "July 15, 2000" "" "Gnokii"
+.TH "gnokii" "1" "January 31, 2004" "Pawel Kot" "Gnokii"
 .SH "NAME"
-gnokii \- modem/fax driver for Nokia mobile phones
+gnokii \- modem/fax driver for the mobile phones
 .SH "SYNOPSIS"
 .B gnokii
 \fIOPTION\fR [\fIARGUMENT\fR]...
 .SH "DESCRIPTION"
 .PP 
 .B gnokii
-is a Linux/Unix tool suite and (eventually) modem/fax driver for Nokia mobile phones, released under the GPL.
+is a multiple systems tool suite and (eventually) modem/fax driver for the mobile phones.
 .PP 
-.B gnokii
-supports most of the Nokia mobiles including 6100 series, 7110/6210/6250, and some recent models as 6310. It supports also the phones that are capable to understand AT commands. Tested AT phones are: Nokia 7110/6210/6250/6310/6510/8210, Siemens S25, Siemens SL45i, Ericsson T39, SonyEricsson T68i.
+.B gnokii 
+at the beginning was designed to support Nokia phones. At the moment it supports most of the Nokia mobiles including 6100 series (models like 6110 or 5110), 7110 series (models like 7110 or 6210) and 6510 series (models like 6310 or 6510). The most recent models as Nokia 7650 are not yet fully supported but we're working on it. At the moment it also supports also the phones that are capable to understand AT commands. Tested AT phones are: Nokia 7110/6210/6250/6310(i)/6510/8210/9210/7650/3650, Siemens S25/SL45i/C55/M55/S55, Ericsson T39, SonyEricsson T68i, Bosch 908/909 and Motorola Timeport P7389i.
 
 .SH "OPTIONS"
 The options that are recognized by
@@ -68,7 +68,7 @@ get the notes with numbers from \fIstart\fR to \fIend\fR from calendar.
 .TP 
 .BR "\-\-writetodo \fIvCalendarfile \fInumber"
 write the notes to ToDo list.
-.PP
+.PP 
 number \- location of the note in the vCalendar file
 .TP 
 .BR "\-\-deletealltodos"
@@ -116,7 +116,7 @@ Meaning of other optional parameters:
 .PP 
 [\-\-long \fIn\fR] \- send no more then \fIn\fR characters, default is 160
 .TP 
-.BR "\-\-savesms [--sender \fIfrom\fP] [--smsc \fImessage_center_number\fP | --smscno \fImessage_center_index\fP] [--folder \fIfolder_id\fP] [--location \fInumber\fP] [--sent | --read] [--deliver]"
+.BR "\-\-savesms [\-\-sender \fIfrom\fP] [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-\-folder \fIfolder_id\fP] [\-\-location \fInumber\fP] [\-\-sent | \-\-read] [\-\-deliver]"
 saves SMS messages to phone. Messages are read from STDIN. You can specify the following optional arguments:
 .PP 
 [\-\-sender] \- set the sender number (only \fI\-\-deliver\fP)
@@ -169,15 +169,15 @@ set the \fIrtttlfile\fR as ringtone (on 6110).
 
 .SS PHONEBOOK
 .TP 
-.BR "\-\-getphonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP] [\fI-r|--raw\fP]"
+.BR "\-\-getphonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP] [\fI\-r|\-\-raw\fP]"
 reads specificed memory location from phone.
 If [\fIend_number\fR] is not specified only one location \- [\fIstart\fR] is
 read.
 If instead of [\fIend_number\fR] the text \fIend\fR is specified then gnokii
-will read from \fIstart_number\fR until it encounters a non-existant location.
+will read from \fIstart_number\fR until it encounters a non\-existant location.
 Valid \fImemory types\fR are: ME, SM, FD, ON, EN, DC, RC, MC, LD.
-You can use also \fI-r\fR or \rI--raw\fR switch to get the raw output. You can
-use it then with \fI--writephonebook\fR. Normally you got verbose output.
+You can use also \fI\-r\fR or \rI\-\-raw\fR switch to get the raw output. You can
+use it then with \fI\-\-writephonebook\fR. Normally you got verbose output.
 .TP 
 .BR "\-\-writephonebook [\-i]"
 reads data from stdin and writes to phonebook
@@ -185,23 +185,23 @@ When \-i option is used, refuses to overwrite existing entries.
 Uses the same format as provided by the output of the getphonebook command.
 
 .SS WAP
-.TP
+.TP 
 .BR "\-\-getwapbookmark \fInumber\fP"
 reads the specified WAP bookmark from phone
-.TP
+.TP 
 .BR "\-\-writewapbookmark \fIname\fP \fIURL\fP"
 write WAP bookmark to phone
-.TP
+.TP 
 .BR "\-\-deletewapbookmark \fInumber\fP"
 delete WAP bookmark from phone
-.TP
-.BR "\-\-getwapsetting \fInumber\fP [\fI-r\fP]"
+.TP 
+.BR "\-\-getwapsetting \fInumber\fP [\fI\-r\fP]"
 read WAP setting from phone
-.TP
+.TP 
 .BR "\-\-writewapsetting"
 reads data from stdin and writes it to phone
-Hint: see syntax from \fI--writephone\fP \fI-r\fP option
-.TP
+Hint: see syntax from \fI\-\-writephone\fP \fI\-r\fP option
+.TP 
 .BR "\-\-activatewapsetting \fInumber\fP"
 activate WAP setting \fInumber\fP
 
@@ -226,14 +226,14 @@ shows the currently set security code.
 .SS SECURITY
 .TP 
 .BR "\-\-identify"
-get IMEI, model and revision.
+get manufacturer, IMEI, model and revision.
 .TP 
 .BR "\-\-entersecuritycode {\fIPIN\fP|\fIPIN2\fP|\fIPUK\fP|\fIPUK2\fP}"
 asks for the code and sends it to the phone.
-.TP
+.TP 
 .BR "\-\-getsecuritycodestatus"
 show if a security code is needed.
-.TP
+.TP 
 .BR "\-\-getlocksinfo"
 show information about the (sim)locks of the phone:
 the lock data, whether a lock is open or closed, whether it is a user or
@@ -242,22 +242,21 @@ factory lock and the number of unlock attempts.
 .SH "DIAGNOSTICS"
 Various error messages are printed to standard error.  The exit code
 is 0 for correct functioning.  Errors which appear to be caused by
-invalid or abused command line parameters cause an exit code of 2, and
-other errors cause an exit code of 1.
+invalid or abused command line parameters cause an exit code of 2, and other errors cause an exit code of 1.
 
 .SH "BUGS"
 .PP 
-We write quality software here ;)
+We write quality software here ;) but see KNOWN_BUGS just in case. If you'd like to send us the bugreport please read the README and Bugs files.
 
 .SH "AUTHOR"
-Hugh Blemings <hugh@blemings.org> and Pavel Janik ml. <Pavel.Janik@suse.cz>
+Hugh Blemings <hugh@blemings.org>, Pavel Janik ml. <Pavel.Janik@suse.cz> and Pawel Kot <pkot@linuxnews.pl>
 
 Manual page written by Dag Wieers <dag@mind.be> and Pawel Kot <pkot@linuxnews.pl>
 
 See also Docs/CREDITS from Gnokii sources.
 
 .SH "COPYING"
-This program is distributed under the GNU Public License.
+This program is distributed under the GNU Public License Version 2.
 
 .SH "SEE ALSO"
-gnokiid, xgnokii
+gnokiid, xgnokii, mgnokiidev, ppm2nokia, sendsms, todologo

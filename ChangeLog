@@ -8,6 +8,7 @@
     o don't say that gnokii is Nokia only in the spec file
                                                         (Pawel Kot)
     o also we are not Linux/Unix only                   (Pawel Kot)
+    o update manpage                                    (Pawel Kot)
  * build system updates
     o update spec file to install all libs              (Pawel Kot)
     o sync Debian build files with Debian mainstream package
