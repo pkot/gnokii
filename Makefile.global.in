@@ -26,7 +26,9 @@ bindir         = @bindir@
 sbindir        = @sbindir@
 libdir         = @libdir@/${PACKAGE}
 xgnokii_libdir = @XGNOKIIDIR@/@XPACKAGE@
-mandir         = @mandir@/man1/
+man1dir        = @mandir@/man1/
+man8dir        = @mandir@/man8/
+xmandir        = ${prefix}/X11R6/man/man1/
 docdir         = ${prefix}/doc/${PACKAGE}
 locdir         = @datadir@/locale
 
@@ -55,6 +57,7 @@ XPM_CFLAGS     = @XPM_CFLAGS@
 OWN_GETOPT     = @OWN_GETOPT@
 
 USE_NLS        = @USE_NLS@
+HAVE_XGNOKII   = @HAVE_XGNOKII@
 
 #
 # Global include directory

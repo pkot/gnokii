@@ -432,6 +432,7 @@ PACKAGE=gnokii
 XPACKAGE=xgnokii
 VERSION=`cat VERSION`
 XVERSION=`cat xgnokii/VERSION`
+HAVE_XGNOKII=$x_support
 
 case "$INSTALL" in
   'config/install-sh -c') INSTALL=`pwd`/$INSTALL
@@ -465,6 +466,7 @@ AC_SUBST(XPM_CFLAGS)
 AC_SUBST(XPM_LIBS)
 AC_SUBST(OWN_GETOPT)
 AC_SUBST(USE_UNIX98PTYS)
+AC_SUBST(HAVE_XGNOKII)
 
 AC_OUTPUT(
    include/config.h.in
