@@ -628,9 +628,9 @@ static GSM_Error AT_WriteSMS(GSM_Data *data, GSM_Statemachine *state, unsigned c
 	req2[offset + 5] = data->RawSMS->DCS;
 	req2[offset + 6] = 0xaa; /* Validity period */
 	req2[offset + 7] = data->RawSMS->Length;
-	memcpy(req2 + offset + 8, data->RawSMS->UserData, data->RawSMS->Length);
+	memcpy(req2 + offset + 8, data->RawSMS->UserData, data->RawSMS->UserDataLength);
 
-	length = data->RawSMS->Length + offset + 8;
+	length = data->RawSMS->UserDataLength + offset + 8;
 
 	/* Length in AT mode is the length of the full message minus SMSC field length */
 	sprintf(req, "AT+%s=%d\r", cmd, length - data->RawSMS->MessageCenter[0] - 1);
