@@ -35,21 +35,34 @@
 
 */
 
+#include "config.h"
 #include "misc.h"
 #include "compat.h"
 
 #include <stdio.h>
-#include <stdlib.h>
+#ifdef HAVE_STDLIB_H
+#  include <stdlib.h>
+#endif
 #include <signal.h>
-#include <string.h>
+#ifdef HAVE_STRING_H
+#  include <string.h>
+#endif
 #ifdef HAVE_STRINGS_H
 #  include <strings.h>	/* for memset */
 #endif
 #include <time.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <ctype.h>
-#include <limits.h>
+#ifdef HAVE_SYS_TYPES_H
+#  include <sys/types.h>
+#endif
+#ifdef HAVE_SYS_STAT_H
+#  include <sys/stat.h>
+#endif
+#ifdef HAVE_CTYPE_H
+#  include <ctype.h>
+#endif
+#ifdef HAVE_LIMITS_H
+#  include <limits.h>
+#endif
 
 
 #ifdef WIN32
