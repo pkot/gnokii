@@ -29,9 +29,11 @@
 
 */
 
-#ifndef __ateric_h_
-#define __ateric_h_
+#ifndef _gnokii_ateric_h
+#define _gnokii_ateric_h
 
-void AT_InitEricsson(GSM_Statemachine *state, char* foundmodel, char* setupmodel);
+#include "gnokii-internal.h"
+
+void at_ericsson_init(struct gn_statemachine *state, char* foundmodel, char* setupmodel);
 
 #endif

@@ -29,9 +29,11 @@
 
 */
 
-#ifndef __atnok_h_
-#define __atnok_h_
+#ifndef _gnokii_atnok_h
+#define _gnokii_atnok_h
 
-void AT_InitNokia(GSM_Statemachine *state, char* foundmodel, char* setupmodel);
+#include "gnokii-internal.h"
+
+void at_nokia_init(struct gn_statemachine *state, char* foundmodel, char* setupmodel);
 
 #endif

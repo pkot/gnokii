@@ -42,21 +42,21 @@
 #include "links/atbus.h"
 
 
-static gn_error GetMemoryStatus(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error ret;
 	
-	ret = AT_SetMemoryType(data->MemoryStatus->MemoryType, state);
+	ret = AT_SetMemoryType(data->memory_status->memory_type, state);
 	if (ret)
 		return ret;
-	if (SM_SendMessage(state, 11, GOP_GetMemoryStatus, "AT+CPBR=?\r\n"))
+	if (sm_send_message(state, 11, GN_OP_GetMemoryStatus, "AT+CPBR=?\r\n"))
 		return GN_ERR_NOTREADY;
-	return SM_Block(state, data, GOP_GetMemoryStatus);
+	return SM_Block(state, data, GN_OP_GetMemoryStatus);
 }
 
-static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, GSM_Data *data, GSM_Statemachine *state)
+static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
-	AT_LineBuffer buf;
+	at_line_buffer buf;
 	char *pos;
 
 	buf.line1 = buffer;
@@ -64,12 +64,12 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 	splitlines(&buf);
 	if (buf.line1 == NULL)
 		return GN_ERR_INVALIDMEMORYTYPE;
-	if (data->MemoryStatus) {
+	if (data->memory_status) {
 		if (strstr(buf.line2, "+CPBR")) {
 			pos = strchr(buf.line2, '-');
 			if (pos) {
-				data->MemoryStatus->Used = atoi(++pos);
-				data->MemoryStatus->Free = 0;
+				data->memory_status->used = atoi(++pos);
+				data->memory_status->free = 0;
 			} else {
 				return GN_ERR_NOTSUPPORTED;
 			}
@@ -78,8 +78,8 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 	return GN_ERR_NONE;
 }
 
-void AT_InitEricsson(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
+void at_init_ericsson(struct gn_statemachine *state, char *foundmodel, char *setupmodel)
 {
-	AT_InsertRecvFunction(GOP_GetMemoryStatus, ReplyMemoryStatus, state);
-	AT_InsertSendFunction(GOP_GetMemoryStatus, GetMemoryStatus, state);
+	at_insert_recv_function(GN_OP_GetMemoryStatus, ReplyMemoryStatus, state);
+	at_insert_send_function(GN_OP_GetMemoryStatus, GetMemoryStatus, state);
 }

@@ -29,9 +29,11 @@
 
 */
 
-#ifndef __atbosch_h_
-#define __atbosch_h_
+#ifndef _gnokii_atbosch_h
+#define _gnokii_atbosch_h
 
-void AT_InitBosch(GSM_Statemachine *state, char* foundmodel, char* setupmodel);
+#include "gnokii-internal.h"
+
+void at_bosch_init(struct gn_statemachine *state, char* foundmodel, char* setupmodel);
 
 #endif

@@ -42,27 +42,27 @@
 #include "links/atbus.h"
 
 
-static AT_SendFunctionType writephonebook;
+static at_send_function_type writephonebook;
 
-static gn_error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
+static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 {
-	GSM_PhonebookEntry newphone;
+	gn_phonebook_entry newphone;
 	char *rptr, *wptr;
 
 	if (writephonebook == NULL)
 		return GN_ERR_UNKNOWN;
-	if (data->PhonebookEntry != NULL) {
-		memcpy(&newphone, data->PhonebookEntry, sizeof(GSM_PhonebookEntry));
-		rptr = data->PhonebookEntry->Name;
-		wptr = newphone.Name;
-		data->PhonebookEntry = &newphone;
+	if (data->phonebook_entry != NULL) {
+		memcpy(&newphone, data->phonebook_entry, sizeof(gn_phonebook_entry));
+		rptr = data->phonebook_entry->name;
+		wptr = newphone.name;
+		data->phonebook_entry = &newphone;
 	}
 	return (*writephonebook)(data, state);
 }
 
-void AT_InitSiemens(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
+void at_init_siemens(struct gn_statemachine *state, char *foundmodel, char *setupmodel)
 {
 	/* names for s35 etc must be escaped */
 	if (foundmodel && !strncasecmp("35", foundmodel + 1, 2))
-		writephonebook = AT_InsertSendFunction(GOP_WritePhonebook, WritePhonebook, state);
+		writephonebook = at_insert_send_function(GN_OP_WritePhonebook, WritePhonebook, state);
 }

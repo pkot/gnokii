@@ -29,9 +29,11 @@
 
 */
 
-#ifndef __atsie_h_
-#define __atsie_h_
+#ifndef _gnokii_atsie_h_
+#define _gnokii_atsie_h_
 
-void AT_InitSiemens(GSM_Statemachine *state, char* foundmodel, char* setupmodel);
+#include "gsm-data.h"
+
+void at_siemens_init(struct gn_statemachine *state, char* foundmodel, char* setupmodel);
 
 #endif

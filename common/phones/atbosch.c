@@ -31,42 +31,39 @@
 
 #include <string.h>
 #include <stdlib.h>
-#include <ctype.h>
 
-#include "misc.h"
-#include "gsm-common.h"
-#include "gsm-statemachine.h"
+#include "gnokii-internal.h"
 #include "phones/generic.h"
 #include "phones/atgen.h"
 #include "phones/atbosch.h"
 #include "links/atbus.h"
 
 
-static gn_error GetCharset(GSM_Data *data, GSM_Statemachine *state)
+static gn_error GetCharset(gn_data *data, struct gn_statemachine *state)
 {
 	AT_DRVINST(state)->charset = CHARGSM;
-	strcpy(data->Model, "GSM");
+	strcpy(data->model, "GSM");
 	return GN_ERR_NONE;
 }
 
-static gn_error SetCharset(GSM_Data *data, GSM_Statemachine *state)
+static gn_error SetCharset(gn_data *data, struct gn_statemachine *state)
 {
 	return GN_ERR_NONE;
 }
 
-static gn_error Unsupported(GSM_Data *data, GSM_Statemachine *state)
+static gn_error Unsupported(gn_data *data, struct gn_statemachine *state)
 {
 	return GN_ERR_NOTSUPPORTED;
 }
 
-static GSM_RecvFunctionType replygetsms;
+static at_recv_function_type replygetsms;
 
 /* 
  * Bosch 909 (and probably also Bosch 908) doesn't provide SMSC information
  * We insert it here to satisfy generic PDU SMS receiving function in atgen.c
  */
 static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
-			    GSM_Data *data, GSM_Statemachine *state)
+			    gn_data *data, struct gn_statemachine *state)
 {
 	int i, ofs, len;
 	char *pos, *lenpos;
@@ -110,17 +107,15 @@ static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
 	return (*replygetsms)(type, buffer, length + 2, data, state);
 }
 
-void AT_InitBosch(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
+void at_bosch_init(struct gn_statemachine *state, char* foundmodel, char* setupmodel)
 {
-	AT_InsertRecvFunction(GOPAT_GetCharset, NULL, state);
-	AT_InsertSendFunction(GOPAT_GetCharset, GetCharset, state);
-	AT_InsertRecvFunction(GOPAT_SetCharset, NULL, state);
-	AT_InsertSendFunction(GOPAT_SetCharset, SetCharset, state);
-	replygetsms = AT_InsertRecvFunction(GOP_GetSMS, ReplyGetSMS, state);
+	at_insert_send_function(GN_OP_AT_GetCharset, GetCharset, state);
+	at_insert_send_function(GN_OP_AT_SetCharset, SetCharset, state);
+	replygetsms = at_insert_recv_function(GN_OP_GetSMS, ReplyGetSMS, state);
 	/* phone lacks many usefull commands :( */
-	AT_InsertSendFunction(GOP_GetBatteryLevel, Unsupported, state);
-	AT_InsertSendFunction(GOP_GetRFLevel, Unsupported, state);
-	AT_InsertSendFunction(GOP_GetSecurityCodeStatus, Unsupported, state);
-	AT_InsertSendFunction(GOP_EnterSecurityCode, Unsupported, state);
-	AT_InsertSendFunction(GOP_SaveSMS, Unsupported, state);
+	at_insert_send_function(GN_OP_GetBatteryLevel, Unsupported, state);
+	at_insert_send_function(GN_OP_GetRFLevel, Unsupported, state);
+	at_insert_send_function(GN_OP_GetSecurityCodeStatus, Unsupported, state);
+	at_insert_send_function(GN_OP_EnterSecurityCode, Unsupported, state);
+	at_insert_send_function(GN_OP_SaveSMS, Unsupported, state);
 }

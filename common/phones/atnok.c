@@ -42,22 +42,22 @@
 #include "links/atbus.h"
 
 
-static AT_SendFunctionType writephonebook;
+static at_send_function_type writephonebook;
 
-static gn_error WritePhonebook(GSM_Data *data, GSM_Statemachine *state)
+static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	if (writephonebook == NULL)
 		return GN_ERR_UNKNOWN;
-	if (data->MemoryStatus->MemoryType == GMT_ME)
+	if (data->memory_status->memory_type == GN_MT_ME)
 		return GN_ERR_NOTSUPPORTED;
 	return (*writephonebook)(data, state);
 }
 
-void AT_InitNokia(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
+void at_init_nokia(GSM_Statemachine *state, char *foundmodel, char *setupmodel)
 {
 	/* block writing of phone memory on nokia phones other than */
 	/* 8210. if you write to the phonebook of a eg 7110 all extended */
 	/* information will be lost. */
 	if (strncasecmp("8210", foundmodel, 4))
-		writephonebook = AT_InsertSendFunction(GOP_WritePhonebook, WritePhonebook, state);
+		writephonebook = at_insert_send_function(GN_OP_WritePhonebook, WritePhonebook, state);
 }
