@@ -14,7 +14,10 @@
   phones. See README for more details on supported mobile phones.
 
   $Log$
-  Revision 1.1  2001-11-19 13:03:18  pkot
+  Revision 1.2  2001-12-14 23:47:52  pkot
+  Fixed fatal linker error -- global symbol conflict of writephonebook (Jan Kratochvil)
+
+  Revision 1.1  2001/11/19 13:03:18  pkot
   nk3110.c cleanup
 
 */
@@ -33,7 +36,7 @@
 #include "links/cbus.h"
 
 
-AT_SendFunctionType writephonebook;
+static AT_SendFunctionType writephonebook;
 
 
 static GSM_Error WritePhonebook(GSM_Data *data,  GSM_Statemachine *state)

@@ -12,28 +12,11 @@
 
   Header file for test utility.
 
-  $Log$
-  Revision 1.28  2001-12-14 14:37:44  pkot
-  Cleanups. Call divert support for at and 7110 series
-
-  Revision 1.27  2001/09/14 12:53:00  pkot
-  New preview logos.
-  Localization fixes.
-  Set valid operator on logos xgnokii screen.
-
-  Revision 1.26  2001/04/23 17:20:02  pkot
-  Added possibility for viewing logos (currently nol and ngg) on console (Bartek Klepacz)
-
-  Revision 1.25  2001/01/15 17:00:51  pkot
-  Initial keypress sequence support. Disable compilation warning
-
-  Revision 1.24  2000/12/19 16:18:19  pkot
-  configure script updates and added shared function for configfile reading
-
-  
 */
 
 /* Prototypes */
+
+#ifdef __gnokii_c_
 
 int monitormode(void);
 
@@ -77,55 +60,57 @@ int displayoutput();
 int presskeysequence();
 int divert(int argc, char *argv[]);
 
+#endif
+
 typedef enum {
-  OPT_HELP,
-  OPT_VERSION,
-  OPT_MONITOR,
-  OPT_ENTERSECURITYCODE,
-  OPT_GETSECURITYCODESTATUS,
-  OPT_SETDATETIME,
-  OPT_GETDATETIME,
-  OPT_SETALARM,
-  OPT_GETALARM,
-  OPT_DIALVOICE,
-  OPT_GETCALENDARNOTE,
-  OPT_WRITECALENDARNOTE,
-  OPT_DELCALENDARNOTE,
-  OPT_GETDISPLAYSTATUS,
-  OPT_GETMEMORY,
-  OPT_WRITEPHONEBOOK,
-  OPT_GETSPEEDDIAL,
-  OPT_SETSPEEDDIAL,
-  OPT_GETSMS,
-  OPT_DELETESMS,
-  OPT_SENDSMS,
-  OPT_SAVESMS,
-  OPT_SENDLOGO,
-  OPT_SENDRINGTONE,
-  OPT_GETSMSC,
-  OPT_GETWELCOMENOTE,
-  OPT_SETWELCOMENOTE,
-  OPT_PMON,
-  OPT_NETMONITOR,
-  OPT_IDENTIFY,
-  OPT_SENDDTMF,
-  OPT_RESET,
-  OPT_SETLOGO,
-  OPT_GETLOGO,
-  OPT_VIEWLOGO,
-  OPT_SETRINGTONE,
-  OPT_GETPROFILE,
-  OPT_DISPLAYOUTPUT,
-  OPT_KEYPRESS,
-  OPT_DIVERT,
-  OPT_FOOGLE
+	OPT_HELP,
+	OPT_VERSION,
+	OPT_MONITOR,
+	OPT_ENTERSECURITYCODE,
+	OPT_GETSECURITYCODESTATUS,
+	OPT_SETDATETIME,
+	OPT_GETDATETIME,
+	OPT_SETALARM,
+	OPT_GETALARM,
+	OPT_DIALVOICE,
+	OPT_GETCALENDARNOTE,
+	OPT_WRITECALENDARNOTE,
+	OPT_DELCALENDARNOTE,
+	OPT_GETDISPLAYSTATUS,
+	OPT_GETMEMORY,
+	OPT_WRITEPHONEBOOK,
+	OPT_GETSPEEDDIAL,
+	OPT_SETSPEEDDIAL,
+	OPT_GETSMS,
+	OPT_DELETESMS,
+	OPT_SENDSMS,
+	OPT_SAVESMS,
+	OPT_SENDLOGO,
+	OPT_SENDRINGTONE,
+	OPT_GETSMSC,
+	OPT_GETWELCOMENOTE,
+	OPT_SETWELCOMENOTE,
+	OPT_PMON,
+	OPT_NETMONITOR,
+	OPT_IDENTIFY,
+	OPT_SENDDTMF,
+	OPT_RESET,
+	OPT_SETLOGO,
+	OPT_GETLOGO,
+	OPT_VIEWLOGO,
+	OPT_SETRINGTONE,
+	OPT_GETPROFILE,
+	OPT_DISPLAYOUTPUT,
+	OPT_KEYPRESS,
+	OPT_DIVERT,
+	OPT_FOOGLE
 } opt_index;
 
 struct gnokii_arg_len {
-  int gal_opt;
-  int gal_min;
-  int gal_max;
-  int gal_flags;
+	int gal_opt;
+	int gal_min;
+	int gal_max;
+	int gal_flags;
 };
 
 /* This is used for checking correct argument count. If it is used then if

@@ -53,12 +53,15 @@
 #include <locale.h>
 #endif
 
+/* Turn on prototypes */
+#define __gnokii_c_
+#include "gnokii.h"
+
 #include "gsm-sms.h"
 #include "gsm-common.h"
 #include "gsm-api.h"
 #include "gsm-networks.h"
 #include "cfgreader.h"
-#include "gnokii.h"
 #include "gsm-filetypes.h"
 #include "gsm-bitmaps.h"
 #include "gsm-ringtones.h"
@@ -2452,7 +2455,7 @@ int getmemory(int argc, char *argv[])
 /* Read data from stdin, parse and write to phone.  The parsing is relatively
    crude and doesn't allow for much variation from the stipulated format. */
 /* FIXME: I guess there's *very* similar code in xgnokii */
-int writephonebook(int argc, char *args[])
+static int writephonebook(int argc, char *args[])
 {
 	GSM_PhonebookEntry entry;
 	GSM_Error error;
