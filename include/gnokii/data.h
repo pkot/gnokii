@@ -131,6 +131,7 @@ typedef enum {
 	GOP_GetSMSStatus,
 	GOP_GetIncomingCallNr,
 	GOP_GetNetworkInfo,
+	GOP_GetSecurityCode,
 	GOP_GetSMS,
 	GOP_GetSMSnoValidate,
 	GOP_GetSMSFolders,
