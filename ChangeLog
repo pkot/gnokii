@@ -14,6 +14,7 @@
     o misc cleanups                                   (Jan Derfinak)
  * nk6510 driver updates
     o Nokia 6360 confirmed to work                    (Scott Hepler)
+    o add Nokia 6610 to supported models       (Jorge Van Hemelryck)
  * nk3110 driver updates
     o more fixes to SMS code                         (Osma Suominen)
     o message type folding in the fbus-3110 code     (Osma Suominen)
