@@ -744,13 +744,25 @@ static int getsms(int argc, char *argv[])
 		switch (error) {
 		case GE_NONE:
 			switch (message.Type) {
-			case SMS_Text:
+			case SMS_Submit:
 				fprintf(stdout, _("%d. MO Message "), message.Number);
-				if (message.Status)
+				switch (message.Status) {
+				case SMS_Read:
+					fprintf(stdout, _("(read)\n"));
+					break;
+				case SMS_Unread:
+					fprintf(stdout, _("(unread)\n"));
+					break;
+				case SMS_Sent:
 					fprintf(stdout, _("(sent)\n"));
-				fprintf(stdout, _("%d. MO Message "), message.Number);
-				if (message.Status)
-					fprintf(stdout, _("(not sent)\n"));
+					break;
+				case SMS_Unsent:
+					fprintf(stdout, _("(unsent)\n"));
+					break;
+				default:
+					fprintf(stdout, _("(read)\n"));
+					break;
+				}
 				fprintf(stdout, _("Text: %s\n\n"), message.UserData[0].u.Text); 
 				break;
 			case SMS_Delivery_Report:
@@ -802,10 +814,23 @@ static int getsms(int argc, char *argv[])
 				break;
 			default:
 				fprintf(stdout, _("%d. Inbox Message "), message.Number);
-				if (message.Status)
+				switch (message.Status) {
+				case SMS_Read:
 					fprintf(stdout, _("(read)\n"));
-				else
-					fprintf(stdout, _("(not read)\n"));
+					break;
+				case SMS_Unread:
+					fprintf(stdout, _("(unread)\n"));
+					break;
+				case SMS_Sent:
+					fprintf(stdout, _("(sent)\n"));
+					break;
+				case SMS_Unsent:
+					fprintf(stdout, _("(unsent)\n"));
+					break;
+				default:
+					fprintf(stdout, _("(read)\n"));
+					break;
+				}
 				fprintf(stdout, _("Date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.Time.Day, message.Time.Month, message.Time.Year, \
 					message.Time.Hour, message.Time.Minute, message.Time.Second);
@@ -2101,7 +2126,6 @@ static int getmemory(int argc, char *argv[])
 	char *memory_type_string;
 	int start_entry;
 	int end_entry;
-	GSM_Statemachine *sm = &State;
 	
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = argv[0];
@@ -2111,8 +2135,8 @@ static int getmemory(int argc, char *argv[])
 		return (-1);
 	}
 
-	start_entry = atoi (argv[1]);
-	if (argc > 2) end_entry = atoi (argv[2]);
+	start_entry = atoi(argv[1]);
+	if (argc > 2) end_entry = atoi(argv[2]);
 	else end_entry = start_entry;
 
 	/* Now retrieve the requested entries. */
@@ -2121,19 +2145,24 @@ static int getmemory(int argc, char *argv[])
 		entry.Location = count;
 
       		data.PhonebookEntry = &entry;
-		error = SM_Functions(GOP_ReadPhonebook, &data, sm);
+		error = SM_Functions(GOP_ReadPhonebook, &data, &State);
 
 		if (error == GE_NONE) {
-			fprintf(stdout, "%s;%s;%s;%d;%d\n", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
+			int i;
+
+			fprintf(stdout, "%s;%s;%s;%d;%d", entry.Name, entry.Number, memory_type_string, entry.Location, entry.Group);
+			for (i = 0; i < entry.SubEntriesCount; i++) {
+				fprintf(stdout, ";%d;%d;%d;%s", entry.SubEntries[i].EntryType, entry.SubEntries[i].NumberType,
+								entry.SubEntries[i].BlockNumber, entry.SubEntries[i].data.Number);
+			}
+			fprintf(stdout, "\n");
 			if (entry.MemoryType == GMT_MC || entry.MemoryType == GMT_DC || entry.MemoryType == GMT_RC)
 				fprintf(stdout, "%02u.%02u.%04u %02u:%02u:%02u\n", entry.Date.Day, entry.Date.Month, entry.Date.Year, entry.Date.Hour, entry.Date.Minute, entry.Date.Second);
-		}  
-		else {
+		} else {
 			if (error == GE_NOTIMPLEMENTED) {
 				fprintf(stderr, _("Function not implemented in %s model!\n"), model);
 				return -1;
-			}
-			else if (error == GE_INVALIDMEMORYTYPE) {
+			} else if (error == GE_INVALIDMEMORYTYPE) {
 				fprintf(stderr, _("Memory type %s not supported!\n"), memory_type_string);
 				return -1;
 			}
@@ -2152,7 +2181,7 @@ static int writephonebook(int argc, char *args[])
 	GSM_PhonebookEntry entry;
 	GSM_Error error = GE_NOTSUPPORTED;
 	char *memory_type_string;
-	int line_count=0;
+	int line_count = 0;
 	int subentry;
 
 	char *Line, OLine[100], BackLine[100];
@@ -2185,11 +2214,11 @@ static int writephonebook(int argc, char *args[])
 			continue;
 		}
 
-		if (!strncmp(ptr,"ME", 2)) {
+		if (!strncmp(ptr, "ME", 2)) {
 			memory_type_string = "int";
 			entry.MemoryType = GMT_ME;
 		} else {
-			if (!strncmp(ptr,"SM", 2)) {
+			if (!strncmp(ptr, "SM", 2)) {
 				memory_type_string = "sim";
 				entry.MemoryType = GMT_SM;
 			} else {
@@ -2214,14 +2243,14 @@ static int writephonebook(int argc, char *args[])
 		for (subentry = 0; ; subentry++) {
 			ptr = strtok(NULL, ";");
 
-			if (ptr &&  *ptr != 0)
+			if (ptr && *ptr != 0)
 				entry.SubEntries[subentry].EntryType = atoi(ptr);
 			else
 				break;
 
 			ptr = strtok(NULL, ";");
 			if (ptr)
-				entry.SubEntries[subentry].NumberType=atoi(ptr);
+				entry.SubEntries[subentry].NumberType = atoi(ptr);
 
 			/* Phone Numbers need to have a number type. */
 			if (!ptr && entry.SubEntries[subentry].EntryType == GSM_Number) {
@@ -2233,7 +2262,7 @@ static int writephonebook(int argc, char *args[])
 
 			ptr = strtok(NULL, ";");
 			if (ptr)
-				entry.SubEntries[subentry].BlockNumber=atoi(ptr);
+				entry.SubEntries[subentry].BlockNumber = atoi(ptr);
 
 			ptr = strtok(NULL, ";");
 
@@ -2265,7 +2294,8 @@ static int writephonebook(int argc, char *args[])
 			GSM_PhonebookEntry aux;
 
 			aux.Location = entry.Location;
-			if (GSM && GSM->GetMemoryLocation) error = GSM->GetMemoryLocation(&aux);
+	      		data.PhonebookEntry = &aux;
+			error = SM_Functions(GOP_ReadPhonebook, &data, &State);
 			
 			if (error == GE_NONE) {
 				if (!aux.Empty) {
@@ -2283,22 +2313,21 @@ static int writephonebook(int argc, char *args[])
 				}
 			} else {
 				fprintf(stderr, _("Unknown error (%d)\n"), error);
-				if (GSM && GSM->Terminate) GSM->Terminate();
 				return 0;
 			}
 		}
 
 		/* Do write and report success/failure. */
-		if (GSM && GSM->WritePhonebookLocation) error = GSM->WritePhonebookLocation(&entry);
+      		data.PhonebookEntry = &entry;
+		error = SM_Functions(GOP_WritePhonebook, &data, &State);
 
 		if (error == GE_NONE)
 			fprintf (stdout, _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), memory_type_string, entry.Location, entry.Name, entry.Number);
 		else
-			fprintf (stdout, _("Write FAILED(%d): memory type: %s, loc: %d, name: %s, number: %s\n"), error, memory_type_string, entry.Location, entry.Name, entry.Number);
+			fprintf (stdout, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), print_error(error), memory_type_string, entry.Location, entry.Name, entry.Number);
 
 	}
 
-	if (GSM && GSM->Terminate) GSM->Terminate();
 	return 0;
 }
 

@@ -49,7 +49,6 @@ static const SMSMessage_Layout nk7110_deliver = {
 	40, true					/* User Data */
 };
 
-/* sending */
 static const SMSMessage_Layout nk7110_submit = {
 	true,
 	 5, true, true,
@@ -59,17 +58,6 @@ static const SMSMessage_Layout nk7110_submit = {
 	-1, -1,
 	41, true
 };
-
-/* saving
-static const SMSMessage_Layout nk7110_submit = {
-	true,
-	 9, true, true,
-	-1, 21, 21, 21, -1, 22, 23, -1, 25, 24, 21, 21,
-	26, true, true,
-	-1, -1,
-	-1, -1,
-	45, true
-};*/
 
 static const SMSMessage_Layout nk7110_delivery_report = {
 	true,
@@ -577,10 +565,12 @@ static GSM_Error P7110_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		break;
 	case 0x0c:
-		switch (message[6]) {
-		case 0x3d: return GE_PHBOOKWRITEFAILED;
-		case 0x3e: return GE_PHBOOKWRITEFAILED;
-		default:   return GE_NONE;
+		if (message[6] == 0x0f) {
+			switch (message[10]) {
+			case 0x3d: return GE_PHBOOKWRITEFAILED;
+			case 0x3e: return GE_PHBOOKWRITEFAILED;
+			default:   return GE_UNKNOWN;
+			}
 		}
 		break;	
 	default:
@@ -756,10 +746,20 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
                 break;
 
-	/* error? */
+	/* error? the error codes are taken from 6100 sources */
 	case 0x09:
-		dprintf("Location empty???\n");
-		return GE_EMPTYSMSLOCATION;
+		dprintf("SMS reading failed:\n");
+		switch (message[4]) {
+		case 0x02:
+			dprintf("\tInvalid location!\n");
+			return GE_INVALIDSMSLOCATION;
+		case 0x07:
+			dprintf("\tEmpty SMS location.\n");
+			return GE_EMPTYSMSLOCATION;
+		default:
+			dprintf("\tUnknown reason.\n");
+			return GE_UNKNOWN;
+		}
 		
 	/* get list of SMS pictures */
 	case 0x97:
@@ -1534,10 +1534,11 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 	unsigned int count = 18;
 	GSM_PhonebookEntry *entry;
 	
-	if (data->PhonebookEntry) entry=data->PhonebookEntry;
+	if (data->PhonebookEntry) entry = data->PhonebookEntry;
 	else return GE_TRYAGAIN;
 
 	req[11] = GetMemoryType(entry->MemoryType);
+	/* Two octets for the memory location */
 	req[12] = (entry->Location >> 8);
 	req[13] = entry->Location & 0xff;
 	block = 1;
@@ -1545,8 +1546,11 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 		/* Name */
 		i = strlen(entry->Name);
 		EncodeUnicode((string + 1), entry->Name, i);
-		string[0] = i * 2;
-		count += PackBlock(0x07, i * 2 + 1, block++, string, req + count);
+		/* Terminating 0 */
+		string[i * 2 + 1] = 0;
+		/* Length ot the string + length field + terminating 0 */
+		string[0] = (i + 1) * 2;
+		count += PackBlock(0x07, (i + 1) * 2, block++, string, req + count);
 		/* Group */
 		string[0] = entry->Group + 1;
 		string[1] = 0;
@@ -1559,26 +1563,24 @@ static GSM_Error P7110_WritePhonebookLocation(GSM_Data *data, GSM_Statemachine *
 					defaultn = i;
 		if (defaultn < i) {
 			string[0] = entry->SubEntries[defaultn].NumberType;
-			string[1] = 0;
-			string[2] = 0;
-			string[3] = 0;
+			string[1] = string[2] = string[3] = 0;
 			i = strlen(entry->SubEntries[defaultn].data.Number);
 			EncodeUnicode((string + 5), entry->SubEntries[defaultn].data.Number, i);
+			string[i * 2 + 1] = 0;
 			string[4] = i * 2;
-			count += PackBlock(0x0b, i * 2 + 5, block++, string, req + count);
+			count += PackBlock(0x0b, i * 2 + 6, block++, string, req + count);
 		}
 		/* Rest of the numbers */
 		for (i = 0; i < entry->SubEntriesCount; i++)
 			if (entry->SubEntries[i].EntryType == GSM_Number)
 				if (i != defaultn) {
 					string[0] = entry->SubEntries[i].NumberType;
-					string[1] = 0;
-					string[2] = 0;
-					string[3] = 0;
+					string[1] = string[2] = string[3] = 0;
 					j = strlen(entry->SubEntries[i].data.Number);
 					EncodeUnicode((string + 5), entry->SubEntries[i].data.Number, j);
+					string[i * 2 + 1] = 0;
 					string[4] = j + 2;
-					count += PackBlock(0x0b, j * 2 + 5, block++, string, req + count);
+					count += PackBlock(0x0b, j * 2 + 6, block++, string, req + count);
 				} 
 		req[17] = block - 1;
 		dprintf("Writing phonebook entry %s...\n",entry->Name);
