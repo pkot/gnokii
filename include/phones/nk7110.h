@@ -132,7 +132,7 @@ typedef enum {
 #define NK7110_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
 #define NK7110_MEMORY_GROUPS		0x10	/* Caller groups */
 
-#define NK7110_MEMORY_DC		0x01	/* ME dialled calls list */
+#define NK7110_MEMORY_DC		0x01	/* ME dialed calls list */
 #define NK7110_MEMORY_MC		0x02	/* ME missed (unanswered received) calls list */
 #define NK7110_MEMORY_RC		0x03	/* ME received calls list */
 #define NK7110_MEMORY_FD		0x04	/* ?? SIM fixdialling-phonebook */

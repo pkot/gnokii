@@ -43,7 +43,7 @@
 #define NK6100_MEMORY_FD 0x04 /* ?? SIM fixdialling-phonebook */
 #define NK6100_MEMORY_ON 0x05 /* ?? SIM (or ME) own numbers list */
 #define NK6100_MEMORY_EN 0x06 /* ?? SIM (or ME) emergency number */
-#define NK6100_MEMORY_DC 0x07 /* ME dialled calls list */
+#define NK6100_MEMORY_DC 0x07 /* ME dialed calls list */
 #define NK6100_MEMORY_RC 0x08 /* ME received calls list */
 #define NK6100_MEMORY_MC 0x09 /* ME missed (unanswered received) calls list */
 #define NK6100_MEMORY_VOICE 0x0b /* Voice Mailbox */
