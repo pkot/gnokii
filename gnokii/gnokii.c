@@ -291,7 +291,8 @@ static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 	if (!strcasecmp(Connection, "irda"))     connection = GCT_Irda;
 
 	aux = CFG_Get(CFG_Info, "global", "use_locking");
-	if (!strcmp(aux, "yes")) lockfile = lock_device(Port);
+	/* Defaults to 'yes' */
+	if (!aux || !strcmp(aux, "yes")) lockfile = lock_device(Port);
 
 	/* Initialise the code for the GSM interface. */
 	error = GSM_Initialise(model, Port, Initlength, connection, rlp_handler, &State);
