@@ -139,6 +139,7 @@ typedef struct {
 						      * entry 5 numbers and 4
 						      * texts [email,notice,postal,url] */
 #define GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER    5
+#define GN_PHONEBOOK_ENTRY_MAX_LENGTH 1024
 
 /* This data type is used to report the number of used and free positions in
    memory (sim or internal). */
