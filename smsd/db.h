@@ -16,12 +16,18 @@
 #define DB_H
 
 #include <glib.h>
+#include "smsd.h"
 #include "gsm-sms.h"
 
-extern void DB_Bye (void);
-extern gint DB_ConnectInbox (const gchar * const);
-extern gint DB_ConnectOutbox (const gchar * const);
+/* extern void DB_Bye (void);
+extern gint DB_Connect (const DBConfig);
 extern gint DB_InsertSMS (const GSM_SMSMessage * const);
 extern void DB_Look (void);
+*/
+
+extern void (*DB_Bye) (void);
+extern gint (*DB_Connect) (const DBConfig);
+extern gint (*DB_InsertSMS) (const GSM_SMSMessage * const);
+extern void (*DB_Look) (void);
 
 #endif

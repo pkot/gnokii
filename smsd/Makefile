@@ -15,21 +15,13 @@ CFLAGS += -DXDEBUG -g $(PTHREAD_CFLAGS) \
 LDFLAGS += $(PTHREAD_LIBS) \
 	   `glib-config --libs`
 
-LDFLAGS += -g -L$(TOPDIR)/common -lgnokii
-
-# Change this according to your system
-# FIXME: detect it in configure
-CFLAGS += -I/usr/include/pgsql
-
-LDFLAGS += -lpq
-#LDFLAGS += -L/usr/lib/pgsql -lpq
+LDFLAGS += -g -rdynamic -L$(TOPDIR)/common -lgnokii -ldl
 
 ifdef XPM_LIBS
     LDFLAGS +=$(XPM_LIBS)
 endif
 
-OBJS = 	db.o \
-	smsd.o \
+OBJS = 	smsd.o \
         lowlevel.o
 
 all: smsd
@@ -38,6 +30,18 @@ all: smsd
 smsd: $(OBJS) $(TOPDIR)/common/gsm-filetypes.o $(TOPDIR)/common/libgnokii.so
 	gcc $(LDFLAGS) $(OBJS) $(TOPDIR)/common/gsm-filetypes.o -o $@
 
+
+### DB Modules
+# Change this according to your system
+# FIXME: detect it in configure
+
+# PostgreSQL support
+libpq.so: smsd.h pq.c
+	gcc -shared -o libpq.so `glib-config --cflags` -I../include \
+        -I/usr/include/pgsql pq.c `glib-config --libs` -lpq
+
+### End of DB Modules
+
 $(TOPDIR)/common/gsm-filetypes.o:
 	$(MAKE) -C $(TOPDIR)/common gsm-filetypes.o
 
@@ -45,7 +49,7 @@ $(TOPDIR)/common/libgnokii.so:
 	$(MAKE) -C $(TOPDIR)/common libgnokii.so
 
 clean:
-	$(RM) $(OBJS) *~ depend smsd
+	$(RM) $(OBJS) *~ depend smsd libpq.so core*
 
 install: all
 	$(INSTALL) -d $(bindir)

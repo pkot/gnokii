@@ -71,22 +71,20 @@ static void InitModelInf (void)
   GSM_Data data;
   gchar buf[64];
   GSM_Error error;
-  char imei[64], model[64], rev[64], manufacturer[64];
+  char model[64], rev[64], manufacturer[64];
 
   data.Manufacturer = manufacturer;
   data.Model = model;
   data.Revision = rev;
-  data.Imei = imei;
                           
-  sleep(2);
-  
-  error = SM_Functions(GOP_GetModel, &data, &sm);
 
+  error = SM_Functions(GOP_GetModel, &data, &sm);
+  
   if (error == GE_NONE)
   {
     g_free (phoneMonitor.phone.model);
     phoneMonitor.phone.version = g_strdup (model);
-    phoneMonitor.phone.model = GetPhoneModel (buf)->model;
+    phoneMonitor.phone.model = GetPhoneModel (model)->model;
     if (phoneMonitor.phone.model == NULL)
       phoneMonitor.phone.model = g_strdup (_("unknown"));
 
@@ -96,20 +94,9 @@ static void InitModelInf (void)
   g_free (phoneMonitor.phone.revision);
   phoneMonitor.phone.revision = g_strdup (rev);
 
-  sleep(2);
-  
-  error = SM_Functions (GOP_Identify, &data, &sm);
-
-  if (error == GE_NONE)
-  {
-    g_free (phoneMonitor.phone.imei);
-    phoneMonitor.phone.imei = g_strdup (imei);
-  }
-
 #ifdef XDEBUG
   g_print ("Version: %s\n", phoneMonitor.phone.version);
   g_print ("Model: %s\n", phoneMonitor.phone.model);
-  g_print ("IMEI: %s\n", phoneMonitor.phone.imei);
   g_print ("Revision: %s\n", phoneMonitor.phone.revision);
 #endif
 }
@@ -127,9 +114,8 @@ static GSM_Error fbusinit (bool enable_monitoring)
 
   /* Initialise the code for the GSM interface. */     
 
-  if (error == GE_NOLINK)
-    error = GSM_Initialise (smsdConfig.model, smsdConfig.port,
-                            smsdConfig.initlength, connection, NULL, &sm);
+  error = GSM_Initialise (smsdConfig.model, smsdConfig.port,
+                          smsdConfig.initlength, connection, NULL, &sm);
 
 #ifdef XDEBUG
   g_print ("fbusinit: error %d\n", error);
@@ -158,7 +144,6 @@ void InitPhoneMonitor (void)
   phoneMonitor.phone.model = g_strdup (_("unknown"));
   phoneMonitor.phone.version = phoneMonitor.phone.model;
   phoneMonitor.phone.revision = g_strdup (_("unknown"));
-  phoneMonitor.phone.imei = g_strdup (_("unknown"));
   phoneMonitor.supported = 0;
   phoneMonitor.working = FALSE;
   phoneMonitor.sms.unRead = phoneMonitor.sms.number = 0;
@@ -190,9 +175,11 @@ static inline void FreeArray (GSList **array)
 
 static void RefreshSMS (const gint number)
 {
-  GSM_Data data;
+  static GSM_Data data;
   GSM_Error error;
   GSM_SMSMessage *msg;
+  SMS_Folder folder;
+  SMS_FolderList folderlist;
   register gint i;
   
 
@@ -203,23 +190,28 @@ static void RefreshSMS (const gint number)
   pthread_mutex_lock (&smsMutex);
   FreeArray (&(phoneMonitor.sms.messages));
   phoneMonitor.sms.number = 0;
-//  pthread_mutex_unlock (&smsMutex);
+  pthread_mutex_unlock (&smsMutex);
 
+  data.SMSFolderList = &folderlist;
+  folder.FolderID = 0;
+  data.SMSFolder = &folder;
+  
   i = 0;
   while (1)
   {
-    GSM_DataClear (&data);
+//    GSM_DataClear (&data);
     msg = g_malloc (sizeof (GSM_SMSMessage));
     msg->MemoryType = GMT_SM;
     msg->Number = ++i;
     data.SMSMessage = msg;
 
-    if ((error = SM_Functions(GOP_GetSMS, &data, &sm)) == GE_NONE)
+    if ((error = GetSMS (&data, &sm)) == GE_NONE)
     {
-  //    pthread_mutex_lock (&smsMutex);
+      pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
       phoneMonitor.sms.number++;
-  //    pthread_mutex_unlock (&smsMutex);
+      pthread_mutex_unlock (&smsMutex);
+      
       if (phoneMonitor.sms.number == number)
       {
         pthread_cond_signal (&smsCond);
@@ -227,7 +219,7 @@ static void RefreshSMS (const gint number)
         return;
       }
     }
-    else if (error == GE_INVALIDSMSLOCATION)  /* All positions are readed */
+    else if (error == GE_INVALIDSMSLOCATION)   /* All positions are readed */
     {
       g_free (msg);
       pthread_cond_signal (&smsCond);
@@ -246,12 +238,14 @@ static gint A_SendSMSMessage (gpointer data)
 {
   D_SMSMessage *d = (D_SMSMessage *) data;
   GSM_Error error;
+  GSM_Data dt;
 
   error = d->status = GE_UNKNOWN;
   if (d)
   {
     pthread_mutex_lock (&sendSMSMutex);
-    error = d->status = GSM->SendSMSMessage (d->sms, 0);
+    dt.SMSMessage = d->sms;
+    error = d->status = SendSMS ( &dt, &sm);
     pthread_cond_signal (&sendSMSCond);
     pthread_mutex_unlock (&sendSMSMutex);
   }
@@ -265,12 +259,13 @@ static gint A_SendSMSMessage (gpointer data)
 
 static gint A_DeleteSMSMessage (gpointer data)
 {
-  GSM_SMSMessage *sms = (GSM_SMSMessage *) data;
+  GSM_Data dt;
   GSM_Error error = GE_UNKNOWN;
 
-  if (sms)
+  dt.SMSMessage = (GSM_SMSMessage *) data;
+  if (dt.SMSMessage)
   {
-    error = GSM->DeleteSMSMessage(sms);
+    error = SM_Functions (GOP_DeleteSMS, &dt, &sm);
 //    I don't use copy, I don't need free message.
 //    g_free (sms);
   }

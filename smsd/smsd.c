@@ -14,6 +14,7 @@
 #include <string.h>
 #include <pthread.h>
 #include <getopt.h>
+#include <dlfcn.h>
 
 #ifndef WIN32
 # include <unistd.h>  /* for usleep */
@@ -43,7 +44,10 @@
 #include "lowlevel.h"
 #include "db.h"
 
-#define DB_CONNECT	"dbname=sms"
+#define DB	"sms"
+#define USER	""
+#define PASSWORD ""
+#define HOST	""
 
  
 /* Hold main configuration data for smsd */
@@ -53,7 +57,11 @@ SmsdConfig smsdConfig;
 bool TerminateThread;
 
 /* Local variables */
-static gchar *connect;
+static DBConfig connect;
+void (*DB_Bye) (void) = NULL;;
+gint (*DB_Connect) (const DBConfig) = NULL;
+gint (*DB_InsertSMS) (const GSM_SMSMessage * const) = NULL;
+void (*DB_Look) (void) = NULL;
 
 static pthread_t db_monitor_th;
 pthread_mutex_t db_monitorMutex;
@@ -83,6 +91,52 @@ gchar *strEscape (const gchar *const s)
 }
 
 
+gint LoadDB (void)
+{
+  void *handle;
+  GString *buf;
+  gchar *error;
+  
+  buf = g_string_sized_new (64);
+  
+  g_string_sprintf (buf, "%s/lib%s.so", smsdConfig.libDir, smsdConfig.dbMod);
+  
+  handle = dlopen (buf->str, RTLD_LAZY);
+  if (!handle)
+    return (1);
+    
+  DB_Bye = dlsym(handle, "DB_Bye");
+  if ((error = dlerror ()) != NULL)
+  {
+    g_print (error);
+    return (2);
+  }
+  
+  DB_Connect = dlsym(handle, "DB_Connect");
+  if ((error = dlerror ()) != NULL)
+  {
+    g_print (error);
+    return (2);
+  }
+  
+  DB_InsertSMS = dlsym(handle, "DB_InsertSMS");
+  if ((error = dlerror ()) != NULL)
+  {
+    g_print (error);
+    return (2);
+  }
+  
+  DB_Look = dlsym(handle, "DB_Look");
+  if ((error = dlerror ()) != NULL)
+  {
+    g_print (error);
+    return (2);
+  }
+  
+  return (0);
+}
+
+
 static void Usage (gchar *p)
 {
   g_print ("\nUsage:  %s [options]\n"
@@ -93,25 +147,70 @@ static void Usage (gchar *p)
 
 static void ReadConfig (gint argc, gchar *argv[])
 {
-  connect = g_strdup (DB_CONNECT);
+  connect.user = g_strdup (USER);
+  connect.password = g_strdup (PASSWORD);
+  connect.db = g_strdup (DB);
+  connect.host = g_strdup (HOST);
+  smsdConfig.dbMod = g_strdup ("pq");
+  smsdConfig.libDir = g_strdup (".");
+  
+  smsdConfig.smsSets = 0;
   while (1)
   {
     gint optionIndex = 0;
     gchar c;
     static struct option longOptions[] =
     {
-      {"db", 1, 0, 'd'}
+      {"user", 1, 0, 'u'},
+      {"password", 1, 0, 'p'},
+      {"db", 1, 0, 'd'},
+      {"host", 1, 0, 'c'},
+      {"reports", 0, 0, 'r'},
+      {"module", 1, 0, 'm'},
+      {"libdir", 1, 0, 'l'}
     };
     
-    c = getopt_long (argc, argv, "d:h", longOptions, &optionIndex);
+    c = getopt_long (argc, argv, "u:p:d:c:rm:l:h", longOptions, &optionIndex);
     if (c == EOF)
       break;
     switch (c)
     {
-      case 'd':
-        g_free (connect);
-        connect = g_strdup (optarg);
+      case 'u':
+        g_free (connect.user);
+        connect.user = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
+        break;
+      
+      case 'p':
+        g_free (connect.password);
+        connect.password = g_strdup (optarg);
+        memset (optarg, 'x', strlen (optarg));
+        break;
+        
+      case 'd':
+        g_free (connect.db);
+        connect.db = g_strdup (optarg);
+        memset (optarg, 'x', strlen (optarg));
+        break;
+        
+      case 'c':
+        g_free (connect.host);
+        connect.host = g_strdup (optarg);
+        memset (optarg, 'x', strlen (optarg));
+        break;
+        
+      case 'r':
+        smsdConfig.smsSets = SMSD_READ_REPORTS;
+        break;
+      
+      case 'm':
+        g_free (smsdConfig.dbMod);
+        smsdConfig.dbMod = g_strdup (optarg);
+        break;
+        
+      case 'l':
+        g_free (smsdConfig.libDir);
+        smsdConfig.libDir = g_strdup (optarg);
         break;
 
         case 'h':
@@ -131,19 +230,23 @@ static void ReadConfig (gint argc, gchar *argv[])
     Usage (argv[0]);
     exit (1);
   }
-   
+
+  if (LoadDB ())
+  {
+    g_print (_("Cannot load database module %s in directory %s!\n"),
+              smsdConfig.dbMod, smsdConfig.libDir);
+    exit (-2);
+  }
+  
   if (readconfig (&smsdConfig.model, &smsdConfig.port, &smsdConfig.initlength,
       &smsdConfig.connection, &smsdConfig.bindir) < 0)
     exit (-1);
-  
-  smsdConfig.smsSets = 0;
 }
-
 
 
 static void *SendSMS2 (void *a)
 {
-  if (DB_ConnectOutbox (connect))
+  if ((*DB_Connect) (connect))
   {
     pthread_exit (0);
     return (0);
@@ -160,7 +263,7 @@ static void *SendSMS2 (void *a)
     }
     pthread_mutex_unlock (&db_monitorMutex);
 
-    DB_Look ();
+    (*DB_Look) ();
 
     sleep (3);
   }
@@ -206,6 +309,11 @@ static void ReadSMS (gpointer d, gpointer userData)
 #ifdef XDEBUG
       g_print ("Report\n");
 #endif
+      g_print ("%d %d\n", smsdConfig.smsSets, SMSD_READ_REPORTS);
+      if (smsdConfig.smsSets & SMSD_READ_REPORTS)
+        (*DB_InsertSMS) (data);
+      
+      
       e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
       e->event = Event_DeleteSMSMessage;
       e->data = data;
@@ -215,12 +323,12 @@ static void ReadSMS (gpointer d, gpointer userData)
     { 
 #ifdef XDEBUG 
       g_print ("%d. %s   ", data->Number, data->RemoteNumber.number);
-      g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->Time.Year + 2000,
+      g_print ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->Time.Year,
                data->Time.Month, data->Time.Day, data->Time.Hour,
                data->Time.Minute, data->Time.Second, data->Time.Timezone,
                data->UserData[0].u.Text);
 #endif
-      DB_InsertSMS (data);
+      (*DB_InsertSMS) (data);
       
       e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
       e->event = Event_DeleteSMSMessage;
@@ -263,7 +371,7 @@ static void MainExit (gint sig)
   
   pthread_join (monitor_th, NULL);
   pthread_join (db_monitor_th, NULL);
-  DB_Bye ();
+  (*DB_Bye) ();
   exit (0);
 }
 
@@ -286,7 +394,7 @@ static void Run (void)
 #endif
 
   InitPhoneMonitor ();
-  if (DB_ConnectInbox (connect))
+  if ((*DB_Connect) (connect))
     exit (2);
   pthread_create (&monitor_th, NULL, Connect, NULL);
   db_monitor = TRUE;

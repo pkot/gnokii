@@ -1,4 +1,10 @@
-* Mon Jan 14 2002 Jan Derfinak  <ja@mail.upjs.sk>
+* Sun Jan 27 2002 Jan Derfinak <ja@mail.upjs.sk>
+- Fix core dumps.
+- Added support for database's plugins.
+- Added option for reading delivery reports.
+
+
+* Mon Jan 14 2002 Jan Derfinak <ja@mail.upjs.sk>
 - added parsing for \ and ' in incoming sms's.
 - Changed "insert into <table> values (<Val1> <Val2> .. <Valn>)"
   to "insert into <table> (<Col1> <Col2> .. <Coln>) values (<Val1> <Val2> ..
