@@ -111,6 +111,7 @@ static gn_error SendRLPFrame(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRLPRXCallback(gn_data *data, struct gn_statemachine *state);
 static gn_error SendDTMF(gn_data *data, struct gn_statemachine *state);
 static gn_error Reset(gn_data *data, struct gn_statemachine *state);
+static gn_error GetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error SetRawRingtone(gn_data *data, struct gn_statemachine *state);
@@ -342,7 +343,7 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 	case GN_OP_Reset:
 		return Reset(data, state);
 	case GN_OP_GetRingtone:
-		return GN_ERR_NOTSUPPORTED;
+		return GetRingtone(data, state);
 	case GN_OP_SetRingtone:
 		return SetRingtone(data, state);
 	case GN_OP_GetRawRingtone:
@@ -2020,6 +2021,27 @@ static gn_error SetProfile(gn_data *data, struct gn_statemachine *state)
 	error |= SetProfileFeature(data, state, 0x09, prof->automatic_answer);
 
 	return (error == GN_ERR_NONE) ? GN_ERR_NONE : GN_ERR_UNKNOWN;
+}
+
+static gn_error GetRingtone(gn_data *data, struct gn_statemachine *state)
+{
+	gn_data d;
+	gn_error err;
+	gn_raw_data rawdata;
+	char buf[4096];
+
+	if (!data->ringtone) return GN_ERR_INTERNALERROR;
+
+	memset(&rawdata, 0, sizeof(gn_raw_data));
+	rawdata.data = buf;
+	rawdata.length = sizeof(buf);
+	gn_data_clear(&d);
+	d.ringtone = data->ringtone;
+	d.raw_data = &rawdata;
+
+	if ((err = GetRawRingtone(&d, state)) != GN_ERR_NONE) return err;
+
+	return pnok_ringtone_from_raw(data->ringtone, rawdata.data, rawdata.length);
 }
 
 static gn_error SetRingtone(gn_data *data, struct gn_statemachine *state)

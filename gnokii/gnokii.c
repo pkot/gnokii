@@ -136,6 +136,7 @@ typedef enum {
 	OPT_GETRINGTONE,
 	OPT_SETRINGTONE,
 	OPT_PLAYRINGTONE,
+	OPT_RINGTONECONVERT,
 	OPT_GETPROFILE,
 	OPT_SETPROFILE,
 	OPT_GETACTIVEPROFILE,
@@ -310,7 +311,8 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --viewlogo logofile\n"
 		     "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
 		     "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"
-		     "          gnokii --playringtone rtttlfile\n"
+		     "          gnokii --playringtone rtttlfile [--volume vol]\n"
+		     "          gnokii --ringtoneconvert source destination\n"
 		     "          gnokii --reset [soft|hard]\n"
 		     "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
 		     "          gnokii --setprofile\n"
@@ -4129,36 +4131,56 @@ static int setringtone(int argc, char *argv[])
 static int playringtone(int argc, char *argv[])
 {
 	gn_ringtone ringtone;
-	gn_raw_data rawdata;
 	gn_tone tone;
 	gn_error error;
-	unsigned char buff[512];
 	int i, ulen;
+
+	int volume = 5;
+	struct option options[] = {
+		{ "volume", required_argument, NULL, 'v'},
+		{ NULL,     0,                 NULL, 0}
+	};
+
+	optarg = NULL;
+	optind = 0;
+	argv++;
+	argc--;
+
+	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
+		switch (i) {
+		case 'v':
+			volume = atoi(optarg);
+			break;
+		default:
+			usage(stderr, -1); /* FIXME */
+			return -1;
+		}
+	}
 
 	memset(&ringtone, 0, sizeof(ringtone));
 	memset(&tone, 0, sizeof(tone));
-	rawdata.data = buff;
-	rawdata.length = sizeof(buff);
 	gn_data_clear(&data);
 	data.ringtone = &ringtone;
-	data.raw_data = &rawdata;
 	data.tone = &tone;
 
-	if (argc != 1) {
+	if (argc <= optind) {
 		usage(stderr, -1);
 		return -1;
 	}
 
-	if ((error = gn_file_ringtone_read(argv[0], &ringtone))) {
-		fprintf(stderr, _("Failed to load ringtone.\n"));
+	if ((error = gn_file_ringtone_read(argv[optind], &ringtone))) {
+		fprintf(stderr, _("Failed to load ringtone: %s\n"), gn_error_print(error));
 		return error;
 	}
 
-	tone.volume = 5;
 	for (i = 0; i < ringtone.notes_count; i++) {
+		tone.volume = volume;
 		gn_ringtone_get_tone(&ringtone, i, &tone.frequency, &ulen);
 		if ((error = gn_sm_functions(GN_OP_PlayTone, &data, &state)) != GN_ERR_NONE) break;
-		usleep(ulen);
+		usleep(ulen - 10000);
+		tone.volume = 0;
+		if ((error = gn_sm_functions(GN_OP_PlayTone, &data, &state)) != GN_ERR_NONE) break;
+		usleep(10000);
 	}
 	if (error == GN_ERR_NONE) {
 		tone.frequency = 0;
@@ -4172,6 +4194,36 @@ static int playringtone(int argc, char *argv[])
 		fprintf(stderr, _("Play failed: %s\n"), gn_error_print(error));
 
 	return error;
+}
+
+static int ringtoneconvert(int argc, char *argv[])
+{
+	gn_ringtone ringtone;
+	gn_error error;
+	unsigned char buff[512];
+	int i, ulen;
+
+	memset(&ringtone, 0, sizeof(ringtone));
+	gn_data_clear(&data);
+	data.ringtone = &ringtone;
+
+	if (argc != 2) {
+		usage(stderr, -1);
+		return -1;
+	}
+
+	if ((error = gn_file_ringtone_read(argv[0], &ringtone)) != GN_ERR_NONE) {
+		fprintf(stderr, _("Failed to load ringtone: %s\n"), gn_error_print(error));
+		return error;
+	}
+	if ((error = gn_file_ringtone_save(argv[1], &ringtone)) != GN_ERR_NONE) {
+		fprintf(stderr, _("Failed to save ringtone: %s\n"), gn_error_print(error));
+		return error;
+	}
+
+	fprintf(stderr, _("%d note(s) converted.\n"), ringtone.notes_count);
+
+	return GN_ERR_NONE;
 }
 
 static int presskey(void)
@@ -4710,6 +4762,9 @@ int main(int argc, char *argv[])
 		/* Play ringtone */
 		{ "playringtone",       required_argument, NULL, OPT_PLAYRINGTONE },
 
+		/* Convert ringtone */
+		{ "ringtoneconvert",    required_argument, NULL, OPT_RINGTONECONVERT },
+
 		/* Get SMS center number mode */
 		{ "getsmsc",            optional_argument, NULL, OPT_GETSMSC },
 
@@ -4842,7 +4897,8 @@ int main(int argc, char *argv[])
 		{ OPT_VIEWLOGO,          1, 1, 0 },
 		{ OPT_GETRINGTONE,       1, 3, 0 },
 		{ OPT_SETRINGTONE,       1, 5, 0 },
-		{ OPT_PLAYRINGTONE,      1, 1, 0 },
+		{ OPT_PLAYRINGTONE,      1, 3, 0 },
+		{ OPT_RINGTONECONVERT,   2, 2, 0 },
 		{ OPT_RESET,             0, 1, 0 },
 		{ OPT_GETPROFILE,        0, 3, 0 },
 		{ OPT_SETACTIVEPROFILE,  1, 1, 0 },
@@ -4917,7 +4973,7 @@ int main(int argc, char *argv[])
 #endif
 
 		/* Initialise the code for the GSM interface. */
-		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE && c != OPT_LISTNETWORKS)
+		if (c != OPT_VIEWLOGO && c != OPT_FOOGLE && c != OPT_LISTNETWORKS && c != OPT_RINGTONECONVERT)
 			businit();
 
 		switch(c) {
@@ -5048,7 +5104,10 @@ int main(int argc, char *argv[])
 			rc = sendringtone(nargc, nargv);
 			break;
 		case OPT_PLAYRINGTONE:
-			rc = playringtone(nargc, nargv);
+			rc = playringtone(argc, argv);
+			break;
+		case OPT_RINGTONECONVERT:
+			rc = ringtoneconvert(nargc, nargv);
 			break;
 		case OPT_GETPROFILE:
 			rc = getprofile(argc, argv);

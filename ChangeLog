@@ -6,14 +6,19 @@
  * 6110 series updates
     o PlayTone message and documentation fixed     (BORBELY Zoltan)
     o get_locks_info and play_tone moved to nokia  (BORBELY Zoltan)
+    o GetRingtone support added                    (BORBELY Zoltan)
  * 7110 series updates
     o PlayTone implemented                         (BORBELY Zoltan)
     o GetLocksInfo implemented                     (BORBELY Zoltan)
     o GetProfile implemented                       (BORBELY Zoltan)
  * libgnokii changes
     o Tomi Ollila's readmidi.c added               (BORBELY Zoltan)
+    o Nokia raw ringtone conversion functions      (BORBELY Zoltan)
  * Documentation updates
     o nk7110 profile reading messages updated      (BORBELY Zoltan)
+ * gnokii changes
+    o ringtoneconvert support added                (BORBELY Zoltan)
+    o playringtone updates and fixes               (BORBELY Zoltan)
 
 0.5.4
 =====

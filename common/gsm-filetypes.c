@@ -110,6 +110,7 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 	filetype = GN_FT_RTTL;
 	if (strstr(filename, ".ott")) filetype = GN_FT_OTT; /* OTT files saved by NCDS3 */
 	else if (strstr(filename, ".mid")) filetype = GN_FT_MIDI;
+	else if (strstr(filename, ".raw")) filetype = GN_FT_NOKRAW_TONE;
 
 	error = GN_ERR_NONE;
 
@@ -126,6 +127,10 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 		break;
 	case GN_FT_MIDI:
 		error = file_midi_load(file, ringtone);
+		fclose(file);
+		break;
+	case GN_FT_NOKRAW_TONE:
+		error = file_nokraw_load(file, ringtone);
 		fclose(file);
 		break;
 	default:
@@ -263,6 +268,27 @@ gn_error file_rttl_load(FILE *file, gn_ringtone *ringtone)
 }
 
 
+gn_error file_nokraw_load(FILE *file, gn_ringtone *ringtone)
+{
+	unsigned char buf[4096];
+	int n;
+	gn_error err;
+
+	strcpy(ringtone->name, "GNOKII");
+
+	if ((n = fread(buf, 1, sizeof(buf), file)) < 0) return GN_ERR_UNKNOWN;
+
+	if (buf[0] == 0x00 && buf[1] == 0x02 && buf[2] == 0xfc && buf[3] == 0x09)
+		err = pnok_ringtone_from_raw(ringtone, buf + 4, n - 4);
+	else if (buf[0] == 0x02 && buf[1] == 0xfc && buf[2] == 0x09)
+		err = pnok_ringtone_from_raw(ringtone, buf + 3, n - 3);
+	else
+		err = pnok_ringtone_from_raw(ringtone, buf, n);
+
+	return err;
+}
+
+
 /* Save the ringtone file - this will overwrite the file */
 /* Confirming must be done before this is called */
 gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone)
@@ -281,6 +307,8 @@ gn_error gn_file_ringtone_save(char *filename, gn_ringtone *ringtone)
 	} else if (strstr(filename, ".mid")) {
 		/* saving in midi format hasn't supported yet */
 		error = GN_ERR_WRONGDATAFORMAT;
+	} else if (strstr(filename, ".raw")) {
+		error = file_nokraw_save(file, ringtone);
 	} else {
 		error = file_rttl_save(file, ringtone);
 	}
@@ -479,6 +507,19 @@ gn_error file_rttl_save(FILE *file, gn_ringtone *ringtone)
 		if (i != ringtone->notes_count - 1)
 			fprintf(file, ",");
 	}
+
+	return GN_ERR_NONE;
+}
+
+gn_error file_nokraw_save(FILE *file, gn_ringtone *ringtone)
+{
+	int n = 4096;
+	char buf[n];
+	gn_error err;
+
+	if ((err = pnok_ringtone_to_raw(buf, &n, ringtone)) != GN_ERR_NONE) return err;
+
+	if (fwrite(buf, n, 1, file) != 1) return GN_ERR_UNKNOWN;
 
 	return GN_ERR_NONE;
 }
