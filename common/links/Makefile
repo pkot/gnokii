@@ -17,22 +17,23 @@
 TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
-OBJS =	atbus.o \
-	fbus.o \
-	fbus-phonet.o \
-	fbus-3110.o \
-	m2bus.o \
-	utils.o
+OBJS =	atbus.lo \
+	fbus.lo \
+	fbus-phonet.lo \
+	fbus-3110.lo \
+	m2bus.lo \
+	utils.lo
 
-#	cbus.o
+#	cbus.lo
 
-all: LINKS.o
+all: libLINKS.la
 
-LINKS.o: $(OBJS)
-	$(LD) LINKS.o $(OBJS)
+libLINKS.la: $(OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o libLINKS.la $(OBJS)
 
 clean:
-	$(RM) $(OBJS) *~ depend LINKS.o
+	$(LIBTOOL) --mode=clean $(RM) libLINKS.la $(OBJS)
+	$(RM) *~ depend
 
 install:
 	@echo

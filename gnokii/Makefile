@@ -16,22 +16,12 @@ ifdef OWN_GETOPT
 endif
 
 ifndef WIN32_CROSS
-ifdef NO_SHARED
-	GNOKII_LIB=libgnokii.a
-else
-	GNOKII_LIB=libgnokii.so
-endif
 PRGNAME=gnokii
 else
-ifdef NO_SHARED
-	GNOKII_LIB=gnokii.lib
-else
-	GNOKII_LIB=gnokii.dll
-endif
 PRGNAME=gnokii.exe
 endif
 
-LDLIBS += -L$(TOPDIR)/common -lgnokii
+LDLIBS += $(TOPDIR)/common/libgnokii.la
 
 ifdef XPM_LIBS
 	LDLIBS += $(XPM_LIBS)
@@ -43,25 +33,26 @@ endif
 
 all: $(PRGNAME)
 
-gnokii: $(OBJS) $(TOPDIR)/common/$(GNOKII_LIB)
-	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
+gnokii: $(OBJS) $(TOPDIR)/common/libgnokii.la
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 gnokii.exe: $(OBJS) $(TOPDIR)/common/$(GNOKII_LIB)
-	$(CC) -mconsole $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
+	$(LIBTOOL) --mode=link $(CC) -mconsole $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 $(TOPDIR)/getopt/libgetopt.a:
 	$(MAKE) -C $(TOPDIR)/getopt
 
 clean:
-	$(RM) $(OBJS) *~ depend gnokii *.exe core *.bak
+	$(LIBTOOL) --mode=clean $(RM) gnokii $(OBJS)
+	$(RM) *~ depend *.exe core *.bak
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) gnokii $(DESTDIR)$(bindir)
+	$(LIBTOOL) --mode=install $(INSTALL) gnokii $(DESTDIR)$(bindir)
 
 install-strip: all
 	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) -s gnokii $(DESTDIR)$(bindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -s gnokii $(DESTDIR)$(bindir)
 	@echo "done"
 
 install-suid: all
@@ -69,7 +60,7 @@ install-suid: all
 		/usr/sbin/groupadd gnokii; \
 	fi
 	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) -o root -g gnokii -m 0750 gnokii $(DESTDIR)$(bindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 0750 gnokii $(DESTDIR)$(bindir)
 	@echo
 
 install-ss: all
@@ -77,7 +68,7 @@ install-ss: all
 		/usr/sbin/groupadd gnokii; \
 	fi
 	$(INSTALL) -d $(DESTDIR)$(bindir)
-	$(INSTALL) -o root -g gnokii -m 0750 -s gnokii $(DESTDIR)$(bindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 0750 -s gnokii $(DESTDIR)$(bindir)
 	@echo
 
 depend dep:

@@ -26,7 +26,7 @@ CFLAGS += -DMODULES_DIR=\"${libdir}/smsd\" $(PTHREAD_CFLAGS) \
 LDLIBS += $(PTHREAD_LIBS) \
 	  $(shell $(GLIBLDLIBS))
 
-LDLIBS += -s -rdynamic -L$(TOPDIR)/common -lgnokii -ldl
+LDLIBS += -rdynamic $(TOPDIR)/common/libgnokii.la -ldl
 # Some systems, eg. FreeBSD don't have libdl. Use this:
 # LDLIBS += -s -rdynamic -L$(TOPDIR)/common -lgnokii
 
@@ -44,8 +44,8 @@ OBJS = 	smsd.o \
 all: smsd
 
 
-smsd: $(OBJS) $(TOPDIR)/common/libgnokii.so
-	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
+smsd: $(OBJS) $(TOPDIR)/common/libgnokii.la
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 
 ### DB Modules
@@ -53,33 +53,36 @@ smsd: $(OBJS) $(TOPDIR)/common/libgnokii.so
 # FIXME: detect it in configure
 
 # PostgreSQL support
-libpq.so: smsd.h pq.c
-	$(CC) -s -shared -o libpq.so $(CFLAGS) -I../include \
-	-I/usr/include/pgsql pq.c $(shell $(GLIBLDLIBS)) -lpq
+libpq.la: smsd.h pq.c
+	$(LIBTOOL) --mode=link $(CC) -o libpq.la $(CFLAGS) -I../include \
+	-I/usr/include/pgsql pq.c $(shell $(GLIBLDLIBS)) -lpq -avoid-version -rpath $(libdir)/smsd
 
 # MySQL support
-libmysql.so: smsd.h mysql.c
-	$(CC) -s -shared -o libmysql.so $(CFLAGS) -I../include \
+libmysql.la: smsd.h mysql.c
+	$(LIBTOOL) --mode=link $(CC) -o libmysql.la $(CFLAGS) -I../include \
 	$(shell mysql_config --cflags) mysql.c $(shell $(GLIBLDLIBS)) $(shell mysql_config --libs)
 
 # File support
-libfile.so: smsd.h file.c
-	$(CC) -s -shared -o libfile.so $(CFLAGS) -I../include \
+libfile.la: smsd.h file.c
+	$(LIBTOOL) --mode=link $(CC) -o libfile.so $(CFLAGS) -I../include \
         file.c $(shell $(GLIBLDLIBS))
 
 ### End of DB Modules
 
-$(TOPDIR)/common/libgnokii.so:
-	$(MAKE) -C $(TOPDIR)/common libgnokii.so
+$(TOPDIR)/common/libgnokii.la:
+	$(MAKE) -C $(TOPDIR)/common libgnokii.la
 
 clean:
-	$(RM) $(OBJS) *~ depend smsd *.so core*
+	$(LIBTOOL) --mode=clean $(RM) smsd libpq.la libmysql.la libfile.la $(OBJS)
+	$(RM) *~ depend *.so core*
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
-	$(INSTALL) -m 755 -s smsd $(DESTDIR)$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -m 755 smsd $(DESTDIR)$(sbindir)
 	$(INSTALL) -d $(DESTDIR)${libdir}/smsd
-	$(INSTALL) lib*.so $(DESTDIR)${libdir}/smsd
+	for f in lib*.la ; do \
+	$(LIBTOOL) --mode=install $(INSTALL) $$f $(DESTDIR)${libdir}/smsd ; \
+	done
 	$(INSTALL) -d $(DESTDIR)$(man8dir)
 	$(INSTALL_DATA) $(SMSD_MAN) $(DESTDIR)$(man8dir)
 

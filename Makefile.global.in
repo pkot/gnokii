@@ -12,10 +12,9 @@ VERSION        = @VERSION@
 
 SHELL          = @SHELL@
 
-LD             = @CC@ -Xlinker -r -nostdlib -nodefaultlibs -o
-
 PACKAGE        = gnokii
 
+top_builddir   = $(TOPDIR)
 srcdir         = @srcdir@
 prefix         = @prefix@
 exec_prefix    = @exec_prefix@
@@ -51,6 +50,7 @@ LIBS           = @LIBS@
 LEX            = @LEX@
 AR             = @AR@
 RANLIB         = @RANLIB@
+LIBTOOL        = @LIBTOOL@
 
 GTK_CFLAGS     = @GTK_CFLAGS@
 GTK_LIBS       = @GTK_LIBS@
@@ -60,7 +60,6 @@ XPM_LIBS       = @XPM_LIBS@
 XPM_CFLAGS     = @XPM_CFLAGS@
 ICONV_LIBS     = @LIBICONV@
 OWN_GETOPT     = @OWN_GETOPT@
-NO_SHARED      = @NO_SHARED@
 
 HAVE_XGNOKII   = @HAVE_XGNOKII@
 WIN32          = @WIN32@
@@ -88,3 +87,6 @@ endif
 
 CFLAGS += -I$(GNOKII_INCLUDE)
 LDLIBS = $(LIBS)
+
+%.lo: %.c
+	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<

@@ -17,26 +17,27 @@
 TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
-OBJS =	tekram.o \
-	bluetooth.o
+OBJS =	tekram.lo \
+	bluetooth.lo
 
 ifdef WIN32
-	OBJS += winserial.o
+	OBJS += winserial.lo
 else
-	OBJS += unixserial.o \
-		unixirda.o \
-		unixbluetooth.o \
-		osxbluetooth.o \
-		tcp.o
+	OBJS += unixserial.lo \
+		unixirda.lo \
+		unixbluetooth.lo \
+		osxbluetooth.lo \
+		tcp.lo
 endif
 
-all: DEVICES.o
+all: libDEVICES.la
 
-DEVICES.o: $(OBJS)
-	$(LD) DEVICES.o $(OBJS)
+libDEVICES.la: $(OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o libDEVICES.la $(OBJS)
 
 clean:
-	$(RM) $(OBJS) *~ depend LINKS.o
+	$(LIBTOOL) --mode=clean $(RM) libDEVICES.la $(OBJS)
+	$(RM) *~ depend
 
 install:
 	@echo

@@ -12,6 +12,7 @@ if [ -f configure.in~ ]; then
 	mv configure.in~ configure.in
 fi
 
+libtoolize -c -f
 aclocal
 autoheader
 autoconf

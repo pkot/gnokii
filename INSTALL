@@ -8,6 +8,7 @@ Quickstart
 ==========
 
     $ gettextize                # only for CVS copies
+    $ libtoolize		# only for CVS copies
     $ aclocal			# only for CVS copies
     $ autoheader		# only for CVS copies
     $ autoconf			# only for CVS copies
@@ -49,6 +50,7 @@ Preparations
 If you retrieved this copy from CVS, then first call
 
     $ gettextize
+    $ libtoolize
     $ aclocal
     $ autoheader
     $ autoconf

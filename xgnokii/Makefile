@@ -27,43 +27,38 @@ CFLAGS += $(PTHREAD_CFLAGS) \
 LDLIBS += $(PTHREAD_LIBS) \
 	  $(GTK_LIBS)
 
-GLDLIBS += -L$(TOPDIR)/common -lgnokii
+GLDLIBS += $(TOPDIR)/common/libgnokii.la
 
-OBJS = 	xgnokii.o \
-	xgnokii_common.o \
-	xgnokii_contacts.o \
-	xgnokii_sms.o \
-	xgnokii_netmon.o \
-	xgnokii_dtmf.o \
-	xgnokii_cfg.o \
-	xgnokii_speed.o \
-	xgnokii_xkeyb.o \
-	xgnokii_calendar.o \
-	xgnokii_logos.o \
-	xgnokii_xring.o \
-	xgnokii_lowlevel.o \
-	xgnokii_data.o
+OBJS = 	xgnokii.lo \
+	xgnokii_common.lo \
+	xgnokii_contacts.lo \
+	xgnokii_sms.lo \
+	xgnokii_netmon.lo \
+	xgnokii_dtmf.lo \
+	xgnokii_cfg.lo \
+	xgnokii_speed.lo \
+	xgnokii_xkeyb.lo \
+	xgnokii_calendar.lo \
+	xgnokii_logos.lo \
+	xgnokii_xring.lo \
+	xgnokii_lowlevel.lo \
+	xgnokii_data.lo
 
 HELP_DIR = docs/help
-
-ifdef NO_SHARED
-        GNOKII_LIB=libgnokii.a
-else
-        GNOKII_LIB=libgnokii.so
-endif
 
 all: xgnokii
 
 
-xgnokii: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/$(GNOKII_LIB)
-	$(CC) $(LDFLAGS) $(OBJS) $(GLDLIBS) $(TOPDIR)/common/data/DATA.o $(LDLIBS) -o $@
+xgnokii: $(OBJS) $(TOPDIR)/common/data/libDATA.la $(TOPDIR)/common/libgnokii.la
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(OBJS) $(GLDLIBS) $(TOPDIR)/common/data/libDATA.la $(LDLIBS) -o $@
 
 clean:
-	$(RM) $(OBJS) *~ xpm/*~ depend xgnokii
+	$(LIBTOOL) --mode=clean $(RM) xgnokii $(OBJS)
+	$(RM) *~ xpm/*~ depend
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(xbindir)
-	$(INSTALL) xgnokii $(DESTDIR)$(xbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) xgnokii $(DESTDIR)$(xbindir)
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -93,7 +88,7 @@ install: all
 
 install-strip: all
 	$(INSTALL) -d $(DESTDIR)$(xbindir)
-	$(INSTALL) -s xgnokii $(DESTDIR)$(xbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -s xgnokii $(DESTDIR)$(xbindir)
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -127,7 +122,7 @@ install-suid: all
 		/usr/sbin/groupadd gnokii; \
 	fi
 	$(INSTALL) -d $(DESTDIR)$(xbindir)
-	$(INSTALL) -o root -g gnokii -m 0750 xgnokii $(DESTDIR)$(xbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 0750 xgnokii $(DESTDIR)$(xbindir)
 	$(INSTALL) -o root -g gnokii -d -m 0750 $(DESTDIR)$(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -161,7 +156,7 @@ install-ss: all
 		/usr/sbin/groupadd gnokii; \
 	fi
 	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xbindir)
-	$(INSTALL) -o root -g gnokii -m 0750 -s xgnokii $(DESTDIR)$(xbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 0750 -s xgnokii $(DESTDIR)$(xbindir)
 	$(INSTALL) -o root -g gnokii -d -m 0750 $(DESTDIR)$(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \

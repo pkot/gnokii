@@ -4,6 +4,7 @@
     o supress compilation warnings                      (Pawel Kot)
     o caller group name and ringtone will be shown (BORBELY Zoltan)
     o install po/ directory with make install         (Guido Falsi)
+    o libtool support added              (PLD Team, BORBELY Zoltan)
  * smsd updates
     o update README with some module clarification      (Pawel Kot)
  * xgnokii updates

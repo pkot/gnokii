@@ -19,94 +19,66 @@ include $(TOPDIR)/Makefile.global
 
 MAJOR_NUMBER = 1
 MINOR_NUMBER = 6
+LIBTOOL_VER = -version-info $(MAJOR_NUMBER):$(MINOR_NUMBER):0
+LIBTOOL_RPATH=-rpath $(libdir)
 
-OBJS =	gsm-api.o \
-	gsm-error.o \
-	gsm-statemachine.o \
-	cfgreader.o \
-	device.o \
-	vcal.o \
-	vcard.o \
-	ldif.o \
-	gsm-networks.o \
-	gsm-filetypes.o \
-	readmidi.o \
-	gsm-ringtones.o \
-	gsm-bitmaps.o \
-	gsm-sms.o \
-	gsm-call.o \
-	gsm-encoding.o \
-	gsm-common.o \
-	sms-nokia.o \
-	nokia-decoding.o \
-	compat.o \
-	misc.o \
-	snprintf.o
+OBJS =	gsm-api.lo \
+	gsm-error.lo \
+	gsm-statemachine.lo \
+	cfgreader.lo \
+	device.lo \
+	vcal.lo \
+	vcard.lo \
+	ldif.lo \
+	gsm-networks.lo \
+	gsm-filetypes.lo \
+	readmidi.lo \
+	gsm-ringtones.lo \
+	gsm-bitmaps.lo \
+	gsm-sms.lo \
+	gsm-call.lo \
+	gsm-encoding.lo \
+	gsm-common.lo \
+	sms-nokia.lo \
+	nokia-decoding.lo \
+	compat.lo \
+	misc.lo \
+	snprintf.lo
 
-ifndef WIN32_CROSS
-GNOKII_STATIC=libgnokii.a
-ifndef NO_SHARED
-GNOKII_LIB  =libgnokii.so
-GNOKII_LIBM =$(GNOKII_LIB).$(MAJOR_NUMBER)
-GNOKII_LIBMM=$(GNOKII_LIBM).$(MINOR_NUMBER)
-endif
-else
-ifdef NO_SHARED
-GNOKII_LIB=gnokii.lib
-else
-GNOKII_LIB=gnokii.dll
-endif
-endif
+all: libgnokii.la
 
-all: $(GNOKII_LIB) $(GNOKII_STATIC)
+phones/libPHONES.la:
+	$(MAKE) -C phones libPHONES.la
 
-phones/PHONES.o:
-	$(MAKE) -C phones PHONES.o
+links/libLINKS.la:
+	$(MAKE) -C links libLINKS.la
 
-links/LINKS.o:
-	$(MAKE) -C links LINKS.o
+devices/libDEVICES.la:
+	$(MAKE) -C devices libDEVICES.la
 
-devices/DEVICES.o:
-	$(MAKE) -C devices DEVICES.o
+gnokii-debug: $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la ../gnokii/gnokii.o
+	$(LIBTOOL) --mode=link $(CC) -o gnokii-debug $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la ../gnokii/gnokii.o
 
-gnokii-debug: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/gnokii.o
-	$(CC) -o gnokii-debug $(LIBS) $(XPM_LIBS) $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o ../gnokii/gnokii.o
-
-libgnokii.so: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	$(CC) -shared -Wl,-soname,$(GNOKII_LIBM) -o $(GNOKII_LIBMM) $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	ln -sf $(GNOKII_LIBMM) $(GNOKII_LIBM)
-	ln -sf $(GNOKII_LIBM) $(GNOKII_LIB)
-
-libgnokii.a: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	$(RM) libgnokii.a
-	$(AR) rc libgnokii.a $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o 
-	$(RANLIB) libgnokii.a
-
-gnokii.dll: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	$(CC) -mwindows -shared -o $@ $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o -Wl,--output-def,gnokii.def,--out-implib,gnokii.lib
-
-gnokii.lib: $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	$(RM) gnokii.lib
-	$(AR) rc gnokii.lib $(OBJS) phones/PHONES.o links/LINKS.o devices/DEVICES.o
-	$(RANLIB) gnokii.lib
+libgnokii.la: $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la
+	$(LIBTOOL) --mode=link $(CC) -o libgnokii.la $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la $(LIBTOOL_VER) $(LIBTOOL_RPATH)
 
 vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
 
 clean:
-	$(RM) $(OBJS) *~ depend libgnokii.a libgnokii.so* gnokii.lib gnokii.dll gnokii.def phones/PHONES.o links/LINKS.o devices/DEVICES.o
+	$(MAKE) -C data clean
+	$(MAKE) -C phones clean
+	$(MAKE) -C links clean
+	$(MAKE) -C devices clean
+	$(LIBTOOL) --mode=clean $(RM) libgnokii.la $(OBJS)
+	$(RM) *~ depend
 
 distclean:
 	$(RM) vcal.c
 
 install:
 	$(INSTALL) -d $(DESTDIR)$(libdir)
-	$(INSTALL) $(GNOKII_STATIC) $(DESTDIR)$(libdir)
-ifndef NO_SHARED
-	$(INSTALL) $(GNOKII_LIBMM) $(DESTDIR)$(libdir)
-	cd $(DESTDIR)$(libdir) && ln -sf $(GNOKII_LIBMM) $(GNOKII_LIBM)
-	cd $(DESTDIR)$(libdir) && ln -sf $(GNOKII_LIBM) $(GNOKII_LIB)
-endif
+	$(LIBTOOL) --mode=install $(INSTALL) libgnokii.la $(DESTDIR)$(libdir)
 	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL_DATA) gnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	@echo

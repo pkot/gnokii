@@ -9,7 +9,7 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-LDLIBS += -L$(TOPDIR)/common -lgnokii
+LDLIBS += $(TOPDIR)/common/libgnokii.la
 
 ifdef XPM_LIBS
 	LDLIBS += $(XPM_LIBS)
@@ -21,27 +21,22 @@ endif
 
 OBJS = gnokiid.o
 
-ifdef NO_SHARED
-        GNOKII_LIB=libgnokii.a
-else
-        GNOKII_LIB=libgnokii.so
-endif
-
 all: gnokiid
 
-gnokiid: $(OBJS) $(TOPDIR)/common/data/DATA.o $(TOPDIR)/common/$(GNOKII_LIB)
-	$(CC) $(LDFLAGS) $(OBJS) $(TOPDIR)/common/data/DATA.o $(LDLIBS) -o $@
+gnokiid: $(OBJS) $(TOPDIR)/common/data/libDATA.la $(TOPDIR)/common/libgnokii.la
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(OBJS) $(TOPDIR)/common/data/libDATA.la $(LDLIBS) -o $@
 
 clean:
-	$(RM) $(OBJS) *~ depend gnokiid *.exe core *.bak
+	$(LIBTOOL) --mode=clean $(RM) gnokiid $(OBJS)
+	$(RM) *~ depend core *.bak
 
 install: all
 	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(INSTALL) gnokiid $(DESTDIR)/$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) gnokiid $(DESTDIR)/$(sbindir)
 
 install-strip: all
 	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(INSTALL) -s gnokiid $(DESTDIR)/$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -s gnokiid $(DESTDIR)/$(sbindir)
 	@echo "done"
 
 install-suid: all
@@ -49,7 +44,7 @@ install-suid: all
 		/usr/sbin/groupadd gnokii; \
 	fi
 	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(INSTALL) -o root -g gnokii -m 4750 gnokiid $(DESTDIR)/$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 4750 gnokiid $(DESTDIR)/$(sbindir)
 	@echo "done"
 
 install-ss: all
@@ -57,7 +52,7 @@ install-ss: all
 		/usr/sbin/groupadd gnokii; \
 	fi
 	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(INSTALL) -o root -g gnokii -m 4750 -s gnokiid $(DESTDIR)/$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 4750 -s gnokiid $(DESTDIR)/$(sbindir)
 	@echo "done"
 
 depend dep:

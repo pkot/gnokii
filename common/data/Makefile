@@ -17,19 +17,20 @@
 TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
-OBJS =	at-emulator.o \
-	datapump.o \
-	rlp-common.o \
-	rlp-crc24.o \
-	virtmodem.o
+OBJS =	at-emulator.lo \
+	datapump.lo \
+	rlp-common.lo \
+	rlp-crc24.lo \
+	virtmodem.lo
 
-all: DATA.o
+all: libDATA.la
 
-DATA.o: $(OBJS)
-	$(LD) DATA.o $(OBJS)
+libDATA.la: $(OBJS)
+	$(LIBTOOL) --mode=link $(CC) -o libDATA.la $(OBJS)
 
 clean:
-	$(RM) $(OBJS) *~ depend DATA.o
+	$(LIBTOOL) --mode=clean $(RM) libDATA.la $(OBJS)
+	$(RM) *~ depend
 
 install:
 	@echo
