@@ -22,7 +22,7 @@ AC_PROG_CC
 AC_PATH_PROG(LD, ld, no)
 AC_PATH_PROG(RM, rm, no)
 AC_CHECK_PROGS(MAKE, gmake make)
-AC_PATH_PROG(INSTALL, install, no)
+AC_PROG_INSTALL
 
 AC_ARG_ENABLE(debug, 
 	[  --enable-debug          compile with debug code],
@@ -194,7 +194,7 @@ else
 		[ -L$x_libraries -lX11 ]
 	) 
 
-	AC_PATH_PROG(GTK_CONFIG, gtk-config, no)
+	AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
 	if test "$GTK_CONFIG" = no
 	then
 		AC_MSG_ERROR(Cannot find gtk-config.)

@@ -28,3 +28,7 @@
 
 * Mon May  1 10:34:44 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
 - New support for NLS (Stano)
+
+* Mon May  1 14:48:52 CEST 2000 Pavel Janik ml. <Pavel.Janik@linux.cz>
+- more FreeBSD-help stuff in the build process
+
