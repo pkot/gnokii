@@ -47,7 +47,7 @@ extern bool CommandMode;
 /* Local variables */
 int		PtyRDFD;	/* File descriptor for reading and writing to/from */
 int		PtyWRFD;	/* pty interface - only different in debug mode. */
-struct pollfd ufds;
+struct pollfd ufds[2];
 u8 pluscount;
 bool connected;
 
@@ -55,12 +55,16 @@ bool DP_Initialise(int read_fd, int write_fd)
 {
 	PtyRDFD = read_fd;
 	PtyWRFD = write_fd;
-	ufds.fd = PtyRDFD;
-	ufds.events = POLLIN;
-	RLP_Initialise(/* GSM->SendRLPFrame */ NULL, DP_CallBack);
+	ufds[0].fd = PtyRDFD;
+	ufds[0].events = POLLIN;
+	ufds[1].fd = device_getfd();
+	ufds[1].events = POLLIN;
+	RLP_Initialise(DP_SendRLPFrame, DP_CallBack);
 	RLP_SetUserRequest(Attach_Req, true);
 	pluscount = 0;
 	connected = false;
+	data.RLP_RX_Callback = RLP_DisplayF96Frame;
+	SM_Functions(GOP_SetRLPRXCallback, &data, sm);
 	return true;
 }
 
@@ -95,14 +99,16 @@ int DP_CallBack(RLP_UserInds ind, u8 *buffer, int length)
 		RLP_SetUserRequest(Reset_Resp, true);
 		break;
 	case GetData:
-		if (poll(&ufds, 1, 0)) {
+		if (poll(ufds, 2, 0) <= 0) break;
+		if (ufds[1].revents & POLLIN) SM_Loop(sm, 1);
+		if (ufds[0].revents) {
 
 			/* Check if the program has closed */
 			/* Return to command mode */
 			/* Note that the call will still be in progress, */
 			/* as with a normal modem (I think) */
 
-			if (ufds.revents != POLLIN) {
+			if (ufds[0].revents != POLLIN) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
 				data.CallNotification = ATEM_CallPassup;
@@ -169,4 +175,12 @@ void DP_CallPassup(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo)
 	default:
 		break;
 	}
+}
+
+int DP_SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
+{
+	data.RLP_Frame = frame;
+	data.RLP_OutDTX = out_dtx;
+
+	return SM_Functions(GOP_SendRLPFrame, &data, sm);
 }

@@ -18,6 +18,7 @@
 #include "gsm-common.h"
 #include "gsm-sms.h"
 #include "gsm-error.h"
+#include "data/rlp-common.h"
 
 /* This is a generic holder for high level information - eg a GSM_Bitmap */
 typedef struct {
@@ -57,6 +58,9 @@ typedef struct {
 	GSM_NetMonitor *NetMonitor;
 	GSM_CallInfo *CallInfo;
 	void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo);
+	RLP_F96Frame *RLP_Frame;
+	bool RLP_OutDTX;
+	void (*RLP_RX_Callback)(RLP_F96Frame *Frame);
 } GSM_Data;
 
 /* Global structures intended to be independant of phone etc */
@@ -138,6 +142,8 @@ typedef enum {
 	GOP_AnswerCall,
 	GOP_CancelCall,
 	GOP_SetCallNotification,
+	GOP_SendRLPFrame,
+	GOP_SetRLPRXCallback,
 	GOP_Max,	/* don't append anything after this entry */
 } GSM_Operation;
 

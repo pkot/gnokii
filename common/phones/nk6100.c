@@ -86,6 +86,7 @@ static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
 /* FIXME: we should get rid on it */
 static void (*OnCellBroadcast)(GSM_CBMessage *Message) = NULL;
 static void (*CallNotification)(GSM_CallStatus CallStatus, GSM_CallInfo *CallInfo) = NULL;
+static void (*RLP_RXCallback)(RLP_F96Frame *Frame) = NULL;
 
 /* static functions prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
@@ -130,6 +131,8 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error AnswerCall(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error CancelCall(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetCallNotification(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SendRLPFrame(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetRLPRXCallback(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -142,6 +145,7 @@ static GSM_Error IncomingCalendar(int messagetype, unsigned char *message, int l
 static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSecurity(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
+static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data);
 
 static int GetMemoryType(GSM_MemoryType memory_type);
 
@@ -158,6 +162,7 @@ static GSM_IncomingFunctionType IncomingFunctions[] = {
 	{ 0x64, IncomingPhoneInfo },
 	{ 0x40, IncomingSecurity },
 	{ 0x01, IncomingCallInfo },
+	{ 0xf1, IncomingRLPFrame },
 	{ 0, NULL}
 };
 
@@ -267,6 +272,10 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return CancelCall(data, state);
 	case GOP_SetCallNotification:
 		return SetCallNotification(data, state);
+	case GOP_SendRLPFrame:
+		return SendRLPFrame(data, state);
+	case GOP_SetRLPRXCallback:
+		return SetRLPRXCallback(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -2217,7 +2226,7 @@ static GSM_Error MakeCall(GSM_Data *data, GSM_Statemachine *state)
 		if (SM_SendMessage(state, pos - req, 0x01, req) != GE_NONE) return GE_NOTREADY;
 		break;
 	default:
-		dprintf("Invalid call type %d\n", 1);
+		dprintf("Invalid call type %d\n", data->CallInfo->Type);
 		return GE_INTERNALERROR;
 	}
 
@@ -2270,6 +2279,10 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 			data->CallInfo->CallID = message[4];
 		break;
 
+	/* Call in progress */
+	case 0x03:
+		return GE_UNSOLICITED;
+
 	/* Remote end hang up */
 	case 0x04:
 		memset(&cinfo, 0, sizeof(cinfo));
@@ -2296,6 +2309,14 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 			CallNotification(GSM_CS_IncomingCall, &cinfo);
 		return GE_UNSOLICITED;
 	
+	/* answered call */
+	case 0x07:
+		memset(&cinfo, 0, sizeof(cinfo));
+		cinfo.CallID = message[4];
+		if (CallNotification)
+			CallNotification(GSM_CS_Established, &cinfo);
+		return GE_UNSOLICITED;
+
 	/* terminated call */
 	case 0x09:
 		memset(&cinfo, 0, sizeof(cinfo));
@@ -2308,13 +2329,115 @@ static GSM_Error IncomingCallInfo(int messagetype, unsigned char *message, int l
 	case 0x0a:
 		return GE_UNSOLICITED;
 
+	/* call held */
+	case 0x23:
+		memset(&cinfo, 0, sizeof(cinfo));
+		cinfo.CallID = message[4];
+		if (CallNotification)
+			CallNotification(GSM_CS_CallHeld, &cinfo);
+		return GE_UNSOLICITED;
+
+	/* call resumed */
+	case 0x25:
+		memset(&cinfo, 0, sizeof(cinfo));
+		cinfo.CallID = message[4];
+		if (CallNotification)
+			CallNotification(GSM_CS_CallResumed, &cinfo);
+		return GE_UNSOLICITED;
+
 	/* Send DTMF/voice call reply */
 	case 0x40:
+		break;
+	
+	/* FIXME: response from answer1? - bozo */
+	case 0x44:
 		break;
 
 	default:
 		return GE_UNHANDLEDFRAME;
 	}
+
+	return GE_NONE;
+}
+
+
+static GSM_Error SendRLPFrame(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[32] = {0x00, 0xd9};
+
+	/*
+	 * Discontinuos transmission (DTX).
+	 * See section 5.6 of GSM 04.22 version 7.0.1.
+	 */
+
+	if (data->RLP_OutDTX) req[1] = 0x01;
+	memcpy(req + 2, (unsigned char *) data->RLP_Frame, 30);
+
+	/*
+	 * It's ugly like the hell, maybe we should implement SM_SendFrame
+	 * and extend the GSM_Link structure. We should clean this up in the
+	 * future... - bozo
+	 * return SM_SendFrame(state, 32, 0xf0, req);
+	 */
+
+	return FBUS_TX_SendFrame(32, 0xf0, req);
+}
+
+static GSM_Error SetRLPRXCallback(GSM_Data *data, GSM_Statemachine *state)
+{
+	RLP_RXCallback = data->RLP_RX_Callback;
+
+	return GE_NONE;
+}
+
+static GSM_Error IncomingRLPFrame(int messagetype, unsigned char *message, int length, GSM_Data *data)
+{
+	RLP_F96Frame frame;
+
+	/*
+	 * We do not need RLP frame parsing to be done when we do not have
+	 * callback specified.
+	 */
+
+	if (!RLP_RXCallback) return GE_NONE;
+
+	/*
+	 * Anybody know the official meaning of the first two bytes?
+	 * Nokia 6150 sends junk frames starting D9 01, and real frames starting
+	 * D9 00. We'd drop the junk frames anyway because the FCS is bad, but
+	 * it's tidier to do it here. We still need to call the callback function
+	 * to give it a chance to handle timeouts and/or transmit a frame
+	 */
+
+	if (message[0] == 0xd9 && message[1] == 0x01) {
+		RLP_RXCallback(NULL);
+		return GE_NONE;
+	}
+	
+	/*
+	 * Nokia uses 240 bit frame size of RLP frames as per GSM 04.22
+	 * specification, so Header consists of 16 bits (2 bytes). See section
+	 * 4.1 of the specification.
+	 */
+	
+	frame.Header[0] = message[2];
+	frame.Header[1] = message[3];
+
+	/*
+	 * Next 200 bits (25 bytes) contain the Information. We store the
+	 * information in the Data array.
+	 */
+	
+	memcpy(frame.Data, message + 4, 25);
+	
+	/* The last 24 bits (3 bytes) contain FCS. */
+	frame.FCS[0] = message[29];
+	frame.FCS[1] = message[30];
+	frame.FCS[2] = message[31];
+
+	/* Here we pass the frame down in the input stream. */
+
+	RLP_RXCallback(&frame);
 
 	return GE_NONE;
 }

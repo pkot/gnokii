@@ -49,6 +49,7 @@
 #include "data/datapump.h"
 #include "data/virtmodem.h"
 #include "data/rlp-common.h"
+#include "device.h"
 
 /* Prototypes */
 static int  VM_PtySetup(char *bindir);
@@ -126,22 +127,24 @@ bool VM_Initialise(char *model,char *port, char *initlength, GSM_ConnectionType 
 static void VM_ThreadLoop(void)
 {
 	int res;
-	struct pollfd ufds;
+	struct pollfd ufds[2];
 
 	/* Note we can't use signals here as they are already used
 	   in the FBUS code.  This may warrant changing the FBUS
 	   code around sometime to use select instead to free up
 	   the SIGIO handler for mainline code. */
 
-	ufds.fd = PtyRDFD;
-	ufds.events = POLLIN;
+	ufds[0].fd = PtyRDFD;
+	ufds[0].events = POLLIN;
+	ufds[1].fd = device_getfd();
+	ufds[1].events = POLLIN;
 
 	while (!TerminateThread) {
 		if (!CommandMode) {
 			sleep(1);
 		} else {  /* If we are in data mode, leave it to datapump to get the data */
 
-			res = poll(&ufds, 1, 500);
+			res = poll(ufds, 2, 500);
 
 			switch (res) {
 			case 0: /* Timeout */
@@ -152,14 +155,18 @@ static void VM_ThreadLoop(void)
 				exit (-1);
 
 			default:
-				if (ufds.revents & POLLIN)
-					VM_CharHandler();
-				if ((ufds.revents & POLLHUP) && !(ufds.revents & POLLIN)) {
+				if (ufds[0].revents & (POLLHUP | POLLERR | POLLNVAL)) {
 					TerminateThread = true;
 					return;
 				}
-				if (!(ufds.revents & POLLIN)) /* Probably the file has been closed */
-					usleep(500);
+				if (ufds[1].revents & (POLLHUP | POLLERR | POLLNVAL)) {
+					TerminateThread = true;
+					return;
+				}
+				if (ufds[0].revents & POLLIN)
+					VM_CharHandler();
+				if (ufds[1].revents & POLLIN)
+					SM_Loop(sm, 1);
 				break;
 			}
 		}
@@ -267,6 +274,15 @@ static int gopen(const char *command)
 		fd = -1;
 	}
 	close(sockfd[0]);
+
+#ifdef USE_UNIX98PTYS
+	/*
+	 * I don't know why but it's required to operate correctly.
+	 * bozo -- tested on: Linux 2.4.17
+	 */
+	if (unlockpt(fd)) return -1;
+#endif
+
 	return(fd);
 }
 
