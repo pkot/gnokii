@@ -943,27 +943,7 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 		data->RawSMS->ValidityIndicator = 0;
 		memcpy(data->RawSMS->Validity,      message, 0);
-
-		/* See if the message # is given back by the phone. If not and
-		 * the status is 'unread' we accept it, if the status is not
-		 * 'unread' it's a "random" message given back by the phone
-		 * because we want a message from the invalid or the empty
-		 * location.
-		 */
-		if (data->SMSFolder) {
-			bool found = false;
-			for (i = 0; i < data->SMSFolder->Number; i++) {
-				if (data->RawSMS->Number == data->SMSFolder->Locations[i])
-					found = true;
-			}
-			if (data->RawSMS->Number > MAX_SMS_MESSAGES)
-				return GE_INVALIDLOCATION;
-			else
-				return GE_EMPTYLOCATION;
-		}
-		
 		break;
-
 	case P7110_SUBSMS_READ_FAIL: /* GetSMS FAIL, 0x09 */
 		dprintf("SMS reading failed:\n");
 		switch (message[4]) {
@@ -1096,9 +1076,10 @@ static GSM_Error ValidateSMS(GSM_Data *data, GSM_Statemachine *state)
 
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
-	if ((!data->SMSFolder) ||
-	    ((data->SMSFolder) &&
-	     (data->RawSMS->MemoryType != data->SMSFolder->FolderID))) {
+	if ((!data->SMSFolder) || (!data->SMSFolderList))
+		return GE_INTERNALERROR;
+
+	if (data->RawSMS->MemoryType != data->SMSFolder->FolderID) {
 		if ((error = P7110_GetSMSFolders(data, state)) != GE_NONE) return error;
 		if ((GetMemoryType(data->RawSMS->MemoryType) >
 		     data->SMSFolderList->FolderID[data->SMSFolderList->Number - 1]) ||
