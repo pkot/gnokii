@@ -23,6 +23,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2002       Pavel Machek <pavel@ucw.cz>
+  
 
   This file provides support for ringtones.
 
@@ -581,4 +583,19 @@ int GSM_EncodeSMSRingtone(char *message, GSM_Ringtone *ringtone)
 	int j = GSM_MAX_8BIT_SMS_LENGTH;
 	GSM_PackRingtone(ringtone, message, &j);
 	return j;
+}
+
+/* Returns message length */
+int GSM_EncodeSMSiMelody(char *imelody, char *message)
+{
+	unsigned short size, current = 0;
+
+	dprintf("EMS iMelody\n");
+	message[current++] = strlen(imelody)+3;
+	message[current++] = 0x0c; 	/* iMelody code */
+	message[current++] = strlen(imelody)+1;
+	message[current++] = 0;		      /* Position in text this melody is at */
+	strcpy(message+current, imelody);
+
+	return (current + strlen(imelody));
 }

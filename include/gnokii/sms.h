@@ -302,7 +302,8 @@ typedef enum {
 	SMS_PlainText    = 0x01,
 	SMS_BitmapData   = 0x02,
 	SMS_RingtoneData = 0x03,
-	SMS_OtherData    = 0x04
+	SMS_iMelodyText  = 0x04,
+	SMS_OtherData    = 0x05
 } SMS_DataType;
 
 /*** FOLDER INFO ***/

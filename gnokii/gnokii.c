@@ -255,7 +255,7 @@ static int usage(FILE *f)
 		     "          gnokii --deletesms memory_type start [end]\n"
 		     "          gnokii --sendsms destination [--smsc message_center_number |\n"
 		     "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
-		     "                 [--long n]\n"
+		     "                 [--long n] [-i]\n"
 		     "          gnokii --savesms [-m] [-l n] [-i]\n"
 		     "          gnokii --smsreader\n"
 		     "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
@@ -428,6 +428,7 @@ static int sendsms(int argc, char *argv[])
 		{ "long",    required_argument, NULL, '3'},
 		{ "picture", required_argument, NULL, '4'},
 		{ "8bit",    0,                 NULL, '8'},
+		{ "imelody", 0,                 NULL, 'i'},
 		{ NULL,      0,                 NULL, 0}
 	};
 
@@ -444,7 +445,9 @@ static int sendsms(int argc, char *argv[])
 	optarg = NULL;
 	optind = 0;
 
-	while ((i = getopt_long(argc, argv, "r8cC:v:", options, NULL)) != -1) {
+	sms.UserData[0].Type = SMS_PlainText;
+	sms.UserData[1].Type = SMS_NoData;
+	while ((i = getopt_long(argc, argv, "r8cC:v:i", options, NULL)) != -1) {
 		switch (i) {       /* -8 is for 8-bit data, -c for compression. both are not yet implemented. */
 		case '1': /* SMSC number */
 			strncpy(sms.SMSC.Number, optarg, sizeof(sms.SMSC.Number) - 1);
@@ -494,6 +497,9 @@ static int sendsms(int argc, char *argv[])
 			sms.DCS.u.General.Alphabet = SMS_8bit;
 			input_len = GSM_MAX_8BIT_SMS_LENGTH;
 			break;
+		case 'i':
+			sms.UserData[0].Type = SMS_iMelodyText;
+			break;
 		default:
 			sendsms_usage();
 		}
@@ -514,15 +520,14 @@ static int sendsms(int argc, char *argv[])
 
 	/*  Null terminate. */
 	message_buffer[chars_read] = 0x00;
-	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
+	if (sms.UserData[0].Type != SMS_iMelodyText && chars_read > 0 && message_buffer[chars_read - 1] == '\n') 
+		message_buffer[--chars_read] = 0x00;
 	if (chars_read < 1) {
 		fprintf(stderr, _("Empty message. Quitting.\n"));
 		return -1;
 	}
-	sms.UserData[0].Type = SMS_PlainText;
 	strncpy(sms.UserData[0].u.Text, message_buffer, chars_read);
 	sms.UserData[0].u.Text[chars_read] = 0;
-	sms.UserData[1].Type = SMS_NoData;
 	data.SMS = &sms;
 
 	/* Send the message. */

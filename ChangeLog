@@ -3,6 +3,7 @@
  * Rewrite of the SMS subsystem             (Pawel Kot, Pavel Machek)
     o first tries at EMS picture SMSes	               (Pavel Machek)
     o support for sending nokia ringtones	       (Pavel Machek)
+    o support for sending iMelody		       (Pavel Machek)
  * Security functions for AT phones                 (Manfred Jonsson)
  * code fixes:
     o added filelocking for gnokiid xgnokii smsd and fixed for gnokii

@@ -1027,7 +1027,7 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 {
 	SMS_AlphabetType al;
 	unsigned int i, length, size = 0, offset = 0;
-	int text_index = -1, bitmap_index = -1, ringtone_index = -1;
+	int text_index = -1, bitmap_index = -1, ringtone_index = -1, imelody_index = -1;
 	char *message = rawsms->UserData;
 	GSM_Error error;
 
@@ -1044,6 +1044,8 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 			bitmap_index   = i; break;
 		case SMS_RingtoneData:
 			ringtone_index = i; break;
+		case SMS_iMelodyText:
+			imelody_index = i; break;
 		case SMS_NoData:
 			break;
 		default:
@@ -1128,6 +1130,16 @@ GSM_Error EncodeData(GSM_API_SMS *sms, GSM_SMSMessage *rawsms, bool multipart)
 		default:
 			return GE_SMSWRONGFORMAT;
 		}
+	}
+
+	/* iMelody coding */
+	if (imelody_index != -1) {
+		size = GSM_EncodeSMSiMelody(sms->UserData[0].u.Text, message + rawsms->UserDataLength);
+		printf("Imelody, size %d\n", size);
+		rawsms->Length += size;
+		rawsms->UserDataLength += size;
+		rawsms->DCS = 0xf5;
+		rawsms->UDHIndicator = 1;
 	}
 
 	/* Bitmap coding */
