@@ -28,6 +28,7 @@
 
 #include "misc.h"
 #include "gsm-api.h"
+#include "gnokii-internal.h"
 
 /* Do not compile this file under Win32 systems. */
 
@@ -101,13 +102,17 @@ static void device_script_cfgfunc(const char *section, const char *key, const ch
 #endif
 }
 
-int device_script(int fd, const char *section)
+int device_script(int fd, const char *section, struct gn_statemachine *state)
 {
 	pid_t pid;
-	const char *scriptname = gn_cfg_get(gn_cfg_info, "global", section);
+	const char *scriptname;
 	int status;
 
-	if (!scriptname)
+	if (!strcmp(section, "connect_script"))
+		scriptname = state->config.connect_script;
+	else
+		scriptname = state->config.disconnect_script;
+	if (scriptname[0] == '\0')
 		return 0;
 
 	errno = 0;
@@ -175,7 +180,7 @@ int serial_close(int fd, struct gn_statemachine *state)
 {
 	/* handle config file disconnect_script:
 	 */
-	if (device_script(fd, "disconnect_script") == -1)
+	if (device_script(fd, "disconnect_script", state) == -1)
 		fprintf(stderr, _("Gnokii serial_close: disconnect_script\n"));
 
 	if (fd >= 0) {
@@ -263,7 +268,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 
 	/* handle config file connect_script:
 	 */
-	if (device_script(fd,"connect_script") == -1) {
+	if (device_script(fd, "connect_script", state) == -1) {
 		fprintf(stderr,"Gnokii serial_opendevice: connect_script\n");
 		serial_close(fd, state);
 		return -1;

@@ -54,6 +54,6 @@ int serial_select(int fd, struct timeval *timeout, struct gn_statemachine *state
 gn_error serial_nreceived(int fd, int *n, struct gn_statemachine *state);
 gn_error serial_flush(int fd, struct gn_statemachine *state);
 
-extern int device_script(int fd, const char *section);
+extern int device_script(int fd, const char *section, struct gn_statemachine *state);
 
 #endif  /* __devices_unixserial_h */
