@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2003 Pawe³ Kot
-                  Last update  4 Jan 2003    Version 0.5.0pre
+                  Last update 12 May 2003    Version 0.5.0
 
 - Contents - 			   
 
@@ -24,15 +24,15 @@
 			   
 - 1.0 Introduction -
 
-This is version 0.5.0pre of gnokii, a Linux/Unix tool suite and modem
+This is version 0.5.0 of gnokii, a Linux/Unix tool suite and modem
 driver for Nokia mobile phones, released under the GPL.  Please
 see COPYING for more details on license/copying issues, the lack of
 warranty and where to send a postcard if you like gnokii :).
 
-gnokii supports most phones from the 5110/6110, 7110/6210 and 6510/6310
-series, details including bugs specific to each series appear in the
-files README-6110, README-7110 and README-6510 respectively. Also all AT
-compatible phones are supported.
+gnokii supports most phones from the 3110/3180, 5110/6110, 7110/6210
+and 6510/6310 series, details including bugs specific to each series
+appear in the files README-3810, README-6110, README-7110 and README-6510
+respectively. Also all AT compatible phones are supported.
 
 In the early stages of the project there were indications that
 Nokia would provide some support for the project.  Regrettably, these
@@ -98,8 +98,8 @@ usage as gnokiid takes care of calling it when required.
   
 Please see the README-3810 file for notes specific to the 3810/8110 series,
 README-6110 for notes on the 5110/6110 series, README-2110 for notes on the
-2110 series, README-7110 for notes on 7110/6210 series and README-6510 for
-notes on the 6510/6310 series.
+2110 series (which is at the moment deprecated), README-7110 for notes on
+7110/6210 series and README-6510 for notes on the 6510/6310 series.
 
 
 - 4.0 Installation from source -
@@ -132,7 +132,7 @@ it in the conventional manner for the package type in question.
 For example if you downloaded a .rpm file you can install it by
 running the following as root.
 
-rpm -i gnokii-0.4.3-i386.rpm
+rpm -i gnokii-0.5.0-i386.rpm
 
 If you are using a Debian based system, you can use dpackage
 to do the installation. On Slackware you use installpkg or pkgtool.
@@ -173,7 +173,7 @@ information such as signal strength, battery level  etc.
 
 If you get an error along the lines of
 	
-  Hmmm... GSM_LinkOK never went true. Quitting.
+  Telephone interface init failed: [...]. Quitting.
 	    
 this indicates that gnokii could not communicate with your phone
 for some reason and you will need to do some troubleshooting.
@@ -304,7 +304,7 @@ Project page on savannah is at
 
 The mailing list devoted to the gnokii project is
 
-	<gnokii-users@mail.nongnu.org>
+	<gnokii-users@nongnu.org>
 
 You can subscribe at
 
@@ -325,28 +325,29 @@ Nokia 3810 Series
  + 8110i
 
 Nokia 6110 Series
- + 6190
- + 6150
- + 6130
- + 6110
+ + 3210
+ + 3310
+ + 3330
+ + 3410
  + 5110
  + 5130
  + 5190
- + 3310
- + 3210
+ + 6110
+ + 6130
+ + 6150
+ + 6190
  + 8210
- + 3330
 
 Nokia 7110 Series
- + 7110
  + 6210
  + 6250
+ + 7110
 
 Nokia 6510 Series
- + 6510
  + 6310
- + 8310
  + 6310i
+ + 6510
+ + 8310
 
 Nokia 2110 Series
  + 2110
@@ -375,11 +376,12 @@ to recognise those who have helped so far!
 
 - 15.0 Release Notes -
 
-200301?? Version 0.5.0
+20030512 Version 0.5.0
 The external API was rewritten. Now it should be easier to write any
 external application using libgnokii. Many bugfixes and code cleanups.
 Improved build system. Better portability to *BSD, MacOSX and Windows. Allow
-to use multiple phones.
+to use multiple phones. Bluetooth support. New helper applications:
+ppm2nokia. Much improved nk3110, nk6510 and AT support.
 
 20020805 Version 0.4.3
 Many functional updates. They touch mainly nk6510 and nk6110 drivers
