@@ -1,3 +1,13 @@
+\set ON_ERROR_STOP 1;
+
+CREATE USER "smsd" WITH NOCREATEDB NOCREATEUSER;
+
+CREATE DATABASE "smsd" WITH OWNER = "smsd";
+
+\connect "smsd" "smsd"
+
+COMMENT ON DATABASE "smsd" IS 'Gnokii SMSD Database';
+
 CREATE TABLE "inbox" (
 	"id" serial,
 	"number" character varying(20) NOT NULL,
@@ -17,5 +27,7 @@ CREATE TABLE "outbox" (
 	"processed" bool DEFAULT 'false',
 	"error" smallint DEFAULT '-1' NOT NULL,
 	"dreport" smallint DEFAULT '0' NOT NULL,
-	PRIMARY KEY  ("id")
+	PRIMARY KEY ("id")
 );
+
+CREATE INDEX "outbox_processed_ix" ON "outbox" (processed);
