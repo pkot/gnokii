@@ -21,7 +21,10 @@
   functions themselves are defined in a structure in gsm-common.h.
 
   $Log$
-  Revision 1.27  2001-05-07 14:13:06  machek
+  Revision 1.28  2001-06-06 09:05:56  machek
+  Convert Grab/Release display to new structure.
+
+  Revision 1.27  2001/05/07 14:13:06  machek
   nokia-2110 module converted to suit new API better. --identify now works.
 
   Revision 1.26  2001/04/25 12:54:47  machek
@@ -107,13 +110,14 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
         GSM_Error ret;
         MODULE(FB38);
         MODULE(FB61);
- #ifndef WIN32  /* MB21 not supported in win32 */
+#ifndef WIN32  /* MB21 not supported in win32 */
         MODULE(MB61);
         MODULE(MB640);
         MODULE(D2711);
 	if (strstr("2110", model)) {
 		extern GSM_Phone phone_nokia_2110;
 		memcpy(&(sm->Phone), &phone_nokia_2110, sizeof(GSM_Phone));
+		sm->Phone.Functions(GOP_Init, NULL, sm);
 	}
 	MODULE(N2110);
  

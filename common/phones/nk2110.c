@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.4  2001-05-09 20:18:46  machek
+  Revision 1.5  2001-06-06 09:05:56  machek
+  Convert Grab/Release display to new structure.
+
+  Revision 1.4  2001/05/09 20:18:46  machek
   Cleaned up code a bit. Made it use device_() interface. Reworked delay
   system; now it is 4 times faster. 5 times faster if you hold * key on
   phone (?!).
@@ -132,7 +135,7 @@ static void SigHandler(int status);
 static void
 yield(void)
 {
-//	usleep(5000);
+	usleep(5000);
 }
 
 static void
@@ -924,10 +927,12 @@ EnableDisplayOutput(void)
 	/* LN_UC_SHARE, LN_UC_SHARE, LN_UC_RELEASE, LN_UC_RELEASE, LN_UC_KEEP */
 	u8  pkt[] = {3, 3, 0, 0, 1};
 
+	fprintf(stderr, "\nShould display output\n");
+#if 0
 	return GE_NOTIMPLEMENTED;	/* We can do grab display, but we do not know how to ungrab it and with
 					   display grabbed, we can't even initialize connection. */
+#endif
 	PacketOK = false;
-
 	SendCommand(pkt, 0x19, 5);
 	fprintf(stderr, "\nGrabbing display");
 	waitfor(PacketOK, 0);
@@ -939,12 +944,22 @@ EnableDisplayOutput(void)
 	return GE_NONE;
 }
 
+static GSM_Error
+DisableDisplayOutput(void)
+{
+	u8  pkt[] = {0, 0, 0, 0, 1};
+	PacketOK = false;
+	SendCommand(pkt, 0x19, 5);
+	waitfor(PacketOK, 0);
+	fprintf(stderr, "\nGrabbing display");
+	return GE_NONE;
+}
 
 /* This is the main loop for the MB21 functions.  When N2110_Initialise
 	   is called a thread is created to run this loop.  This loop is
 	   exited when the application calls the N2110_Terminate function. */
 static void
-ThreadLoop(void)
+RegisterMe(void)
 {
 	fprintf(stderr, "Initializing... ");
 	/* Do initialisation stuff */
@@ -970,14 +985,14 @@ Initialise(char *port_device, char *initlength,
 	   void (*rlp_callback)(RLP_F96Frame *frame))
 {
 	RequestTerminate = false;
-	N2110_LinkOK      = false;
+	N2110_LinkOK     = false;
 	setvbuf(stdout, NULL, _IONBF, 0);
 	setvbuf(stderr, NULL, _IONBF, 0);
-	memset(VersionInfo,0,sizeof(VersionInfo));
+	memset(VersionInfo, 0, sizeof(VersionInfo));
 	strncpy(PortDevice, port_device, GSM_MAX_DEVICE_NAME_LENGTH);
 	switch (connection) {
 	case GCT_Serial:
-		ThreadLoop();
+		RegisterMe();
 		break;
 	default:
 		return GE_NOTSUPPORTED;
@@ -1124,17 +1139,21 @@ GSM_Functions N2110_Functions = {
 
 #endif
 
-static GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
+static GSM_Error link_Loop(struct timeval *tm)
+{
+	POLLIT;
+	return GE_NONE;
+}
+
+GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
 	GSM_Error err = GE_NONE;
 
 	printf("Asked for %d\n", op);
 	switch (op) {
-#if 0
 	case GOP_Init:
-		return N2110_Initialise(state);
+		state->Link.Loop = link_Loop;
 		break;
-#endif
 	case GOP_Identify:
 	case GOP_GetModel:
 	case GOP_GetRevision:
@@ -1153,6 +1172,12 @@ static GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		return N2110_GetMemoryStatus(data, state);
 		break;
 #endif
+	case GOP_DisplayOutput:
+		if (data->OutputFn)
+			return EnableDisplayOutput();
+		else
+			return DisableDisplayOutput();
+
 	default:
 		return GE_NOTIMPLEMENTED;
 		break;

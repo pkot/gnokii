@@ -623,6 +623,7 @@ typedef struct {
 	float *BatteryLevel;
 	GSM_RFUnits *RFUnits;
 	float *RFLevel;
+	GSM_Error (*OutputFn)(char *Display, char *Indicators);
 	char *IncomingCallNr;
 	GSM_PowerSource *PowerSource;
 	GSM_DateTime *DateTime;
@@ -669,6 +670,7 @@ typedef enum {
 	GOP_SetBitmap,
 	GOP_GetBatteryLevel,
 	GOP_GetRFLevel,
+	GOP_DisplayOutput,
 	GOP_GetMemoryStatus,
 	GOP_ReadPhonebook,
 	GOP_WritePhonebook,
