@@ -24,6 +24,7 @@ font.tytul {font-family: Verdana, Tahoma, Arial, Helvetica; font-weight: bold; t
 font.podtytul {font-family: Verdana, Tahoma, Arial, Helvetica; font-weight: bold; text-decoration: none; color:#FF0000}
 a.podtytul {font-family: Verdana, Tahoma, Arial, Helvetica; font-weight: bold; text-decoration: none; color:#FF0000}
 
+h3.dzial {font-family: Verdana, Tahoma, Arial, Helvetica; font-weight: bold; text-decoration: none; color:#1F409F}
 font.dzial {font-family: Verdana, Tahoma, Arial, Helvetica; font-weight: bold; text-decoration: none; color:#1F409F}
 a.dzial {font-family: Verdana, Tahoma, Arial, Helvetica; font-weight: bold; text-decoration: none; color:#525FF5}
 a.dzial:hover {font-weight: bolder; text-decoration: underline}

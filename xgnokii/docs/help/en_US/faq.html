@@ -1,358 +1,305 @@
 <html>
 <head>
    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
-   <meta name="Author" content="Marcin Wiacek">
-   <title>GNOKII FAQ</title>
+   <title>gnokii FAQ</title>
    <link REL=stylesheet HREF="styl.css" TYPE="text/css">
 </head>
+
+
 <body>
+<h1>gnokii FAQ</h1>
 
-<a NAME="Top"></a>
-<p align="RIGHT"><a class="autoremail" href="index.html">Main page</a></p>
-<center><font color="#1F409F" size=+2 class="tytul">GNOKII FAQ</font></center>
+<ol>
+<li><a href="#name">What is gnokii?</a></li>
+<li><a href="#pronounce">How do you pronounce gnokii?</a></li>
+<li><a href="#models">What models are supported?</a></li>
+<li><a href="#nolink">I get "Hmmm... GSM_LinkOK never went true. Quitting." message when running gnokii. What's wrong?</a></li>
+<li><a href="#mgnokiidev">Does mgnokiidev need to be suid root?</a></li>
+<li><a href="#suidroot">Should any other gnokii binary be installed suid root?</a></li>
+<li><a href="#6210">Can I use IrDA with 6210/7110 and gnokii?</a></li>
+<li><a href="#protocol">Can I get a copy of the protocol for the (insert phone model here)?</a></li>
+<li><a href="#solaris">Does gnokii work under Sun's Solaris?</a></li>
+<li><a href="#keysequence">Could you tell me the key for on, off and select menu in <code>gnokii --keysequence function</code>?</a></li>
+<li><a href="#relocation">I get <i>undefined symbol: GSM_ELogHandler</i> when runnig gnokii. What's wrong?</a></li>
+<li><a href="#vcal">I had problems during compilation with vcal.lx/vcal.c. What should I do?</a></li>
+<li><a href="#cables">Which cable for the Nokia phones should I use?</a></li>
+<li><a href="#structure">I get "Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!" message. What's wrong?</a></li>
+<li><a href="#dcd">I get 'ERROR: Modem DCD is down and global/require_dcd parameter is set!' What should I do?</a></li>
+<li><a href="#po">I can't compile gnokii. It fails when building the po directory.</a></li>
+<li><a href="#irda">When connecting by IrDA I got "Couldn't open PHONET device: No route to host" message. What can be wrong?</a></li>
+<li><a href="#newphone">My phone is not mentioned as supported by gnokii, but it seems that it is similar to the one of the mentioned in the supported phones list? What should I do to check this out?</a></li>
+</ol>
 
-<p><hr size="2" noshade width="60%" align="center" style="color: #004080">
+<!--          -->
 
-<p><font color="#1F409F" size=+2 class="dzial">What is gnokii ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+<a name="name"></a>
+<h3 class="dzial">What is gnokii?</h3>
 
-<p>Generally, what is gnokii (G from GNU, NOKII from Nokia) ?
+<p>It is the name of a project that aims to develop tools and drivers for
+   Nokia mobile phones. These tools include modem drivers, console tools,
+   GUI applications etc. All software that forms part of the project is
+   released under the GNU General Public License.  Please see the COPYING
+   file for more details on license/copying issues, the lack of warranty
+   and where to send a postcard if you like gnokii :-)  Gnokii is designed
+   to work on a variety of operating systems (Linux, FreeBSD, etc.) and
+   hardware platforms (PPC, Intel, etc.)</p>
 
-<p>It is a name of project. The aim of it is to develop tools and drivers
-for Nokia mobile phones. Of course, I think in this moment about really
-different tools - for example, modem drivers, console tools, etc.
-All created here software is released under the GNU
-General Public License. Please see <a href="COPYING">COPYING</a>
-for more details on license/copying issues,
-the lack of warranty and where to send a postcard if you like gnokii :).
-Anyway, our software works on many software (Linux, Free BSD, etc.)
-and hardware (Intel, etc.) platforms...
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
-<p><font color="#1F409F" size=+2 class="dzial">What software applications are created in gnokii project ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+<a name="pronounce"></a>
+<h3 class="dzial"> How do you pronounce gnokii?</h3>
 
+<p>You can pronounce gnokii as "gnooki" or "gnocky" at your option :) Note,
+that there's already a gnocky project, a gtk2 frontend to gnokii, so keep it
+in mind to be able to distinct them.</p>
+
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<a name="models"></a>
+<h3 class="dzial">What models are supported?</h3>
+
+<p>These models are supported</p>
 <ul>
-
-<li>
-The first application, gnokii, is a command line utility that was
-originally provided to assist developers and interested users in
-working with the low level API functions that were being developed.
-
-<p>From these rather humble beginnings, it has evolved into a the main
-command line tool of the suite.  Many people now use it for
-reading/writing phone book entries, sending and receiving SMS messages
-etc.  Ultimately it is intended that it will become a utility that
-communicates with gnokiid to provide a command line interface to
-the functionality provided by the gnokiid daemon.
-<br>&nbsp;
-</li>
-
-<li>
-The second application provided is xgnokii which as the name suggests
-is a X-windows based application that provides a graphical interface
-to your phone.  Amongst other things, xgnokii allows you to read and
-write phone book entries, read, write and send SMS messages, monitor
-battery and received signal strength.
-
-<p>At present xgnokii works directly with the phone, however in the
-future it will more likely use the "side" interface of gnokiid.
-
-<p>The main author of it is <a href=mailto:ja@mail.upjs.sk>Jan Derfinak</a>
-<br>&nbsp;
-</li>
-
-<li>
-The third part of the suite is gnokiid.  gnokiid provides a
-virtual modem interface, /dev/gnokii that looks like a regular
-Hayes-AT compatible modem with the ETSI defined extensions for
-GSM phones.  What this means in practical terms is that you can
-treat the /dev/gnokii device like an ordinary modem and use it
-to make data calls from pppd or a terminal application like
-minicom.
-<br>&nbsp;
-</li>
-
-<li>
-gnokiid is still under development, it's ultimate aim being to
-act as a "master" daemon that interfaces with your phone on one
-side and gnokii or xgnokii on the other.  This "side" code is still
-under discussion, particularly with respect to the most appropriate
-choice of communication method (IPC, TCP/IP etc.)
-<br>&nbsp;
-</li>
-
-<li>
-The last application provided with the suite is mgnokiidev which is
-used by gnokiid to create on demand a symbolic link between
-/dev/gnokii and the pseudo tty used by gnokiid for the virtual
-modem interface.  It's operation is transparent under normal
-usage as gnokiid takes care of calling it when required.
-</li>
-
+<li>Nokia 6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|3360|3390|3410|8210|8250|8290|RPM-1</li>
+<li>Nokia 7110|6210|6250|7190</li>
+<li>Nokia 6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i</li>
+<li>Nokia 3110|3810|8110|8110i</li>
+<li>Nokia 5160|6160|6185</li>
+<li>AT mode compatible phones (namely Nokia 62X0, Nokia 7110, Nokia 8210,
+Nokia 6310, Nokia 6510 (you should expect all newer Nokia phones to work),
+Ericsson T39, Sony-Ericsson T68i, Siemens S25/SL45i/C55/M55/S55, Motorola
+Timeport P7389i (L series), C350, Bosch 908/909 are known to work)</li>
+</ul>
+<p>The following models are no longer being actively supported by the
+ core team and the underlying code may have undergone some bit rot:
+</p>
+<ul>
+<li>Nokia 2110|2140|6080</li>
+<li>Nokia 640</li>
+<li>Dancall 2711 and 2713</li>
 </ul>
 
-<p>This project also inspired some people to write other software for Nokia.
-For example:
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
+<a name="nolink"></a>
+<h3 class="dzial">I get "Hmmm... GSM_LinkOK never went true. Quitting." message when running gnokii. What's wrong?</h3>
+
+<P>Gnokii cannot connect to the phone.  Possible reasons are:</P>
+<UL>
+<li>wrong serial port is defined in gnokii config file</li>
+<li>you are using the wrong cable</li>
+<li>you are using not supported phone model</li>
+<li>you don't have permission to write to /dev/ttySX device</li>
+</UL>
+
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<a name="mgnokiidev"></a>
+<h3 class="dzial">Does mgnokiidev need to be suid root??</h3>
+
+<p>Yes. gnokiid needs to create a symbolic link in the /dev directory.
+mgnokiidev is the program which does this and hence it must be suid
+root so it can write to the directory.  mgnokiidev is executable only
+for gnokii group members (and root) so it presents minimal security
+risk.</P>
+<p>Be sure that you don't use a version of gnokii older than 0.3.5
+ if you want to install mkgnokiidev suid root and give the access for
+ execution for untrusted users. Earlier versions had security
+ problems and allowed people to write to an arbitrary file.
+</p>
+
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<a name="suidroot"></a>
+<h3 class="dzial">Should any other gnokii binary be installed suid root?</h3>
+
+<p> No. There is no need. gnokii isn't intended for setuid/setgid operation.
+ If you set the setuid/setgid bit, you're taking a huge security
+ risk. All you need is read/write permission for the device you are using
+ for connection (port option in the config file). You can safely do it
+ using groups management.
+</p>
+
+
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<a name="6210"></a>
+<h3 class="dzial">Can I use IrDA with 6210/7110 and gnokii?</h3>
+
+<p>Yes. Just put:
+<pre>
+connection = irda
+</pre>
+line into your config file.</p>
+
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<a name="protocol"></a>
+<h3 class="dzial"> Can I get a copy of the protocol for the (insert phone model here)?</h3>
+
+<p>We don't have any formal documentation of the protocols in use.</P>
+
+<p> The best source we can offer is the knowledge assembled by Nagy Balazs
+ and Marcin Wiacek. You can find result of their work in Docs/protocol/
+ subdirectory in gnokii sources. Note that not all known protocol functions
+ are implemented in gnokii.</p>
+
+<p> Alternatively there are some web sites that have collated some
+ information:<p>
 <ul>
-<li>
-There is a perlmodule available for gnokii. It gives access to all
-the routines that are defined in gsm-common.h from a perl-program. It
-is intended for application developers who want to use their favorite
-language in interfacing the phone data with databases, ldap-directories
-and (in the future) different calendar applications. It is written by
-<a href="mailto:konstantin@agouros.de">Konstantin Agouros</a>
-and support starts with revision 0.2.6-pre3 of gnokii.
-
-<p>The homepage of this module is
-<a href="http://www.agouros.de/gnokii">http://www.agouros.de/gnokii</a>
-
-</li>
-</ul>
-<p><font color="#1F409F" size=+2 class="dzial">Which phones are supported ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
-
-<p>You can also ask, what phones are supported ? All, you want :-) Really !
-
-<p>At first, we were making in gnokii project modules
-for Nokia 3810/8110 and 51x0/61x0 phones. Later users started to
-write parts for other Nokia phones. And we hope to extend it to another
-models: 7110, etc. Remember: it's even possible to write modules
-for other than Nokia phones
-too (just imagine: support for the most popular phones in one software !)...
-
-<p>In this moment we have modules for:
-
-<table cols=3>
-
-<tr align=center>
-<td nowrap><b>Designed for</b></td>
-<td><b>Works with</b></td>
-<td><b>People, who are responsible ;-) for it (you can ask them, send update, report bug)</b></td>
-</tr>
-
-<tr align=center>
-<td>Nokia 6110</td>
-<td>Nokia 6110, 6130, 6150, 6190, 5110, 5130, 5190, 3310, 3210</td>
-<td>
-<a href=mailto:Pavel.Janik@suse.cz>Pavel Janik</a>,
-<a href=mailto:ck231@cam.ac.uk>Chris Kemp</a> (logos support)
-</td>
-</tr>
-
-<tr align=center>
-<td>Nokia 3810</td>
-<td>Nokia 3110, 3810, 8110, 8110i</td>
-<td>
-<a href=mailto:hugh@blemings.org>Hugh Blemings</a>
-</td>
-</tr>
-
-<tr align=center>
-<td>Nokia 640</td>
-<td>Nokia 640</td>
-<td>
-<a href=mailto:stanson@chat.ru>Andrew Kozin</a>
-</td>
-</tr>
-
-<tr align=center>
-<td>Nokia 6160</td>
-<td>Nokia 5160, 6160</td>
-<td>
-</td>
-</tr>
-
-<tr align=center>
-<td>Nokia 2110</td>
-<td>Nokia 2110, 6080</td>
-<td>
-<a href=mailto:pavel@ucw.cz>Pavel Machek</a>
-</td>
-</tr>
-
-<tr align=center>
-<td>Nokia 7110</td>
-<td>Nokia 7110, 6210</td>
-<td>
-<a href=mailto:ck231@cam.ac.uk>Chris Kemp</a>
-</td>
-</tr>
-
-</table>
-
-<p>If you want <em>really</em> uptodate information, look at
-common/misc.c. You can find which phone supports what in source.
-
-<p>You can also look into
-<a href="http://gnokii.org/users">registered gnokii users database</a>
-too see used by them phones...
-
-<p><font color="#1F409F" size=+2 class="dzial">What is compatibility with hardware ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
-
-<p>Generally, gnokii can work with all computers, which have serial port
-(over cable).
-
-<p>If you want to use infrared, sometimes are small problems, because some
-IrDa connectors are not compatible with some standards...
-
-<p><font color="#1F409F" size=+2 class="dzial">How can I get support for it ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
-
-<p>We our only people and we sometimes make mistakes. But don't worry:
-support for gnokii is really great. At first, you can tell your problem
-to all gnokii users (in May 2000 on the list there were subscribed about
-1000 people).
-
-<p>The most often it's enough. If not, contact with authors:
-
-<p>When problem is connected with module for concrete phone, write to people
-listed in answer for question <b>Which phones are supported ?</b>.
-For other parts: <a href=mailto:ja@mail.upjs.sk>Jan Derfinak</a>
-is responsible for xgnokii.
-
-<p><font color="#1F409F" size=+2 class="dzial">How to contact with gnokii users ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
-
-<p>Thanks to the efforts of
-<a href="http://www.net.lut.ac.uk/~martin/">Martin Hamilton</a> we have a Majordomo based mailing
-list gnokii@net.lut.ac.uk.
-
-<p>You can subscribe by sending email to
-gnokii-request@net.lut.ac.uk with the word <i>subscribe</i> in the body of the text.
-
-<p><b><font color=red>
-Note that the list is not a forum for discussion on how to obtain copies of
-Nokia's proprietary software.</font></b>
-It is the primary discussion forum for the project.
-
-<p><a href="">Archive of the list</a>
-
-<p><font color="#1F409F" size=+2 class="dzial">Does Nokia sponsors/supports this work ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
-
-<p>In the early stages of the project there were indications that
-Nokia would provide some support for the project.  Regrettably, these
-negotiations stalled over the issue of binary versus open source
-releases and the project has proceeded without official or unofficial
-assistance.
-
-<p><font color="#1F409F" size=+2 class="dzial">How can I help with creating it ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
-
-<p>There are some things, you can do you gnokii:
-
-<ul>
-<li>Tell us that you're interested, or that you would use the resulting
-software or that you would be happy to test it out.
-
-<p>The best method to make it is to adding yourself to the user database
-at <a href="http://gnokii.org/users">http://gnokii.org/users</a>.
-<br>&nbsp;
-</li>
-
-<li>
-Give your input in discussions about the design and development of the suite
-now that we are at that stage. In particular the best model of driver
-interface will need to be discussed broadly to get the best result.
-We've only had limited driver writing experience so if you've more, let us know!
-<br>&nbsp;
-</li>
-
-<li>
-Help examining the protocol and its differences between phone models.
-<br>&nbsp;
-</li>
-
-<li>
-Port the software to a new platform. Please tell us before you do so to ensure
-that the port will integrate nicely into the source code tree.
-<br>&nbsp;
-</li>
-
-<li>
-Help us in writing our software or preparing help into it.
-</li>
+<li><a href="http://www.gadgets.demon.co.uk/nokia61xx/protocol.html">Nokia 5110/6110</a></li>
+<li><a href="http://www.mwiacek.com/">Marcin Wiacek's pages are also useful</a></li>
 </ul>
 
-<p><font color="#1F409F" size=+2 class="dzial">Where to get latest versions ?</font><br>
-<hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
-<p>The source of gnokii aplications is in the CVS server.
-The server's address is xgnokii/docs/help/en_US/faq.html. If you
-are already familiar with CVS, set the CVSROOT to
+<a name="solaris"></a>
+<h3 class="dzial">Does gnokii work under Sun's Solaris?</h3>
 
-<p><i>pserver:anoncvs@subversions.gnu.org:/cvsroot/gnokii</i>
+<p> In general yes, but it depends on hardware -- your serial port
+ must support at least 115200 baud rate. Sun Enterprise 250 machine is known
+ to work with gnokii.  Earlier Sparc machines (IPC, IPX, Classic) probably
+ won't work due to hardware limitations.
+</p>
+<p> If your hardware doesn't support 115200 baud rate you can try the M2BUS
+ mode (don't forget it needs an M2BUS capable cable). It is much slower
+ but it should work.
+</p>
 
-<p>and use the empty password for checking out the repository with the name
-gnokii.
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
-<p>If you are not familiar with cvs, don't worry. It's very simple.
-Just install the cvs package for your distribution and follow these steps:
+<a name="keysequence"></a>
+<h3 class="dzial">Could you tell me the key for on, off and select menu in <code>gnokii --keysequence function</code>?</h3>
 
-<ul>
-<li>set your environmental variable CVSROOT. If you have bash (Bourne
-Again Shell):
+<p>M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
+ +: increase volume, -: decrease volume, 0123456789#* as is.
+</p>
 
-<p><i>export CVSROOT=pserver:anoncvs@subversions.gnu.org:/cvsroot/gnokii</i>
 
-<p>If you have different shell, use different command (e.g. setenv).
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
-<p>&nbsp;
-</li>
+<a name="relocation"></a>
+<h3 class="dzial">I get <i>undefined symbol: GSM_ELogHandler</i> when runnig gnokii. What's wrong?</h3>
 
-<li>Log in to the CVS server as anonymous reader by typing
+<p>gnokii didn't install correctly. You probably had gnokii installed already and you either forget to
+run <code>make install</code> or the installation didn't overwrite the old library.
+Remove the old libgnokii.so and then rerun <code>make install</code>.</p>
 
-<p><i>cvs login</i>
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+<a name="vcal"></a>
+<h3 class="dzial">I had problems during compilation with vcal.lx/vcal.c. What should I do?</h3>
 
-<p>Use the empty password.
+<p>Install flex. It should be available in every Linux distribution as well
+ as in CygWin.</p>
 
-<p>&nbsp;
-</li>
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
-<li>If you are logged in you are ready to checkout the latest sources:
+<a name="cables"></a>
+<h3 class="dzial">Which cable for the Nokia phones should I use?</h3>
 
-<p><i>cvs co gnokii</i>
-</li>
-</ul>
+<p>For Nokia 61X0/51X0 models you should use DAU9P cable. Nokia 61X0
+models are also capable to make an infrared connection.<br>
+For Nokia 7110/62X0/6310 models you need either DAU9P or DLR3P cable. With
+DLR3P cable you can use AT commands to talk to the phone. These phones are
+able to make an irda connection.<br>
+Most Nokia phones that have no visible connector have one under the battery.
+See <a href="cables.shtml">our cables page</a> to find the sites with more detailes, also the places where
+to buy the cable.<br>
+Most of the modern phones have the irda connector (3XXX series models don't
+have them).
+</p>
 
-<p>If you prefer, there is a WWW interface to the CVS server at
-<a href="http://savannah.gnu.org/cgi-bin/viewcvs/gnokii/">http://savannah.gnu.org/cgi-bin/viewcvs/gnokii/</a>.
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
-<p>Now you are on your own - you have the current sources on your disk
-in the directory gnokii. If you are going to make substantial changes
-and feel that they should be included into gnokii please mention it
-on the list first to avoid duplicated effort.
-	
-<p>If you would like to receive email when updates are made to the CVS
-repository, subscribe to gnokii-commit mailing list at
-<a href="http://lists.nongnu.org/mailman/listinfo/gnokii-commit">http://lists.nongnu.org/mailman/listinfo/gnokii-commit</a>.
+<a name="structure"></a>
+<h3 class="dzial">I get "Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!" message. What's wrong?</h3>
 
-<p>Our thanks go to the Czech Linux Users Group for hosting the original
-CVS repository at cvs.linux.cz and then to the Samba Team who kept hosting
-our CVS for the several years at cvs.samba.org.
+<p>You use ancient version of gnokii! Upgrade! See <a href="downloads.shtml">our downloads page</a> for the detailes.</p>
 
-<p>Another way to get almost latest (x)gnokii tools is to download it from
-pages of authors:
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
-<ul>
-<li>
-<a href="ftp://ftp.upjs.sk/pub/users/ja/xgnokii/">ftp://ftp.upjs.sk/pub/users/ja/xgnokii/</a>
-- here are really latest versions of xgnokii (site of
-<a href=mailto:ja@mail.upjs.sk>Jan Derfinak</a> - main author of XGNOKII).</li>
+<a name="dcd"></a>
+<h3 class="dzial">I get 'ERROR: Modem DCD is down and global/require_dcd parameter is set!'
+ What should I do?</h3>
 
-<li>
-<a href="ftp://urtica.linuxnews.pl/pub/people/pkot/gnokii/">
-ftp://urtica.linuxnews.pl/pub/people/pkot/gnokii/</a> (site of
-<a href="mailto:pkot@linuxnews.pl">Pawel Kot</a>).
-</li>
-</ul>
+<p>Either comment out require_dcd variable in the config file or set it to 0.</p>
 
-<p>Remember: it's still work in progress. It means, that we very often change it,
-add new functions and correct our bugs (sometimes once a day :-))... So,
-it's good to check it often...
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
 
-</div>
-</body>
-</html>
+<a name="po"></a>
+<h3 class="dzial">I can't compile gnokii. It fails when building the po directory.</h3>
+
+<p>You need to run gettextize. See autogen.sh and INSTALL files. If you don't
+   have it on your system, grab the -current tarball which should have all
+   needed files already generated.</p>
+
+
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+<a name="irda"></a>
+<h3 class="dzial">When connecting by IrDA I got "Couldn't open PHONET device: No route to host" message. What can be wrong?</h3>
+
+<p>Something's wrong with the irda device setup. Try to run:</p>
+<pre>
+echo 115200 &gt; /proc/sys/net/irda/max_baud_rate
+</pre>
+<p>and see whether it helps.</p>
+
+<!--          --><hr align="LEFT" size="3" width="300" color="#60c0a0" noshade>
+
+<a name="newphone"></a>
+<h3 class="dzial">My phone is not mentioned as supported by gnokii, but it seems that it is
+ similar to the one of the mentioned in the supported phones list? What
+ should I do to check this out?</h3>
+
+<p>It is quite simple. If you use AT compatible phone you can just use
+   'model = AT' in the config file. If you have Nokia and you would like to
+   enable FBUS mode (it has more facilities then AT mode), there are few
+   things you should do.</p>
+
+<p>For example, let's say you want to check the support for Nokia
+   6211, which should be compatible with Nokia 6210. First, find the
+   correct driver. The drivers are located in the common/phones/ directory
+   within the gnokii sources:</p>
+
+<pre>
+pkot@bzzzt:~/gnokii/common/phones$ grep -n 6210 *
+nk7110.c:148:      "7110|6210|6250|7190",      /* Supported models */
+nk7110.c:958:   /* This is ugly hack. But the picture message format in 6210
+nk7110.c:1197:  /* Nokia 6210 and family does not show not "fixed" messages from the
+nk7110.c:1610:  /* 6210/7110 needs to seek the first free pos to inhabit with next note */
+</pre>
+
+<p>Line 148 in this case is the one you want as it is where we define
+   the GSM_Phone structure. Just add new model, so the line will contain:</p>
+
+<pre>
+7110|6210|6250|7190|6211
+</pre>
+
+<p>Once this is done, look in the file common/misc.c.  It contains a large
+   phone capabilities table. Find the one for the phone that is similar to
+   yours. In our case this is 6210:</p>
+
+<pre>
+{"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS }
+</pre>
+
+<p>We will replace two first fields as for our phone. The second field is
+   the phone model identifier. In most of the phones to get this type on
+   your phone keyboard the following sequence: *#0000#. If it doesn't work
+   search the Internet for the information. Let's say in our example that
+   the string is NPL-3. Our line will contain:
+</p>
+
+<pre>
+{"6211",  "NPL-3", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS }
+</pre>
+
+<p>This is almost everything. If you have Linux and need to enable the IrDA
+   connection, edit the common/devices/unixirda.c file. Find there the
+   phone[] table. It contains the numerous Nokia models mentioned. Add your
+   phone name there. In our case: "Nokia 6211". Recompile the sources and
+   add "model = 6211" (according to your Nokia model) to the config and try
+   if it works. In any case let us know (to the gnokii mailing list) about
+   the result.</p>
+
