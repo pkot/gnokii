@@ -229,13 +229,13 @@ large changes and/or submitting big patches.
 
 - 10.0 gnokii by CVS -
 
-The gnokii project has a new CVS server thanks to Andrew Tridgell
-and the Samba team.  The server's address is pserver.samba.org.  If you
-are already familiar with CVS, set the CVSROOT to 
+The source of gnokii aplications is in the CVS server.  The server's
+address is subversions.gnu.org.  If you are already familiar with CVS,
+set the CVSROOT to 
 
-	:pserver:cvs@pserver.samba.org:/cvsroot
+	:pserver:anoncvs@subversions.gnu.org:/cvsroot/gnokii
 
-and use the password cvs for checking out the repository with the name
+and use the empty password for checking out the repository with the name
 gnokii.
 
 If you are not familiar with cvs, don't worry. It's very simple.
@@ -244,7 +244,7 @@ Just install the cvs package for your distribution and follow these steps:
 	1. set your environmental variable CVSROOT. If you have bash (Bourne
            Again Shell):
 
-	export CVSROOT=:pserver:cvs@pserver.samba.org:/cvsroot
+	export CVSROOT=:pserver:anoncvs@subversions.gnu.org:/cvsroot/gnokii
 
 	   If you have different shell, use different command (e.g. setenv).
 
@@ -253,7 +253,7 @@ Just install the cvs package for your distribution and follow these steps:
 
 	cvs login
 
-	   Use 'cvs' as your password.
+	   Use the empty password.
 
 
 	3. If you are logged in you are ready to checkout the latest sources:
@@ -262,7 +262,7 @@ Just install the cvs package for your distribution and follow these steps:
 
 If you prefer, there is a WWW interface to the CVS server at
 
-http://pserver.samba.org/cgi-bin/cvsweb/gnokii/
+http://savannah.gnu.org/cgi-bin/viewcvs/gnokii/
 
 Once you have the sources, you will need to run the following commands
 
@@ -276,13 +276,14 @@ Now you are on your own - you have the current sources on your disk
 in the directory gnokii.  If you are going to make substantial changes
 and feel that they should be included into gnokii please mention it
 on the list first to avoid duplicated effort.
-	
+
 If you would like to receive email when updates are made to the CVS
-repository, just send Hugh and email to that effect (hugh@blemings.org)
-and you'll be added to the recipients list.
+repository, subscribe to gnokii-commit mailing list at
+http://mail.freesoftware.fsf.org/mailman/listinfo/gnokii-commit.
 
 Our thanks go to the Czech Linux Users Group for hosting the original
-CVS repository at cvs.linux.cz.
+CVS repository at cvs.linux.cz and then to the Samba Team who kept hosting
+our CVS for the several years at cvs.samba.org.
 
 - 11.0 Protocol Details -
 
