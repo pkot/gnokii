@@ -309,7 +309,10 @@ static int gopen(const char *command)
 	 * I don't know why but it's required to operate correctly.
 	 * bozo -- tested on: Linux 2.4.17
 	 */
-	if (unlockpt(fd)) return -1;
+	if (fd >= 0 && unlockpt(fd)) {
+		close(fd);
+		fd = -1;
+	}
 #endif
 
 	return(fd);
