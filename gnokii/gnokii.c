@@ -259,7 +259,7 @@ static void version(void)
 static int usage(FILE *f)
 {
 	fprintf(f, _("   usage: gnokii [--help|--monitor|--version]\n"
-		     "          gnokii --getphonebook memory_type start_number [end_number|end]"
+		     "          gnokii --getphonebook memory_type start_number [end_number|end]\n"
 		     "                 [-r|--raw]\n"
 		     "          gnokii --writephonebook [-i]\n"
 		     "          gnokii --getwapbookmark number\n"
@@ -275,7 +275,9 @@ static int usage(FILE *f)
 		     "          gnokii --sendsms destination [--smsc message_center_number |\n"
 		     "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
 		     "                 [--long n] [-i]\n"
-		     "          gnokii --savesms [-m] [-l n] [-i]\n"
+		     "          gnokii --savesms [--sender from] [--smsc message_center_number |\n"
+		     "                 --smscno message_center_index] [--folder folder_id]\n"
+		     "                 [--location number] [--sent | --read] [--deliver] \n"
 		     "          gnokii --smsreader\n"
 		     "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
 		     "          gnokii --setsmsc\n"
@@ -492,10 +494,10 @@ static int sendsms(int argc, char *argv[])
 	int input_len, i, curpos = 0;
 
 	struct option options[] = {
-		{ "smsc",    required_argument, NULL, '1'},
-		{ "smscno",  required_argument, NULL, '2'},
-		{ "long",    required_argument, NULL, '3'},
-		{ "picture", required_argument, NULL, '4'},
+		{ "smsc",    required_argument, NULL, '0'},
+		{ "smscno",  required_argument, NULL, '1'},
+		{ "long",    required_argument, NULL, '2'},
+		{ "picture", required_argument, NULL, '3'},
 		{ "8bit",    0,                 NULL, '8'},
 		{ "imelody", 0,                 NULL, 'i'},
 		{ "animation",required_argument,NULL, 'a'},
@@ -671,9 +673,26 @@ static int savesms(int argc, char *argv[])
 	   255 * 153 = 39015 default alphabet characters */
 	char message_buffer[255 * GSM_MAX_SMS_LENGTH];
 	int input_len, chars_read;
-	int i, confirm = -1;
+	int i;
+#if 0
+	int confirm = -1;
 	int interactive = 0;
 	char ans[8];
+#endif
+	unsigned char memory_type[20];
+
+	struct option options[] = {
+		{ "smsc",     required_argument, NULL, '0'},
+		{ "smscno",   required_argument, NULL, '1'},
+		{ "sender",   required_argument, NULL, '2'},
+		{ "location", required_argument, NULL, '3'},
+		{ "read",     0,                 NULL, 'r'},
+		{ "sent",     0,                 NULL, 's'},
+		{ "folder",   required_argument, NULL, 'f'},
+		{ "deliver",  0                , NULL, 'd'},
+		{ NULL,       0,                 NULL, 0}
+	};
+
 
 	DefaultSubmitSMS(&sms);
 
@@ -683,44 +702,76 @@ static int savesms(int argc, char *argv[])
 	/* of setting an default? */
 	strcpy(sms.Remote.Number, "0");
 	sms.Remote.Type = SMS_Unknown;
-	
+	sms.Number = 0;
 	input_len = GSM_MAX_SMS_LENGTH;
 
+	optarg = NULL;
+	optind = 0;
+
 	/* Option parsing */
-	while ((i = getopt(argc, argv, "ml:in:s:c:")) != -1) {
+	while ((i = getopt_long(argc, argv, "rsf:id", options, NULL)) != -1) {
 		switch (i) {
-		case 'm': /* mark the message as sent */
-			sms.Status = SMS_Sent;
+		case '0': /* SMSC number */
+			snprintf(sms.SMSC.Number, sizeof(sms.SMSC.Number) - 1, "%s", optarg);
+			if (sms.SMSC.Number[0] == '+') 
+				sms.SMSC.Type = SMS_International;
+			else
+				sms.SMSC.Type = SMS_Unknown;
 			break;
-		case 'l': /* Specify the location */
-			sms.Number = atoi(optarg);
+		case '1': /* SMSC number index in phone memory */
+			data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
+			data.MessageCenter->No = atoi(optarg);
+			if (data.MessageCenter->No < 1 || data.MessageCenter->No > 5) {
+				free(data.MessageCenter);
+				sendsms_usage();
+			}
+			if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE) {
+				strcpy(sms.SMSC.Number, data.MessageCenter->SMSC.Number);
+				sms.SMSC.Type = data.MessageCenter->SMSC.Type;
+			}
+			free(data.MessageCenter);
 			break;
-		case 'i': /* Ask before overwriting */
-			interactive = 1;
-			break;
-		case 'n': /* Specify the from number */
+		case '2': /* sender number */
 			if (*optarg == '+')
 				sms.Remote.Type = SMS_International;
 			else
 				sms.Remote.Type = SMS_Unknown;
 			strncpy(sms.Remote.Number, optarg, sizeof(sms.Remote.Number));
 			break;
-		case 's': /* Specify the smsc number */
+		case '3': /* location to write to */
+			sms.Number = atoi(optarg);
 			break;
-		case 'c': /* Specify the smsc location */
+		case 's': /* mark the message as sent */
+		case 'r': /* mark the message as read */
+			sms.Status = SMS_Sent;
+			break;
+#if 0
+		case 'i': /* Ask before overwriting */
+			interactive = 1;
+			break;
+#endif
+		case 'f': /* Specify the folder where to save the message */
+			snprintf(memory_type, 19, "%s", optarg);
+			if (StrToMemoryType(memory_type) == GMT_XX) {
+				fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
+				return (-1);
+			}
+			break;
+		case 'd': /* type Deliver */
+			sms.Type = SMS_Deliver;
 			break;
 		default:
 			usage(stderr);
 			return -1;
 		}
 	}
-
+#if 0
 	if (interactive) {
 		GSM_API_SMS aux;
 
 		aux.Number = sms.Number;
 		data.SMS = &aux;
-		error = SM_Functions(GOP_GetSMS, &data, &State);
+		error = SM_Functions(GOP_GetSMSnoValidate, &data, &State);
 		switch (error) {
 		case GE_NONE:
 			fprintf(stderr, _("Message at specified location exists. "));
@@ -741,6 +792,18 @@ static int savesms(int argc, char *argv[])
 			return -1;
 		}
 	}
+#endif
+	if ((!sms.SMSC.Number[0]) && (sms.Type == SMS_Deliver)) {
+		data.MessageCenter = calloc(1, sizeof(SMS_MessageCenter));
+		data.MessageCenter->No = 1;
+		if (SM_Functions(GOP_GetSMSCenter, &data, &State) == GE_NONE) {
+			strcpy(sms.SMSC.Number, data.MessageCenter->SMSC.Number);
+			sms.SMSC.Type = data.MessageCenter->SMSC.Type;
+		}
+		free(data.MessageCenter);
+	}
+
+	if (!sms.SMSC.Type) sms.SMSC.Type = SMS_Unknown;
 
 	fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
 
@@ -761,6 +824,9 @@ static int savesms(int argc, char *argv[])
 		fprintf(stderr, _("Empty message. Quitting"));
 		return -1;
 	}
+	if (memory_type[0] != '\0')
+		sms.MemoryType = StrToMemoryType(memory_type);
+	dprintf("mt: %s\n", memory_type);
 
 	sms.UserData[0].Type = SMS_PlainText;
 	strncpy(sms.UserData[0].u.Text, message_buffer, chars_read);
@@ -4296,7 +4362,7 @@ int main(int argc, char *argv[])
 		{ OPT_GETSMS,            2, 5, 0 },
 		{ OPT_DELETESMS,         2, 3, 0 },
 		{ OPT_SENDSMS,           1, 10, 0 },
-		{ OPT_SAVESMS,           0, 6, 0 },
+		{ OPT_SAVESMS,           0, 10, 0 },
 		{ OPT_SENDLOGO,          3, 4, GAL_XOR },
 		{ OPT_SENDRINGTONE,      2, 2, 0 },
 		{ OPT_GETSMSC,           0, 3, 0 },
@@ -4469,7 +4535,7 @@ int main(int argc, char *argv[])
 			rc = sendsms(nargc, nargv);
 			break;
 		case OPT_SAVESMS:
-			rc = savesms(argc, argv);
+			rc = savesms(nargc, nargv);
 			break;
 		case OPT_SENDLOGO:
 			rc = sendlogo(nargc, nargv);

@@ -82,6 +82,7 @@ static GSM_Error P7110_GetCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_WriteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_DeleteCalendarNote(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_SendSMS(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error P7110_SaveSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMS(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_GetSMSnoValidate(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error P7110_PollSMS(GSM_Data *data, GSM_Statemachine *state);
@@ -216,6 +217,8 @@ static GSM_Error P7110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemach
 		break;
 	case GOP_SendSMS:
 		return P7110_SendSMS(data, state);
+	case GOP_SaveSMS:
+		return P7110_SaveSMS(data, state);
 	case GOP_DeleteSMSnoValidate:
 		return P7110_DeleteSMSnoValidate(data, state);
 	case GOP_DeleteSMS:
@@ -879,6 +882,25 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/* Message subtype */
 	switch (message[3]) {
+	/* save sms succeeded */
+	case 0x05:
+		dprintf("Message stored in folder %i at location %i\n", message[4], (message[5] << 8) | message[6]);
+		if (data->RawSMS) data->RawSMS->Number = (message[5] << 8) | message[6];
+		break;
+	/* save sms failed */
+	case 0x06:
+		dprintf("SMS saving failed:\n");
+		switch (message[4]) {
+		case 0x02:
+			dprintf("\tAll locations busy.\n");
+			return GE_MEMORYFULL;
+		case 0x03:
+			dprintf("\tInvalid location!\n");
+			return GE_INVALIDLOCATION;
+		default:
+			dprintf("\tUnknown reason.\n");
+			return GE_UNHANDLEDFRAME;
+		}
 	case P7110_SUBSMS_READ_OK: /* GetSMS OK, 0x08 */
 		dprintf("Trying to get message # %i from the folder # %i\n", (message[6] << 8) | message[7], message[5]);
 		if (!data->RawSMS) return GE_INTERNALERROR;
@@ -934,12 +956,10 @@ static GSM_Error P7110_IncomingFolder(int messagetype, unsigned char *message, i
 				if (data->RawSMS->Number == data->SMSFolder->Locations[i])
 					found = true;
 			}
-			if (!found && data->RawSMS->Status != SMS_Unread) {
-				if (data->RawSMS->Number > MAX_SMS_MESSAGES)
-					return GE_INVALIDLOCATION;
-				else
-					return GE_EMPTYLOCATION;
-			}
+			if (data->RawSMS->Number > MAX_SMS_MESSAGES)
+				return GE_INVALIDLOCATION;
+			else
+				return GE_EMPTYLOCATION;
 		}
 		
 		break;
@@ -1213,6 +1233,79 @@ static GSM_Error P7110_GetSMSFolderStatus(GSM_Data *data, GSM_Statemachine *stat
 
 	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, 7);
 }
+
+static GSM_Error P7110_SaveSMS(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req[256] = { FBUS_FRAME_HEADER, 0x04,
+				   0x07,		/* sms state */
+				   0x10,		/* folder */
+				   0x00,0x00,		/* location */
+				   0x00 };		/* type */
+#if 0
+	unsigned char req2[200] = { FBUS_FRAME_HEADER, 0x83};
+	GSM_Error		error;
+#endif
+	int len;
+
+	dprintf("Saving sms\n");
+
+	switch (data->RawSMS->Type) {
+	case SMS_Submit:
+		if (data->RawSMS->Status == SMS_Sent)
+			req[4] = 0x05; 
+		else
+			req[4] = 0x07; 
+		req[8] = 0x02;
+		break;
+	case SMS_Deliver:
+		if (data->RawSMS->Status == SMS_Sent)
+			req[4] = 0x01;
+		else
+			req[4] = 0x03;
+		req[8] = 0x00;
+		break;
+	default:
+		req[4] = 0x07;
+		req[8] = 0x00;
+		break;
+	}
+
+	if ((data->RawSMS->MemoryType != GMT_ME) && (data->RawSMS->MemoryType != GMT_SM))
+		req[5] = GetMemoryType(data->RawSMS->MemoryType);
+	else
+		req[5] = P7110_MEMORY_OU;
+
+	req[6] = data->RawSMS->Number / 256;
+	req[7] = data->RawSMS->Number % 256;
+
+	if (req[5] == P7110_MEMORY_TE) return GE_INVALIDLOCATION;
+
+	len = PNOK_FBUS_EncodeSMS(data, state, req + 9);
+	len += 9;
+
+	SEND_MESSAGE_BLOCK(P7110_MSG_FOLDER, len);
+
+#if 0
+	if (error == GE_NONE && strlen(DecodeUnicodeString(sms->Name))!=0) {
+		folder = sms->Folder;
+		sms->Folder = 0;
+		N7110_GetSMSLocation(sms, &folderid, &location);
+		length = 4;
+		NameReq[length++] = folderid;
+		NameReq[length++] = location / 256;
+		NameReq[length++] = location;
+		CopyUnicodeString(NameReq+length, sms->Name);
+		length = length+strlen(DecodeUnicodeString(sms->Name))*2;
+		NameReq[length++] = 0;
+		NameReq[length++] = 0;
+		error=GSM_WaitFor (s, NameReq, length, 0x14, 4, ID_SaveSMSMessage);
+		sms->Folder = folder;
+	}
+	return error;
+#endif
+}
+
+
 
 /*****************************/
 /***********  S M S  *********/

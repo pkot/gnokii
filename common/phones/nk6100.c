@@ -1449,17 +1449,30 @@ static GSM_Error GetSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 
 static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
-	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x04, 0x05, 0x02, 0x00, 0x02};
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x04, 
+				  0x07, /* status */
+				  0x02, 
+				  0x00, /* number */
+				  0x02 }; /* type */
+	int len;
 
 	if (!data->RawSMS) return GE_INTERNALERROR;
 
 	if (44 + data->RawSMS->UserDataLength > sizeof(req))
 		return GE_WRONGDATAFORMAT;
 
-	if (data->RawSMS->Status == SMS_Unsent)
-		req[4] |= 0x02;
+	if (data->RawSMS->Type == SMS_Deliver) {	/* Inbox */
+		dprintf("INBOX!\n");
+		req[4] 		= 0x03;			/* SMS State - GSM_Unread */
+		req[7] 		= 0x00;			/* SMS Type */
+	}
+
+	if (data->RawSMS->Status == SMS_Sent)
+		req[4] -= 0x02;
+
 	req[6] = data->RawSMS->Number;
 
+#if 0
 	req[20] = 0x01; /* SMS Submit */
 	if (data->RawSMS->UDHIndicator)		req[20] |= 0x40;
 	if (data->RawSMS->ValidityIndicator)	req[20] |= 0x10;
@@ -1467,8 +1480,11 @@ static GSM_Error SaveSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 	req[24] = data->RawSMS->UserDataLength;
 	memcpy(req + 37, data->RawSMS->Validity, 7);
 	memcpy(req + 44, data->RawSMS->UserData, data->RawSMS->UserDataLength);
+#endif
+	len = PNOK_FBUS_EncodeSMS(data, state, req + 8);
+	len += 8;
 
-	if (SM_SendMessage(state, 44 + data->RawSMS->UserDataLength, 0x14, req) != GE_NONE) return GE_NOTREADY;
+	if (SM_SendMessage(state, len, 0x14, req) != GE_NONE) return GE_NOTREADY;
 	return SM_Block(state, data, 0x14);
 }
 

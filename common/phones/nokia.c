@@ -199,23 +199,38 @@ int PNOK_FBUS_EncodeSMS(GSM_Data *data, GSM_Statemachine *state, unsigned char *
 {
 	int pos = 0;
 
-	memcpy(req, data->RawSMS->MessageCenter, 12);
+	if (data->RawSMS->MessageCenter[0] != '\0') 
+		memcpy(req, data->RawSMS->MessageCenter, 12);
 	pos += 12;
-	req[pos] = 0x01; /* SMS Submit */
+
+	if (data->RawSMS->Type != SMS_Deliver)
+		req[pos] = 0x01; /* SMS Submit */
+	else
+		req[pos] = 0x00; /* SMS Deliver */
+
 	if (data->RawSMS->ReplyViaSameSMSC)  req[pos] |= 0x80;
 	if (data->RawSMS->RejectDuplicates)  req[pos] |= 0x04;
 	if (data->RawSMS->Report)            req[pos] |= 0x20;
 	if (data->RawSMS->UDHIndicator)      req[pos] |= 0x40;
-	if (data->RawSMS->ValidityIndicator) req[pos] |= 0x10;
-	pos++;
-	req[pos++] = data->RawSMS->Reference;
+	if (data->RawSMS->Type != SMS_Deliver) {
+		if (data->RawSMS->ValidityIndicator) req[pos] |= 0x10;
+		pos++;
+		req[pos++] = data->RawSMS->Reference;
+	} else
+		pos++;
+
 	req[pos++] = data->RawSMS->PID;
 	req[pos++] = data->RawSMS->DCS;
 	req[pos++] = data->RawSMS->Length;
 	memcpy(req + pos, data->RawSMS->RemoteNumber, 12);
 	pos += 12;
-	memcpy(req + pos, data->RawSMS->Validity, 7);
-	pos+= 7;
+
+	if (data->RawSMS->Type != SMS_Deliver)
+		memcpy(req + pos, data->RawSMS->Validity, 7);
+	else
+		memcpy(req + pos, "\x20\x80\x50\x80\x73\x54\x00", 7);  /* FIXME: Real date instead of hardcoded */
+	pos += 7;
+
 	memcpy(req + pos, data->RawSMS->UserData, data->RawSMS->UserDataLength);
 	pos += data->RawSMS->UserDataLength;
 
