@@ -80,6 +80,8 @@ int serial_open(__const char *__file, int __oflag) {
   retcode=tcgetattr(__fd, &serial_termios);
   if(retcode==-1) {
     perror("Gnokii serial_open:tcgetattr");
+    /* Don't call serial_close since serial_termios is not valid */
+    close(__fd);
     return(-1);
   }
   
@@ -116,6 +118,7 @@ int serial_opendevice(__const char *__file, int __with_odd_parity) {
   retcode=fcntl(fd, F_SETOWN, getpid());
   if (retcode == -1){
     perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
+    serial_close(fd);
     return(-1);
   }
 
@@ -124,6 +127,7 @@ int serial_opendevice(__const char *__file, int __with_odd_parity) {
   retcode=fcntl(fd, F_SETFL, FASYNC);
   if (retcode == -1){
     perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
+    serial_close(fd);
     return(-1);
   }
 
@@ -149,12 +153,14 @@ int serial_opendevice(__const char *__file, int __with_odd_parity) {
   retcode=tcflush(fd, TCIFLUSH);
   if (retcode == -1) {
     perror("Gnokii serial_opendevice: tcflush");
+    serial_close(fd);
     return(-1);
   }
 
   retcode=tcsetattr(fd, TCSANOW, &tp);
   if (retcode == -1){
     perror("Gnokii serial_opendevice: tcsetattr");
+    serial_close(fd);
     return(-1);
   }
 

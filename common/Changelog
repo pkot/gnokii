@@ -124,5 +124,7 @@
 * Sun 26 Nov 2000 Chris Kemp <ck231@cam.ac.uk>
 - Marcus Pallinger's unixserial.c error reporting
 
+* Sun 26 Nov 2000 Chris Kemp <ck231@cam.ac.uk>
+- Calling serial_close with any errors from above patch
 
 
