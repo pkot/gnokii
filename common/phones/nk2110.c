@@ -11,7 +11,10 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.2  2001-04-27 16:00:01  machek
+  Revision 1.3  2001-05-07 14:13:03  machek
+  nokia-2110 module converted to suit new API better. --identify now works.
+
+  Revision 1.2  2001/04/27 16:00:01  machek
   Better error messages.
 
   Revision 1.1  2001/04/25 12:54:47  machek
@@ -94,7 +97,7 @@ static char *Revision = NULL,
 
 GSM_Information N2110_Information = INFO;
 
-static GSM_Phone phone = {
+GSM_Phone phone_nokia_2110 = {
 	NULL,
 	NULL,
 	INFO,
@@ -187,6 +190,8 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	}
 	printf("echo?");
 	if (read(PortFD, pkt2, current) != current) {
+		if (errno == EAGAIN)
+			return (GE_NONE);
 		perror( _("Read error:") );
 		return (GE_INTERNALERROR);
 	}
@@ -425,9 +430,10 @@ GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 	return (GE_NONE);
 }
 
-static GSM_Error GetVersionInfo()
+static GSM_Error GetVersionInfo(void)
 {
 	char *s = VersionInfo;
+	dprintf("Getting version info...\n");
 	if (GetValue(0x11, 0x03) == -1)
 		return GE_TIMEOUT;
 
@@ -442,28 +448,6 @@ static GSM_Error GetVersionInfo()
 	dprintf("Revision %s, Date %s, Model %s\n", Revision, RevisionDate, Model );
 	ModelValid = true;
 	return (GE_NONE);
-}
-
-static GSM_Error
-GetRevision(char *revision)
-{
-	GSM_Error err = GE_NONE;
-
-	if(!Revision) err = GetVersionInfo();
-	if(err == GE_NONE) strncpy(revision, Revision, 64);
-
-	return err;
-}
-
-static GSM_Error
-GetModel2110(char *model)
-{
-	GSM_Error err = GE_NONE;
-
-	if(!Model) err = GetVersionInfo();
-	if(err == GE_NONE) strncpy(model, Model, 64);
-
-	return err;
 }
 
 /* Our "Not implemented" functions */
@@ -1088,8 +1072,8 @@ GSM_Functions N2110_Functions = {
 	UNIMPLEMENTED,
 	UNIMPLEMENTED,
 	UNIMPLEMENTED,
-	GetRevision,
-	GetModel2110,
+	UNIMPLEMENTED,
+	UNIMPLEMENTED,
 	PNOK_GetManufacturer,
 	UNIMPLEMENTED,
 	UNIMPLEMENTED,
@@ -1127,36 +1111,36 @@ GSM_Functions N2110_Functions = {
 
 static GSM_Error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state)
 {
-#if 0
+	GSM_Error err = GE_NONE;
+
+	printf("Asked for %d\n", op);
 	switch (op) {
+#if 0
 	case GOP_Init:
 		return N2110_Initialise(state);
 		break;
-	case GOP_GetModel:
-		return N2110_GetModel(data, state);
-		break;
-	case GOP_GetRevision:
-		return N2110_GetRevision(data, state);
-		break;
-	case GOP_GetImei:
-		return N2110_GetIMEI(data, state);
-		break;
+#endif
 	case GOP_Identify:
-		return N2110_Identify(data, state);
-		break;
+	case GOP_GetModel:
+	case GOP_GetRevision:
+		if(!Model) err = GetVersionInfo();
+		if(err == GE_NONE) strncpy(data->Model, Model, 64);
+		if(err == GE_NONE) strncpy(data->Revision, Revision, 64);
+		return err;
 	case GOP_GetBatteryLevel:
-		return N2110_GetBatteryLevel(data, state);
+		return GetBatteryLevel(data->BatteryUnits, data->BatteryLevel);
 		break;
 	case GOP_GetRFLevel:
-		return N2110_GetRFLevel(data, state);
+		return GetRFLevel(data->RFUnits, data->RFLevel);
 		break;
+#if 0
 	case GOP_GetMemoryStatus:
 		return N2110_GetMemoryStatus(data, state);
 		break;
+#endif
 	default:
 		return GE_NOTIMPLEMENTED;
 		break;
 	}
-#endif
 	return GE_NOTIMPLEMENTED;
 }

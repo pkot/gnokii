@@ -21,7 +21,10 @@
   functions themselves are defined in a structure in gsm-common.h.
 
   $Log$
-  Revision 1.26  2001-04-25 12:54:47  machek
+  Revision 1.27  2001-05-07 14:13:06  machek
+  nokia-2110 module converted to suit new API better. --identify now works.
+
+  Revision 1.26  2001/04/25 12:54:47  machek
   Partly converted nokia 2110 to "new" form, and moved it to phone
   directory.
 
@@ -108,6 +111,10 @@ GSM_Error GSM_Initialise(char *model, char *device, char *initlength, GSM_Connec
         MODULE(MB61);
         MODULE(MB640);
         MODULE(D2711);
+	if (strstr("2110", model)) {
+		extern GSM_Phone phone_nokia_2110;
+		memcpy(&(sm->Phone), &phone_nokia_2110, sizeof(GSM_Phone));
+	}
 	MODULE(N2110);
  
         GSM_LinkOK = &LinkAlwaysOK;
