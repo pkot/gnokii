@@ -88,6 +88,17 @@ A: Yes. Just put this line
    into your config file.
 
 -------------------------------------------------------------------------------
+Q. I'd like to send/receive sms, to handle voice calls, etc from my own
+   application. What should I do?
+
+A. If the license of your application is GPL the easiest solution is to
+   use libgnokii. In this case you needn't to handle low level stuff,
+   libgnokii will do it for you. If you want to use a scripting language,
+   Konstantin Agouros had written a perl module, you can download it from
+
+   http://www.agouros.de/gnokii
+
+-------------------------------------------------------------------------------
 Q. Can I get a copy of the protocol for the <insert phone model here>?
 
 A. We don't have any formal documentation of the protocols in use.
@@ -113,6 +124,9 @@ A. We don't have any formal documentation of the protocols in use.
 
      Nagy Balazs' pages:
        {Seem to have dissapeared, anyone have a new link ? - Hugh}
+
+     If you find the previous pages hard to read, there's a good introduction:
+       http://www.embedtronics.com/nokia/fbus.html
 
 -------------------------------------------------------------------------------
 Q. Does gnokii work under Sun's Solaris?
@@ -264,22 +278,10 @@ nk7110.c:1610:  /* 6210/7110 needs to seek the first free pos to inhabit with ne
    the result.
 
 -------------------------------------------------------------------------------
-Q. I'd like to send/receive sms, to handle voice calls, etc from my own
-   application. What should I do?
+Q. How do I enable debug output?
 
-A. If the license of your application is GPL the easiest solution is to
-   use libgnokii. In this case you needn't to handle low level stuff,
-   libgnokii will do it for you. If you want to use a scripting language,
-   Konstantin Agouros had written a perl module, you can download it from
+A. Place the new section in your config file (or update existing section in
+   a similiar way):
 
-   http://www.agouros.de/gnokii
-
--------------------------------------------------------------------------------
-Q. I cannot use libgnokii, I want to reimplement everything from scratch.
-   Where can I find the protocol docs?
-
-A. The protocol is quite complex and the docs isn't verbose enough. You'll
-   find everything in Docs/protocol/, these are all we have. Try to read
-   the following page, this is a good introduction:
-
-   http://www.embedtronics.com/nokia/fbus.html
+   [logging]
+   debug = on
