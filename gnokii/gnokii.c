@@ -19,7 +19,10 @@
   really powerful and useful :-)
 
   $Log$
-  Revision 1.148  2001-11-19 13:46:43  pkot
+  Revision 1.149  2001-11-19 16:00:15  pkot
+  Another typo
+
+  Revision 1.148  2001/11/19 13:46:43  pkot
   reading unread SMS in 6210 from Inbox. Folder updates (Markus Plail)
 
   Revision 1.147  2001/11/18 00:54:32  pkot
@@ -1104,7 +1107,7 @@ int getsms(int argc, char *argv[])
 {
 	int del = 0;
 	SMS_Folder folder;
-	SMS_FolderList folders;
+	SMS_FolderList folderlist;
 	GSM_SMSMessage message;
 	char *memory_type_string;
 	int start_message, end_message, count, mode = 1;
