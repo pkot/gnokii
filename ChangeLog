@@ -30,6 +30,8 @@
                                                      (Osma Suominen)
     o don't erroneously report timeout if a message was not
       sent and the phone does not reply within 100ms (Osma Suominen)
+ * device layer updates
+    o handling write errors in unixserial           (BORBELY Zoltan)
 
 0.5.0pre9
 =========

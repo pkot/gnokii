@@ -427,7 +427,7 @@ static void check_dcd(int fd)
 /* Write to serial device. */
 size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
-	size_t r = 0;
+	size_t r = 0, bs;
 	ssize_t got;
 
 #ifndef TIOCMGET
@@ -438,17 +438,28 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine 
 	if (state->config.require_dcd)
 		check_dcd(fd);
 
-	if (state->config.serial_write_usleep < 0)
-		return write(fd, buf, n);
-
 	while (n > 0) {
-		got = write(fd, buf, 1);
-		if (got <= 0)
-			return (!r ? -1 : r);
-		buf++;
-		n--;
-		r++;
-		if (state->config.serial_write_usleep)
+		bs = (state->config.serial_write_usleep < 0) ? n : 1;
+		got = write(fd, buf, bs);
+		if (got == 0) {
+			dprintf("serial_write: oops, zero byte has written!\n");
+		}
+		else if (got < 0) {
+			if (errno == EINTR) continue;
+			if (errno != EAGAIN) {
+				dprintf("serial_write: write error %d\n", errno);
+				return -1;
+			}
+			dprintf("serial_write: transmitter busy, waiting\n");
+			serial_select(fd, NULL, state);
+			dprintf("serial_write: transmitter ready\n");
+			continue;
+		}
+
+		buf += got;
+		n -= got;
+		r += got;
+		if (state->config.serial_write_usleep > 0)
 			usleep(state->config.serial_write_usleep);
 	}
 	return r;
