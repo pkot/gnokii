@@ -26,6 +26,7 @@ OBJS =	cfgreader.o \
 	gsm-api.o \
 	gsm-networks.o \
 	mbus-2110.o \
+	mbus-6160.o \
 	mbus-640.o \
 	rlp-common.o \
 	rlp-crc24.o
