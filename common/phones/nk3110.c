@@ -63,6 +63,8 @@ static gn_error P3110_GetMemoryStatus(gn_data *data, struct gn_statemachine *sta
 static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_DeleteSMSMessage(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *state, bool save_sms);
+static gn_error P3110_ReadPhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_WritePhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingCall(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingCallAnswered(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -80,6 +82,8 @@ static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *buffer, 
 static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingPhonebookRead(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error P3110_IncomingPhonebookWrite(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingPINEntered(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error P3110_IncomingPhoneInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -123,6 +127,12 @@ static gn_incoming_function_type incoming_functions[] = {
 	{ 0x3f, P3110_IncomingNothing },
 	{ 0x40, P3110_IncomingNoSMSInfo },
 	{ 0x41, P3110_IncomingSMSInfo },
+	{ 0x42, P3110_IncomingNothing },
+	{ 0x43, P3110_IncomingNothing },
+	{ 0x44, P3110_IncomingPhonebookWrite },
+	{ 0x45, P3110_IncomingPhonebookWrite },
+	{ 0x46, P3110_IncomingPhonebookRead },
+	{ 0x47, P3110_IncomingPhonebookRead },
 	{ 0x48, P3110_IncomingPINEntered },
 	{ 0x4a, P3110_IncomingNothing },
 	{ 0x4b, P3110_IncomingStatusInfo },
@@ -177,7 +187,10 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 	case GN_OP_GetMemoryStatus:
 		return P3110_GetMemoryStatus(data, state);
 	case GN_OP_ReadPhonebook:
+		return P3110_ReadPhonebook(data, state);
 	case GN_OP_WritePhonebook:
+		return P3110_WritePhonebook(data, state);
+
 	case GN_OP_GetPowersource:
 	case GN_OP_GetAlarm:
 	case GN_OP_GetSMSStatus:
@@ -470,6 +483,42 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 
 	/* Retries must have failed. */
 	return GN_ERR_FAILED;
+}
+
+static gn_error P3110_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[2];
+	
+	req[0] = get_memory_type(data->phonebook_entry->memory_type);
+	req[1] = data->phonebook_entry->location;
+	
+	if (sm_message_send(2, 0x43, req, state) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
+	
+	return sm_block(0x46, data, state);
+}
+
+static gn_error P3110_WritePhonebook(gn_data *data, struct gn_statemachine *state)
+{
+	int namelen, numberlen;
+	unsigned char req[256];
+	
+	req[0] = get_memory_type(data->phonebook_entry->memory_type);
+	req[1] = data->phonebook_entry->location;
+	
+	namelen = strlen(data->phonebook_entry->name);
+	numberlen = strlen(data->phonebook_entry->number);
+	
+	req[2] = namelen;
+	memcpy(req + 3, data->phonebook_entry->name, namelen);
+	
+	req[3 + namelen] = numberlen;
+	memcpy(req + 3 + namelen + 1, data->phonebook_entry->number, numberlen);
+
+	if (sm_message_send(3 + namelen + 1 + numberlen, 0x42, req, state) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
+	
+	return sm_block(0x44, data, state);
 }
 
 static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
@@ -956,6 +1005,65 @@ static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, i
 	return GN_ERR_NONE;
 }
 
+static gn_error P3110_IncomingPhonebookRead(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	int namelen, numberlen;
+	
+	if(!data->phonebook_entry) return GN_ERR_INTERNALERROR;
+
+	switch (message[0]) { /* unfold message type */
+	case 0x46:
+		dprintf("Phonebook read OK\n");
+		break;
+	case 0x47:
+		/* 0x74 is the only seen error code */
+		if (message[2] == 0x74)
+			return GN_ERR_INVALIDLOCATION;
+		else
+			return GN_ERR_EMPTYLOCATION;
+	default:
+		return GN_ERR_INTERNALERROR;
+	}
+
+	/* empty locations are reported with empty name and number, so
+	 * check for that case here */
+	 
+	if (message[2] == 0x00 && message[3] == 0x00)
+		return GN_ERR_EMPTYLOCATION;
+
+	data->phonebook_entry->caller_group = 0;
+	data->phonebook_entry->subentries_count = 0;
+	
+	namelen = message[2];
+
+	memcpy(data->phonebook_entry->name, message + 3, namelen);
+	*(data->phonebook_entry->name + namelen) = '\0';
+
+	numberlen = message[3 + namelen];
+	
+	memcpy(data->phonebook_entry->number, message + 3 + namelen + 1, numberlen);
+	*(data->phonebook_entry->number + numberlen) = '\0';
+		
+	return GN_ERR_NONE;
+}
+
+static gn_error P3110_IncomingPhonebookWrite(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	switch (message[0]) { /* unfold message type */
+	case 0x44:
+		dprintf("Phonebook written OK\n");
+		return GN_ERR_NONE;
+	case 0x45:
+		dprintf("Phonebook write failed (0x%02x)\n", message[2]);
+		switch(message[2]) {
+			case 0x74:	return GN_ERR_INVALIDLOCATION;
+			case 0x66:	return GN_ERR_ENTRYTOOLONG;
+			default:	return GN_ERR_UNKNOWN;
+		}
+	default:
+		return GN_ERR_INTERNALERROR;
+	}
+}
 
 /* 0x48 is sent during power-on of the phone, after the 0x13
    message is received and the PIN (if any) has been entered

@@ -297,6 +297,10 @@ static void fb3110_tx_ack_send(u8 *message, int length, struct gn_statemachine *
 		   SMS message center details.  Phone responds with an ack to
 		   our 0x3f request then sends an 0x41 message that has the
 		   actual data in it. */
+	case 0x42:
+		/* ack for phonebook write */
+	case 0x43:
+		/* ack for phonebook read */
 	case 0x4a:
 		/* 0x4a message is a response to our 0x4a request, assumed to
 		   be a keepalive message of sorts.  No response required. */
