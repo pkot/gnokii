@@ -176,6 +176,7 @@ GSM_Network GSM_Networks[] =
   { "228 02", "diAx Mobile AG" },
   { "230 01", "Paegas" },
   { "230 02", "EuroTel" },
+  { "230 03", "Oskar" },
   { "231 01", "Globtel" },
   { "231 02", "EuroTel GSM" },
   { "232 01", "A1" },
