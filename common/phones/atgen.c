@@ -152,7 +152,7 @@ static const SMSMessage_Layout at_deliver = {
 
 static const SMSMessage_Layout at_submit = {
 	true,						/* Is the SMS type supported */
-	 0, true, false,				/* SMSC */
+	-1, true, false,				/* SMSC */
 	-1,  1,  1,  1, -1,  2,  4, -1,  7,  5,  1,
 	 6, -1, -1,					/* Validity */
 	 3, true, false,				/* Remote Number */
