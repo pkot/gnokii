@@ -11,7 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.9  2001-01-15 21:10:20  ja
+  Revision 1.10  2001-01-17 02:54:56  chris
+  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
+  I can now edit my phonebook in xgnokii but it is 'work in progress'.
+
+  Revision 1.9  2001/01/15 21:10:20  ja
   Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
 
   
@@ -114,6 +118,7 @@ static void InitModelInf (void)
     phoneMonitor.supported.keyboard = KeyboardSupported (buf);
     phoneMonitor.supported.calendar = CalendarSupported (buf);
     phoneMonitor.supported.data = DataSupported (buf);
+    phoneMonitor.supported.extPbk = ExtPbkSupported (buf);
   }
 
   i = 0;
@@ -890,12 +895,14 @@ void *GUI_Connect (void *a)
 
     if (GSM->GetRFLevel (&rf_units, &phoneMonitor.rfLevel) != GE_NONE)
       phoneMonitor.rfLevel = -1;
-
+    if (rf_units==GRF_Percentage) phoneMonitor.rfLevel/=20.0;
+   
     if (GSM->GetPowerSource(&phoneMonitor.powerSource) == GE_NONE && phoneMonitor.powerSource == GPS_ACDC) {
       phoneMonitor.batteryLevel=((int) phoneMonitor.batteryLevel+1)%5;
     }
     else if (GSM->GetBatteryLevel(&batt_units, &phoneMonitor.batteryLevel) != GE_NONE)
       phoneMonitor.batteryLevel=-1;
+    if (batt_units==GBU_Percentage) phoneMonitor.batteryLevel/=20;
 
     if (GSM->GetAlarm (0, &Alarm) == GE_NONE && Alarm.AlarmEnabled != 0)
       phoneMonitor.alarm = TRUE;

@@ -121,6 +121,7 @@ typedef struct {
 #define PM_DTMF		0x20
 #define PM_DATA		0x40
 #define PM_SPEEDDIAL	0x80
+#define PM_EXTPBK       0x100
 
 extern char *GetModel (const char *);
 extern int CallerGroupSupported (const char *);
@@ -131,5 +132,6 @@ extern int CalendarSupported (const char *);
 extern int DTMFSupported (const char *);
 extern int DataSupported (const char *);
 extern int SpeedDialSupported (const char *);
+extern int ExtPbkSupported (const char *);
 
 #endif /* __misc_h */

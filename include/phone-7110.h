@@ -17,16 +17,20 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.1  2001-01-14 22:47:01  chris
+  Revision 1.2  2001-01-17 02:54:56  chris
+  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
+  I can now edit my phonebook in xgnokii but it is 'work in progress'.
+
+  Revision 1.1  2001/01/14 22:47:01  chris
   Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
 
 */
 
-#ifndef __gsm_common_h
-#include "gsm-common.h"
-#endif
+#ifndef __phone_7110_h
+#define __phone_7110_h
 
+#include <gsm-common.h>
 
 extern GSM_Functions P7110_Functions;
 extern bool P7110_LinkOK;
@@ -77,16 +81,21 @@ GSM_Error P7110_GetIMEI(char *imei);
 GSM_Error P7110_GetRevision(char *revision);
 GSM_Error P7110_GetModel(char *model);
 GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry);
+GSM_Error P7110_WritePhonebookLocation(GSM_PhonebookEntry *entry);
 GSM_Error P7110_GetMemoryStatus(GSM_MemoryStatus *status);
 GSM_Error P7110_GetBatteryLevel(GSM_BatteryUnits *units, float *level);
+GSM_Error P7110_GetRFLevel(GSM_RFUnits *units, float *level);
+GSM_Error P7110_GetBitmap(GSM_Bitmap *bitmap);
+GSM_Error P7110_SetBitmap(GSM_Bitmap *bitmap);
 
 int P7110_GetMemoryType(GSM_MemoryType memory_type);
 void P7110_Terminate();
 bool P7110_SendRLPFrame( RLP_F96Frame *frame, bool out_dtx );
 
 
-#endif
+#endif  /* #ifdef __phone_7110_c */
 
+#endif  /* #ifndef __phone_7110_h */
 
 
 

@@ -56,6 +56,7 @@ typedef struct {
   GtkWidget *dialog;
   GtkWidget *name;
   GtkWidget *number;
+  GtkWidget *extended;
   GtkWidget *memoryBox;
   GtkWidget *memoryTypePhone;
   GtkWidget *memoryTypeSIM;
@@ -160,5 +161,7 @@ extern SelectContactData *GUI_SelectContactDialog (void);
 extern void GUI_RefreshGroupMenu (void);
 
 extern PhonebookEntry *GUI_GetEntry (GSM_MemoryType, gint);
+
+void ExtPbkChanged (GtkWidget *widget, gpointer data );
 
 #endif

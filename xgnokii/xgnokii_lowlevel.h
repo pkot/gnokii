@@ -11,7 +11,11 @@
   Released under the terms of the GNU GPL, see file COPYING for more details.
 
   $Log$
-  Revision 1.5  2001-01-15 21:10:20  ja
+  Revision 1.6  2001-01-17 02:54:57  chris
+  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
+  I can now edit my phonebook in xgnokii but it is 'work in progress'.
+
+  Revision 1.5  2001/01/15 21:10:20  ja
   Better status reporting in xgnokii, fixed phone capabilities detection in xgnokii.
 
   
@@ -171,6 +175,7 @@ typedef struct {
     bool keyboard:1;
     bool calendar:1;
     bool data:1;
+    bool extPbk:1;
   } supported;
 } PhoneMonitor;
 

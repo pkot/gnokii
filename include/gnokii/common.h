@@ -346,7 +346,8 @@ typedef enum {
   GRF_dBm,
   GRF_mV,
   GRF_uV,
-  GRF_CSQ
+  GRF_CSQ,
+  GRF_Percentage
 } GSM_RFUnits;
 
 /* Define enums for Battery units. */

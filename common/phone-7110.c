@@ -17,7 +17,11 @@
   The various routines are called P7110_(whatever).
 
   $Log$
-  Revision 1.1  2001-01-14 22:46:59  chris
+  Revision 1.2  2001-01-17 02:54:54  chris
+  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
+  I can now edit my phonebook in xgnokii but it is 'work in progress'.
+
+  Revision 1.1  2001/01/14 22:46:59  chris
   Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
 
@@ -43,11 +47,12 @@
 GSM_Link link;
 GSM_IncomingFunctionType P7110_IncomingFunctions[] = {
   { 0x03, P7110_GenericCRHandler },
+  { 0x0a, P7110_GenericCRHandler },
   { 0x17, P7110_GenericCRHandler },
   { 0x1b, P7110_GenericCRHandler }
 };
 GSM_Phone phone = {
-   3,  /* No of functions in array */
+   4,  /* No of functions in array */
    P7110_IncomingFunctions
 };
 
@@ -76,7 +81,7 @@ GSM_Functions P7110_Functions = {
   P7110_Initialise,
   P7110_Terminate,
   P7110_ReadPhonebook, /* GetMemoryLocation */
-  UNIMPLEMENTED, /* WritePhonebookLocation */
+  P7110_WritePhonebookLocation, /* WritePhonebookLocation */
   UNIMPLEMENTED, /* GetSpeedDial */
   UNIMPLEMENTED, /* SetSpeedDial */
   P7110_GetMemoryStatus, /* GetMemoryStatus */
@@ -87,7 +92,7 @@ GSM_Functions P7110_Functions = {
   UNIMPLEMENTED, /* DeleteSMSMessage */
   UNIMPLEMENTED, /* SendSMSMessage */
   UNIMPLEMENTED, /* SaveSMSMessage */
-  UNIMPLEMENTED, /* GetRFLevel */
+  P7110_GetRFLevel, /* GetRFLevel */
   P7110_GetBatteryLevel, /* GetBatteryLevel */
   UNIMPLEMENTED, /* GetPowerSource */
   UNIMPLEMENTED, /* GetDisplayStatus */
@@ -109,8 +114,8 @@ GSM_Functions P7110_Functions = {
   UNIMPLEMENTED, /* DeleteCalendarNote */
   UNIMPLEMENTED, /* NetMonitor */
   UNIMPLEMENTED, /* SendDTMF */
-  UNIMPLEMENTED, /* GetBitmap */
-  UNIMPLEMENTED, /* SetBitmap */
+  P7110_GetBitmap, /* GetBitmap */
+  P7110_SetBitmap, /* SetBitmap */
   UNIMPLEMENTED, /* SetRingtone */
   UNIMPLEMENTED, /* SendRingtone */
   UNIMPLEMENTED, /* Reset */ 
@@ -210,7 +215,29 @@ static void UnicodeDecode (char* dest, const char* src, int len)
 	dest[len] = '\0';
 }
 
+/* Makes Unicode from "normal" string.
+   Dest - where to save destination string,
+   Src - where to get string from,
+   Pixd - variable containing offset (index) of the first char inside Dest,
+          it is updated on return (IN+OUT argument), must NOT be NULL */
+static void UnicodeEncode (char* dest, int *pidx, const char* src)
+{
+	int j;
+	char ch1, ch2;
 
+	for ( ; *src != '\0';  ++src )
+	{
+		ch1 = 0x00;  ch2 = *src;
+		for ( j = 0;  unicode_table[j][2] != 0x00;  ++j )
+			if ( *src == unicode_table[j][2] )
+			{
+				ch1 = unicode_table[j][0];
+				ch2 = unicode_table[j][1];
+			}
+		dest[(*pidx)++] = ch1;
+		dest[(*pidx)++] = ch2;
+	}
+}
 
 
 
@@ -263,6 +290,154 @@ GSM_Error P7110_GetModel(char *model)
 }
 
 
+GSM_Error GetCallerBitmap(GSM_Bitmap *bitmap)
+{
+  unsigned char req[500] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x01, 0x00, 0x01,
+                         0x00, 0x10 , /* memory type */
+                         0x00, 0x00,  /* location */
+                         0x00, 0x00};
+  int len=14;
+  int blocks, i;
+  unsigned char *blockstart;
+
+  req[11]=bitmap->number+1;
+
+  if (PGEN_CommandResponse(&link,req,&len,0x03,0x03,500)==GE_NONE) {
+
+    if( req[6] == 0x0f ) // not found
+      {
+        if( req[10] == 0x34 ) // not found because inv. location
+          return GE_INVALIDPHBOOKLOCATION;
+        else return GE_NOTIMPLEMENTED;
+      }
+
+    //P7110_DebugMessage(req,len);
+
+    bitmap->size=0;
+    bitmap->height=0;
+    bitmap->width=0;
+    bitmap->text[0]=0;
+    
+    blocks     = req[17];        
+    blockstart = req+18;
+    
+    for( i = 0; i < blocks; i++ ) {
+      switch( blockstart[0] ) {
+      case 0x07:                   /* Name */
+	UnicodeDecode(bitmap->text,blockstart+6,blockstart[5]/2);
+	break;
+      case 0x0c:                   /* Ringtone */
+	bitmap->ringtone=blockstart[5];
+	break;
+      case 0x1b:                   /* Bitmap */
+	bitmap->width=blockstart[5];
+	bitmap->height=blockstart[6];
+	bitmap->size=(bitmap->width*bitmap->height)/8;
+	memcpy(bitmap->bitmap,blockstart+10,bitmap->size);
+	break;
+      case 0x1c:                   /* Graphic on/off */
+	break;
+      case 0x1e:                   /* Number */
+	break;
+      default:
+	fprintf(stdout, "Unknown caller logo block %02x\n\r",blockstart[0]);
+	break;
+      }
+      blockstart+=blockstart[3];
+    }
+    return GE_NONE;
+  }
+  else return GE_NOTIMPLEMENTED;
+}
+
+
+inline unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
+{
+  *(block++)=id;
+  *(block++)=0;
+  *(block++)=0;
+  *(block++)=size+6;
+  *(block++)=no;
+  memcpy(block,buf,size);
+  block+=size;
+  *(block++)=0;
+
+  return size+6;
+}
+
+GSM_Error SetCallerBitmap(GSM_Bitmap *bitmap)
+{
+  unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
+                         0x00, 0x10,  /* memory type */
+                         0x00, 0x00,  /* location */
+                         0x00, 0x00, 0x00};
+  char string[500];
+  int block, i;
+  unsigned int count=18;
+
+
+  req[13]=bitmap->number+1;
+  block=1;
+
+  /* Name */
+  i=0;
+  UnicodeEncode(string+1, &i, bitmap->text);
+  string[0]=i;
+  count+=PackBlock(0x07,i+1,block++,string,req+count);
+  
+  /* Ringtone */
+  string[0]=bitmap->ringtone;
+  string[1]=0;
+  count+=PackBlock(0x0c,2,block++,string,req+count);
+  
+  /* Number */
+  string[0]=bitmap->number+1;
+  string[1]=0;
+  count+=PackBlock(0x1e,2,block++,string,req+count);
+
+  /* Logo on/off - assume on for now */
+  string[0]=1;
+  string[1]=0;
+  count+=PackBlock(0x1c,2,block++,string,req+count);
+
+  /* Logo */
+  string[0]=bitmap->width;
+  string[1]=bitmap->height;
+  string[2]=0;
+  string[3]=0;
+  string[4]=0x7e; /* Size */
+  memcpy(string+5,bitmap->bitmap,bitmap->size);
+  count+=PackBlock(0x1b,bitmap->size+5,block++,string,req+count);
+
+  req[17]=block-1;
+
+  if (PGEN_CommandResponse(&link,req,&count,0x03,0x03,500)!=GE_NONE)
+    return GE_NOTIMPLEMENTED;
+
+  return GE_NONE;
+}
+
+
+/* Only works with caller logos for now */
+
+GSM_Error P7110_GetBitmap(GSM_Bitmap *bitmap)
+{
+
+  if (bitmap->type!=GSM_CallerLogo) return GE_NOTIMPLEMENTED;
+
+  return GetCallerBitmap(bitmap);
+
+}
+
+GSM_Error P7110_SetBitmap(GSM_Bitmap *bitmap)
+{
+
+  if (bitmap->type!=GSM_CallerLogo) return GE_NOTIMPLEMENTED;
+
+  return SetCallerBitmap(bitmap);
+}
+
+
 GSM_Error P7110_GetRevision(char *revision)
 {
   unsigned char req[100] = {FBUS_FRAME_HEADER, 0x03, 0x01, 0x32};
@@ -288,6 +463,18 @@ GSM_Error P7110_GetBatteryLevel(GSM_BatteryUnits *units, float *level)
   else return GE_NOTIMPLEMENTED;
 }
 
+GSM_Error P7110_GetRFLevel(GSM_RFUnits *units, float *level)
+{
+  unsigned char req[100] = {FBUS_FRAME_HEADER, 0x81};
+  int len=4;
+
+  if (PGEN_CommandResponse(&link,req,&len,0x0a,0x0a,100)==GE_NONE) {
+    *units=GRF_Percentage;
+    *level=req[4];
+    return GE_NONE;
+  }
+  else return GE_NOTIMPLEMENTED;
+}
 
 GSM_Error P7110_GetMemoryStatus(GSM_MemoryStatus *status)
 {
@@ -351,6 +538,79 @@ int P7110_GetMemoryType(GSM_MemoryType memory_type)
    return (result);
 }
 
+GSM_Error P7110_WritePhonebookLocation(GSM_PhonebookEntry *entry)
+{
+  unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
+                         0x00, 0x00,  /* memory type */
+                         0x00, 0x00,  /* location */
+                         0x00, 0x00, 0x00};
+  char string[500];
+  int block, i, j, defaultn;
+  unsigned int count=18;
+
+  req[11] = P7110_GetMemoryType(entry->MemoryType);
+  req[12] = (entry->Location>>8);
+  req[13] = entry->Location & 0xff;
+
+  block=1;
+
+  if (strlen(entry->Name)>0) {
+
+  /* Name */
+  i=0;
+  UnicodeEncode(string+1, &i, entry->Name);
+  string[0]=i;
+  count+=PackBlock(0x07,i+1,block++,string,req+count);
+  
+  /* Group */
+  string[0]=entry->Group+1;
+  string[1]=0;
+  count+=PackBlock(0x1e,2,block++,string,req+count);
+  
+  /* Default Number */
+
+  defaultn=999;
+  for (i=0;i<entry->SubEntriesCount;i++)
+    if (entry->SubEntries[i].EntryType==GSM_Number)
+      if (strcmp(entry->Number,entry->SubEntries[i].data.Number)==0)
+	defaultn=i;
+
+  if (defaultn<i) {
+    string[0]=entry->SubEntries[defaultn].NumberType;
+    string[1]=0;
+    string[2]=0;
+    string[3]=0;
+    i=0;
+    UnicodeEncode(string+5, &i,entry->SubEntries[defaultn].data.Number);
+    string[4]=i;
+    count+=PackBlock(0x0b,i+5,block++,string,req+count);
+  }
+
+  /* Rest of the numbers */
+
+  for (i=0;i<entry->SubEntriesCount;i++)
+    if (entry->SubEntries[i].EntryType==GSM_Number)
+      if (i!=defaultn) {
+	string[0]=entry->SubEntries[i].NumberType;
+	string[1]=0;
+	string[2]=0;
+	string[3]=0;
+	j=0;
+	UnicodeEncode(string+5, &j,entry->SubEntries[i].data.Number);
+	string[4]=j;
+	count+=PackBlock(0x0b,j+5,block++,string,req+count);
+      } 
+
+  req[17]=block-1;
+
+  if (PGEN_CommandResponse(&link,req,&count,0x03,0x03,500)!=GE_NONE)
+    return GE_NOTIMPLEMENTED;
+
+  }
+
+  return GE_NONE;
+}
+
 
 
 GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry)
@@ -361,7 +621,7 @@ GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry)
                          0x00, 0x00};
   int len=14;
   int blocks, blockcount, i;
-  char *pBlock;
+  unsigned char *pBlock;
 
   req[9] = P7110_GetMemoryType(entry->MemoryType);
   req[10] = (entry->Location>>8);
@@ -469,7 +729,7 @@ GSM_Error P7110_ReadPhonebook(GSM_PhonebookEntry *entry)
 	    blockcount++;
 	    break;
 	  case P7110_ENTRYTYPE_GROUP:
-	    entry->Group = pBlock[5];
+	    entry->Group = pBlock[5]-1;
 #ifdef DEBUG
 	    fprintf(stderr, _("   Group: %d\n"), entry->Group);
 #endif /* DEBUG */

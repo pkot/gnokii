@@ -17,11 +17,18 @@
   The various routines are called FBUS_(whatever).
 
   $Log$
-  Revision 1.1  2001-01-14 22:47:01  chris
+  Revision 1.2  2001-01-17 02:54:55  chris
+  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
+  I can now edit my phonebook in xgnokii but it is 'work in progress'.
+
+  Revision 1.1  2001/01/14 22:47:01  chris
   Preliminary 7110 support (dlr9 only) and the beginnings of a new structure
 
 
 */
+
+#ifndef __fbus_generic_h
+#define __fbus_generic_h
 
 #include <sys/time.h>
 
@@ -110,7 +117,9 @@ int FBUS_TX_SendFrame(u8 message_length, u8 message_type, u8 *buffer);
 GSM_Error FBUS_SendMessage(u16 messagesize, u8 messagetype, void *message);
 int FBUS_TX_SendAck(u8 message_type, u8 message_seq);
 
-#endif
+#endif   /* #ifdef __fbus_generic_c */
+
+#endif   /* #ifndef __fbus_generic_h */
 
 
 

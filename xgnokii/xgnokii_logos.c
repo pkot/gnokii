@@ -833,6 +833,7 @@ void GetNetworkInfoEvent(GtkWidget *widget) {
 
 void GetLogoEvent(GtkWidget *widget) {
   GSM_Error error;
+  int i;
   PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
   D_Bitmap *data = (D_Bitmap *)g_malloc(sizeof(D_Bitmap));
   char *operator = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
@@ -842,6 +843,11 @@ void GetLogoEvent(GtkWidget *widget) {
   data->bitmap = &bitmap;
   e->event = Event_GetBitmap;
   e->data = data;
+  if (phoneMonitor.supported.callerGroups) {
+    for (i = 0;i < 6;i++) 
+      if (strcmp(gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(callerCombo)->entry)),
+                 xgnokiiConfig.callerGroups[i]) == 0) bitmap.number = i; 
+  }
 
   /* launch event and wait for result */
   GUI_InsertEvent(e);

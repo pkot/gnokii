@@ -57,7 +57,7 @@ static PhoneModel models[] = {
 	{"616x",  "NSW-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
 	{"6185",  "NSD-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
 	{"6190",  "NSB-3", PM_CALLERGROUP | PM_CALENDAR | PM_NETMONITOR | PM_KEYBOARD | PM_SMS | PM_DTMF | PM_DATA | PM_SPEEDDIAL },
-	{"7110",  "NSE-5", PM_DATA },
+	{"7110",  "NSE-5", PM_CALLERGROUP | PM_SPEEDDIAL | PM_EXTPBK},
 	{"9000i", "RAE-4", 0 },
 	{"9110",  "RAE-2", 0 },
 	{"550",	  "THF-10", 0 },
@@ -124,3 +124,10 @@ inline int SpeedDialSupported (const char *num)
 {
 	return (GetPhoneModel(num)->flags & PM_SPEEDDIAL ? 1 : 0);
 }
+
+int ExtPbkSupported (const char *num)
+{
+	return ((GetPhoneModel(num)->flags & PM_EXTPBK)>0);
+}
+
+

@@ -18,7 +18,11 @@
   useful :-)
 
   $Log$
-  Revision 1.113  2001-01-15 17:00:49  pkot
+  Revision 1.114  2001-01-17 02:54:55  chris
+  More 7110 work.  Use with care! (eg it is not possible to delete phonebook entries)
+  I can now edit my phonebook in xgnokii but it is 'work in progress'.
+
+  Revision 1.113  2001/01/15 17:00:49  pkot
   Initial keypress sequence support. Disable compilation warning
 
   Revision 1.112  2001/01/12 14:09:13  pkot
@@ -3154,10 +3158,6 @@ int foogle(char *argv[])
   fbusinit(NULL);
 
   // Fill in what you would like to test here...
-
-  sleep(5);
-
-  GSM->Terminate();
 
   return 0;
 }
