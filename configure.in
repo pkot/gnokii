@@ -294,6 +294,7 @@ if test "$no_x" = yes -o "$with_x" = "no"; then
    GTK_LIBS=""
 else
    AC_PATH_X
+   CPPFLAGS="$CPPFLAGS -I$x_includes"
    AC_CHECK_HEADERS(X11/xpm.h,
                     [ XPMINC="yes" ],
                     [ XPMINC="no" ])

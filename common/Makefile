@@ -61,7 +61,7 @@ DATA.o: $(DATA_OBJS)
 	$(LD) $(LDREL) $(LDOUT) DATA.o $(DATA_OBJS)
 
 gsm-filetypes.o: gsm-filetypes.c 
-	$(CC) $(CFLAGS) $(XPM_FLAGS) -c gsm-filetypes.c
+	$(CC) $(CFLAGS) $(XPM_CFLAGS) -c gsm-filetypes.c
 
 vcal.c: vcal.lx
 	$(LEX) -ovcal.c vcal.lx
