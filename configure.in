@@ -501,6 +501,7 @@ AC_SUBST(WIN32)
 AC_OUTPUT(
    Makefile.global
    po/Makefile.in
+   po/Makefile
    packaging/RedHat/gnokii.spec
    packaging/Slackware/SlackBuild
    )

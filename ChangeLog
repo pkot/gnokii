@@ -18,6 +18,8 @@
     o few corrections for the po files copyrights         (Pawel Kot)
     o __ptr_t detection fixed to work with older autoconf
       packages                                       (BORBELY Zoltan)
+    o add po/Makefile target in configure.in so it should work
+      everywhere                                          (Pawel Kot)
  * New API for gnokii
     [some of these changes are temporary -- they will allow be to
      better control the changes]
