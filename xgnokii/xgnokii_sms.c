@@ -106,7 +106,7 @@ static GtkWidget *treeFolderItem[GN_SMS_FOLDER_MAX_NUMBER], *subTree;
 
 static inline void Help1(GtkWidget * w, gpointer data)
 {
-	gchar *indx = g_strdup_printf("/help/%s/windows/sms/index.html", xgnokiiConfig.locale);
+	gchar *indx = g_strdup_printf("/help/%s/windows/sms/index.html", xgnokiiConfig.help_locale);
 	Help(w, indx);
 	g_free(indx);
 }
@@ -114,7 +114,7 @@ static inline void Help1(GtkWidget * w, gpointer data)
 
 static inline void Help2(GtkWidget * w, gpointer data)
 {
-	gchar *indx = g_strdup_printf("/help/%s/sms_send.html", xgnokiiConfig.locale);
+	gchar *indx = g_strdup_printf("/help/%s/sms_send.html", xgnokiiConfig.help_locale);
 	Help(w, indx);
 	g_free(indx);
 }

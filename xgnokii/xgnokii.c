@@ -42,6 +42,10 @@
 #include <time.h>		/* for time   */
 #include <pthread.h>
 
+#ifdef HAVE_SYS_STAT_H
+#  include <sys/stat.h>
+#endif
+
 #ifndef WIN32
 #  include <unistd.h>		/* for usleep */
 #  include <signal.h>
@@ -201,7 +205,7 @@ static gn_sms_message_center tempMessageSettings;
 
 static inline void Help1(GtkWidget * w, gpointer data)
 {
-	gchar *indx = g_strdup_printf("/help/%s/index.html", xgnokiiConfig.locale);
+	gchar *indx = g_strdup_printf("/help/%s/index.html", xgnokiiConfig.help_locale);
 	Help(w, indx);
 	g_free(indx);
 }
@@ -2300,16 +2304,27 @@ static gint RemoveSplash(GtkWidget * Win)
 	return FALSE;
 }
 
-static void ReadConfig(void)
+static bool LocaleHelpExists(gchar *help_locale)
 {
 #ifdef WIN32
-	xgnokiiConfig.locale = "";
+	bool retval = true;
 #else
-	if ((xgnokiiConfig.locale = getenv("LC_ALL")) == NULL)
-		if ((xgnokiiConfig.locale = getenv("LC_MESSAGES")) == NULL)
-			if ((xgnokiiConfig.locale = getenv("LANG")) == NULL)
-				xgnokiiConfig.locale = "POSIX";
+	bool retval;
+	gchar *file;
+	struct stat buf;
+
+	file = g_strdup_printf("/%s/help/%s", xgnokiiConfig.xgnokiidir, help_locale);
+	if (stat(file, &buf) == 0)
+		retval = true;
+	else
+		retval = false;
+	g_free(file);
 #endif
+	return retval;
+}
+
+static void ReadConfig(void)
+{
 	if (gn_cfg_read_default() < 0) {
 		exit(-1);
 	}
@@ -2334,6 +2349,27 @@ static void ReadConfig(void)
 	    xgnokiiConfig.callerGroups[2] = xgnokiiConfig.callerGroups[3] =
 	    xgnokiiConfig.callerGroups[4] = xgnokiiConfig.callerGroups[5] = NULL;
 	xgnokiiConfig.smsSets = 0;
+#ifdef WIN32
+	xgnokiiConfig.locale = "";
+	xgnokiiConfig.help_locale = "";
+#else
+	if ((xgnokiiConfig.locale = getenv("LC_ALL")) == NULL)
+		if ((xgnokiiConfig.locale = getenv("LC_MESSAGES")) == NULL)
+			if ((xgnokiiConfig.locale = getenv("LANG")) == NULL)
+				xgnokiiConfig.locale = "POSIX";
+	xgnokiiConfig.help_locale = g_strdup(xgnokiiConfig.locale);
+#endif
+	/* we have set en_US.UTF8 locale that is not supported by xgnokii */
+	if (!LocaleHelpExists(xgnokiiConfig.help_locale)) {
+		char *pos = strchr(xgnokiiConfig.locale, '.');
+		g_free(xgnokiiConfig.help_locale);
+		xgnokiiConfig.help_locale = g_strndup(xgnokiiConfig.locale,
+						pos - xgnokiiConfig.locale);
+		if (!LocaleHelpExists(xgnokiiConfig.help_locale)) {
+			g_free(xgnokiiConfig.help_locale);
+			xgnokiiConfig.help_locale = g_strdup("en_US");
+		}
+	}
 }
 
 

@@ -58,7 +58,7 @@ static bool speedDialInitialized;
 static inline void Help1(GtkWidget * w, gpointer data)
 {
 	gchar *indx =
-	    g_strdup_printf("/help/%s/windows/speeddial/index.html", xgnokiiConfig.locale);
+	    g_strdup_printf("/help/%s/windows/speeddial/index.html", xgnokiiConfig.help_locale);
 	Help(w, indx);
 	g_free(indx);
 }
