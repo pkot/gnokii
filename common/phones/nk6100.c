@@ -83,6 +83,8 @@ static const SMSMessage_Layout nk6100_picture = {
 static SMSMessage_PhoneLayout nk6100_layout;
 
 static unsigned char MagicBytes[4] = { 0x00, 0x00, 0x00, 0x00 };
+/* FIXME: we should get rid on it */
+static void (*OnCellBroadcast)(GSM_CBMessage *Message) = NULL;
 
 /* static functions prototypes */
 static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *state);
@@ -123,6 +125,7 @@ static GSM_Error DisplayOutput(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error PollDisplay(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error GetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state);
+static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state);
 static GSM_Error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingModelInfo(int messagetype, unsigned char *message, int length, GSM_Data *data);
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data);
@@ -250,6 +253,8 @@ static GSM_Error Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *s
 		return GetSMSCenter(data, state);
 	case GOP_SetSMSCenter:
 		return SetSMSCenter(data, state);
+	case GOP_SetCellBroadcast:
+		return SetCellBroadcast(data, state);
 	default:
 		return GE_NOTIMPLEMENTED;
 	}
@@ -857,6 +862,19 @@ static GSM_Error SetSMSCenter(GSM_Data *data, GSM_Statemachine *state)
 	return SM_Block(state, data, 0x02);
 }
 
+static GSM_Error SetCellBroadcast(GSM_Data *data, GSM_Statemachine *state)
+{
+	unsigned char req_ena[] = {FBUS_FRAME_HEADER, 0x20, 0x01, 0x01, 0x00, 0x00, 0x01, 0x01};
+	unsigned char req_dis[] = {FBUS_FRAME_HEADER, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+	unsigned char *req;
+
+	req = data->OnCellBroadcast ? req_ena : req_dis;
+	OnCellBroadcast = data->OnCellBroadcast;
+
+	if (SM_SendMessage(state, 10, 0x02, req) != GE_NONE) return GE_NOTREADY;
+	return SM_Block(state, data, 0x02);
+}
+
 static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x01, 0x02, 0x00};
@@ -876,7 +894,9 @@ static GSM_Error SendSMSMessage(GSM_Data *data, GSM_Statemachine *state)
 static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int length, GSM_Data *data)
 {
 	SMS_MessageCenter *smsc;
+	GSM_CBMessage cbmsg;
 	unsigned char *pos;
+	int n;
 
 	switch (message[3]) {
 	/* Message sent */
@@ -896,12 +916,28 @@ static GSM_Error IncomingSMS1(int messagetype, unsigned char *message, int lengt
 	/* SMS message received */
 	case 0x10:
 		/* FIXME: unsolicited SMS notification */
-		break;
+		return GE_UNSOLICITED;
 
 	/* FIXME: unhandled frame, request: Get HW&SW version !!! */
 	case 0x0e:
 		if (length == 4) return GE_NONE;
 		return GE_UNHANDLEDFRAME;
+
+	/* Set CellBroadcast OK */
+	case 0x21:
+		break;
+
+	/* Read CellBroadcast */
+	case 0x23:
+		if (OnCellBroadcast) {
+			memset(&cbmsg, 0, sizeof(cbmsg));
+			cbmsg.New = true;
+			cbmsg.Channel = message[7];
+			n = Unpack7BitCharacters(0, length-10, sizeof(cbmsg.Message)-1, message+10, cbmsg.Message);
+			DecodeAscii(cbmsg.Message, cbmsg.Message, n);
+			OnCellBroadcast(&cbmsg);
+		}
+		return GE_UNSOLICITED;
 
 	/* Set SMS center OK */
 	case 0x31:
@@ -2049,7 +2085,7 @@ static GSM_Error IncomingDisplay(int messagetype, unsigned char *message, int le
 
 			dprintf("(x,y): %d,%d, len: %d, data: %s\n", x, y, n, drawmsg.Data.DisplayText.text);
 		}
-		break;
+		return GE_UNSOLICITED;
 
 	/* Display status */
 	case 0x52:

@@ -280,6 +280,9 @@ static int usage(void)
 
 static GSM_Statemachine State;
 static GSM_Data data;
+static GSM_CBMessage CBQueue[16];
+static int cb_ridx = 0;
+static int cb_widx = 0;
 
 static void fbusinit(void (*rlp_handler)(RLP_F96Frame *frame))
 {
@@ -1932,6 +1935,29 @@ static int getalarm(void)
 	return error;
 }
 
+static void StoreCBMessage(GSM_CBMessage *Message )
+{
+	if (CBQueue[cb_widx].New) {
+		/* queue is full */
+		return;
+	}
+
+	CBQueue[cb_widx] = *Message;
+	cb_widx = (cb_widx + 1) % (sizeof(CBQueue) / sizeof(GSM_CBMessage));
+}
+
+static GSM_Error ReadCBMessage(GSM_CBMessage *Message)
+{
+	if (!CBQueue[cb_ridx].New)
+		return GE_NONEWCBRECEIVED;
+	
+	*Message = CBQueue[cb_ridx];
+	CBQueue[cb_ridx].New = false;
+	cb_ridx = (cb_ridx + 1) % (sizeof(CBQueue) / sizeof(GSM_CBMessage));
+
+	return GE_NONE;
+}
+
 /* In monitor mode we don't do much, we just initialise the fbus code.
    Note that the fbus code no longer has an internal monitor mode switch,
    instead compile with DEBUG enabled to get all the gumpf. */
@@ -1944,7 +1970,7 @@ static int monitormode(void)
 	GSM_Data data;
 
 	GSM_NetworkInfo NetworkInfo;
-//	GSM_CBMessage CBMessage;
+	GSM_CBMessage CBMessage;
 
 	GSM_MemoryStatus SIMMemoryStatus   = {GMT_SM, 0, 0};
 	GSM_MemoryStatus PhoneMemoryStatus = {GMT_ME, 0, 0};
@@ -1968,9 +1994,6 @@ static int monitormode(void)
 
 	fprintf(stderr, _("Entering monitor mode...\n"));
 
-	//sleep(1);
-	//GSM->EnableCellBroadcast();
-
 	/* Loop here indefinitely - allows you to see messages from GSM code in
 	   response to unknown messages etc. The loops ends after pressing the
 	   Ctrl+C. */
@@ -1981,6 +2004,12 @@ static int monitormode(void)
 	data.PowerSource = &powersource;
 	data.SMSStatus = &SMSStatus;
 	data.NetworkInfo = &NetworkInfo;
+	data.OnCellBroadcast = StoreCBMessage;
+
+	memset(CBQueue, 0, sizeof(CBQueue));
+	cb_ridx = 0;
+	cb_widx = 0;
+	SM_Functions(GOP_SetCellBroadcast, &data, &State);
 
 	while (!bshutdown) {
 		if (SM_Functions(GOP_GetRFLevel, &data, &State) == GE_NONE)
@@ -2037,11 +2066,14 @@ static int monitormode(void)
 		if (SM_Functions(GOP_GetNetworkInfo, &data, &State) == GE_NONE)
 			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), GSM_GetNetworkName (NetworkInfo.NetworkCode), GSM_GetCountryName(NetworkInfo.NetworkCode), NetworkInfo.LAC[0], NetworkInfo.LAC[1], NetworkInfo.CellID[0], NetworkInfo.CellID[1]);
 
-//		if (GSM->ReadCellBroadcast(&CBMessage) == GE_NONE)
-//			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), CBMessage.Channel, CBMessage.Message);
+		if (ReadCBMessage(&CBMessage) == GE_NONE)
+			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), CBMessage.Channel, CBMessage.Message);
 
 		sleep(1);
 	}
+
+	data.OnCellBroadcast = NULL;
+	SM_Functions(GOP_SetCellBroadcast, &data, &State);
 
 	fprintf(stderr, _("Leaving monitor mode...\n"));
 

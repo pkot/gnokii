@@ -59,8 +59,11 @@ char *print_error(GSM_Error e)
 	case GE_MEMORYFULL:               return "Memory is full";
 	case GE_NOTWAITING:               return "Not waiting for a response from the phone";
 	case GE_NOTREADY:                 return "Device not ready.";
+	case GE_EMPTYMEMORYLOCATION:      return "Empty memory location.";
 	case GE_LINEBUSY:                 return "Outgoing call requested reported line busy";
 	case GE_NOCARRIER:                return "No Carrier error during data call setup ?";
+	case GE_UNHANDLEDFRAME:           return "Unhandled frame received, please see the log!";
+	case GE_UNSOLICITED:              return "Unsolicited message received.";
 	default:                          return "Unknown error.";
 	}
 }

@@ -71,6 +71,7 @@ typedef enum {
 	/* The following value signals the current frame is unhandled */
 
 	GE_UNHANDLEDFRAME,        /* 43. The current frame isn't handled by the incoming function */
+	GE_UNSOLICITED            /* 44. Unsolicited message received. */
 } GSM_Error;
 
 extern char *print_error(GSM_Error e);
