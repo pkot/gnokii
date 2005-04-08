@@ -1933,7 +1933,8 @@ static int getlogo(int argc, char *argv[])
 	/* There is caller group number missing in argument list. */
 	if ((bitmap.type == GN_BMP_CallerLogo) && (argc >= 2)) {
 		bitmap.number = (argv[1][0] < '0') ? 0 : argv[1][0] - '0';
-		if (bitmap.number > 9) bitmap.number = 0;
+		if (bitmap.number > 9)
+			bitmap.number = 0;
 		argv++;
 		argc--;
 	}
@@ -1949,19 +1950,24 @@ static int getlogo(int argc, char *argv[])
 			switch (bitmap.type) {
 			case GN_BMP_DealerNoteText:
 				fprintf(stdout, _("Dealer welcome note "));
-				if (bitmap.text[0]) fprintf(stdout, _("currently set to \"%s\"\n"), bitmap.text);
-				else fprintf(stdout, _("currently empty\n"));
+				if
+					(bitmap.text[0]) fprintf(stdout, _("currently set to \"%s\"\n"), bitmap.text);
+				else
+					fprintf(stdout, _("currently empty\n"));
 				break;
 			case GN_BMP_WelcomeNoteText:
 				fprintf(stdout, _("Welcome note "));
-				if (bitmap.text[0]) fprintf(stdout, _("currently set to \"%s\"\n"), bitmap.text);
-				else fprintf(stdout, _("currently empty\n"));
+				if (bitmap.text[0])
+					fprintf(stdout, _("currently set to \"%s\"\n"), bitmap.text);
+				else
+					fprintf(stdout, _("currently empty\n"));
 				break;
 			case GN_BMP_OperatorLogo:
 			case GN_BMP_NewOperatorLogo:
-				if (!bitmap.width) goto empty_bitmap;
+				if (!bitmap.width)
+					goto empty_bitmap;
 				fprintf(stdout, _("Operator logo for %s (%s) network got succesfully\n"),
-					bitmap.netcode, gn_network_name_get(bitmap.netcode));
+						bitmap.netcode, gn_network_name_get(bitmap.netcode));
 				if (argc == 3) {
 					strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
@@ -1971,7 +1977,8 @@ static int getlogo(int argc, char *argv[])
 				}
 				break;
 			case GN_BMP_StartupLogo:
-				if (!bitmap.width) goto empty_bitmap;
+				if (!bitmap.width)
+					goto empty_bitmap;
 				fprintf(stdout, _("Startup logo got successfully\n"));
 				if (argc == 3) {
 					strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
@@ -2003,7 +2010,8 @@ static int getlogo(int argc, char *argv[])
 				fprintf(stderr, _("Your phone doesn't have logo uploaded !\n"));
 				return -1;
 			}
-			if ((argc > 1) && (SaveBitmapFileDialog(argv[1], &bitmap, info) != GN_ERR_NONE)) return -1;
+			if ((argc > 1) && (SaveBitmapFileDialog(argv[1], &bitmap, info) != GN_ERR_NONE))
+				return -1;
 			break;
 		default:
 			fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
