@@ -38,6 +38,8 @@ CREATE TABLE outbox (
   processed tinyint(4) NOT NULL default '0',
   error tinyint(4) NOT NULL default '-1',
   dreport tinyint(4) NOT NULL default '0',
+  not_before time NOT NULL default '00:00:00',
+  not_after time  NOT NULL default '23:59:59',
   PRIMARY KEY  (id)
 ) TYPE=MyISAM;
 

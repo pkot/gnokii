@@ -19,5 +19,7 @@ CREATE TABLE "outbox" (
 	"processed" bool DEFAULT 'false',
 	"error" smallint DEFAULT '-1' NOT NULL,
 	"dreport" smallint DEFAULT '0' NOT NULL,
+	"not_before" time without time zone DEFAULT '00:00:00' NOT NULL,
+        "not_after" time without time zone DEFAULT '23:59:59' NOT NULL,
 	PRIMARY KEY ("id")
 );

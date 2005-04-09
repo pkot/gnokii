@@ -77,7 +77,7 @@ gint DB_ConnectOutbox (DBConfig connect)
   {
      g_print (_("Connection to database '%s' on host '%s' failed.\n"),
               connect.db, connect.host);
-     g_print (_("Error: %s\n"), mysql_error (&mysqlIn));
+     g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
      return (1);
   }
 
@@ -149,7 +149,8 @@ void DB_Look (const gchar * const phone)
   buf = g_string_sized_new (128);
 
   g_string_sprintf (buf, "SELECT id, number, text, dreport FROM outbox \
-                          WHERE processed='0' %s", phnStr->str);
+                          WHERE processed='0' AND CURTIME() >= not_before \
+                          AND CURTIME() <= not_after %s", phnStr->str);
   g_string_free (phnStr, TRUE);
   
   if (mysql_real_query (&mysqlOut, buf->str, buf->len))
@@ -176,14 +177,20 @@ void DB_Look (const gchar * const phone)
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
     sms.delivery_report = atoi (row[3]);
 
-    strncpy (sms.remote.number, row[1], sizeof (sms.remote.number) - 1);
-    sms.remote.number[sizeof(sms.remote.number) - 1] = '\0';
+    if (row[1] != NULL)
+      strncpy (sms.remote.number, row[1], sizeof (sms.remote.number) - 1);
+    else
+      *sms.remote.number = '\0';
+    sms.remote.number[sizeof (sms.remote.number) - 1] = '\0';
     if (sms.remote.number[0] == '+')
       sms.remote.type = GN_GSM_NUMBER_International;
     else
       sms.remote.type = GN_GSM_NUMBER_Unknown;
     
-    strncpy (sms.user_data[0].u.text, row[2], GN_SMS_MAX_LENGTH + 1);
+    if (row[2] != NULL)
+      strncpy (sms.user_data[0].u.text, row[2], GN_SMS_MAX_LENGTH + 1);
+    else
+      *sms.user_data[0].u.text = '\0';
     sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';
     sms.user_data[0].length = strlen (sms.user_data[0].u.text);
     sms.user_data[0].type = GN_SMS_DATA_Text;

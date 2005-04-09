@@ -158,7 +158,8 @@ void DB_Look (const gchar * const phone)
   PQclear (res1);
 
   g_string_sprintf (buf, "SELECT id, number, text, dreport FROM outbox \
-                          WHERE processed='f' %s FOR UPDATE", phnStr->str);
+                          WHERE processed='f' AND localtime(0) >= not_before \
+                          AND localtime(0) <= not_after %s FOR UPDATE", phnStr->str);
   g_string_free (phnStr, TRUE);
 
   res1 = PQexec (connOut, buf->str);
