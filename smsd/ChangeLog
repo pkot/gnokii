@@ -1,6 +1,6 @@
 * Sat Apr  9 2005 Jan Derfinak <ja@mail.upjs.sk>
 - version 1.4
-- added time window for outgoing sms
+- added time window for outgoing sms (Martin White <gnokii at mgw.org.uk>)
 - fixed strncpy() if mysql_fetch_row returns NULL
 - DATABASE FORMAT CHANGED - please add new columns 'not_before', 'not_after'
   to outbox
