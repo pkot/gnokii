@@ -177,6 +177,9 @@ Thank you to, in no particular order...
 
 *  Martin Goldhahn for work on vCalendar support and other pieces of code
 
+*  Bastien Nocera for changes to the cfgreader, variuos other patches and
+   work on integrating libgnokii with gnome-phone-manager
+
 *  Everyone chatting with us on IRC #gnokii at freenode.net
 
 *  Lucy for making pizza and putting up with Hugh disappearing to

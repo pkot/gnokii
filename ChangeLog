@@ -54,6 +54,8 @@
     o escape '\n', '\r', ';', ',' and '\' in the phonebook entries
       for raw and vcard types (ldif is todo)            (Pawel Kot)
     o lvalue casts eliminated                      (BORBELY Zoltan)
+    o add the ability to read the configuration from memory (let
+      the file reading things do the application)  (Bastien Nocera)
  * 6100 driver updates
     o add Nokia 8850 support                       (Denis Pitzalis)
     o handle new frames when SIM card is not inserted   (Pawel Kot)

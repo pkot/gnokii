@@ -22,7 +22,10 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (c) 1999 Tim Potter
+  Copyright (c) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (c) 2003-2005 Pawel Kot
+  Copyright (c) 2005 Bastien Nocera
 
   Config file (/etc/gnokiirc and ~/.gnokiirc) reader.
 
@@ -30,6 +33,9 @@
 
 */
 
+
+/* for strndup */
+#define _GNU_SOURCE
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
@@ -46,36 +52,25 @@
 API struct gn_cfg_header *gn_cfg_info;
 static gn_config gn_config_default, gn_config_global;
 
-/* Read configuration information from a ".INI" style file */
-struct gn_cfg_header *cfg_file_read(const char *filename)
+struct gn_cfg_header *cfg_memory_read(const char **lines)
 {
-	FILE *handle;
-	char *line;
-	char *buf;
+	char *line, *buf;
 	struct gn_cfg_header *cfg_info = NULL, *cfg_head = NULL;
+	int i;
 
-	/* Error check */
-	if (filename == NULL) {
-		return NULL;
-	}
-
-	/* Initialisation */
-	if ((buf = (char *)malloc(255)) == NULL) {
-		return NULL;
-	}
-
-	/* Open file */
-	if ((handle = fopen(filename, "r")) == NULL) {
-		dprintf("cfg_file_read - open %s: %s\n", filename, strerror(errno));
+	/* Check whether the given memory location is not null */
+	if (lines == NULL) {
+		dprintf("cfg_memory_read - passed nil data\n");
 		return NULL;
 	} else {
-		dprintf("Opened configuration file %s\n", filename);
+		dprintf("Opened configuration file from memory\n");
 	}
 
 	/* Iterate over lines in the file */
-	while (fgets(buf, 255, handle) != NULL) {
+	for (i = 0; lines[i] != NULL; i++) {
 
-		line = buf;
+		line = strdup (lines[i]);
+		buf = line;
 
 		/* Strip leading, trailing whitespace */
 		while(isspace((int) *line))
@@ -94,7 +89,6 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 
 			/* Allocate new heading entry */
 			if ((heading = (struct gn_cfg_header *)malloc(sizeof(*heading))) == NULL) {
-				free(buf);
 				return NULL;
 			}
 
@@ -121,19 +115,19 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 
 			dprintf("Added new section %s\n", heading->section);
 
+			free(buf);
+
 			/* Go on to next line */
 			continue;
 		}
 
 		/* Process key/value line */
-
 		if ((strchr(line, '=') != NULL) && cfg_info != NULL) {
 			struct gn_cfg_entry *entry;
 			char *value;
 
 			/* Allocate new entry */
 			if ((entry = (struct gn_cfg_entry *)malloc(sizeof(*entry))) == NULL) {
-				free(buf);
 				return NULL;
 			}
 
@@ -141,10 +135,10 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 			memset(entry, '\0', sizeof(*entry));
 
 			value = strchr(line, '=');
-			*value = '\0';		/* Split string */
+			*value = '\0';	/* Split string */
 			value++;
 
-			while(isspace((int) *value)) {      /* Remove leading white */
+			while (isspace((int) *value)) { /* Remove leading white */
 				value++;
 			}
 
@@ -169,17 +163,116 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 
 			dprintf("Adding key/value %s/%s\n", entry->key, entry->value);
 
+			free(buf);
+
 			/* Go on to next line */
 			continue;
 		}
 
 			/* Line not part of any heading */
 		fprintf(stderr, "Orphaned line: %s\n", line);
+
+		free(buf);
 	}
 
-	free(buf);
 	/* Return pointer to configuration information */
 	return cfg_head;
+}
+
+#define READ_CHUNK_SIZE 64
+
+/* Read configuration information from a ".INI" style file */
+struct gn_cfg_header *cfg_file_read(const char *filename)
+{
+	FILE *handle;
+	char *lines, *line_begin, *line_end, *pos;
+	char **split_lines;
+	int read, ret, num_lines, i, copied;
+	struct gn_cfg_header *header = NULL;
+
+	/* Open file */
+	if ((handle = fopen(filename, "r")) == NULL) {
+		dprintf("cfg_file_read - open %s: %s\n", filename, strerror(errno));
+		goto out;
+	} else {
+		dprintf("Opened configuration file %s\n", filename);
+	}
+
+	/* Read the lines */
+	lines = NULL;
+	read = 0;
+	do {
+		lines = realloc(lines, read + READ_CHUNK_SIZE);
+		if (!lines)
+			goto err_read;
+
+		ret = fread(lines + read, 1, READ_CHUNK_SIZE, handle);
+		/* Read error */
+		if (ret < 0 && feof(handle) == 0)
+			goto err_read;
+
+		/* Overflow */
+		if (read + ret < read)
+			goto err_read;
+
+		read += ret;
+	} while (ret > 0);
+
+	fclose(handle);
+	lines = realloc(lines, read + 1);
+	lines[read] = '\0';
+
+	/* Now split the lines */
+	split_lines = NULL;
+	line_begin = lines;
+	num_lines = 0;
+	copied = 0;
+	while ((pos = strchr(line_begin, '\n')) && copied < read) {
+		char *buf;
+
+		if (!pos) {
+			line_end = lines + read;
+		} else {
+			line_end = pos;
+		}
+
+		num_lines++;
+		buf = (char *)strndup(line_begin, line_end - line_begin);
+		split_lines = realloc(split_lines,
+				(num_lines + 1) * sizeof(char*));
+		split_lines[num_lines - 1] = buf;
+
+		if (pos) {
+			copied += (line_end + 1 - line_begin);
+			line_begin = line_end + 1;
+		}
+	}
+
+
+	free(lines);
+	if (split_lines == NULL)
+		goto out;
+	split_lines[num_lines] = NULL;
+
+	/* Finally, load the configuration from the split lines */
+	header = cfg_memory_read((const char **)split_lines);
+
+	/* Free the split_lines */
+	for (i = 0; split_lines[i] != NULL; i++) {
+		printf("%s\n", split_lines[i]);
+		free(split_lines[i]);
+	}
+	free(split_lines);
+
+	goto out;
+
+err_read:
+	fclose(handle);
+	if (lines)
+		free(lines);
+
+out:
+	return header;
 }
 
 /*  Write configuration information to a config file */
@@ -459,16 +552,23 @@ API int gn_cfg_read(char **bindir)
 
 	retval = gn_cfg_read_default();
 
-	*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
-	if (!*bindir) *bindir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
-	if (!*bindir) *bindir = "/usr/local/sbin";
+	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
+	if (!*bindir)
+		*bindir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
+	if (!*bindir)
+		*bindir = "/usr/local/sbin";
 
 	return retval;
 }
 
-API int gn_cfg_file_read(const char *file)
+static int cfg_file_or_memory_read(const char *file, const char **lines)
 {
 	char *val;
+
+	if (file == NULL && lines == NULL) {
+		dprintf("Couldn't open a config file or memory.\n");
+		return -1;
+	}
 
 	/* I know that it doesn't belong here but currently there is now generic
 	 * application init function anywhere.
@@ -479,9 +579,14 @@ API int gn_cfg_file_read(const char *file)
 	/*
 	 * Try opening a given config file
 	 */
-	if ((gn_cfg_info = cfg_file_read(file)) == NULL) {
+	if (file != NULL)
+		gn_cfg_info = cfg_file_read(file);
+	else
+		gn_cfg_info = cfg_memory_read(lines);
+
+	if (gn_cfg_info == NULL) {
 		/* this is bad, but the previous was much worse - bozo */
-		dprintf(_("Couldn't open %s config file,\n"), file);
+		dprintf("Couldn't open %s config file,\n", file);
 		return -1;
 	}
 	strcpy(gn_config_default.model, "");
@@ -519,6 +624,16 @@ API int gn_cfg_file_read(const char *file)
 	gn_log_rlpdebug("LOG: rlpdebug mask is 0x%x\n", gn_log_rlpdebug_mask);
 	gn_log_xdebug("LOG: xdebug mask is 0x%x\n", gn_log_xdebug_mask);
 	return 0;
+}
+
+API int gn_cfg_file_read(const char *file)
+{
+	return cfg_file_or_memory_read(file, NULL);
+}
+
+API int gn_cfg_memory_read(const char **lines)
+{
+	return cfg_file_or_memory_read(NULL, lines);
 }
 
 API bool gn_cfg_phone_load(const char *iname, struct gn_statemachine *state)
