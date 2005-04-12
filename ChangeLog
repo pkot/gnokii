@@ -88,6 +88,7 @@
  * gnapplet driver updates
     o getprofile support                           (BORBELY Zoltan)
     o getactiveprofile support                     (BORBELY Zoltan)
+    o unnecessary variables eliminated             (BORBELY Zoltan)
 
 0.6.4
 =====

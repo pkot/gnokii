@@ -616,7 +616,6 @@ static gn_error gnapplet_incoming_info(int messagetype, unsigned char *message, 
 
 static gn_error gnapplet_read_phonebook(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
@@ -631,7 +630,6 @@ static gn_error gnapplet_read_phonebook(gn_data *data, struct gn_statemachine *s
 
 static gn_error gnapplet_write_phonebook(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	gn_phonebook_subentry *se;
 	int i, need_defnumber;
 	REQUEST_DEF;
@@ -678,7 +676,6 @@ static gn_error gnapplet_write_phonebook(gn_data *data, struct gn_statemachine *
 
 static gn_error gnapplet_delete_phonebook(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
@@ -693,7 +690,6 @@ static gn_error gnapplet_delete_phonebook(gn_data *data, struct gn_statemachine 
 
 static gn_error gnapplet_memory_status(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->memory_status) return GN_ERR_INTERNALERROR;
@@ -795,7 +791,6 @@ static gn_error gnapplet_incoming_phonebook(int messagetype, unsigned char *mess
 
 static gn_error gnapplet_get_network_info(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->network_info) return GN_ERR_INTERNALERROR;
@@ -808,7 +803,6 @@ static gn_error gnapplet_get_network_info(gn_data *data, struct gn_statemachine 
 
 static gn_error gnapplet_get_rf_level(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->rf_unit || !data->rf_level) return GN_ERR_INTERNALERROR;
@@ -858,7 +852,6 @@ static gn_error gnapplet_incoming_netinfo(int messagetype, unsigned char *messag
 
 static gn_error gnapplet_get_power_info(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->battery_unit && !data->battery_level && !data->power_source) return GN_ERR_INTERNALERROR;
@@ -916,7 +909,6 @@ static gn_error gnapplet_incoming_debug(int messagetype, unsigned char *message,
 
 static gn_error gnapplet_sms_get_status(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->sms_status) return GN_ERR_INTERNALERROR;
@@ -929,7 +921,6 @@ static gn_error gnapplet_sms_get_status(gn_data *data, struct gn_statemachine *s
 
 static gn_error gnapplet_sms_folder_list(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->sms_folder_list) return GN_ERR_INTERNALERROR;
@@ -942,7 +933,6 @@ static gn_error gnapplet_sms_folder_list(gn_data *data, struct gn_statemachine *
 
 static gn_error gnapplet_sms_folder_status(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->sms_folder) return GN_ERR_INTERNALERROR;
@@ -956,7 +946,6 @@ static gn_error gnapplet_sms_folder_status(gn_data *data, struct gn_statemachine
 
 static gn_error gnapplet_sms_folder_create(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->sms_folder) return GN_ERR_INTERNALERROR;
@@ -970,7 +959,6 @@ static gn_error gnapplet_sms_folder_create(gn_data *data, struct gn_statemachine
 
 static gn_error gnapplet_sms_folder_delete(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->sms_folder) return GN_ERR_INTERNALERROR;
@@ -1004,7 +992,6 @@ static gn_error gnapplet_sms_validate(gn_data *data, struct gn_statemachine *sta
 
 static gn_error gnapplet_sms_message_read_nv(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	gn_error error;
 	REQUEST_DEF;
 
@@ -1033,7 +1020,6 @@ static gn_error gnapplet_sms_message_read(gn_data *data, struct gn_statemachine 
 
 static gn_error gnapplet_sms_message_write(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	unsigned char buf[256];
 	gn_error error;
 	int n;
@@ -1058,7 +1044,6 @@ static gn_error gnapplet_sms_message_write(gn_data *data, struct gn_statemachine
 
 static gn_error gnapplet_sms_message_send(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	unsigned char buf[256];
 	gn_error error;
 	int n;
@@ -1079,7 +1064,6 @@ static gn_error gnapplet_sms_message_send(gn_data *data, struct gn_statemachine 
 
 static gn_error gnapplet_sms_message_delete_nv(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	gn_error error;
 	REQUEST_DEF;
 
@@ -1108,7 +1092,6 @@ static gn_error gnapplet_sms_message_delete(gn_data *data, struct gn_statemachin
 
 static gn_error gnapplet_sms_message_move_nv(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	gn_error error;
 	REQUEST_DEF;
 
@@ -1138,7 +1121,6 @@ static gn_error gnapplet_sms_message_move(gn_data *data, struct gn_statemachine 
 
 static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->message_center) return GN_ERR_INTERNALERROR;
@@ -1152,7 +1134,6 @@ static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *
 
 static gn_error gnapplet_sms_center_write(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	gn_error error;
 	REQUEST_DEF;
 
@@ -1290,7 +1271,6 @@ static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, i
 
 static gn_error gnapplet_calendar_note_read(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->calnote) return GN_ERR_INTERNALERROR;
@@ -1304,7 +1284,6 @@ static gn_error gnapplet_calendar_note_read(gn_data *data, struct gn_statemachin
 
 static gn_error gnapplet_calendar_note_write(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->calnote) return GN_ERR_INTERNALERROR;
@@ -1333,7 +1312,6 @@ static gn_error gnapplet_calendar_note_write(gn_data *data, struct gn_statemachi
 
 static gn_error gnapplet_calendar_note_delete(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->calnote) return GN_ERR_INTERNALERROR;
@@ -1347,7 +1325,6 @@ static gn_error gnapplet_calendar_note_delete(gn_data *data, struct gn_statemach
 
 static gn_error gnapplet_calendar_todo_read(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->todo) return GN_ERR_INTERNALERROR;
@@ -1361,7 +1338,6 @@ static gn_error gnapplet_calendar_todo_read(gn_data *data, struct gn_statemachin
 
 static gn_error gnapplet_calendar_todo_write(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->todo) return GN_ERR_INTERNALERROR;
@@ -1377,7 +1353,6 @@ static gn_error gnapplet_calendar_todo_write(gn_data *data, struct gn_statemachi
 
 static gn_error gnapplet_calendar_todo_delete(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->todo) return GN_ERR_INTERNALERROR;
@@ -1473,7 +1448,6 @@ static gn_error gnapplet_incoming_calendar(int messagetype, unsigned char *messa
 
 static gn_error gnapplet_clock_datetime_read(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->datetime) return GN_ERR_INTERNALERROR;
@@ -1486,7 +1460,6 @@ static gn_error gnapplet_clock_datetime_read(gn_data *data, struct gn_statemachi
 
 static gn_error gnapplet_clock_datetime_write(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->datetime) return GN_ERR_INTERNALERROR;
@@ -1500,7 +1473,6 @@ static gn_error gnapplet_clock_datetime_write(gn_data *data, struct gn_statemach
 
 static gn_error gnapplet_clock_alarm_read(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->alarm) return GN_ERR_INTERNALERROR;
@@ -1513,7 +1485,6 @@ static gn_error gnapplet_clock_alarm_read(gn_data *data, struct gn_statemachine 
 
 static gn_error gnapplet_clock_alarm_write(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->alarm) return GN_ERR_INTERNALERROR;
@@ -1574,7 +1545,6 @@ static gn_error gnapplet_incoming_clock(int messagetype, unsigned char *message,
 
 static gn_error gnapplet_profile_read(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->profile) return GN_ERR_INTERNALERROR;
@@ -1588,7 +1558,6 @@ static gn_error gnapplet_profile_read(gn_data *data, struct gn_statemachine *sta
 
 static gn_error gnapplet_profile_active_read(gn_data *data, struct gn_statemachine *state)
 {
-	gnapplet_driver_instance *drvinst = DRVINSTANCE(state);
 	REQUEST_DEF;
 
 	if (!data->profile) return GN_ERR_INTERNALERROR;
