@@ -259,7 +259,6 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 
 	/* Free the split_lines */
 	for (i = 0; split_lines[i] != NULL; i++) {
-		printf("%s\n", split_lines[i]);
 		free(split_lines[i]);
 	}
 	free(split_lines);
