@@ -84,6 +84,8 @@ static gn_error NK7110_GetNetworkInfo(gn_data *data, struct gn_statemachine *sta
 static gn_error NK7110_GetSpeedDial(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetSMSCenter(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetClock(char req_type, gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_SetClock(gn_data *data, struct gn_statemachine *state);
+static gn_error NK7110_SetAlarm(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state);
@@ -226,8 +228,12 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK7110_GetSMSCenter(data, state);
 	case GN_OP_GetDateTime:
 		return NK7110_GetClock(NK7110_SUBCLO_GET_DATE, data, state);
+	case GN_OP_SetDateTime:
+		return NK7110_SetClock(data, state);
 	case GN_OP_GetAlarm:
 		return NK7110_GetClock(NK7110_SUBCLO_GET_ALARM, data, state);
+	case GN_OP_SetAlarm:
+		return NK7110_SetAlarm(data, state);
 	case GN_OP_GetCalendarNote:
 		return NK7110_GetCalendarNote(data, state);
 	case GN_OP_WriteCalendarNote:
@@ -1553,6 +1559,8 @@ static gn_error NK7110_IncomingClock(int messagetype, unsigned char *message, in
 		data->datetime->second = message[14];
 
 		break;
+	case NK7110_SUBCLO_DATE_SET:
+		break;
 	case NK7110_SUBCLO_ALARM_RCVD:
 		if (!data->alarm) return GN_ERR_INTERNALERROR;
 		switch(message[8]) {
@@ -1573,6 +1581,8 @@ static gn_error NK7110_IncomingClock(int messagetype, unsigned char *message, in
 		data->alarm->timestamp.minute = message[10];
 
 		break;
+	case NK7110_SUBCLO_ALARM_SET:
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (clock handling): 0x%02x\n", NK7110_MSG_CLOCK, message[3]);
 		e = GN_ERR_UNHANDLEDFRAME;
@@ -1586,6 +1596,46 @@ static gn_error NK7110_GetClock(char req_type, gn_data *data, struct gn_statemac
 	unsigned char req[] = {FBUS_FRAME_HEADER, req_type};
 
 	SEND_MESSAGE_BLOCK(NK7110_MSG_CLOCK, 4);
+}
+
+static gn_error NK7110_SetClock(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x60, 0x01, 0x01, 0x07,
+				0x00, 0x00,	/* year hi/lo */
+				0x00, 0x00,	/* month, day */
+				0x00, 0x00,	/* hour, minute */
+				0x00};
+
+	if (!data->datetime) return GN_ERR_INTERNALERROR;
+
+	req[7] = data->datetime->year >> 8;
+	req[8] = data->datetime->year & 0xff;
+	req[9] = data->datetime->month;
+	req[10] = data->datetime->day;
+	req[11] = data->datetime->hour;
+	req[12] = data->datetime->minute;
+
+	SEND_MESSAGE_BLOCK(NK7110_MSG_CLOCK, 14);
+}
+
+static gn_error NK7110_SetAlarm(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x6b, 0x01, 0x20, 0x03,
+				0x02,		/* should be alarm on/off */
+				0x00, 0x00,	/* hours, minutes */
+				0x00};
+
+	if (!data->alarm) return GN_ERR_INTERNALERROR;
+
+	if (data->alarm->enabled) {
+		req[7] = NK7110_ALARM_ENABLED;
+		req[8] = data->alarm->timestamp.hour;
+		req[9] = data->alarm->timestamp.minute;
+	} else {
+		req[7] = NK7110_ALARM_DISABLED;
+	}
+
+	SEND_MESSAGE_BLOCK(NK7110_MSG_CLOCK, 11);
 }
 
 

@@ -27,6 +27,7 @@
     o call status query function added             (BORBELY Zoltan)
     o call management functions has been rewritten (BORBELY Zoltan)
     o GetSMSFolder will return correct folder ids  (BORBELY Zoltan)
+    o clock and alarm can be set                   (BORBELY Zoltan)
  * link layer updates
     o Support for the DKU2 cable added                 (Chris Kemp)
     o DKU2 kernel module patches for 2.4.22 and 2.6.9  (Chris Kemp)
