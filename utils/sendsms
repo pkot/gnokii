@@ -4,6 +4,34 @@
 #   Author : Gabriele Zappi - Rimini <gzappi@inwind.it>
 #  	History:
 #	  feb 17, 2001         Script created (v1.0)
+#         jun  3, 2003         Use --getphonebook instead of --getmemory
+#                              as changed in gnokii (Ville Skytta)
+#         jan 20, 2004         Use www.gnokii.org as a primary site to get
+#                              gnokii (Pawel Kot)
+#                              Remove notice on mygnokii as this is no longer
+#                              mainained (Pawel Kot)
+###############################################################################
+# G N O K I I
+#
+# A Linux/Unix toolset and driver for the mobile phones.
+#
+# This file is part of gnokii.
+#
+# Gnokii is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License version 2
+# as published by the Free Software Foundation.
+#
+# Gnokii is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with gnokii; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# Copyright (c) 2001 Gabriele Zappi - Rimini
+#
 ###############################################################################
 # $Id$
 ###############################################################################
