@@ -4,7 +4,7 @@
 
   G N O K I I
 
-  A Linux/Unix toolset and driver for Nokia mobile phones.
+  A Linux/Unix toolset and driver for the mobile phones.
 
   This file is part of gnokii.
 
@@ -23,7 +23,9 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright 2001 Pavel Machek <pavel@ucw.cz>
-  Copyright 2002 Ladislav Michl <ladis@linux-mips.org>
+  Copyright 2001 Manfred Jonsson
+  Copyright 2002-2003 Ladislav Michl <ladis@linux-mips.org>
+  Copyright 2001-2004 Pawel Kot
 
   This file provides functions specific to the Dancall 2711.
   See README for more details on supported mobile phones.

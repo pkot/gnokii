@@ -4,7 +4,7 @@
 
   G N O K I I
 
-  A Linux/Unix toolset and driver for mobile phones.
+  A Linux/Unix toolset and driver for the mobile phones.
 
   This file is part of gnokii.
 
@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright 2004 Hugo Haas <hugo@larve.net>
-  Copyright 2004 Pawel Kot <pkot@bezsensu.pl>
+  Copyright 2004 Pawel Kot
 
   This file provides functions specific to at commands on ericsson
   phones. See README for more details on supported mobile phones.
