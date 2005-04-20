@@ -4,7 +4,7 @@
 
   G N O K I I
 
-  A Linux/Unix toolset and driver for Nokia mobile phones.
+  A Linux/Unix toolset and driver for the mobile phones.
 
   This file is part of gnokii.
 
@@ -22,8 +22,18 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
-  Copyright (C) 2002-2005 Pawel Kot
+  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2000      Jan Derfinak
+  Copyright (C) 2000-2004 Pawel Kot
+  Copyright (C) 2001      Jan Kratochvil, Ladis Michl, Chris Kemp
+  Copyright (C) 2002-2004 BORBELY Zoltan
+  Copyright (C) 2002      Manfred Jonsson, Markus Plail
+
+  Some parts of the gn_lock_device() function are derived from minicom
+  communications package, main.c file written by Miquel van Smoorenburg.
+  These parts are copyrighted under GNU GPL version 2.
+
+  Copyright 1991-1995 Miquel van Smoorenburg.
 
 */
 

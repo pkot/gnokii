@@ -4,7 +4,7 @@
 
   G N O K I I
 
-  A Linux/Unix toolset and driver for Nokia mobile phones.
+  A Linux/Unix toolset and driver for the mobile phones.
 
   This file is part of gnokii.
 
@@ -22,7 +22,11 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2001 Pawe³ Kot <pkot@linuxnews.pl>
+  Copyright (C) 1999-2000 Pavel Janik ml.
+  Copyright (C) 2001-2005 Pawel Kot
+  Copyright (C) 2002      Markus Plail, Manfred Jonsson
+  Copyright (C) 2002-2004 BORBELY Zoltan
+  Copyright (C) 2003      Martin Goldhahn
 
   Functions for encoding SMS, calendar and other things.
 

@@ -4,7 +4,7 @@
   
   G N O K I I
 
-  A Linux/Unix GUI for Nokia mobile phones.
+  A Linux/Unix toolkit and driver for the mobile phones.
 
   This file is part of gnokii.
 
@@ -24,7 +24,9 @@
 
   This file is based on vcard.c written by Pavel Machek.
 
-  Copyright (C) 2003 Pawel Kot <pkot@linuxnews.pl>
+  Copyright (C) 1999 Hugh Blemings, Pavel Janik
+  Copyright (C) 2002 Pavel Machek
+  Copyright (C) 2003 Pawel Kot, Martin Goldhahn, BORBELY Zoltan
 
  */
 
