@@ -15,7 +15,7 @@ MODULE_ROOT   := /lib/modules/$(shell uname -r)/kernel/drivers/usb/serial
 
 KERN_SOURCE   := /lib/modules/$(shell uname -r)/build
 PWD           := $(shell pwd)
-EXTRA_CFLAGS  := -I/usr/src/linux/drivers/usb/serial
+EXTRA_CFLAGS  := -I/lib/modules/$(shell uname -r)/source/drivers/usb/serial
 
 obj-m         := $(MODULE_NAME).o
 MODULE_OBJECT := $(MODULE_NAME).ko

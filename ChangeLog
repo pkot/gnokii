@@ -31,6 +31,9 @@
  * link layer updates
     o Support for the DKU2 cable added                 (Chris Kemp)
     o DKU2 kernel module patches for 2.4.22 and 2.6.9  (Chris Kemp)
+    o fix the compilation for dku2 when the kernel sources are not
+      located in /usr/src/linux                         (Pawel Kot)
+    o some minor cleanups of the 2.6 driver             (Pawel Kot)
  * documentation updates
     o added new FAQ entry regrading win32 setup and the relvant
       sample in Docs/sample/gnokiirc                    (Pawel Kot)

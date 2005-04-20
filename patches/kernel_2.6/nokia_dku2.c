@@ -47,8 +47,11 @@
 #define NOKIA7600_PRODUCT_ID 0x0400
 #define NOKIA6230_PRODUCT_ID 0x040f
 
+#define NOKIA_AT_PORT 0x82
+#define NOKIA_FBUS_PORT 0x86
+
 /* Function prototypes */
-static int nokia_probe (struct usb_serial *serial, const struct usb_device_id *id);
+static int nokia_probe(struct usb_serial *serial, const struct usb_device_id *id);
 
 static struct usb_device_id id_table [] = {
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7600_PRODUCT_ID) },
@@ -81,38 +84,36 @@ static struct usb_serial_device_type nokia_device = {
 /* we have to set an alternative configuration to make the relevant endpoints available */
 /* In 2.6 this is really easy... */
 
-static int nokia_probe (struct usb_serial *serial, const struct usb_device_id *id)
+static int nokia_probe(struct usb_serial *serial, const struct usb_device_id *id)
 {
+	int retval = -1;
+
 	dbg("%s", __FUNCTION__);
 
-	if (serial->interface->altsetting[0].endpoint[0].desc.bEndpointAddress == 0x82) {
-
-	  // the AT port
-	  printk("Nokia AT Port:\n");
-
-	  return 0;
-
-	} else if (serial->interface->num_altsetting == 2 && serial->interface->altsetting[1].endpoint[0].desc.bEndpointAddress == 0x86) {
-
-	  // the FBUS port
-	  printk("Nokia FBUS Port:\n");
-	
-	  usb_set_interface(serial->dev,10,1);
-
-	  return 0;
+	if (serial->interface->altsetting[0].endpoint[0].desc.bEndpointAddress == NOKIA_AT_PORT) {
+		/* the AT port */
+		printk("Nokia AT Port:\n");
+		retval = 0;
+	} else if (serial->interface->num_altsetting == 2 &&
+		   serial->interface->altsetting[1].endpoint[0].desc.bEndpointAddress == NOKIA_FBUS_PORT) {
+		/* the FBUS port */
+		printk("Nokia FBUS Port:\n");
+		usb_set_interface(serial->dev, 10, 1);
+		retval = 0;
 	}
 
-	return(-1);
+	return retval;
 }
 
 
-static int __init nokia_init (void)
+static int __init nokia_init(void)
 {
-        int retval;
+        int retval = 0;
 
-	if( (retval = usb_serial_register(&nokia_device)) ) return retval;
+	if ((retval = usb_serial_register(&nokia_device)))
+		return retval;
 
-	if( (retval = usb_register(&nokia_driver)) ) {
+	if ((retval = usb_register(&nokia_driver))) {
 	        usb_serial_deregister(&nokia_device);
 		return retval;
 	}
@@ -120,19 +121,19 @@ static int __init nokia_init (void)
 	info(DRIVER_VERSION " " DRIVER_AUTHOR);
 	info(DRIVER_DESC);
 
-	return 0;
+	return retval;
 }
 
-static void __exit nokia_exit (void)
+static void __exit nokia_exit(void)
 {
-	usb_serial_deregister (&nokia_device);
+	usb_serial_deregister(&nokia_device);
 }
 
 module_init(nokia_init);
 module_exit(nokia_exit);
 
-MODULE_AUTHOR( DRIVER_AUTHOR );
-MODULE_DESCRIPTION( DRIVER_DESC );
+MODULE_AUTHOR(DRIVER_AUTHOR);
+MODULE_DESCRIPTION( DRIVER_DESC);
 MODULE_LICENSE("GPL");
 
 MODULE_PARM(debug, "i");
