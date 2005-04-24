@@ -72,8 +72,8 @@ install: build
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/gnokii-smsd/ bindir=usr/sbin
 	mkdir -p $(CURDIR)/debian/gnokii-smsd-mysql/usr/share/smsd
 	mkdir -p $(CURDIR)/debian/gnokii-smsd-pgsql/usr/share/smsd
-	mv $(CURDIR)/debian/gnokii-smsd/usr/lib/smsd/libmysql.so $(CURDIR)/debian/gnokii-smsd-mysql/usr/share/smsd
-	mv $(CURDIR)/debian/gnokii-smsd/usr/lib/smsd/libpq.so $(CURDIR)/debian/gnokii-smsd-pgsql/usr/share/smsd
+	mv $(CURDIR)/debian/gnokii-smsd/usr/lib/smsd/libmysql.la $(CURDIR)/debian/gnokii-smsd-mysql/usr/share/smsd
+	mv $(CURDIR)/debian/gnokii-smsd/usr/lib/smsd/libpq.la $(CURDIR)/debian/gnokii-smsd-pgsql/usr/share/smsd
 	#rm -fR $(CURDIR)/debian/gnokii-smsd/usr/share
 	rm -fR $(CURDIR)/debian/gnokii-smsd/usr/lib
 
