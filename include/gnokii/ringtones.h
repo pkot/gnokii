@@ -4,7 +4,7 @@
 
   G N O K I I
 
-  A Linux/Unix toolset and driver for Nokia mobile phones.
+  A Linux/Unix toolset and driver for the mobile phones.
 
   This file is part of gnokii.
 
@@ -22,7 +22,10 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2000      Marcin Wiacek, Chris Kemp
+  Copyright (C) 2001-2003 Pawel Kot
+  Copyright (C) 2002-2003 BORBELY Zoltan
 
   This file provides definitions of macros from the Smart Messaging
   Specification. It is mainly rewrite of the spec to C :-) Viva Nokia!
