@@ -425,11 +425,40 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	bool connected = false;
 	unsigned int attempt = 0;
 	int i;
-	char *irda_blacklist[] = {"NPL-2",	/* 6100 */
+	/* The below list is the list of the phones that may get broken when
+	 * using libgnokii to communicate with them over irda in the fbus mode
+	 * under Linux. The reason for that is unknown, we are working on the
+	 * issue.
+	 */
+	/* pkot -- not sure if all these have irda, these are taken from
+	 * http://www.mobile-review.com/forum2/showthread.php?t=10266
+	 * as Series 40 v1 and few others reported. The list on the forum
+	 * for Series 40 v1 doesn't look complete so the below list may be
+	 * incomplete as well. Contact gnokii-users@nongnu.org to add more
+	 * models.
+	 */
+	char *irda_blacklist[] = {"RH-59",	/* 2600 */
+				  "RH-53",	/* 2650 */
+				  "RH-19",	/* 3100 */
+				  "RH-30",	/* 3200 */
+				  "NEM-1",	/* 3300 */
+				  "NPL-2",	/* 6100 */
+				  "NPL-3",	/* 6200 */
+				  "RH-20",	/* 6220 */
+				  "NHL-4U"	/* 6610 */
 				  "RM-37",	/* 6610i */
+				  "NHM-1",	/* 6650 */
+				  "NHL-6",	/* 6800 */
+				  "RM-2",	/* 6810 */
+				  "NHL-9",	/* 6820 */
+				  "RH-23",	/* 7200 */
 				  "NHL-4",	/* 7210 */
-				  "NHL-4J",	/* 7250 -- I'm not sure, but don't risk it -- bozo */
+				  "NHL-4J",	/* 7250 */
 				  "NHL-4JX",	/* 7250i */
+				  "RM-17",	/* 7260 */
+				  "RM-8",	/* 7270 */
+				  "RM-14",	/* 7280 */
+				  "NMM-3",	/* 7600 */
 				  "NPM-6",	/* 5100 */
 				  "NPM-6X",	/* 5100 */
 				  NULL};
@@ -499,14 +528,17 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 		if (state->driver.functions(GN_OP_GetModel, &data, state) == GN_ERR_NONE)
 			connected = true;
 
-		/* Refuse to work on 6100 only on Linux with IrDA connection */
+		/* Refuse to work on 6100 only on Linux with IrDA connection.
+		 * A single request to the phone within the initialization
+		 * (getting the model) should not matter.
+		 */
 #ifdef __linux__
 		if (state->config.connection_type == GN_CT_Irda || state->config.connection_type == GN_CT_Infrared) {
 			for (i = 0; irda_blacklist[i]; i++) {
 				if (!strcmp(data.model, irda_blacklist[i])) {
-					fprintf(stderr, _("Sorry, this function is known to break your phone (Nokia 6100). Refusing to\n"
-							  "do it. You may try to use AT driver. If you are brave enough to test the\n"
-							  "driver anyway, please contact developers at gnokii-users@nongnu.org.\n"
+					fprintf(stderr, _("Sorry, this function is known to break your phone (Nokia phones series 40 v1).\n"
+							  "Refusing to do it. You may try to use AT driver. If you are brave enough to\n"
+							  "test the driver anyway, please contact developers at gnokii-users@nongnu.org.\n"
 							  "See also http://thread.gmane.org/gmane.linux.drivers.gnokii/3195"));
 					return GN_ERR_NOTIMPLEMENTED;
 				}

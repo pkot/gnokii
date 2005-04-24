@@ -22,6 +22,7 @@
     o fix todo writing                              (Balint Reczey)
     o GetSMSFolder will return correct folder ids  (BORBELY Zoltan)
     o CalendarNotesInfo message parsing enhanced   (BORBELY Zoltan)
+    o update irda_blacklist models                      (Pawel Kot)
  * 7110 driver updates
     o ringtone list will return fix entries too    (BORBELY Zoltan)
     o call status query function added             (BORBELY Zoltan)
