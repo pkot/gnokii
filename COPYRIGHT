@@ -1,6 +1,6 @@
-GNOKII - A Linux/Unix toolset and driver for the GSM phones
+GNOKII - A Linux/Unix toolset and driver for the mobile phones
          Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
-         Copyright (C) 2001-2004 Pawe³ Kot
+         Copyright (C) 2001-2005 Pawe³ Kot
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -27,7 +27,7 @@ Australia                             Czech Republic
 pkot@bezsensu.pl
 Pawe³ Kot
 ul. Dembego 6/45
-02-798 Warsaw
+02-796 Warsaw
 Poland
 
 We would be delighted to receive a postcard from you if you use gnokii but
