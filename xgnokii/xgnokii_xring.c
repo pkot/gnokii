@@ -4,7 +4,7 @@
 
   X G N O K I I
 
-  A Linux/Unix GUI for Nokia mobile phones.
+  A Linux/Unix GUI for the mobile phones.
 
   This file is part of gnokii.
 
@@ -24,6 +24,7 @@
 
   Copyright (C) 1999 Tomi Ollila
   Copyright (C) 2003 BORBELY Zoltan
+  Copyright (C) 2004 Pawel Kot
 
 */
 
