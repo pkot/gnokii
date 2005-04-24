@@ -4,7 +4,7 @@
 
   S M S D
 
-  A Linux/Unix GUI for Nokia mobile phones.
+  A Linux/Unix tool for the mobile phones.
 
   This file is part of gnokii.
 

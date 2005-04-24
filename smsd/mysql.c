@@ -4,7 +4,7 @@
 
   S M S D
 
-  A Linux/Unix GUI for Nokia mobile phones.
+  A Linux/Unix tool for the mobile phones.
 
   This file is part of gnokii.
 
@@ -24,6 +24,7 @@
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
   & Jan Derfinak <ja@mail.upjs.sk>.
+  Copyright (C) 2002 BORBELY Zoltan
 
   This file is a module to smsd for MySQL db server.
   
