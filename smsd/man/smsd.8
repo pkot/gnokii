@@ -1,4 +1,4 @@
-.TH "smsd" "8" "October  5, 2003" "" "Gnokii"
+.TH "smsd" "8" "October  26, 2005" "" "Gnokii"
 .SH "NAME"
 smsd \- daemon for handling incoming and outgoing SMSes using libgnokii
 .SH "SYNOPSIS"
@@ -82,8 +82,15 @@ This attribute contains return value of gn_sms_send() function. For explanation 
 .TP
 .B dreport
 request for delivery report per message. Possible values are 0 for no delivery report, 1 for delivery report.
-.RE
 
+.TP
+.B not_before
+sms will not be send before this time (default 00:00:00).
+
+.TP
+.B not_after
+sms will not be send after this time (default 23:59:59).
+.RE
 .PP
 \fBSMSD\fR is multi threaded program. If you list processes you will see more then
 one instance of smsd.
