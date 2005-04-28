@@ -1,3 +1,14 @@
+gnokii (0.6.5) unstable; urgency=low
+
+  * updates to new gnokii version
+  * remove gnokii wrapper
+  * fix smsd build
+  * add libfile module to smsd
+  * add ppm2nokia and todologo to the installable files
+  * update package descrptions
+
+ - Pawel Kot  Thu, 28 Apr 2005 22:53:34 +0200
+
 gnokii (0.6.0) unstable; urgency=low
 
   * let Debian users build new gnokii version

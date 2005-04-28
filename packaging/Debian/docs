@@ -11,6 +11,7 @@ Docs/README-siemens
 Docs/README-Symbian
 Docs/README-WIN32
 Docs/README-MacOSX
+Docs/README-DKU2
 Docs/DataCalls-QuickStart
 Docs/gettext-howto
 Docs/packaging-howto
@@ -21,4 +22,5 @@ Docs/gnokii.nol
 Docs/FAQ
 Docs/logos.txt
 Docs/ringtones.txt
+Docs/KNOWN_BUGS
 TODO

@@ -30,6 +30,7 @@ build-stamp:
 	# Compile the smsd subpackage.
 	cd smsd &&\
 	$(MAKE) &&\
+	$(MAKE) libfile.la &&\
 	$(MAKE) libpq.la &&\
 	$(MAKE) libmysql.la
 	#/usr/bin/docbook-to-man debian/gnokii.sgml > gnokii.1
@@ -62,18 +63,20 @@ install: build
 
 	# Install the main package into debian/gnokii
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/gnokii/
-	mkdir -p $(CURDIR)/debian/gnokii/usr/lib/gnokii
-	mv $(CURDIR)/debian/gnokii/usr/bin/gnokii $(CURDIR)/debian/gnokii/usr/lib/gnokii/gnokii
-	install -m 755 $(CURDIR)/debian/gnokii.wrapper $(CURDIR)/debian/gnokii/usr/bin/gnokii
+	install -m 755 $(CURDIR)/debian/gnokii/usr/bin/gnokii $(CURDIR)/debian/gnokii/usr/bin/gnokii
 	install -m 755 $(CURDIR)/utils/sendsms $(CURDIR)/debian/gnokii/usr/bin/sendsms
+	install -m 755 $(CURDIR)/utils/ppm2nokia $(CURDIR)/debian/gnokii/usr/bin/ppm2nokia
+	install -m 755 $(CURDIR)/utils/todologo $(CURDIR)/debian/gnokii/usr/bin/todologo
 
 	# Install the SMSD subpackage and modules into debian/gnokii-smsd and debian/gnokii-smsd-*
 	cd smsd &&\
 	$(MAKE) install DESTDIR=$(CURDIR)/debian/gnokii-smsd/ bindir=usr/sbin
 	mkdir -p $(CURDIR)/debian/gnokii-smsd-mysql/usr/share/smsd
 	mkdir -p $(CURDIR)/debian/gnokii-smsd-pgsql/usr/share/smsd
+	mkdir -p $(CURDIR)/debian/gnokii-smsd-file/usr/share/smsd
 	mv $(CURDIR)/debian/gnokii-smsd/usr/lib/smsd/libmysql.la $(CURDIR)/debian/gnokii-smsd-mysql/usr/share/smsd
 	mv $(CURDIR)/debian/gnokii-smsd/usr/lib/smsd/libpq.la $(CURDIR)/debian/gnokii-smsd-pgsql/usr/share/smsd
+	mv $(CURDIR)/debian/gnokii-smsd/usr/lib/smsd/libfile.la $(CURDIR)/debian/gnokii-smsd-file/usr/share/smsd
 	#rm -fR $(CURDIR)/debian/gnokii-smsd/usr/share
 	rm -fR $(CURDIR)/debian/gnokii-smsd/usr/lib
 
@@ -111,7 +114,7 @@ binary-arch: build install
 	dh_installinfo
 	dh_installchangelogs -p gnokii ChangeLog
 	dh_installchangelogs -p gnokii-smsd smsd/ChangeLog
-	dh_installchangelogs -p gnokii-smsd-pgsql -p gnokii-smsd-mysql
+	dh_installchangelogs -p gnokii-smsd-pgsql -p gnokii-smsd-mysql -p gnokii-smsd-file
 	dh_link
 	dh_strip
 	dh_compress
