@@ -12,7 +12,10 @@ nk6510 driver. Configurations known to be affected:
 	connection = irda
 Hadley Rich reports the same bad behaviour with Nokia 7250i. It is not
 supported explicitely but hacking the sources to support it (the usual way)
-leads to the damage.
+leads to the damage. It seems that this behaviour affects Nokia Series 40
+v1. See http://www.mobile-review.com/forum2/showthread.php?t=10266 for more
+complete list. these phones are currently disabled in gnokii when using FBUS
+over IrDA communication.
 
 3. Nokia 6310(i) doesn't work well over the DRL3P cable. After few
 successfull connections it stops working. When you power the phone off and
