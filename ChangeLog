@@ -13,6 +13,7 @@
     o support for basic file manipulation              (Chris Kemp)
     o --sendsms will warn when no SMSC cannot be read from the
       phone and advice to use --smsc option             (Pawel Kot)
+    o resolve copyright issues                          (Pawel Kot)
  * 6510 driver updates
     o correctly read SMS datetime                       (Pawel Kot)
     o deleting sms can return an unhandled message (BORBELY Zoltan)
