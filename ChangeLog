@@ -1,5 +1,5 @@
-0.6.5 (not released yet)
-========================
+0.6.5
+=====
  * translation updates
     o updated Estonian translation                  (Hans Motshärg)
     o xgnokii_xring.c was missing from POTFILES.in  (Hans Motshärg)
