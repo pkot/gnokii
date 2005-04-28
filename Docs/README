@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janík ml.
-                         (C) 2001 - 2004 Pawe³ Kot
-                Last update 17 October 2004  Version 0.6.4
+                         (C) 2001 - 2005 Pawe³ Kot
+                 Last update 29 April 2005  Version 0.6.5
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.4 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.5 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -87,6 +87,11 @@ used by gnokiid to create on demand a symbolic link between
 interface.  It's operation is transparent under normal usage as gnokiid
 takes care of calling it when required.
 
+There are also several third-party applications using libgnokii, namely:
+gnocky, knokiisync, gnokiifs (all available from gnokii CVS and FTP
+servers), kdepim (distributed within KDE), Multisync and Opensync (as a
+plugin).
+
 
 - 3.0  Notes for specific model phones -
 
@@ -126,10 +131,10 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.6.4-i386.rpm
+rpm -i gnokii-0.6.5-i386.rpm
 
 If you are using a Debian based system, you can use dpackage to do the
-installation. On Slackware you use installpkg or pkgtool.
+installation. On Slackware you can use installpkg or pkgtool.
 
 
 - 6.0 Configuration -
@@ -319,6 +324,8 @@ for both monitoring and the tools themselves.
 
 - 13.0 Handsets tested -
 
+Note that this list may be outdated and not accurate.
+
 Nokia 3810 Series
  + 3110
  + 3810
@@ -359,6 +366,7 @@ Nokia 6510 Series
  + 6610
  + 8310
  + 6800
+ + 6170
 
 Nokia 2110 Series
  - deprecated
@@ -389,6 +397,13 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20050529 Version 0.6.5
+This is really big release. The delay since the previous version was caused
+by the copyright issues that should be resolved right now. The code
+improvements contain: DKU2 calbe support (along with Linux kernel driver),
+filesystem functions, fixes for SMS and TODO reading, call management. For
+more details see the ChangeLog.
+
 20041017 Version 0.6.4
 Many improvements: build system, new phones supported by various drivers,
 more functionality in gnapplet driver (calendar, todo, sms and much more),
