@@ -1138,8 +1138,8 @@ static void DoSendSMS(void)
 			sms.delivery_report = false;
 		sms.type = GN_SMS_MT_Submit;
 
-		strncpy(sms.remote.number, number, GN_BCD_STRING_MAX_LENGTH + 1);
-		sms.remote.number[GN_BCD_STRING_MAX_LENGTH] = '\0';
+		strncpy(sms.remote.number, number, GN_BCD_STRING_MAX_LENGTH);
+		sms.remote.number[GN_BCD_STRING_MAX_LENGTH - 1] = '\0';
 		if (sms.remote.number[0] == '+')
 			sms.remote.type = GN_GSM_NUMBER_International;
 		else 
