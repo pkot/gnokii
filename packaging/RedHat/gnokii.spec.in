@@ -71,10 +71,10 @@ rm -rf ${RPM_BUILD_ROOT}
 
 %files
 %defattr(-,root,root)
-%doc Docs/CREDITS Docs/DataCalls-QuickStart Docs/FAQ Docs/README
+%doc Docs/CREDITS Docs/DataCalls-QuickStart Docs/FAQ Docs/README Docs/KNOWN_BUGS
 %doc Docs/README-3810 Docs/README-6110 Docs/README-2110 Docs/README-6510 Docs/README-7110
 %doc Docs/README-dancall Docs/README-siemens Docs/README-ericsson Docs/README-Symbian
-%doc Docs/README-WIN32 Docs/README-MacOSX
+%doc Docs/README-WIN32 Docs/README-MacOSX Docs/README-DKU2
 %doc Docs/gettext-howto Docs/gnokii-IrDA-Linux Docs/gnokii-ir-howto Docs/packaging-howto
 %doc Docs/gnokii-hackers-howto Docs/gnokii.nol Docs/logos.txt Docs/ringtones.txt Docs/Bugs
 %doc Docs/sample/logo/gnokii.xpm Docs/sample/ringtone/star.imelody Docs/sample/ringtone/star.rtttl
@@ -95,6 +95,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %attr(0750, root, gnokii) %{_libdir}/libgnokii.la
 %{_bindir}/ppm2nokia
 %{_bindir}/sendsms
+%{_bindir}/todologo
 %{_datadir}/locale/*
 %config %{_sysconfdir}/gnokiirc
 %{_mandir}/*/*
@@ -103,7 +104,6 @@ rm -rf ${RPM_BUILD_ROOT}
 %files xgnokii
 %defattr(-,root,root)
 %{_prefix}/X11R6/bin/xgnokii
-%{_bindir}/todologo
 %{_prefix}/X11R6/share/xgnokii
 
 %files devel
@@ -115,6 +115,9 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_libdir}/pkgconfig/*
 
 %changelog
+
+* Thu Apr 28 2005 Pawel Kot
+- minor updates: new Docs files, move todologo to the gnokii package
 
 * Mon Feb 23 2004 BORBELY Zoltan <bozo@andrews.hu>
 - require flex at build time (suggested by Olivier Kaloudoff)
