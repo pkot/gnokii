@@ -1,7 +1,7 @@
 gnokii: gnokii (Toolset for the mobile phones)
 gnokii:
-gnokii: gnokii is a Linux/Unix tool suite for mobile phones. It provides a
-gnokii: library to communicate with a phone hiding the communication
+gnokii: gnokii is a Linux/Unix tool suite for the mobile phones. It provides
+gnokii: a library to communicate with a phone hiding the communication
 gnokii: protocol. The library handles SMS, phonebook, calendar, phone calls,
 gnokii: and other mobile phone capabilities. It supports Nokia, AT-capable,
 gnokii: or Motorola Timeport phones, as well as Symbian-based phones.
