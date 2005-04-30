@@ -3,6 +3,7 @@
  * build system updates
     o update gnokii.spec -- split up to the smaller packages
                                                         (Pawel Kot)
+    o added gnokii.ebuild based on Gentoo mainstream    (Pawel Kot)
 
 0.6.5
 =====
