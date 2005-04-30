@@ -1,3 +1,9 @@
+0.6.6 (not released yet)
+========================
+ * build system updates
+    o update gnokii.spec -- split up to the smaller packages
+                                                        (Pawel Kot)
+
 0.6.5
 =====
  * translation updates

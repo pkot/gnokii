@@ -19,11 +19,11 @@ Requires: libgnokii = %{version}-%{release}
 Gnokii is a multisystem tool suite and (eventually) modem/fax driver for
 the mobile phones, released under the GPL.
 
-%package libgnokii
+%package -n libgnokii
 Summary: A gnokii shared library
 Group: Libraries
 
-%description libgnokii
+%description -n libgnokii
 Gnokii shared library
 
 %package -n libgnokii-devel
@@ -33,51 +33,51 @@ Requires: libgnokii = %{version}-%{release}
 Requires: XFree86-devel
 Requires: bluez-libs-devel
 
-%description libgnokii-devel
+%description -n libgnokii-devel
 libgnokii header files.
 
-%package xgnokii
+%package -n xgnokii
 Summary: Graphical gtk+ based tool suite for the mobile phones.
 Group: X11/Applications
 
-%description xgnokii
+%description -n xgnokii
 Xgnokii is a graphical gtk+ based tool suite for the mobile phones. It
 allows you to edit your contacts book, send/read SMS's from/in your
 computer and more.
 
-%package gnokii-smsd
+%package -n gnokii-smsd
 Summary:	Daemon for handling incoming and outgoing SMSes using libgnokii
 Group:		Daemons
 Requires:	gnokii = %{version}-%{release}
 
-%description gnokii-smsd
+%description -n gnokii-smsd
 The SMSD (SMS daemon) program is intended for receiving and sending
 SMSes
 
-%package gnokii-smsd-mysql
+%package -n gnokii-smsd-mysql
 Summary:	mysql plugin for gnokii-smsd
 Group:		Daemons
 Requires:	gnokii-smsd = %{version}-%{release}
 Requires:	mysql-devel
 
-%description gnokii-smsd-mysql
+%description -n gnokii-smsd-mysql
 MySQL plugin for gnokii-smsd
 
-%package gnokii-smsd-psql
+%package -n gnokii-smsd-psql
 Summary:	psql plugin for gnokii-smsd
 Group:		Daemons
 Requires:	gnokii-smsd = %{version}-%{release}
 Requires:	postgresql-devel
 
-%description gnokii-smsd-psql
+%description -n gnokii-smsd-psql
 PostgreSQL plugin for gnokii-smsd
 
-%package gnokii-smsd-file
+%package -n gnokii-smsd-file
 Summary:	file plugin for gnokii-smsd
 Group:		Daemons
 Requires:	gnokii-smsd = %{version}-%{release}
 
-%description gnokii-smsd-file
+%description -n gnokii-smsd-file
 Plain file plugin for gnokii-smsd
 
 %prep
@@ -152,7 +152,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(4750,root,gnokii,0750)
 %{_sbindir}/mgnokiidev
 
-%files xgnokii
+%files -n xgnokii
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/xgnokii
 %dir %{_datadir}/xgnokii
@@ -162,11 +162,11 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_desktopdir}/gnokii.desktop
 %{_mandir}/man1/xgnokii.1x*
 
-%files libgnokii
+%files -n libgnokii
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libgnokii.so.*.*
 
-%files libgnokii-devel
+%files -n libgnokii-devel
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_libdir}/libgnokii.so
 %{_libdir}/libgnokii.la
@@ -175,21 +175,21 @@ rm -rf ${RPM_BUILD_ROOT}
 %{_includedir}/gnokii
 %{_pkgconfigdir}/*.pc
 
-%files gnokii-smsd
+%files -n gnokii-smsd
 %defattr(644,root,root,755)
 %doc smsd/ChangeLog smsd/README smsd/README.MySQL smsd/README.Tru64 smsd/action smsd/*.sql
 %{_sbindir}/smsd
 %{_mandir}/man8/smsd.*
 
-%files gnokii-smsd-mysql
+%files -n gnokii-smsd-mysql
 %defattr(644,root,root,755)
 %{_libdir}/smsd/libmysql.la
 
-%files gnokii-smsd-psql
+%files -n gnokii-smsd-psql
 %defattr(644,root,root,755)
 %{_libdir}/smsd/libpq.la
 
-%files gnokii-smsd-file
+%files -n gnokii-smsd-file
 %defattr(644,root,root,755)
 %{_libdir}/smsd/libfile.la
 
