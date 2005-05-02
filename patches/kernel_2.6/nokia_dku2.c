@@ -59,7 +59,7 @@ static struct usb_device_id id_table [] = {
 	{ }			/* Terminating entry */
 };
 
-MODULE_DEVICE_TABLE (usb, id_table);
+MODULE_DEVICE_TABLE(usb, id_table);
 
 static struct usb_driver nokia_driver = {
 	.owner =	THIS_MODULE,
