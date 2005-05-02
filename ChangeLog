@@ -4,6 +4,8 @@
     o update gnokii.spec -- split up to the smaller packages
                                                         (Pawel Kot)
     o added gnokii.ebuild based on Gentoo mainstream    (Pawel Kot)
+ * link layer updates
+    o DKU2 driver as the separate module for Linux 2.4  (Pawel Kot)
 
 0.6.5
 =====
