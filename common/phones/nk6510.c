@@ -1613,6 +1613,8 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 
 	/* Get the data */
 	while (data->file->togo>0) {
+		int progress;
+		
 		i = data->file->file_length-data->file->togo;
 		req3[11] = (i&0xff0000)>>16;
 		req3[12] = (i&0xff00)>>8;
@@ -1627,6 +1629,8 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 		if (sm_message_send(sizeof(req3), NK6510_MSG_FILE, req3, state)) return GN_ERR_NOTREADY; 
 		err = sm_block(NK6510_MSG_FILE, data, state); 
 		if (err!=GN_ERR_NONE) return err;
+		progress = 100 * (data->file->file_length - data->file->togo) / data->file->file_length;
+		fprintf(stderr, _("Progress: %d%% completed\n"), progress);
 	}
 	
 	/* Finish the transfer */
