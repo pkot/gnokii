@@ -4976,11 +4976,23 @@ static int getfile(int nargc, char *nargv[])
 	if ((error = gn_sm_functions(GN_OP_GetFile, &data, &state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get file %s: %s\n"), nargv[0], gn_error_print(error));
 	else {
-		if (nargc==1) {
-			strncpy(filename2, strrchr(nargv[0], '/') + 1, 512);
+		if (nargc == 1) {
+			if (strrchr(nargv[0], '/'))
+				strncpy(filename2, strrchr(nargv[0], '/') + 1, 512);
+			else if (strrchr(nargv[0], '\\'))
+				strncpy(filename2, strrchr(nargv[0], '\\') + 1, 512);
+			else
+				strcpy(filename2, "default.dat");
 			fprintf(stdout, _("Got file %s.  Save to [%s]: "), nargv[0], filename2);
 			gn_line_get(stdin, filename2, 512);
-			if (filename2[0]==0) strncpy(filename2, strrchr(nargv[0], '/') + 1, 512);
+			if (filename2[0] == 0) {
+				if (strrchr(nargv[0], '/'))
+					strncpy(filename2, strrchr(nargv[0], '/') + 1, 512);
+				else if (strrchr(nargv[0], '\\'))
+					strncpy(filename2, strrchr(nargv[0], '\\') + 1, 512);
+				else
+					strcpy(filename2, "default.dat");
+			}
 			f = fopen(filename2, "w");
 		} else {
 			f = fopen(nargv[1], "w");

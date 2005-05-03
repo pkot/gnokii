@@ -9,6 +9,10 @@
     o clean up 2.4 driver                               (Pawel Kot)
  * 6510 driver updates
     o add Nokia 6170 support                            (Pawel Kot)
+ * gnokii updates
+    o fix the segfault with --getfile when no local_filename is
+    given and remote_filename does not contain '/' character
+    (eg. it was given with '\\' charaters)              (Pawel Kot)
 
 0.6.5
 =====
