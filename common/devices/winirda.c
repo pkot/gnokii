@@ -48,6 +48,7 @@ static char *phone[] = {
 	"Nokia 3650",
 	"Nokia 5100",
 	"Nokia 6100",
+	"Nokia 6170",
 	"Nokia 6210",
 	"Nokia 6230",
 	"Nokia 6250",
