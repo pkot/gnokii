@@ -78,18 +78,12 @@ static struct usb_serial_device_type nokia_device = {
 	.shutdown =		nokia_shutdown,
 };
 
-struct nokia_private {
-
-};
-
 /* do some startup allocations not currently performed by usb_serial_probe() */
 static int nokia_startup(struct usb_serial *serial)
 {
         struct usb_serial_port *port;
         struct usb_endpoint_descriptor *endpoint;
 	int buffer_size = 0;
-
-	struct nokia_private *priv;
 
 	dbg("%s", __FUNCTION__);
 
@@ -141,14 +135,6 @@ static int nokia_startup(struct usb_serial *serial)
 	} else
 		return -1;
 
-	/* allocate the private data structure */
-	serial->port->private = kmalloc(sizeof(struct nokia_private), GFP_KERNEL);
-	if (!serial->port->private)
-		return -1; /* error */
-	
-	/* set initial values */
-	priv = (struct nokia_private *)serial->port->private;
-	
 	init_waitqueue_head(&serial->port->write_wait);
 	
 	return 0;
