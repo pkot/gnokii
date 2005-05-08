@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
 "POT-Creation-Date: 2005-05-03 23:58+0200\n"
-"PO-Revision-Date: 2005-05-09 01:28+0200\n"
+"PO-Revision-Date: 2005-05-09 01:34+0200\n"
 "Last-Translator: Pawe³ Kot <pkot@bezsensu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -1291,7 +1291,7 @@ msgstr "NIeudana próba zapisu pliku \"%s\"\n"
 #: gnokii/gnokii.c:1955
 #, c-format
 msgid "Dealer welcome note "
-msgstr "Komunikat powitalny dostawcy"
+msgstr "Komunikat powitalny operatora"
 
 #: gnokii/gnokii.c:1957 gnokii/gnokii.c:1964
 #, c-format
@@ -1367,7 +1367,7 @@ msgstr "B³±d podczas ustawiania"
 #: gnokii/gnokii.c:2134
 #, c-format
 msgid " dealer"
-msgstr " dostawca"
+msgstr " operator"
 
 #: gnokii/gnokii.c:2135
 #, c-format
@@ -1447,7 +1447,7 @@ msgstr "Zadanie nie mo¿e byæ odczytane: %s\n"
 #: gnokii/gnokii.c:2294 gnokii/gnokii.c:2492 gnokii/gnokii.c:5065
 #, fuzzy, c-format
 msgid "Cannot read file %s\n"
-msgstr "### Nie mo¿na utworzyæ pliku %s\n"
+msgstr "Nie mo¿na odczytaæ pliku %s\n"
 
 #: gnokii/gnokii.c:2315 gnokii/gnokii.c:2513
 #, c-format
@@ -1457,7 +1457,7 @@ msgstr "Nieudana próba wczytania pliku vCalendar: %s\n"
 #: gnokii/gnokii.c:2322 gnokii/gnokii.c:2520 gnokii/gnokii.c:4016
 #, c-format
 msgid "Succesfully written!\n"
-msgstr "Pomy¶lnie zapisano!\n"
+msgstr "Zapisano pomy¶lnie!\n"
 
 #: gnokii/gnokii.c:2323
 #, fuzzy, c-format
@@ -1527,32 +1527,32 @@ msgstr "   Czas alarmu: %02d:%02d:%02d\n"
 #: gnokii/gnokii.c:2442
 #, c-format
 msgid "   Repeat: every day\n"
-msgstr ""
+msgstr "   Powtarzanie: codziennie\n"
 
 #: gnokii/gnokii.c:2445
 #, c-format
 msgid "   Repeat: every week\n"
-msgstr ""
+msgstr "   Powtarzanie: co tydzieñ\n"
 
 #: gnokii/gnokii.c:2448
 #, fuzzy, c-format
 msgid "   Repeat: every 2 weeks\n"
-msgstr "co dwa tygodnie"
+msgstr "   Powtarzanie: co dwa tygodnie\n"
 
 #: gnokii/gnokii.c:2451
 #, c-format
 msgid "   Repeat: every month\n"
-msgstr ""
+msgstr "   Powtarzanie: co miesi±c\n"
 
 #: gnokii/gnokii.c:2454
 #, c-format
 msgid "   Repeat: every year\n"
-msgstr ""
+msgstr "   Powtarzanie: co roku\n"
 
 #: gnokii/gnokii.c:2457
 #, fuzzy, c-format
 msgid "   Repeat: %d hours\n"
-msgstr "   Tekst: %s\n"
+msgstr "   Powtarzanie: co %d godzin\n"
 
 #: gnokii/gnokii.c:2461
 #, c-format
