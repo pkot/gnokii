@@ -133,20 +133,20 @@ int device_script(int fd, const char *section, struct gn_statemachine *state)
 		cfg_foreach(gn_cfg_info, section, device_script_cfgfunc);
 		errno = 0;
 		if (dup2(fd, 0) != 0 || dup2(fd, 1) != 1 || close(fd)) {
-			fprintf(stderr, _("device_script(\"%s\"): file descriptor prepare: %s\n"), scriptname, strerror(errno));
+			fprintf(stderr, _("device_script(\"%s\"): file descriptor preparation failure: %s\n"), scriptname, strerror(errno));
 			_exit(-1);
 		}
 		/* FIXME: close all open descriptors - how to track them?
 		 */
 		execl("/bin/sh", "sh", "-c", scriptname, NULL);
-		fprintf(stderr, _("device_script(\"%s\"): execute script: %s\n"), scriptname, strerror(errno));
+		fprintf(stderr, _("device_script(\"%s\"): script exection failure: %s\n"), scriptname, strerror(errno));
 		_exit(-1);
 		/* NOTREACHED */
 
 	default:
 		if (pid == waitpid(pid, &status, 0 /* options */) && WIFEXITED(status) && !WEXITSTATUS(status))
 			return 0;
-		fprintf(stderr, _("device_script(\"%s\"): child script failure: %s, exit code=%d\n"), scriptname,
+		fprintf(stderr, _("device_script(\"%s\"): child script execution failure: %s, exit code=%d\n"), scriptname,
 			(WIFEXITED(status) ? _("normal exit") : _("abnormal exit")),
 			(WIFEXITED(status) ? WEXITSTATUS(status) : -1));
 		errno = EIO;
@@ -174,7 +174,7 @@ int serial_open(const char *file, int oflag)
 
 	retcode = tcgetattr(fd, &serial_termios);
 	if (retcode == -1) {
-		perror("Gnokii serial_open:tcgetattr");
+		perror("Gnokii serial_open: tcgetattr");
 		/* Don't call serial_close since serial_termios is not valid */
 		close(fd);
 		return -1;
@@ -189,7 +189,7 @@ int serial_close(int fd, struct gn_statemachine *state)
 	/* handle config file disconnect_script:
 	 */
 	if (device_script(fd, "disconnect_script", state) == -1)
-		fprintf(stderr, _("Gnokii serial_close: disconnect_script\n"));
+		dprintf("Gnokii serial_close: disconnect_script\n");
 
 	if (fd >= 0) {
 #if 1 /* HACK */
@@ -277,7 +277,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	/* handle config file connect_script:
 	 */
 	if (device_script(fd, "connect_script", state) == -1) {
-		fprintf(stderr,"Gnokii serial_opendevice: connect_script\n");
+		dprintf("Gnokii serial_opendevice: connect_script\n");
 		serial_close(fd, state);
 		return -1;
 	}
@@ -446,7 +446,7 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine 
 
 #ifndef TIOCMGET
 	if (state->config.require_dcd)
-		fprintf(stderr, _("WARNING: global/require_dcd argument was set but it is not supported on this system!\n"));
+		dprintf("WARNING: global/require_dcd argument was set but it is not supported on this system!\n");
 #endif
 
 	if (state->config.require_dcd)

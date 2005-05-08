@@ -20,6 +20,7 @@
     o updated Estonian translation                  (Hans Motshärg)
  * libgnokii updates
     o return all call dates as subentries               (Pawel Kot)
+    o unify error messages in unixserial                (Pawel Kot)
  * nk6510 driver updates
     o handle invalid memory types                       (Pawel Kot)
 
