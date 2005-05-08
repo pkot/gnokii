@@ -1819,8 +1819,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 				dprintf("Memory status - location = %d, Capacity: %d \n",
 					(message[4] << 8) + message[5], (message[18] << 8) + message[19]);
 			} else {
-				dprintf("Unknown error getting mem status\n");
-				return GN_ERR_NOTIMPLEMENTED;
+				return GN_ERR_INVALIDMEMORYTYPE;
 			}
 		}
 		break;
@@ -1864,6 +1863,8 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 				return GN_ERR_EMPTYLOCATION;
 			case 0x34:
 				return GN_ERR_INVALIDLOCATION;
+			case 0x31:
+				return GN_ERR_INVALIDMEMORYTYPE;
 			default:
 				return GN_ERR_UNKNOWN;
 			}
@@ -1897,7 +1898,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
+		dprintf("Unknown subtype of type 0x03 (0x%02x)\n", message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
@@ -3768,7 +3769,8 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		ca = data->call_active;
 		memset(ca, 0x00, 2 * sizeof(gn_call_active));
 		for (i = 0; i < message[4]; i++) {
-			if (pos[0] != 0x64) return GN_ERR_UNHANDLEDFRAME;
+			if (pos[0] != 0x64)
+				return GN_ERR_UNHANDLEDFRAME;
 			ca[i].call_id = pos[2];
 			ca[i].channel = pos[3];
 			switch (pos[4]) {
@@ -3842,8 +3844,11 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Cause ID: %i\n", message[6]);
 		return GN_ERR_UNKNOWN;
 
+	case 0xf0:
+		return GN_ERR_UNHANDLEDFRAME;
+
 	default:
-		dprintf("Unknown subtype of type 0x01 (%d)\n", message[3]);
+		dprintf("Unknown subtype of type 0x01 (0x%02x)\n", message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
