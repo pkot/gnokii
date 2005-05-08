@@ -1871,6 +1871,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		dprintf("Received phonebook info\n");
 		blocks     = message[21];
 		return phonebook_decode(message + 22, length - 21, data, blocks, message[11], 12);
+
 	case 0x0c: /* Write memory location */
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
