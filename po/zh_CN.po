@@ -6,8 +6,8 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: gnokii\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2004-11-20 20:08+0800\n"
+"Report-Msgid-Bugs-To: feedback@gnokii.org\n"
+"POT-Creation-Date: 2005-05-03 23:58+0200\n"
 "PO-Revision-Date: 2004-11-20 20:39+0800\n"
 "Last-Translator: Funda Wang <fundawang@linux.net.cn>\n"
 "Language-Team: zh_CN <i18n-translation@lists.linux.net.cn>\n"
@@ -15,323 +15,318 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
-#: common/cfgreader.c:316 common/cfgreader.c:327 common/cfgreader.c:335
-#: common/cfgreader.c:342 common/cfgreader.c:361 common/cfgreader.c:370
-#: common/cfgreader.c:387
+#: common/cfgreader.c:413 common/cfgreader.c:424 common/cfgreader.c:432
+#: common/cfgreader.c:439 common/cfgreader.c:458 common/cfgreader.c:467
+#: common/cfgreader.c:484 common/cfgreader.c:491
 #, c-format
 msgid "Unsupported [%s] %s value \"%s\"\n"
 msgstr "不支持的 [%s] %s 值“%s”\n"
 
-#: common/cfgreader.c:353
+#: common/cfgreader.c:450
 #, c-format
 msgid "Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value\n"
 msgstr ""
 
-#: common/cfgreader.c:406
+#: common/cfgreader.c:510
 #, c-format
 msgid "Unrecognized [logging] option \"%s\", use \"off\" or \"on\" value\n"
 msgstr ""
 
-#: common/cfgreader.c:439
+#: common/cfgreader.c:543
 #, c-format
 msgid "Couldn't open %s or %s.\n"
 msgstr ""
 
-#: common/cfgreader.c:475
+#: common/cfgreader.c:609
 #, c-format
-msgid "Couldn't open %s config file,\n"
+msgid "No global section in %s config file.\n"
 msgstr ""
 
-#: common/cfgreader.c:492
-#, c-format
-msgid "No global section in % config file.\n"
-msgstr ""
-
-#: common/cfgreader.c:527
+#: common/cfgreader.c:654
 #, c-format
 msgid "Config error - no model specified.\n"
 msgstr ""
 
-#: common/cfgreader.c:531
+#: common/cfgreader.c:658
 #, c-format
 msgid "Config error - no port specified.\n"
 msgstr ""
 
-#: common/data/virtmodem.c:142
+#: common/data/virtmodem.c:145
 #, c-format
 msgid "gn_vm_initialise - VM_GSMInitialise failed!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:149
+#: common/data/virtmodem.c:152
 #, c-format
 msgid "gn_vm_initialise - VM_PtySetup failed!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:154
+#: common/data/virtmodem.c:157
 #, c-format
 msgid "gn_vm_initialise - gn_atem_initialise failed!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:159
+#: common/data/virtmodem.c:162
 #, c-format
 msgid "gn_vm_Initialise - dp_Initialise failed!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:359
+#: common/data/virtmodem.c:362
 #, c-format
 msgid "Cannot access %s, check the bindir in your gnokiirc!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:366
+#: common/data/virtmodem.c:369
 #, c-format
 msgid "Couldn't open pty!\n"
 msgstr ""
 
-#: common/data/virtmodem.c:383 xgnokii/xgnokii_lowlevel.c:240
+#: common/data/virtmodem.c:386 xgnokii/xgnokii_lowlevel.c:243
 #, c-format
 msgid "GSM/FBUS init failed!\n"
 msgstr ""
 
-#: common/devices/unixserial.c:125
+#: common/devices/unixserial.c:129
 #, c-format
 msgid "device_script(\"%s\"): fork() failure: %s!\n"
 msgstr ""
 
-#: common/devices/unixserial.c:132
+#: common/devices/unixserial.c:136
 #, c-format
 msgid "device_script(\"%s\"): file descriptor prepare: %s\n"
 msgstr ""
 
-#: common/devices/unixserial.c:138
+#: common/devices/unixserial.c:142
 #, c-format
 msgid "device_script(\"%s\"): execute script: %s\n"
 msgstr ""
 
-#: common/devices/unixserial.c:145
+#: common/devices/unixserial.c:149
 #, c-format
 msgid "device_script(\"%s\"): child script failure: %s, exit code=%d\n"
 msgstr ""
 
-#: common/devices/unixserial.c:146
+#: common/devices/unixserial.c:150
 msgid "normal exit"
 msgstr ""
 
-#: common/devices/unixserial.c:146
+#: common/devices/unixserial.c:150
 msgid "abnormal exit"
 msgstr ""
 
-#: common/devices/unixserial.c:188
+#: common/devices/unixserial.c:192
 #, c-format
 msgid "Gnokii serial_close: disconnect_script\n"
 msgstr ""
 
-#: common/devices/unixserial.c:389
+#: common/devices/unixserial.c:393
 #, c-format
 msgid "Serial port speed %d not supported!\n"
 msgstr ""
 
-#: common/devices/unixserial.c:429
+#: common/devices/unixserial.c:433
 #, c-format
 msgid "ERROR: Modem DCD is down and global/require_dcd parameter is set!\n"
 msgstr ""
 
-#: common/devices/unixserial.c:445
+#: common/devices/unixserial.c:449
 #, c-format
 msgid ""
 "WARNING: global/require_dcd argument was set but it is not supported on this "
 "system!\n"
 msgstr ""
 
-#: common/gsm-filetypes.c:1064 gnokii/gnokii.c:1434
+#: common/gsm-filetypes.c:1070 gnokii/gnokii.c:1458
 #, c-format
 msgid "File %s exists.\n"
 msgstr ""
 
-#: common/gsm-filetypes.c:1066 gnokii/gnokii.c:914 gnokii/gnokii.c:1435
-#: gnokii/gnokii.c:3545
+#: common/gsm-filetypes.c:1072 gnokii/gnokii.c:938 gnokii/gnokii.c:1459
+#: gnokii/gnokii.c:3536
 #, c-format
 msgid "Overwrite? (yes/no) "
 msgstr ""
 
-#: common/gsm-filetypes.c:1068 gnokii/gnokii.c:916 gnokii/gnokii.c:1437
-#: gnokii/gnokii.c:3547
+#: common/gsm-filetypes.c:1074 gnokii/gnokii.c:940 gnokii/gnokii.c:1461
+#: gnokii/gnokii.c:3538
 msgid "yes"
 msgstr "是"
 
-#: common/gsm-filetypes.c:1069 gnokii/gnokii.c:917 gnokii/gnokii.c:3548
+#: common/gsm-filetypes.c:1075 gnokii/gnokii.c:941 gnokii/gnokii.c:3539
 msgid "no"
 msgstr "否"
 
-#: common/gsm-filetypes.c:1078
+#: common/gsm-filetypes.c:1084
 #, c-format
 msgid "Failed to write file %s\n"
 msgstr ""
 
-#: common/gsm-filetypes.c:1512
+#: common/gsm-filetypes.c:1504
 #, c-format
 msgid "Format problem on line [%s]\n"
 msgstr ""
 
-#: common/links/cbus.c:287
+#: common/links/cbus.c:290
 msgid "Couldn't open CBUS device"
 msgstr ""
 
-#: common/links/fbus.c:79 common/links/fbus.c:102 common/links/fbus.c:146
+#: common/links/fbus.c:84 common/links/fbus.c:107 common/links/fbus.c:151
 msgid "Couldn't open FBUS device"
 msgstr ""
 
-#: common/links/fbus-phonet.c:86
+#: common/links/fbus-phonet.c:90
 msgid "Couldn't open PHONET device"
 msgstr ""
 
-#: common/misc.c:392
+#: common/misc.c:403
 #, c-format
 msgid "Cannot lock NULL device.\n"
 msgstr ""
 
-#: common/misc.c:407
+#: common/misc.c:418
 #, c-format
 msgid "Out of memory error while locking device.\n"
 msgstr ""
 
-#: common/misc.c:435
+#: common/misc.c:446
 #, c-format
 msgid "Lockfile %s is stale. Overriding it..\n"
 msgstr ""
 
-#: common/misc.c:438
+#: common/misc.c:449
 #, c-format
 msgid "Overriding failed, please check the permissions.\n"
 msgstr ""
 
-#: common/misc.c:439 common/misc.c:454
+#: common/misc.c:450 common/misc.c:465
 #, c-format
 msgid "Cannot lock device.\n"
 msgstr "无法锁定设备。\n"
 
-#: common/misc.c:443
+#: common/misc.c:454
 #, c-format
 msgid "Device already locked.\n"
 msgstr "设备已经锁定。\n"
 
-#: common/misc.c:452
+#: common/misc.c:463
 #, c-format
 msgid "Unable to read lockfile %s.\n"
 msgstr ""
 
-#: common/misc.c:453
+#: common/misc.c:464
 #, c-format
 msgid "Please check for reason and remove the lockfile by hand.\n"
 msgstr ""
 
-#: common/misc.c:463
+#: common/misc.c:474
 #, c-format
 msgid "Device seems to be locked by unknown process.\n"
 msgstr ""
 
-#: common/misc.c:465
+#: common/misc.c:476
 #, c-format
 msgid "Please check permission on lock directory.\n"
 msgstr ""
 
-#: common/misc.c:467
+#: common/misc.c:478
 #, c-format
 msgid "Cannot create lockfile %s. Please check for existence of the path."
 msgstr ""
 
-#: common/misc.c:490
+#: common/misc.c:501
 #, c-format
 msgid "Cannot unlock device\n"
 msgstr "无法解锁设备\n"
 
-#: common/phones/nk6100.c:954 xgnokii/xgnokii.c:227 xgnokii/xgnokii.c:1024
+#: common/phones/nk6100.c:963 xgnokii/xgnokii.c:231 xgnokii/xgnokii.c:1028
 msgid "Family"
 msgstr "家庭"
 
-#: common/phones/nk6100.c:955 xgnokii/xgnokii.c:228 xgnokii/xgnokii.c:1036
+#: common/phones/nk6100.c:964 xgnokii/xgnokii.c:232 xgnokii/xgnokii.c:1040
 msgid "VIP"
 msgstr "VIP"
 
-#: common/phones/nk6100.c:956 xgnokii/xgnokii.c:229 xgnokii/xgnokii.c:1048
+#: common/phones/nk6100.c:965 xgnokii/xgnokii.c:233 xgnokii/xgnokii.c:1052
 msgid "Friends"
 msgstr "朋友"
 
-#: common/phones/nk6100.c:957 xgnokii/xgnokii.c:230 xgnokii/xgnokii.c:1060
+#: common/phones/nk6100.c:966 xgnokii/xgnokii.c:234 xgnokii/xgnokii.c:1064
 msgid "Colleagues"
 msgstr "伙伴"
 
-#: common/phones/nk6100.c:958 xgnokii/xgnokii.c:231 xgnokii/xgnokii.c:1072
+#: common/phones/nk6100.c:967 xgnokii/xgnokii.c:235 xgnokii/xgnokii.c:1076
 msgid "Other"
 msgstr "其他"
 
-#: common/phones/nk6100.c:1542 xgnokii/xgnokii.c:528 xgnokii/xgnokii_sms.c:849
+#: common/phones/nk6100.c:1462 xgnokii/xgnokii.c:532 xgnokii/xgnokii_sms.c:853
 #, c-format
 msgid "Set %d"
 msgstr "设置 %d"
 
-#: common/phones/nk6100.c:1989
+#: common/phones/nk6100.c:1912
 #, c-format
 msgid "Personal"
 msgstr "个人"
 
-#: common/phones/nk6100.c:1992 common/phones/nk6100.c:2019
+#: common/phones/nk6100.c:1915 common/phones/nk6100.c:1942
 #, c-format
 msgid "Car"
 msgstr "车载"
 
-#: common/phones/nk6100.c:1995 common/phones/nk6100.c:2022
+#: common/phones/nk6100.c:1918 common/phones/nk6100.c:1945
 #, c-format
 msgid "Headset"
 msgstr "头戴"
 
-#: common/phones/nk6100.c:1998 common/phones/nk6100.c:2025
+#: common/phones/nk6100.c:1921 common/phones/nk6100.c:1948
 #, c-format
 msgid "Unknown (%d)"
 msgstr "未知(%d)"
 
-#: common/phones/nk6100.c:2004
+#: common/phones/nk6100.c:1927
 #, c-format
 msgid "General"
 msgstr "常规"
 
-#: common/phones/nk6100.c:2007
+#: common/phones/nk6100.c:1930
 #, c-format
 msgid "Silent"
 msgstr "静音"
 
-#: common/phones/nk6100.c:2010 xgnokii/xgnokii_calendar.c:195
+#: common/phones/nk6100.c:1933 xgnokii/xgnokii_calendar.c:197
 #, c-format
 msgid "Meeting"
 msgstr "会议"
 
-#: common/phones/nk6100.c:2013
+#: common/phones/nk6100.c:1936
 #, c-format
 msgid "Outdoor"
 msgstr "户外"
 
-#: common/phones/nk6100.c:2016
+#: common/phones/nk6100.c:1939
 #, c-format
 msgid "Pager"
 msgstr "寻呼"
 
-#: common/phones/nk2110.c:248 common/phones/nk2110.c:777
+#: common/phones/nk2110.c:249 common/phones/nk2110.c:778
 #, c-format
 msgid "PC   : "
 msgstr "PC："
 
-#: common/phones/nk2110.c:287
+#: common/phones/nk2110.c:288
 msgid "Phone: "
 msgstr "电话："
 
-#: common/phones/nk2110.c:785
+#: common/phones/nk2110.c:786
 msgid "Write error!\n"
 msgstr ""
 
-#: common/phones/nk2110.c:787
+#: common/phones/nk2110.c:788
 msgid "Read ack error!\n"
 msgstr ""
 
-#: common/phones/nk2110.c:815
+#: common/phones/nk2110.c:816
 msgid "Setting MBUS communication with 2110...\n"
 msgstr ""
 
@@ -359,12 +354,12 @@ msgid ""
 "instead"
 msgstr ""
 
-#: gnokiid/gnokiid.c:54
+#: gnokiid/gnokiid.c:57
 #, c-format
 msgid "GNOKIID Version %s\n"
 msgstr ""
 
-#: gnokiid/gnokiid.c:59
+#: gnokiid/gnokiid.c:62
 #, c-format
 msgid ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999\n"
@@ -372,7 +367,7 @@ msgid ""
 "Built %s %s\n"
 msgstr ""
 
-#: gnokiid/gnokiid.c:70
+#: gnokiid/gnokiid.c:73
 #, c-format
 msgid ""
 "   usage: gnokiid {--help|--version}\n"
@@ -381,17 +376,17 @@ msgid ""
 "          --debug           uses stdin/stdout for virtual modem comms\n"
 msgstr ""
 
-#: gnokiid/gnokiid.c:133 smsd/lowlevel.c:144 xgnokii/xgnokii_lowlevel.c:223
+#: gnokiid/gnokiid.c:136 smsd/lowlevel.c:144 xgnokii/xgnokii_lowlevel.c:226
 #, c-format
 msgid "Lock file error. Exiting\n"
 msgstr ""
 
-#: gnokii/gnokii.c:254
+#: gnokii/gnokii.c:264
 #, c-format
 msgid "GNOKII Version %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:261
+#: gnokii/gnokii.c:271
 #, c-format
 msgid ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
@@ -407,7 +402,7 @@ msgid ""
 "Built %s %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:276
+#: gnokii/gnokii.c:286
 #, c-format
 msgid ""
 "Usage:\n"
@@ -508,7 +503,7 @@ msgid ""
 "          gnokii --getlocksinfo\n"
 msgstr ""
 
-#: gnokii/gnokii.c:370
+#: gnokii/gnokii.c:380
 #, c-format
 msgid ""
 "          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
@@ -517,7 +512,19 @@ msgid ""
 "          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 msgstr ""
 
-#: gnokii/gnokii.c:376
+#: gnokii/gnokii.c:386
+#, c-format
+msgid ""
+"File options:\n"
+"          gnokii --getfilelist remote_path\n"
+"          gnokii --getfileid remote_filename\n"
+"          gnokii --getfile remote_filename [local_filename]\n"
+"          gnokii --getallfiles remote_path\n"
+"          gnokii --putfile local_filename remote_filename\n"
+"          gnokii --deletefile remote_filename\n"
+msgstr ""
+
+#: gnokii/gnokii.c:394
 #, c-format
 msgid ""
 "Misc options:\n"
@@ -527,19 +534,19 @@ msgid ""
 "          gnokii --getnetworkinfo\n"
 msgstr ""
 
-#: gnokii/gnokii.c:416
+#: gnokii/gnokii.c:434
 #, c-format
 msgid "Lock file error. Exiting.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:431
+#: gnokii/gnokii.c:449
 #, c-format
 msgid ""
 "Telephone interface init failed: %s\n"
 "Quitting.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:468
+#: gnokii/gnokii.c:486
 #, c-format
 msgid ""
 " usage: gnokii --sendsms destination\n"
@@ -559,7 +566,7 @@ msgid ""
 "\n"
 msgstr ""
 
-#: gnokii/gnokii.c:487
+#: gnokii/gnokii.c:505
 #, c-format
 msgid ""
 "usage: gnokii --getcalendarnote start_number [end_number | end] [-v]\n"
@@ -572,1239 +579,1251 @@ msgid ""
 "  NOTE: if no end is given, only the start entry is written\n"
 msgstr ""
 
-#: gnokii/gnokii.c:505 gnokii/gnokii.c:944
+#: gnokii/gnokii.c:523 gnokii/gnokii.c:968
 #, c-format
 msgid "Please enter SMS text. End your input with <cr><control-D>:"
 msgstr ""
 
-#: gnokii/gnokii.c:511 gnokii/gnokii.c:951
+#: gnokii/gnokii.c:529 gnokii/gnokii.c:975
 #, c-format
 msgid "Couldn't read from stdin!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:514
+#: gnokii/gnokii.c:532
 #, c-format
 msgid "Input too long! (%d, maximum is %d)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:535
+#: gnokii/gnokii.c:553
 #, c-format
 msgid "Could not null bitmap: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:540
+#: gnokii/gnokii.c:558
 #, c-format
 msgid "Could not load bitmap from %s: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:645 gnokii/gnokii.c:954
+#: gnokii/gnokii.c:663 gnokii/gnokii.c:978
 #, c-format
 msgid "Input too long!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:678
+#: gnokii/gnokii.c:696
 #, c-format
 msgid "Incorrect --concat option\n"
 msgstr ""
 
-#: gnokii/gnokii.c:714 gnokii/gnokii.c:740
+#: gnokii/gnokii.c:732 gnokii/gnokii.c:760
 #, c-format
 msgid "Empty message. Quitting.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:755 gnokii/gnokii.c:1858 gnokii/gnokii.c:4196
-#: gnokii/gnokii.c:4356
+#: gnokii/gnokii.c:749
+#, c-format
+msgid ""
+"Cannot read the SMSC number from your phone. If the sms send will fail, "
+"please use --smsc option explicitely giving the number.\n"
+msgstr ""
+
+#: gnokii/gnokii.c:775 gnokii/gnokii.c:1882 gnokii/gnokii.c:4187
+#: gnokii/gnokii.c:4347
 #, c-format
 msgid "Send succeeded!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:757 gnokii/gnokii.c:1859 gnokii/gnokii.c:4198
+#: gnokii/gnokii.c:777 gnokii/gnokii.c:1883 gnokii/gnokii.c:4189
 #, c-format
 msgid "SMS Send failed (%s)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:867 gnokii/gnokii.c:1263 gnokii/gnokii.c:1515
-#: gnokii/gnokii.c:3255 gnokii/gnokii.c:3596
+#: gnokii/gnokii.c:887 gnokii/gnokii.c:1287 gnokii/gnokii.c:1539
+#: gnokii/gnokii.c:3272 gnokii/gnokii.c:3587
 #, c-format
 msgid "Unknown memory type %s (use ME, SM, ...)!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:877 gnokii/gnokii.c:882
+#: gnokii/gnokii.c:897 gnokii/gnokii.c:902
 #, c-format
 msgid "Invalid datetime format: %s (should be YYMMDDHHMMSS, all digits)!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:912
+#: gnokii/gnokii.c:918
+#, c-format
+msgid "Invalid datetime: %s.\n"
+msgstr ""
+
+#: gnokii/gnokii.c:936
 #, c-format
 msgid "Message at specified location exists. "
 msgstr ""
 
-#: gnokii/gnokii.c:926 gnokii/gnokii.c:1043 gnokii/gnokii.c:1162
-#: gnokii/gnokii.c:1184 gnokii/gnokii.c:1207 gnokii/gnokii.c:1602
-#: gnokii/gnokii.c:1644 gnokii/gnokii.c:1689 gnokii/gnokii.c:1988
-#: gnokii/gnokii.c:2152 gnokii/gnokii.c:2598 gnokii/gnokii.c:2648
-#: gnokii/gnokii.c:2997 gnokii/gnokii.c:3000 gnokii/gnokii.c:3054
-#: gnokii/gnokii.c:3400 gnokii/gnokii.c:3654 gnokii/gnokii.c:3684
-#: gnokii/gnokii.c:3710 gnokii/gnokii.c:3895 gnokii/gnokii.c:3964
-#: gnokii/gnokii.c:3990 gnokii/gnokii.c:4728 gnokii/gnokii.c:4816
-#: gnokii/gnokii.c:4818
+#: gnokii/gnokii.c:950 gnokii/gnokii.c:1067 gnokii/gnokii.c:1186
+#: gnokii/gnokii.c:1208 gnokii/gnokii.c:1231 gnokii/gnokii.c:1626
+#: gnokii/gnokii.c:1668 gnokii/gnokii.c:1713 gnokii/gnokii.c:2020
+#: gnokii/gnokii.c:2184 gnokii/gnokii.c:2630 gnokii/gnokii.c:2680
+#: gnokii/gnokii.c:3029 gnokii/gnokii.c:3032 gnokii/gnokii.c:3086
+#: gnokii/gnokii.c:3391 gnokii/gnokii.c:3645 gnokii/gnokii.c:3675
+#: gnokii/gnokii.c:3701 gnokii/gnokii.c:3886 gnokii/gnokii.c:3955
+#: gnokii/gnokii.c:3981 gnokii/gnokii.c:4719 gnokii/gnokii.c:4807
+#: gnokii/gnokii.c:4809
 #, c-format
 msgid "Error: %s\n"
 msgstr "错误：%s\n"
 
-#: gnokii/gnokii.c:948
+#: gnokii/gnokii.c:972
 #, c-format
 msgid "storing sms"
 msgstr ""
 
-#: gnokii/gnokii.c:960
+#: gnokii/gnokii.c:984
 #, c-format
 msgid "Empty message. Quitting"
 msgstr ""
 
-#: gnokii/gnokii.c:977
+#: gnokii/gnokii.c:1001
 #, c-format
 msgid "Saved to %d!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:979
+#: gnokii/gnokii.c:1003
 #, c-format
 msgid "Saving failed (%s)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1018
+#: gnokii/gnokii.c:1042
 #, c-format
 msgid "Starting SMS center number is greater than stop\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1023
+#: gnokii/gnokii.c:1047
 #, c-format
 msgid "SMS center number must be greater than 1\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1056
+#: gnokii/gnokii.c:1080
 #, c-format
 msgid "No. %d: \"%s\" (defined name)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1058
+#: gnokii/gnokii.c:1082
 #, c-format
 msgid "No. %d: \"%s\" (default name)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1059
+#: gnokii/gnokii.c:1083
 #, c-format
 msgid "SMS center number is %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1060
+#: gnokii/gnokii.c:1084
 #, c-format
 msgid "Default recipient number is %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1061
+#: gnokii/gnokii.c:1085
 #, c-format
 msgid "Messages sent as "
 msgstr ""
 
-#: gnokii/gnokii.c:1065 xgnokii/xgnokii.c:536 xgnokii/xgnokii.c:565
-#: xgnokii/xgnokii.c:1416 xgnokii/xgnokii_calendar.c:1548
+#: gnokii/gnokii.c:1089 xgnokii/xgnokii.c:540 xgnokii/xgnokii.c:569
+#: xgnokii/xgnokii.c:1420 xgnokii/xgnokii_calendar.c:1550
 #, c-format
 msgid "Text"
 msgstr "文本"
 
-#: gnokii/gnokii.c:1068
+#: gnokii/gnokii.c:1092
 #, c-format
 msgid "VoiceMail"
 msgstr "语音邮件"
 
-#: gnokii/gnokii.c:1071 xgnokii/xgnokii.c:544 xgnokii/xgnokii.c:1422
+#: gnokii/gnokii.c:1095 xgnokii/xgnokii.c:548 xgnokii/xgnokii.c:1426
 #, c-format
 msgid "Fax"
 msgstr "传真"
 
-#: gnokii/gnokii.c:1075
+#: gnokii/gnokii.c:1099
 #, c-format
 msgid "Email"
 msgstr "电子邮件"
 
-#: gnokii/gnokii.c:1078 xgnokii/xgnokii.c:553
+#: gnokii/gnokii.c:1102 xgnokii/xgnokii.c:557
 #, c-format
 msgid "ERMES"
 msgstr ""
 
-#: gnokii/gnokii.c:1081 xgnokii/xgnokii.c:557
+#: gnokii/gnokii.c:1105 xgnokii/xgnokii.c:561
 #, c-format
 msgid "X.400"
 msgstr ""
 
-#: gnokii/gnokii.c:1084 gnokii/gnokii.c:1111 xgnokii/xgnokii_calendar.c:230
+#: gnokii/gnokii.c:1108 gnokii/gnokii.c:1135 xgnokii/xgnokii_calendar.c:232
 #, c-format
 msgid "Unknown"
 msgstr "未知"
 
-#: gnokii/gnokii.c:1089
+#: gnokii/gnokii.c:1113
 #, c-format
 msgid "Message validity is "
 msgstr "消息有效期为"
 
-#: gnokii/gnokii.c:1093
+#: gnokii/gnokii.c:1117
 #, c-format
 msgid "1 hour"
 msgstr "1小时"
 
-#: gnokii/gnokii.c:1096
+#: gnokii/gnokii.c:1120
 #, c-format
 msgid "6 hours"
 msgstr "6小时"
 
-#: gnokii/gnokii.c:1099
+#: gnokii/gnokii.c:1123
 #, c-format
 msgid "24 hours"
 msgstr "24小时"
 
-#: gnokii/gnokii.c:1102
+#: gnokii/gnokii.c:1126
 #, c-format
 msgid "72 hours"
 msgstr "72小时"
 
-#: gnokii/gnokii.c:1105 xgnokii/xgnokii.c:587 xgnokii/xgnokii.c:1486
+#: gnokii/gnokii.c:1129 xgnokii/xgnokii.c:591 xgnokii/xgnokii.c:1490
 #, c-format
 msgid "1 week"
 msgstr "1周"
 
-#: gnokii/gnokii.c:1108
+#: gnokii/gnokii.c:1132
 #, c-format
 msgid "Maximum time"
 msgstr "最长时间"
 
-#: gnokii/gnokii.c:1156 gnokii/gnokii.c:3159 gnokii/gnokii.c:3933
+#: gnokii/gnokii.c:1180 gnokii/gnokii.c:3191 gnokii/gnokii.c:3924
 #, c-format
 msgid "Input line format isn't valid\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1186
+#: gnokii/gnokii.c:1210
 #, c-format
 msgid "Folder with name: %s successfully created!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1203
+#: gnokii/gnokii.c:1227
 #, c-format
 msgid "Error: Number must be between 1 and %i!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1209
+#: gnokii/gnokii.c:1233
 #, c-format
 msgid "Number %i of 'My Folders' successfully deleted!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1225
+#: gnokii/gnokii.c:1249
 #, c-format
 msgid "Cannot list available folders: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1229
+#: gnokii/gnokii.c:1253
 #, c-format
 msgid "No. Name                             Id #Msg\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1230
+#: gnokii/gnokii.c:1254
 #, c-format
 msgid "============================================\n"
 msgstr "============================================\n"
 
-#: gnokii/gnokii.c:1234
+#: gnokii/gnokii.c:1258
 #, c-format
 msgid "Cannot stat folder \"%s\": %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1237
+#: gnokii/gnokii.c:1261
 #, c-format
 msgid "%3d %-32s %2u %4u\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1288
+#: gnokii/gnokii.c:1312
 #, c-format
 msgid "Saving into %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1292
+#: gnokii/gnokii.c:1316
 #, c-format
 msgid "Filename too long - will be truncated to 63 characters.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1318
+#: gnokii/gnokii.c:1342
 #, c-format
 msgid "%d. MO Message "
 msgstr ""
 
-#: gnokii/gnokii.c:1321 gnokii/gnokii.c:1333 gnokii/gnokii.c:1341
-#: gnokii/gnokii.c:1389 gnokii/gnokii.c:1401
+#: gnokii/gnokii.c:1345 gnokii/gnokii.c:1357 gnokii/gnokii.c:1365
+#: gnokii/gnokii.c:1413 gnokii/gnokii.c:1425
 #, c-format
 msgid "(read)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1324 gnokii/gnokii.c:1392
+#: gnokii/gnokii.c:1348 gnokii/gnokii.c:1416
 #, c-format
 msgid "(unread)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1327 gnokii/gnokii.c:1395
+#: gnokii/gnokii.c:1351 gnokii/gnokii.c:1419
 #, c-format
 msgid "(sent)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1330 gnokii/gnokii.c:1398
+#: gnokii/gnokii.c:1354 gnokii/gnokii.c:1422
 #, c-format
 msgid "(unsent)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1336 gnokii/gnokii.c:1365
+#: gnokii/gnokii.c:1360 gnokii/gnokii.c:1389
 #, c-format
 msgid ""
 "Text: %s\n"
 "\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1339
+#: gnokii/gnokii.c:1363
 #, c-format
 msgid "%d. Delivery Report "
 msgstr ""
 
-#: gnokii/gnokii.c:1343
+#: gnokii/gnokii.c:1367
 #, c-format
 msgid "(not read)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1344
+#: gnokii/gnokii.c:1368
 #, c-format
 msgid "Sending date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr ""
 
-#: gnokii/gnokii.c:1349 gnokii/gnokii.c:1359 gnokii/gnokii.c:1374
-#: gnokii/gnokii.c:1409
+#: gnokii/gnokii.c:1373 gnokii/gnokii.c:1383 gnokii/gnokii.c:1398
+#: gnokii/gnokii.c:1433
 #, c-format
 msgid "+%02d00"
 msgstr ""
 
-#: gnokii/gnokii.c:1351 gnokii/gnokii.c:1361 gnokii/gnokii.c:1376
-#: gnokii/gnokii.c:1411
+#: gnokii/gnokii.c:1375 gnokii/gnokii.c:1385 gnokii/gnokii.c:1400
+#: gnokii/gnokii.c:1435
 #, c-format
 msgid "%02d00"
 msgstr ""
 
-#: gnokii/gnokii.c:1354
+#: gnokii/gnokii.c:1378
 #, c-format
 msgid "Response date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr ""
 
-#: gnokii/gnokii.c:1364
+#: gnokii/gnokii.c:1388
 #, c-format
 msgid "Receiver: %s Msg Center: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1368
+#: gnokii/gnokii.c:1392
 #, c-format
 msgid "Picture Message\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1369 gnokii/gnokii.c:1404
+#: gnokii/gnokii.c:1393 gnokii/gnokii.c:1428
 #, c-format
 msgid "Date/time: %02d/%02d/%04d %02d:%02d:%02d "
 msgstr ""
 
-#: gnokii/gnokii.c:1379
+#: gnokii/gnokii.c:1403
 #, c-format
 msgid "Sender: %s Msg center: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1380
+#: gnokii/gnokii.c:1404
 #, c-format
 msgid "Bitmap:\n"
 msgstr "位图：\n"
 
-#: gnokii/gnokii.c:1382 gnokii/gnokii.c:1419
+#: gnokii/gnokii.c:1406 gnokii/gnokii.c:1443
 #, c-format
 msgid "Text:\n"
 msgstr "文本：\n"
 
-#: gnokii/gnokii.c:1386
+#: gnokii/gnokii.c:1410
 #, c-format
 msgid "%d. Inbox Message "
 msgstr ""
 
-#: gnokii/gnokii.c:1414
+#: gnokii/gnokii.c:1438
 #, c-format
 msgid "Sender: %s Msg Center: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1422
+#: gnokii/gnokii.c:1446
 #, c-format
 msgid "GSM operator logo for %s (%s) network.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1423
+#: gnokii/gnokii.c:1447
 #, c-format
 msgid "Saved by Logo Express\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1424
+#: gnokii/gnokii.c:1448
 #, c-format
 msgid "Saved by Operator Logo Uploader by Thomas Kessler\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1427
+#: gnokii/gnokii.c:1451
 #, c-format
 msgid "Logo:\n"
 msgstr "标志：\n"
 
-#: gnokii/gnokii.c:1441
+#: gnokii/gnokii.c:1465
 #, c-format
 msgid "Couldn't save logofile %s!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1446
+#: gnokii/gnokii.c:1470
 #, c-format
 msgid "Ringtone\n"
 msgstr "铃音\n"
 
-#: gnokii/gnokii.c:1450
+#: gnokii/gnokii.c:1474
 #, c-format
 msgid "Linked (%d/%d):\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1455
+#: gnokii/gnokii.c:1479
 #, c-format
 msgid "WAP vCard:\n"
 msgstr "WAP vCard：\n"
 
-#: gnokii/gnokii.c:1458
+#: gnokii/gnokii.c:1482
 #, c-format
 msgid "WAP vCalendar:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1461
+#: gnokii/gnokii.c:1485
 #, c-format
 msgid "WAP vCardSecure:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1464
+#: gnokii/gnokii.c:1488
 #, c-format
 msgid "WAP vCalendarSecure:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1467 gnokii/gnokii.c:2382
+#: gnokii/gnokii.c:1491 gnokii/gnokii.c:2414
 #, c-format
 msgid "Unknown\n"
 msgstr "未知\n"
 
-#: gnokii/gnokii.c:1482
+#: gnokii/gnokii.c:1506
 #, c-format
 msgid "(delete failed)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1484
+#: gnokii/gnokii.c:1508
 #, c-format
 msgid "(message deleted)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1488
+#: gnokii/gnokii.c:1512
 #, c-format
 msgid "GetSMS %s %d failed! (%s)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1490
+#: gnokii/gnokii.c:1514
 #, c-format
 msgid ""
 "See the gnokii manual page for the supported memory types with the phone\n"
 "you use.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1531
+#: gnokii/gnokii.c:1555
 #, c-format
 msgid "Deleted SMS %s %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1533
+#: gnokii/gnokii.c:1557
 #, c-format
 msgid ""
 "DeleteSMS %s %d failed!(%s)\n"
 "\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1590 gnokii/gnokii.c:1672
+#: gnokii/gnokii.c:1614 gnokii/gnokii.c:1696
 msgid "Enter your code: "
 msgstr "输入您的代码："
 
-#: gnokii/gnokii.c:1599
+#: gnokii/gnokii.c:1623
 #, c-format
 msgid "Code ok.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1618
+#: gnokii/gnokii.c:1642
 #, c-format
 msgid "Security code status: "
 msgstr ""
 
-#: gnokii/gnokii.c:1622
+#: gnokii/gnokii.c:1646
 #, c-format
 msgid "waiting for Security Code.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1625
+#: gnokii/gnokii.c:1649
 #, c-format
 msgid "waiting for PIN.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1628
+#: gnokii/gnokii.c:1652
 #, c-format
 msgid "waiting for PIN2.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1631
+#: gnokii/gnokii.c:1655
 #, c-format
 msgid "waiting for PUK.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1634
+#: gnokii/gnokii.c:1658
 #, c-format
 msgid "waiting for PUK2.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1637
+#: gnokii/gnokii.c:1661
 #, c-format
 msgid "nothing to enter.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1640
+#: gnokii/gnokii.c:1664
 #, c-format
 msgid "Unknown!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1673
+#: gnokii/gnokii.c:1697
 msgid "Enter new code: "
 msgstr ""
 
-#: gnokii/gnokii.c:1674
+#: gnokii/gnokii.c:1698
 msgid "Retype new code: "
 msgstr ""
 
-#: gnokii/gnokii.c:1676
+#: gnokii/gnokii.c:1700
 #, c-format
 msgid "Error: new code differ\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1686
+#: gnokii/gnokii.c:1710
 #, c-format
 msgid "Code changed.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1702
+#: gnokii/gnokii.c:1726
 #, c-format
 msgid "INCOMING CALL: ID: %d, Number: %s, Name: \"%s\"\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1705
+#: gnokii/gnokii.c:1729
 #, c-format
 msgid "CALL %d TERMINATED (LOCAL)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1708
+#: gnokii/gnokii.c:1732
 #, c-format
 msgid "CALL %d TERMINATED (REMOTE)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1711
+#: gnokii/gnokii.c:1735
 #, c-format
 msgid "CALL %d ACCEPTED BY THE REMOTE SIDE\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1714
+#: gnokii/gnokii.c:1738
 #, c-format
 msgid "CALL %d PLACED ON HOLD\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1717
+#: gnokii/gnokii.c:1741
 #, c-format
 msgid "CALL %d RETRIEVED FROM HOLD\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1742
+#: gnokii/gnokii.c:1766
 #, c-format
 msgid "Dialing failed: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1744
+#: gnokii/gnokii.c:1768
 #, c-format
 msgid "Dialled call, id: %d (lowlevel id: %d)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1803
+#: gnokii/gnokii.c:1827
 #, c-format
 msgid "Sending operator logo.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1804
+#: gnokii/gnokii.c:1828
 #, c-format
 msgid "Sending caller line identification logo.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1805
+#: gnokii/gnokii.c:1829
 #, c-format
 msgid "Sending Multipart Message: Picture Message.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1806
+#: gnokii/gnokii.c:1830
 #, c-format
 msgid "Sending EMS-compliant Picture Message.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1807
+#: gnokii/gnokii.c:1831
 #, c-format
 msgid "Sending EMS-compliant Animation.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1808
+#: gnokii/gnokii.c:1832
 #, c-format
 msgid "You should specify what kind of logo to send!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1822
+#: gnokii/gnokii.c:1846
 #, c-format
 msgid "Cannot send logo: specified and loaded bitmap type differ!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1876
+#: gnokii/gnokii.c:1900
 #, c-format
 msgid "Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "
 msgstr ""
 
-#: gnokii/gnokii.c:1878
+#: gnokii/gnokii.c:1902
 msgid "O"
 msgstr ""
 
-#: gnokii/gnokii.c:1878
+#: gnokii/gnokii.c:1902
 msgid "o"
 msgstr ""
 
-#: gnokii/gnokii.c:1879
+#: gnokii/gnokii.c:1903
 msgid "N"
 msgstr ""
 
-#: gnokii/gnokii.c:1879
+#: gnokii/gnokii.c:1903
 msgid "n"
 msgstr ""
 
-#: gnokii/gnokii.c:1880
+#: gnokii/gnokii.c:1904
 msgid "S"
 msgstr ""
 
-#: gnokii/gnokii.c:1880
+#: gnokii/gnokii.c:1904
 msgid "s"
 msgstr ""
 
-#: gnokii/gnokii.c:1884
+#: gnokii/gnokii.c:1908
 #, c-format
 msgid "Enter name of new file: "
 msgstr ""
 
-#: gnokii/gnokii.c:1894
+#: gnokii/gnokii.c:1918
 #, c-format
 msgid "Failed to write file \"%s\"\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1930
+#: gnokii/gnokii.c:1955
 #, c-format
 msgid "Dealer welcome note "
 msgstr ""
 
-#: gnokii/gnokii.c:1931 gnokii/gnokii.c:1936
+#: gnokii/gnokii.c:1957 gnokii/gnokii.c:1964
 #, c-format
 msgid "currently set to \"%s\"\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1932 gnokii/gnokii.c:1937
+#: gnokii/gnokii.c:1959 gnokii/gnokii.c:1966
 #, c-format
 msgid "currently empty\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1935
+#: gnokii/gnokii.c:1962
 #, c-format
 msgid "Welcome note "
 msgstr ""
 
-#: gnokii/gnokii.c:1942
+#: gnokii/gnokii.c:1972
 #, c-format
 msgid "Operator logo for %s (%s) network got succesfully\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1947 gnokii/gnokii.c:1958 gnokii/gnokii.c:1973
-#: gnokii/gnokii.c:2056
+#: gnokii/gnokii.c:1977 gnokii/gnokii.c:1989 gnokii/gnokii.c:2004
+#: gnokii/gnokii.c:2088
 #, c-format
 msgid "Sorry, gnokii doesn't know %s network !\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1954
+#: gnokii/gnokii.c:1985
 #, c-format
 msgid "Startup logo got successfully\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1965 gnokii/gnokii.c:1982
+#: gnokii/gnokii.c:1996 gnokii/gnokii.c:2013
 #, c-format
 msgid "Your phone doesn't have logo uploaded !\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1967
+#: gnokii/gnokii.c:1998
 #, c-format
 msgid "Caller logo got successfully\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1968
+#: gnokii/gnokii.c:1999
 #, c-format
 msgid "Caller group name: %s, ringing tone: %s (%d)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1979
+#: gnokii/gnokii.c:2010
 #, c-format
 msgid "Unknown bitmap type.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:1992
+#: gnokii/gnokii.c:2024
 #, c-format
 msgid "What kind of logo do you want to get ?\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2010
+#: gnokii/gnokii.c:2042
 #, c-format
 msgid "Error while reading file \"%s\": %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2084
+#: gnokii/gnokii.c:2116
 #, c-format
 msgid "What kind of logo do you want to set ?\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2101
+#: gnokii/gnokii.c:2133
 #, c-format
 msgid "Error setting"
 msgstr ""
 
-#: gnokii/gnokii.c:2102
+#: gnokii/gnokii.c:2134
 #, c-format
 msgid " dealer"
 msgstr ""
 
-#: gnokii/gnokii.c:2103
+#: gnokii/gnokii.c:2135
 #, c-format
 msgid " welcome note - "
 msgstr ""
 
-#: gnokii/gnokii.c:2123
+#: gnokii/gnokii.c:2155
 #, c-format
 msgid "SIM card and PIN is required\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2129
+#: gnokii/gnokii.c:2161
 #, c-format
 msgid "too long, truncated to \"%s\" (length %i)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2137
+#: gnokii/gnokii.c:2169
 #, c-format
 msgid "Error setting startup logo - SIM card and PIN is required\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2138
+#: gnokii/gnokii.c:2170
 #, c-format
 msgid "i: %i, %2x %2x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2149
+#: gnokii/gnokii.c:2181
 #, c-format
 msgid "Done.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2164
+#: gnokii/gnokii.c:2196
 #, c-format
 msgid "Could not load bitmap: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2220
+#: gnokii/gnokii.c:2252
 #, c-format
 msgid "Todo: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2221
+#: gnokii/gnokii.c:2253
 #, c-format
 msgid "Priority: "
 msgstr ""
 
-#: gnokii/gnokii.c:2224
+#: gnokii/gnokii.c:2256
 #, c-format
 msgid "low\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2227
+#: gnokii/gnokii.c:2259
 #, c-format
 msgid "medium\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2230
+#: gnokii/gnokii.c:2262
 #, c-format
 msgid "high\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2233 gnokii/gnokii.c:3766 gnokii/gnokii.c:3789
-#: gnokii/gnokii.c:3802 gnokii/gnokii.c:3814 gnokii/gnokii.c:3829
-#: gnokii/gnokii.c:3841 gnokii/gnokii.c:3858 gnokii/gnokii.c:3870
-#: gnokii/gnokii.c:3882
+#: gnokii/gnokii.c:2265 gnokii/gnokii.c:3757 gnokii/gnokii.c:3780
+#: gnokii/gnokii.c:3793 gnokii/gnokii.c:3805 gnokii/gnokii.c:3820
+#: gnokii/gnokii.c:3832 gnokii/gnokii.c:3849 gnokii/gnokii.c:3861
+#: gnokii/gnokii.c:3873
 #, c-format
 msgid "unknown\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2239
+#: gnokii/gnokii.c:2271
 #, c-format
 msgid "The ToDo note could not be read: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2262 gnokii/gnokii.c:2460
+#: gnokii/gnokii.c:2294 gnokii/gnokii.c:2492 gnokii/gnokii.c:5065
 #, c-format
 msgid "Cannot read file %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2283 gnokii/gnokii.c:2481
+#: gnokii/gnokii.c:2315 gnokii/gnokii.c:2513
 #, c-format
 msgid "Failed to load vCalendar file: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2290 gnokii/gnokii.c:2488 gnokii/gnokii.c:4025
+#: gnokii/gnokii.c:2322 gnokii/gnokii.c:2520 gnokii/gnokii.c:4016
 #, c-format
 msgid "Succesfully written!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2291
+#: gnokii/gnokii.c:2323
 #, c-format
 msgid "Priority %d. %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2293
+#: gnokii/gnokii.c:2325
 #, c-format
 msgid "Failed to write todo note: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2307
+#: gnokii/gnokii.c:2339
 #, c-format
 msgid "Succesfully deleted all ToDo notes!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2309
+#: gnokii/gnokii.c:2341
 #, c-format
 msgid "Failed to delete todo note: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2366
+#: gnokii/gnokii.c:2398
 #, c-format
 msgid "   Type of the note: "
 msgstr ""
 
-#: gnokii/gnokii.c:2370
+#: gnokii/gnokii.c:2402
 #, c-format
 msgid "Reminder\n"
 msgstr "提醒\n"
 
-#: gnokii/gnokii.c:2373
+#: gnokii/gnokii.c:2405
 #, c-format
 msgid "Call\n"
 msgstr "呼叫\n"
 
-#: gnokii/gnokii.c:2376
+#: gnokii/gnokii.c:2408
 #, c-format
 msgid "Meeting\n"
 msgstr "会议\n"
 
-#: gnokii/gnokii.c:2379
+#: gnokii/gnokii.c:2411
 #, c-format
 msgid "Birthday\n"
 msgstr "生日\n"
 
-#: gnokii/gnokii.c:2386
+#: gnokii/gnokii.c:2418
 #, c-format
 msgid "   Date: %d-%02d-%02d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2390
+#: gnokii/gnokii.c:2422
 #, c-format
 msgid "   Time: %02d:%02d:%02d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2395
+#: gnokii/gnokii.c:2427
 #, c-format
 msgid "   Alarm date: %d-%02d-%02d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2400
+#: gnokii/gnokii.c:2432
 #, c-format
 msgid "   Alarm time: %02d:%02d:%02d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2410
+#: gnokii/gnokii.c:2442
 #, c-format
 msgid "   Repeat: every day\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2413
+#: gnokii/gnokii.c:2445
 #, c-format
 msgid "   Repeat: every week\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2416
+#: gnokii/gnokii.c:2448
 #, c-format
 msgid "   Repeat: every 2 weeks\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2419
+#: gnokii/gnokii.c:2451
 #, c-format
 msgid "   Repeat: every month\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2422
+#: gnokii/gnokii.c:2454
 #, c-format
 msgid "   Repeat: every year\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2425
+#: gnokii/gnokii.c:2457
 #, c-format
 msgid "   Repeat: %d hours\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2429
+#: gnokii/gnokii.c:2461
 #, c-format
 msgid "   Text: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2432
+#: gnokii/gnokii.c:2464
 #, c-format
 msgid "   Phone: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2436
+#: gnokii/gnokii.c:2468
 #, c-format
 msgid "The calendar note can not be read: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2490
+#: gnokii/gnokii.c:2522
 #, c-format
 msgid "Failed to write calendar note: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2524
+#: gnokii/gnokii.c:2556
 #, c-format
 msgid "Calendar note deleted.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2526
+#: gnokii/gnokii.c:2558
 #, c-format
 msgid "The calendar note cannot be deleted: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2594
+#: gnokii/gnokii.c:2626
 #, c-format
 msgid "Date: %4d/%02d/%02d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2595
+#: gnokii/gnokii.c:2627
 #, c-format
 msgid "Time: %02d:%02d:%02d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2644
+#: gnokii/gnokii.c:2676
 #, c-format
 msgid "Alarm: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2645
+#: gnokii/gnokii.c:2677
 #, c-format
 msgid "Time: %02d:%02d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2687
+#: gnokii/gnokii.c:2719
 #, c-format
 msgid "CALL%d: IDLE\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2716
+#: gnokii/gnokii.c:2748
 #, c-format
 msgid "CALL%d: %s %s(%s) (callid: %d, duration: %d sec)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2757
+#: gnokii/gnokii.c:2789
 #, c-format
 msgid "Entering monitor mode...\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2786
+#: gnokii/gnokii.c:2818
 #, c-format
 msgid "RFLevel: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2789
+#: gnokii/gnokii.c:2821
 #, c-format
 msgid "Battery: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2792
+#: gnokii/gnokii.c:2824
 #, c-format
 msgid "Power Source: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2792
+#: gnokii/gnokii.c:2824
 msgid "AC/DC"
 msgstr ""
 
-#: gnokii/gnokii.c:2792
-msgid "battery"
-msgstr ""
-
-#: gnokii/gnokii.c:2796
-#, c-format
-msgid "SIM: Used %d, Free %d\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2800
-#, c-format
-msgid "Phone: Used %d, Free %d\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2804
-#, c-format
-msgid "DC: Used %d, Free %d\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2808
-#, c-format
-msgid "EN: Used %d, Free %d\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2812
-#, c-format
-msgid "FD: Used %d, Free %d\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2816
-#, c-format
-msgid "LD: Used %d, Free %d\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2820
-#, c-format
-msgid "MC: Used %d, Free %d\n"
-msgstr ""
-
 #: gnokii/gnokii.c:2824
-#, c-format
-msgid "ON: Used %d, Free %d\n"
+msgid "battery"
 msgstr ""
 
 #: gnokii/gnokii.c:2828
 #, c-format
+msgid "SIM: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2832
+#, c-format
+msgid "Phone: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2836
+#, c-format
+msgid "DC: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2840
+#, c-format
+msgid "EN: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2844
+#, c-format
+msgid "FD: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2848
+#, c-format
+msgid "LD: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2852
+#, c-format
+msgid "MC: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2856
+#, c-format
+msgid "ON: Used %d, Free %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2860
+#, c-format
 msgid "RC: Used %d, Free %d\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2831
-#, c-format
-msgid "SMS Messages: Unread %d, Number %d\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2834
-#, c-format
-msgid "Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2841
-#, c-format
-msgid "Cell broadcast received on channel %d: %s\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2850
-#, c-format
-msgid "Leaving monitor mode...\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2857
-#, c-format
-msgid "Call in progress: %-3s\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2858 gnokii/gnokii.c:2860 gnokii/gnokii.c:2862
-#: gnokii/gnokii.c:2864 gnokii/gnokii.c:2866 gnokii/gnokii.c:2868
-#: gnokii/gnokii.c:2870 gnokii/gnokii.c:2872
-msgid "on"
-msgstr ""
-
-#: gnokii/gnokii.c:2858 gnokii/gnokii.c:2860 gnokii/gnokii.c:2862
-#: gnokii/gnokii.c:2864 gnokii/gnokii.c:2866 gnokii/gnokii.c:2868
-#: gnokii/gnokii.c:2870 gnokii/gnokii.c:2872
-msgid "off"
-msgstr ""
-
-#: gnokii/gnokii.c:2859
-#, c-format
-msgid "Unknown: %-3s\n"
-msgstr ""
-
-#: gnokii/gnokii.c:2861
-#, c-format
-msgid "Unread SMS: %-3s\n"
 msgstr ""
 
 #: gnokii/gnokii.c:2863
 #, c-format
+msgid "SMS Messages: Unread %d, Number %d\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2866
+#, c-format
+msgid "Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2873
+#, c-format
+msgid "Cell broadcast received on channel %d: %s\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2882
+#, c-format
+msgid "Leaving monitor mode...\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2889
+#, c-format
+msgid "Call in progress: %-3s\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2890 gnokii/gnokii.c:2892 gnokii/gnokii.c:2894
+#: gnokii/gnokii.c:2896 gnokii/gnokii.c:2898 gnokii/gnokii.c:2900
+#: gnokii/gnokii.c:2902 gnokii/gnokii.c:2904
+msgid "on"
+msgstr ""
+
+#: gnokii/gnokii.c:2890 gnokii/gnokii.c:2892 gnokii/gnokii.c:2894
+#: gnokii/gnokii.c:2896 gnokii/gnokii.c:2898 gnokii/gnokii.c:2900
+#: gnokii/gnokii.c:2902 gnokii/gnokii.c:2904
+msgid "off"
+msgstr ""
+
+#: gnokii/gnokii.c:2891
+#, c-format
+msgid "Unknown: %-3s\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2893
+#, c-format
+msgid "Unread SMS: %-3s\n"
+msgstr ""
+
+#: gnokii/gnokii.c:2895
+#, c-format
 msgid "Voice call: %-3s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2865
+#: gnokii/gnokii.c:2897
 #, c-format
 msgid "Fax call active: %-3s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2867
+#: gnokii/gnokii.c:2899
 #, c-format
 msgid "Data call active: %-3s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2869
+#: gnokii/gnokii.c:2901
 #, c-format
 msgid "Keyboard lock: %-3s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2871
+#: gnokii/gnokii.c:2903
 #, c-format
 msgid "SMS storage full: %-3s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2973
+#: gnokii/gnokii.c:3005
 #, c-format
 msgid "Entered display monitoring mode...\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2990 gnokii/gnokii.c:4809
+#: gnokii/gnokii.c:3022 gnokii/gnokii.c:4800
 #, c-format
 msgid "Shutting down\n"
 msgstr ""
 
-#: gnokii/gnokii.c:2992
+#: gnokii/gnokii.c:3024
 #, c-format
 msgid "Leaving display monitor mode...\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3071
+#: gnokii/gnokii.c:3103
 #, c-format
 msgid "Starting profile number is greater than stop\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3076
+#: gnokii/gnokii.c:3108
 #, c-format
 msgid "Profile number must be value from 0 to %d!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3081
+#: gnokii/gnokii.c:3113
 #, c-format
 msgid "This phone supports only %d profiles!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3098 gnokii/gnokii.c:3191
+#: gnokii/gnokii.c:3130 gnokii/gnokii.c:3223
 #, c-format
 msgid "Cannot get profile %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3111
+#: gnokii/gnokii.c:3143
 #, c-format
 msgid " (name defined)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3112
+#: gnokii/gnokii.c:3144
 #, c-format
 msgid "Incoming call alert: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3113
+#: gnokii/gnokii.c:3145
 #, c-format
 msgid "Ringing tone: %s (%d)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3114
+#: gnokii/gnokii.c:3146
 #, c-format
 msgid "Ringing volume: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3115
+#: gnokii/gnokii.c:3147
 #, c-format
 msgid "Message alert tone: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3116
+#: gnokii/gnokii.c:3148
 #, c-format
 msgid "Keypad tones: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3117
+#: gnokii/gnokii.c:3149
 #, c-format
 msgid "Warning and game tones: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3120
+#: gnokii/gnokii.c:3152
 #, c-format
 msgid "Lights: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3120 gnokii/gnokii.c:3127
+#: gnokii/gnokii.c:3152 gnokii/gnokii.c:3159
 msgid "On"
 msgstr ""
 
-#: gnokii/gnokii.c:3120
+#: gnokii/gnokii.c:3152
 msgid "Automatic"
 msgstr ""
 
-#: gnokii/gnokii.c:3121
+#: gnokii/gnokii.c:3153
 #, c-format
 msgid "Vibration: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3124
+#: gnokii/gnokii.c:3156
 #, c-format
 msgid "Caller groups: 0x%02x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3127
+#: gnokii/gnokii.c:3159
 #, c-format
 msgid "Automatic answer: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3127
+#: gnokii/gnokii.c:3159
 msgid "Off"
 msgstr "关"
 
-#: gnokii/gnokii.c:3165
+#: gnokii/gnokii.c:3197
 #, c-format
 msgid "Cannot set profile: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3185
+#: gnokii/gnokii.c:3217
 #, c-format
 msgid "Cannot get active profile: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3193
+#: gnokii/gnokii.c:3225
 #, c-format
 msgid "Active profile: %d (%s)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3211
+#: gnokii/gnokii.c:3243
 #, c-format
 msgid "Cannot set active profile to %d: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3338
+#: gnokii/gnokii.c:3329
 #, c-format
 msgid ""
 "%d. Name: %s\n"
@@ -1812,590 +1831,645 @@ msgid ""
 "Group id: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3342
+#: gnokii/gnokii.c:3333
 #, c-format
 msgid "Email address: "
 msgstr "电子邮件地址："
 
-#: gnokii/gnokii.c:3345
+#: gnokii/gnokii.c:3336
 #, c-format
 msgid "Address: "
 msgstr "地址："
 
-#: gnokii/gnokii.c:3348
+#: gnokii/gnokii.c:3339
 #, c-format
 msgid "Notes: "
 msgstr "备忘："
 
-#: gnokii/gnokii.c:3353
+#: gnokii/gnokii.c:3344
 #, c-format
 msgid "Home number: "
 msgstr "宅电号码："
 
-#: gnokii/gnokii.c:3356
+#: gnokii/gnokii.c:3347
 #, c-format
 msgid "Cellular number: "
 msgstr "手机号码："
 
-#: gnokii/gnokii.c:3359
+#: gnokii/gnokii.c:3350
 #, c-format
 msgid "Fax number: "
 msgstr "传真号码"
 
-#: gnokii/gnokii.c:3362
+#: gnokii/gnokii.c:3353
 #, c-format
 msgid "Business number: "
 msgstr "办公号码："
 
-#: gnokii/gnokii.c:3365
+#: gnokii/gnokii.c:3356
 #, c-format
 msgid "Preferred number: "
 msgstr "首选号码："
 
-#: gnokii/gnokii.c:3368 gnokii/gnokii.c:3378
+#: gnokii/gnokii.c:3359 gnokii/gnokii.c:3369
 #, c-format
 msgid "Unknown (%d): "
 msgstr "未知(%d)："
 
-#: gnokii/gnokii.c:3373
+#: gnokii/gnokii.c:3364
 #, c-format
 msgid "WWW address: "
 msgstr "WWW 地址："
 
-#: gnokii/gnokii.c:3385
+#: gnokii/gnokii.c:3376
 #, c-format
 msgid "Date: %02u.%02u.%04u %02u:%02u:%02u\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3390
+#: gnokii/gnokii.c:3381
 #, c-format
 msgid "Empty memory location. Skipping.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3393
+#: gnokii/gnokii.c:3384
 #, c-format
 msgid "Error reading from the location %d in memory %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3542
+#: gnokii/gnokii.c:3533
 #, c-format
 msgid "Location busy. "
 msgstr "位置忙。"
 
-#: gnokii/gnokii.c:3559
+#: gnokii/gnokii.c:3550
 #, c-format
 msgid "Error (%s)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3571
+#: gnokii/gnokii.c:3562
 #, c-format
 msgid "Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3574
+#: gnokii/gnokii.c:3565
 #, c-format
 msgid "Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3617
+#: gnokii/gnokii.c:3608
 #, c-format
 msgid "Phonebook entry removed: memory type: %s, loc: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3624
+#: gnokii/gnokii.c:3615
 #, c-format
 msgid "Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3648 gnokii/gnokii.c:3754
+#: gnokii/gnokii.c:3639 gnokii/gnokii.c:3745
 #, c-format
 msgid "WAP bookmark nr. %d:\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3649 gnokii/gnokii.c:3755
+#: gnokii/gnokii.c:3640 gnokii/gnokii.c:3746
 #, c-format
 msgid "Name: %s\n"
 msgstr "名称：%s\n"
 
-#: gnokii/gnokii.c:3650
+#: gnokii/gnokii.c:3641
 #, c-format
 msgid "URL: %s\n"
 msgstr "URL：%s\n"
 
-#: gnokii/gnokii.c:3681
+#: gnokii/gnokii.c:3672
 #, c-format
 msgid "WAP bookmark nr. %d succesfully written!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3707
+#: gnokii/gnokii.c:3698
 #, c-format
 msgid "WAP bookmark nr. %d deleted!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3756
+#: gnokii/gnokii.c:3747
 #, c-format
 msgid "Home: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3757
+#: gnokii/gnokii.c:3748
 #, c-format
 msgid "Session mode: "
 msgstr ""
 
-#: gnokii/gnokii.c:3760
+#: gnokii/gnokii.c:3751
 #, c-format
 msgid "temporary\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3763
+#: gnokii/gnokii.c:3754
 #, c-format
 msgid "permanent\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3769
+#: gnokii/gnokii.c:3760
 #, c-format
 msgid "Connection security: "
 msgstr "连接安全性："
 
-#: gnokii/gnokii.c:3771
+#: gnokii/gnokii.c:3762
 #, c-format
 msgid "yes\n"
 msgstr "是\n"
 
-#: gnokii/gnokii.c:3773
+#: gnokii/gnokii.c:3764
 #, c-format
 msgid "no\n"
 msgstr "否\n"
 
-#: gnokii/gnokii.c:3774
+#: gnokii/gnokii.c:3765
 #, c-format
 msgid "Data bearer: "
 msgstr ""
 
-#: gnokii/gnokii.c:3777 gnokii/gnokii.c:3792
+#: gnokii/gnokii.c:3768 gnokii/gnokii.c:3783
 #, c-format
 msgid "GSM data\n"
 msgstr "GSM 数据\n"
 
-#: gnokii/gnokii.c:3780 gnokii/gnokii.c:3848
+#: gnokii/gnokii.c:3771 gnokii/gnokii.c:3839
 #, c-format
 msgid "GPRS\n"
 msgstr "GPRS\n"
 
-#: gnokii/gnokii.c:3783 gnokii/gnokii.c:3889
+#: gnokii/gnokii.c:3774 gnokii/gnokii.c:3880
 #, c-format
 msgid "SMS\n"
 msgstr "SMS\n"
 
-#: gnokii/gnokii.c:3786
+#: gnokii/gnokii.c:3777
 #, c-format
 msgid "USSD\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3793 gnokii/gnokii.c:3861
+#: gnokii/gnokii.c:3784 gnokii/gnokii.c:3852
 #, c-format
 msgid "   Authentication type: "
 msgstr ""
 
-#: gnokii/gnokii.c:3796 gnokii/gnokii.c:3864
+#: gnokii/gnokii.c:3787 gnokii/gnokii.c:3855
 #, c-format
 msgid "normal\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3799 gnokii/gnokii.c:3867
+#: gnokii/gnokii.c:3790 gnokii/gnokii.c:3858
 #, c-format
 msgid "secure\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3805
+#: gnokii/gnokii.c:3796
 #, c-format
 msgid "   Data call type: "
 msgstr ""
 
-#: gnokii/gnokii.c:3808
+#: gnokii/gnokii.c:3799
 #, c-format
 msgid "analogue\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3811
+#: gnokii/gnokii.c:3802
 #, c-format
 msgid "ISDN\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3817
+#: gnokii/gnokii.c:3808
 #, c-format
 msgid "   Data call speed: "
 msgstr ""
 
-#: gnokii/gnokii.c:3820 gnokii/gnokii.c:3838 gnokii/gnokii.c:3879
+#: gnokii/gnokii.c:3811 gnokii/gnokii.c:3829 gnokii/gnokii.c:3870
 #, c-format
 msgid "automatic\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3823
+#: gnokii/gnokii.c:3814
 #, c-format
 msgid "9600\n"
 msgstr "9600\n"
 
-#: gnokii/gnokii.c:3826
+#: gnokii/gnokii.c:3817
 #, c-format
 msgid "14400\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3832 gnokii/gnokii.c:3873
+#: gnokii/gnokii.c:3823 gnokii/gnokii.c:3864
 #, c-format
 msgid "   Login type: "
 msgstr ""
 
-#: gnokii/gnokii.c:3835 gnokii/gnokii.c:3876
+#: gnokii/gnokii.c:3826 gnokii/gnokii.c:3867
 #, c-format
 msgid "manual\n"
 msgstr "手动\n"
 
-#: gnokii/gnokii.c:3844 gnokii/gnokii.c:3886
+#: gnokii/gnokii.c:3835 gnokii/gnokii.c:3877
 #, c-format
 msgid "   IP: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3845
+#: gnokii/gnokii.c:3836
 #, c-format
 msgid "   Number: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3846 gnokii/gnokii.c:3887
+#: gnokii/gnokii.c:3837 gnokii/gnokii.c:3878
 #, c-format
 msgid "   Username: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3847 gnokii/gnokii.c:3888
+#: gnokii/gnokii.c:3838 gnokii/gnokii.c:3879
 #, c-format
 msgid "   Password: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3849
+#: gnokii/gnokii.c:3840
 #, c-format
 msgid "   connection: "
 msgstr ""
 
-#: gnokii/gnokii.c:3852
+#: gnokii/gnokii.c:3843
 #, c-format
 msgid "when needed\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3855
+#: gnokii/gnokii.c:3846
 #, c-format
 msgid "always\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3885
+#: gnokii/gnokii.c:3876
 #, c-format
 msgid "   Access point: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3890
+#: gnokii/gnokii.c:3881
 #, c-format
 msgid "   Service number: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3891
+#: gnokii/gnokii.c:3882
 #, c-format
 msgid "   Server number: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3940
+#: gnokii/gnokii.c:3931
 #, c-format
 msgid "Cannot write WAP setting: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3961
+#: gnokii/gnokii.c:3952
 #, c-format
 msgid "WAP setting nr. %d activated!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:3987
+#: gnokii/gnokii.c:3978
 #, c-format
 msgid "SpeedDial nr. %d: %d:%d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4017
+#: gnokii/gnokii.c:4008
 #, c-format
 msgid "Unknown memory type %s!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4090 gnokii/gnokii.c:4091 gnokii/gnokii.c:4092
-#: gnokii/gnokii.c:4093
+#: gnokii/gnokii.c:4081 gnokii/gnokii.c:4082 gnokii/gnokii.c:4083
+#: gnokii/gnokii.c:4084
 msgid "(unknown)"
 msgstr "(未知)"
 
-#: gnokii/gnokii.c:4097
+#: gnokii/gnokii.c:4088
 #, c-format
 msgid "IMEI         : %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4098
+#: gnokii/gnokii.c:4089
 #, c-format
 msgid "Manufacturer : %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4099
+#: gnokii/gnokii.c:4090
 #, c-format
 msgid "Model        : %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4100
+#: gnokii/gnokii.c:4091
 #, c-format
 msgid "Revision     : %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4126
+#: gnokii/gnokii.c:4117
 #, c-format
 msgid "What kind of reset do you want??\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4145
+#: gnokii/gnokii.c:4136
 #, c-format
 msgid "GSM/FBUS init failed! (Unknown model?). Quitting.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4166 gnokii/gnokii.c:4334 gnokii/gnokii.c:4347
+#: gnokii/gnokii.c:4157 gnokii/gnokii.c:4325 gnokii/gnokii.c:4338
 #, c-format
 msgid "Failed to load ringtone.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4257
+#: gnokii/gnokii.c:4248
 #, c-format
 msgid "Getting ringtone %d failed: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4260
+#: gnokii/gnokii.c:4251
 #, c-format
 msgid "Getting ringtone %d (\"%s\") succeeded!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4266
+#: gnokii/gnokii.c:4257
 #, c-format
 msgid "Failed to save ringtone.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4273 gnokii/gnokii.c:4466
+#: gnokii/gnokii.c:4264 gnokii/gnokii.c:4457
 #, c-format
 msgid "Failed to save ringtone: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4358
+#: gnokii/gnokii.c:4349
 #, c-format
 msgid "Send failed: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4408 gnokii/gnokii.c:4462
+#: gnokii/gnokii.c:4399 gnokii/gnokii.c:4453
 #, c-format
 msgid "Failed to load ringtone: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4440
+#: gnokii/gnokii.c:4431
 #, c-format
 msgid "Play succeeded!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4442
+#: gnokii/gnokii.c:4433
 #, c-format
 msgid "Play failed: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4470
+#: gnokii/gnokii.c:4461
 #, c-format
 msgid "%d note(s) converted.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4482
+#: gnokii/gnokii.c:4473
 #, c-format
 msgid "Failed to get the list of ringtones\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4528
+#: gnokii/gnokii.c:4519
 #, c-format
 msgid "Ringtone %d deleted\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4530
+#: gnokii/gnokii.c:4521
 #, c-format
 msgid "Failed to delete ringtone %d: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4543
+#: gnokii/gnokii.c:4534
 #, c-format
 msgid "Failed to press key: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4602
+#: gnokii/gnokii.c:4593
 #, c-format
 msgid "Error entering char: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4705
+#: gnokii/gnokii.c:4696
 #, c-format
 msgid "Divert type: "
 msgstr ""
 
-#: gnokii/gnokii.c:4707 gnokii/gnokii.c:4716
+#: gnokii/gnokii.c:4698 gnokii/gnokii.c:4707
 #, c-format
 msgid "all\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4708
+#: gnokii/gnokii.c:4699
 #, c-format
 msgid "busy\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4709
+#: gnokii/gnokii.c:4700
 #, c-format
 msgid "noans\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4710
+#: gnokii/gnokii.c:4701
 #, c-format
 msgid "outofreach\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4711
+#: gnokii/gnokii.c:4702
 #, c-format
 msgid "notavail\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4712 gnokii/gnokii.c:4720
+#: gnokii/gnokii.c:4703 gnokii/gnokii.c:4711
 #, c-format
 msgid "unknown(0x%02x)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4714
+#: gnokii/gnokii.c:4705
 #, c-format
 msgid "Call type: "
 msgstr ""
 
-#: gnokii/gnokii.c:4717
+#: gnokii/gnokii.c:4708
 #, c-format
 msgid "voice\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4718
+#: gnokii/gnokii.c:4709
 #, c-format
 msgid "fax\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4719
+#: gnokii/gnokii.c:4710
 #, c-format
 msgid "data\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4723
+#: gnokii/gnokii.c:4714
 #, c-format
 msgid "Number: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4724
+#: gnokii/gnokii.c:4715
 #, c-format
 msgid "Timeout: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4726
+#: gnokii/gnokii.c:4717
 #, c-format
 msgid "Divert isn't active.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4749
+#: gnokii/gnokii.c:4740
 #, c-format
 msgid "SMS received from number: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4758
+#: gnokii/gnokii.c:4749
 #, c-format
 msgid "Got message %d: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4765
+#: gnokii/gnokii.c:4756
 #, c-format
 msgid "### Exists?!\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4770
+#: gnokii/gnokii.c:4761
 #, c-format
 msgid "### Cannot create file %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4801
+#: gnokii/gnokii.c:4792
 #, c-format
 msgid "Entered sms reader mode...\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4811
+#: gnokii/gnokii.c:4802
 #, c-format
 msgid "Exiting sms reader mode...\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4832
+#: gnokii/gnokii.c:4823
 #, c-format
 msgid "Getting security code... \n"
 msgstr ""
 
-#: gnokii/gnokii.c:4834
+#: gnokii/gnokii.c:4825
 #, c-format
 msgid "Security code is: %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4869
+#: gnokii/gnokii.c:4860
 #, c-format
 msgid "Network      : %s (%s)\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4872
+#: gnokii/gnokii.c:4863
 #, c-format
 msgid "Network code : %s\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4873
+#: gnokii/gnokii.c:4864
 #, c-format
 msgid "LAC          : %04x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4874
+#: gnokii/gnokii.c:4865
 #, c-format
 msgid "Cell id      : %04x\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4894
+#: gnokii/gnokii.c:4885
 #, c-format
 msgid "%7s : %10s, %7s, %6s, counter %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:4936
+#: gnokii/gnokii.c:4909 gnokii/gnokii.c:4933 gnokii/gnokii.c:5015
+#, c-format
+msgid "Failed to get info for %s: %s\n"
+msgstr ""
+
+#: gnokii/gnokii.c:4911
+#, c-format
+msgid "Filelist for path %s:\n"
+msgstr ""
+
+#: gnokii/gnokii.c:4913
+#, fuzzy, c-format
+msgid "  %s\n"
+msgstr "URL：%s\n"
+
+#: gnokii/gnokii.c:4935
+#, c-format
+msgid "Fileid for file %s is %02x %02x %02x %02x %02x %02x\n"
+msgstr ""
+
+#: gnokii/gnokii.c:4953
+#, c-format
+msgid "Failed to delete %s: %s\n"
+msgstr ""
+
+#: gnokii/gnokii.c:4955
+#, fuzzy, c-format
+msgid "Deleted: %s\n"
+msgstr "删除"
+
+#: gnokii/gnokii.c:4977 gnokii/gnokii.c:5023
+#, c-format
+msgid "Failed to get file %s: %s\n"
+msgstr ""
+
+#: gnokii/gnokii.c:4981
+#, c-format
+msgid "Got file %s.  Save to [%s]: "
+msgstr ""
+
+#: gnokii/gnokii.c:4989 gnokii/gnokii.c:5028 gnokii/gnokii.c:5058
+#, fuzzy, c-format
+msgid "Cannot open file %s\n"
+msgstr "无法锁定设备。\n"
+
+#: gnokii/gnokii.c:5025
+#, c-format
+msgid "Got file %s.\n"
+msgstr ""
+
+#: gnokii/gnokii.c:5070
+#, c-format
+msgid "Failed to put file to %s: %s\n"
+msgstr ""
+
+#: gnokii/gnokii.c:5111
 #, c-format
 msgid "HOME variable missing\n"
 msgstr ""
 
-#: gnokii/gnokii.c:5239
+#: gnokii/gnokii.c:5431
 #, c-format
 msgid "WARNING: cannot open logfile, logs will be directed to stderr\n"
 msgstr ""
 
-#: gnokii/gnokii.c:5262
+#: gnokii/gnokii.c:5454
 #, c-format
 msgid "Use '%s --help' for usage information.\n"
 msgstr ""
 
-#: gnokii/gnokii.c:5512
+#: gnokii/gnokii.c:5722
 #, c-format
 msgid "Unknown option: %d\n"
 msgstr ""
 
-#: gnokii/gnokii.c:5519
+#: gnokii/gnokii.c:5729
 #, c-format
 msgid "Wrong number of arguments\n"
 msgstr ""
 
 #: smsd/lowlevel.c:101 smsd/lowlevel.c:181 smsd/lowlevel.c:183
-#: xgnokii/xgnokii_lowlevel.c:165 xgnokii/xgnokii_lowlevel.c:251
-#: xgnokii/xgnokii_lowlevel.c:253 xgnokii/xgnokii_lowlevel.c:254
-#: xgnokii/xgnokii_sms.c:269 xgnokii/xgnokii_sms.c:349
+#: xgnokii/xgnokii_lowlevel.c:168 xgnokii/xgnokii_lowlevel.c:254
+#: xgnokii/xgnokii_lowlevel.c:256 xgnokii/xgnokii_lowlevel.c:257
+#: xgnokii/xgnokii_sms.c:273 xgnokii/xgnokii_sms.c:353
 msgid "unknown"
 msgstr "未知"
 
@@ -2410,175 +2484,175 @@ msgstr ""
 msgid "GSM/FBUS init failed! (Unknown model ?). Quitting.\n"
 msgstr ""
 
-#: smsd/lowlevel.c:398
+#: smsd/lowlevel.c:402
 #, c-format
 msgid ""
 "GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\n"
 "Entering dumb mode."
 msgstr ""
 
-#: smsd/lowlevel.c:424
+#: smsd/lowlevel.c:432
 #, c-format
 msgid ""
 "GN_OP_GetSMSStatus at line %d in file %s returns error %d\n"
 "Entering dumb mode."
 msgstr ""
 
-#: smsd/lowlevel.c:439 xgnokii/xgnokii_lowlevel.c:1326
+#: smsd/lowlevel.c:447 xgnokii/xgnokii_lowlevel.c:1329
 #, c-format
 msgid "Event %d failed with return code %d!\n"
 msgstr ""
 
-#: xgnokii/xgnokii.c:223
+#: xgnokii/xgnokii.c:227
 msgid "Reading caller groups names ..."
 msgstr ""
 
-#: xgnokii/xgnokii.c:232
+#: xgnokii/xgnokii.c:236
 msgid "No group"
 msgstr "无分组"
 
-#: xgnokii/xgnokii.c:353
+#: xgnokii/xgnokii.c:357
 msgid "Short Message received"
 msgstr "接收到了短消息"
 
-#: xgnokii/xgnokii.c:359
+#: xgnokii/xgnokii.c:363
 msgid "Working ..."
 msgstr "正在工作..."
 
-#: xgnokii/xgnokii.c:376
+#: xgnokii/xgnokii.c:380
 msgid "Call in progress"
 msgstr "呼叫进行中"
 
-#: xgnokii/xgnokii.c:389
+#: xgnokii/xgnokii.c:393
 msgid "Hide"
 msgstr "隐藏"
 
-#: xgnokii/xgnokii.c:477
+#: xgnokii/xgnokii.c:481
 #, c-format
 msgid ""
 "Outgoing call in progress:\n"
 "Time: %s"
 msgstr ""
 
-#: xgnokii/xgnokii.c:479
+#: xgnokii/xgnokii.c:483
 #, c-format
 msgid ""
 "Incomming call from: %s\n"
 "Time: %s"
 msgstr ""
 
-#: xgnokii/xgnokii.c:540 xgnokii/xgnokii.c:1428
+#: xgnokii/xgnokii.c:544 xgnokii/xgnokii.c:1432
 msgid "Paging"
 msgstr "寻呼"
 
-#: xgnokii/xgnokii.c:549 xgnokii/xgnokii.c:1434
+#: xgnokii/xgnokii.c:553 xgnokii/xgnokii.c:1438
 msgid "E-Mail"
 msgstr "电子邮件"
 
-#: xgnokii/xgnokii.c:561
+#: xgnokii/xgnokii.c:565
 msgid "Voice"
 msgstr "语音"
 
-#: xgnokii/xgnokii.c:571 xgnokii/xgnokii.c:1462
+#: xgnokii/xgnokii.c:575 xgnokii/xgnokii.c:1466
 msgid "1 h"
 msgstr "1小时"
 
-#: xgnokii/xgnokii.c:575 xgnokii/xgnokii.c:1468
+#: xgnokii/xgnokii.c:579 xgnokii/xgnokii.c:1472
 msgid "6 h"
 msgstr "6小时"
 
-#: xgnokii/xgnokii.c:579 xgnokii/xgnokii.c:595 xgnokii/xgnokii.c:1474
+#: xgnokii/xgnokii.c:583 xgnokii/xgnokii.c:599 xgnokii/xgnokii.c:1478
 msgid "24 h"
 msgstr "24小时"
 
-#: xgnokii/xgnokii.c:583 xgnokii/xgnokii.c:1480
+#: xgnokii/xgnokii.c:587 xgnokii/xgnokii.c:1484
 msgid "72 h"
 msgstr "72小时"
 
-#: xgnokii/xgnokii.c:591
+#: xgnokii/xgnokii.c:595
 msgid "Max. time"
 msgstr "最长时间"
 
-#: xgnokii/xgnokii.c:638
+#: xgnokii/xgnokii.c:642
 msgid "Reading SMS centers ..."
 msgstr "正在读取短消息中心..."
 
-#: xgnokii/xgnokii.c:889
+#: xgnokii/xgnokii.c:893
 msgid "SMS not supported!"
 msgstr "不支持短消息！"
 
-#: xgnokii/xgnokii.c:894
+#: xgnokii/xgnokii.c:898
 msgid "Calendar not supported!"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1085
+#: xgnokii/xgnokii.c:1089
 msgid "Error writing configuration file!"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1097 xgnokii/xgnokii_contacts.c:3332
+#: xgnokii/xgnokii.c:1101 xgnokii/xgnokii_contacts.c:3336
 msgid "Contacts"
 msgstr "联系人"
 
-#: xgnokii/xgnokii.c:1103 xgnokii/xgnokii.c:1848
+#: xgnokii/xgnokii.c:1107 xgnokii/xgnokii.c:1852
 msgid "SMS"
 msgstr "短消息"
 
-#: xgnokii/xgnokii.c:1108 xgnokii/xgnokii_calendar.c:1555
+#: xgnokii/xgnokii.c:1112 xgnokii/xgnokii_calendar.c:1557
 msgid "Calendar"
 msgstr "日历"
 
-#: xgnokii/xgnokii.c:1113 xgnokii/xgnokii_logos.c:1535
+#: xgnokii/xgnokii.c:1117 xgnokii/xgnokii_logos.c:1544
 msgid "Logos"
 msgstr "标志"
 
-#: xgnokii/xgnokii.c:1119
+#: xgnokii/xgnokii.c:1123
 msgid "DTMF"
 msgstr "DTMF"
 
-#: xgnokii/xgnokii.c:1124 xgnokii/xgnokii_speed.c:556
+#: xgnokii/xgnokii.c:1128 xgnokii/xgnokii_speed.c:558
 msgid "Speed Dial"
 msgstr "快速拨号"
 
-#: xgnokii/xgnokii.c:1129
+#: xgnokii/xgnokii.c:1133
 msgid "Keyboard"
 msgstr "键盘"
 
-#: xgnokii/xgnokii.c:1134 xgnokii/xgnokii_netmon.c:323
+#: xgnokii/xgnokii.c:1138 xgnokii/xgnokii_netmon.c:324
 msgid "Net Monitor"
 msgstr "网络监视器"
 
-#: xgnokii/xgnokii.c:1139 xgnokii/xgnokii_xring.c:828
+#: xgnokii/xgnokii.c:1143 xgnokii/xgnokii_xring.c:829
 msgid "Ringtone"
 msgstr "铃音"
 
-#: xgnokii/xgnokii.c:1144
+#: xgnokii/xgnokii.c:1148
 msgid "Data calls"
 msgstr "数据呼叫"
 
-#: xgnokii/xgnokii.c:1153 xgnokii/xgnokii.c:1576
+#: xgnokii/xgnokii.c:1157 xgnokii/xgnokii.c:1580
 msgid "Options"
 msgstr "选项"
 
-#: xgnokii/xgnokii.c:1163 xgnokii/xgnokii.c:2145
+#: xgnokii/xgnokii.c:1167 xgnokii/xgnokii.c:2149
 msgid "Help"
 msgstr "帮助"
 
-#: xgnokii/xgnokii.c:1168 xgnokii/xgnokii.c:1185
+#: xgnokii/xgnokii.c:1172 xgnokii/xgnokii.c:1189
 msgid "About"
 msgstr "关于"
 
-#: xgnokii/xgnokii.c:1188 xgnokii/xgnokii.c:1359
-#: xgnokii/xgnokii_calendar.c:705 xgnokii/xgnokii_calendar.c:751
-#: xgnokii/xgnokii_calendar.c:898 xgnokii/xgnokii_calendar.c:1018
-#: xgnokii/xgnokii_calendar.c:1158 xgnokii/xgnokii_calendar.c:1291
-#: xgnokii/xgnokii_calendar.c:1448 xgnokii/xgnokii_contacts.c:1087
-#: xgnokii/xgnokii_contacts.c:1331 xgnokii/xgnokii_contacts.c:1465
-#: xgnokii/xgnokii_contacts.c:1616 xgnokii/xgnokii_contacts.c:1994
-#: xgnokii/xgnokii_contacts.c:3153 xgnokii/xgnokii_sms.c:581
+#: xgnokii/xgnokii.c:1192 xgnokii/xgnokii.c:1363
+#: xgnokii/xgnokii_calendar.c:707 xgnokii/xgnokii_calendar.c:753
+#: xgnokii/xgnokii_calendar.c:900 xgnokii/xgnokii_calendar.c:1020
+#: xgnokii/xgnokii_calendar.c:1160 xgnokii/xgnokii_calendar.c:1293
+#: xgnokii/xgnokii_calendar.c:1450 xgnokii/xgnokii_contacts.c:1091
+#: xgnokii/xgnokii_contacts.c:1335 xgnokii/xgnokii_contacts.c:1469
+#: xgnokii/xgnokii_contacts.c:1620 xgnokii/xgnokii_contacts.c:1998
+#: xgnokii/xgnokii_contacts.c:3157 xgnokii/xgnokii_sms.c:585
 msgid "Ok"
 msgstr "确定"
 
-#: xgnokii/xgnokii.c:1199
+#: xgnokii/xgnokii.c:1203
 #, c-format
 msgid ""
 "xgnokii version: %s\n"
@@ -2592,532 +2666,532 @@ msgid ""
 "See GPL for details.\n"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1353
+#: xgnokii/xgnokii.c:1357
 msgid "Edit SMS Setting"
 msgstr "编辑短消息设置"
 
-#: xgnokii/xgnokii.c:1367 xgnokii/xgnokii_calendar.c:714
-#: xgnokii/xgnokii_calendar.c:760 xgnokii/xgnokii_calendar.c:907
-#: xgnokii/xgnokii_calendar.c:1027 xgnokii/xgnokii_calendar.c:1167
-#: xgnokii/xgnokii_calendar.c:1300 xgnokii/xgnokii_calendar.c:1456
+#: xgnokii/xgnokii.c:1371 xgnokii/xgnokii_calendar.c:716
+#: xgnokii/xgnokii_calendar.c:762 xgnokii/xgnokii_calendar.c:909
+#: xgnokii/xgnokii_calendar.c:1029 xgnokii/xgnokii_calendar.c:1169
+#: xgnokii/xgnokii_calendar.c:1302 xgnokii/xgnokii_calendar.c:1458
 #: xgnokii/xgnokii_common.c:78 xgnokii/xgnokii_common.c:160
-#: xgnokii/xgnokii_contacts.c:1098 xgnokii/xgnokii_contacts.c:1473
-#: xgnokii/xgnokii_contacts.c:1624 xgnokii/xgnokii_contacts.c:1861
-#: xgnokii/xgnokii_contacts.c:1908 xgnokii/xgnokii_contacts.c:2004
-#: xgnokii/xgnokii_contacts.c:2268 xgnokii/xgnokii_contacts.c:3160
-#: xgnokii/xgnokii_sms.c:589
+#: xgnokii/xgnokii_contacts.c:1102 xgnokii/xgnokii_contacts.c:1477
+#: xgnokii/xgnokii_contacts.c:1628 xgnokii/xgnokii_contacts.c:1865
+#: xgnokii/xgnokii_contacts.c:1912 xgnokii/xgnokii_contacts.c:2008
+#: xgnokii/xgnokii_contacts.c:2272 xgnokii/xgnokii_contacts.c:3164
+#: xgnokii/xgnokii_sms.c:593
 msgid "Cancel"
 msgstr "取消"
 
-#: xgnokii/xgnokii.c:1380
+#: xgnokii/xgnokii.c:1384
 msgid "Set's name:"
 msgstr "设置名称："
 
-#: xgnokii/xgnokii.c:1394
+#: xgnokii/xgnokii.c:1398
 msgid "Center:"
 msgstr "中心："
 
-#: xgnokii/xgnokii.c:1408
+#: xgnokii/xgnokii.c:1412
 msgid "Sending Format:"
 msgstr "发送格式："
 
-#: xgnokii/xgnokii.c:1448
+#: xgnokii/xgnokii.c:1452
 msgid "Validity Period:"
 msgstr "有效期："
 
-#: xgnokii/xgnokii.c:1456
+#: xgnokii/xgnokii.c:1460
 msgid "Max. Time"
 msgstr "最长时间"
 
-#: xgnokii/xgnokii.c:1573
+#: xgnokii/xgnokii.c:1577
 msgid "Set's name"
 msgstr "设置名称"
 
-#: xgnokii/xgnokii.c:1573
+#: xgnokii/xgnokii.c:1577
 msgid "Center number"
 msgstr "中心号码"
 
-#: xgnokii/xgnokii.c:1573
+#: xgnokii/xgnokii.c:1577
 msgid "Format"
 msgstr "格式"
 
-#: xgnokii/xgnokii.c:1573
+#: xgnokii/xgnokii.c:1577
 msgid "Validity"
 msgstr "有效期"
 
-#: xgnokii/xgnokii.c:1581
+#: xgnokii/xgnokii.c:1585
 msgid "Apply"
 msgstr "应用"
 
-#: xgnokii/xgnokii.c:1589 xgnokii/xgnokii_contacts.c:2254
+#: xgnokii/xgnokii.c:1593 xgnokii/xgnokii_contacts.c:2258
 #: xgnokii/xgnokii_dtmf.c:181
 msgid "Save"
 msgstr "保存"
 
-#: xgnokii/xgnokii.c:1595
+#: xgnokii/xgnokii.c:1599
 msgid "Close"
 msgstr "关闭"
 
-#: xgnokii/xgnokii.c:1609
+#: xgnokii/xgnokii.c:1613
 msgid "Phone and connection type"
 msgstr "电话和连接类型"
 
-#: xgnokii/xgnokii.c:1616
+#: xgnokii/xgnokii.c:1620
 msgid "Connection"
 msgstr "连接"
 
-#: xgnokii/xgnokii.c:1623
+#: xgnokii/xgnokii.c:1627
 msgid "Port:"
 msgstr "端口："
 
-#: xgnokii/xgnokii.c:1637 xgnokii/xgnokii.c:1716
+#: xgnokii/xgnokii.c:1641 xgnokii/xgnokii.c:1720
 msgid "Model:"
 msgstr "型号："
 
-#: xgnokii/xgnokii.c:1651
+#: xgnokii/xgnokii.c:1655
 msgid "Init length:"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1665
+#: xgnokii/xgnokii.c:1669
 msgid "Bindir:"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1679
+#: xgnokii/xgnokii.c:1683
 msgid "Connection:"
 msgstr "连接："
 
-#: xgnokii/xgnokii.c:1683
+#: xgnokii/xgnokii.c:1687
 msgid "infrared"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1690
+#: xgnokii/xgnokii.c:1694
 msgid "serial"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1697
+#: xgnokii/xgnokii.c:1701
 msgid "irda"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1702
+#: xgnokii/xgnokii.c:1706
 msgid "Phone information"
 msgstr "电话信息"
 
-#: xgnokii/xgnokii.c:1709
+#: xgnokii/xgnokii.c:1713
 msgid "Phone"
 msgstr "电话"
 
-#: xgnokii/xgnokii.c:1730
+#: xgnokii/xgnokii.c:1734
 msgid "Version:"
 msgstr "版本："
 
-#: xgnokii/xgnokii.c:1744
+#: xgnokii/xgnokii.c:1748
 msgid "Revision:"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1758
+#: xgnokii/xgnokii.c:1762
 msgid "IMEI:"
 msgstr "IMEI："
 
-#: xgnokii/xgnokii.c:1772
+#: xgnokii/xgnokii.c:1776
 msgid "Names length:"
 msgstr "姓名长度："
 
-#: xgnokii/xgnokii.c:1780
+#: xgnokii/xgnokii.c:1784
 msgid "SIM:"
 msgstr "SIM："
 
-#: xgnokii/xgnokii.c:1798
+#: xgnokii/xgnokii.c:1802
 msgid "Phone:"
 msgstr "电话："
 
-#: xgnokii/xgnokii.c:1805
+#: xgnokii/xgnokii.c:1809
 msgid "Alarm setting"
 msgstr "提醒设置"
 
-#: xgnokii/xgnokii.c:1812 xgnokii/xgnokii.c:1819
-#: xgnokii/xgnokii_calendar.c:974 xgnokii/xgnokii_calendar.c:1106
-#: xgnokii/xgnokii_calendar.c:1235 xgnokii/xgnokii_calendar.c:1367
-#: xgnokii/xgnokii_calendar.c:1549
+#: xgnokii/xgnokii.c:1816 xgnokii/xgnokii.c:1823
+#: xgnokii/xgnokii_calendar.c:976 xgnokii/xgnokii_calendar.c:1108
+#: xgnokii/xgnokii_calendar.c:1237 xgnokii/xgnokii_calendar.c:1369
+#: xgnokii/xgnokii_calendar.c:1551
 msgid "Alarm"
 msgstr "提醒"
 
-#: xgnokii/xgnokii.c:1842 xgnokii/xgnokii_sms.c:1700
+#: xgnokii/xgnokii.c:1846 xgnokii/xgnokii_sms.c:1704
 msgid "Short Message Service"
 msgstr "短消息"
 
-#: xgnokii/xgnokii.c:1875
+#: xgnokii/xgnokii.c:1879
 msgid "Edit"
 msgstr "编辑"
 
-#: xgnokii/xgnokii.c:1887 xgnokii/xgnokii_sms.c:1567
-#: xgnokii/xgnokii_sms.c:1743
+#: xgnokii/xgnokii.c:1891 xgnokii/xgnokii_sms.c:1571
+#: xgnokii/xgnokii_sms.c:1747
 msgid "Business Card"
 msgstr "名片"
 
-#: xgnokii/xgnokii.c:1893
+#: xgnokii/xgnokii.c:1897
 msgid "User"
 msgstr "用户"
 
-#: xgnokii/xgnokii.c:1911 xgnokii/xgnokii_calendar.c:1223
-#: xgnokii/xgnokii_calendar.c:1355 xgnokii/xgnokii_contacts.c:1486
+#: xgnokii/xgnokii.c:1915 xgnokii/xgnokii_calendar.c:1225
+#: xgnokii/xgnokii_calendar.c:1357 xgnokii/xgnokii_contacts.c:1490
 msgid "Name:"
 msgstr "姓名："
 
-#: xgnokii/xgnokii.c:1936
+#: xgnokii/xgnokii.c:1940
 msgid "Title:"
 msgstr ""
 
-#: xgnokii/xgnokii.c:1961
+#: xgnokii/xgnokii.c:1965
 msgid "Company:"
 msgstr "公司："
 
-#: xgnokii/xgnokii.c:1986
+#: xgnokii/xgnokii.c:1990
 msgid "Telephone:"
 msgstr "电话："
 
-#: xgnokii/xgnokii.c:2012
+#: xgnokii/xgnokii.c:2016
 msgid "Fax:"
 msgstr "传真："
 
-#: xgnokii/xgnokii.c:2037
+#: xgnokii/xgnokii.c:2041
 msgid "E-Mail:"
 msgstr "电子邮件："
 
-#: xgnokii/xgnokii.c:2062
+#: xgnokii/xgnokii.c:2066
 msgid "Address:"
 msgstr "地址："
 
-#: xgnokii/xgnokii.c:2085
+#: xgnokii/xgnokii.c:2089
 msgid "Caller groups names"
 msgstr ""
 
-#: xgnokii/xgnokii.c:2092
+#: xgnokii/xgnokii.c:2096
 msgid "Groups"
 msgstr "群组"
 
-#: xgnokii/xgnokii.c:2100
+#: xgnokii/xgnokii.c:2104
 #, c-format
 msgid "Group %d:"
 msgstr ""
 
-#: xgnokii/xgnokii.c:2113
+#: xgnokii/xgnokii.c:2117
 msgid "Mailbox"
 msgstr "邮箱"
 
-#: xgnokii/xgnokii.c:2120
+#: xgnokii/xgnokii.c:2124
 msgid "Mail"
 msgstr "邮件"
 
-#: xgnokii/xgnokii.c:2127
+#: xgnokii/xgnokii.c:2131
 msgid "Path to mailbox:"
 msgstr ""
 
-#: xgnokii/xgnokii.c:2138
+#: xgnokii/xgnokii.c:2142
 msgid "Help viewer"
 msgstr "帮助查看器"
 
-#: xgnokii/xgnokii.c:2152
+#: xgnokii/xgnokii.c:2156
 msgid "Viewer:"
 msgstr ""
 
-#: xgnokii/xgnokii_calendar.c:142
+#: xgnokii/xgnokii_calendar.c:144
 msgid "Reminder"
 msgstr ""
 
-#: xgnokii/xgnokii_calendar.c:148 xgnokii/xgnokii_calendar.c:175
-#: xgnokii/xgnokii_calendar.c:202
+#: xgnokii/xgnokii_calendar.c:150 xgnokii/xgnokii_calendar.c:177
+#: xgnokii/xgnokii_calendar.c:204
 msgid "never"
 msgstr "从不"
 
-#: xgnokii/xgnokii_calendar.c:151 xgnokii/xgnokii_calendar.c:178
-#: xgnokii/xgnokii_calendar.c:205
+#: xgnokii/xgnokii_calendar.c:153 xgnokii/xgnokii_calendar.c:180
+#: xgnokii/xgnokii_calendar.c:207
 msgid "daily"
 msgstr "每天"
 
-#: xgnokii/xgnokii_calendar.c:154 xgnokii/xgnokii_calendar.c:181
-#: xgnokii/xgnokii_calendar.c:208
+#: xgnokii/xgnokii_calendar.c:156 xgnokii/xgnokii_calendar.c:183
+#: xgnokii/xgnokii_calendar.c:210
 msgid "weekly"
 msgstr "每周"
 
-#: xgnokii/xgnokii_calendar.c:157 xgnokii/xgnokii_calendar.c:184
-#: xgnokii/xgnokii_calendar.c:211
+#: xgnokii/xgnokii_calendar.c:159 xgnokii/xgnokii_calendar.c:186
+#: xgnokii/xgnokii_calendar.c:213
 msgid "every two weeks"
 msgstr "每两周"
 
-#: xgnokii/xgnokii_calendar.c:160 xgnokii/xgnokii_calendar.c:187
-#: xgnokii/xgnokii_calendar.c:214
+#: xgnokii/xgnokii_calendar.c:162 xgnokii/xgnokii_calendar.c:189
+#: xgnokii/xgnokii_calendar.c:216
 msgid "yearly"
 msgstr "每年"
 
-#: xgnokii/xgnokii_calendar.c:168
+#: xgnokii/xgnokii_calendar.c:170
 msgid "Call"
 msgstr "呼叫"
 
-#: xgnokii/xgnokii_calendar.c:222
+#: xgnokii/xgnokii_calendar.c:224
 msgid "Birthday"
 msgstr "生日"
 
-#: xgnokii/xgnokii_calendar.c:268
+#: xgnokii/xgnokii_calendar.c:270
 msgid "Type: "
 msgstr "类型："
 
-#: xgnokii/xgnokii_calendar.c:274 xgnokii/xgnokii_sms.c:474
+#: xgnokii/xgnokii_calendar.c:276 xgnokii/xgnokii_sms.c:478
 msgid "Date: "
 msgstr "日期："
 
-#: xgnokii/xgnokii_calendar.c:286
+#: xgnokii/xgnokii_calendar.c:288
 msgid "Alarm: "
 msgstr "提醒："
 
-#: xgnokii/xgnokii_calendar.c:297
+#: xgnokii/xgnokii_calendar.c:299
 msgid "Number: "
 msgstr "号码："
 
-#: xgnokii/xgnokii_calendar.c:308
+#: xgnokii/xgnokii_calendar.c:310
 msgid "Recurrence: "
 msgstr ""
 
-#: xgnokii/xgnokii_calendar.c:316
+#: xgnokii/xgnokii_calendar.c:318
 msgid "Text: "
 msgstr "文本："
 
-#: xgnokii/xgnokii_calendar.c:522
+#: xgnokii/xgnokii_calendar.c:524
 #, c-format
 msgid ""
 "Saving failed failed\n"
 "(error=%d)"
 msgstr ""
 
-#: xgnokii/xgnokii_calendar.c:698 xgnokii/xgnokii_calendar.c:744
+#: xgnokii/xgnokii_calendar.c:700 xgnokii/xgnokii_calendar.c:746
 msgid "Choose date"
 msgstr "选择日期"
 
-#: xgnokii/xgnokii_calendar.c:784
+#: xgnokii/xgnokii_calendar.c:786
 msgid "Alarm time:"
 msgstr "提醒时间："
 
-#: xgnokii/xgnokii_calendar.c:891 xgnokii/xgnokii_calendar.c:1617
+#: xgnokii/xgnokii_calendar.c:893 xgnokii/xgnokii_calendar.c:1619
 msgid "Add reminder"
 msgstr "添加提醒"
 
-#: xgnokii/xgnokii_calendar.c:927 xgnokii/xgnokii_calendar.c:1046
-#: xgnokii/xgnokii_calendar.c:1187 xgnokii/xgnokii_calendar.c:1320
+#: xgnokii/xgnokii_calendar.c:929 xgnokii/xgnokii_calendar.c:1048
+#: xgnokii/xgnokii_calendar.c:1189 xgnokii/xgnokii_calendar.c:1322
 msgid "Date:"
 msgstr "日期："
 
-#: xgnokii/xgnokii_calendar.c:962
+#: xgnokii/xgnokii_calendar.c:964
 msgid "Subject:"
 msgstr "主题："
 
-#: xgnokii/xgnokii_calendar.c:1011
+#: xgnokii/xgnokii_calendar.c:1013
 msgid "Add Call"
 msgstr "添加呼叫"
 
-#: xgnokii/xgnokii_calendar.c:1081 xgnokii/xgnokii_contacts.c:1499
-#: xgnokii/xgnokii_contacts.c:2015
+#: xgnokii/xgnokii_calendar.c:1083 xgnokii/xgnokii_contacts.c:1503
+#: xgnokii/xgnokii_contacts.c:2019
 msgid "Number:"
 msgstr "号码："
 
-#: xgnokii/xgnokii_calendar.c:1094
+#: xgnokii/xgnokii_calendar.c:1096
 msgid "Text:"
 msgstr "文本："
 
-#: xgnokii/xgnokii_calendar.c:1126 xgnokii/xgnokii_calendar.c:1258
+#: xgnokii/xgnokii_calendar.c:1128 xgnokii/xgnokii_calendar.c:1260
 msgid "Repeat:"
 msgstr "重复："
 
-#: xgnokii/xgnokii_calendar.c:1151 xgnokii/xgnokii_calendar.c:1625
+#: xgnokii/xgnokii_calendar.c:1153 xgnokii/xgnokii_calendar.c:1627
 msgid "Add meeting"
 msgstr "添加会议"
 
-#: xgnokii/xgnokii_calendar.c:1284 xgnokii/xgnokii_calendar.c:1629
+#: xgnokii/xgnokii_calendar.c:1286 xgnokii/xgnokii_calendar.c:1631
 msgid "Add birthday"
 msgstr "添加生日"
 
-#: xgnokii/xgnokii_calendar.c:1441
+#: xgnokii/xgnokii_calendar.c:1443
 msgid "Delete calendar note"
 msgstr "删除日历备忘"
 
-#: xgnokii/xgnokii_calendar.c:1473
+#: xgnokii/xgnokii_calendar.c:1475
 msgid "Do you want to delete selected note(s)?"
 msgstr "您想要删除选中的备忘吗？"
 
-#: xgnokii/xgnokii_calendar.c:1510 xgnokii/xgnokii_contacts.c:3286
-#: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1484
-#: xgnokii/xgnokii_netmon.c:264 xgnokii/xgnokii_sms.c:1256
-#: xgnokii/xgnokii_sms.c:1660 xgnokii/xgnokii_speed.c:523
-#: xgnokii/xgnokii_xkeyb.c:241 xgnokii/xgnokii_xring.c:809
+#: xgnokii/xgnokii_calendar.c:1512 xgnokii/xgnokii_contacts.c:3290
+#: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1493
+#: xgnokii/xgnokii_netmon.c:265 xgnokii/xgnokii_sms.c:1260
+#: xgnokii/xgnokii_sms.c:1664 xgnokii/xgnokii_speed.c:525
+#: xgnokii/xgnokii_xkeyb.c:242 xgnokii/xgnokii_xring.c:810
 msgid "/_File"
 msgstr "/文件(_F)"
 
-#: xgnokii/xgnokii_calendar.c:1511 xgnokii/xgnokii_contacts.c:3287
-#: xgnokii/xgnokii_speed.c:524
+#: xgnokii/xgnokii_calendar.c:1513 xgnokii/xgnokii_contacts.c:3291
+#: xgnokii/xgnokii_speed.c:526
 msgid "/File/_Read from phone"
 msgstr "/文件(F)/从电话读取(_R)"
 
-#: xgnokii/xgnokii_calendar.c:1512 xgnokii/xgnokii_contacts.c:3288
-#: xgnokii/xgnokii_speed.c:525
+#: xgnokii/xgnokii_calendar.c:1514 xgnokii/xgnokii_contacts.c:3292
+#: xgnokii/xgnokii_speed.c:527
 msgid "/File/_Save to phone"
 msgstr "/文件(F)/保存到电话(_S)"
 
-#: xgnokii/xgnokii_calendar.c:1513 xgnokii/xgnokii_contacts.c:3289
-#: xgnokii/xgnokii_dtmf.c:223 xgnokii/xgnokii_logos.c:1488
-#: xgnokii/xgnokii_sms.c:1259 xgnokii/xgnokii_sms.c:1664
-#: xgnokii/xgnokii_speed.c:526
+#: xgnokii/xgnokii_calendar.c:1515 xgnokii/xgnokii_contacts.c:3293
+#: xgnokii/xgnokii_dtmf.c:223 xgnokii/xgnokii_logos.c:1497
+#: xgnokii/xgnokii_sms.c:1263 xgnokii/xgnokii_sms.c:1668
+#: xgnokii/xgnokii_speed.c:528
 msgid "/File/Sep1"
 msgstr "/文件(F)/Sep1"
 
-#: xgnokii/xgnokii_calendar.c:1514
+#: xgnokii/xgnokii_calendar.c:1516
 msgid "/File/Send via S_MS"
 msgstr "/文件(F)/通过短消息发送(_M)"
 
-#: xgnokii/xgnokii_calendar.c:1515 xgnokii/xgnokii_contacts.c:3292
-#: xgnokii/xgnokii_logos.c:1492 xgnokii/xgnokii_sms.c:1262
-#: xgnokii/xgnokii_speed.c:529
+#: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3296
+#: xgnokii/xgnokii_logos.c:1501 xgnokii/xgnokii_sms.c:1266
+#: xgnokii/xgnokii_speed.c:531
 msgid "/File/Sep2"
 msgstr "/文件(F)/Sep2"
 
-#: xgnokii/xgnokii_calendar.c:1516 xgnokii/xgnokii_contacts.c:3290
-#: xgnokii/xgnokii_speed.c:527
+#: xgnokii/xgnokii_calendar.c:1518 xgnokii/xgnokii_contacts.c:3294
+#: xgnokii/xgnokii_speed.c:529
 msgid "/File/_Import from file"
 msgstr "/文件(F)/从文件导入(_I)"
 
-#: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3291
-#: xgnokii/xgnokii_speed.c:528
+#: xgnokii/xgnokii_calendar.c:1519 xgnokii/xgnokii_contacts.c:3295
+#: xgnokii/xgnokii_speed.c:530
 msgid "/File/_Export to file"
 msgstr "/文件(F)/导出到文件"
 
-#: xgnokii/xgnokii_calendar.c:1518
+#: xgnokii/xgnokii_calendar.c:1520
 msgid "/File/Sep3"
 msgstr "/文件(F)/Sep3"
 
-#: xgnokii/xgnokii_calendar.c:1519 xgnokii/xgnokii_contacts.c:3293
-#: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1493
-#: xgnokii/xgnokii_netmon.c:265 xgnokii/xgnokii_sms.c:1263
-#: xgnokii/xgnokii_sms.c:1665 xgnokii/xgnokii_speed.c:530
-#: xgnokii/xgnokii_xkeyb.c:242 xgnokii/xgnokii_xring.c:819
+#: xgnokii/xgnokii_calendar.c:1521 xgnokii/xgnokii_contacts.c:3297
+#: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1502
+#: xgnokii/xgnokii_netmon.c:266 xgnokii/xgnokii_sms.c:1267
+#: xgnokii/xgnokii_sms.c:1669 xgnokii/xgnokii_speed.c:532
+#: xgnokii/xgnokii_xkeyb.c:243 xgnokii/xgnokii_xring.c:820
 msgid "/File/_Close"
 msgstr "/文件(F)/关闭(_C)"
 
-#: xgnokii/xgnokii_calendar.c:1520 xgnokii/xgnokii_contacts.c:3294
-#: xgnokii/xgnokii_logos.c:1494 xgnokii/xgnokii_speed.c:531
-#: xgnokii/xgnokii_xring.c:820
+#: xgnokii/xgnokii_calendar.c:1522 xgnokii/xgnokii_contacts.c:3298
+#: xgnokii/xgnokii_logos.c:1503 xgnokii/xgnokii_speed.c:533
+#: xgnokii/xgnokii_xring.c:821
 msgid "/_Edit"
 msgstr "/编辑(_E)"
 
-#: xgnokii/xgnokii_calendar.c:1521
+#: xgnokii/xgnokii_calendar.c:1523
 msgid "/Edit/Add _reminder"
 msgstr "/编辑(E)/添加提醒(_R)"
 
-#: xgnokii/xgnokii_calendar.c:1522
+#: xgnokii/xgnokii_calendar.c:1524
 msgid "/Edit/Add _call"
 msgstr "/编辑(E)/添加呼叫(_C)"
 
-#: xgnokii/xgnokii_calendar.c:1523
+#: xgnokii/xgnokii_calendar.c:1525
 msgid "/Edit/Add _meeting"
 msgstr "/编辑(E)/添加会议(_M)"
 
-#: xgnokii/xgnokii_calendar.c:1524
+#: xgnokii/xgnokii_calendar.c:1526
 msgid "/Edit/Add _birthday"
 msgstr "/编辑(E)/添加生日(_B)"
 
-#: xgnokii/xgnokii_calendar.c:1528 xgnokii/xgnokii_contacts.c:3298
+#: xgnokii/xgnokii_calendar.c:1530 xgnokii/xgnokii_contacts.c:3302
 msgid "/Edit/_Delete"
 msgstr "/编辑(E)/删除(_D)"
 
-#: xgnokii/xgnokii_calendar.c:1529 xgnokii/xgnokii_contacts.c:3301
-#: xgnokii/xgnokii_logos.c:1502
+#: xgnokii/xgnokii_calendar.c:1531 xgnokii/xgnokii_contacts.c:3305
+#: xgnokii/xgnokii_logos.c:1511
 msgid "/Edit/Sep4"
 msgstr "/编辑(E)/Sep4"
 
-#: xgnokii/xgnokii_calendar.c:1530 xgnokii/xgnokii_contacts.c:3305
+#: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3309
 msgid "/Edit/Select _all"
 msgstr "/编辑(E)/全部选中(_A)"
 
-#: xgnokii/xgnokii_calendar.c:1531 xgnokii/xgnokii_contacts.c:3308
-#: xgnokii/xgnokii_dtmf.c:225 xgnokii/xgnokii_netmon.c:269
-#: xgnokii/xgnokii_sms.c:1264 xgnokii/xgnokii_sms.c:1674
-#: xgnokii/xgnokii_speed.c:533 xgnokii/xgnokii_xkeyb.c:243
+#: xgnokii/xgnokii_calendar.c:1533 xgnokii/xgnokii_contacts.c:3312
+#: xgnokii/xgnokii_dtmf.c:225 xgnokii/xgnokii_netmon.c:270
+#: xgnokii/xgnokii_sms.c:1268 xgnokii/xgnokii_sms.c:1678
+#: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:244
 msgid "/_Help"
 msgstr "/帮助(_H)"
 
-#: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3309
-#: xgnokii/xgnokii_dtmf.c:226 xgnokii/xgnokii_netmon.c:270
-#: xgnokii/xgnokii_sms.c:1265 xgnokii/xgnokii_sms.c:1675
-#: xgnokii/xgnokii_speed.c:534 xgnokii/xgnokii_xkeyb.c:244
+#: xgnokii/xgnokii_calendar.c:1534 xgnokii/xgnokii_contacts.c:3313
+#: xgnokii/xgnokii_dtmf.c:226 xgnokii/xgnokii_netmon.c:271
+#: xgnokii/xgnokii_sms.c:1269 xgnokii/xgnokii_sms.c:1679
+#: xgnokii/xgnokii_speed.c:536 xgnokii/xgnokii_xkeyb.c:245
 msgid "/Help/_Help"
 msgstr "/帮助(H)/帮助(_H)"
 
-#: xgnokii/xgnokii_calendar.c:1533 xgnokii/xgnokii_contacts.c:3310
-#: xgnokii/xgnokii_dtmf.c:227 xgnokii/xgnokii_netmon.c:271
-#: xgnokii/xgnokii_sms.c:1266 xgnokii/xgnokii_sms.c:1676
-#: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:245
+#: xgnokii/xgnokii_calendar.c:1535 xgnokii/xgnokii_contacts.c:3314
+#: xgnokii/xgnokii_dtmf.c:227 xgnokii/xgnokii_netmon.c:272
+#: xgnokii/xgnokii_sms.c:1270 xgnokii/xgnokii_sms.c:1680
+#: xgnokii/xgnokii_speed.c:537 xgnokii/xgnokii_xkeyb.c:246
 msgid "/Help/_About"
 msgstr "/帮助(H)/关于(_A)"
 
-#: xgnokii/xgnokii_calendar.c:1548
+#: xgnokii/xgnokii_calendar.c:1550
 msgid "#"
 msgstr "#"
 
-#: xgnokii/xgnokii_calendar.c:1548
+#: xgnokii/xgnokii_calendar.c:1550
 msgid "Type"
 msgstr "类型"
 
-#: xgnokii/xgnokii_calendar.c:1548
+#: xgnokii/xgnokii_calendar.c:1550
 msgid "Date"
 msgstr "日期"
 
-#: xgnokii/xgnokii_calendar.c:1549 xgnokii/xgnokii_contacts.c:1947
-#: xgnokii/xgnokii_contacts.c:3326 xgnokii/xgnokii_speed.c:550
+#: xgnokii/xgnokii_calendar.c:1551 xgnokii/xgnokii_contacts.c:1951
+#: xgnokii/xgnokii_contacts.c:3330 xgnokii/xgnokii_speed.c:552
 msgid "Number"
 msgstr "号码"
 
-#: xgnokii/xgnokii_calendar.c:1549
+#: xgnokii/xgnokii_calendar.c:1551
 msgid "Recurrence"
 msgstr "再现"
 
-#: xgnokii/xgnokii_calendar.c:1583 xgnokii/xgnokii_contacts.c:3362
-#: xgnokii/xgnokii_speed.c:586
+#: xgnokii/xgnokii_calendar.c:1585 xgnokii/xgnokii_contacts.c:3366
+#: xgnokii/xgnokii_speed.c:588
 msgid "Read from phone"
 msgstr "从电话读取"
 
-#: xgnokii/xgnokii_calendar.c:1587 xgnokii/xgnokii_contacts.c:3366
-#: xgnokii/xgnokii_speed.c:590
+#: xgnokii/xgnokii_calendar.c:1589 xgnokii/xgnokii_contacts.c:3370
+#: xgnokii/xgnokii_speed.c:592
 msgid "Save to phone"
 msgstr "保存到电话"
 
-#: xgnokii/xgnokii_calendar.c:1594
+#: xgnokii/xgnokii_calendar.c:1596
 msgid "Send via SMS"
 msgstr "通过短消息发送"
 
-#: xgnokii/xgnokii_calendar.c:1601 xgnokii/xgnokii_contacts.c:3373
-#: xgnokii/xgnokii_logos.c:1582 xgnokii/xgnokii_speed.c:597
-#: xgnokii/xgnokii_xring.c:877
+#: xgnokii/xgnokii_calendar.c:1603 xgnokii/xgnokii_contacts.c:3377
+#: xgnokii/xgnokii_logos.c:1591 xgnokii/xgnokii_speed.c:599
+#: xgnokii/xgnokii_xring.c:878
 msgid "Import from file"
 msgstr "从文件导入"
 
-#: xgnokii/xgnokii_calendar.c:1605 xgnokii/xgnokii_contacts.c:3377
-#: xgnokii/xgnokii_logos.c:1586 xgnokii/xgnokii_speed.c:601
-#: xgnokii/xgnokii_xring.c:881
+#: xgnokii/xgnokii_calendar.c:1607 xgnokii/xgnokii_contacts.c:3381
+#: xgnokii/xgnokii_logos.c:1595 xgnokii/xgnokii_speed.c:603
+#: xgnokii/xgnokii_xring.c:882
 msgid "Export to file"
 msgstr "导出到文件"
 
-#: xgnokii/xgnokii_calendar.c:1621
+#: xgnokii/xgnokii_calendar.c:1623
 msgid "Add call"
 msgstr "添加呼叫"
 
-#: xgnokii/xgnokii_calendar.c:1633
+#: xgnokii/xgnokii_calendar.c:1635
 msgid "Delete note"
 msgstr "删除备忘"
 
-#: xgnokii/xgnokii_calendar.c:1696 xgnokii/xgnokii_contacts.c:3183
-#: xgnokii/xgnokii_contacts.c:3430 xgnokii/xgnokii_sms.c:1829
-#: xgnokii/xgnokii_speed.c:631
+#: xgnokii/xgnokii_calendar.c:1698 xgnokii/xgnokii_contacts.c:3187
+#: xgnokii/xgnokii_contacts.c:3434 xgnokii/xgnokii_sms.c:1833
+#: xgnokii/xgnokii_speed.c:633
 #, c-format
 msgid "Error: %s: line %d: Can't allocate memory!\n"
 msgstr ""
 
-#: xgnokii/xgnokii_calendar.c:1725 xgnokii/xgnokii_sms.c:1863
+#: xgnokii/xgnokii_calendar.c:1727 xgnokii/xgnokii_sms.c:1867
 msgid "couldn't allocate colour"
 msgstr ""
 
@@ -3167,148 +3241,148 @@ msgstr "否"
 msgid "Can't exec %s\n"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:307 xgnokii/xgnokii_contacts.c:347
-#: xgnokii/xgnokii_contacts.c:540 xgnokii/xgnokii_contacts.c:566
-#: xgnokii/xgnokii_contacts.c:711 xgnokii/xgnokii_contacts.c:731
+#: xgnokii/xgnokii_contacts.c:311 xgnokii/xgnokii_contacts.c:351
+#: xgnokii/xgnokii_contacts.c:544 xgnokii/xgnokii_contacts.c:570
+#: xgnokii/xgnokii_contacts.c:715 xgnokii/xgnokii_contacts.c:735
 msgid "Can't change memory type!"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:359 xgnokii/xgnokii_contacts.c:421
+#: xgnokii/xgnokii_contacts.c:363 xgnokii/xgnokii_contacts.c:425
 msgid ""
 "Sorry, phonebook name will be truncated,\n"
 "because you save it into SIM memory!"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:578 xgnokii/xgnokii_contacts.c:622
+#: xgnokii/xgnokii_contacts.c:582 xgnokii/xgnokii_contacts.c:626
 msgid ""
 "Sorry, phonebook name will be truncated\n"
 "because you save it into SIM memory!"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:823
+#: xgnokii/xgnokii_contacts.c:827
 msgid "Can't find pattern!"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1106
+#: xgnokii/xgnokii_contacts.c:1110
 msgid "Delete"
 msgstr "删除"
 
-#: xgnokii/xgnokii_contacts.c:1125
+#: xgnokii/xgnokii_contacts.c:1129
 msgid "Number/Text:"
 msgstr "号码/文本："
 
-#: xgnokii/xgnokii_contacts.c:1137
+#: xgnokii/xgnokii_contacts.c:1141
 msgid "Type:"
 msgstr "类型："
 
-#: xgnokii/xgnokii_contacts.c:1172 xgnokii/xgnokii_contacts.c:1566
-#: xgnokii/xgnokii_contacts.c:3392 xgnokii/xgnokii_speed.c:608
+#: xgnokii/xgnokii_contacts.c:1176 xgnokii/xgnokii_contacts.c:1570
+#: xgnokii/xgnokii_contacts.c:3396 xgnokii/xgnokii_speed.c:610
 msgid "Edit entry"
 msgstr "编辑条目"
 
-#: xgnokii/xgnokii_contacts.c:1323
+#: xgnokii/xgnokii_contacts.c:1327
 msgid "Numbers"
 msgstr "号码"
 
-#: xgnokii/xgnokii_contacts.c:1343
+#: xgnokii/xgnokii_contacts.c:1347
 msgid "New"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1525
+#: xgnokii/xgnokii_contacts.c:1529
 msgid "Memory:"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1529
+#: xgnokii/xgnokii_contacts.c:1533
 msgid "phone"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1546
+#: xgnokii/xgnokii_contacts.c:1550
 msgid "Caller group:"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1609
+#: xgnokii/xgnokii_contacts.c:1613
 msgid "Delete entries"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1641
+#: xgnokii/xgnokii_contacts.c:1645
 msgid "Do you want to delete selected entries?"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1659 xgnokii/xgnokii_contacts.c:3384
+#: xgnokii/xgnokii_contacts.c:1663 xgnokii/xgnokii_contacts.c:3388
 msgid "New entry"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1703 xgnokii/xgnokii_contacts.c:3388
+#: xgnokii/xgnokii_contacts.c:1707 xgnokii/xgnokii_contacts.c:3392
 msgid "Duplicate entry"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1772 xgnokii/xgnokii_contacts.c:1780
-#: xgnokii/xgnokii_contacts.c:1808
+#: xgnokii/xgnokii_contacts.c:1776 xgnokii/xgnokii_contacts.c:1784
+#: xgnokii/xgnokii_contacts.c:1812
 msgid "Can't find free memory."
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1845
+#: xgnokii/xgnokii_contacts.c:1849
 msgid "Changing memory type"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1852
+#: xgnokii/xgnokii_contacts.c:1856
 msgid "Continue"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1874
+#: xgnokii/xgnokii_contacts.c:1878
 msgid ""
 "If you change from phone memory to SIM memory\n"
 "some entries may be truncated."
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1892 xgnokii/xgnokii_contacts.c:1898
+#: xgnokii/xgnokii_contacts.c:1896 xgnokii/xgnokii_contacts.c:1902
 msgid "Find"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1924
+#: xgnokii/xgnokii_contacts.c:1928
 msgid "Pattern:"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1939 xgnokii/xgnokii_contacts.c:3326
-#: xgnokii/xgnokii_speed.c:550
+#: xgnokii/xgnokii_contacts.c:1943 xgnokii/xgnokii_contacts.c:3330
+#: xgnokii/xgnokii_speed.c:552
 msgid "Name"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:1988 xgnokii/xgnokii_contacts.c:3403
+#: xgnokii/xgnokii_contacts.c:1992 xgnokii/xgnokii_contacts.c:3407
 msgid "Dial voice"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2120
+#: xgnokii/xgnokii_contacts.c:2124
 msgid "Phone memory..."
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2131
+#: xgnokii/xgnokii_contacts.c:2135
 msgid "SIM memory..."
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2158
+#: xgnokii/xgnokii_contacts.c:2162
 msgid "Saving entries"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2187
+#: xgnokii/xgnokii_contacts.c:2191
 #, c-format
 msgid "%s: line: %d: Can't write ME memory entry number %d! Error: %d\n"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2224
+#: xgnokii/xgnokii_contacts.c:2228
 #, c-format
 msgid "%s: line %d:Can't write SM memory entry number %d! Error: %d\n"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2248
+#: xgnokii/xgnokii_contacts.c:2252
 msgid "Save changes?"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2262
+#: xgnokii/xgnokii_contacts.c:2266
 msgid "Don't save"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2284
+#: xgnokii/xgnokii_contacts.c:2288
 msgid ""
 "You have made changes in your\n"
 "contacts directory.\n"
@@ -3317,128 +3391,128 @@ msgid ""
 "Do you want save these changes into phone?\n"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2345 xgnokii/xgnokii_contacts.c:2371
-#: xgnokii/xgnokii_contacts.c:2875 xgnokii/xgnokii_contacts.c:2897
+#: xgnokii/xgnokii_contacts.c:2349 xgnokii/xgnokii_contacts.c:2375
+#: xgnokii/xgnokii_contacts.c:2879 xgnokii/xgnokii_contacts.c:2901
 #, c-format
 msgid "%s: line %d: Can't allocate memory!\n"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2475
+#: xgnokii/xgnokii_contacts.c:2479
 msgid "Getting entries"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2724 xgnokii/xgnokii_dtmf.c:135
-#: xgnokii/xgnokii_speed.c:423
+#: xgnokii/xgnokii_contacts.c:2728 xgnokii/xgnokii_dtmf.c:135
+#: xgnokii/xgnokii_speed.c:425
 #, c-format
 msgid "Can't open file %s for writing!"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2758 xgnokii/xgnokii_dtmf.c:166
-#: xgnokii/xgnokii_logos.c:1360 xgnokii/xgnokii_speed.c:463
+#: xgnokii/xgnokii_contacts.c:2762 xgnokii/xgnokii_dtmf.c:166
+#: xgnokii/xgnokii_logos.c:1369 xgnokii/xgnokii_speed.c:465
 msgid "Overwrite file?"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2759 xgnokii/xgnokii_dtmf.c:167
-#: xgnokii/xgnokii_logos.c:1361 xgnokii/xgnokii_speed.c:464
+#: xgnokii/xgnokii_contacts.c:2763 xgnokii/xgnokii_dtmf.c:167
+#: xgnokii/xgnokii_logos.c:1370 xgnokii/xgnokii_speed.c:466
 #, c-format
 msgid ""
 "File %s already exist.\n"
 "Overwrite?"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2775 xgnokii/xgnokii_speed.c:480
+#: xgnokii/xgnokii_contacts.c:2779 xgnokii/xgnokii_speed.c:482
 msgid "Export"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2806 xgnokii/xgnokii_dtmf.c:99
-#: xgnokii/xgnokii_speed.c:330
+#: xgnokii/xgnokii_contacts.c:2810 xgnokii/xgnokii_dtmf.c:99
+#: xgnokii/xgnokii_speed.c:332
 #, c-format
 msgid "Can't open file %s for reading!"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:2957 xgnokii/xgnokii_speed.c:401
+#: xgnokii/xgnokii_contacts.c:2961 xgnokii/xgnokii_speed.c:403
 msgid "Import"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:3150 xgnokii/xgnokii_sms.c:1370
+#: xgnokii/xgnokii_contacts.c:3154 xgnokii/xgnokii_sms.c:1374
 msgid "Select contacts"
 msgstr ""
 
-#: xgnokii/xgnokii_contacts.c:3295
+#: xgnokii/xgnokii_contacts.c:3299
 msgid "/Edit/_New"
 msgstr "/编辑(E)/新建(_N)"
 
-#: xgnokii/xgnokii_contacts.c:3296
+#: xgnokii/xgnokii_contacts.c:3300
 msgid "/Edit/D_uplicate"
 msgstr "/编辑(E)/复制(_U)"
 
-#: xgnokii/xgnokii_contacts.c:3297 xgnokii/xgnokii_speed.c:532
+#: xgnokii/xgnokii_contacts.c:3301 xgnokii/xgnokii_speed.c:534
 msgid "/Edit/_Edit"
 msgstr "/编辑(E)/编辑(_E)"
 
-#: xgnokii/xgnokii_contacts.c:3299 xgnokii/xgnokii_logos.c:1497
+#: xgnokii/xgnokii_contacts.c:3303 xgnokii/xgnokii_logos.c:1506
 msgid "/Edit/Sep3"
 msgstr "/编辑(E)/Sep3"
 
-#: xgnokii/xgnokii_contacts.c:3300
+#: xgnokii/xgnokii_contacts.c:3304
 msgid "/Edit/_Change memory type"
 msgstr "/编辑(E)/更改存储类型(_C)"
 
-#: xgnokii/xgnokii_contacts.c:3302
+#: xgnokii/xgnokii_contacts.c:3306
 msgid "/Edit/_Find"
 msgstr "/编辑(E)/查找(_F)"
 
-#: xgnokii/xgnokii_contacts.c:3303
+#: xgnokii/xgnokii_contacts.c:3307
 msgid "/Edit/Find ne_xt"
 msgstr "/编辑(E)/查找下一个(_X)"
 
-#: xgnokii/xgnokii_contacts.c:3304
+#: xgnokii/xgnokii_contacts.c:3308
 msgid "/Edit/Sep5"
 msgstr "/编辑(E)/Sep5"
 
-#: xgnokii/xgnokii_contacts.c:3306
+#: xgnokii/xgnokii_contacts.c:3310
 msgid "/_Dial"
 msgstr "/拨号(_D)"
 
-#: xgnokii/xgnokii_contacts.c:3307
+#: xgnokii/xgnokii_contacts.c:3311
 msgid "/Dial/Dial _voice"
 msgstr "/拨号(D)/语音拨号(_V)"
 
-#: xgnokii/xgnokii_contacts.c:3326
+#: xgnokii/xgnokii_contacts.c:3330
 msgid "Memory"
 msgstr "存储"
 
-#: xgnokii/xgnokii_contacts.c:3326
+#: xgnokii/xgnokii_contacts.c:3330
 msgid "Group"
 msgstr "群组"
 
-#: xgnokii/xgnokii_contacts.c:3396
+#: xgnokii/xgnokii_contacts.c:3400
 msgid "Delete entry"
 msgstr "删除项"
 
-#: xgnokii/xgnokii_data.c:55
+#: xgnokii/xgnokii_data.c:57
 msgid ""
 "Data calls are currently\n"
 "Disabled\n"
 " "
 msgstr ""
 
-#: xgnokii/xgnokii_data.c:57
+#: xgnokii/xgnokii_data.c:59
 msgid ""
 "Data calls are currently\n"
 "Enabled\n"
 " "
 msgstr ""
 
-#: xgnokii/xgnokii_data.c:111
+#: xgnokii/xgnokii_data.c:113
 msgid "Virtual Modem"
 msgstr "虚拟调制解调器"
 
-#: xgnokii/xgnokii_data.c:129
+#: xgnokii/xgnokii_data.c:131
 msgid "Enable"
 msgstr "启用"
 
-#: xgnokii/xgnokii_data.c:133
+#: xgnokii/xgnokii_data.c:135
 msgid "Disable"
 msgstr "禁用"
 
@@ -3446,14 +3520,14 @@ msgstr "禁用"
 msgid "Load"
 msgstr ""
 
-#: xgnokii/xgnokii_dtmf.c:221 xgnokii/xgnokii_logos.c:1485
-#: xgnokii/xgnokii_xring.c:810
+#: xgnokii/xgnokii_dtmf.c:221 xgnokii/xgnokii_logos.c:1494
+#: xgnokii/xgnokii_xring.c:811
 msgid "/File/_Open"
 msgstr "/文件(F)/打开(_O)"
 
-#: xgnokii/xgnokii_dtmf.c:222 xgnokii/xgnokii_logos.c:1486
-#: xgnokii/xgnokii_sms.c:1258 xgnokii/xgnokii_sms.c:1661
-#: xgnokii/xgnokii_xring.c:811
+#: xgnokii/xgnokii_dtmf.c:222 xgnokii/xgnokii_logos.c:1495
+#: xgnokii/xgnokii_sms.c:1262 xgnokii/xgnokii_sms.c:1665
+#: xgnokii/xgnokii_xring.c:812
 msgid "/File/_Save"
 msgstr "/文件(F)/保存(_S)"
 
@@ -3461,759 +3535,759 @@ msgstr "/文件(F)/保存(_S)"
 msgid "Dial Tone"
 msgstr "拨号音"
 
-#: xgnokii/xgnokii_logos.c:989
+#: xgnokii/xgnokii_logos.c:993
 #, c-format
 msgid ""
 "Error getting network info\n"
 "(error=%d)"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1030
+#: xgnokii/xgnokii_logos.c:1037
 #, c-format
 msgid ""
 "Error getting bitmap\n"
 "(error=%d)"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1078
+#: xgnokii/xgnokii_logos.c:1087
 #, c-format
 msgid ""
 "Error setting bitmap\n"
 "(error=%d)"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1333
+#: xgnokii/xgnokii_logos.c:1342
 #, c-format
 msgid ""
 "Error saving file\n"
 "(error=%d)"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1382
+#: xgnokii/xgnokii_logos.c:1391
 #, c-format
 msgid "Can't open file %s for reading !"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1392
+#: xgnokii/xgnokii_logos.c:1401
 #, c-format
 msgid ""
 "Error reading file\n"
 "(error=%d)"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1419
+#: xgnokii/xgnokii_logos.c:1428
 msgid "Save logo as ..."
 msgstr "标志另存为..."
 
-#: xgnokii/xgnokii_logos.c:1444
+#: xgnokii/xgnokii_logos.c:1453
 msgid "Open logo..."
 msgstr "打开标志..."
 
-#: xgnokii/xgnokii_logos.c:1487 xgnokii/xgnokii_xring.c:812
+#: xgnokii/xgnokii_logos.c:1496 xgnokii/xgnokii_xring.c:813
 msgid "/File/Save _as ..."
 msgstr "/文件(F)/另存为(_A)..."
 
-#: xgnokii/xgnokii_logos.c:1489
+#: xgnokii/xgnokii_logos.c:1498
 msgid "/File/_Get operator"
 msgstr "/文件(F)/获得运营商(_G)"
 
-#: xgnokii/xgnokii_logos.c:1490
+#: xgnokii/xgnokii_logos.c:1499
 msgid "/File/Get _logo"
 msgstr "/文件(F)/获得标志(_L)"
 
-#: xgnokii/xgnokii_logos.c:1491
+#: xgnokii/xgnokii_logos.c:1500
 msgid "/File/Se_t logo"
 msgstr "/文件(F)/设置标志(_T)"
 
-#: xgnokii/xgnokii_logos.c:1495 xgnokii/xgnokii_xring.c:821
+#: xgnokii/xgnokii_logos.c:1504 xgnokii/xgnokii_xring.c:822
 msgid "/Edit/_Clear"
 msgstr "/编辑(E)/清除(_C)"
 
-#: xgnokii/xgnokii_logos.c:1496
+#: xgnokii/xgnokii_logos.c:1505
 msgid "/Edit/_Invert"
 msgstr "/编辑(E)/反转(_I)"
 
-#: xgnokii/xgnokii_logos.c:1498
+#: xgnokii/xgnokii_logos.c:1507
 msgid "/Edit/_Up logo"
 msgstr "/编辑(E)/上移标志(_U)"
 
-#: xgnokii/xgnokii_logos.c:1499
+#: xgnokii/xgnokii_logos.c:1508
 msgid "/Edit/_Down logo"
 msgstr "/编辑(E)/下移标志(_D)"
 
-#: xgnokii/xgnokii_logos.c:1500
+#: xgnokii/xgnokii_logos.c:1509
 msgid "/Edit/_Left logo"
 msgstr "/编辑(E)/左移标志(_L)"
 
-#: xgnokii/xgnokii_logos.c:1501
+#: xgnokii/xgnokii_logos.c:1510
 msgid "/Edit/_Right logo"
 msgstr "/编辑(E)/右移标志(_R)"
 
-#: xgnokii/xgnokii_logos.c:1503
+#: xgnokii/xgnokii_logos.c:1512
 msgid "/Edit/Flip _horizontal"
 msgstr "/编辑(E)/水平翻转(_H)"
 
-#: xgnokii/xgnokii_logos.c:1504
+#: xgnokii/xgnokii_logos.c:1513
 msgid "/Edit/Flip _vertical"
 msgstr "/编辑(E)/垂直翻转(_V)"
 
-#: xgnokii/xgnokii_logos.c:1563
+#: xgnokii/xgnokii_logos.c:1572
 msgid "Clear logo"
 msgstr "清除标志"
 
-#: xgnokii/xgnokii_logos.c:1570
+#: xgnokii/xgnokii_logos.c:1579
 msgid "Get logo"
 msgstr "获得标志"
 
-#: xgnokii/xgnokii_logos.c:1575
+#: xgnokii/xgnokii_logos.c:1584
 msgid "Set logo"
 msgstr "设置标志"
 
-#: xgnokii/xgnokii_logos.c:1595
+#: xgnokii/xgnokii_logos.c:1604
 msgid "Startup logo"
 msgstr "启动标志"
 
-#: xgnokii/xgnokii_logos.c:1604
+#: xgnokii/xgnokii_logos.c:1613
 msgid "Operator logo"
 msgstr "网络标志"
 
-#: xgnokii/xgnokii_logos.c:1614
+#: xgnokii/xgnokii_logos.c:1623
 msgid "Caller logo"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1736
+#: xgnokii/xgnokii_logos.c:1749
 msgid "Brush tool"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1747
+#: xgnokii/xgnokii_logos.c:1760
 msgid "Line tool"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1757
+#: xgnokii/xgnokii_logos.c:1770
 msgid "Rectangle tool"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1767
+#: xgnokii/xgnokii_logos.c:1780
 msgid "Filled rectangle tool"
 msgstr ""
 
-#: xgnokii/xgnokii_logos.c:1776
+#: xgnokii/xgnokii_logos.c:1789
 msgid "Invert logo"
 msgstr "反转标志"
 
-#: xgnokii/xgnokii_logos.c:1781
+#: xgnokii/xgnokii_logos.c:1794
 msgid "Horizontal flip"
 msgstr "水平翻转"
 
-#: xgnokii/xgnokii_logos.c:1786
+#: xgnokii/xgnokii_logos.c:1799
 msgid "Vertical flip"
 msgstr "垂直翻转"
 
-#: xgnokii/xgnokii_logos.c:1841
+#: xgnokii/xgnokii_logos.c:1854
 msgid "Load preview pixmap error, feature disabled."
 msgstr ""
 
-#: xgnokii/xgnokii_lowlevel.c:504
+#: xgnokii/xgnokii_lowlevel.c:507
 #, c-format
 msgid "%s: line %d: Can't get memory entry number %d from memory %d! %d\n"
 msgstr ""
 
-#: xgnokii/xgnokii_lowlevel.c:1240
+#: xgnokii/xgnokii_lowlevel.c:1243
 msgid "Connecting..."
 msgstr "正在连接..."
 
-#: xgnokii/xgnokii_lowlevel.c:1323
+#: xgnokii/xgnokii_lowlevel.c:1326
 msgid "Working..."
 msgstr "正在工作..."
 
-#: xgnokii/xgnokii_lowlevel.c:1374
+#: xgnokii/xgnokii_lowlevel.c:1377
 msgid "Refreshing SMSes..."
 msgstr "正在刷新短消息..."
 
-#: xgnokii/xgnokii_netmon.c:266
+#: xgnokii/xgnokii_netmon.c:267
 msgid "/_Tools"
 msgstr "/工具(_T)"
 
-#: xgnokii/xgnokii_netmon.c:267
+#: xgnokii/xgnokii_netmon.c:268
 msgid "/Tools/Net monitor o_n"
 msgstr "/工具(T)/网络监视开(_N)"
 
-#: xgnokii/xgnokii_netmon.c:268
+#: xgnokii/xgnokii_netmon.c:269
 msgid "/Tools/Net monitor o_ff"
 msgstr "/工具(T)/网络监视关(_F)"
 
-#: xgnokii/xgnokii_netmon.c:385 xgnokii/xgnokii_netmon.c:388
+#: xgnokii/xgnokii_netmon.c:386 xgnokii/xgnokii_netmon.c:389
 msgid "Active cell"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:391
+#: xgnokii/xgnokii_netmon.c:392
 msgid "NCELL list I"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:394
+#: xgnokii/xgnokii_netmon.c:395
 msgid "NCELL list II"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:397
+#: xgnokii/xgnokii_netmon.c:398
 msgid "NCELL list III"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:400
+#: xgnokii/xgnokii_netmon.c:401
 msgid "Prefered/Denied networks"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:403
+#: xgnokii/xgnokii_netmon.c:404
 msgid "System information bits"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:406
+#: xgnokii/xgnokii_netmon.c:407
 msgid "TMSI, Paging, PLU"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:409
+#: xgnokii/xgnokii_netmon.c:410
 msgid "Cells info"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:412
+#: xgnokii/xgnokii_netmon.c:413
 msgid "DTX, Cipher, Hopping"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:422
+#: xgnokii/xgnokii_netmon.c:423
 msgid "Uplink DTX"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:425
+#: xgnokii/xgnokii_netmon.c:426
 msgid "BTS TEST"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:428
+#: xgnokii/xgnokii_netmon.c:429
 msgid "CELL BARR-Flag"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:431
+#: xgnokii/xgnokii_netmon.c:432
 msgid "Accumulator, Charge status"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:434
+#: xgnokii/xgnokii_netmon.c:435
 msgid "?Constant voltage charging display"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:437
+#: xgnokii/xgnokii_netmon.c:438
 msgid "?Battery full detection"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:440
+#: xgnokii/xgnokii_netmon.c:441
 msgid "Accumulator"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:443
+#: xgnokii/xgnokii_netmon.c:444
 msgid "SW-Resets"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:446
+#: xgnokii/xgnokii_netmon.c:447
 msgid "Reset-Counter"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:450
+#: xgnokii/xgnokii_netmon.c:451
 msgid "Cause codes for last connection abortion"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:460
+#: xgnokii/xgnokii_netmon.c:461
 msgid "Reset handover counters"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:463
+#: xgnokii/xgnokii_netmon.c:464
 msgid "Handover Counter"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:466
+#: xgnokii/xgnokii_netmon.c:467
 msgid "Handover Counter (Dual)"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:469
+#: xgnokii/xgnokii_netmon.c:470
 msgid "L2-Timeouts"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:472
+#: xgnokii/xgnokii_netmon.c:473
 msgid "SIM"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:475
+#: xgnokii/xgnokii_netmon.c:476
 msgid "?Block display 1"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:481
+#: xgnokii/xgnokii_netmon.c:482
 msgid "Memory status before reset"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:484
+#: xgnokii/xgnokii_netmon.c:485
 msgid "Reset Counters"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:488
+#: xgnokii/xgnokii_netmon.c:489
 msgid "Counter for PLMN Search and Cell reselection (Singleband)"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:498
+#: xgnokii/xgnokii_netmon.c:499
 msgid "Neighbourhood measurement"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:501
+#: xgnokii/xgnokii_netmon.c:502
 msgid "Calls"
 msgstr "呼叫"
 
-#: xgnokii/xgnokii_netmon.c:504
+#: xgnokii/xgnokii_netmon.c:505
 msgid "Temporary counters of DSP"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:508
+#: xgnokii/xgnokii_netmon.c:509
 msgid "Control of task information displays"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:511
+#: xgnokii/xgnokii_netmon.c:512
 msgid "Information about task numbers 0-7"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:515
+#: xgnokii/xgnokii_netmon.c:516
 msgid "Information about task numbers 8-15"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:519
+#: xgnokii/xgnokii_netmon.c:520
 msgid "Information about task numbers 16-23"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:522
+#: xgnokii/xgnokii_netmon.c:523
 msgid "Information about OS_SYSTEM_STACK"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:526
+#: xgnokii/xgnokii_netmon.c:527
 msgid "Information about current MCU and DSP software versions"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:529
+#: xgnokii/xgnokii_netmon.c:530
 msgid "Hardware version"
 msgstr "硬件版本"
 
-#: xgnokii/xgnokii_netmon.c:548
+#: xgnokii/xgnokii_netmon.c:549
 msgid "Chan"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:549
+#: xgnokii/xgnokii_netmon.c:550
 msgid "RxLv"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:550
+#: xgnokii/xgnokii_netmon.c:551
 msgid "C1"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:551
+#: xgnokii/xgnokii_netmon.c:552
 msgid "C2"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:552
+#: xgnokii/xgnokii_netmon.c:553
 msgid "ACT"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:553
+#: xgnokii/xgnokii_netmon.c:554
 msgid "NC2"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:554
+#: xgnokii/xgnokii_netmon.c:555
 msgid "NC3"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:555
+#: xgnokii/xgnokii_netmon.c:556
 msgid "NC4"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:556
+#: xgnokii/xgnokii_netmon.c:557
 msgid "NC5"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:557
+#: xgnokii/xgnokii_netmon.c:558
 msgid "NC6"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:558
+#: xgnokii/xgnokii_netmon.c:559
 msgid "NC7"
 msgstr ""
 
-#: xgnokii/xgnokii_netmon.c:588
+#: xgnokii/xgnokii_netmon.c:589
 msgid "Page:"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:257 xgnokii/xgnokii_sms.c:337
-#: xgnokii/xgnokii_sms.c:451
+#: xgnokii/xgnokii_sms.c:261 xgnokii/xgnokii_sms.c:341
+#: xgnokii/xgnokii_sms.c:455
 msgid "read"
 msgstr "已读"
 
-#: xgnokii/xgnokii_sms.c:260 xgnokii/xgnokii_sms.c:340
-#: xgnokii/xgnokii_sms.c:438
+#: xgnokii/xgnokii_sms.c:264 xgnokii/xgnokii_sms.c:344
+#: xgnokii/xgnokii_sms.c:442
 msgid "unread"
 msgstr "未读"
 
-#: xgnokii/xgnokii_sms.c:263 xgnokii/xgnokii_sms.c:343
+#: xgnokii/xgnokii_sms.c:267 xgnokii/xgnokii_sms.c:347
 msgid "sent"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:266 xgnokii/xgnokii_sms.c:346
+#: xgnokii/xgnokii_sms.c:270 xgnokii/xgnokii_sms.c:350
 msgid "not sent"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:309
+#: xgnokii/xgnokii_sms.c:313
 msgid "read report"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:312
+#: xgnokii/xgnokii_sms.c:316
 msgid "unread report"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:319
+#: xgnokii/xgnokii_sms.c:323
 msgid "seen picture"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:322
+#: xgnokii/xgnokii_sms.c:326
 msgid "unseen picture"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:325
+#: xgnokii/xgnokii_sms.c:329
 msgid "sent picture"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:328
+#: xgnokii/xgnokii_sms.c:332
 msgid "not sent picture"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:331
+#: xgnokii/xgnokii_sms.c:335
 msgid "unknown picture"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:469
+#: xgnokii/xgnokii_sms.c:473
 msgid "From: "
 msgstr "来自："
 
-#: xgnokii/xgnokii_sms.c:574
+#: xgnokii/xgnokii_sms.c:578
 msgid "Delete SMS"
 msgstr "删除短消息"
 
-#: xgnokii/xgnokii_sms.c:606
+#: xgnokii/xgnokii_sms.c:610
 msgid "Do you want to delete selected SMS?"
 msgstr "您想要删除选中的短消息吗？"
 
-#: xgnokii/xgnokii_sms.c:628
+#: xgnokii/xgnokii_sms.c:632
 #, c-format
 msgid "Cannot open mailbox %s for appending!"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:642
+#: xgnokii/xgnokii_sms.c:646
 #, c-format
 msgid ""
 "Cannot save to mailbox %s.\n"
 "\\%s is locked for process %d!"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:655
+#: xgnokii/xgnokii_sms.c:659
 #, c-format
 msgid "Cannot lock mailbox %s!"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:710
+#: xgnokii/xgnokii_sms.c:714
 #, c-format
 msgid "Cannot unlock mailbox %s!"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:758
+#: xgnokii/xgnokii_sms.c:762
 msgid "Choose Mailbox File"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:973 xgnokii/xgnokii_sms.c:1104
+#: xgnokii/xgnokii_sms.c:977 xgnokii/xgnokii_sms.c:1108
 msgid "Address line contains illegal address!"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:1077
+#: xgnokii/xgnokii_sms.c:1081
 #, c-format
 msgid ""
 "SMS send to %s failed\n"
 "(error=%d)"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:1163 xgnokii/xgnokii_sms.c:1195
+#: xgnokii/xgnokii_sms.c:1167 xgnokii/xgnokii_sms.c:1199
 #, c-format
 msgid "Sending SMS to %s (%d/%d) ...\n"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:1221
+#: xgnokii/xgnokii_sms.c:1225
 #, c-format
 msgid "Sending SMS to %s ...\n"
 msgstr ""
 
-#: xgnokii/xgnokii_sms.c:1257
+#: xgnokii/xgnokii_sms.c:1261
 msgid "/File/Sen_d"
 msgstr "/文件(F)/发送(_D)"
 
-#: xgnokii/xgnokii_sms.c:1260
+#: xgnokii/xgnokii_sms.c:1264
 msgid "/File/Check _Names"
 msgstr "/文件(F)/检查姓名(_N)"
 
-#: xgnokii/xgnokii_sms.c:1261
+#: xgnokii/xgnokii_sms.c:1265
 msgid "/File/C_ontacts"
 msgstr "/文件(F)/联系人(_O)"
 
-#: xgnokii/xgnokii_sms.c:1322
+#: xgnokii/xgnokii_sms.c:1326
 msgid "Send message"
 msgstr "发送消息"
 
-#: xgnokii/xgnokii_sms.c:1326
+#: xgnokii/xgnokii_sms.c:1330
 msgid "Save message to outbox"
 msgstr "将消息保存到发件箱"
 
-#: xgnokii/xgnokii_sms.c:1333
+#: xgnokii/xgnokii_sms.c:1337
 msgid "Check names"
 msgstr "检查姓名"
 
-#: xgnokii/xgnokii_sms.c:1346
+#: xgnokii/xgnokii_sms.c:1350
 msgid "To:"
 msgstr "收件人："
 
-#: xgnokii/xgnokii_sms.c:1417
+#: xgnokii/xgnokii_sms.c:1421
 msgid "Delivery report"
 msgstr "发送报告"
 
-#: xgnokii/xgnokii_sms.c:1421
+#: xgnokii/xgnokii_sms.c:1425
 msgid "Send as Long SMS"
 msgstr "发送为多条短消息"
 
-#: xgnokii/xgnokii_sms.c:1425
+#: xgnokii/xgnokii_sms.c:1429
 msgid "SMS Center:"
 msgstr "短消息中心："
 
-#: xgnokii/xgnokii_sms.c:1444
+#: xgnokii/xgnokii_sms.c:1448
 msgid "New Message"
 msgstr "新建消息"
 
-#: xgnokii/xgnokii_sms.c:1472
+#: xgnokii/xgnokii_sms.c:1476
 msgid "Forward Message"
 msgstr "转发消息"
 
-#: xgnokii/xgnokii_sms.c:1518
+#: xgnokii/xgnokii_sms.c:1522
 msgid "Reply Message"
 msgstr "回复消息"
 
-#: xgnokii/xgnokii_sms.c:1662
+#: xgnokii/xgnokii_sms.c:1666
 msgid "/File/Save to mailbo_x"
 msgstr "/文件(F)/保存到邮箱(_X)"
 
-#: xgnokii/xgnokii_sms.c:1663
+#: xgnokii/xgnokii_sms.c:1667
 msgid "/File/Save to _file"
 msgstr "/文件(F)/保存到文件(_F)"
 
-#: xgnokii/xgnokii_sms.c:1666
+#: xgnokii/xgnokii_sms.c:1670
 msgid "/_Messages"
 msgstr "/消息(_M)"
 
-#: xgnokii/xgnokii_sms.c:1667
+#: xgnokii/xgnokii_sms.c:1671
 msgid "/_Messages/(De)_Activate SMS reading"
 msgstr "/消息(_M)/激活短消息阅读(_A)"
 
-#: xgnokii/xgnokii_sms.c:1668
+#: xgnokii/xgnokii_sms.c:1672
 msgid "/_Messages/_New"
 msgstr "/消息(_M)/新建(_N)"
 
-#: xgnokii/xgnokii_sms.c:1669
+#: xgnokii/xgnokii_sms.c:1673
 msgid "/_Messages/_Forward"
 msgstr "/消息(_M)/转发(_F)"
 
-#: xgnokii/xgnokii_sms.c:1670
+#: xgnokii/xgnokii_sms.c:1674
 msgid "/_Messages/_Reply"
 msgstr "/消息(_M)/回复(_R)"
 
-#: xgnokii/xgnokii_sms.c:1671
+#: xgnokii/xgnokii_sms.c:1675
 msgid "/_Messages/_Delete"
 msgstr "/消息(_M)/删除(_D)"
 
-#: xgnokii/xgnokii_sms.c:1672
+#: xgnokii/xgnokii_sms.c:1676
 msgid "/Messages/Sep3"
 msgstr "/消息(_M)/Sep3"
 
-#: xgnokii/xgnokii_sms.c:1673
+#: xgnokii/xgnokii_sms.c:1677
 msgid "/_Messages/_Business card"
 msgstr "/消息(_M)/名片(_B)"
 
-#: xgnokii/xgnokii_sms.c:1694
+#: xgnokii/xgnokii_sms.c:1698
 msgid "Status"
 msgstr "状态"
 
-#: xgnokii/xgnokii_sms.c:1694
+#: xgnokii/xgnokii_sms.c:1698
 msgid "Date / Time"
 msgstr "日期/时间"
 
-#: xgnokii/xgnokii_sms.c:1694
+#: xgnokii/xgnokii_sms.c:1698
 msgid "Sender"
 msgstr "发送人"
 
-#: xgnokii/xgnokii_sms.c:1694
+#: xgnokii/xgnokii_sms.c:1698
 msgid "Message"
 msgstr "消息"
 
-#: xgnokii/xgnokii_sms.c:1730
+#: xgnokii/xgnokii_sms.c:1734
 msgid "New message"
 msgstr "新建消息"
 
-#: xgnokii/xgnokii_sms.c:1734
+#: xgnokii/xgnokii_sms.c:1738
 msgid "Forward message"
 msgstr "转发消息"
 
-#: xgnokii/xgnokii_sms.c:1738
+#: xgnokii/xgnokii_sms.c:1742
 msgid "Reply message"
 msgstr "回复消息"
 
-#: xgnokii/xgnokii_sms.c:1750
+#: xgnokii/xgnokii_sms.c:1754
 msgid "Delete message"
 msgstr "删除消息"
 
-#: xgnokii/xgnokii_sms.c:1775
+#: xgnokii/xgnokii_sms.c:1779
 msgid "SMS's"
 msgstr "短消息"
 
-#: xgnokii/xgnokii_speed.c:187
+#: xgnokii/xgnokii_speed.c:189
 msgid "Reading data ..."
 msgstr "正在读取数据..."
 
-#: xgnokii/xgnokii_speed.c:196 xgnokii/xgnokii_speed.c:202
-#: xgnokii/xgnokii_speed.c:262
+#: xgnokii/xgnokii_speed.c:198 xgnokii/xgnokii_speed.c:204
+#: xgnokii/xgnokii_speed.c:264
 msgid "Cannot allocate memory!"
 msgstr ""
 
-#: xgnokii/xgnokii_speed.c:274
+#: xgnokii/xgnokii_speed.c:276
 #, c-format
 msgid "Error writing speed dial for key %d!\n"
 msgstr ""
 
-#: xgnokii/xgnokii_speed.c:346
+#: xgnokii/xgnokii_speed.c:348
 msgid "Cannot allocate memory!\n"
 msgstr ""
 
-#: xgnokii/xgnokii_speed.c:357 xgnokii/xgnokii_speed.c:382
+#: xgnokii/xgnokii_speed.c:359 xgnokii/xgnokii_speed.c:384
 msgid "Error reading file!"
 msgstr ""
 
-#: xgnokii/xgnokii_speed.c:550
+#: xgnokii/xgnokii_speed.c:552
 msgid "Key"
 msgstr ""
 
-#: xgnokii/xgnokii_xkeyb.c:185
+#: xgnokii/xgnokii_xkeyb.c:186
 msgid "Cannot load background pixmap!"
 msgstr ""
 
-#: xgnokii/xgnokii_xkeyb.c:260
+#: xgnokii/xgnokii_xkeyb.c:261
 msgid "XGnokii Keyboard"
 msgstr "XGnokii 键盘"
 
-#: xgnokii/xgnokii_xring.c:396
+#: xgnokii/xgnokii_xring.c:397
 #, c-format
 msgid "User #%d (%s)"
 msgstr ""
 
-#: xgnokii/xgnokii_xring.c:415
+#: xgnokii/xgnokii_xring.c:416
 #, c-format
 msgid "User #%d (*EMPTY*)"
 msgstr ""
 
-#: xgnokii/xgnokii_xring.c:604
+#: xgnokii/xgnokii_xring.c:605
 #, c-format
 msgid ""
 "Error reading file\n"
 "(error=%s)"
 msgstr ""
 
-#: xgnokii/xgnokii_xring.c:619
+#: xgnokii/xgnokii_xring.c:620
 msgid "Open ringtone..."
 msgstr "打开铃音..."
 
-#: xgnokii/xgnokii_xring.c:641 xgnokii/xgnokii_xring.c:684
+#: xgnokii/xgnokii_xring.c:642 xgnokii/xgnokii_xring.c:685
 #, c-format
 msgid ""
 "Error writing file\n"
 "(error=%s)"
 msgstr ""
 
-#: xgnokii/xgnokii_xring.c:661
+#: xgnokii/xgnokii_xring.c:662
 msgid "Save ringtone as..."
 msgstr "铃音另存为..."
 
-#: xgnokii/xgnokii_xring.c:729
+#: xgnokii/xgnokii_xring.c:730
 #, c-format
 msgid ""
 "Error getting ringtone\n"
 "(error=%s)"
 msgstr ""
 
-#: xgnokii/xgnokii_xring.c:746
+#: xgnokii/xgnokii_xring.c:747
 #, c-format
 msgid ""
 "Error setting ringtone\n"
 "(error=%s)"
 msgstr ""
 
-#: xgnokii/xgnokii_xring.c:765
+#: xgnokii/xgnokii_xring.c:766
 #, c-format
 msgid ""
 "Error deleting ringtone\n"
 "(error=%s)"
 msgstr ""
 
-#: xgnokii/xgnokii_xring.c:813
+#: xgnokii/xgnokii_xring.c:814
 msgid "/File/S1"
 msgstr "/文件(F)/S1"
 
-#: xgnokii/xgnokii_xring.c:814
+#: xgnokii/xgnokii_xring.c:815
 msgid "/File/_Get ringtone"
 msgstr "/文件(F)/获得铃音(_G)"
 
-#: xgnokii/xgnokii_xring.c:815
+#: xgnokii/xgnokii_xring.c:816
 msgid "/File/Se_t ringtone"
 msgstr "/文件(F)/设定铃音(_T)"
 
-#: xgnokii/xgnokii_xring.c:816
+#: xgnokii/xgnokii_xring.c:817
 msgid "/File/Delete ringtone"
 msgstr "/文件(F)/删除铃音"
 
-#: xgnokii/xgnokii_xring.c:817
+#: xgnokii/xgnokii_xring.c:818
 msgid "/File/_Play"
 msgstr "/文件(F)/播放(_P)"
 
-#: xgnokii/xgnokii_xring.c:818
+#: xgnokii/xgnokii_xring.c:819
 msgid "/File/S2"
 msgstr "/文件(F)/S2"
 
-#: xgnokii/xgnokii_xring.c:857
+#: xgnokii/xgnokii_xring.c:858
 msgid "Clear ringtone"
 msgstr "清除铃音"
 
-#: xgnokii/xgnokii_xring.c:863
+#: xgnokii/xgnokii_xring.c:864
 msgid "Get ringtone"
 msgstr "获得铃音"
 
-#: xgnokii/xgnokii_xring.c:867
+#: xgnokii/xgnokii_xring.c:868
 msgid "Set ringtone"
 msgstr "设定铃音"
 
-#: xgnokii/xgnokii_xring.c:871
+#: xgnokii/xgnokii_xring.c:872
 msgid "Delete ringtone"
 msgstr "删除铃音"
 
-#: xgnokii/xgnokii_xring.c:887
+#: xgnokii/xgnokii_xring.c:888
 msgid "Play"
 msgstr "播放"
 
-#: xgnokii/xgnokii_xring.c:896
+#: xgnokii/xgnokii_xring.c:897
 msgid "Select ringtone"
 msgstr "选择铃音"
 
-#: xgnokii/xgnokii_xring.c:901
+#: xgnokii/xgnokii_xring.c:902
 msgid "Ringtone name"
 msgstr "铃音名称"
 
-#: xgnokii/xgnokii_xring.c:913
+#: xgnokii/xgnokii_xring.c:914
 msgid "Set tempo"
 msgstr "设置节奏"
