@@ -3759,8 +3759,10 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 	switch (message[3]) {
 	/* get call status */
 	case 0x21:
-		if (!data->call_active) return GN_ERR_INTERNALERROR;
-		if (message[5] != 0xff) return GN_ERR_UNHANDLEDFRAME;
+		if (!data->call_active)
+			return GN_ERR_INTERNALERROR;
+		if (message[5] != 0xff)
+			return GN_ERR_UNHANDLEDFRAME;
 		pos = message + 6;
 		ca = data->call_active;
 		memset(ca, 0x00, 2 * sizeof(gn_call_active));
@@ -3769,24 +3771,54 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 			ca[i].call_id = pos[2];
 			ca[i].channel = pos[3];
 			switch (pos[4]) {
-			case 0x00: ca[i].state = GN_CALL_Idle; break; /* missing number, wait a little */
-			case 0x02: ca[i].state = GN_CALL_Dialing; break;
-			case 0x03: ca[i].state = GN_CALL_Ringing; break;
-			case 0x04: ca[i].state = GN_CALL_Incoming; break;
-			case 0x05: ca[i].state = GN_CALL_Established; break;
-			case 0x06: ca[i].state = GN_CALL_Held; break;
-			case 0x07: ca[i].state = GN_CALL_RemoteHangup; break;
-			default: return GN_ERR_UNHANDLEDFRAME;
+			case 0x00:
+				ca[i].state = GN_CALL_Idle;
+				break; /* missing number, wait a little */
+			case 0x02:
+				ca[i].state = GN_CALL_Dialing;
+				break;
+			case 0x03:
+				ca[i].state = GN_CALL_Ringing;
+				break;
+			case 0x04:
+				ca[i].state = GN_CALL_Incoming;
+				break;
+			case 0x05:
+				ca[i].state = GN_CALL_Established;
+				break;
+			case 0x06:
+				ca[i].state = GN_CALL_Held;
+				break;
+			case 0x07:
+				ca[i].state = GN_CALL_RemoteHangup;
+				break;
+			default:
+				return GN_ERR_UNHANDLEDFRAME;
 			}
 			switch (pos[5]) {
-			case 0x00: ca[i].prev_state = GN_CALL_Idle; break; /* missing number, wait a little */
-			case 0x02: ca[i].prev_state = GN_CALL_Dialing; break;
-			case 0x03: ca[i].prev_state = GN_CALL_Ringing; break;
-			case 0x04: ca[i].prev_state = GN_CALL_Incoming; break;
-			case 0x05: ca[i].prev_state = GN_CALL_Established; break;
-			case 0x06: ca[i].prev_state = GN_CALL_Held; break;
-			case 0x07: ca[i].prev_state = GN_CALL_RemoteHangup; break;
-			default: return GN_ERR_UNHANDLEDFRAME;
+			case 0x00:
+				ca[i].prev_state = GN_CALL_Idle;
+				break; /* missing number, wait a little */
+			case 0x02:
+				ca[i].prev_state = GN_CALL_Dialing;
+				break;
+			case 0x03:
+				ca[i].prev_state = GN_CALL_Ringing;
+				break;
+			case 0x04:
+				ca[i].prev_state = GN_CALL_Incoming;
+				break;
+			case 0x05:
+				ca[i].prev_state = GN_CALL_Established;
+				break;
+			case 0x06:
+				ca[i].prev_state = GN_CALL_Held;
+				break;
+			case 0x07:
+				ca[i].prev_state = GN_CALL_RemoteHangup;
+				break;
+			default:
+				return GN_ERR_UNHANDLEDFRAME;
 			}
 			char_unicode_decode(ca[i].name, pos + 12, 2 * pos[10]);
 			char_unicode_decode(ca[i].number, pos + 112, 2 * pos[11]);
@@ -3794,7 +3826,8 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		}
 		dprintf("Call status:\n");
 		for (i = 0; i < 2; i++) {
-			if (ca[i].state == GN_CALL_Idle) continue;
+			if (ca[i].state == GN_CALL_Idle)
+				continue;
 			dprintf("ch#%d: id#%d st#%d pst#%d %s (%s)\n",
 				ca[i].channel, ca[i].call_id, ca[i].state, ca[i].prev_state, ca[i].number, ca[i].name);
 		}
@@ -3811,7 +3844,6 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 	default:
 		dprintf("Unknown subtype of type 0x01 (%d)\n", message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
-		break;
 	}
 	return GN_ERR_NONE;
 }
@@ -3820,7 +3852,8 @@ static gn_error NK6510_GetActiveCalls(gn_data *data, struct gn_statemachine *sta
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x20};
 
-	if (!data->call_active) return GN_ERR_INTERNALERROR;
+	if (!data->call_active)
+		return GN_ERR_INTERNALERROR;
 
 	SEND_MESSAGE_BLOCK(NK6510_MSG_COMMSTATUS, 4);
 }
@@ -3833,7 +3866,8 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 	gn_call_active active[2];
 	gn_data d;
 
-	if (!data->call_info) return GN_ERR_INTERNALERROR;
+	if (!data->call_info)
+		return GN_ERR_INTERNALERROR;
 
 	switch (data->call_info->type) {
 	case GN_CALL_Voice:
@@ -3859,21 +3893,31 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 	pos += len;
 
 	switch (data->call_info->send_number) {	
-	case GN_CALL_Never:   voice_end[5] = 0x01; break;
-	case GN_CALL_Always:  voice_end[5] = 0x00; break;
-	case GN_CALL_Default: voice_end[5] = 0x00; break;
-	default: return GN_ERR_INTERNALERROR;
+	case GN_CALL_Never:
+		voice_end[5] = 0x01;
+		break;
+	case GN_CALL_Always:
+		voice_end[5] = 0x00;
+		break;
+	case GN_CALL_Default:
+		voice_end[5] = 0x00;
+		break;
+	default:
+		return GN_ERR_INTERNALERROR;
 	}
 	memcpy(req + pos, voice_end, sizeof(voice_end));
 	pos += sizeof(voice_end);
 
-	if (sm_message_send(pos, NK6510_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
-	if (sm_block_ack(state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (sm_message_send(pos, NK6510_MSG_COMMSTATUS, req, state))
+		return GN_ERR_NOTREADY;
+	if (sm_block_ack(state) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 
 	memset(active, 0, sizeof(*active));
 	gn_data_clear(&d);
 	d.call_active = active;
-	if (NK6510_GetActiveCalls(&d, state) != GN_ERR_NONE) return GN_ERR_NOTREADY;
+	if (NK6510_GetActiveCalls(&d, state) != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
 	data->call_info->call_id = active[0].call_id;
 
 	return GN_ERR_NONE;
@@ -3883,11 +3927,13 @@ static gn_error NK6510_CancelCall(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x08, 0x00};
 
-	if (!data->call_info) return GN_ERR_INTERNALERROR;
+	if (!data->call_info)
+		return GN_ERR_INTERNALERROR;
 
 	req[4] = data->call_info->call_id;
 
-	if (sm_message_send(5, NK6510_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	if (sm_message_send(5, NK6510_MSG_COMMSTATUS, req, state))
+		return GN_ERR_NOTREADY;
 	return sm_block_ack(state);
 }
 
@@ -3895,11 +3941,13 @@ static gn_error NK6510_AnswerCall(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x06, 0x00};
 
-	if (!data->call_info) return GN_ERR_INTERNALERROR;
+	if (!data->call_info)
+		return GN_ERR_INTERNALERROR;
 
 	req[4] = data->call_info->call_id;
 
-	if (sm_message_send(5, NK6510_MSG_COMMSTATUS, req, state)) return GN_ERR_NOTREADY;
+	if (sm_message_send(5, NK6510_MSG_COMMSTATUS, req, state))
+		return GN_ERR_NOTREADY;
 	return sm_block_ack(state);
 }
 
