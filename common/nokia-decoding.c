@@ -170,11 +170,12 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->data.date.hour   = blockstart[10];
 			subentry->data.date.minute = blockstart[11];
 			subentry->data.date.second = blockstart[12];
-			dprintf("   Date: %04u.%02u.%04u\n", subentry->data.date.year,
+			dprintf("   Date: %04u.%02u.%02u\n", subentry->data.date.year,
 				subentry->data.date.month, subentry->data.date.day);
 			dprintf("   Time: %02u:%02u:%02u\n", subentry->data.date.hour,
 				subentry->data.date.minute, subentry->data.date.second);
 			subblock_count++;
+			data->phonebook_entry->subentries_count++;
 			break;
 		case GN_PHONEBOOK_ENTRY_Logo:   /* Caller group logo */
 			if (data->bitmap) {

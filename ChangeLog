@@ -12,10 +12,14 @@
     o add progress information for GetFile()            (Pawel Kot)
  * gnokii updates
     o fix the segfault with --getfile when no local_filename is
-    given and remote_filename does not contain '/' character
-    (eg. it was given with '\\' charaters)              (Pawel Kot)
+      given and remote_filename does not contain '/' character
+      (eg. it was given with '\\' charaters)            (Pawel Kot)
+    o show the (missed, dialled, etc) calls date and time
+                                                        (Pawel Kot)
  * translation updates
     o updated Estonian translation                  (Hans Motshärg)
+ * libgnokii updates
+    o return all call dates as subentries               (Pawel Kot)
 
 0.6.5
 =====

@@ -3327,6 +3327,7 @@ static int getphonebook(int argc, char *argv[])
 				break;
 			default:
 				fprintf(stdout, _("%d. Name: %s\nNumber: %s\nGroup id: %d\n"), entry.location, entry.name, entry.number, entry.caller_group);
+				dprintf("subentries count: %d\n", entry.subentries_count);
 				for (i = 0; i < entry.subentries_count; i++) {
 					switch (entry.subentries[i].entry_type) {
 					case GN_PHONEBOOK_ENTRY_Email:
@@ -3364,6 +3365,7 @@ static int getphonebook(int argc, char *argv[])
 						fprintf(stdout, _("WWW address: "));
 						break;
 					case GN_PHONEBOOK_ENTRY_Date:
+						fprintf(stdout, _("Date: %04u.%02u.%02u %02u:%02u:%02u\n"), entry.subentries[i].data.date.year, entry.subentries[i].data.date.month, entry.subentries[i].data.date.day, entry.subentries[i].data.date.hour, entry.subentries[i].data.date.minute, entry.subentries[i].data.date.second);
 						break;
 					default:
 						fprintf(stdout, _("Unknown (%d): "), entry.subentries[i].entry_type);
@@ -3372,8 +3374,11 @@ static int getphonebook(int argc, char *argv[])
 					if (entry.subentries[i].entry_type != GN_PHONEBOOK_ENTRY_Date)
 						fprintf(stdout, "%s\n", entry.subentries[i].data.number);
 				}
-				if (entry.memory_type == GN_MT_MC || entry.memory_type == GN_MT_DC || entry.memory_type == GN_MT_RC)
-					fprintf(stdout, _("Date: %02u.%02u.%04u %02u:%02u:%02u\n"), entry.date.day, entry.date.month, entry.date.year, entry.date.hour, entry.date.minute, entry.date.second);
+				if ((entry.memory_type == GN_MT_MC ||
+				     entry.memory_type == GN_MT_DC ||
+				     entry.memory_type == GN_MT_RC) &&
+				    entry.date.year)
+					fprintf(stdout, _("Date: %02u.%02u.%04u %02u:%02u:%02u\n"), entry.date.year, entry.date.month, entry.date.day, entry.date.hour, entry.date.minute, entry.date.second);
 				break;
 			}
 			break;
