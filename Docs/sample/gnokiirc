@@ -18,8 +18,15 @@ port = /dev/ttyS0
 # Use this setting also for the Bluetooth connection:
 # port = aa:bb:cc:dd:ee:ff
 
-# Set model to the model number of your phone
-model = 6110
+# Set model to the model number of your phone. For the
+# Symbian phones use:
+# model = series60
+# For other non-Nokia phones and when you want to use AT
+# mode use:
+# model = AT
+# If you can't figure out what to put here read the FAQ.
+# If it still doesn't help, consult gnokii-ml or #gnokii at freenode.
+model = 6510
 
 # Initlength controls the number of characters sent to the
 # phone during initialisation.  You can either set it to
