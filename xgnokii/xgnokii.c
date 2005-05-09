@@ -1202,9 +1202,10 @@ static GtkWidget *CreateAboutDialog(void)
 
 	g_snprintf(buf, 2000, _("xgnokii version: %s\ngnokii version: %s\n\n\
 Copyright (C) 1999-2004 Pavel Janik ml.,\nHugh Blemings, Jan Derfinak,\n\
-Pawel Kot and others xgnokii is free software, covered by the GNU General\n\
-Public License, and you are welcome to change it and/or distribute copies\n\
-of it under certain conditions. There is absolutely no waranty for xgnokii.\n\
+Pawel Kot and others\n\
+xgnokii is free software, covered by the GNU General Public License,\n\
+d you are welcome to change it and/or distribute copies of it under\n\
+certain conditions. There is absolutely no waranty for xgnokii.\n\
 See GPL for details.\n"), XVERSION, VERSION);
 	label = gtk_label_new((gchar *) buf);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);
