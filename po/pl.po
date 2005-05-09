@@ -2,16 +2,15 @@
 # translation of pl.po to polish
 # This is the Polish locale definition for Gnokii.
 # Copyright (C) 2000 Jacek Fiok <j.fiok@zodiac.mimuw.edu.pl>.
-# Copyright (C) 2002 Pawe³ Kot <pkot@linuxnews.pl>.
-# Daniel Koæ <kocio@linuxnews.pl>, 2003, 2004.
-# Pawe³ Kot <pkot@bezsensu.pl>, 2005.
+# Copyright (C) 2002, 2005 Pawe³ Kot
+# Copyright (C) 2003, 2004 Daniel Koæ <kocio@linuxnews.pl>
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
 "POT-Creation-Date: 2005-05-03 23:58+0200\n"
-"PO-Revision-Date: 2005-05-09 01:34+0200\n"
+"PO-Revision-Date: 2005-05-09 22:40+0200\n"
 "Last-Translator: Pawe³ Kot <pkot@bezsensu.pl>\n"
 "Language-Team: Polish <pl@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -2574,11 +2573,11 @@ msgstr "Wczytywanie nazw grup..."
 
 #: xgnokii/xgnokii.c:236
 msgid "No group"
-msgstr "¯adna grupa"
+msgstr "Brak grupy"
 
 #: xgnokii/xgnokii.c:357
 msgid "Short Message received"
-msgstr "otrzymano wiadomo¶æ"
+msgstr "Otrzymano wiadomo¶æ SMS"
 
 #: xgnokii/xgnokii.c:363
 msgid "Working ..."
@@ -2586,7 +2585,7 @@ msgstr "Pracujê ..."
 
 #: xgnokii/xgnokii.c:380
 msgid "Call in progress"
-msgstr "Rozmowa trwa"
+msgstr "Trwa rozmowa"
 
 #: xgnokii/xgnokii.c:393
 msgid "Hide"
@@ -2672,7 +2671,7 @@ msgstr "Kalendarz"
 
 #: xgnokii/xgnokii.c:1117 xgnokii/xgnokii_logos.c:1544
 msgid "Logos"
-msgstr "Loga"
+msgstr "Logo"
 
 #: xgnokii/xgnokii.c:1123
 msgid "DTMF"
@@ -2693,11 +2692,11 @@ msgstr "Monitor sieci"
 #: xgnokii/xgnokii.c:1143 xgnokii/xgnokii_xring.c:829
 #, fuzzy
 msgid "Ringtone"
-msgstr "Dzwonek\n"
+msgstr "Dzwonek"
 
 #: xgnokii/xgnokii.c:1148
 msgid "Data calls"
-msgstr "Po³±czenia danych"
+msgstr "Transmisja danych"
 
 #: xgnokii/xgnokii.c:1157 xgnokii/xgnokii.c:1580
 msgid "Options"
@@ -2739,11 +2738,10 @@ msgstr ""
 "gnokii wersja: %s\n"
 "\n"
 "Copyright (C) 1999,2000 Pavel Jank ml.,\n"
-"Hugh Blemings, Jan Derfinak i inni\n"
-"xgnokii jest Wolnym Oprogramowaniem na licencji GNU General Public License, "
-"masz prawo\n"
-"je zmieniaæ i/lub rozpowszechniaæ pod kilkoma warunkami.\n"
-"Nie ma ¿adnej gwarancji na xgnokii. Po wiêcej szczegó³ów siêgnij do GPL.\n"
+"Hugh Blemings, Jan Derfinak, Pawe³ Kot i inni\n"
+"xgnokii jest Wolnym Oprogramowaniem na licencji GNU General Public License.\n"
+"Masz prawo je zmieniaæ i/lub rozpowszechniaæ pod kilkoma warunkami.\n"
+"Nie ma ¿adnej gwarancji na xgnokii. Szczegó³y znajdziesz w tre¶ci GPL.\n"
 
 #: xgnokii/xgnokii.c:1357
 msgid "Edit SMS Setting"
@@ -2829,19 +2827,19 @@ msgstr "Model:"
 
 #: xgnokii/xgnokii.c:1655
 msgid "Init length:"
-msgstr "Pocz±tkowa d³ugo¶æ:"
+msgstr "D³ugo¶æ sekwencji inicjalizuj±cej:"
 
 #: xgnokii/xgnokii.c:1669
 msgid "Bindir:"
-msgstr "Bindir:"
+msgstr "Katalog z binariami:"
 
 #: xgnokii/xgnokii.c:1683
 msgid "Connection:"
-msgstr "Po³±czenie:"
+msgstr "Type po³±czenia:"
 
 #: xgnokii/xgnokii.c:1687
 msgid "infrared"
-msgstr "podczerwieñ (IR)"
+msgstr "podczerwieñ (protokó³ Nokia, tylko modele 6110, 6130, 6150))"
 
 #: xgnokii/xgnokii.c:1694
 msgid "serial"
@@ -2849,7 +2847,7 @@ msgstr "szeregowe (serial)"
 
 #: xgnokii/xgnokii.c:1701
 msgid "irda"
-msgstr "irda"
+msgstr "podczerwieñ (protokó³ IrDA)"
 
 #: xgnokii/xgnokii.c:1706
 msgid "Phone information"
@@ -2873,7 +2871,7 @@ msgstr "IMEI:"
 
 #: xgnokii/xgnokii.c:1776
 msgid "Names length:"
-msgstr "D³ugo¶æ nazw:"
+msgstr "Maksymalna d³ugo¶æ nazw:"
 
 #: xgnokii/xgnokii.c:1784
 msgid "SIM:"
@@ -2905,7 +2903,7 @@ msgstr "Edycja"
 #: xgnokii/xgnokii.c:1891 xgnokii/xgnokii_sms.c:1571
 #: xgnokii/xgnokii_sms.c:1747
 msgid "Business Card"
-msgstr "Business Card"
+msgstr "Wizytówka"
 
 #: xgnokii/xgnokii.c:1897
 msgid "User"
@@ -2955,7 +2953,7 @@ msgstr "Grupa %d:"
 
 #: xgnokii/xgnokii.c:2117
 msgid "Mailbox"
-msgstr "Skrzynka"
+msgstr "Skrzynka pocztowa"
 
 #: xgnokii/xgnokii.c:2124
 msgid "Mail"
@@ -2963,15 +2961,15 @@ msgstr "E-mail"
 
 #: xgnokii/xgnokii.c:2131
 msgid "Path to mailbox:"
-msgstr "¦cie¿ka do skrzynki:"
+msgstr "¦cie¿ka do skrzynki pocztowej:"
 
 #: xgnokii/xgnokii.c:2142
 msgid "Help viewer"
-msgstr "Ogl±dacz pomocy"
+msgstr "Przegl±darka pomocy"
 
 #: xgnokii/xgnokii.c:2156
 msgid "Viewer:"
-msgstr "Ogl±dacz:"
+msgstr "Przegl±darka:"
 
 #: xgnokii/xgnokii_calendar.c:144
 msgid "Reminder"
@@ -3028,7 +3026,7 @@ msgstr "Numer: "
 
 #: xgnokii/xgnokii_calendar.c:310
 msgid "Recurrence: "
-msgstr ""
+msgstr "Powtarzalno¶æ:"
 
 #: xgnokii/xgnokii_calendar.c:318
 msgid "Text: "
@@ -3091,11 +3089,11 @@ msgstr "Dodaj urodziny"
 
 #: xgnokii/xgnokii_calendar.c:1443
 msgid "Delete calendar note"
-msgstr "Kasowanie notatki"
+msgstr "Usuñ notatkê"
 
 #: xgnokii/xgnokii_calendar.c:1475
 msgid "Do you want to delete selected note(s)?"
-msgstr "Czy chcesz skasowaæ zaznaczone notatki?"
+msgstr "Czy chcesz usun±æ zaznaczone notatki?"
 
 #: xgnokii/xgnokii_calendar.c:1512 xgnokii/xgnokii_contacts.c:3290
 #: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1493
@@ -3120,17 +3118,17 @@ msgstr "/Plik/Zapis do telefonu"
 #: xgnokii/xgnokii_sms.c:1263 xgnokii/xgnokii_sms.c:1668
 #: xgnokii/xgnokii_speed.c:528
 msgid "/File/Sep1"
-msgstr ""
+msgstr "/Plik/Sep1"
 
 #: xgnokii/xgnokii_calendar.c:1516
 msgid "/File/Send via S_MS"
-msgstr "/Plik/Wy¶lij wiadomo¶æ"
+msgstr "/Plik/Wy¶lij wiadomo¶æ SMS"
 
 #: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3296
 #: xgnokii/xgnokii_logos.c:1501 xgnokii/xgnokii_sms.c:1266
 #: xgnokii/xgnokii_speed.c:531
 msgid "/File/Sep2"
-msgstr ""
+msgstr "/Plik/Sep2"
 
 #: xgnokii/xgnokii_calendar.c:1518 xgnokii/xgnokii_contacts.c:3294
 #: xgnokii/xgnokii_speed.c:529
@@ -3144,7 +3142,7 @@ msgstr "/Plik/Eksport do pliku"
 
 #: xgnokii/xgnokii_calendar.c:1520
 msgid "/File/Sep3"
-msgstr ""
+msgstr "/Plik/Sep3"
 
 #: xgnokii/xgnokii_calendar.c:1521 xgnokii/xgnokii_contacts.c:3297
 #: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1502
@@ -3183,7 +3181,7 @@ msgstr "/Edycja/_Usuñ"
 #: xgnokii/xgnokii_calendar.c:1531 xgnokii/xgnokii_contacts.c:3305
 #: xgnokii/xgnokii_logos.c:1511
 msgid "/Edit/Sep4"
-msgstr ""
+msgstr "/Edycja/Sep4"
 
 #: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3309
 msgid "/Edit/Select _all"
@@ -3229,7 +3227,7 @@ msgstr "Numer"
 
 #: xgnokii/xgnokii_calendar.c:1551
 msgid "Recurrence"
-msgstr ""
+msgstr "Powtarzalno¶æ"
 
 #: xgnokii/xgnokii_calendar.c:1585 xgnokii/xgnokii_contacts.c:3366
 #: xgnokii/xgnokii_speed.c:588
@@ -3243,7 +3241,7 @@ msgstr "Zapis do telefonu"
 
 #: xgnokii/xgnokii_calendar.c:1596
 msgid "Send via SMS"
-msgstr "Wy¶lij jako wiadomo¶æ"
+msgstr "Wy¶lij jako wiadomo¶æ SMS"
 
 #: xgnokii/xgnokii_calendar.c:1603 xgnokii/xgnokii_contacts.c:3377
 #: xgnokii/xgnokii_logos.c:1591 xgnokii/xgnokii_speed.c:599
@@ -3350,7 +3348,7 @@ msgstr "Nie mogê znale¼æ ¶cie¿ki!"
 
 #: xgnokii/xgnokii_contacts.c:1110
 msgid "Delete"
-msgstr "Skasuj"
+msgstr "Usuñ"
 
 #: xgnokii/xgnokii_contacts.c:1129
 msgid "Number/Text:"
@@ -3387,11 +3385,11 @@ msgstr "Grupa:"
 
 #: xgnokii/xgnokii_contacts.c:1613
 msgid "Delete entries"
-msgstr "Kasowanie pozycji"
+msgstr "Usuñ pozycje"
 
 #: xgnokii/xgnokii_contacts.c:1645
 msgid "Do you want to delete selected entries?"
-msgstr "Czy chcesz skasowaæ zaznaczone pozycje?"
+msgstr "Czy chcesz usun±æ zaznaczone pozycje?"
 
 #: xgnokii/xgnokii_contacts.c:1663 xgnokii/xgnokii_contacts.c:3388
 msgid "New entry"
@@ -3420,15 +3418,15 @@ msgid ""
 "some entries may be truncated."
 msgstr ""
 "Jesli zmienisz pamiêæ telefonu na SIM\n"
-"niektóre wpisy mog± zostaæ skrócone."
+"niektóre wpisy mog± zostaæ uciête."
 
 #: xgnokii/xgnokii_contacts.c:1896 xgnokii/xgnokii_contacts.c:1902
 msgid "Find"
-msgstr "Szukanie"
+msgstr "Szukaj"
 
 #: xgnokii/xgnokii_contacts.c:1928
 msgid "Pattern:"
-msgstr "Scie¿ka:"
+msgstr "Wzorzec:"
 
 #: xgnokii/xgnokii_contacts.c:1943 xgnokii/xgnokii_contacts.c:3330
 #: xgnokii/xgnokii_speed.c:552
@@ -3437,7 +3435,7 @@ msgstr "Nazwa"
 
 #: xgnokii/xgnokii_contacts.c:1992 xgnokii/xgnokii_contacts.c:3407
 msgid "Dial voice"
-msgstr "Dzwoñ (voice)"
+msgstr "Dzwoñ"
 
 #: xgnokii/xgnokii_contacts.c:2124
 msgid "Phone memory..."
@@ -3516,7 +3514,7 @@ msgstr ""
 
 #: xgnokii/xgnokii_contacts.c:2779 xgnokii/xgnokii_speed.c:482
 msgid "Export"
-msgstr "Eksport"
+msgstr "Eksportuj"
 
 #: xgnokii/xgnokii_contacts.c:2810 xgnokii/xgnokii_dtmf.c:99
 #: xgnokii/xgnokii_speed.c:332
@@ -3526,7 +3524,7 @@ msgstr "Nie mo¿na otworzyæ pliku %s do odczytu!"
 
 #: xgnokii/xgnokii_contacts.c:2961 xgnokii/xgnokii_speed.c:403
 msgid "Import"
-msgstr "Import"
+msgstr "Importuj"
 
 #: xgnokii/xgnokii_contacts.c:3154 xgnokii/xgnokii_sms.c:1374
 msgid "Select contacts"
@@ -3546,7 +3544,7 @@ msgstr "/Edycja/Edycja"
 
 #: xgnokii/xgnokii_contacts.c:3303 xgnokii/xgnokii_logos.c:1506
 msgid "/Edit/Sep3"
-msgstr ""
+msgstr "/Edycja/Sep3"
 
 #: xgnokii/xgnokii_contacts.c:3304
 msgid "/Edit/_Change memory type"
@@ -3562,7 +3560,7 @@ msgstr "/Edycja/Znajd¼ nastêpne"
 
 #: xgnokii/xgnokii_contacts.c:3308
 msgid "/Edit/Sep5"
-msgstr ""
+msgstr "/Edycja/Sep5"
 
 #: xgnokii/xgnokii_contacts.c:3310
 msgid "/_Dial"
@@ -3633,7 +3631,7 @@ msgstr "/Plik/_Zapisz"
 
 #: xgnokii/xgnokii_dtmf.c:249
 msgid "Dial Tone"
-msgstr "Dial Tone"
+msgstr "Wybieranie tonowe"
 
 #: xgnokii/xgnokii_logos.c:993
 #, c-format
@@ -3699,7 +3697,7 @@ msgstr "/Plik/Zapisz jako..."
 
 #: xgnokii/xgnokii_logos.c:1498
 msgid "/File/_Get operator"
-msgstr ""
+msgstr "/Plik/Pobierz operatora"
 
 #: xgnokii/xgnokii_logos.c:1499
 msgid "/File/Get _logo"
@@ -3719,19 +3717,19 @@ msgstr "/Edycja/Inwersja"
 
 #: xgnokii/xgnokii_logos.c:1507
 msgid "/Edit/_Up logo"
-msgstr ""
+msgstr "/Edycja/Logo w górê"
 
 #: xgnokii/xgnokii_logos.c:1508
 msgid "/Edit/_Down logo"
-msgstr ""
+msgstr "/Edycja/Logo w dó³"
 
 #: xgnokii/xgnokii_logos.c:1509
 msgid "/Edit/_Left logo"
-msgstr ""
+msgstr "/Edycja/Logo w lewo"
 
 #: xgnokii/xgnokii_logos.c:1510
 msgid "/Edit/_Right logo"
-msgstr ""
+msgstr "/Edycja/Logo w prawo"
 
 #: xgnokii/xgnokii_logos.c:1512
 msgid "/Edit/Flip _horizontal"
@@ -3816,15 +3814,15 @@ msgstr "Odswie¿anie wiadomo¶ci..."
 
 #: xgnokii/xgnokii_netmon.c:267
 msgid "/_Tools"
-msgstr "/Narzêdzia"
+msgstr "/_Narzêdzia"
 
 #: xgnokii/xgnokii_netmon.c:268
 msgid "/Tools/Net monitor o_n"
-msgstr "/Narzêdzia/Monitor sieci"
+msgstr "/Narzêdzia/Monitor sieci _w³±czony"
 
 #: xgnokii/xgnokii_netmon.c:269
 msgid "/Tools/Net monitor o_ff"
-msgstr "/Narzêdzia/Monitor sieci wy³±czony"
+msgstr "/Narzêdzia/Monitor sieci w_y³±czony"
 
 #: xgnokii/xgnokii_netmon.c:386 xgnokii/xgnokii_netmon.c:389
 msgid "Active cell"
@@ -4189,7 +4187,7 @@ msgstr "Odpowiedz"
 
 #: xgnokii/xgnokii_sms.c:1666
 msgid "/File/Save to mailbo_x"
-msgstr "/Plik/Zapisz do _skrzynki"
+msgstr "/Plik/Zapisz do _skrzynki pocztowej"
 
 #: xgnokii/xgnokii_sms.c:1667
 msgid "/File/Save to _file"
@@ -4221,7 +4219,7 @@ msgstr "/_Wiadomo¶ci/_Usuñ"
 
 #: xgnokii/xgnokii_sms.c:1676
 msgid "/Messages/Sep3"
-msgstr ""
+msgstr "/Wiadomo¶ci/Sep3"
 
 #: xgnokii/xgnokii_sms.c:1677
 msgid "/_Messages/_Business card"
@@ -4261,7 +4259,7 @@ msgstr "Usuñ"
 
 #: xgnokii/xgnokii_sms.c:1779
 msgid "SMS's"
-msgstr "SMS-y"
+msgstr "SMSy"
 
 #: xgnokii/xgnokii_speed.c:189
 msgid "Reading data ..."
@@ -4365,68 +4363,68 @@ msgstr ""
 #: xgnokii/xgnokii_xring.c:814
 #, fuzzy
 msgid "/File/S1"
-msgstr "/Plik/_Wy¶lij"
+msgstr "/Plik/S1"
 
 #: xgnokii/xgnokii_xring.c:815
 #, fuzzy
 msgid "/File/_Get ringtone"
-msgstr "/Plik/_Pobierz logo"
+msgstr "/Plik/_Pobierz dzwonek"
 
 #: xgnokii/xgnokii_xring.c:816
 #, fuzzy
 msgid "/File/Se_t ringtone"
-msgstr "/Plik/_Ustaw logo"
+msgstr "/Plik/Us_taw dzwonek"
 
 #: xgnokii/xgnokii_xring.c:817
 #, fuzzy
 msgid "/File/Delete ringtone"
-msgstr "NIe uda³o siê zapisaæ dzwonka: %s\n"
+msgstr "/Plik/Usuñ dzwonek"
 
 #: xgnokii/xgnokii_xring.c:818
 #, fuzzy
 msgid "/File/_Play"
-msgstr "/Plik/_Zapisz"
+msgstr "/Plik/_Graj"
 
 #: xgnokii/xgnokii_xring.c:819
 #, fuzzy
 msgid "/File/S2"
-msgstr "/Plik/_Wy¶lij"
+msgstr "/Plik/S2"
 
 #: xgnokii/xgnokii_xring.c:858
 #, fuzzy
 msgid "Clear ringtone"
-msgstr "Usuñ logo"
+msgstr "Usuñ dzwonek"
 
 #: xgnokii/xgnokii_xring.c:864
 #, fuzzy
 msgid "Get ringtone"
-msgstr "Dzwonek\n"
+msgstr "Pobierz dzwonek"
 
 #: xgnokii/xgnokii_xring.c:868
 #, fuzzy
 msgid "Set ringtone"
-msgstr "Dzwonek\n"
+msgstr "Ustaw dzwonek"
 
 #: xgnokii/xgnokii_xring.c:872
 #, fuzzy
 msgid "Delete ringtone"
-msgstr "Kasowanie notatki"
+msgstr "Usuñ dzwonek"
 
 #: xgnokii/xgnokii_xring.c:888
 msgid "Play"
-msgstr ""
+msgstr "Graj"
 
 #: xgnokii/xgnokii_xring.c:897
 #, fuzzy
 msgid "Select ringtone"
-msgstr "Kasowanie notatki"
+msgstr "Wybierz dzwonek"
 
 #: xgnokii/xgnokii_xring.c:902
 #, fuzzy
 msgid "Ringtone name"
-msgstr "Dzwonek\n"
+msgstr "Nazwa dzwonka"
 
 #: xgnokii/xgnokii_xring.c:914
 msgid "Set tempo"
-msgstr ""
+msgstr "Ustaw temo"
 
