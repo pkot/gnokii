@@ -22,6 +22,7 @@
  * libgnokii updates
     o return all call dates as subentries               (Pawel Kot)
     o unify error messages in unixserial                (Pawel Kot)
+    o avoid lvalue casting -- be gcc 4.0 compliant (various people)
  * nk6510 driver updates
     o handle invalid memory types                       (Pawel Kot)
 

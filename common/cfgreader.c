@@ -554,7 +554,7 @@ API int gn_cfg_read(char **bindir)
 
 	retval = gn_cfg_read_default();
 
-	(char *)*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
+	*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
 	if (!*bindir)
 		*bindir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
 	if (!*bindir)
