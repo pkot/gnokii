@@ -424,7 +424,6 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	gn_error err = GN_ERR_NONE;
 	bool connected = false;
 	unsigned int attempt = 0;
-	int i;
 	/* The below list is the list of the phones that may get broken when
 	 * using libgnokii to communicate with them over irda in the fbus mode
 	 * under Linux. The reason for that is unknown, we are working on the
@@ -533,6 +532,9 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 		 * (getting the model) should not matter.
 		 */
 #ifdef __linux__
+	{
+		int i;
+
 		if (state->config.connection_type == GN_CT_Irda || state->config.connection_type == GN_CT_Infrared) {
 			for (i = 0; irda_blacklist[i]; i++) {
 				if (!strcmp(data.model, irda_blacklist[i])) {
@@ -544,6 +546,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 				}
 			}
 		}
+	}
 #endif
 
 		/* Change the defaults for Nokia 8310 */

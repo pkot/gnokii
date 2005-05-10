@@ -27,6 +27,7 @@
                                                         (Pawel Kot)
  * nk6510 driver updates
     o handle invalid memory types                       (Pawel Kot)
+    o fix compile warning on non linux                  (Pawel Kot)
 
 0.6.5
 =====
