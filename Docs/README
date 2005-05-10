@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2005 Pawe³ Kot
-                 Last update 29 April 2005  Version 0.6.5
+                  Last update 12 May 2005  Version 0.6.6
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.5 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.6 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -397,7 +397,11 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
-20050529 Version 0.6.5
+20050512 Version 0.6.6
+Minor bugfix release. Various cleanups to the code. Translation updates.
+Fixes to the file handling.
+
+20050429 Version 0.6.5
 This is really big release. The delay since the previous version was caused
 by the copyright issues that should be resolved right now. The code
 improvements contain: DKU2 calbe support (along with Linux kernel driver),

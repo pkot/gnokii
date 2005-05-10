@@ -1,5 +1,5 @@
-0.6.6 (not released yet)
-========================
+0.6.6
+=====
  * build system updates
     o update gnokii.spec -- split up to the smaller packages
                                                         (Pawel Kot)
