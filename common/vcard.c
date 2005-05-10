@@ -34,6 +34,7 @@
 #include "config.h"
 #include "compat.h"
 #include "gnokii.h"
+#include "gnokii-internal.h"
 
 API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 {
