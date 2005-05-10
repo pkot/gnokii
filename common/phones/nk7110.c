@@ -3306,6 +3306,7 @@ static gn_error NK7110_IncomingCommstatus(int messagetype, unsigned char *messag
 	default:
 		return GN_ERR_UNHANDLEDFRAME;
 	}
+	return GN_ERR_NONE;
 }
 
 static gn_error NK7110_GetActiveCalls(gn_data *data, struct gn_statemachine *state)

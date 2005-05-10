@@ -10,6 +10,8 @@
  * 6510 driver updates
     o add Nokia 6170 support                            (Pawel Kot)
     o add progress information for GetFile()            (Pawel Kot)
+    o handle invalid memory types                       (Pawel Kot)
+    o fix compile warning on non linux                  (Pawel Kot)
  * gnokii updates
     o fix the segfault with --getfile when no local_filename is
       given and remote_filename does not contain '/' character
@@ -25,9 +27,9 @@
     o avoid lvalue casting -- be gcc 4.0 compliant (various people)
     o add missing includes for add_slashes() and strip_slashes
                                                         (Pawel Kot)
- * nk6510 driver updates
-    o handle invalid memory types                       (Pawel Kot)
-    o fix compile warning on non linux                  (Pawel Kot)
+ * nk7110 driver updates
+    o prepare all exit paths with NK7110_IncomingCommstatus
+                                                        (Pawel Kot)
 
 0.6.5
 =====
