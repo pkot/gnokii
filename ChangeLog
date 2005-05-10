@@ -30,6 +30,8 @@
  * nk7110 driver updates
     o prepare all exit paths with NK7110_IncomingCommstatus
                                                         (Pawel Kot)
+ * gnapplet driver updates
+    o remove unused variables                           (Pawel Kot)
 
 0.6.5
 =====

@@ -992,7 +992,6 @@ static gn_error gnapplet_sms_validate(gn_data *data, struct gn_statemachine *sta
 
 static gn_error gnapplet_sms_message_read_nv(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error;
 	REQUEST_DEF;
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
@@ -1064,7 +1063,6 @@ static gn_error gnapplet_sms_message_send(gn_data *data, struct gn_statemachine 
 
 static gn_error gnapplet_sms_message_delete_nv(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error;
 	REQUEST_DEF;
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
@@ -1092,7 +1090,6 @@ static gn_error gnapplet_sms_message_delete(gn_data *data, struct gn_statemachin
 
 static gn_error gnapplet_sms_message_move_nv(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error;
 	REQUEST_DEF;
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
@@ -1134,7 +1131,6 @@ static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *
 
 static gn_error gnapplet_sms_center_write(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error;
 	REQUEST_DEF;
 
 	if (!data->message_center) return GN_ERR_INTERNALERROR;
