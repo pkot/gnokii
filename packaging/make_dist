@@ -39,9 +39,9 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
    make distclean
    mv common/gnvcal2.c common/gnvcal.c
    cd ..
-   tar cfz /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION} --exclude CVS
+   tar -cz --exclude CVS -f /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION}
    echo "Distribution generated in /tmp/gnokii-${VERSION}.tar.gz"
-   tar cfj /tmp/gnokii-${VERSION}.tar.bz2 gnokii-${VERSION} --exclude CVS
+   tar -cj --exclude CVS -f /tmp/gnokii-${VERSION}.tar.bz2 gnokii-${VERSION}
    echo "Distribution generated in /tmp/gnokii-${VERSION}.tar.bz2"
 )
 
