@@ -4,11 +4,12 @@
 
 # Set initial variables:
 CWD=`pwd`
-if [ "$TMP" = "" ]; then
+if [ "${TMP}" = "" ]; then
   TMP=/tmp
 fi
-PKG=$TMP/package-xgnokii
+PKG=${TMP}/package-xgnokii
 
+NAME=gnokii
 VERSION=@VERSION@
 ARCH=${ARCH:-i486}
 BUILD=1
@@ -20,10 +21,10 @@ rm -rf $PKG
 mkdir -p $PKG
 
 cd $TMP
-rm -rf gnokii-$VERSION
-tar xzvf $CWD/gnokii-$VERSION.tar.gz
-cd gnokii-$VERSION
-chown -R root.root .
+rm -rf ${NAME}-${VERSION}
+tar xzvf ${CWD}/${NAME}-${VERSION}.tar.gz
+chown -R root.root ${NAME}-${VERSION}
+cd ${NAME}-${VERSION}
 ./configure \
   --prefix=/usr \
   --sysconfdir=/etc \
@@ -32,26 +33,26 @@ chown -R root.root .
   --enable-security \
   --with-x \
   --with-xgnokiidir=/usr/X11R6 \
-  $ARCH-slackware-linux
+  ${ARCH}-slackware-linux
 make
 # File permissions will be set by doinst.sh
-make install-strip DESTDIR=$PKG
-make install-docs DESTDIR=$PKG
+make install-strip DESTDIR=${PKG}
+make install-docs DESTDIR=${PKG}
 
-gzip -9 $PKG/usr/man/man?/*
+gzip -9 ${PKG}/usr/man/man?/*
 # Default config
-mkdir -r $PKG/etc
-cp Docs/sample/gnokiirc $PKG/etc/gnokiirc.new
-mkdir -p $PKG/install
-cat $CWD/slack-desc-xgnokii > $PKG/install/slack-desc
-cat $CDW/doinst-xgnokii.sh > $PKG/install/doinst.sh
+mkdir -P ${PKG}/etc
+cp Docs/sample/gnokiirc ${PKG}/etc/gnokiirc.new
+mkdir -p ${PKG}/install
+cat ${CWD}/slack-desc-xgnokii > ${PKG}/install/slack-desc
+cat ${CWD}/doinst-xgnokii.sh > ${PKG}/install/doinst.sh
 
 # Build the package:
-cd $PKG
-makepkg -l y -c n $TMP/xgnokii-$VERSION-$ARCH-$BUILD.tgz
+cd ${PKG}
+makepkg -l y -c n ${TMP}/x${NAME}-${VERSION}-${ARCH}-${BUILD}.tgz
 
 # Clean up the extra stuff:
 if [ "$1" = "--cleanup" ]; then
-  rm -rf $TMP/gnokii-$VERSION
-  rm -rf $PKG
+  rm -rf ${TMP}/${NAME}-${VERSION}
+  rm -rf ${PKG}
 fi

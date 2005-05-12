@@ -3,6 +3,7 @@
  * build system updates
     o remove SlackBuild-xgnokii on make distclean       (Pawel Kot)
     o don't remove SlackBuilds when preparing a tarball (Pawel Kot)
+    o updated SlackBuilds                               (Pawel Kot)
 
 0.6.6
 =====
