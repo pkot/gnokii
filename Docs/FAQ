@@ -201,12 +201,19 @@ A. For Nokia 61X0/51X0 models you should use DAU9P cable. Nokia 61X0 models are
    DLR3P cable you can use AT commands to talk to the phone. These phones are
    also able to use an irda connection.
 
+   For modern Nokia phones without external memory (6100, 3100, 3120, 3200,
+   3220, 6610, 7210, 7250, 68xx, 6200, 6220) use DKU-5 cable.
+
+   For modern Nokia phones with external memory (6620, 7610, 6630, 3230, 6230,
+   668x, 9300, 7710, 9500, 3200) use DKU-2 cable.
+
    Most Nokia phones that have no visible connector have one under the battery.
    See our cables page (http://www.gnokii.org/cables.shtml) to find sites
    with more details and some suggested places to buy the cable.
 
-   Most of the modern phones have the irda connector (3XXX series models don't
-   have them).
+   For other vendors see user manuals and vendor websites.
+
+   Most of the modern phones have the irda or bluettoth connector.
 
 -------------------------------------------------------------------------------
 Q. I get 'Sorry, phone has not yet been converted to new style.
