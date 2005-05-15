@@ -26,24 +26,40 @@ Q. What models are supported?
 
 A. Currently the supported phones are (All Nokia models unless
    noted otherwise):
-         + Nokia 6110|6130|6150|6190|5110|5130|5190|3310|3210|3330|3360|2290|3410|8210|8250|8290|RPM-1
-         + Nokia 7110|6210|6250|7190
-         + Nokia 6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6170
-         + Nokia 3110|3810|8110|8110i
-         + Nokia 5160|6160|6185
-         + AT mode compatible phones (namely Nokia 62X0, Nokia 7110,
-           Nokia 8210, Nokia 6310(i), Nokia 6510 (you should expect all
-           newer Nokia phones to work), Ericsson T39, Sony-Ericsson T68i,
-           Siemens S25/SL45i/C55/M55/S55, Motorola Timeport P7389i (L series),
-           C350, Bosch 908/909 are known to work)
-	 + Symbian series60 based phones (namely Nokia 3650, Nokia 3660,
-	   Nokia 7650, Siemens SX1 are known to work)
+    - nk6100 driver:
+        + Nokia 6110, 6130, 6150, 6190
+        + Nokia 5110, 5130, 5190
+        + Nokia 3210, 3310, 3330, 3360, 3390, 3410
+        + Nokia 8210, 8250, 8290, 8850
+        + Nokia RPM-1
+    - nk7110 driver:
+        + Nokia 7110, 6210, 6250, 7190
+    - nk6510 driver:
+        + Nokia 3510(i), 3510i 3595
+        + Nokia 5100
+        + Nokia 6020, 6100, 6170, 6230, 6310(i), 6360, 6510
+        + Nokia 6610(i), 6650, 6800, 6810, 6820, 6820b, 6610i, 6230
+        + Nokia 7210, 7250, 7250i, 7600
+        + Nokia 8310
+    - nk3110 driver:
+        + Nokia 3110, 3810, 8110, 8110i
+    - nk6160 driver:
+        + Nokia 5160, 6160, 6185
+    - atgen driver:
+        AT mode compatible phones (namely Nokia 62X0, Nokia 7110, Nokia 8210,
+        Nokia 6310, Nokia 6510 (you should expect all newer Nokia phones to work),
+        Ericsson T39, Sony-Ericsson T68i, Siemens S25/SL45i/C55/M55/S55, Motorola
+        Timeport P7389i (L series), C350, Bosch 908/909 are known to work)
+    - gnapplet driver:
+        Symbian series60 based phones (namely Nokia 3650, Nokia 3660, Nokia 6600,
+        Nokia 7650, Siemens SX1 are known to work)
 
    The following models are no longer being actively supported by the
    core team and the underlying code may have undergone some bit rot:
-         + Nokia 2110|2140|6080
-         + Nokia 640
-         + Dancall 2711 and 2713
+    - nk2110 driver:
+        + Nokia 2110, 2140, 6080
+    - dc2711 driver:
+        + Dancall 2711 and 2713
 
 -------------------------------------------------------------------------------
 Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
