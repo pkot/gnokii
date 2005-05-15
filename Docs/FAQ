@@ -1,5 +1,5 @@
 GNOKII FAQ
-Pawe³ Kot, pkot@linuxnews.pl
+Pawel Kot, pkot@bezsensu.pl
 Hugh Blemings, hugh@blemings.org
 
 $Id$
@@ -156,7 +156,7 @@ A. You can use the gsm-code *21*yournumber# for this. Pipe it in per
    stdout to gnokii with the following command: "echo '*21*yournumber#G' |
    gnokii --keysequence". The 'G' at the end stands for the handy key with
    'Green phone'-symbol on it. Note: This will take some time, because your
-   provider has to affirm it. I.e. redirecting to a number in munich,
+   provider has to affirm it. I.e. redirecting to a number in Munich,
    Germany (tested on Nokia 8210):
    echo '*21*089123455678#G' | gnokii --keysequence
 
@@ -223,13 +223,6 @@ echo 115200 > /proc/sys/net/irda/max_baud_rate
    and see whether it helps.
 
 -------------------------------------------------------------------------------
-Q. I'm using the Win32 gnokii distribution and got the error "Couldn't open
-   FBUS device". What's wrong?
-
-A. Make sure that you put in the config file "port = com1:", not
-   "port = :com1".
-
--------------------------------------------------------------------------------
 Q. My phone is not mentioned as supported by gnokii, but it seems that it is
    similar to the one of the mentioned in the supported phones list? What
    should I do to check this out?
@@ -276,6 +269,13 @@ nk7110.c:1610:  /* 6210/7110 needs to seek the first free pos to inhabit with ne
    add "model = 6211" (according to your Nokia model) to the config and try
    if it works. In any case let us know (to the gnokii mailing list) about
    the result.
+
+-------------------------------------------------------------------------------
+Q. I'm using the Win32 gnokii distribution and got the error "Couldn't open
+   FBUS device". What's wrong?
+
+A. Make sure that you put in the config file "port = com1:", not
+   "port = :com1".
 
 -------------------------------------------------------------------------------
 Q. How do I enable debug output?
