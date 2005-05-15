@@ -84,7 +84,7 @@ gn_driver driver_nokia_6160 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"6160|5120",		/* Supported models */
+		"6160|5120|6185",	/* Supported models */
 		4,			/* Max RF Level */
 		0,			/* Min RF Level */
 		GN_RF_Arbitrary,	/* RF level units */
