@@ -6,6 +6,9 @@
     o updated SlackBuilds                               (Pawel Kot)
  * nk6510 driver updates
     o added Nokia 6020 support (also over irda)    (Chris Debenham)
+ * documentation updates
+    o make FAQ more up-to-date (supported model, which cable to
+      use)                                              (Pawel Kot)
 
 0.6.6
 =====
