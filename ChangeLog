@@ -1,3 +1,9 @@
+0.6.8 (not released yet)
+========================
+ * documentation updates
+    o sample of FreeBSD port setting in the config file (taken
+      from FreeBSD gnokii patches)                   (FreeBSD Team)
+
 0.6.7
 =====
  * build system updates

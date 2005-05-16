@@ -15,6 +15,9 @@ port = /dev/ttyS0
 # port = com1:
 # or similiar.
 #
+# FreeBSD (probably NetBSD and OpenBSD too) use:
+# port = /dev/cuaa0
+#
 # Use this setting also for the Bluetooth connection:
 # port = aa:bb:cc:dd:ee:ff
 
