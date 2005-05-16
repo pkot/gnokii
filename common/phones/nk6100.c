@@ -219,14 +219,14 @@ struct {
 	 * { "NSE-3",	NULL,		NK6100_CAP_OLD_CALL_API }
 	 * Set NULL in the second field for all software versions.
 	 */
-	{ "NSE-3",	"-4.06",	NK6100_CAP_NBS_UPLOAD },
-	{ "NHM-5",      NULL,           NK6100_CAP_PB_UNICODE },
-	{ "NHM-6",      NULL,           NK6100_CAP_PB_UNICODE },
-	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE },
-	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE },
-	{ "RPM-1",	"-4.23",	NK6100_CAP_NBS_UPLOAD },
-	{ "NSE-8",	NULL,		NK6100_CAP_OLD_KEY_API | NK6100_CAP_NO_PSTATUS | NK6100_CAP_NO_CB },
-	{ "NSE-9",	NULL,		NK6100_CAP_OLD_KEY_API },
+	{ "NSE-3",	"-4.06",	NK6100_CAP_NBS_UPLOAD }, /* 6110 */
+	{ "NHM-5",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3310 */
+	{ "NHM-6",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3330 */
+	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3410 */
+	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE }, /* 8250 */
+	{ "RPM-1",	"-4.23",	NK6100_CAP_NBS_UPLOAD }, /* Card Phone 2.0 */
+	{ "NSE-8",	NULL,		NK6100_CAP_OLD_KEY_API | NK6100_CAP_NO_PSTATUS | NK6100_CAP_NO_CB }, /* 3210 */
+	{ "NSE-9",	NULL,		NK6100_CAP_OLD_KEY_API }, /* 3210 */
 	{ NULL,		NULL,		0 }
 };
 
