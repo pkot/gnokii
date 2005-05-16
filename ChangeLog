@@ -4,6 +4,7 @@
     o remove SlackBuild-xgnokii on make distclean       (Pawel Kot)
     o don't remove SlackBuilds when preparing a tarball (Pawel Kot)
     o updated SlackBuilds                               (Pawel Kot)
+    o upgrade to newer libtool                          (Pawel Kot)
  * nk6510 driver updates
     o added Nokia 6020 support (also over irda)    (Chris Debenham)
  * documentation updates
