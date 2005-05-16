@@ -5,6 +5,9 @@
     o don't remove SlackBuilds when preparing a tarball (Pawel Kot)
     o updated SlackBuilds                               (Pawel Kot)
     o upgrade to newer libtool                          (Pawel Kot)
+    o add configure option to disable unix98 pty test for clean
+      Gentoo ebuilding                                  (Pawel Kot)
+    o Gentoo requires gnokii-${VERSION}.ebuild name     (Pawel Kot)
  * nk6510 driver updates
     o added Nokia 6020 support (also over irda)    (Chris Debenham)
  * documentation updates
