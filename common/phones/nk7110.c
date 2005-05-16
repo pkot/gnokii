@@ -746,7 +746,6 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 		blockstart = message + 18;
 		subblockcount = 0;
 		return phonebook_decode(message + 18, length - 17, data, blocks, message[11], 8);
-		break;
 	case 0x0c:
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
