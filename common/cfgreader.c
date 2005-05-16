@@ -36,9 +36,6 @@
 
 */
 
-
-/* for strndup */
-#define _GNU_SOURCE
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
@@ -240,7 +237,9 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 		}
 
 		num_lines++;
-		buf = (char *)strndup(line_begin, line_end - line_begin);
+		buf = malloc(line_end - line_begin + 1);
+		strncpy(buf, line_begin, line_end - line_begin);
+		buf[line_end - line_begin] = 0;
 		split_lines = realloc(split_lines,
 				(num_lines + 1) * sizeof(char*));
 		split_lines[num_lines - 1] = buf;

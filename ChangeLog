@@ -9,6 +9,8 @@
  * documentation updates
     o make FAQ more up-to-date (supported model, which cable to
       use)                                              (Pawel Kot)
+ * libgnokii updates
+    o don't use strndup               (Marcus Pallinger, Pawel Kot)
 
 0.6.6
 =====
