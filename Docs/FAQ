@@ -202,7 +202,8 @@ A. For Nokia 61X0/51X0 models you should use DAU9P cable. Nokia 61X0 models are
    also able to use an irda connection.
 
    For modern Nokia phones without external memory (6100, 3100, 3120, 3200,
-   3220, 6610, 7210, 7250, 68xx, 6200, 6220) use DKU-5 cable.
+   3220, 6610, 7210, 7250, 68xx, 6200, 6220) use DKU-5 cable. The recent
+   replacement for this cable is named CA-42.
 
    For modern Nokia phones with external memory (6620, 7610, 6630, 3230, 6230,
    668x, 9300, 7710, 9500, 3200) use DKU-2 cable.
