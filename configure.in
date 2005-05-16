@@ -1,5 +1,4 @@
-dnl
-dnl  Makefile for the GNOKII tool suite.
+file for the GNOKII tool suite.
 dnl
 dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 dnl                2000 Karel Zak, Pawe³ Kot
@@ -463,6 +462,19 @@ AC_ARG_ENABLE(win32,
    [ win32="no"]
 )
 
+AC_ARG_ENABLE(unix98test,
+   [  --enable-unix98test     if you want to disable UNIX98 test and assume to use it [default=yes]],
+   [ if test x$enable_unix98test = xno; then
+	unix98test="no"
+        AC_DEFINE(USE_UNIX98PTYS)
+     else
+	unix98test="yes"
+     fi ],
+   [ unix98test="yes"]
+)
+
+if test x$unix98test = xyes; then
+
 AC_CHECK_FUNC(grantpt,
    [ AC_TRY_RUN([
 #define  _XOPEN_SOURCE 500
@@ -499,6 +511,8 @@ int main()
 		AC_DEFINE(USE_UNIX98PTYS))
    ]
 )
+
+fi
 
 AC_TRY_COMPILE( [#define _XOPEN_SOURCE 500
 		 #include <sys/types.h>
