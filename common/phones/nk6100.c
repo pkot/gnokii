@@ -223,7 +223,7 @@ struct {
 	{ "NHM-5",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3310 */
 	{ "NHM-6",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3330 */
 	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3410 */
-	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE }, /* 8250 */
+	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE | NK6100_CAP_CAL_UNICODE }, /* 8250 */
 	{ "RPM-1",	"-4.23",	NK6100_CAP_NBS_UPLOAD }, /* Card Phone 2.0 */
 	{ "NSE-8",	NULL,		NK6100_CAP_OLD_KEY_API | NK6100_CAP_NO_PSTATUS | NK6100_CAP_NO_CB }, /* 3210 */
 	{ "NSE-9",	NULL,		NK6100_CAP_OLD_KEY_API }, /* 3210 */
@@ -766,13 +766,11 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	}
 	*pos++ = get_memory_type(pe->memory_type);
 	*pos++ = pe->location;
-	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_PB_UNICODE) {
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_PB_UNICODE)
 		namelen = char_unicode_encode(pos + 1, pe->name, namelen);
-		*pos++ = namelen;
-	} else {
+	else
 		namelen = pnok_string_encode(pos + 1, namelen, pe->name);
-		*pos++ = namelen;
-	}
+	*pos++ = namelen;
 	pos += namelen;
 	*pos++ = numlen;
 	pnok_string_encode(pos, numlen, pe->number);
@@ -2429,7 +2427,7 @@ static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 				 0x00};	/* The type of calendar note */
 	gn_calnote *note;
 	unsigned char *pos;
-	unsigned int numlen;
+	unsigned int numlen, namelen;
 
 	if (!data->calnote)
 		return GN_ERR_UNKNOWN;
@@ -2470,9 +2468,13 @@ static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 		pos += 7;
 	}
 	
-
-	*pos = pnok_string_encode(pos+1, 255, note->text);
-	pos += *pos+1;
+	/* FIXME: use some constant not 255 magic number */
+	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_CAL_UNICODE)
+		namelen = char_unicode_encode(pos + 1, note->text, 255);
+	else
+		namelen = pnok_string_encode(pos + 1, 255, note->text);
+	*pos++ = namelen;
+	pos += namelen;
 
 	if (note->type == GN_CALNOTE_CALL) {
 		*pos++ = numlen;
@@ -2558,7 +2560,10 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 			note->alarm.timestamp.second = *pos++;
 			note->alarm.enabled = (note->alarm.timestamp.year != 0);
 			n = *pos++;
-			pnok_string_decode(note->text, sizeof(note->text), pos, n);
+			if ((DRVINSTANCE(state)->capabilities & NK6100_CAP_CAL_UNICODE))
+				char_unicode_decode(note->text, pos, n);
+			else
+				pnok_string_decode(note->text, sizeof(note->text), pos, n);
 			pos += n;
 
 			if (note->type == GN_CALNOTE_CALL) {

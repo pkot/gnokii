@@ -58,6 +58,7 @@
 #define	NK6100_CAP_OLD_KEY_API	8
 #define	NK6100_CAP_NO_PSTATUS	16
 #define	NK6100_CAP_NO_CB	32
+#define	NK6100_CAP_CAL_UNICODE	64
 
 typedef struct {
 	gn_key_code key;
