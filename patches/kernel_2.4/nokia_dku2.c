@@ -68,7 +68,7 @@ MODULE_DEVICE_TABLE(usb, id_table);
 
 static struct usb_serial_device_type nokia_device = {
 	.owner =		THIS_MODULE,
-	.name =			"Nokia DKU2",
+	.name =			"Nokia 7600/6230 DKU2 driver",
 	.id_table =		id_table,
 	.num_interrupt_in =	1,
 	.num_bulk_in =		1,
