@@ -270,7 +270,7 @@ API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 	iterate_cal(comp, 0, &id, &compresult, ICAL_VEVENT_COMPONENT);
 
 	if (!compresult) {
-		fprintf(stderr, _("No component found."));
+		fprintf(stderr, _("No component found.\n"));
 	} else {
 		const char *str;
 		icalcomponent *alarm = {0};
@@ -380,7 +380,7 @@ API int gn_todo2ical(FILE *f, gn_todo *ctodo)
 							0),
 				    0);
 
-	if(pIcal) {
+	if (pIcal) {
 		char *icalstrbuf = NULL;
 		const char *icalstr = icalcomponent_as_ical_string(pIcal);
 		/* conversion to UTF-8 */
@@ -439,7 +439,7 @@ API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
 	iterate_cal(comp, 0, &id, &compresult, ICAL_VTODO_COMPONENT);
 
 	if (!compresult) {
-		fprintf(stderr, _("No component found."));
+		fprintf(stderr, _("No component found.\n"));
 	} else {
 		const char *priostr = NULL;
 		icalproperty *priority = icalcomponent_get_first_property(compresult, ICAL_PRIORITY_PROPERTY);
