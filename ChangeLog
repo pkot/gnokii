@@ -9,6 +9,8 @@
                                                         (Pawel Kot)
     o read and write calendar notes as unicode on unicode capable
       phones                                            (Pawel Kot)
+ * libgnokii updates
+    o add sanity checks to vcal converting code         (Pawel Kot)
 
 0.6.7
 =====

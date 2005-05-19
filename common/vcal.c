@@ -350,9 +350,12 @@ API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 		fprintf(stderr, _("Component found\n%s\n"), icalcomponent_as_ical_string(compresult));
 
 	}
-	icalcomponent_free(compresult);
-	icalcomponent_free(comp);
-	icalparser_free(parser);
+	if (compresult)
+		icalcomponent_free(compresult);
+	if (comp)
+		icalcomponent_free(comp);
+	if (parser)
+		icalparser_free(parser);
 #else
 	retval = GN_ERR_NOTIMPLEMENTED;
 #endif /* HAVE_LIBICAL */
