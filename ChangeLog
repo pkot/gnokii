@@ -3,6 +3,7 @@
  * documentation updates
     o sample of FreeBSD port setting in the config file (taken
       from FreeBSD gnokii patches)                   (FreeBSD Team)
+    o update DKU-2 documentation                        (Pawel Kot)
  * nk6100 driver updates
     o read phonebook names as unicode on unicode capable phones
                                                         (Pawel Kot)
