@@ -11,6 +11,7 @@
       phones                                            (Pawel Kot)
  * libgnokii updates
     o add sanity checks to vcal converting code         (Pawel Kot)
+    o new model id for Nokia 6230                 (Richard Wallman)
 
 0.6.7
 =====
