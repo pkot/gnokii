@@ -444,7 +444,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 				  "NPL-2",	/* 6100 */
 				  "NPL-3",	/* 6200 */
 				  "RH-20",	/* 6220 */
-				  "NHL-4U"	/* 6610 */
+				  "NHL-4U",	/* 6610 */
 				  "RM-37",	/* 6610i */
 				  "NHM-1",	/* 6650 */
 				  "NHL-6",	/* 6800 */

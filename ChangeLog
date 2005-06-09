@@ -19,6 +19,9 @@
       infinite loop -- fix it to handle GN_ERR_INVALIDMEMORYTYPE
       error; reported by Richard Wallman as debian bug #312632
                                                         (Pawel Kot)
+ * nk6510 driver updates
+    o added Nokia 6230i support                    (BORBELY Zoltan)
+    o colon was missing from the irda blacklist    (BORBELY Zoltan)
 
 0.6.7
 =====
