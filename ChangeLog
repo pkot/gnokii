@@ -12,6 +12,13 @@
  * libgnokii updates
     o add sanity checks to vcal converting code         (Pawel Kot)
     o new model id for Nokia 6230                 (Richard Wallman)
+ * xgnokii updates
+    o avoid infinite loop on misconfiguration: when xgnokii doesn't
+      recognize a phone (missing model id in models[]), and the
+      phone doesn't support getting SMS from SIM it goes into
+      infinite loop -- fix it to handle GN_ERR_INVALIDMEMORYTYPE
+      error; reported by Richard Wallman as debian bug #312632
+                                                        (Pawel Kot)
 
 0.6.7
 =====

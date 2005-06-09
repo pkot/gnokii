@@ -425,10 +425,17 @@ static void RefreshSMS(const gint number)
 					g_free(fld);
 					break;
 				}
-			} else if (error == GN_ERR_INVALIDLOCATION) {	/* All positions are read */
+			} else if (error == GN_ERR_INVALIDLOCATION) {
+				/* All positions are read */
 				g_free(list);
 				g_free(fld);
 				g_free(msg);
+				break;
+			} else if (error == GN_ERR_INVALIDMEMORYTYPE) {
+				/* We have some misconfiguration: phone doesn't handle
+				   neither folders nor SIM */
+				fprintf(stderr, _("Misconfiguration detected: phone handles neither folders nor sim.\n"
+						  "Contact gnokii developers to fix the issue.\n"));
 				break;
 			} else {
 				g_free(msg);
