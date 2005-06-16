@@ -1380,7 +1380,7 @@ msgstr "Fertig.\n"
 #: gnokii/gnokii.c:2196
 #, c-format
 msgid "Could not load bitmap: %s\n"
-msgstr "Konnte Bild: %s nich laden.\n"
+msgstr "Konnte Bild: %s nicht laden.\n"
 
 #: gnokii/gnokii.c:2252
 #, fuzzy, c-format
@@ -1430,7 +1430,7 @@ msgstr "Fehler beim Schreiben von Datei: %s\n"
 #: gnokii/gnokii.c:2315 gnokii/gnokii.c:2513
 #, c-format
 msgid "Failed to load vCalendar file: %s\n"
-msgstr "Konnte die vCalendar Datei: %s nich laden.\n"
+msgstr "Konnte die vCalendar Datei: %s nicht laden.\n"
 
 #: gnokii/gnokii.c:2322 gnokii/gnokii.c:2520 gnokii/gnokii.c:4021
 #, c-format
@@ -2259,7 +2259,7 @@ msgstr "Senden fehlgeschlagen: %s\n"
 #: gnokii/gnokii.c:4404 gnokii/gnokii.c:4458
 #, fuzzy, c-format
 msgid "Failed to load ringtone: %s\n"
-msgstr "Konnte die vCalendar Datei: %s nich laden.\n"
+msgstr "Konnte die vCalendar Datei: %s nicht laden.\n"
 
 #: gnokii/gnokii.c:4436
 #, fuzzy, c-format
@@ -3422,7 +3422,7 @@ msgstr "Kann keinen freien Speicher finden."
 
 #: xgnokii/xgnokii_contacts.c:1849
 msgid "Changing memory type"
-msgstr "Wechlse Speicherart"
+msgstr "Wechsle Speicherart"
 
 #: xgnokii/xgnokii_contacts.c:1856
 msgid "Continue"
@@ -3556,7 +3556,7 @@ msgstr ""
 #: xgnokii/xgnokii_contacts.c:3304
 #, fuzzy
 msgid "/Edit/_Change memory type"
-msgstr "Wechlse Speicherart"
+msgstr "Wechsle Speicherart"
 
 #: xgnokii/xgnokii_contacts.c:3306
 msgid "/Edit/_Find"
@@ -3590,7 +3590,7 @@ msgstr "Gruppe"
 
 #: xgnokii/xgnokii_contacts.c:3400
 msgid "Delete entry"
-msgstr "Eintrag löscehn"
+msgstr "Eintrag löschen"
 
 #: xgnokii/xgnokii_data.c:57
 msgid ""
@@ -4121,7 +4121,7 @@ msgstr ""
 
 #: xgnokii/xgnokii_sms.c:977 xgnokii/xgnokii_sms.c:1108
 msgid "Address line contains illegal address!"
-msgstr "Addresszeile enthält eine falsche Adresse!"
+msgstr "Adresszeile enthält eine falsche Adresse!"
 
 #: xgnokii/xgnokii_sms.c:1081
 #, c-format
