@@ -1384,9 +1384,9 @@ gn_error gn_file_bitmap_show(char *filename)
 
 	for (i = 0; i < bitmap.height; i++) {
 		for (j = 0; j < bitmap.width; j++) {
-			printf("%c", gn_bmp_point(&bitmap, j, i) ? '#' : ' ');
+			fprintf(stdout, "%c", gn_bmp_point(&bitmap, j, i) ? '#' : ' ');
 		}
-		printf("\n");
+		fprintf(stdout, "\n");
 	}
 
 	return GN_ERR_NONE;
