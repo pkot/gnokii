@@ -1452,11 +1452,9 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	entry->empty = true;
 	memory_type_char[2] = 0;
 
-	printf("%s\n", line + offset);
 	GET_NEXT_TOKEN();
 	switch (o) {
 	case 0:
-		dprintf("dupa1\n");
 		return GN_ERR_WRONGDATAFORMAT;
 	case 1:
 		/* empty name: this is a request to delete the entry */
@@ -1469,11 +1467,9 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 
 	BUG(offset >= length);
 
-	printf("%s\n", line + offset);
 	GET_NEXT_TOKEN();
 	switch (o) {
 	case 0:
-		dprintf("dupa2\n");
 		return GN_ERR_WRONGDATAFORMAT;
 	default:
 		break;
@@ -1483,13 +1479,11 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 
 	BUG(offset >= length);
 
-	printf("%s\n", line + offset);
 	GET_NEXT_TOKEN();
 	switch (o) {
 	case 3:
 		break;
 	default:
-		dprintf("dupa3: %d\n", o);
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 	STORE_TOKEN(memory_type_char);
@@ -1512,7 +1506,6 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	STORE_TOKEN(number);
 	switch (o) {
 	case 0:
-		dprintf("dupa4\n");
 		return GN_ERR_WRONGDATAFORMAT;
 	case 1:
 		entry->location = 0;
@@ -1530,7 +1523,6 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 	STORE_TOKEN(number);
 	switch (o) {
 	case 0:
-		dprintf("dupa5\n");
 		return GN_ERR_WRONGDATAFORMAT;
 	case 1:
 		entry->caller_group = 0;
