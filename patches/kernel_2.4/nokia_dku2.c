@@ -55,8 +55,8 @@
 /* Function prototypes */
 static int nokia_startup(struct usb_serial *serial);
 static void nokia_shutdown(struct usb_serial *serial);
-void generic_read_bulk_callback(struct urb *urb);
-void generic_write_bulk_callback(struct urb *urb);
+static void generic_read_bulk_callback(struct urb *urb);
+static void generic_write_bulk_callback(struct urb *urb);
 
 static struct usb_device_id id_table [] = {
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7600_PRODUCT_ID) },
@@ -138,6 +138,81 @@ static int nokia_startup(struct usb_serial *serial)
 	init_waitqueue_head(&serial->port->write_wait);
 	
 	return 0;
+}
+
+static void generic_read_bulk_callback (struct urb *urb)
+{
+	struct usb_serial_port *port = (struct usb_serial_port *)urb->context;
+	struct usb_serial *serial = get_usb_serial (port, __FUNCTION__);
+	struct tty_struct *tty;
+	unsigned char *data = urb->transfer_buffer;
+	int i;
+	int result;
+
+	dbg("%s - port %d", __FUNCTION__, port->number);
+
+	if (!serial) {
+		dbg("%s - bad serial pointer, exiting", __FUNCTION__);
+		return;
+	}
+
+	if (urb->status) {
+		dbg("%s - nonzero read bulk status received: %d", __FUNCTION__, urb->status);
+		return;
+	}
+
+	usb_serial_debug_data (__FILE__, __FUNCTION__, urb->actual_length, data);
+
+	tty = port->tty;
+	if (tty && urb->actual_length) {
+		for (i = 0; i < urb->actual_length ; ++i) {
+			/* if we insert more than TTY_FLIPBUF_SIZE characters, we drop them. */
+			if(tty->flip.count >= TTY_FLIPBUF_SIZE) {
+				tty_flip_buffer_push(tty);
+			}
+			/* this doesn't actually push the data through unless tty->low_latency is set */
+			tty_insert_flip_char(tty, data[i], 0);
+		}
+	  	tty_flip_buffer_push(tty);
+	}
+
+	/* Continue trying to always read  */
+	usb_fill_bulk_urb (port->read_urb, serial->dev,
+			   usb_rcvbulkpipe (serial->dev,
+				   	    port->bulk_in_endpointAddress),
+			   port->read_urb->transfer_buffer,
+			   port->read_urb->transfer_buffer_length,
+			   ((serial->type->read_bulk_callback) ? 
+			     serial->type->read_bulk_callback : 
+			     generic_read_bulk_callback), port);
+	result = usb_submit_urb(port->read_urb);
+	if (result)
+		err("%s - failed resubmitting read urb, error %d", __FUNCTION__, result);
+}
+
+static void generic_write_bulk_callback (struct urb *urb)
+{
+	struct usb_serial_port *port = (struct usb_serial_port *)urb->context;
+	struct usb_serial *serial = get_usb_serial (port, __FUNCTION__);
+
+	dbg("%s - port %d", __FUNCTION__, port->number);
+
+	port->write_busy = 0;
+	wmb();
+
+	if (!serial) {
+		err("%s - null serial pointer, exiting", __FUNCTION__);
+		return;
+	}
+
+	if (urb->status) {
+		dbg("%s - nonzero write bulk status received: %d", __FUNCTION__, urb->status);
+	}
+
+	queue_task(&port->tqueue, &tq_immediate);
+	mark_bh(IMMEDIATE_BH);
+
+	return;
 }
 
 static void nokia_shutdown(struct usb_serial *serial)
