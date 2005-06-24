@@ -8,6 +8,27 @@ First of all: Phones supported by this driver so far are:
  * 8310
  * 6310
  * 6310i
+ * 6360
+ * 6610
+ * 6100
+ * 5100
+ * 3510
+ * 3510i
+ * 3595
+ * 6800
+ * 6810
+ * 6820
+ * 6820b
+ * 6610i
+ * 6230
+ * 6650
+ * 7210
+ * 7250
+ * 7250i
+ * 7600
+ * 6170
+ * 6020
+ * 6230i
 All the newest phones should work with this driver, too, i.e. 7610, 7210
 once they are out. If you have any of these phones, please test it with
 model set to 6510 and give report to the ML.
