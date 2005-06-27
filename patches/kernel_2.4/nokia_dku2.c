@@ -40,17 +40,18 @@
 /*
  * Version Information
  */
-#define DRIVER_VERSION "v0.2"
-#define DRIVER_AUTHOR "C Kemp"
-#define DRIVER_DESC "Nokia DKU2 Driver"
+#define DRIVER_VERSION	"v0.2"
+#define DRIVER_AUTHOR	"C Kemp"
+#define DRIVER_DESC	"Nokia DKU2 Driver"
 
 
-#define NOKIA_VENDOR_ID	0x0421
-#define NOKIA7600_PRODUCT_ID 0x0400
-#define NOKIA6230_PRODUCT_ID 0x040f
+#define NOKIA_VENDOR_ID		0x0421
+#define NOKIA7600_PRODUCT_ID	0x0400
+#define NOKIA6230_PRODUCT_ID	0x040f
+#define NOKIA6320i_PRODUCT_ID	0x0428
 
-#define NOKIA_AT_PORT 0x82
-#define NOKIA_FBUS_PORT 0x86
+#define NOKIA_AT_PORT	0x82
+#define NOKIA_FBUS_PORT	0x86
 
 /* Function prototypes */
 static int nokia_startup(struct usb_serial *serial);
@@ -61,6 +62,7 @@ static void generic_write_bulk_callback(struct urb *urb);
 static struct usb_device_id id_table [] = {
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7600_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230i_PRODUCT_ID) },
 	{ }			/* Terminating entry */
 };
 
@@ -68,7 +70,7 @@ MODULE_DEVICE_TABLE(usb, id_table);
 
 static struct usb_serial_device_type nokia_device = {
 	.owner =		THIS_MODULE,
-	.name =			"Nokia 7600/6230 DKU2 driver",
+	.name =			"Nokia 7600/6230/6230i DKU2 driver",
 	.id_table =		id_table,
 	.num_interrupt_in =	1,
 	.num_bulk_in =		1,
