@@ -13,6 +13,8 @@
  * libgnokii updates
     o add sanity checks to vcal converting code         (Pawel Kot)
     o new model id for Nokia 6230                 (Richard Wallman)
+    o swap CR and LF in at emulator as they were incorrectly mixed
+                                                    (Daniele Forsi)
  * xgnokii updates
     o avoid infinite loop on misconfiguration: when xgnokii doesn't
       recognize a phone (missing model id in models[]), and the
