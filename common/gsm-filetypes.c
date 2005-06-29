@@ -1419,7 +1419,7 @@ static int get_next_token(char *src, int delim)
 			break;
 		}
 	}
-	return i;
+	return i + 1;
 }
 
 #define BUG(x) \
