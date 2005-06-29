@@ -256,12 +256,12 @@ int at_encode(int charset, char *dst, char *src, int len)
 		len = char_ascii_encode(dst, src, len);
 		break;
 	case AT_CHAR_HEXGSM:
-		char_hex_encode(dst, src, len);
 		len *= 2;
+		char_hex_encode(dst, src, len);
 		break;
 	case AT_CHAR_UCS2:
-		char_ucs2_encode(dst, src, len);
 		len *= 4;
+		char_ucs2_encode(dst, src, len);
 		break; 
 	default:
 		memcpy(dst, src, len);
