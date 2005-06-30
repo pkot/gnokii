@@ -17,6 +17,8 @@
                                                     (Daniele Forsi)
     o fix off by one in get_next_token(); found by Dave Godfrey
                                                         (Pawel Kot)
+    o add support for wap push notification indicators recognition
+                                                        (Pawel Kot)
  * xgnokii updates
     o avoid infinite loop on misconfiguration: when xgnokii doesn't
       recognize a phone (missing model id in models[]), and the

@@ -80,6 +80,7 @@ static struct sms_udh_data headers[] = {
 	{ 0x04, "\x01\x02\x01\x00" },         /* Fax Messages */
 	{ 0x04, "\x01\x02\x02\x00" },         /* Email Messages */
 	{ 0x06, "\x05\x04\x0b\x84\x23\xf0" }, /* WAP PUSH */
+	{ 0x06, "\x05\x04\x0b\x84\x0b\x84" },
 	{ 0x00, "" },
 };
 
@@ -510,6 +511,10 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 			case 0x23f7:
 				dprintf("WAP vCalendarSecure\n");
 				udh->udh[nr].type = GN_SMS_UDH_WAPvCalendarSecure;
+				break;
+			case 0x0b84:
+				dprintf("WAP Push\n");
+				udh->udh[nr].type = GN_SMS_UDH_WAPPush;
 				break;
 			default:
 				dprintf("Unknown\n");
