@@ -31,6 +31,8 @@
     o colon was missing from the irda blacklist    (BORBELY Zoltan)
  * link layer updates
     o fix dku2 module for 2.4 kernel                    (Pawel Kot)
+    o added configure script to customize kernel sources and kernel
+      modules directories for dku2 driver               (Pawel Kot)
  * atgen driver updates
     o fix string length calculating in at_encode()  (Daniele Forsi)
 
