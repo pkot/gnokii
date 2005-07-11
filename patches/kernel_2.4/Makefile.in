@@ -10,9 +10,9 @@
 ##########################################################################
 
 MODULE		:= nokia_dku2
-MODULE_ROOT	:= /lib/modules/$(shell uname -r)/kernel/drivers/usb/serial
+MODULE_ROOT	:= @MODULESDIR@/kernel/drivers/usb/serial
 
-INCLUDE		:= -I/lib/modules/$(shell uname -r)/build/include/linux -I/lib/modules/$(shell uname -r)/build/drivers/usb/serial
+INCLUDE		:= -I@SOURCESDIR@/include/linux -I@SOURCESDIR@/drivers/usb/serial
 CFLAGS		:= -O2 -DMODULE -D__KERNEL__ ${INCLUDE}
 
 ${MODULE}.o: ${MODULE}.c
