@@ -23,17 +23,22 @@ gnokii must be configured to use the second of these - in this case /dev/ttyUSB1
 
 * Install *
 
-- Get / configure / build a set of kernel sources.
-- make sure that you are running this kernel, and /lib/modules/`uname -r`/build
-  points to the kernel sources directory
-- cd $gnokii_sources/patches/kernel_2.{4,6}
-- make
-- Become root
-- make install
-- modprobe nokia_dku2
-- dmesg
-- Look for the lines as shown above!
-- Edit .gnokiirc to include port=/dev/ttyUSB.. and connection=dku2 
+| Get / configure / build a set of kernel sources.
+$ cd $gnokii_sources/patches/kernel_2.{4,6}
+| If you have the gnokii CVS version
+$ autoconf
+| See ./configure --help for the available options
+| Defaults are:
+|  kernsrcdir: /lib/modules/`uname -r`/build -- directory where the sources are
+|  kernmoddir: /lib/modules/`uname -r` -- base module installation directory
+$ ./configure --with-kernsrcdir=dir1 --with-kernmoddir=dir2 
+$ make
+| Become root
+# make install
+# modprobe nokia_dku2
+# dmesg
+| Look for the lines as shown above!
+| Edit .gnokiirc to include port=/dev/ttyUSB.. and connection=dku2 
 
 
 * Known Bugs *
