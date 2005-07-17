@@ -196,66 +196,66 @@ static char *lockfile = NULL;
 static char *profile_get_call_alert_string(int code)
 {
 	switch (code) {
-	case GN_PROFILE_CALLALERT_Ringing:	return "Ringing";
-	case GN_PROFILE_CALLALERT_Ascending:	return "Ascending";
-	case GN_PROFILE_CALLALERT_RingOnce:	return "Ring once";
-	case GN_PROFILE_CALLALERT_BeepOnce:	return "Beep once";
-	case GN_PROFILE_CALLALERT_CallerGroups:	return "Caller groups";
-	case GN_PROFILE_CALLALERT_Off:		return "Off";
-	default:				return "Unknown";
+	case GN_PROFILE_CALLALERT_Ringing:	return _("Ringing");
+	case GN_PROFILE_CALLALERT_Ascending:	return _("Ascending");
+	case GN_PROFILE_CALLALERT_RingOnce:	return _("Ring once");
+	case GN_PROFILE_CALLALERT_BeepOnce:	return _("Beep once");
+	case GN_PROFILE_CALLALERT_CallerGroups:	return _("Caller groups");
+	case GN_PROFILE_CALLALERT_Off:		return _("Off");
+	default:				return _("Unknown");
 	}
 }
 
 static char *profile_get_volume_string(int code)
 {
 	switch (code) {
-	case GN_PROFILE_VOLUME_Level1:		return "Level 1";
-	case GN_PROFILE_VOLUME_Level2:		return "Level 2";
-	case GN_PROFILE_VOLUME_Level3:		return "Level 3";
-	case GN_PROFILE_VOLUME_Level4:		return "Level 4";
-	case GN_PROFILE_VOLUME_Level5:		return "Level 5";
-	default:				return "Unknown";
+	case GN_PROFILE_VOLUME_Level1:		return _("Level 1");
+	case GN_PROFILE_VOLUME_Level2:		return _("Level 2");
+	case GN_PROFILE_VOLUME_Level3:		return _("Level 3");
+	case GN_PROFILE_VOLUME_Level4:		return _("Level 4");
+	case GN_PROFILE_VOLUME_Level5:		return _("Level 5");
+	default:				return _("Unknown");
 	}
 }
 
 static char *profile_get_keypad_tone_string(int code)
 {
 	switch (code) {
-	case GN_PROFILE_KEYVOL_Off:		return "Off";
-	case GN_PROFILE_KEYVOL_Level1:		return "Level 1";
-	case GN_PROFILE_KEYVOL_Level2:		return "Level 2";
-	case GN_PROFILE_KEYVOL_Level3:		return "Level 3";
-	default:				return "Unknown";
+	case GN_PROFILE_KEYVOL_Off:		return _("Off");
+	case GN_PROFILE_KEYVOL_Level1:		return _("Level 1");
+	case GN_PROFILE_KEYVOL_Level2:		return _("Level 2");
+	case GN_PROFILE_KEYVOL_Level3:		return _("Level 3");
+	default:				return _("Unknown");
 	}
 }
 
 static char *profile_get_message_tone_string(int code)
 {
 	switch (code) {
-	case GN_PROFILE_MESSAGE_NoTone:		return "No tone";
-	case GN_PROFILE_MESSAGE_Standard:	return "Standard";
-	case GN_PROFILE_MESSAGE_Special:	return "Special";
-	case GN_PROFILE_MESSAGE_BeepOnce:	return "Beep once";
-	case GN_PROFILE_MESSAGE_Ascending:	return "Ascending";
-	default:				return "Unknown";
+	case GN_PROFILE_MESSAGE_NoTone:		return _("No tone");
+	case GN_PROFILE_MESSAGE_Standard:	return _("Standard");
+	case GN_PROFILE_MESSAGE_Special:	return _("Special");
+	case GN_PROFILE_MESSAGE_BeepOnce:	return _("Beep once");
+	case GN_PROFILE_MESSAGE_Ascending:	return _("Ascending");
+	default:				return _("Unknown");
 	}
 }
 
 static char *profile_get_warning_tone_string(int code)
 {
 	switch (code) {
-	case GN_PROFILE_WARNING_Off:		return "Off";
-	case GN_PROFILE_WARNING_On:		return "On";
-	default:				return "Unknown";
+	case GN_PROFILE_WARNING_Off:		return _("Off");
+	case GN_PROFILE_WARNING_On:		return _("On");
+	default:				return _("Unknown");
 	}
 }
 
 static char *profile_get_vibration_string(int code)
 {
 	switch (code) {
-	case GN_PROFILE_VIBRATION_Off:		return "Off";
-	case GN_PROFILE_VIBRATION_On:		return "On";
-	default:				return "Unknown";
+	case GN_PROFILE_VIBRATION_Off:		return _("Off");
+	case GN_PROFILE_VIBRATION_On:		return _("On");
+	default:				return _("Unknown");
 	}
 }
 
@@ -354,7 +354,6 @@ static int usage(FILE *f, int retval)
 		     "Logo options:\n"
 		     "          gnokii --sendlogo {caller|op|picture} destination logofile\n"
 		     "                 [network code]\n"
-		     "          gnokii --sendringtone rtttlfile destination\n"
 		     "          gnokii --setlogo op [logofile] [network code]\n"
 		     "          gnokii --setlogo startup [logofile]\n"
 		     "          gnokii --setlogo caller [logofile] [caller group number] [group name]\n"
@@ -366,6 +365,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --getlogo {dealer|text}\n"
 		     "          gnokii --viewlogo logofile\n"
 		     "Ringtone options:\n"
+		     "          gnokii --sendringtone rtttlfile destination\n"
 		     "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
 		     "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"
 		     "          gnokii --playringtone rtttlfile [--volume vol]\n"
@@ -594,7 +594,7 @@ static char *get_ringtone_name(int id)
 			return ringtone_list.ringtone[i].name;
 	}
 
-	return "Unknown";
+	return _("Unknown");
 }
 
 /* Send  SMS messages. */
@@ -2496,6 +2496,7 @@ static int writecalendarnote(char *argv[])
 	location = atoi(argv[1]);
 
 	error = gn_ical2calnote(f, &calnote, location);
+
 	fclose(f);
 #ifndef WIN32
 	if (error == GN_ERR_NOTIMPLEMENTED) {
@@ -2673,7 +2674,7 @@ static int getalarm(void)
 
 	switch (error) {
 	case GN_ERR_NONE:
-		fprintf(stdout, _("Alarm: %s\n"), (alarm.enabled)?"on":"off");
+		fprintf(stdout, _("Alarm: %s\n"), (alarm.enabled)? _("on"): _("off"));
 		fprintf(stdout, _("Time: %02d:%02d\n"), alarm.timestamp.hour, alarm.timestamp.minute);
 		break;
 	default:
@@ -2724,23 +2725,23 @@ static void displaycall(int call_id)
 	switch (call->status) {
 	case GN_CALL_Ringing:
 	case GN_CALL_Incoming:
-		s = "RINGING";
+		s = _("RINGING");
 		timersub(&now, &call->start_time, &delta);
 		break;
 	case GN_CALL_Dialing:
-		s = "DIALING";
+		s = _("DIALING");
 		timersub(&now, &call->start_time, &delta);
 		break;
 	case GN_CALL_Established:
-		s = "ESTABLISHED";
+		s = _("ESTABLISHED");
 		timersub(&now, &call->answer_time, &delta);
 		break;
 	case GN_CALL_Held:
-		s = "ON HOLD";
+		s = _("ON HOLD");
 		timersub(&now, &call->answer_time, &delta);
 		break;
 	default:
-		s = "UNKNOWN STATE";
+		s = _("UNKNOWN STATE");
 		memset(&delta, 0, sizeof(delta));
 		break;
 	}
@@ -5479,10 +5480,11 @@ int main(int argc, char *argv[])
 	}
 
 	/* Read config file */
-	if (gn_cfg_read_default() < 0) {
+	if (gn_cfg_read_default() < 0)
 		exit(1);
-	}
-	if (!gn_cfg_phone_load("", &state)) exit(1);
+
+	if (!gn_cfg_phone_load("", &state))
+		exit(1);
 
 	/* We have to build an array of the arguments which will be passed to the
 	   functions.  Please note that every text after the --command will be

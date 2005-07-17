@@ -35,6 +35,9 @@
       modules directories for dku2 driver               (Pawel Kot)
  * atgen driver updates
     o fix string length calculating in at_encode()  (Daniele Forsi)
+ * gnokii updates
+    o make more strings translatable, move help entries into the
+      correct locations                                 (Pawel Kot)
 
 0.6.7
 =====
