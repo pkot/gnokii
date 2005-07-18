@@ -227,7 +227,7 @@ gn_driver driver_nokia_6510 = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6800|6810|6820|6820b|6610i|6230|6650|7210|7250|7250i|7600|6170|6020|6230i", /* Supported models */
+		"6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6800|6810|6820|6820b|6610i|6230|6650|7210|7250|7250i|7600|6170|6020|6230i|5140", /* Supported models */
 		7,                     /* Max RF Level */
 		0,                     /* Min RF Level */
 		GN_RF_Percentage,      /* RF level units */
@@ -460,6 +460,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 				  "NMM-3",	/* 7600 */
 				  "NPM-6",	/* 5100 */
 				  "NPM-6X",	/* 5100 */
+				  "NPL-5",	/* 5140 */
 				  NULL};
 
 	/* Copy in the phone info */

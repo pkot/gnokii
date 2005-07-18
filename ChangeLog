@@ -29,6 +29,7 @@
  * nk6510 driver updates
     o added Nokia 6230i support                    (BORBELY Zoltan)
     o colon was missing from the irda blacklist    (BORBELY Zoltan)
+    o added Nokia 5140 support                     (BORBELY Zoltan)
  * link layer updates
     o fix dku2 module for 2.4 kernel                    (Pawel Kot)
     o added configure script to customize kernel sources and kernel
