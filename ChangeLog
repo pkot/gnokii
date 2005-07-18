@@ -39,6 +39,8 @@
  * gnokii updates
     o make more strings translatable, move help entries into the
       correct locations                                 (Pawel Kot)
+    o implement end keyword for --getsms            (Daniele Forsi)
+    o implement end keyword for --deletesms        (BORBELY Zoltan)
 
 0.6.7
 =====

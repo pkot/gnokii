@@ -1296,7 +1296,10 @@ static int getsms(int argc, char *argv[])
 
 		/* [end] can be only argv[4] */
 		if (argv[4][0] != '-') {
-			end_message = atoi(argv[4]);
+			if (!strcmp(argv[4], "end" ))
+				end_message = INT_MAX;
+			else
+				end_message = atoi(argv[4]);
 		}
 
 		/* parse all options (beginning with '-' */
@@ -1509,6 +1512,8 @@ static int getsms(int argc, char *argv[])
 			}
 			break;
 		default:
+			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message))
+				return GN_ERR_NONE;
 			fprintf(stderr, _("GetSMS %s %d failed! (%s)\n"), memory_type_string, count, gn_error_print(error));
 			if (error == GN_ERR_INVALIDMEMORYTYPE)
 				fprintf(stderr, _("See the gnokii manual page for the supported memory types with the phone\nyou use.\n"));
@@ -1541,7 +1546,12 @@ static int deletesms(int argc, char *argv[])
 	}
 
 	start_message = end_message = atoi(argv[1]);
-	if (argc > 2) end_message = atoi(argv[2]);
+	if (argc > 2) {
+		if (!strcmp(argv[2], "end"))
+			end_message = INT_MAX;
+		else
+			end_message = atoi(argv[2]);
+	}
 
 	/* Now delete the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
@@ -1553,8 +1563,11 @@ static int deletesms(int argc, char *argv[])
 
 		if (error == GN_ERR_NONE)
 			fprintf(stderr, _("Deleted SMS %s %d\n"), memory_type_string, count);
-		else
+		else {
+			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message))
+				return GN_ERR_NONE;
 			fprintf(stderr, _("DeleteSMS %s %d failed!(%s)\n\n"), memory_type_string, count, gn_error_print(error));
+		}
 	}
 
 	/* FIXME: We return the value of the last read.
