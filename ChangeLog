@@ -5,6 +5,7 @@
       from FreeBSD gnokii patches)                   (FreeBSD Team)
     o update DKU-2 documentation                        (Pawel Kot)
     o fixed German translation                        (Jens Seidel)
+    o update main README with DKU-2 and win32 info      (Pawel Kot)
  * nk6100 driver updates
     o read phonebook names as unicode on unicode capable phones
                                                         (Pawel Kot)

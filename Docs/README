@@ -100,8 +100,13 @@ README-6110 for notes on the 5110/6110 series, README-2110 for notes on the
 2110 series (which is at the moment deprecated), README-7110 for notes on
 7110/6210 series and README-6510 for notes on the 6510/6310 series.
 
+If you have DKU2 cable, read README-DKU2 to see how to get support under
+Linux (other OSes are not supported yet).
+
 See also README-dancall, README-ericsson, README-siemens and README-Symbian
 for notes on these phones.
+
+For building WIN32 versions see README-WIN32 file.
 
 
 - 4.0 Installation from source -
