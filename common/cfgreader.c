@@ -227,6 +227,7 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 	line_begin = lines;
 	num_lines = 0;
 	copied = 0;
+
 	while ((pos = strchr(line_begin, '\n')) && copied < read) {
 		char *buf;
 
@@ -641,9 +642,9 @@ API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state)
 {
 	char section[256];
 
-	if (iname == NULL || *iname == '\0')
+	if (iname == NULL || *iname == '\0') {
 		state->config = gn_config_global;
-	else {
+	} else {
 		snprintf(section, sizeof(section), "phone_%s", iname);
 		if (!cfg_psection_load(&state->config, section, &gn_config_global))
 			return false;
