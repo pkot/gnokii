@@ -49,7 +49,7 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
    # prepare configure for dku-2 module
    # for 2.4 kernel
    cd patches/kernel_2.4
-   autconf
+   autoconf
    cd ../..
    # and for 2.6 kernel
    cd patches/kernel_2.6
