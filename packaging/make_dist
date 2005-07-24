@@ -46,6 +46,16 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
    # and again for Slack
    mv packaging/Slackware/SlackBuild-save packaging/Slackware/SlackBuild
    mv packaging/Slackware/SlackBuild-xgnokii-save packaging/Slackware/SlackBuild-xgnokii
+   # prepare configure for dku-2 module
+   # for 2.4 kernel
+   cd patches/kernel_2.4
+   autconf
+   cd ../..
+   # and for 2.6 kernel
+   cd patches/kernel_2.6
+   autoconf
+   cd ../..
+   # prepare the tarballs
    cd ..
    tar -cz --exclude CVS -f /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION}
    echo "Distribution generated in /tmp/gnokii-${VERSION}.tar.gz"
