@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janík ml.
                          (C) 2001 - 2005 Pawe³ Kot
-                  Last update 16 May 2005  Version 0.6.7
+                  Last update 24 July 2005  Version 0.6.8
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.7 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.8 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -136,7 +136,7 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.6.7-i386.rpm
+rpm -i gnokii-0.6.8-i386.rpm
 
 If you are using a Debian based system, you can use dpackage to do the
 installation. On Slackware you can use installpkg or pkgtool.
@@ -402,6 +402,11 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20050724 Version 0.6.8
+Another bugfix release. Main highlights are: removed an infinite loop with
+xgnokii, fixed to unicode handling, updates to nokia_dku2 driver, end
+keyword for --getsms and --deletesms.
+
 20050516 Version 0.6.7
 Minor bugfix release. Don't use non-portable strndup. Update FAQ. Update
 build scripts for Slackware and Gentoo. New option --disable-unix98test for
