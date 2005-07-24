@@ -33,13 +33,14 @@
 
 /* Structure definitions */
 
-/* A linked list of key/value pairs */
+/* A linked list of key/value pairs of the configuration file */
 struct gn_cfg_entry {
 	struct gn_cfg_entry *next, *prev;
 	char *key;
 	char *value;
 };
 
+/* A linked list of the config file sections together with key included */
 struct gn_cfg_header {
 	struct gn_cfg_header *next, *prev;
 	struct gn_cfg_entry *entries;

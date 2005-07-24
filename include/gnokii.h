@@ -86,6 +86,8 @@ struct gn_statemachine;
 
 #include <gnokii/statemachine.h>
 
+/* The global variable that keeps the current configuration. This should be
+ * filled in before the phone initialization */
 extern API struct gn_cfg_header *gn_cfg_info;
 
 /* Files */
@@ -94,19 +96,27 @@ API int gn_file_text_save(char *filename, char *text, int mode);
 /* Misc */
 API gn_memory_type gn_str2memory_type(const char *s);
 API char *gn_memory_type2str(gn_memory_type mt);
+/* Zero the gn_data structure */
 API void gn_data_clear(gn_data *data);
 extern API gn_phone *gn_gsm_info;
 extern API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
 			 struct gn_statemachine *state);
+/* Initialise the connection and setup the driver according to the current
+ * configuration */
 API gn_error gn_gsm_initialise(struct gn_statemachine *sm);
 API int gn_timestamp_isvalid(gn_timestamp dt);
 
-/* Config file */
+/* Config handling */
+/* Get the key value from the given config, given section and the key name */
 API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
 API int gn_cfg_read(char **bindir); /* DEPRECATED */
+/* Read the config from the file filename */
 API int gn_cfg_file_read(const char *filename);
+/* Read the config from the file already put into the memory */
 API int gn_cfg_memory_read(const char **lines);
+/* Read the config from the standard $HOME/.gnokiirc or /etc/gnokiirc locations */
 API int gn_cfg_read_default();
+/* Use phone_iname section for the communication. Default is the global section */
 API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state);
 
 /* In/Out routines, file formats */
@@ -146,7 +156,9 @@ typedef API void (*gn_log_func_t)(const char *fmt, ...);
 
 API int gn_line_get(FILE *file, char *line, int count);
 
+/* Place a lock for the given device in /var/lock or /var/run */
 API char *gn_device_lock(const char *);
+/* Remove a lock for the given device from /var/lock or /var/run */
 API int gn_device_unlock(char *);
 
 API char *gn_model_get(const char *);
