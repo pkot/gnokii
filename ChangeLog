@@ -34,6 +34,7 @@
     o fix dku2 module for 2.4 kernel                    (Pawel Kot)
     o added configure script to customize kernel sources and kernel
       modules directories for dku2 driver               (Pawel Kot)
+    o add Nokia 6170 ids to the nokia_dku2 driver       (Pawel Kot)
  * atgen driver updates
     o fix string length calculating in at_encode()  (Daniele Forsi)
  * gnokii updates

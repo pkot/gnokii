@@ -46,6 +46,7 @@
 #define NOKIA_VENDOR_ID		0x0421
 #define NOKIA7600_PRODUCT_ID	0x0400
 #define NOKIA6230_PRODUCT_ID	0x040f
+#define NOKIA6170_PRODUCT_ID	0x0416
 #define NOKIA6230i_PRODUCT_ID	0x0428
 
 #define NOKIA_AT_PORT	0x82
@@ -57,6 +58,7 @@ static int nokia_probe(struct usb_serial *serial, const struct usb_device_id *id
 static struct usb_device_id id_table [] = {
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7600_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6170_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230i_PRODUCT_ID) },
 	{ }			/* Terminating entry */
 };
@@ -73,7 +75,7 @@ static struct usb_driver nokia_driver = {
 
 static struct usb_serial_device_type nokia_device = {
 	.owner =		THIS_MODULE,
-	.name =			"Nokia 7600/6230/6230i DKU2 driver",
+	.name =			"Nokia 7600/6230/6230i/6170 DKU2 driver",
 	.id_table =		id_table,
 	.num_interrupt_in =	1,
 	.num_bulk_in =		1,

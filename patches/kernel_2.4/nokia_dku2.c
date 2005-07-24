@@ -48,6 +48,7 @@
 #define NOKIA_VENDOR_ID		0x0421
 #define NOKIA7600_PRODUCT_ID	0x0400
 #define NOKIA6230_PRODUCT_ID	0x040f
+#define NOKIA6170_PRODUCT_ID	0x0416
 #define NOKIA6320i_PRODUCT_ID	0x0428
 
 #define NOKIA_AT_PORT	0x82
@@ -62,6 +63,7 @@ static void generic_write_bulk_callback(struct urb *urb);
 static struct usb_device_id id_table [] = {
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7600_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6170_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230i_PRODUCT_ID) },
 	{ }			/* Terminating entry */
 };
