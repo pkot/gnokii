@@ -277,7 +277,7 @@ AC_ARG_WITH(bluetooth,
 		AC_MSG_WARN(Usage is: --with-bluetooth=DIR)
 	  else
 		LIBS="$LIBS -L$withval/lib"
-		CFLAGS="$CFLAGS -I$withval/include"
+		CFLAGS="$CFLAGS -I$withval/net -I$withval/"
 	  fi
 	]
 )
