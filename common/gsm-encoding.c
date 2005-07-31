@@ -418,6 +418,9 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 		case -1:
 			i_len++;
 			break;
+		case 0:
+			/* return at the end of the string */
+			return;
 		default:
 			i_len += length;
 			break;

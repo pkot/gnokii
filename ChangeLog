@@ -11,6 +11,9 @@
     o only print an "invalid index" error when the "end" keyword
       wasn't used, or we managed to get the real end index (some
       phones don't report the end index)           (Bastien Nocera)
+ * libgnokii updates
+    o exit from char_ucs2_encode() infinite loop on the null
+      termination                                  (Bastien Nocera)
 
 0.6.8
 =====
