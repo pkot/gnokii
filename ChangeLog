@@ -6,6 +6,8 @@
  * atgen driver updates
     o error out when trying to set a memory type that's beyond what
       is supported by the AT driver                (Bastien Nocera)
+ * gnokii updates
+    o don't print empty entries in --getphonebook  (Bastien Nocera)
 
 0.6.8
 =====

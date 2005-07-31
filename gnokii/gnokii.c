@@ -3328,6 +3328,8 @@ static int getphonebook(int argc, char *argv[])
 			int i;
 		case GN_ERR_NONE:
 			num_entries--;
+			if (entry.empty != false)
+				break;
 			switch (type) {
 			case 1:
 				gn_file_phonebook_raw_write(stdout, &entry, memory_type_string);
