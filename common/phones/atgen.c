@@ -221,6 +221,8 @@ char *memorynames[] = {
 	"CB", /* Currently selected memory */
 };
 
+#define NR_MEMORIES (sizeof (memorynames) / sizeof ((memorynames)[0]))
+
 typedef struct {
 	char *str;
 	at_charset charset;
@@ -508,6 +510,8 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->memorytype) {
+		if (mt >= NR_MEMORIES)
+			return GN_ERR_INVALIDMEMORYTYPE;
 		sprintf(req, "AT+CPBS=\"%s\"\r", memorynames[mt]);
 		ret = sm_message_send(13, GN_OP_Init, req, state);
 		if (ret)
@@ -1362,7 +1366,7 @@ static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int le
 	data->sms_status->folders_count = 0;
 
 	data->sms_status->new_message_store = GN_MT_ME;
-	for (i = 0; i < sizeof(memorynames)/sizeof(char *); i++) {
+	for (i = 0; i < NR_MEMORIES; i++) {
 		if (strcmp(store, memorynames[i]) == 0) {
 			data->sms_status->new_message_store = i;
 			break;

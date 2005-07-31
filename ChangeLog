@@ -3,6 +3,9 @@
  * build system updates
     o add $withval/net to CFLAGS with --with-bluetooth and
       configure script                             (Bastien Nocera)
+ * atgen driver updates
+    o error out when trying to set a memory type that's beyond what
+      is supported by the AT driver                (Bastien Nocera)
 
 0.6.8
 =====
