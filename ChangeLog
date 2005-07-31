@@ -8,6 +8,9 @@
       is supported by the AT driver                (Bastien Nocera)
  * gnokii updates
     o don't print empty entries in --getphonebook  (Bastien Nocera)
+    o only print an "invalid index" error when the "end" keyword
+      wasn't used, or we managed to get the real end index (some
+      phones don't report the end index)           (Bastien Nocera)
 
 0.6.8
 =====
