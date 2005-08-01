@@ -56,6 +56,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 		struct gn_statemachine *state)
 {
 	state->device.type = device_type;
+	state->device.device_instance = NULL;
 
 	dprintf("Serial device: opening device %s\n", file);
 
