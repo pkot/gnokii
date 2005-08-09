@@ -76,6 +76,8 @@ install: all
 	$(INSTALL_DATA) xpm/Preview_3210.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL_DATA) xpm/Preview_6250.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
 	$(INSTALL_DATA) xpm/Preview_7110.xpm $(DESTDIR)$(xgnokii_libdir)/xpm
+	$(INSTALL) -d $(DESTDIR)$(datadir)/applications
+	$(INSTALL_DATA) xgnokii.desktop $(DESTDIR)$(datadir)/applications
 
 install-strip: all
 	$(INSTALL) -d $(DESTDIR)$(xbindir)

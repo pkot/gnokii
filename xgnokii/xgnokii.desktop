@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=0.9.4
+Name=Xgnokii Mobile Phone Tool
+GenericName=Mobile Phone Tool
+Comment=Mobile phone tool suite
+Icon=xgnokii
+Exec=xgnokii
+Terminal=false
+Type=Application
+Encoding=UTF-8
+Categories=Application;Network;Utility;GTK;

@@ -17,6 +17,8 @@
     o exit from char_ucs2_encode() infinite loop on the null
       termination                                  (Bastien Nocera)
     o initialize state->device.device_interface    (Bastien Nocera)
+ * xgnokii updates
+    o add xgnokii.desktop                            (Ville Skytta)
 
 0.6.8
 =====
