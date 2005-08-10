@@ -1742,7 +1742,7 @@ void GUI_CreateLogosWindow(void)
 	/* vertical tool bar */
 	vertToolBar = gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(vertToolBar), GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_orientation(GTK_TOOLBAR(vertToolBar), GTK_ORIENTATION_HORIZONTAL);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(vertToolBar), GTK_ORIENTATION_VERTICAL);
 
 	buttonBrush = gtk_toolbar_append_element(GTK_TOOLBAR(vertToolBar),
 						 GTK_TOOLBAR_CHILD_RADIOBUTTON, NULL, NULL,
