@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999      Pavel Janík ml., Hugh Blemings
-  Copyright (C) 1999-2000 Ján Derfiòák <ja@mail.upjs.sk>.
+  Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2002-2004 Pawel Kot, BORBELY Zoltan
   Copyright (C) 2002      Markus Plail, Manfred Jonsson, Pavel Machek
   Copyright (C) 2003      Tomi Ollila, Uli Hopp

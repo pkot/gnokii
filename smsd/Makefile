@@ -1,19 +1,20 @@
 #
 # Makefile for the smsd.
 #
-# Copyright (C) 1999 Hugh Blemings & Pavel Janík ml. & Jan Derfinak
+# Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
+#               1999-2005 Jan Derfinak
 #               2000 Karel Zak
 # $Id$
 #
 
-GLIBCFLAGS = glib-config --cflags
-GLIBLDLIBS = glib-config --libs
+#GLIBCFLAGS = glib-config --cflags
+#GLIBLDLIBS = glib-config --libs
 
 # Comment out above lines and uncomment below lines if you want compile smsd
 # with glib2 instead of glib1.
 #
-#GLIBCFLAGS = pkg-config --cflags glib-2.0
-#GLIBLDLIBS = pkg-config --libs glib-2.0
+GLIBCFLAGS = pkg-config --cflags glib-2.0
+GLIBLDLIBS = pkg-config --libs glib-2.0
 
 TOPDIR=..
 include $(TOPDIR)/Makefile.global

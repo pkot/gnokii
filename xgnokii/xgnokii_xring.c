@@ -25,6 +25,8 @@
   Copyright (C) 1999 Tomi Ollila
   Copyright (C) 2003 BORBELY Zoltan
   Copyright (C) 2004 Pawel Kot
+  Copyright (C) 2005 Jan Derfinak
+  
 
 */
 
@@ -470,7 +472,7 @@ static void close_application(GtkWidget * widget, GdkEvent * event, gpointer dat
 	}
 	play_tone(0, 0, -1);
 
-	gdk_key_repeat_restore();
+//	gdk_key_repeat_restore();
 	gtk_widget_hide(gi.w);
 }
 
@@ -546,7 +548,7 @@ static gboolean button_release(GtkWidget * widget, GdkEvent * event, gpointer da
 static gboolean focus_in(GtkWidget * widget, GdkEvent * event, gpointer data)
 {
 	gi.focus = TRUE;
-	gdk_key_repeat_disable();
+//	gdk_key_repeat_disable();
 
 	return TRUE;
 }
@@ -556,7 +558,7 @@ static gboolean focus_out(GtkWidget * widget, GdkEvent * event, gpointer data)
 	tone_stop(&gi);
 
 	gi.focus = FALSE;
-	gdk_key_repeat_restore();
+//	gdk_key_repeat_restore();
 
 	return TRUE;
 }
@@ -598,7 +600,7 @@ static void read_ringtone(GtkWidget *w, GtkFileSelection *fs)
 		gi.file_name = NULL;
 	}
 
-	file_name = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	file_name = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((err = gn_file_ringtone_read(file_name, &gi.ringtone)) != GN_ERR_NONE) {
@@ -635,7 +637,7 @@ static void write_ringtone(GtkWidget *w, GtkFileSelection *fs)
 	gchar *file_name;
 	gn_error err;
 
-	file_name = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	file_name = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((err = gn_file_ringtone_save(file_name, &gi.ringtone)) != GN_ERR_NONE) {
@@ -842,7 +844,7 @@ void GUI_CreateXringWindow(void)
 	/* create menubar */
 
 	gi.accel = gtk_accel_group_new();
-	gtk_accel_group_attach(gi.accel, GTK_OBJECT(gi.w));
+	gtk_window_add_accel_group(GTK_WINDOW(gi.w), gi.accel);
 	gi.item_factory = gtk_item_factory_new(GTK_TYPE_MENU_BAR, "<main>", gi.accel);
 	gtk_item_factory_create_items(gi.item_factory, sizeof(menu_items) / sizeof(menu_items[0]), menu_items, NULL);
 	gi.menu = gtk_item_factory_get_widget(gi.item_factory, "<main>");
@@ -851,9 +853,9 @@ void GUI_CreateXringWindow(void)
 
 	/* create toolbar */
 
-	gi.toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(gi.toolbar), GTK_RELIEF_NORMAL);
+	gi.toolbar = gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(gi.toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(gi.toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(gi.toolbar), NULL, _("Clear ringtone"), NULL,
 			NewPixmap(New_xpm, gi.w->window, &gi.w->style->bg[GTK_STATE_NORMAL]),

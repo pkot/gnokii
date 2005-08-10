@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
-  & Ján Derfiòák <ja@mail.upjs.sk>.
+  & 1999-2005 Jan Derfinak.
 
 */
 
@@ -92,7 +92,7 @@ static void OkLoadDialog(GtkWidget * w, GtkFileSelection * fs)
 	gchar line[MAX_DTMF_LENGTH + 1];
 	gchar buf[80];
 
-	fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	fileName = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(fileName, "r")) == NULL) {
@@ -156,13 +156,13 @@ static void OkSaveDialog(GtkWidget * w, GtkFileSelection * fs)
 	static YesNoDialog dialog = { NULL, NULL };
 	gchar err[255];
 
-	saveFileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	saveFileName = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(saveFileName, "r")) != NULL) {
 		fclose(f);
 		if (dialog.dialog == NULL) {
-			CreateYesNoDialog(&dialog, YesSaveDialog, CancelDialog, GUI_DTMFWindow);
+			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesSaveDialog, (GtkSignalFunc) CancelDialog, GUI_DTMFWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
 			g_snprintf(err, 255, _("File %s already exist.\nOverwrite?"), saveFileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
@@ -257,7 +257,7 @@ void GUI_CreateDTMFWindow()
 
 	gtk_item_factory_create_items(item_factory, nmenu_items, menu_items, NULL);
 
-	gtk_accel_group_attach(accel_group, GTK_OBJECT(GUI_DTMFWindow));
+	gtk_window_add_accel_group(GTK_WINDOW(GUI_DTMFWindow), accel_group);
 
 	/* Finally, return the actual menu bar created by the item factory. */
 	menubar = gtk_item_factory_get_widget(item_factory, "<main>");

@@ -13,7 +13,7 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 CFLAGS += $(PTHREAD_CFLAGS) \
-	  $(GTK_CFLAGS)
+	  $(GTK_CFLAGS) -DGTK_ENABLE_BROKEN
 
 LDLIBS += $(PTHREAD_LIBS) \
 	  $(GTK_LIBS)

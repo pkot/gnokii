@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
-  & Ján Derfiòák <ja@mail.upjs.sk>.
+  & 1999-2005 Jan Derfinak
   Copyright (C) 2002-2003 Pawel Kot
   Copyright (C) 2002      BORBELY Zoltan, Markus Plail
 
@@ -325,7 +325,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	gint location;
 	register gint i, row_i = 0;
 
-	fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	fileName = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(fileName, "r")) == NULL) {
@@ -454,13 +454,13 @@ static void OkExportDialog(GtkWidget * w, GtkFileSelection * fs)
 	gchar err[255];
 
 
-	exportDialogData.fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	exportDialogData.fileName = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(exportDialogData.fileName, "r")) != NULL) {
 		fclose(f);
 		if (dialog.dialog == NULL) {
-			CreateYesNoDialog(&dialog, YesExportDialog, CancelDialog,
+			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesExportDialog, (GtkSignalFunc) CancelDialog,
 					  GUI_SpeedDialWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
 			g_snprintf(err, 255, _("File %s already exist.\nOverwrite?"),
@@ -567,7 +567,7 @@ void GUI_CreateSpeedDialWindow(void)
 
 	gtk_item_factory_create_items(item_factory, nmenu_items, menu_items, NULL);
 
-	gtk_accel_group_attach(accel_group, GTK_OBJECT(GUI_SpeedDialWindow));
+	gtk_window_add_accel_group(GTK_WINDOW(GUI_SpeedDialWindow), accel_group);
 
 	/* Finally, return the actual menu bar created by the item factory. */
 	menubar = gtk_item_factory_get_widget(item_factory, "<main>");
@@ -582,8 +582,9 @@ void GUI_CreateSpeedDialWindow(void)
 
 	/* Create the toolbar */
 
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Read from phone"), NULL,
 				NewPixmap(Read_xpm, GUI_SpeedDialWindow->window,

@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
-  Copyright (C) 1999-2002 Ján Derfiòák <ja@mail.upjs.sk>.
+  Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2001-2003 Pawel Kot
   Copyright (C) 2002-2003 BORBELY Zoltan
   Copyright (C) 2002      Markus Plail
@@ -721,7 +721,7 @@ static void SaveToMailbox(gchar *mailbox_name)
 
 static void OKSaveSMStoMailbox(GtkWidget * widget, gpointer data)
 {
-  mailbox_name = gtk_file_selection_get_filename(GTK_FILE_SELECTION(data));
+  mailbox_name = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(data));
   SaveToMailbox(mailbox_name);
   gtk_widget_hide(GTK_WIDGET(data));
 }
@@ -762,7 +762,7 @@ create_SaveSMStoMailbox (void)
   SaveSMStoMailbox = gtk_file_selection_new (_("Choose Mailbox File"));
   gtk_object_set_data (GTK_OBJECT (SaveSMStoMailbox), "SaveSMStoMailbox", SaveSMStoMailbox);
   gtk_container_set_border_width (GTK_CONTAINER (SaveSMStoMailbox), 10);
-  GTK_WINDOW (SaveSMStoMailbox)->type = GTK_WINDOW_DIALOG;
+  GTK_WINDOW (SaveSMStoMailbox)->type = GTK_WINDOW_TOPLEVEL;
 
   ok_button1 = GTK_FILE_SELECTION (SaveSMStoMailbox)->ok_button;
   gtk_object_set_data (GTK_OBJECT (SaveSMStoMailbox), "ok_button1", ok_button1);
@@ -810,7 +810,7 @@ static inline void RefreshSMSStatus(void)
 static inline gint RefreshSMSLength(GtkWidget * widget, GdkEventKey * event, gpointer callback_data)
 {
 	RefreshSMSStatus();
-	if (GTK_EDITABLE(widget)->editable == FALSE)
+	if (gtk_editable_get_editable (GTK_EDITABLE(widget)) == FALSE)
 		return (FALSE);
 	if (event->keyval == GDK_BackSpace || event->keyval == GDK_Clear ||
 	    event->keyval == GDK_Insert || event->keyval == GDK_Delete ||
@@ -1305,7 +1305,7 @@ static void CreateSMSSendWindow(void)
 
 	gtk_item_factory_create_items(item_factory, nmenu_items, send_menu_items, NULL);
 
-	gtk_accel_group_attach(accel_group, GTK_OBJECT(sendSMS.SMSSendWindow));
+	gtk_window_add_accel_group(GTK_WINDOW(sendSMS.SMSSendWindow), accel_group);
 
 	/* Finally, return the actual menu bar created by the item factory. */
 	menubar = gtk_item_factory_get_widget(item_factory, "<main>");
@@ -1320,8 +1320,9 @@ static void CreateSMSSendWindow(void)
 
 	/* Create the toolbar */
 
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Send message"), NULL,
 				NewPixmap(SendSMS_xpm, GUI_SMSWindow->window,
@@ -1714,7 +1715,7 @@ void GUI_CreateSMSWindow(void)
 
 	gtk_item_factory_create_items(item_factory, nmenu_items, menu_items, NULL);
 
-	gtk_accel_group_attach(accel_group, GTK_OBJECT(GUI_SMSWindow));
+	gtk_window_add_accel_group(GTK_WINDOW(GUI_SMSWindow), accel_group);
 
 	/* Finally, return the actual menu bar created by the item factory. */
 	menubar = gtk_item_factory_get_widget(item_factory, "<main>");
@@ -1728,8 +1729,9 @@ void GUI_CreateSMSWindow(void)
 	gtk_widget_show(menubar);
 
 	/* Create the toolbar */
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("New message"), NULL,
 				NewPixmap(Edit_xpm, GUI_SMSWindow->window,
@@ -1760,14 +1762,14 @@ void GUI_CreateSMSWindow(void)
 	gtk_widget_show(toolbar);
 
 	vpaned = gtk_vpaned_new();
-	gtk_paned_set_handle_size(GTK_PANED(vpaned), 10);
-	gtk_paned_set_gutter_size(GTK_PANED(vpaned), 15);
+//	gtk_paned_set_handle_size(GTK_PANED(vpaned), 10);
+//	gtk_paned_set_gutter_size(GTK_PANED(vpaned), 15);
 	gtk_box_pack_end(GTK_BOX(main_vbox), vpaned, TRUE, TRUE, 0);
 	gtk_widget_show(vpaned);
 
 	hpaned = gtk_hpaned_new();
-	gtk_paned_set_handle_size(GTK_PANED(hpaned), 8);
-	gtk_paned_set_gutter_size(GTK_PANED(hpaned), 10);
+//	gtk_paned_set_handle_size(GTK_PANED(hpaned), 8);
+//	gtk_paned_set_gutter_size(GTK_PANED(hpaned), 10);
 	gtk_paned_add1(GTK_PANED(vpaned), hpaned);
 	gtk_widget_show(hpaned);
 

@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999      Pavel Janík ml., Hugh Blemings
-  Copyright (C) 1999-2002 Ján Derfiòák <ja@mail.upjs.sk>.
+  Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2002      Markus Plail, Pavel Machek
   Copyright (C) 2002-2004 Pawel Kot, BORBELY Zoltan
   Copyright (C) 2002-2003 Uli Hopp
@@ -32,6 +32,7 @@
 */
 
 
+#include <gtk/gtk.h>
 #include "misc.h"
 
 #include <stdio.h>
@@ -45,7 +46,6 @@
 
 #include <stdlib.h>
 #include <string.h>
-#include <gtk/gtk.h>
 
 #include "gnokii.h"
 #include "xgnokii_contacts.h"
@@ -1173,7 +1173,7 @@ static void EditSubEntries(GtkWidget * clist,
 	gint type;
 
 	if (editSubEntriesData.dialog == NULL)
-		CreateSubEntriesDialog(&editSubEntriesData, _("Edit entry"), OkEditSubEntriesDialog, row);
+		CreateSubEntriesDialog(&editSubEntriesData, _("Edit entry"), (GtkSignalFunc) OkEditSubEntriesDialog, row);
 
 	gtk_clist_get_text(GTK_CLIST(clist), row, 1, &buf);
 	editNumbersData.row = row;
@@ -1567,7 +1567,7 @@ static void EditPbEntry(PhonebookEntry * pbEntry, gint row)
 	editSubEntriesData.pbEntry = pbEntry;
 
 	if (editEditEntryData.dialog == NULL)
-		CreateEditDialog(&editEditEntryData, _("Edit entry"), OkEditEntryDialog);
+		CreateEditDialog(&editEditEntryData, _("Edit entry"), (GtkSignalFunc) OkEditEntryDialog);
 
 
 	gtk_entry_set_text(GTK_ENTRY(editEditEntryData.name), pbEntry->entry.name);
@@ -1660,7 +1660,7 @@ void NewPbEntry(PhonebookEntry * pbEntry)
 	editSubEntriesData.pbEntry = pbEntry;
 
 	if (newEditEntryData.dialog == NULL)
-		CreateEditDialog(&newEditEntryData, _("New entry"), OkNewEntryDialog);
+		CreateEditDialog(&newEditEntryData, _("New entry"), (GtkSignalFunc) OkNewEntryDialog);
 
 	gtk_entry_set_text(GTK_ENTRY(newEditEntryData.name), pbEntry->entry.name);
 
@@ -1704,7 +1704,7 @@ void DuplicatePbEntry(PhonebookEntry * pbEntry)
 	editSubEntriesData.pbEntry = pbEntry;
 
 	if (duplicateEditEntryData.dialog == NULL)
-		CreateEditDialog(&duplicateEditEntryData, _("Duplicate entry"), OkNewEntryDialog);
+		CreateEditDialog(&duplicateEditEntryData, _("Duplicate entry"), (GtkSignalFunc) OkNewEntryDialog);
 
 	gtk_entry_set_text(GTK_ENTRY(duplicateEditEntryData.name), pbEntry->entry.name);
 
@@ -2109,7 +2109,7 @@ static void CreateProgressDialog(gint maxME, gint maxSM)
 	GtkWidget *vbox, *label;
 	GtkAdjustment *adj;
 
-	progressDialog.dialog = gtk_window_new(GTK_WINDOW_DIALOG);
+	progressDialog.dialog = gtk_dialog_new();
 	gtk_window_position(GTK_WINDOW(progressDialog.dialog), GTK_WIN_POS_MOUSE);
 	gtk_window_set_modal(GTK_WINDOW(progressDialog.dialog), TRUE);
 	gtk_signal_connect(GTK_OBJECT(progressDialog.dialog), "delete_event",
@@ -2583,7 +2583,7 @@ static void ReadSaveContacts(void)
 	static GtkWidget *dialog = NULL;
 
 	if (dialog == NULL)
-		dialog = CreateSaveQuestionDialog(ReadSaveCallback, ReadDontSaveCallback);
+		dialog = CreateSaveQuestionDialog((GtkSignalFunc) ReadSaveCallback, (GtkSignalFunc) ReadDontSaveCallback);
 
 	gtk_widget_show(dialog);
 }
@@ -2751,13 +2751,13 @@ static void OkExportDialog(GtkWidget * w, GtkFileSelection * fs)
 	FILE *f;
 	gchar err[255];
 
-	exportDialogData.fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	exportDialogData.fileName = (gchar *)gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(exportDialogData.fileName, "r")) != NULL) {
 		fclose(f);
 		if (dialog.dialog == NULL) {
-			CreateYesNoDialog(&dialog, YesExportDialog, CancelDialog,
+			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesExportDialog, (GtkSignalFunc) CancelDialog,
 					  GUI_ContactsWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
 			g_snprintf(err, 255, _("File %s already exist.\nOverwrite?"),
@@ -2803,7 +2803,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	gchar *fileName;
 	gint i;
 
-	fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	fileName = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(fileName, "r")) == NULL) {
@@ -2992,7 +2992,7 @@ void static ImportSaveContacts(void)
 	static GtkWidget *dialog = NULL;
 
 	if (dialog == NULL)
-		dialog = CreateSaveQuestionDialog(ImportSaveCallback, ImportDontSaveCallback);
+		dialog = CreateSaveQuestionDialog((GtkSignalFunc) ImportSaveCallback, (GtkSignalFunc) ImportDontSaveCallback);
 
 	gtk_widget_show(dialog);
 }
@@ -3041,7 +3041,7 @@ void GUI_QuitSaveContacts(void)
 	static GtkWidget *dialog = NULL;
 
 	if (dialog == NULL)
-		dialog = CreateSaveQuestionDialog(QuitSaveCallback, QuitDontSaveCallback);
+		dialog = CreateSaveQuestionDialog((GtkSignalFunc) QuitSaveCallback, (GtkSignalFunc) QuitDontSaveCallback);
 
 	gtk_widget_show(dialog);
 }
@@ -3345,7 +3345,7 @@ void GUI_CreateContactsWindow(void)
 
 	gtk_item_factory_create_items(item_factory, nmenu_items, menu_items, NULL);
 
-	gtk_accel_group_attach(accel_group, GTK_OBJECT(GUI_ContactsWindow));
+	gtk_window_add_accel_group(GTK_WINDOW(GUI_ContactsWindow), accel_group);
 
 	/* Finally, return the actual menu bar created by the item factory. */
 	menubar = gtk_item_factory_get_widget(item_factory, "<main>");
@@ -3360,8 +3360,9 @@ void GUI_CreateContactsWindow(void)
 
 	/* Create the toolbar */
 
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Read from phone"), NULL,
 				NewPixmap(Read_xpm, GUI_ContactsWindow->window,

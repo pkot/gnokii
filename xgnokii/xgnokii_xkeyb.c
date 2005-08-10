@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
-  & Ján Derfiòák <ja@mail.upjs.sk>.
+  & 1999-2005 Jan Derfinak.
   Copyright (C) 2002 BORBELY Zoltan
 
 */
@@ -269,8 +269,8 @@ void GUI_CreateXkeybWindow(void)
 
 	gtk_item_factory_create_items(item_factory, nmenu_items, menu_items, NULL);
 
-	gtk_accel_group_attach(accel_group, GTK_OBJECT(GUI_XkeybWindow));
-
+	gtk_window_add_accel_group(GTK_WINDOW(GUI_XkeybWindow), accel_group);
+	
 	/* Finally, return the actual menu bar created by the item factory. */
 	menubar = gtk_item_factory_get_widget(item_factory, "<main>");
 

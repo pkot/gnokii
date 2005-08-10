@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999      Pavel Janík ml., Hugh Blemings
-  Copyright (C) 1999-2001 Ján Derfiòák <ja@mail.upjs.sk>.
+  Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2000-2001 Marcin Wiacek, Chris Kemp
   Copyright (C) 2002-2003 Pawel Kot
   Copyright (C) 2002      Markus Plail
@@ -1008,8 +1008,8 @@ void GetLogoEvent(GtkWidget * widget)
 	int i;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_Bitmap *data = (D_Bitmap *) g_malloc(sizeof(D_Bitmap));
-	char *netcou = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
-	char network[64], country[24];
+	gchar *netcou = (gchar *) gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
+	gchar network[64], country[24];
 
 	/* prepare data for event */
 	sscanf(netcou, "%s (%[^)])", network, country);
@@ -1049,8 +1049,8 @@ void SetLogoEvent(GtkWidget * widget)
 	gn_error error;
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	D_Bitmap *data = (D_Bitmap *) g_malloc(sizeof(D_Bitmap));
-	char *netcou = gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
-	char network[64], country[24];
+	gchar *netcou = (gchar *) gtk_entry_get_text(GTK_ENTRY(GTK_COMBO(networkCombo)->entry));
+	gchar network[64], country[24];
 	int i;
 
 	/* prepare data */
@@ -1358,13 +1358,13 @@ static void ExportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 	FILE *f;
 	gchar err[255];
 
-	exportDialogData.fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	exportDialogData.fileName = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(exportDialogData.fileName, "r")) != NULL) {
 		fclose(f);
 		if (dialog.dialog == NULL) {
-			CreateYesNoDialog(&dialog, YesLogoFileExportDialog, CancelDialog,
+			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesLogoFileExportDialog, (GtkSignalFunc) CancelDialog,
 					  GUI_LogosWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
 			g_snprintf(err, 255, _("File %s already exist.\nOverwrite?"),
@@ -1384,7 +1384,7 @@ void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 	gchar *fileName;
 	FILE *f;
 
-	fileName = gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
+	fileName = (gchar *) gtk_file_selection_get_filename(GTK_FILE_SELECTION(fs));
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(fileName, "r")) == NULL) {
@@ -1550,8 +1550,8 @@ void GUI_CreateLogosWindow(void)
 	CreateInfoDialog(&infoDialog, GUI_LogosWindow);
 
 	accelGroup = gtk_accel_group_new();
-	gtk_accel_group_attach(accelGroup, GTK_OBJECT(GUI_LogosWindow));
-
+	gtk_window_add_accel_group(GTK_WINDOW(GUI_LogosWindow), accelGroup);
+	
 /* create main vbox */
 	vbox = gtk_vbox_new(FALSE, 1);
 	gtk_container_add(GTK_CONTAINER(GUI_LogosWindow), vbox);
@@ -1565,9 +1565,9 @@ void GUI_CreateLogosWindow(void)
 	gtk_widget_show(menuBar);
 
 /* toolbar */
-	toolBar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolBar), GTK_RELIEF_NORMAL);
+	toolBar = gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(toolBar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolBar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolBar), NULL, _("Clear logo"), NULL,
 				NewPixmap(New_xpm, GUI_LogosWindow->window,
@@ -1740,9 +1740,9 @@ void GUI_CreateLogosWindow(void)
 	gtk_widget_show(drawingArea);
 
 	/* vertical tool bar */
-	vertToolBar = gtk_toolbar_new(GTK_ORIENTATION_VERTICAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(vertToolBar), GTK_RELIEF_NORMAL);
+	vertToolBar = gtk_toolbar_new();
 	gtk_toolbar_set_style(GTK_TOOLBAR(vertToolBar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(vertToolBar), GTK_ORIENTATION_HORIZONTAL);
 
 	buttonBrush = gtk_toolbar_append_element(GTK_TOOLBAR(vertToolBar),
 						 GTK_TOOLBAR_CHILD_RADIOBUTTON, NULL, NULL,

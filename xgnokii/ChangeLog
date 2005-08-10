@@ -1,26 +1,29 @@
-* Thu 22 Mar 2001 Jan Derfinak <ja@mail.upjs.sk>
+* Wed 10 Aug 2005 Jan Derfinak
+- First phase of moving to gtk2. -DGTK_ENABLE_BROKEN is needed to compile.
+
+* Thu 22 Mar 2001 Jan Derfinak 
 - Added 6210 preview to xlogos module.
 
-* Sat 03 Mar 2001 Jan Derfinak <ja@mail.upjs.sk>
+* Sat 03 Mar 2001 Jan Derfinak 
 - Pavel Machek's patch for finegrained indicators.
 
-* Fri 02 Feb 2001 Jan Derfinak <ja@mail.upjs.sk>
+* Fri 02 Feb 2001 Jan Derfinak 
 - New dialoges for 6210/7110 in contacts window.
 
-* Sat 13 Jan 2001 Jan Derfinak <ja@mail.upjs.sk>
+* Sat 13 Jan 2001 Jan Derfinak 
 - Patch from Pavel Machek <pavel@ucw.cz>. It provides better feedback to user,
   puts GPL into copyright (it belongs there), and fixes docs.
 - Corrected non translatable labels/sentenses in xgnokii.c.
   Hans Motshärg <hans.motsharg@eyp.ee>
 
-* Sun 19 Dec 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Sun 19 Dec 2000 Jan Derfinak 
 - Functions for detecting phone's capabilites moved to common directory.
 
-* Sat Jul 15 13:18:12 CEST 2000 Jan Derfinak Jan Derfinak <ja@mail.upjs.sk>
+* Sat Jul 15 13:18:12 CEST 2000 Jan Derfinak Jan Derfinak 
 - Patch from Christopher Kemp <ck231@cam.ac.uk> to enable data mode in
   xgnokii.
 
-* Sun Jul 02 19:02:39 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Sun Jul 02 19:02:39 CEST 2000 Jan Derfinak 
 - Deleting calendar notes work.
 - Initialization timeout shorted from 15 secs to 10 secs.
 
@@ -28,35 +31,35 @@
 - Saving SMS's to mailbox. Original idea from Petri Lahti <petri.lahti@iki.fi>
 - User configurable maximum length of names in contacts on SIM and phone.
 
-* Sat Jun 16 22:35:24 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Sat Jun 16 22:35:24 CEST 2000 Jan Derfinak 
 - New pixmap in calendar window from Marcel Koeppen <jojo@jojosoft.de>
 
-* Tue Jun 13 01:58:56 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Tue Jun 13 01:58:56 CEST 2000 Jan Derfinak 
 - Initialization timeout was extended from 5 secs to 15 secs.
 - Corrected algorithm for SMS reading. Now we can read all SMS on SIM card.
 - Changed date/time in delivery report from send date to delivery date.
 
-* Mon Jun 12 16:33:45 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Mon Jun 12 16:33:45 CEST 2000 Jan Derfinak 
 - xlogos integrated into xgnokii (Robert Vojta <penguin@clark.cz>)
 - Little progress in calendar window.
 - Cleaning code for compiling under Solaris 8 with new gcc.
 - Small changes and fixes.
 
-* Wed May 24 16:50:07 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Wed May 24 16:50:07 CEST 2000 Jan Derfinak 
 - Changed structure in help directory. (Polish help don't work now.)
 
-* Sun May 21 22:33:19 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Sun May 21 22:33:19 CEST 2000 Jan Derfinak 
 - New English online help. <(Marcin Wiacek
   <Marcin-Wiacek@topnet.pl>)
 - Added notes viewer in Calendar window.
 - Added function which get and show notes in phone.
 
-* Wed May 17 17:51:07 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Wed May 17 17:51:07 CEST 2000 Jan Derfinak 
 - New install procedure for online documetation. (Brad Guillory
   <round@baileylink.net>)
 - Small progress in Calendar window.
 
-* Tue May 16 11:24:08 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Tue May 16 11:24:08 CEST 2000 Jan Derfinak 
 - Okay, okay you are better in ice hockey.
 - Why did you removed slovak messages? You cannot translate them? :)
 - New skin for 5110 in keyboard window (Marcin Wiacek
@@ -75,14 +78,14 @@
 - slovak debug messages removed :-)
 - Hey, we will beat you tomorrow in ice hockey!
 
-* Fri May 12 01:14:48 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Fri May 12 01:14:48 CEST 2000 Jan Derfinak 
 - Callers groups are readed only once.
 - Added info dialog when reading SMS centers.
 - New online help from Marcin Wiacek <Marcin-Wiacek@topnet.pl> in English
   and Polish language. Language version depends on locale settings (LANG,
   LC_MESSAGES or LC_ALL)
 
-* Mon May  1 21:16:35 CEST 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Mon May  1 21:16:35 CEST 2000 Jan Derfinak 
 - added new thread to xgnokii. This thread glue slow phone interface with
   quick user interface (GUI).
 - new backgroung for xgnokii. "Business Cards" is replaced with "Calendar".
@@ -97,13 +100,13 @@
 - added detection for MNT phones (Andrew Kozin <stanson@chat.ru>)
 - more minor fixes.
 
-* Thu Mar 20 12:06:47 CET 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Thu Mar 20 12:06:47 CET 2000 Jan Derfinak 
 xgnokii-20000320
 - corrected if clause for support Callers groups and Netmonitor.
 - removed option for memory type change, if phone support only SIM memory.
 - xkeyb integrated into xgnokii.
 
-* Thu Mar 16 15:45:39 CET 2000 Jan Derfinak <ja@mail.upjs.sk>
+* Thu Mar 16 15:45:39 CET 2000 Jan Derfinak 
 xgnokii-20000316
 - File CHANGES renamed to ChangeLog
 - Changed URL to Marcin Wi1cek nokia pages in xgnokii help.
@@ -240,5 +243,3 @@ xgnokii-19990816
 - Simple options menu.
 - Application skeleton and some code cleanup.
 - Base for contacts window.
-
-Jan Derfinak <ja@mail.upjs.sk>

@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999      Pavel Janík ml., Hugh Blemings
-  Copyright (C) 1999-2002 Ján Derfiòák <ja@mail.upjs.sk>.
+  Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2001-2002 Pawel Kot
   Copyright (C) 2002      BORBELY Zoltan, Markus Plail
 
@@ -1565,8 +1565,8 @@ void GUI_CreateCalendarWindow()
 
 	gtk_item_factory_create_items(item_factory, nmenu_items, menu_items, NULL);
 
-	gtk_accel_group_attach(accel_group, GTK_OBJECT(GUI_CalendarWindow));
-
+	gtk_window_add_accel_group (GTK_WINDOW(GUI_CalendarWindow), accel_group);
+	
 	/* Finally, return the actual menu bar created by the item factory. */
 	menubar = gtk_item_factory_get_widget(item_factory, "<main>");
 
@@ -1579,8 +1579,9 @@ void GUI_CreateCalendarWindow()
 	gtk_widget_show(menubar);
 
 	/* Create the toolbar */
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_ICONS);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_ICONS);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Read from phone"), NULL,
 				NewPixmap(Read_xpm, GUI_CalendarWindow->window,

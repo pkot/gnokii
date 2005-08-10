@@ -1,8 +1,12 @@
+* Wed Aug 10 2005 Jan Derfinak
+- Switch to glib2.
+
+
 * Fri May 13 2005 Pawel Kot
 - README should say about pq/mysql.la not pq/mysql.so
 
 
-* Sat Apr  9 2005 Jan Derfinak <ja@mail.upjs.sk>
+* Sat Apr  9 2005 Jan Derfinak 
 - version 1.4
 - added time window for outgoing sms (Martin White <gnokii at mgw.org.uk>)
 - fixed strncpy() if mysql_fetch_row returns NULL
@@ -10,7 +14,7 @@
   to outbox
 
 
-* Tue Jan 25 2005 Jan Derfinak <ja@mail.upjs.sk>
+* Tue Jan 25 2005 Jan Derfinak 
 - Improved db modules handling in Makefile by David Vrabel.
 
 
@@ -22,11 +26,11 @@
 - Correctly exit when the device is locked.
 
 
-* Mon Oct 11 2004 Jan Derfinak <ja@mail.upjs.sk>
+* Mon Oct 11 2004 Jan Derfinak 
 - Added support for drivers without GN_OP_GetSMSStatus.
 
 
-* Tue Aug  3 2004 Jan Derfinak <ja@mail.upjs.sk>
+* Tue Aug  3 2004 Jan Derfinak 
 - Changed LDLIBS for FreeBSD. Idea from <robert@dk-hostmaster.dk>.
 
 
@@ -43,7 +47,7 @@
   mixing fPIC (from libgnokii) and non-fPIC (from smsd) code.
 
 
-* Wed May 19 2004 Jan Derfinak <ja@mail.upjs.sk>
+* Wed May 19 2004 Jan Derfinak 
 - The meaning of default value 'now' changed in latest postgresql.
   It is replaced with function now().
   Thanks to Stefan de Konink <stefandekonink@utelisys.com>.
@@ -71,12 +75,12 @@
   Taken from FreeBSD ports.
 
 
-* Sun Oct 05 2003 Jan Derfinak <ja@mail.upjs.sk>
+* Sun Oct 05 2003 Jan Derfinak 
 - Added possibility to run multiple instances at the same time.
 - Version changed to 1.2.
 
 
-* Tue Sep 30 2003 Jan Derfinak <ja@mail.upjs.sk>
+* Tue Sep 30 2003 Jan Derfinak 
 - added alpha support for glib2
 
 
@@ -96,7 +100,7 @@
 - Bad SQL statement fixed in the mysql module.
 
 
-* Sun Feb 09 2003 Jan Definak <ja@mail.upjs.sk>
+* Sun Feb 09 2003 Jan Definak 
 - Added comment for Tru64 from Peter Kolmisoppi <peter@opoint.com>.
 - Added support for logging to file.
 - Added possibility to request delivery report per message. Global option
@@ -118,11 +122,11 @@
 - Converted to new libgnokii API.
 
 
-* Sun Aug 11 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Sun Aug 11 2002 Jan Derfinak 
 - Added libfile.
 
 
-* Sun Aug  4 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Sun Aug  4 2002 Jan Derfinak 
 - Added support for phones with sms folders.
 
 
@@ -131,11 +135,11 @@
    encode them in the unicode.
 
 
-* Sun Jul 07 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Sun Jul 07 2002 Jan Derfinak 
 - Fixed sms's sending to reflect changes in gnokii code.
 
 
-* Fri Jun 28 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Fri Jun 28 2002 Jan Derfinak 
 - Fixed sms's receiving to reflect changes in gnokii code.
 - Sms's sending still don't work.
 
@@ -150,29 +154,29 @@
 - Minor locking fixes.
 
 
-* Thu Feb 14 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Thu Feb 14 2002 Jan Derfinak 
 - Rewrited PostgreSQL plugin.
 - Added retrying when sending sms's.
 - Removed GSMLinkOK test.
 - Code and documentation cleanup.
 
 
-* Sun Feb 03 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Sun Feb 03 2002 Jan Derfinak 
 - MySQL support is now really working.
 
 
-* Fri Feb 01 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Fri Feb 01 2002 Jan Derfinak 
 - Added experimental support for MySQL. Fixes will coming soon. 
   (Ganesh Lohia <ganesh@pobox.com>)
 
 
-* Sun Jan 27 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Sun Jan 27 2002 Jan Derfinak 
 - Fix core dumps.
 - Added support for database's plugins.
 - Added option for reading delivery reports.
 
 
-* Mon Jan 14 2002 Jan Derfinak <ja@mail.upjs.sk>
+* Mon Jan 14 2002 Jan Derfinak 
 - added parsing for \ and ' in incoming sms's.
 - Changed "insert into <table> values (<Val1> <Val2> .. <Valn>)"
   to "insert into <table> (<Col1> <Col2> .. <Coln>) values (<Val1> <Val2> ..
@@ -188,5 +192,5 @@
 - Use libgnokii.so.
 
 
-* Fri 02 Feb 2001 Jan Derfinak <ja@mail.upjs.sk>
+* Fri 02 Feb 2001 Jan Derfinak 
 - Fixed smsd to new capability code.

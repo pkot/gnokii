@@ -389,16 +389,14 @@ else
          GTK_CFLAGS=""
          GTK_LIBS=""
       else
-         AC_PATH_PROGS(GTK_CONFIG, gtk-config gtk12-config, no)
-         if test "$GTK_CONFIG" = no; then
+         PKG_CHECK_MODULES(GTK, gtk+-2.0 >= 2.0, found_gtk=yes, found_gtk=no)
+         if test "$found_gtk" = no; then
             x_support="no"
             GTK_CFLAGS=""
             GTK_LIBS=""
-            AC_MSG_WARN(Cannot find gtk-config.)
+            AC_MSG_WARN(Cannot find GTK+ 2.0.)
             AC_MSG_WARN(Disabling xgnokii.)
          else
-            GTK_CFLAGS=`$GTK_CONFIG --cflags`
-            GTK_LIBS=`$GTK_CONFIG --libs`
             x_support="yes"
 
             XGNOKIIDIR='${prefix}'

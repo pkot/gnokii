@@ -23,13 +23,16 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999      Pavel Janík ml., Hugh Blemings
-  Copyright (C) 1999-2002 Ján Derfiòák <ja@mail.upjs.sk>.
+  Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2001-2004 Pawel Kot
   Copyright (C) 2001      Chris Kemp, Marian Jancar
   Copyright (C) 2002      Markus Plail
   Copyright (C) 2003-2004 BORBELY Zoltan
 
 */
+
+#include <gdk/gdkkeysyms.h>
+#include <gtk/gtk.h>
 
 #include "config.h"
 #include "compat.h"
@@ -60,9 +63,6 @@
 #  undef IN
 #  undef OUT
 #endif
-
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
 
 #include "gnokii.h"
 
@@ -1292,7 +1292,7 @@ static inline gint RefreshUserStatusCallBack(GtkWidget * widget,
 					     GdkEventKey * event, gpointer callback_data)
 {
 	RefreshUserStatus();
-	if (GTK_EDITABLE(widget)->editable == FALSE)
+	if (gtk_editable_get_editable (GTK_EDITABLE(widget)) == FALSE)
 		return (FALSE);
 	if (event->keyval == GDK_BackSpace || event->keyval == GDK_Clear ||
 	    event->keyval == GDK_Insert || event->keyval == GDK_Delete ||

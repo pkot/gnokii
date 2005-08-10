@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
-  & Ján Derfiòák <ja@mail.upjs.sk>.
+  & 1999-2005 Jan Derfinak.
   Copyright (C) 2002-2004 Pawel Kot
 
 */
@@ -231,7 +231,7 @@ void AddToBorder(GtkWidget * table, gchar * text, gint i, gint j, gint k, gint l
 	GtkWidget *label = gtk_label_new(text);
 	GtkWidget *frame = gtk_frame_new(NULL);
 
-	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_OUT);
+//	gtk_frame_set_shadow_type(GTK_FRAME(frame), GTK_SHADOW_OUT);
 	gtk_container_add(GTK_CONTAINER(frame), label);
 	gtk_table_attach_defaults(GTK_TABLE(table), frame, i, j, k, l);
 }
@@ -332,7 +332,7 @@ void GUI_CreateNetmonWindow()
 
 	gtk_item_factory_create_items(item_factory, nmenu_items, menu_items, NULL);
 
-	gtk_accel_group_attach(accel_group, GTK_OBJECT(GUI_NetmonWindow));
+	gtk_window_add_accel_group(GTK_WINDOW(GUI_NetmonWindow), accel_group);
 
 	/* Finally, return the actual menu bar created by the item factory. */
 	menubar = gtk_item_factory_get_widget(item_factory, "<main>");
@@ -380,8 +380,9 @@ void GUI_CreateNetmonWindow()
 	vbox = gtk_vbox_new(TRUE, 0);
 
 	/* 1. line */
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_TEXT);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_TEXT);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), "1", _("Active cell"),
 				NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 1);
@@ -417,8 +418,9 @@ void GUI_CreateNetmonWindow()
 	gtk_widget_show(toolbar);
 
 	/* 2. line */
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_TEXT);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_TEXT);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), "13", _("Uplink DTX"),
 				NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 13);
@@ -455,8 +457,9 @@ void GUI_CreateNetmonWindow()
 	gtk_widget_show(toolbar);
 
 	/* 3. line */
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_TEXT);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_TEXT);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), "40", _("Reset handover counters"),
 				NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 40);
@@ -493,8 +496,9 @@ void GUI_CreateNetmonWindow()
 	gtk_widget_show(toolbar);
 
 	/* 4. line */
-	toolbar = gtk_toolbar_new(GTK_ORIENTATION_HORIZONTAL, GTK_TOOLBAR_TEXT);
-	gtk_toolbar_set_button_relief(GTK_TOOLBAR(toolbar), GTK_RELIEF_NORMAL);
+	toolbar = gtk_toolbar_new();
+	gtk_toolbar_set_style(GTK_TOOLBAR(toolbar), GTK_TOOLBAR_TEXT);
+	gtk_toolbar_set_orientation(GTK_TOOLBAR(toolbar), GTK_ORIENTATION_HORIZONTAL);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), "62", _("Neighbourhood measurement"),
 				NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 62);
@@ -581,7 +585,7 @@ void GUI_CreateNetmonWindow()
 	button = gtk_spin_button_new(adj, 0, 0);
 	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(button), TRUE);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(button), TRUE);
-	gtk_spin_button_set_shadow_type(GTK_SPIN_BUTTON(button), GTK_SHADOW_OUT);
+//	gtk_spin_button_set_shadow_type(GTK_SPIN_BUTTON(button), GTK_SHADOW_OUT);
 	gtk_signal_connect(GTK_OBJECT(adj), "value_changed",
 			   GTK_SIGNAL_FUNC(ChangedSpinner), (gpointer) button);
 	gtk_box_pack_end(GTK_BOX(hbox), button, FALSE, FALSE, 0);
