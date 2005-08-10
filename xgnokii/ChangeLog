@@ -1,5 +1,6 @@
 * Wed 10 Aug 2005 Jan Derfinak
 - First phase of moving to gtk2. -DGTK_ENABLE_BROKEN is needed to compile.
+  Based on patch from Bastien Nocera.
 
 * Thu 22 Mar 2001 Jan Derfinak 
 - Added 6210 preview to xlogos module.
