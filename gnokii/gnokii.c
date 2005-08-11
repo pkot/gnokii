@@ -4932,7 +4932,7 @@ static int getfilelist(char *path)
 		fprintf(stderr, _("Failed to get info for %s: %s\n"), path, gn_error_print(error));
 	else {
 		fprintf(stdout, _("Filelist for path %s:\n"), path);
-		for(i = 0; i < fi.file_count; i++) {
+		for (i = 0; i < fi.file_count; i++) {
 			fprintf(stdout, _("  %s\n"), fi.files[i]->name);
 			free(fi.files[i]);
 		}
@@ -5051,7 +5051,7 @@ static int getallfiles(char *path)
 		fprintf(stderr, _("Failed to get info for %s: %s\n"), path, gn_error_print(error));
 	else {
 		*(strrchr(path,'/')+1) = 0;
-		for(i = 0; i < fi.file_count; i++) {
+		for (i = 0; i < fi.file_count; i++) {
 			data.file = fi.files[i];
 			strncpy(filename2, fi.files[i]->name, 512);
 			snprintf(fi.files[i]->name, 512, "%s%s", path, filename2);
@@ -5081,7 +5081,8 @@ static int putfile(int nargc, char *nargv[])
 	gn_error error;
 	FILE *f;
 
-	if (nargc != 2) usage(stderr, -1);
+	if (nargc != 2)
+		usage(stderr, -1);
 
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", nargv[1]);
@@ -5089,7 +5090,7 @@ static int putfile(int nargc, char *nargv[])
 	gn_data_clear(&data);
 	data.file = &fi;
 
-	f=fopen(nargv[0],"r");
+	f = fopen(nargv[0],"r");
 	if (!f || fseek(f, 0, SEEK_END)) {
 		fprintf(stderr, _("Cannot open file %s\n"), nargv[0]);
 		return GN_ERR_FAILED;
