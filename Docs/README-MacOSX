@@ -6,22 +6,24 @@ The MacOS X port of Gnokii has successfully been tested on some phones.
 I expect all phones supported by gnokii to work (famous last words...)
 
 XGnokii, and others
-The graphical X version, the AT-emulater and virtual device are not ported
-to MacOS X. This might change in the future but as far as I know no work is
-in progress. Of course the effort of porting only makes sense if there is a
-need. Do you have the need for extended MacOS X functionality don't ask me
-but let us all know on the Gnokii mailing list.
+The graphical X version, and the AT-emulator and virtual device compile
+correctly with Darwin ports, but have not been thouroughly tested. If you
+have any problems with these components of Gnokii, please report it to
+the Gnokii mailing list.
 
 Successfully tested hardware
 USB to Serial adapters:
  - Keyspan USA-28Xb
+ - Keyspan USA-19QW
  - BAFO technologies BF-810
 
 Cables:
  - dlr3p
+ - dau9p
 
 Phones:
  - 3410
+ - 6110
  - 6210
  - 6310
 
@@ -47,23 +49,53 @@ Always set "use_locking = no" otherwise gnokii won't work.
 USB to serial adapters always introduce two new device files in /dev per
 serial port. Use the one starting with "cu.".
 
-Compiling
-=========
+Installing with Darwin Ports 1.0
+================================
 
-This was only tested under 10.2. May not work with older versions. The
-base directory of gnokii will be called <gnokii_dir>.
+The easiest way to install Gnokii on Mac OS X systems is to use the Darwin
+Ports system. 
 
-1. get and install fink (http://fink.sourceforge.net). Apart from the base
-package (= the installer) nothing is needed.
+1) Download and install Darwin Ports by following the instructions at
+   http://darwinports.opendarwin.org/getdp/
 
-2. copy the contents of /sw/share/aclocal to /usr/share/aclocal. You need
-to be root to do this
+2) If you haven't already, execute "sudo port -d selfupdate" (without the
+   quote marks)
 
-3. call 'cd <gnokii_dir>'
+3) To install all of Gnokii, including the graphical X version, type
+   "sudo port install gnokii"
+   without the quote marks. 
 
-4. call 'sh autogen.sh --disable-shared --disable-nls'
+   To install the command line tool and the 
+   AT-command emulator, type:
+   "sudo port install gnokii +no_x11"
+   without the quote marks. 
 
-5. call 'make'
+Compiling the command line tool and the AT-command emulator
+===========================================================
+
+These commands have been tested on Gnokii version 0.6.8, but should
+also work on later versions, compiled on Mac OS X 10.4.2.
+
+The preferred method of installing Gnokii is to use the Darwin Ports 
+method described above.
+
+1) Download the latest version of libtool from 
+   http://www.gnu.org/software/libtool/ (version 1.5.18 is fine). you
+   will not need to install it, but we need a file from it.
+
+2) Download the latest Gnokii distribution. (If you want to install from
+   CVS, you should already know what you're doing, so you're on your
+   own)
+
+3) Extract both Gnokii and Libtool
+
+4) copy ltmain.sh from the Libtool directory, replacing the version in 
+   the config direcorty of the Gnokii distribution
+
+5) in the gnokii directory, type:
+   ./configure --disable-shared --disable-nls --without-x
+
+6) type "make" (without the quote marks)
 
 If after some time you now see
 "##########################################
@@ -85,3 +117,6 @@ please let me know on my email address mentioned below.
 
 Author:	Ruotger Skupin (Ruotger.Skupin@berlin.de)
 Date:	February 5, 2003
+
+Updated August 15, 2005 by Marcus Pallinger.
+Please report all problems to the Gnokii mailing list.

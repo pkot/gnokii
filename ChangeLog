@@ -19,6 +19,9 @@
     o initialize state->device.device_interface    (Bastien Nocera)
  * xgnokii updates
     o add xgnokii.desktop                            (Ville Skytta)
+    o ported to gtk2                 (Jan Derfinak, Bastien Nocera)
+ * documentation updates
+    o update information about gnokii on MacOS X (Marcus Pallinger)
 
 0.6.8
 =====
