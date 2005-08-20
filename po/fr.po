@@ -4,10 +4,10 @@
 # 
 msgid ""
 msgstr ""
-"Project-Id-Version: gnokii 0.5.6\n"
+"Project-Id-Version: gnokii 0.6.8\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
 "POT-Creation-Date: 2005-05-10 21:52+0200\n"
-"PO-Revision-Date: 2003-11-15 23:51+0100\n"
+"PO-Revision-Date: 2005-08-19 23:33+0100\n"
 "Last-Translator: Olivier Kaloudoff <kalou@kalou.net>\n"
 "Language-Team: French <kalou@kalou.net>\n"
 "MIME-Version: 1.0\n"
@@ -27,19 +27,19 @@ msgid "Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value\n"
 msgstr "Option [%s] \"%s\" non reconnue, utilisez plutot \"%s\" or \"%s\".\n"
 
 #: common/cfgreader.c:509
-#, fuzzy, c-format
+#, c-format
 msgid "Unrecognized [logging] option \"%s\", use \"off\" or \"on\" value\n"
-msgstr "Option [%s] \"%s\" non reconnue, utilisez plutot \"%s\" or \"%s\".\n"
+msgstr "Option [%s] \"%s\" non reconnue, utilisez plutot les valeurs \"on\" or \"off\".\n"
 
 #: common/cfgreader.c:542
-#, fuzzy, c-format
+#, c-format
 msgid "Couldn't open %s or %s.\n"
-msgstr "Impossible d'ouvrir un pty.\n"
+msgstr "Impossible d'ouvrir %s ou %s\n"
 
 #: common/cfgreader.c:608
-#, fuzzy, c-format
+#, c-format
 msgid "No global section in %s config file.\n"
-msgstr "Enregistrement du fichier logo %s: echec.\n"
+msgstr "Aucune section globale disponible dans le fichier %s.\n"
 
 #: common/cfgreader.c:653
 #, c-format
@@ -94,17 +94,17 @@ msgid "device_script(\"%s\"): fork() failure: %s!\n"
 msgstr "device_script(\"%s\"): fork() echec: (erreur=%s).\n"
 
 #: common/devices/unixserial.c:136
-#, fuzzy, c-format
+#, c-format
 msgid "device_script(\"%s\"): file descriptor preparation failure: %s\n"
-msgstr "device_script(\"%s\"): preparation du descripteur de fichier: %s\n"
+msgstr "device_script(\"%s\"): preparation du descripteur de fichier: %s, echec\n"
 
 #: common/devices/unixserial.c:142
-#, fuzzy, c-format
+#, c-format
 msgid "device_script(\"%s\"): script exection failure: %s\n"
-msgstr "device_script(\"%s\"): fork() echec: (erreur=%s).\n"
+msgstr "device_script(\"%s\"): echec a l'execution du script: %s\n"
 
 #: common/devices/unixserial.c:149
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "device_script(\"%s\"): child script execution failure: %s, exit code=%d\n"
 msgstr ""
@@ -419,62 +419,62 @@ msgstr ""
 #, c-format
 msgid ""
 "Usage:\n"
-"General options:\n"
+"Options Generales:\n"
 "          gnokii --help\n"
 "          gnokii --monitor [delay|once]\n"
 "          gnokii --version\n"
 "SMS options:\n"
-"          gnokii --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
-"          gnokii --deletesms memory_type start [end]\n"
-"          gnokii --sendsms destination [--smsc message_center_number |\n"
-"                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
+"          gnokii --getsms type_de_memoire debut [fin] [-f fichier] [-F fichier] [-d]\n"
+"          gnokii --deletesms type_de_memoire debut [fin]\n"
+"          gnokii --sendsms destination [--smsc numero_du_centre_de_messages  |\n"
+"                 --smscno index_centre_de_messages] [-r] [-C n] [-v n]\n"
 "                 [--long n] [-i]\n"
-"          gnokii --savesms [--sender from] [--smsc message_center_number |\n"
-"                 --smscno message_center_index] [--folder folder_id]\n"
-"                 [--location number] [--sent | --read] [--deliver] \n"
+"          gnokii --savesms [--sender expediteur] [--smsc numero_du_centre_de_messages |\n"
+"                 --smscno index_centre_de_messages] [--folder numero_de_repertoire]\n"
+"                 [--location numero] [--sent | --read] [--deliver] \n"
 "                 [--datetime YYMMDDHHMMSS] \n"
-"          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
+"          gnokii --getsmsc [numero_debut [numero_fin]] [-r|--raw]\n"
 "          gnokii --setsmsc\n"
-"          gnokii --createsmsfolder name\n"
-"          gnokii --deletesmsfolder number\n"
+"          gnokii --createsmsfolder nom\n"
+"          gnokii --deletesmsfolder numero\n"
 "          gnokii --showsmsfolderstatus\n"
 "          gnokii --smsreader\n"
-"Phonebook options:\n"
-"          gnokii --getphonebook memory_type start_number [end_number|end]\n"
+"Options du Repertoire:\n"
+"          gnokii --getphonebook type_de_memoire numero_debut [numero_fin|fin]\n"
 "                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
 "          gnokii --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
 "                 [-m|--memory-type|--memory] [-n|--memory-location|--"
 "memory]\n"
 "                 [[-v|--vcard]|[-l|--ldif]]\n"
-"          gnokii --deletephonebook memory_type start_number [end_number|"
+"          gnokii --deletephonebook type_de_memoire numero_debut [numero_fin|"
 "end]\n"
-"Calendar options:\n"
-"          gnokii --getcalendarnote start_number [end_number|end] [-v]\n"
-"          gnokii --writecalendarnote vcalendarfile number\n"
-"          gnokii --deletecalendarnote start [end_number|end]\n"
-"ToDo options:\n"
-"          gnokii --gettodo start_number [end_number|end] [-v]\n"
-"          gnokii --writetodo vcalendarfile number\n"
+"Options du Calendrier:\n"
+"          gnokii --getcalendarnote numero_debut [numero_fin|fin] [-v]\n"
+"          gnokii --writecalendarnote fichier_vcalendar numero\n"
+"          gnokii --deletecalendarnote debut [numero_fin|fin]\n"
+"Options a Implementer:\n"
+"          gnokii --gettodo numero_debut [numero_fin|fin] [-v]\n"
+"          gnokii --writetodo fichier_vcalendar numero\n"
 "          gnokii --deletealltodos\n"
-"Dialling and call options:\n"
-"          gnokii --getspeeddial number\n"
-"          gnokii --setspeeddial number memory_type location\n"
-"          gnokii --dialvoice number\n"
-"          gnokii --senddtmf string\n"
-"          gnokii --answercall callid\n"
-"          gnokii --hangup callid\n"
+"Options de numerotation et options d'appel:\n"
+"          gnokii --getspeeddial numero\n"
+"          gnokii --setspeeddial numero type_de_memoire location\n"
+"          gnokii --dialvoice numero\n"
+"          gnokii --senddtmf chaine\n"
+"          gnokii --answercall identifiant_appel\n"
+"          gnokii --hangup identifiant_appel\n"
 "          gnokii --divert {--op|-o} {register|enable|query|disable|erasure}\n"
 "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
 "                 {--call|-c} {all|voice|fax|data}\n"
-"                 [{--timeout|-m} time_in_seconds]\n"
-"                 [{--number|-n} number]\n"
+"                 [{--timeout|-m} temps_en_secondes]\n"
+"                 [{--number|-n} numero]\n"
 "Phone settings:\n"
 "          gnokii --getdisplaystatus\n"
 "          gnokii --displayoutput\n"
-"          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
+"          gnokii --getprofile [numero_debut [numero_fin]] [-r|--raw]\n"
 "          gnokii --setprofile\n"
 "          gnokii --getactiveprofile\n"
-"          gnokii --setactiveprofile profile_number\n"
+"          gnokii --setactiveprofile numero_de_profile\n"
 "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
 "          gnokii --reset [soft|hard]\n"
 "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
@@ -482,36 +482,36 @@ msgid ""
 "          gnokii --setalarm [HH MM]\n"
 "          gnokii --getalarm\n"
 "WAP options:\n"
-"          gnokii --getwapbookmark number\n"
-"          gnokii --writewapbookmark name URL\n"
-"          gnokii --deletewapbookmark number\n"
-"          gnokii --getwapsetting number [-r]\n"
+"          gnokii --getwapbookmark numero\n"
+"          gnokii --writewapbookmark nom URL\n"
+"          gnokii --deletewapbookmark numero\n"
+"          gnokii --getwapsetting numero [-r]\n"
 "          gnokii --writewapsetting\n"
-"          gnokii --activatewapsetting number\n"
+"          gnokii --activatewapsetting numero\n"
 "Logo options:\n"
-"          gnokii --sendlogo {caller|op|picture} destination logofile\n"
+"          gnokii --sendlogo {caller|op|picture} destination fichier_logo\n"
 "                 [network code]\n"
 "          gnokii --sendringtone rtttlfile destination\n"
-"          gnokii --setlogo op [logofile] [network code]\n"
-"          gnokii --setlogo startup [logofile]\n"
-"          gnokii --setlogo caller [logofile] [caller group number] [group "
+"          gnokii --setlogo op [fichier_logo] [code du reseau]\n"
+"          gnokii --setlogo startup [fichier_logo]\n"
+"          gnokii --setlogo caller [fichier_logo] [caller group number] [group "
 "name]\n"
 "          gnokii --setlogo {dealer|text} [text]\n"
-"          gnokii --getlogo op [logofile] [network code]\n"
-"          gnokii --getlogo startup [logofile] [network code]\n"
-"          gnokii --getlogo caller [caller group number] [logofile]\n"
-"                 [network code]\n"
+"          gnokii --getlogo op [fichier_logo] [code du reseau]\n"
+"          gnokii --getlogo startup [fichier_logo] [code du reseau]\n"
+"          gnokii --getlogo caller [caller group number] [fichier_logo]\n"
+"                 [code du reseau]\n"
 "          gnokii --getlogo {dealer|text}\n"
-"          gnokii --viewlogo logofile\n"
-"Ringtone options:\n"
-"          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
-"          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name "
-"name]\n"
-"          gnokii --playringtone rtttlfile [--volume vol]\n"
+"          gnokii --viewlogo fichier_logo\n"
+"Options de la sonnerie:\n"
+"          gnokii --getringtone fichier_rtttl [location] [-r|--raw]\n"
+"          gnokii --setringtone fichier_rtttl [location] [-r|--raw] [--name "
+"nom]\n"
+"          gnokii --playringtone fichier_rtttl [--volume vol]\n"
 "          gnokii --ringtoneconvert source destination\n"
 "          gnokii --getringtonelist\n"
-"          gnokii --deleteringtone start [end]\n"
-"Security options:\n"
+"          gnokii --deleteringtone debut [fin]\n"
+"Options de Securite:\n"
 "          gnokii --identify\n"
 "          gnokii --getlocksinfo\n"
 msgstr ""
@@ -542,18 +542,19 @@ msgid ""
 msgstr ""
 
 #: gnokii/gnokii.c:394
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Misc options:\n"
 "          gnokii --keysequence\n"
 "          gnokii --enterchar\n"
 "          gnokii --listnetworks\n"
 "          gnokii --getnetworkinfo\n"
-msgstr ""
-"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
-"          gnokii --getsecuritycodestatus\n"
-"          gnokii --getsecuritycode\n"
-"          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
+msgstr "Options diverses:"
+"          gnokii --keysequence\n"
+"          gnokii --enterchar\n"
+"          gnokii --listnetworks\n"
+"          gnokii --getnetworkinfo\n"
+
 
 #: gnokii/gnokii.c:434
 #, c-format
@@ -734,9 +735,9 @@ msgid "Starting SMS center number is greater than stop\n"
 msgstr "Le numero du centre SMS est plus grand que la valeur maximale.\n"
 
 #: gnokii/gnokii.c:1047
-#, fuzzy, c-format
+#, c-format
 msgid "SMS center number must be greater than 1\n"
-msgstr "Le numero de centre SMS doit etre superieur a 1: %s.\n"
+msgstr "Le numero de centre SMS doit etre superieur a 1\n"
 
 #: gnokii/gnokii.c:1080
 #, c-format
@@ -855,24 +856,25 @@ msgid "Number %i of 'My Folders' successfully deleted!\n"
 msgstr "Le repertoire %i a bien ete detruit.\n"
 
 #: gnokii/gnokii.c:1249
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot list available folders: %s\n"
-msgstr "Activation du profile %d: echec (%s).\n"
+msgstr "Impossible d'obtenir la liste des repertoires disponibles: %s\n"
 
 #: gnokii/gnokii.c:1253
 #, c-format
 msgid "No. Name                             Id #Msg\n"
-msgstr ""
+msgstr "No. Nom                             Id #Msg\n"
 
 #: gnokii/gnokii.c:1254
 #, c-format
 msgid "============================================\n"
-msgstr ""
+msgstr "============================================\n"
+
 
 #: gnokii/gnokii.c:1258
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot stat folder \"%s\": %s\n"
-msgstr "Activation du profile %s: echec.\n"
+msgstr "Impossible de lire les informations du repertoire \"%s\": %s\n"
 
 #: gnokii/gnokii.c:1261
 #, c-format
@@ -1326,7 +1328,7 @@ msgstr "Transfer du logo interlocuteur: ok.\n"
 #: gnokii/gnokii.c:1999
 #, fuzzy, c-format
 msgid "Caller group name: %s, ringing tone: %s (%d)\n"
-msgstr "Sonnerie: %s (%d)\n"
+msgstr "Groupe appelant: %s, sonnerie: (%d)\n"
 
 #: gnokii/gnokii.c:2010
 #, c-format
@@ -1434,9 +1436,9 @@ msgid "The ToDo note could not be read: %s\n"
 msgstr "La note n'a pas pu etre lue: %s.\n"
 
 #: gnokii/gnokii.c:2294 gnokii/gnokii.c:2492 gnokii/gnokii.c:5082
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot read file %s\n"
-msgstr "Erreur a la creation du fichier %s\n"
+msgstr "Lecture du fichier %s impossible\n"
 
 #: gnokii/gnokii.c:2315 gnokii/gnokii.c:2513
 #, c-format
@@ -1449,14 +1451,14 @@ msgid "Succesfully written!\n"
 msgstr "Ecriture: ok.\n"
 
 #: gnokii/gnokii.c:2323
-#, fuzzy, c-format
+#, c-format
 msgid "Priority %d. %s\n"
-msgstr "Priorite: "
+msgstr "Priorite %d. %s\n"
 
 #: gnokii/gnokii.c:2325
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to write todo note: %s\n"
-msgstr "Ecriture du calendrier %s: echec.\n"
+msgstr "Ecriture de la note %s: echec.\n"
 
 #: gnokii/gnokii.c:2339
 #, c-format
@@ -1464,9 +1466,9 @@ msgid "Succesfully deleted all ToDo notes!\n"
 msgstr "Suppression de toutes les notes: ok.\n"
 
 #: gnokii/gnokii.c:2341
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to delete todo note: %s\n"
-msgstr "Enregistrement de la sonnerie impossible: %s\n"
+msgstr "Impossible d'effacer la note: %s\n"
 
 #: gnokii/gnokii.c:2398
 #, c-format
@@ -1524,9 +1526,9 @@ msgid "   Repeat: every week\n"
 msgstr ""
 
 #: gnokii/gnokii.c:2448
-#, fuzzy, c-format
+#, c-format
 msgid "   Repeat: every 2 weeks\n"
-msgstr "toutes les 2 semaines"
+msgstr "   Repetition: toutes les 2 semaines\n"
 
 #: gnokii/gnokii.c:2451
 #, c-format
@@ -1541,7 +1543,7 @@ msgstr ""
 #: gnokii/gnokii.c:2457
 #, fuzzy, c-format
 msgid "   Repeat: %d hours\n"
-msgstr "   Texte: %s\n"
+msgstr "   Repetition: %d heures\n"
 
 #: gnokii/gnokii.c:2461
 #, c-format
@@ -1599,9 +1601,9 @@ msgid "CALL%d: IDLE\n"
 msgstr "Appel%d: inactif\n"
 
 #: gnokii/gnokii.c:2748
-#, fuzzy, c-format
+#, c-format
 msgid "CALL%d: %s %s(%s) (callid: %d, duration: %d sec)\n"
-msgstr "Appel%d: %s %s(%s) (duree: %d sec)\n"
+msgstr "Appel%d: %s %s(%s) (appel no.%d, duree: %d sec)\n"
 
 #: gnokii/gnokii.c:2789
 #, c-format
@@ -1933,7 +1935,7 @@ msgid "WWW address: "
 msgstr "Adresse WWW:"
 
 #: gnokii/gnokii.c:3368
-#, fuzzy, c-format
+#, c-format
 msgid "Date: %04u.%02u.%02u %02u:%02u:%02u\n"
 msgstr "Date: %02u.%02u.%04u %02u:%02u:%02u\n"
 
@@ -2285,19 +2287,19 @@ msgid "%d note(s) converted.\n"
 msgstr "%d note(s) convertie(s).\n"
 
 #: gnokii/gnokii.c:4478
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to get the list of ringtones\n"
-msgstr "Impossible de charger la liste des sonneries: %s\n"
+msgstr "Impossible de charger la liste des sonneries:\n"
 
 #: gnokii/gnokii.c:4524
-#, fuzzy, c-format
+#, c-format
 msgid "Ringtone %d deleted\n"
-msgstr "Sonnerie\n"
+msgstr "Sonnerie %d detruite\n"
 
 #: gnokii/gnokii.c:4526
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to delete ringtone %d: %s\n"
-msgstr "Enregistrement de la sonnerie impossible: %s\n"
+msgstr "Destruction de la sonnerie %d impossible: %s\n"
 
 #: gnokii/gnokii.c:4539
 #, c-format
@@ -2445,9 +2447,9 @@ msgid "%7s : %10s, %7s, %6s, counter %d\n"
 msgstr "%7s : %10s, %7s, %6s, compteur %d\n"
 
 #: gnokii/gnokii.c:4914 gnokii/gnokii.c:4938 gnokii/gnokii.c:5032
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to get info for %s: %s\n"
-msgstr "Enregistrement de la sonnerie impossible: %s\n"
+msgstr "Lecture des informations pour %s impossible: %s\n"
 
 #: gnokii/gnokii.c:4916
 #, c-format
@@ -2455,9 +2457,9 @@ msgid "Filelist for path %s:\n"
 msgstr ""
 
 #: gnokii/gnokii.c:4918
-#, fuzzy, c-format
+#, c-format
 msgid "  %s\n"
-msgstr "   IP: %s\n"
+msgstr "   %s\n"
 
 #: gnokii/gnokii.c:4940
 #, c-format
@@ -2465,19 +2467,19 @@ msgid "Fileid for file %s is %02x %02x %02x %02x %02x %02x\n"
 msgstr ""
 
 #: gnokii/gnokii.c:4958
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to delete %s: %s\n"
-msgstr "Enregistrement de la sonnerie impossible: %s\n"
+msgstr "Suppression impossible de %s: %s\n"
 
 #: gnokii/gnokii.c:4960
-#, fuzzy, c-format
+#, c-format
 msgid "Deleted: %s\n"
-msgstr "SMS %s %d detruit.\n"
+msgstr "Supprime: %s\n"
 
 #: gnokii/gnokii.c:4982 gnokii/gnokii.c:5040
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to get file %s: %s\n"
-msgstr "Impossible d'ecrire le fichier %s\n"
+msgstr "Impossible d'obtenir le fichier %s: %s\n"
 
 #: gnokii/gnokii.c:4991
 #, c-format
@@ -2485,19 +2487,19 @@ msgid "Got file %s.  Save to [%s]: "
 msgstr ""
 
 #: gnokii/gnokii.c:5006 gnokii/gnokii.c:5045 gnokii/gnokii.c:5075
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot open file %s\n"
-msgstr "Erreur a la creation du fichier %s\n"
+msgstr "Ouverture du fichier %s impossible\n"
 
 #: gnokii/gnokii.c:5042
 #, fuzzy, c-format
 msgid "Got file %s.\n"
-msgstr "Erreur a la creation du fichier %s\n"
+msgstr "Fichier %s, got it !.\n"
 
 #: gnokii/gnokii.c:5087
-#, fuzzy, c-format
+#, c-format
 msgid "Failed to put file to %s: %s\n"
-msgstr "Impossible d'ecrire le fichier %s\n"
+msgstr "Impossible de deposer un fichier vers %s: %s\n"
 
 #: gnokii/gnokii.c:5128
 #, c-format
@@ -4294,332 +4296,112 @@ msgid "User #%d (*EMPTY*)"
 msgstr ""
 
 #: xgnokii/xgnokii_xring.c:605
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error reading file\n"
 "(error=%s)"
-msgstr "Lecture du fichier: echec (erreur=%d)."
+msgstr "Lecture du fichier: echec (erreur=%s)."
 
 #: xgnokii/xgnokii_xring.c:620
-#, fuzzy
+#,
 msgid "Open ringtone..."
-msgstr "Ouvrir logo ..."
+msgstr "Ouvrir sonnerie ..."
 
 #: xgnokii/xgnokii_xring.c:642 xgnokii/xgnokii_xring.c:685
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error writing file\n"
 "(error=%s)"
-msgstr "Lecture du fichier: echec (erreur=%d)."
+msgstr "Lecture du fichier: echec (erreur=%s)."
 
 #: xgnokii/xgnokii_xring.c:662
-#, fuzzy
+#, 
 msgid "Save ringtone as..."
-msgstr "Enregistrer logo sous ..."
+msgstr "Enregistrer sonnerie sous ..."
 
 #: xgnokii/xgnokii_xring.c:730
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error getting ringtone\n"
 "(error=%s)"
-msgstr "Lecture de l'image bitmap: echec(erreur=%d)."
+msgstr "Lecture de la sonnerie: echec(erreur=%s)."
 
 #: xgnokii/xgnokii_xring.c:747
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error setting ringtone\n"
 "(error=%s)"
-msgstr "Envoi de l'image bitmap: echec(erreur=%d)."
+msgstr "Erreur au reglage de la sonnerie: echec(erreur=%s)."
 
 #: xgnokii/xgnokii_xring.c:766
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error deleting ringtone\n"
 "(error=%s)"
-msgstr "Lecture de l'image bitmap: echec(erreur=%d)."
+msgstr "Erreur a la destruction de la sonnerie: echec(erreur=%s)."
 
 #: xgnokii/xgnokii_xring.c:814
-#, fuzzy
+#, 
 msgid "/File/S1"
-msgstr "/Fichier/Sep1"
+msgstr "/Fichier/S1"
 
 #: xgnokii/xgnokii_xring.c:815
-#, fuzzy
+#, 
 msgid "/File/_Get ringtone"
-msgstr "/Fichier/Charger operateur"
+msgstr "/Fichier/Charger sonnerie"
 
 #: xgnokii/xgnokii_xring.c:816
-#, fuzzy
 msgid "/File/Se_t ringtone"
-msgstr "/Fichier/Activer logo"
+msgstr "/Fichier/Regler sonnerie"
 
 #: xgnokii/xgnokii_xring.c:817
-#, fuzzy
 msgid "/File/Delete ringtone"
-msgstr "Enregistrement de la sonnerie impossible: %s\n"
+msgstr "Fichier/Detruire sonnerie"
 
 #: xgnokii/xgnokii_xring.c:818
-#, fuzzy
+#, 
 msgid "/File/_Play"
-msgstr "/Fichier/Enregistrer"
+msgstr "/Fichier/Jouer"
 
 #: xgnokii/xgnokii_xring.c:819
-#, fuzzy
+#, 
 msgid "/File/S2"
-msgstr "/Fichier/Sep2"
+msgstr "/Fichier/S2"
 
 #: xgnokii/xgnokii_xring.c:858
-#, fuzzy
+#, 
 msgid "Clear ringtone"
-msgstr "Effacer logo"
+msgstr "Supprimer sonnerie"
 
 #: xgnokii/xgnokii_xring.c:864
-#, fuzzy
+#, 
 msgid "Get ringtone"
-msgstr "Sonnerie"
+msgstr "Charger Sonnerie"
 
 #: xgnokii/xgnokii_xring.c:868
-#, fuzzy
+#, 
 msgid "Set ringtone"
-msgstr "Sonnerie"
+msgstr "Regler Sonnerie"
 
 #: xgnokii/xgnokii_xring.c:872
-#, fuzzy
+#, 
 msgid "Delete ringtone"
-msgstr "Supprimer la note"
+msgstr "Supprimer la sonnerie"
 
 #: xgnokii/xgnokii_xring.c:888
 msgid "Play"
-msgstr ""
+msgstr "Jouer"
 
 #: xgnokii/xgnokii_xring.c:897
-#, fuzzy
+#, 
 msgid "Select ringtone"
-msgstr "Supprimer la note"
+msgstr "Choisir cette sonnerie"
 
 #: xgnokii/xgnokii_xring.c:902
-#, fuzzy
+#, 
 msgid "Ringtone name"
-msgstr "Sonnerie"
+msgstr "Nom de la sonnerie"
 
 #: xgnokii/xgnokii_xring.c:914
 msgid "Set tempo"
-msgstr ""
-
-#~ msgid "device_script(\"%s\"): execute script: %s\n"
-#~ msgstr "device_script(\"%s\"): execution du script: %s.\n"
-
-#~ msgid "Gnokii serial_close: disconnect_script\n"
-#~ msgstr "Gnokii serial_close: disconnect_script\n"
-
-#~ msgid ""
-#~ "WARNING: global/require_dcd argument was set but it is not supported on "
-#~ "this system!\n"
-#~ msgstr ""
-#~ "WARNING: l'argument global/require_dcd est active, mais non supporte sur "
-#~ "ce systeme.\n"
-
-#~ msgid "Couldn't open %s or gnokiirc. Exiting now...\n"
-#~ msgstr ""
-#~ "Impossible d'ouvrir le fichier %s ou gnokiirc. Sortie du programme...\n"
-
-#~ msgid "Couldn't open %s or /etc/gnokiirc. Exiting now...\n"
-#~ msgstr ""
-#~ "Impossible d'ouvrir le fichier %s ou /etc/gnokiirc. Sortie du "
-#~ "programme...\n"
-
-#, fuzzy
-#~ msgid ""
-#~ "   usage: gnokii [--help|--monitor [delay]|--version]\n"
-#~ "          gnokii --getphonebook memory_type start_number [end_number|"
-#~ "end]\n"
-#~ "                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
-#~ "          gnokii --writephonebook [-f|--force][[-v|--vcard]|[-l|--ldif]]\n"
-#~ "          gnokii --getwapbookmark number\n"
-#~ "          gnokii --writewapbookmark name URL\n"
-#~ "          gnokii --deletewapbookmark number\n"
-#~ "          gnokii --getwapsetting number [-r]\n"
-#~ "          gnokii --writewapsetting\n"
-#~ "          gnokii --activatewapsetting number\n"
-#~ "          gnokii --getspeeddial number\n"
-#~ "          gnokii --setspeeddial number memory_type location\n"
-#~ "          gnokii --createsmsfolder name\n"
-#~ "          gnokii --deletesmsfolder number\n"
-#~ "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-"
-#~ "d]\n"
-#~ "          gnokii --deletesms memory_type start [end]\n"
-#~ "          gnokii --sendsms destination [--smsc message_center_number |\n"
-#~ "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
-#~ "                 [--long n] [-i]\n"
-#~ "          gnokii --savesms [--sender from] [--smsc message_center_number "
-#~ "|\n"
-#~ "                 --smscno message_center_index] [--folder folder_id]\n"
-#~ "                 [--location number] [--sent | --read] [--deliver] \n"
-#~ "          gnokii --smsreader\n"
-#~ "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
-#~ "          gnokii --setsmsc\n"
-#~ "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
-#~ "          gnokii --getdatetime\n"
-#~ "          gnokii --setalarm [HH MM]\n"
-#~ "          gnokii --getalarm\n"
-#~ "          gnokii --dialvoice number\n"
-#~ "          gnokii --answercall callid\n"
-#~ "          gnokii --hangup callid\n"
-#~ "          gnokii --gettodo start [end] [-v]\n"
-#~ "          gnokii --writetodo vcardfile number\n"
-#~ "          gnokii --deletealltodos\n"
-#~ "          gnokii --getcalendarnote start_number [end_number|end] [-v]\n"
-#~ "          gnokii --writecalendarnote vcardfile number\n"
-#~ "          gnokii --deletecalendarnote start [end]\n"
-#~ "          gnokii --getdisplaystatus\n"
-#~ "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
-#~ "          gnokii --identify\n"
-#~ "          gnokii --senddtmf string\n"
-#~ "          gnokii --sendlogo {caller|op|picture} destination logofile "
-#~ "[network code]\n"
-#~ "          gnokii --sendringtone rtttlfile destination\n"
-#~ "          gnokii --setlogo op [logofile] [network code]\n"
-#~ "          gnokii --setlogo startup [logofile]\n"
-#~ "          gnokii --setlogo caller [logofile] [caller group number] [group "
-#~ "name]\n"
-#~ "          gnokii --setlogo {dealer|text} [text]\n"
-#~ "          gnokii --getlogo op [logofile] [network code]\n"
-#~ "          gnokii --getlogo startup [logofile] [network code]\n"
-#~ "          gnokii --getlogo caller [caller group number] [logofile] "
-#~ "[network code]\n"
-#~ "          gnokii --getlogo {dealer|text}\n"
-#~ "          gnokii --viewlogo logofile\n"
-#~ "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
-#~ "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name "
-#~ "name]\n"
-#~ "          gnokii --playringtone rtttlfile [--volume vol]\n"
-#~ "          gnokii --ringtoneconvert source destination\n"
-#~ "          gnokii --getringtonelist\n"
-#~ "          gnokii --deleteringtone start [end]\n"
-#~ "          gnokii --reset [soft|hard]\n"
-#~ "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
-#~ "          gnokii --setprofile\n"
-#~ "          gnokii --getactiveprofile\n"
-#~ "          gnokii --setactiveprofile profile_number\n"
-#~ "          gnokii --displayoutput\n"
-#~ "          gnokii --keysequence\n"
-#~ "          gnokii --enterchar\n"
-#~ "          gnokii --divert {--op|-o} {register|enable|query|disable|"
-#~ "erasure}\n"
-#~ "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
-#~ "                 {--call|-c} {all|voice|fax|data}\n"
-#~ "                 [{--timeout|-m} time_in_seconds]\n"
-#~ "                 [{--number|-n} number]\n"
-#~ "          gnokii --listnetworks\n"
-#~ "          gnokii --getnetworkinfo\n"
-#~ "          gnokii --getlocksinfo\n"
-#~ msgstr ""
-#~ "   usage: gnokii [--help|--monitor [delay]|--version]\n"
-#~ "          gnokii --getphonebook memory_type start_number [end_number|"
-#~ "end]\n"
-#~ "                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
-#~ "          gnokii --writephonebook [-f|--force][[-v|--vcard]|[-l|--ldif]]\n"
-#~ "          gnokii --getwapbookmark number\n"
-#~ "          gnokii --writewapbookmark name URL\n"
-#~ "          gnokii --deletewapbookmark number\n"
-#~ "          gnokii --getwapsetting number [-r]\n"
-#~ "          gnokii --writewapsetting\n"
-#~ "          gnokii --activatewapsetting number\n"
-#~ "          gnokii --getspeeddial number\n"
-#~ "          gnokii --setspeeddial number memory_type location\n"
-#~ "          gnokii --createsmsfolder name\n"
-#~ "          gnokii --deletesmsfolder number\n"
-#~ "          gnokii --getsms memory_type start [end] [-f file] [-F file] [-"
-#~ "d]\n"
-#~ "          gnokii --deletesms memory_type start [end]\n"
-#~ "          gnokii --sendsms destination [--smsc message_center_number |\n"
-#~ "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
-#~ "                 [--long n] [-i]\n"
-#~ "          gnokii --savesms [--sender from] [--smsc message_center_number "
-#~ "|\n"
-#~ "                 --smscno message_center_index] [--folder folder_id]\n"
-#~ "                 [--location number] [--sent | --read] [--deliver] \n"
-#~ "          gnokii --smsreader\n"
-#~ "          gnokii --getsmsc [start_number [end_number]] [-r|--raw]\n"
-#~ "          gnokii --setsmsc\n"
-#~ "          gnokii --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
-#~ "          gnokii --getdatetime\n"
-#~ "          gnokii --setalarm [HH MM]\n"
-#~ "          gnokii --getalarm\n"
-#~ "          gnokii --dialvoice number\n"
-#~ "          gnokii --answercall callid\n"
-#~ "          gnokii --hangup callid\n"
-#~ "          gnokii --gettodo start [end] [-v]\n"
-#~ "          gnokii --writetodo vcardfile number\n"
-#~ "          gnokii --deletealltodos\n"
-#~ "          gnokii --getcalendarnote start [end] [-v]\n"
-#~ "          gnokii --writecalendarnote vcardfile number\n"
-#~ "          gnokii --deletecalendarnote start [end]\n"
-#~ "          gnokii --getdisplaystatus\n"
-#~ "          gnokii --netmonitor {reset|off|field|devel|next|nr}\n"
-#~ "          gnokii --identify\n"
-#~ "          gnokii --senddtmf string\n"
-#~ "          gnokii --sendlogo {caller|op|picture} destination logofile "
-#~ "[network code]\n"
-#~ "          gnokii --sendringtone rtttlfile destination\n"
-#~ "          gnokii --setlogo op [logofile] [network code]\n"
-#~ "          gnokii --setlogo startup [logofile]\n"
-#~ "          gnokii --setlogo caller [logofile] [caller group number] [group "
-#~ "name]\n"
-#~ "          gnokii --setlogo {dealer|text} [text]\n"
-#~ "          gnokii --getlogo op [logofile] [network code]\n"
-#~ "          gnokii --getlogo startup [logofile] [network code]\n"
-#~ "          gnokii --getlogo caller [caller group number] [logofile] "
-#~ "[network code]\n"
-#~ "          gnokii --getlogo {dealer|text}\n"
-#~ "          gnokii --viewlogo logofile\n"
-#~ "          gnokii --getringtone rtttlfile [location] [-r|--raw]\n"
-#~ "          gnokii --setringtone rtttlfile [location] [-r|--raw] [--name "
-#~ "name]\n"
-#~ "          gnokii --playringtone rtttlfile [--volume vol]\n"
-#~ "          gnokii --ringtoneconvert source destination\n"
-#~ "          gnokii --getringtonelist\n"
-#~ "          gnokii --reset [soft|hard]\n"
-#~ "          gnokii --getprofile [start_number [end_number]] [-r|--raw]\n"
-#~ "          gnokii --setprofile\n"
-#~ "          gnokii --getactiveprofile\n"
-#~ "          gnokii --setactiveprofile profile_number\n"
-#~ "          gnokii --displayoutput\n"
-#~ "          gnokii --keysequence\n"
-#~ "          gnokii --enterchar\n"
-#~ "          gnokii --divert {--op|-o} {register|enable|query|disable|"
-#~ "erasure}\n"
-#~ "                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
-#~ "                 {--call|-c} {all|voice|fax|data}\n"
-#~ "                 [{--timeout|-m} time_in_seconds]\n"
-#~ "                 [{--number|-n} number]\n"
-#~ "          gnokii --listnetworks\n"
-#~ "          gnokii --getnetworkinfo\n"
-#~ "          gnokii --getlocksinfo\n"
-
-#~ msgid "Missing phone number type on line %d entry [%s]\n"
-#~ msgstr "Numero de telephone et type manquant a la ligne %d, entree [%s].\n"
-
-#~ msgid "There is no phone number on line [%s] entry %d\n"
-#~ msgstr "Aucun numero de telephone trouve a la ligne [%s], entree %d\n"
-
-#~ msgid ""
-#~ "Can't get SM memory status!\n"
-#~ "\n"
-#~ "Setting max SIM entries to 100!\n"
-#~ msgstr ""
-#~ "Impossible d'obtenir l'etat de la memoire SM.\n"
-#~ "\n"
-#~ "Parametre max SIM mis a 100.\n"
-
-#~ msgid ""
-#~ "Can't get SM memory status!\n"
-#~ "\n"
-#~ "Setting max SIM entries set to 100!\n"
-#~ msgstr ""
-#~ "Impossible d'obtenir l'etat de la memoire SM.\n"
-#~ "\n"
-#~ "Parametre max SIM mis a 100.\n"
-
-#~ msgid "Ringtone number: %d\n"
-#~ msgstr "Sonnerie numero: %d\n"
+msgstr "Regler le rythme"
