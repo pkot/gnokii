@@ -17,13 +17,18 @@
     o exit from char_ucs2_encode() infinite loop on the null
       termination                                  (Bastien Nocera)
     o initialize state->device.device_interface    (Bastien Nocera)
+    o new gsm operator added                        (Max Sanzharov)
  * xgnokii updates
     o add xgnokii.desktop                            (Ville Skytta)
     o ported to gtk2                 (Jan Derfinak, Bastien Nocera)
+    o check mark added to the "(de)activate sms reading"
+      menu item                                    (BORBELY Zoltan)
  * documentation updates
     o update information about gnokii on MacOS X (Marcus Pallinger)
  * translation updates
     o update French translation                 (Olivier Kaloudoff)
+ * nk6510 driver updates
+    o 6500 and 8310 model numbers are the same     (BORBELY Zoltan)
 
 0.6.8
 =====

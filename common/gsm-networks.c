@@ -362,6 +362,7 @@ static gn_network networks[] = {
 	{"255 02", "WellCOM"},
 	{"255 03", "KYIVSTAR"},
 	{"255 05", "Golden Telecom GSM"},
+	{"255 06", "life:)"},
 	{"257 01", "VELCOM"},
 	{"257 02", "MTS"},
 	{"259 01", "VoXtel S.A."},

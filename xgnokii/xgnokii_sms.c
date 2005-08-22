@@ -1645,7 +1645,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>W", CloseSMS, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
-	{NULL, "<control>A", ActivateSMS, 0, NULL},
+	{NULL, "<control>A", ActivateSMS, 0, "<CheckItem>"},
 	{NULL, "<control>N", NewSMS, 0, NULL},
 	{NULL, "<control>F", ForwardSMS, 0, NULL},
 	{NULL, "<control>R", ReplySMS, 0, NULL},
