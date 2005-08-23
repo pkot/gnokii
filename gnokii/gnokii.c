@@ -182,11 +182,14 @@ typedef enum {
 	OPT_DELETERINGTONE,
 	OPT_SHOWSMSFOLDERSTATUS,
 	OPT_GETFILELIST,
+	OPT_GETFILEDETAILSBYID,
 	OPT_GETFILEID,
 	OPT_GETFILE,
+	OPT_GETFILEBYID,
 	OPT_GETALLFILES,
 	OPT_PUTFILE,
-	OPT_DELETEFILE
+	OPT_DELETEFILE,
+	OPT_DELETEFILEBYID
 } opt_index;
 
 static FILE *logfile = NULL;
@@ -385,11 +388,14 @@ static int usage(FILE *f, int retval)
 #endif
 	fprintf(f, _("File options:\n"
 		     "          gnokii --getfilelist remote_path\n"
+		     "          gnokii --getfiledetailsbyid [id]\n"
 		     "          gnokii --getfileid remote_filename\n"
 		     "          gnokii --getfile remote_filename [local_filename]\n"
+		     "          gnokii --getfilebyid id [local_filename]\n"
 		     "          gnokii --getallfiles remote_path\n"
 		     "          gnokii --putfile local_filename remote_filename\n"
 		     "          gnokii --deletefile remote_filename\n"
+		     "          gnokii --deletefilebyid id\n"
 		));
 	fprintf(f, _("Misc options:\n"
 		     "          gnokii --keysequence\n"
@@ -4915,6 +4921,25 @@ static int getlocksinfo(void)
 	return 0;
 }
 
+/* For now let's assume just 0xffff files */
+static void set_fileid(gn_file *fi, char *arg)
+{
+	int j, index, len = 1;
+	index = j = atoi(arg);
+	while (j > 255) {
+		len++;
+		j /= 256;
+	}
+	if (len % 2)
+		len++;
+	fi->id = calloc(len + 1, sizeof(char));
+	fi->id[0] = len;
+	for (j = len; j > 0; j--) {
+		fi->id[j] = index % 256;
+		index = (index & 0xff00) >> 8;
+	}
+}
+
 /* Get file list. */
 static int getfilelist(char *path)
 {
@@ -4935,6 +4960,72 @@ static int getfilelist(char *path)
 		for (i = 0; i < fi.file_count; i++) {
 			fprintf(stdout, _("  %s\n"), fi.files[i]->name);
 			free(fi.files[i]);
+		}
+	}
+	return error;
+}
+
+static int getfiledetailsbyid(int nargc, char *nargv[])
+{
+    	gn_file fi;
+    	gn_file_list fil;
+	gn_error error;
+	int i;
+
+	memset(&fi, 0, sizeof(fi));
+	memset(&fil, 0, sizeof(fil));
+
+	gn_data_clear(&data);
+	data.file = &fi;
+	data.file_list = &fil;
+	/* default parameter is root == 0x01 */
+	if (nargc == 0) {
+		fi.id = calloc(3, sizeof(char));
+		fi.id[0] = 2;
+		fi.id[1] = 0x00;
+		fi.id[2] = 0x01;
+	} else {
+		set_fileid(&fi, nargv[0]);
+	}
+
+	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, &data, &state)) != GN_ERR_NONE)
+		fprintf(stderr, _("Failed to get filename: %s\n"), gn_error_print(error));
+	else {
+		int fileid = 0, counter = 16;
+		for (i = fi.id[0]; i > 0; i--) {
+			fileid += fi.id[i] * (counter / 16);
+			counter *= 16;
+		}
+		fprintf(stdout, _("| %s (%d)\n"), fi.name, fileid);
+		for (i = 0; i < fil.file_count; i++) {
+			int j;
+		    	gn_file fi2;
+		    	gn_file_list fil2;
+			gn_error error2;
+
+			memset(&fi2, 0, sizeof(fi2));
+			memset(&fil2, 0, sizeof(fil2));
+
+			gn_data_clear(&data);
+			data.file = &fi2;
+			data.file_list = &fil2;
+			fi2.id = fil.files[i]->id;
+
+			error2 = gn_sm_functions(GN_OP_GetFileDetailsById, &data, &state);
+			switch (error2) {
+			case GN_ERR_NONE:
+				fileid = 0;
+				counter = 16;
+				for (j = fi2.id[0]; j > 0; j--) {
+					fileid += fi2.id[j] * (counter / 16);
+					counter *= 16;
+				}
+				fprintf(stdout, _(" - %s (%d)\n"), fi2.name, fileid);
+				break;
+			default:
+				fprintf(stderr, _("Failed to get filename: %s\n"), gn_error_print(error));
+				break;
+			}
 		}
 	}
 	return error;
@@ -4973,9 +5064,29 @@ static int deletefile(char *filename)
 	data.file = &fi;
 
 	if ((error = gn_sm_functions(GN_OP_DeleteFile, &data, &state)) != GN_ERR_NONE)
-		fprintf(stderr, _("Failed to delete %s: %s\n"),filename, gn_error_print(error));
+		fprintf(stderr, _("Failed to delete %s: %s\n"), filename, gn_error_print(error));
 	else {
 		fprintf(stdout, _("Deleted: %s\n"), filename);
+	}
+	return error;
+}
+
+/* Delete file */
+static int deletefilebyid(char *id)
+{
+    	gn_file fi;
+	gn_error error;
+
+	memset(&fi, 0, sizeof(fi));
+	set_fileid(&fi, id);
+
+	gn_data_clear(&data);
+	data.file = &fi;
+
+	if ((error = gn_sm_functions(GN_OP_DeleteFileById, &data, &state)) != GN_ERR_NONE)
+		fprintf(stderr, _("Failed to delete %s: %s\n"), id, gn_error_print(error));
+	else {
+		fprintf(stdout, _("Deleted: %s\n"), id);
 	}
 	return error;
 }
@@ -5028,6 +5139,52 @@ static int getfile(int nargc, char *nargv[])
 		fwrite(fi.file, fi.file_length, 1, f);
 		fclose(f);
 		free(fi.file);
+	}
+	return error;
+}
+
+/* Get file */
+static int getfilebyid(int nargc, char *nargv[])
+{
+    	gn_file fi;
+    	gn_file_list fil;
+	gn_error error;
+	FILE *f;
+	char filename2[512];
+
+	if (nargc < 1)
+		usage(stderr, -1);
+
+	memset(&fi, 0, sizeof(fi));
+	set_fileid(&fi, nargv[0]);
+
+	gn_data_clear(&data);
+	data.file = &fi;
+	data.file_list = &fil;
+
+	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, &data, &state)) != GN_ERR_NONE)
+		fprintf(stderr, _("Failed to get file: %s\n"), gn_error_print(error));
+	else {
+		dprintf("File is %s\n", fi.name);
+		fi.file = malloc(fi.file_length);
+		error = gn_sm_functions(GN_OP_GetFileById, &data, &state);
+		if (error == GN_ERR_NONE) {
+			if (nargc == 1) {
+				strncpy(filename2, fi.name, 512);
+				f = fopen(filename2, "w");
+			} else {
+				f = fopen(nargv[1], "w");
+			}
+			if (!f) {
+				fprintf(stderr, _("Cannot open file %s\n"), filename2);
+				return GN_ERR_FAILED;
+			}
+			fwrite(fi.file, fi.file_length, 1, f);
+			fclose(f);
+			free(fi.file);
+		} else {
+			fprintf(stderr, "%s\n", gn_error_print(error));
+		}
 	}
 	return error;
 }
@@ -5387,17 +5544,23 @@ int main(int argc, char *argv[])
 		/* Get (sim)lock info */
 		{ "getlocksinfo",       no_argument,       NULL, OPT_GETLOCKSINFO },
                 /* Get file list */
-		{ "getfilelist",        required_argument,       NULL, OPT_GETFILELIST },
+		{ "getfilelist",        required_argument, NULL, OPT_GETFILELIST },
+                /* Get file details by id */
+		{ "getfiledetailsbyid", optional_argument, NULL, OPT_GETFILEDETAILSBYID },
                 /* Get file id */
-		{ "getfileid",          required_argument,       NULL, OPT_GETFILEID },
+		{ "getfileid",          required_argument, NULL, OPT_GETFILEID },
                 /* Get file */
-		{ "getfile",            required_argument,       NULL, OPT_GETFILE },
+		{ "getfile",            required_argument, NULL, OPT_GETFILE },
+                /* Get file by id */
+		{ "getfilebyid",        required_argument, NULL, OPT_GETFILEBYID },
 		/* Get all files */
-		{ "getallfiles",        required_argument,       NULL, OPT_GETALLFILES },
+		{ "getallfiles",        required_argument, NULL, OPT_GETALLFILES },
                 /* Put a file */
-		{ "putfile",        required_argument,       NULL, OPT_PUTFILE },
+		{ "putfile",            required_argument, NULL, OPT_PUTFILE },
 		/* Delete a file */
-		{ "deletefile",        required_argument,       NULL, OPT_DELETEFILE },
+		{ "deletefile",         required_argument, NULL, OPT_DELETEFILE },
+		/* Delete a file by id */
+		{ "deletefilebyid",     required_argument, NULL, OPT_DELETEFILEBYID },
 
 		{ 0, 0, 0, 0},
 	};
@@ -5456,11 +5619,14 @@ int main(int argc, char *argv[])
 		{ OPT_ACTIVATEWAPSETTING,1, 1, 0 },
 		{ OPT_MONITOR,           0, 1, 0 },
 		{ OPT_GETFILELIST,       1, 1, 0 },
+		{ OPT_GETFILEDETAILSBYID,0, 1, 0 },
 		{ OPT_GETFILEID,         1, 1, 0 },
 		{ OPT_GETFILE,           1, 2, 0 },
+		{ OPT_GETFILEBYID,       1, 2, 0 },
 		{ OPT_GETALLFILES,       1, 1, 0 },
 		{ OPT_PUTFILE,           2, 2, 0 },
-		{ OPT_DELETEFILE,           1, 1, 0 },
+		{ OPT_DELETEFILE,        1, 1, 0 },
+		{ OPT_DELETEFILEBYID,    1, 1, 0 },
 		{ 0, 0, 0, 0 },
 	};
 
@@ -5736,11 +5902,17 @@ int main(int argc, char *argv[])
 		case OPT_GETFILELIST:
 			rc = getfilelist(optarg);
 			break;
+		case OPT_GETFILEDETAILSBYID:
+			rc = getfiledetailsbyid(nargc, nargv);
+			break;
 		case OPT_GETFILEID:
 			rc = getfileid(optarg);
 			break;
 		case OPT_GETFILE:
 			rc = getfile(nargc, nargv);
+			break;
+		case OPT_GETFILEBYID:
+			rc = getfilebyid(nargc, nargv);
 			break;
 		case OPT_GETALLFILES:
 			rc = getallfiles(optarg);
@@ -5750,6 +5922,9 @@ int main(int argc, char *argv[])
 			break;
 		case OPT_DELETEFILE:
 			rc = deletefile(optarg);
+			break;
+		case OPT_DELETEFILEBYID:
+			rc = deletefilebyid(optarg);
 			break;
 #ifndef WIN32
 		case OPT_FOOGLE:

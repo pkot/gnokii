@@ -239,6 +239,9 @@ typedef enum {
 	GN_OP_GetFile,
 	GN_OP_PutFile,
 	GN_OP_DeleteFile,
+	GN_OP_GetFileDetailsById,
+	GN_OP_GetFileById,
+	GN_OP_DeleteFileById,
 	GN_OP_Max,	/* don't append anything after this entry */
 } gn_operation;
 

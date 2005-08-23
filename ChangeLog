@@ -13,6 +13,8 @@
     o only print an "invalid index" error when the "end" keyword
       wasn't used, or we managed to get the real end index (some
       phones don't report the end index)           (Bastien Nocera)
+    o duplicated files operations -- you can use them "by name"
+      or "by id" (new ops)                              (Pawel Kot)
  * libgnokii updates
     o exit from char_ucs2_encode() infinite loop on the null
       termination                                  (Bastien Nocera)
@@ -29,6 +31,9 @@
     o update French translation                 (Olivier Kaloudoff)
  * nk6510 driver updates
     o 6500 and 8310 model numbers are the same     (BORBELY Zoltan)
+    o file support for Nokia 6610i and family -- it differs from
+      already implemented support as it is not named based but
+      id based                                          (Pawel Kot)
 
 0.6.8
 =====

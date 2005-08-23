@@ -142,8 +142,11 @@ static gn_error NK6510_Reset(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetFileId(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetFileById(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_DeleteFileById(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetFileDetailsById(gn_data *data, struct gn_statemachine *state);
 
 #ifdef  SECURITY
 static gn_error NK6510_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
@@ -406,10 +409,16 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_GetFileId(data, state);
 	case GN_OP_GetFile:
 		return NK6510_GetFile(data, state);
+	case GN_OP_GetFileById:
+		return NK6510_GetFileById(data, state);
 	case GN_OP_PutFile:
 		return NK6510_PutFile(data, state);
 	case GN_OP_DeleteFile:
 		return NK6510_DeleteFile(data, state);
+	case GN_OP_DeleteFileById:
+		return NK6510_DeleteFileById(data, state);
+	case GN_OP_GetFileDetailsById:
+		return NK6510_GetFileDetailsById(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -1570,6 +1579,28 @@ static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state)
 	return sm_block(NK6510_MSG_FILE, data, state);
 }
 
+static gn_error NK6510_GetFileDetailsById(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x14, 0x00, 0x00,
+					0x00, 0x01,
+					0x00, 0x00 }; /* Location */
+	int length, i;
+	
+  	if (!data->file)
+  		return GN_ERR_INTERNALERROR;
+
+	length = data->file->id[0];
+	for (i = 0; i < length; i++) {
+		req[8 + i] = data->file->id[i+1];
+	}
+	length /= 2;
+	req[6] = (length & 0xff00) >> 8;
+	req[7] = (length & 0x00ff);
+	dprintf("Sending: %d %d %d %d\n", req[6], req[7], req[8], req[9]);
+	if (sm_message_send(8 + 2 * length, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(NK6510_MSG_FILE, data, state);
+}
+
 static gn_error NK6510_GetFileId(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x82, 0x00};
@@ -1580,7 +1611,7 @@ static gn_error NK6510_GetFileId(gn_data *data, struct gn_statemachine *state)
 	i = strlen(data->file->name);
 	req[5] = char_unicode_encode(req+6, data->file->name, i);
 
-	if ( sm_message_send(req[5]+9, NK6510_MSG_FILE, req, state) ) return GN_ERR_NOTREADY;
+	if (sm_message_send(req[5]+9, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(NK6510_MSG_FILE, data, state);
 }
 
@@ -1595,7 +1626,7 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 	unsigned char req4[] = {FBUS_FRAME_HEADER, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
 	gn_error err;
 	int i;
-	
+
   	if (!data->file)
   		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
@@ -1652,6 +1683,54 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 	return sm_block(NK6510_MSG_FILE, data, state);
 }
 
+static gn_error NK6510_GetFileById(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0e, 0x00, 0x00,
+				0x00, 0x01,
+				0x00, 0x00, /* Location */
+				0x00, 0x00, 0x00, 0x00, /* Start position */
+				0x00, 0x00, 0x00, 0x00}; /* Size */
+	gn_error err;
+	int i, length;
+
+  	if (!data->file)
+  		return GN_ERR_INTERNALERROR;
+
+	length = data->file->id[0];
+	for (i = 0; i < length; i++) {
+		req[8 + i] = data->file->id[i+1];
+	}
+	length /= 2;
+	req[6] = (length & 0xff00) >> 8;
+	req[7] = (length & 0x00ff);
+	/* Get the data */
+	while (data->file->togo > 0) {
+		int progress, offset;
+
+		offset = 9 + 2 * length;
+		i = data->file->file_length - data->file->togo;
+		req[offset] = (i & 0xff0000) >> 16;
+		req[offset + 1] = (i & 0xff00) >> 8;
+		req[offset + 2] = i & 0xff;
+		if (data->file->togo > 0x100) {
+			req[offset + 5] = 0x01;
+		} else {
+			req[offset + 4] = (data->file->togo & 0xff0000) >> 16;
+			req[offset + 5] = (data->file->togo & 0xff00) >> 8;
+			req[offset + 6] = data->file->togo & 0xff;
+		}
+		if (sm_message_send(sizeof(req), NK6510_MSG_FILE, req, state))
+			return GN_ERR_NOTREADY;
+		err = sm_block(NK6510_MSG_FILE, data, state);
+		if (err != GN_ERR_NONE)
+			return err;
+		progress = 100 * (data->file->file_length - data->file->togo) / data->file->file_length;
+		fprintf(stderr, _("Progress: %d%% completed\n"), progress);
+	}
+
+	return err;	
+}
+
 static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req1[512] = {FBUS_FRAME_HEADER, 0x72, 0x11, 0x00, 0x00};
@@ -1661,36 +1740,43 @@ static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
 	gn_error err;
 	int i;
 	
-  	if (!data->file) return GN_ERR_INTERNALERROR;
+  	if (!data->file)
+  		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
 
 	/* Start the transfer */
 	req1[7] = char_unicode_encode(req1+8, data->file->name, i);
 	data->file->togo = 0;
-      	if (sm_message_send(req1[7]+12, NK6510_MSG_FILE, req1, state)) return GN_ERR_NOTREADY;
+      	if (sm_message_send(req1[7]+12, NK6510_MSG_FILE, req1, state))
+      		return GN_ERR_NOTREADY;
 	err = sm_block(NK6510_MSG_FILE, data, state);
-	if (err!=GN_ERR_NONE) return err;
-	if (data->file->togo!=data->file->file_length) return GN_ERR_INTERNALERROR;
+	if (err != GN_ERR_NONE)
+		return err;
+	if (data->file->togo != data->file->file_length)
+		return GN_ERR_INTERNALERROR;
 
 	/* Put the data */
-	while (data->file->togo>0) {
+	while (data->file->togo > 0) {
 		i = data->file->togo;
-		if (data->file->togo>0x100) {
+		if (data->file->togo > 0x100) {
 			req2[12] = 0x01;
 			data->file->just_sent = 0x100;
 		} else {
-			req2[11] = (data->file->togo&0xff0000)>>16;
-			req2[12] = (data->file->togo&0xff00)>>8;
-			req2[13] = data->file->togo&0xff;
+			req2[11] = (data->file->togo & 0xff0000) >> 16;
+			req2[12] = (data->file->togo & 0xff00)   >> 8;
+			req2[13] = (data->file->togo & 0xff);
 			data->file->just_sent = data->file->togo;
 		}
 		memcpy(req2+14, data->file->file + data->file->file_length - data->file->togo, data->file->just_sent);
-		if (sm_message_send(14+data->file->just_sent, NK6510_MSG_FILE, req2, state)) return GN_ERR_NOTREADY;
+		if (sm_message_send(14+data->file->just_sent, NK6510_MSG_FILE, req2, state))
+			return GN_ERR_NOTREADY;
 		err = sm_block(NK6510_MSG_FILE, data, state);
-		if (err!=GN_ERR_NONE) return err;
-		if (data->file->togo!=i-data->file->just_sent) return GN_ERR_INTERNALERROR;
+		if (err != GN_ERR_NONE)
+			return err;
+		if (data->file->togo!=i-data->file->just_sent)
+			return GN_ERR_INTERNALERROR;
 	}
-	
+
 	/* Finish the transfer */
 	if (sm_message_send(sizeof(req3), NK6510_MSG_FILE, req3, state)) return GN_ERR_NOTREADY;
 	return sm_block(NK6510_MSG_FILE, data, state);
@@ -1701,7 +1787,8 @@ static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x62, 0x00};
 	int i;
 	
-  	if (!data->file) return GN_ERR_INTERNALERROR;
+  	if (!data->file)
+  		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
 
 	req[5] = char_unicode_encode(req+6, data->file->name, i);
@@ -1709,14 +1796,131 @@ static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state)
 	return sm_block(NK6510_MSG_FILE, data, state);
 }
 
+static gn_error NK6510_DeleteFileById(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[10] = {FBUS_FRAME_HEADER, 0x1E, 0x00, 0x00,
+					0x00, 0x01,
+					0x00, 0x00}; /* file identifier */
+	int i, length;
+
+  	if (!data->file)
+  		return GN_ERR_INTERNALERROR;
+
+	length = data->file->id[0];
+	for (i = 0; i < length; i++) {
+		req[8 + i] = data->file->id[i+1];
+	}
+	length /= 2;
+	req[6] = (length & 0xff00) >> 8;
+	req[7] = (length & 0x00ff);
+	if (sm_message_send(8 + length / 2, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY;
+	return sm_block(NK6510_MSG_FILE, data, state);
+}
+
 
 static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	int i;
+	int i, j, frame_length;
 	gn_file *file;
+	gn_file_list *fll;
 	gn_error error = GN_ERR_NONE;
 
 	switch (message[3]) {
+	case 0x0f:
+		/* Recv a block of file */
+		if (data->file) {
+			i = (message[8] << 8) + message[9];
+			memcpy(data->file->file + data->file->file_length - data->file->togo, message+10, i);
+			data->file->togo -= i;
+   		}
+		break;
+	case 0x15: /* Answer for GetFileDetailsById */
+		if (!data->file || !data->file_list) {
+			error = GN_ERR_INTERNALERROR;
+			dprintf("error!\n");
+			goto out;
+		}
+		switch (message[4]) {
+		case 0x04:
+			error = GN_ERR_EMPTYLOCATION;
+			goto out;
+		case 0x01: /* OK */
+			break;
+		default:
+			error = GN_ERR_UNKNOWN;
+			dprintf("error!\n");
+			goto out;
+		}
+		if (!data->file) {
+			error = GN_ERR_INTERNALERROR;
+			dprintf("error!\n");
+			goto out;
+		}
+		/* frame length */
+		frame_length = 256 * message[8] + message[9];
+		file = data->file;
+		fll = data->file_list;
+		char_unicode_decode(file->name, message + 10, 184);
+		dprintf("Filename: %s\n", file->name);
+		if (message[196] != 0xff) {
+			/* read timestamp */
+			file->year = (message[210]<<8) + message[211];
+			file->month = message[212];
+			file->day = message[213];
+			file->hour = message[214];
+			file->minute = message[215];
+			file->second = message[216];
+			dprintf("Timestamp: %04d-%02d-%02d %02d:%02d:%02d\n",
+				file->year, file->month, file->day,
+				file->hour, file->minute, file->second);
+		}
+		file->togo = file->file_length = 256 * message[220] + message[221];
+		dprintf("Filesize: %d bytes\n", file->file_length);
+
+		switch (message[227]) {
+		case 0x00:
+			dprintf("directory\n");
+			break;
+		case 0x01:
+			dprintf("java jed file\n");
+			break;
+		case 0x02:
+			dprintf("image\n");
+			break;
+		case 0x04:
+			dprintf("ringtone\n");
+			break;
+		case 0x10:
+			dprintf("java jar file\n");
+			break;
+		case 0x20:
+			dprintf("java rms file\n");
+			break;
+		default:
+			dprintf("unknown file\n");
+		}
+
+		data->file_list->file_count = 0;
+		j = 0;
+		if (length > 0xe8) {
+			for (i = 250; i < length ;) {
+				int k, len = 2 * (message[i] * 256 + message[i+1]);
+				data->file_list->file_count++;
+				data->file_list->files[j] = calloc(1, sizeof(gn_file));
+				data->file_list->files[j]->id = calloc(len + 1, sizeof(char));
+				data->file_list->files[j]->id[0] = len;
+				for (k = 0; k < len; k++) {
+					data->file_list->files[j]->id[k+1] = message[i + 2 + k];
+				}
+				i += (len + 2);
+				j++;
+			}
+		}
+		dprintf("%d subentries\n", data->file_list->file_count);
+		break;
+	case 0x1f:
+		/* file deleted */
+		break;
 	case 0x59:
 		/* Sent a block of file ok */
 		if (data->file) {
@@ -1792,7 +1996,12 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		break;
 	case 0x83:
 		if (data->file) {
-			memcpy(data->file->id, message+4, 6);
+			int i;
+
+			data->file->id = calloc(7, sizeof(char));
+			for (i = 0; i < 6; i++) {
+				data->file->id[i] = message[4 + i];
+			}
 		}
 		break;
 	default:
