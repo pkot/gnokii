@@ -4921,11 +4921,10 @@ static int getlocksinfo(void)
 	return 0;
 }
 
-/* For now let's assume just 0xffff files */
 static void set_fileid(gn_file *fi, char *arg)
 {
-	int j, index, len = 1;
-	index = j = atoi(arg);
+	unsigned long j, index, len = 1;
+	index = j = atol(arg);
 	while (j > 255) {
 		len++;
 		j /= 256;
@@ -4936,7 +4935,7 @@ static void set_fileid(gn_file *fi, char *arg)
 	fi->id[0] = len;
 	for (j = len; j > 0; j--) {
 		fi->id[j] = index % 256;
-		index = (index & 0xff00) >> 8;
+		index = (index >> 8);
 	}
 }
 
@@ -4988,6 +4987,7 @@ static int getfiledetailsbyid(int nargc, char *nargv[])
 		set_fileid(&fi, nargv[0]);
 	}
 
+	return 0;
 	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, &data, &state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get filename: %s\n"), gn_error_print(error));
 	else {
