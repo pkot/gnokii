@@ -34,6 +34,7 @@
     o file support for Nokia 6610i and family -- it differs from
       already implemented support as it is not named based but
       id based                                          (Pawel Kot)
+    o Nokia 6220 support added                        (Peter Vajko)
 
 0.6.8
 =====
