@@ -54,6 +54,14 @@ You can use the following settings in your gnokiirc to access the phone:
     model = series60
     connection = irda
 
+- TCP/IP connection (disabled by default, you have to edit gnapplet.ini
+    on your phone to enable it)
+
+    [global]
+    port = 169.254.1.68:1912	(put the IP address of your phone here)
+    model = series60
+    connection = tcp
+
 You have to start gnapplet first (you'll find it in the menu), then start
 gnokii or xgnokii. After gnokii disconnects (or you won't connect in 30
 seconds), the application will terminate.
@@ -65,6 +73,10 @@ The current code is able to:
  * read the memory status
  * read network info
  * read RF/battery level
+ * read/set clock, read/set alarm
+ * read/write/delete calendar entries
+ * read/write/delete todo entries
+ * send/receive sms
 
 * Bugs *
 
