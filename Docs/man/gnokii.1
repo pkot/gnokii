@@ -411,6 +411,40 @@ show information about the (sim)locks of the phone:
 the lock data, whether a lock is open or closed, whether it is a user or
 factory lock and the number of unlock attempts.
 
+.SS FILE
+Not that some phones (like Nokia 6610i) support only id based operations
+(gnokii options with "byid" suffix). Use gnokiifs for the transparent support.
+.TP
+.BR "\-\-getfilelist \fIremote_path\fP"
+lists files from the given directory. Use A:\* or B:\* to get the root directory
+from either phone memory or card memory.
+.TP
+.BR "\-\-getfiledetailsbyid [\fIid\fP]"
+lists file details or directory contents from the entry identified by \fIid\fP.
+If no identifier is given, list the root directory contents.
+.TP
+.BR "\-\-getfileid \fIremote_filename\fP"
+gets id of the file.
+.TP
+.BR "\-\-getfile \fIremote_filename\fP [\fIlocal_filename\fP]"
+gets file identified by name and path from the phone and stores it at the local
+computer.
+.TP
+.BR "\-\-getfilebyid \fIid\fP [\fIlocal_filename\fP]"
+gets file identified by id from the phone and stores it at the local computer.
+.TP
+.BR "\-\-getallfiles \fIremote_path\fP"
+gets all files from the remote path.
+.TP
+.BR "\-\-putfile \fIlocal_filename\fP \fIremote_filename\fP"
+stores the file in the phone memory or on the memory card.
+.TP
+.BR "\-\-deletefile \fIremote_filename\fP"
+removes the file from the phone.
+.TP
+.BR "\-\-deletefilebyid \fIid\fP"
+removes the file from the phone.
+
 .SH "DIAGNOSTICS"
 Various error messages are printed to standard error.  The exit code
 is 0 for correct functioning.  Errors which appear to be caused by
