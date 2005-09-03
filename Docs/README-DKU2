@@ -32,6 +32,7 @@ $ autoconf
 |  kernsrcdir: /lib/modules/`uname -r`/build -- directory where the sources are
 |  kernmoddir: /lib/modules/`uname -r` -- base module installation directory
 $ ./configure --with-kernsrcdir=dir1 --with-kernmoddir=dir2 
+| replace dir1 and dir2 with real paths
 $ make
 | Become root
 # make install
