@@ -1903,6 +1903,9 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		data->file_list->file_count = 0;
 		j = 0;
 		if (length > 0xe8) {
+			/* first 4 octets are for the length */
+			/* next 4 octets are for the type (?) */
+			/* then pairs (len, location) */
 			for (i = 250; i < length ;) {
 				int k, len = 2 * (message[i] * 256 + message[i+1]);
 				data->file_list->file_count++;
