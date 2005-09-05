@@ -2313,7 +2313,7 @@ msgstr "(nieznany)"
 #: gnokii/gnokii.c:4093
 #, c-format
 msgid "IMEI         : %s\n"
-msgstr "IMEI         : %s\n"
+msgstr "IMEI      : %s\n"
 
 #: gnokii/gnokii.c:4094
 #, c-format
@@ -2323,12 +2323,12 @@ msgstr "Producent : %s\n"
 #: gnokii/gnokii.c:4095
 #, c-format
 msgid "Model        : %s\n"
-msgstr "Model        : %s\n"
+msgstr "Model     : %s\n"
 
 #: gnokii/gnokii.c:4096
 #, c-format
 msgid "Revision     : %s\n"
-msgstr "Wersja     : %s\n"
+msgstr "Wersja    : %s\n"
 
 #: gnokii/gnokii.c:4122
 #, c-format
