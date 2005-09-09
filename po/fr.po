@@ -29,7 +29,7 @@ msgstr "Option [%s] \"%s\" non reconnue, utilisez plutot \"%s\" or \"%s\".\n"
 #: common/cfgreader.c:509
 #, c-format
 msgid "Unrecognized [logging] option \"%s\", use \"off\" or \"on\" value\n"
-msgstr "Option [%s] \"%s\" non reconnue, utilisez plutot les valeurs \"on\" or \"off\".\n"
+msgstr "Option [logging] \"%s\" non reconnue, utilisez plutot les valeurs \"on\" or \"off\".\n"
 
 #: common/cfgreader.c:542
 #, c-format
