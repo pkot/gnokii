@@ -64,7 +64,7 @@ ConfigEntry config[] = {
 
 static void GetDefaultValues()
 {
-	gchar *homedir;
+	const gchar *homedir;
 
 	xgnokiiConfig.user.name = g_strdup("");
 	xgnokiiConfig.user.title = g_strdup("");
@@ -86,7 +86,7 @@ void GUI_ReadXConfig()
 {
 	FILE *file;
 	gchar *line;
-	gchar *homedir;
+	const gchar *homedir;
 	gchar *rcfile;
 	gchar *current;
 	register gint len;
@@ -196,19 +196,24 @@ gint GUI_SaveXConfig()
 {
 	FILE *file;
 	gchar *line;
-	gchar *homedir;
+	const gchar *homedir;
 	gchar *rcfile;
 	register gint i;
 
-	if ((homedir = getenv("HOME")) == NULL) {
+#ifdef WIN32
+	homedir = g_get_home_dir();
+	rcfile = g_strconcat(homedir, "\\_xgnokiirc", NULL);
+#else
+	if ((homedir = g_get_home_dir()) == NULL) {
 		g_print(_("ERROR: Can't find HOME enviroment variable!\n"));
-		return (1);
+		return(1);
 	}
 
 	if ((rcfile = g_strconcat(homedir, "/.xgnokiirc", NULL)) == NULL) {
-		g_print(_("ERROR: Can't allocate memory for config writing!\n"));
-		return (2);
+		g_print(_("ERROR: Can't allocate memory for config reading!\n"));
+		return(2);
 	}
+#endif
 
 	if ((file = fopen(rcfile, "w")) == NULL) {
 		g_print(_("ERROR: Can't open file %s for writing!\n"), rcfile);
