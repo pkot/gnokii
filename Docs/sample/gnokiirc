@@ -1,10 +1,11 @@
 # This is a sample ~/.gnokiirc file.  Copy it into your
 # home directory and name it .gnokiirc.
+# See http://wiki.gnokii.org/index.php/Config for working examples.
 #
 
 [global]
 
-# Set port to the physical serial port used to connect to your phone.
+# Set port to the physical port used to connect to your phone.
 # Linux version is:
 port = /dev/ttyS0
 #
@@ -18,8 +19,23 @@ port = /dev/ttyS0
 # FreeBSD (probably NetBSD and OpenBSD too) use:
 # port = /dev/cuaa0
 #
+# With Linux-IrDA you will want to use
+# port = /dev/ircomm0
+# or similiar.
+#
 # Use this setting also for the Bluetooth connection:
 # port = aa:bb:cc:dd:ee:ff
+# when using it with AT driver set it to:
+# port = /dev/rfcomm0
+# or similiar.
+#
+# For the Linux USB cables you will need one of the following settings (or
+# similiar)
+# port = /dev/ttyUSB0
+# port = /dev/tts/USB0
+# port = /dev/ttyACM0
+# the last one will work only with AT driver. The correct setting should be
+# given in the dmesg output.
 
 # Set model to the model number of your phone. For the
 # Symbian phones use:
@@ -30,6 +46,8 @@ port = /dev/ttyS0
 # If you can't figure out what to put here read the FAQ.
 # If it still doesn't help, consult gnokii-ml or #gnokii at freenode.
 model = 6510
+# There are few main models that should make use of the certain drivers.
+# These are: 6110, 7110, 6510, 3110, 2110, 6160.
 
 # Initlength controls the number of characters sent to the
 # phone during initialisation.  You can either set it to
@@ -53,6 +71,16 @@ initlength = default
 # Note that it is recommended and currently the best way to use this
 # cable with nk6510 driver.
 connection = serial
+# With DKU-2 cable use the following setting
+# connection = dku2
+# With DKU-5 cable use the following setting
+# connection = dlr3p
+# For Bluetooth and AT driver use the following setting
+# connection = serial
+# For other Bluetooth settings use
+# connection = bluetooth
+# For infraded connection with phones other then Nokia 6110/6130/6150 use
+# connection = irda
 
 # Set this to 'yes' if you want gnokii to set and check the lock file in
 # /var/lock directory. It avoids potential conflicts with other serial
@@ -132,11 +160,11 @@ TELEPHONE = 12345678
 
 [logging]
 
-# where to log the debug output (on: stderr)
-debug = off
+# where to log the debug output (on: stderr, off: /dev/null)
+debug = on
 
-# where to log the rlp debug output (on: stderr)
+# where to log the rlp debug output (on: stderr, off: /dev/null)
 rlpdebug = off
 
-# where to log X debug output (on: stderr)
+# where to log X debug output (on: stderr, off: /dev/null)
 xdebug = off
