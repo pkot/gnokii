@@ -41,6 +41,7 @@
  * link layer updates
     o update dku2 driver: more models, cleanups, allow module
       unloading, use .short_name     (Pawel Kot, Matthias Blaesing)
+    o IrDA support for Nokia 6021 added            (Tuukka Hastrup)
 
 0.6.8
 =====
