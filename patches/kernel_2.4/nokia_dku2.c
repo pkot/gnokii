@@ -150,7 +150,7 @@ static int nokia_startup(struct usb_serial *serial)
 	return 0;
 }
 
-static void generic_read_bulk_callback (struct urb *urb)
+static void generic_read_bulk_callback(struct urb *urb)
 {
 	struct usb_serial_port *port = (struct usb_serial_port *)urb->context;
 	struct usb_serial *serial = get_usb_serial (port, __FUNCTION__);
@@ -171,13 +171,13 @@ static void generic_read_bulk_callback (struct urb *urb)
 		return;
 	}
 
-	usb_serial_debug_data (__FILE__, __FUNCTION__, urb->actual_length, data);
+	usb_serial_debug_data(__FILE__, __FUNCTION__, urb->actual_length, data);
 
 	tty = port->tty;
 	if (tty && urb->actual_length) {
 		for (i = 0; i < urb->actual_length ; ++i) {
 			/* if we insert more than TTY_FLIPBUF_SIZE characters, we drop them. */
-			if(tty->flip.count >= TTY_FLIPBUF_SIZE) {
+			if (tty->flip.count >= TTY_FLIPBUF_SIZE) {
 				tty_flip_buffer_push(tty);
 			}
 			/* this doesn't actually push the data through unless tty->low_latency is set */
@@ -187,23 +187,23 @@ static void generic_read_bulk_callback (struct urb *urb)
 	}
 
 	/* Continue trying to always read  */
-	usb_fill_bulk_urb (port->read_urb, serial->dev,
-			   usb_rcvbulkpipe (serial->dev,
-				   	    port->bulk_in_endpointAddress),
-			   port->read_urb->transfer_buffer,
-			   port->read_urb->transfer_buffer_length,
-			   ((serial->type->read_bulk_callback) ? 
-			     serial->type->read_bulk_callback : 
-			     generic_read_bulk_callback), port);
+	usb_fill_bulk_urb(port->read_urb, serial->dev,
+			  usb_rcvbulkpipe(serial->dev,
+					  port->bulk_in_endpointAddress),
+			  port->read_urb->transfer_buffer,
+			  port->read_urb->transfer_buffer_length,
+			  ((serial->type->read_bulk_callback) ? 
+			    serial->type->read_bulk_callback : 
+			    generic_read_bulk_callback), port);
 	result = usb_submit_urb(port->read_urb);
 	if (result)
 		err("%s - failed resubmitting read urb, error %d", __FUNCTION__, result);
 }
 
-static void generic_write_bulk_callback (struct urb *urb)
+static void generic_write_bulk_callback(struct urb *urb)
 {
 	struct usb_serial_port *port = (struct usb_serial_port *)urb->context;
-	struct usb_serial *serial = get_usb_serial (port, __FUNCTION__);
+	struct usb_serial *serial = get_usb_serial(port, __FUNCTION__);
 
 	dbg("%s - port %d", __FUNCTION__, port->number);
 
@@ -247,7 +247,7 @@ static int __init nokia_init(void)
 	return 0;
 }
 
-static void __exit nokia_exit (void)
+static void __exit nokia_exit(void)
 {
 	usb_deregister(&nokia_driver);
 	usb_serial_deregister(&nokia_device);
@@ -256,8 +256,8 @@ static void __exit nokia_exit (void)
 module_init(nokia_init);
 module_exit(nokia_exit);
 
-MODULE_AUTHOR( DRIVER_AUTHOR );
-MODULE_DESCRIPTION( DRIVER_DESC );
+MODULE_AUTHOR(DRIVER_AUTHOR);
+MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE("GPL");
 
 MODULE_PARM(debug, "i");
