@@ -20,6 +20,7 @@
       termination                                  (Bastien Nocera)
     o initialize state->device.device_interface    (Bastien Nocera)
     o new gsm operator added                        (Max Sanzharov)
+    o allow more subentries for a pbk entry        (BORBELY Zoltan)
  * xgnokii updates
     o add xgnokii.desktop                            (Ville Skytta)
     o ported to gtk2                 (Jan Derfinak, Bastien Nocera)

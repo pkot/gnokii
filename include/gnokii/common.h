@@ -137,7 +137,7 @@ typedef struct {
    not support these lengths so they have their own limits set. */
 #define GN_PHONEBOOK_NAME_MAX_LENGTH            61   /* For 6510 */
 #define GN_PHONEBOOK_NUMBER_MAX_LENGTH          49   /* For 6510 */
-#define GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER      10   /* For 6510 */
+#define GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER      20   /* it was 10 for 6510, but modern phones supports more */
 						     /* 7110 is able to have in one
 						      * entry 5 numbers and 4
 						      * texts [email,notice,postal,url] */
