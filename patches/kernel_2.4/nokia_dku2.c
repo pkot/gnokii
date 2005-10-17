@@ -13,6 +13,8 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
+ *  20.09.2005 - Matthias Blaesing <matthias.blaesing@rwth-aachen.de>
+ *  Added usb_deregister to exit code - to allow remove and reinsert of module
  */
 
 
@@ -76,7 +78,7 @@ MODULE_DEVICE_TABLE(usb, id_table);
 
 static struct usb_serial_device_type nokia_device = {
 	.owner =		THIS_MODULE,
-	.name =			"Nokia 7600/6230/6230i DKU2 driver",
+	.name =			"Nokia 7600/6230(i)/6170/66x0 DKU2 driver",
 	.id_table =		id_table,
 	.num_interrupt_in =	1,
 	.num_bulk_in =		1,
@@ -247,6 +249,7 @@ static int __init nokia_init(void)
 
 static void __exit nokia_exit (void)
 {
+	usb_deregister(&nokia_driver);
 	usb_serial_deregister(&nokia_device);
 }
 

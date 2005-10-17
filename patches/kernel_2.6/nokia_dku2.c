@@ -13,6 +13,11 @@
  *  the Free Software Foundation; either version 2 of the License, or
  *  (at your option) any later version.
  *
+ *  20.09.2005 - Matthias Blaesing <matthias.blaesing@rwth-aachen.de>
+ *  Added short name to device structure to make driver load into kernel 2.6.13
+ *
+ *  20.09.2005 - Matthias Blaesing <matthias.blaesing@rwth-aachen.de>
+ *  Added usb_deregister to exit code - to allow remove and reinsert of module
  */
 
 
@@ -79,7 +84,8 @@ static struct usb_driver nokia_driver = {
 
 static struct usb_serial_device_type nokia_device = {
 	.owner =		THIS_MODULE,
-	.name =			"Nokia 7600/6230/6230i/6170 DKU2 driver",
+	.name =			"Nokia 7600/6230(i)/6170/66x0 DKU2 driver",
+	.short_name =		"Nokia DKU2",
 	.id_table =		id_table,
 	.num_interrupt_in =	1,
 	.num_bulk_in =		1,
@@ -134,6 +140,7 @@ static int __init nokia_init(void)
 
 static void __exit nokia_exit(void)
 {
+	usb_deregister(&nokia_driver);
 	usb_serial_deregister(&nokia_device);
 }
 
