@@ -39,6 +39,7 @@
 #endif
 
 #include "usb-serial.h"
+#include "nokia_dku2.h"
 
 /*
  * Version Information
@@ -46,18 +47,6 @@
 #define DRIVER_VERSION	"v0.2"
 #define DRIVER_AUTHOR	"C Kemp"
 #define DRIVER_DESC	"Nokia DKU2 Driver"
-
-
-#define NOKIA_VENDOR_ID		0x0421
-#define NOKIA7600_PRODUCT_ID	0x0400
-#define NOKIA6230_PRODUCT_ID	0x040f
-#define NOKIA6170_PRODUCT_ID	0x0416
-#define NOKIA6670_PRODUCT_ID	0x041d
-#define NOKIA6670_PRODUCT_ID	0x041e
-#define NOKIA6230i_PRODUCT_ID	0x0428
-
-#define NOKIA_AT_PORT	0x82
-#define NOKIA_FBUS_PORT	0x86
 
 /* Function prototypes */
 static int nokia_probe(struct usb_serial *serial, const struct usb_device_id *id);
