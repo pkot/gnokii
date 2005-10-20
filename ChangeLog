@@ -1,5 +1,5 @@
-0.6.9 (not released yet)
-========================
+0.6.9
+=====
  * build system updates
     o add $withval/net to CFLAGS with --with-bluetooth and
       configure script                             (Bastien Nocera)
