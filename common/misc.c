@@ -135,6 +135,7 @@ static gn_phone_model models[] = {
 	{"3108",  "RH-6", 0 },
 	{"3110",  "NHE-8", PM_SMS | PM_DTMF | PM_DATA },
 	{"3110",  "0310" , PM_SMS | PM_DTMF | PM_DATA }, /* NHE-8 */
+	{"3120",  "RH-19", PM_CALENDAR | PM_SPEEDDIAL | PM_EXTPBK | PM_SMS | PM_FOLDERS },
 	{"3120b", "RH-50", PM_CALENDAR | PM_SPEEDDIAL | PM_EXTPBK | PM_SMS | PM_FOLDERS },
 	{"3200",  "RH-30", 0 },
 	{"3200b", "RH-31", 0 },
