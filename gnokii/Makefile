@@ -21,7 +21,6 @@ else
 PRGNAME=gnokii.exe
 TARGET=-mconsole
 CFLAGS+=-DGNOKIIDLL_IMPORTS
-LDLIBS+=-lws2_32 -lwinmm
 endif
 
 LDLIBS += $(TOPDIR)/common/libgnokii.la

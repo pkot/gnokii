@@ -15,8 +15,6 @@ win32/mingw-cross/mingw-cross.sh
 
 make DESTDIR=$BUILD_ROOT install
 
-mv $BUILD_ROOT/lib/gnokii.dll $BUILD_ROOT/bin/
-
 install COPYRIGHT $BUILD_ROOT
 install COPYING $BUILD_ROOT
 make DESTDIR=$BUILD_ROOT docdir=/doc -C Docs install

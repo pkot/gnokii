@@ -23,6 +23,7 @@ ifdef WIN32_CROSS
 LIBTOOL_UNDEF = -no-undefined
 LIBTOOL_VER = -version-info $(MAJOR_NUMBER):$(MINOR_NUMBER):0 -avoid-version
 LIBTOOL_RPATH=-rpath $(libdir)
+LDLIBS += -lws2_32 -lwinmm
 else
 LIBTOOL_VER = -version-info $(MAJOR_NUMBER):$(MINOR_NUMBER):0
 LIBTOOL_RPATH=-rpath $(libdir)

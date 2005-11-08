@@ -8,6 +8,9 @@
  * gnokii updates
     o let --getfiledetailsbyid work: remove spurious return 0
                                                 (Stefan Sassenberg)
+ * build system updates
+    o mingw cross compilation fixes                (BORBELY Zoltan)
+    o IrDA support detection for mingw cross build (BORBELY Zoltan)
 
 0.6.9
 =====
