@@ -12,7 +12,7 @@ Group: Applications/Communications
 Source: htp://www.gnokii.org/download/gnokii/%{name}-%{version}.tar.gz
 BuildRoot: /var/tmp/%{name}-%{version}-root
 BuildRequires: gettext, gtk+-devel >= 1.2.0, flex, bluez-libs-devel
-BuildRequires: mysql-devel, postgreql-devel, XFree86-devel
+BuildRequires: mysql-devel, postgresql-devel, XFree86-devel
 Requires: libgnokii = %{version}-%{release}
 
 %description
