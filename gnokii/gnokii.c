@@ -4987,7 +4987,6 @@ static int getfiledetailsbyid(int nargc, char *nargv[])
 		set_fileid(&fi, nargv[0]);
 	}
 
-	return 0;
 	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, &data, &state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get filename: %s\n"), gn_error_print(error));
 	else {

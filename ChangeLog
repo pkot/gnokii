@@ -5,6 +5,9 @@
     o Nokia 3100 support added                         (Janos Zana)
     o Nokia 3120 support added                     (Matthew Palmer)
     o Nokia 5140i support added                         (Pawel Kot)
+ * gnokii updates
+    o let --getfiledetailsbyid work: remove spurious return 0
+                                                (Stefan Sassenberg)
 
 0.6.9
 =====
