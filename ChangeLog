@@ -12,6 +12,8 @@
  * build system updates
     o mingw cross compilation fixes                (BORBELY Zoltan)
     o IrDA support detection for mingw cross build (BORBELY Zoltan)
+ * documentation updates
+    o Swedish translation added                   (Daniel Nylander)
 
 0.6.9
 =====
