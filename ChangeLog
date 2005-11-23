@@ -8,6 +8,8 @@
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
+ * build system updates
+    o AM_GNU_GETTEXT doesn't support use-libtool   (BORBELY Zoltan)
 
 0.6.10
 ======
