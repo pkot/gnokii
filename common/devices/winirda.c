@@ -139,6 +139,7 @@ int irda_open(struct gn_statemachine *state)
 	SOCKADDR_IRDA	peer;
 	SOCKET fd = INVALID_SOCKET;
 	DWORD daddr = INVALID_DADDR;
+	int x;
 
 	if (WSAStartup(MAKEWORD(2,0), &wsaData) == 0) {
 		fd = socket(AF_IRDA, SOCK_STREAM, 0);	/* Create socket */
@@ -146,7 +147,16 @@ int irda_open(struct gn_statemachine *state)
 		if (daddr != INVALID_DADDR)  {
 			peer.irdaAddressFamily = AF_IRDA;
 			*(DWORD*)peer.irdaDeviceID = daddr;
-			strcpy(peer.irdaServiceName, "Nokia:PhoNet");
+
+			if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
+				strcpy(peer.irdaServiceName, "IrDA:IrCOMM");
+				x = 1;
+				if ( setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, &x, sizeof(x)) == SOCKET_ERROR ) {
+					closesocket(fd);
+					return -1;
+				}
+			} else
+				strcpy(peer.irdaServiceName, "Nokia:PhoNet");
 
 			if (connect(fd, (struct sockaddr *)&peer, sizeof(peer))) {	/* Connect to service "Nokia:PhoNet" */
 				perror("connect");

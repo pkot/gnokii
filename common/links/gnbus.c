@@ -290,7 +290,11 @@ gn_error gnbus_initialise(struct gn_statemachine *state)
 	GNBUSINST(state)->i.state = GNBUS_RX_Sync;
 	GNBUSINST(state)->i.checksum_idx = 0;
 
-	conn_type = (state->config.connection_type == GN_CT_Irda) ? GN_CT_Serial : state->config.connection_type;
+	if (state->config.connection_type == GN_CT_Irda && strcasecmp(state->config.port_device, "IrDA:IrCOMM"))
+		conn_type = GN_CT_Serial;
+	else
+		conn_type = state->config.connection_type;
+
 	if (!device_open(state->config.port_device, false, false, false, conn_type, state)) {
 		perror(_("Couldn't open GNBUS device"));
 		free(GNBUSINST(state));
