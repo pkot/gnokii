@@ -67,7 +67,7 @@ dummy:
 intl: dummy
 	-ln -sf include/config.h config.h
 	$(MAKE) -C intl
-	$(MAKE) -C intl localcharset.lo
+	$(MAKE) -C intl localcharset.o
 	-$(RM) config.h
 
 $(DIRS): dummy

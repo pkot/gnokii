@@ -34,7 +34,7 @@ AM_ICONV
 dnl ======================== Default setting
 ALL_LINGUAS="cs de et fi nl sk pl it sl fr zh_CN sv"
 AC_CHECK_HEADERS(libintl.h)
-AM_GNU_GETTEXT([use-libtool])
+AM_GNU_GETTEXT([no-libtool])
 AC_CHECK_FUNCS(locale_charset)
 if test x$am_cv_langinfo_codeset != xyes -a x$ac_cv_func_locale_charset != xyes ; then
 	NEED_LOCALE_CHARSET=1
