@@ -183,7 +183,7 @@ int irda_open(struct gn_statemachine *state)
 	if (daddr != -1)  {
 		if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
 			fprintf(stderr, _("Virtual IrCOMM device unsupported under Linux\n"));
-			return GN_ERR_NOTSUPPORTED;
+			return -1;
 		}
 
 		fd = socket(AF_IRDA, SOCK_STREAM, 0);	/* Create socket */
