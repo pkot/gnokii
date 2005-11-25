@@ -10,6 +10,7 @@
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * build system updates
     o AM_GNU_GETTEXT doesn't support use-libtool   (BORBELY Zoltan)
+    o Makefile cleanup due to the gettext changes  (BORBELY Zoltan)
  * gnapplet driver updates
     o Nokia 6680 support added                     (BORBELY Zoltan)
 

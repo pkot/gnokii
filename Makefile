@@ -22,10 +22,6 @@ BIN_DIRS += gnokiid utils
 DATA_DIR = common/data
 endif
 
-ifdef NEED_LCHARSET
-DIRS = intl
-endif
-
 DIRS += common/phones \
 	common/links \
 	common/devices \
@@ -63,12 +59,6 @@ all: $(DIRS)
 	@echo "##########################################"
 
 dummy:
-
-intl: dummy
-	-ln -sf include/config.h config.h
-	$(MAKE) -C intl
-	$(MAKE) -C intl localcharset.o
-	-$(RM) config.h
 
 $(DIRS): dummy
 	$(MAKE) -C $@

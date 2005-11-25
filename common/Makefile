@@ -55,7 +55,7 @@ OBJS =	gsm-api.lo \
 	snprintf.lo
 
 ifdef NEED_LCHARSET
-OBJS += ../intl/localcharset.o
+OBJS += ../intl/localcharset.lo
 endif
 
 all: libgnokii.la
