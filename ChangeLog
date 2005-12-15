@@ -15,6 +15,7 @@
     o Nokia 6680 support added                     (BORBELY Zoltan)
  * documentation updates
     o xgnokii requires now glib-2.0 and gtk+-2.0        (Pawel Kot)
+    o CVS access has changed on savannah                (Pawel Kot)
 
 0.6.10
 ======

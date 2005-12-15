@@ -229,33 +229,15 @@ The source of gnokii aplications is in the CVS server.  The server's address
 is savannah.nongnu.org.  If you are already familiar with CVS, set the
 CVSROOT to
 
-	:ext:anoncvs@subversions.gnu.org:/cvsroot/gnokii
-
-and CVS_RSH to ssh, and using ssh protocol v2, check out the repository with
-the name gnokii.
+	:pserver:anonymous@cvs.sv.nongnu.org:/sources/gnokii
 
 If you are not familiar with cvs, don't worry. It's very simple. Just
 install the cvs package for your distribution and follow these steps:
 
-	1. Set up your ssh client to connect to savannah servers using ssh
-           v2 protocol. Put:
-
-	Host savannah.nongnu.org
-		Protocol 2
-
-	   into your ssh configuration (~/.ssh/config)
-
-	2. Set your environmental variable CVS_RSH (remote shell command).
-	   If you have bash (Bourne Again Shell):
-
-	export CVS_RSH=ssh
-
-	   If you have different shell, use different command (e.g. setenv).
-
-	3. Set your environmental variable CVSROOT. If you have bash (Bourne
+	1. Set your environmental variable CVSROOT. If you have bash (Bourne
            Again Shell):
 
-	export CVSROOT=:ext:anoncvs@savannah.nongnu.org:/cvsroot/gnokii
+	export CVSROOT=:pserver:anonymous@cvs.sv.nongnu.org:/sources/gnokii
 
 	   If you have different shell, use different command (e.g. setenv).
 
@@ -265,7 +247,7 @@ install the cvs package for your distribution and follow these steps:
 
 If you prefer, there is a WWW interface to the CVS server at
 
-http://savannah.nongnu.org/cgi-bin/viewcvs/gnokii/
+http://cvs.savannah.nongnu.org/cgi-bin/viewcvs/gnokii/
 
 Once you have the sources, you will need to run the following commands
 
