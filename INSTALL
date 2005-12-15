@@ -29,9 +29,9 @@ Requirements
 
 Additional libraries and header files needed for the various gnokii parts:
 
-xgnokii:		libX11, libXpm, glib-1.2, gtk+-1.2
+xgnokii:		libX11, libXpm, glib-2.0, gtk+-2.0
 bitmap support:		libXpm for xpm files support, gnokii can deal without
-			this
+			this (xgnokii cannot)
 irda support:		Linux kernel includes
 bluetooth support:	bluez (Linux Bluetooth stack)
 libical support:	libical-0.24, you may want to use gnokii internal iCal
