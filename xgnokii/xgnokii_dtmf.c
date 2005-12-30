@@ -311,12 +311,12 @@ void GUI_CreateDTMFWindow()
 	gtk_table_attach_defaults(GTK_TABLE(table), button, 2, 3, 5, 6);
 
 
-	button = gtk_button_new_with_label("Pause");
+	button = gtk_button_new_with_label(_("Pause"));
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			   GTK_SIGNAL_FUNC(ButtonCB), (gpointer) 'p');
 	gtk_table_attach_defaults(GTK_TABLE(table), button, 0, 1, 6, 7);
 
-	button = gtk_button_new_with_label("Wait");
+	button = gtk_button_new_with_label(_("Wait"));
 	gtk_signal_connect(GTK_OBJECT(button), "clicked",
 			   GTK_SIGNAL_FUNC(ButtonCB), (gpointer) 'w');
 	gtk_table_attach_defaults(GTK_TABLE(table), button, 1, 2, 6, 7);

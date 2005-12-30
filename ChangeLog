@@ -16,6 +16,8 @@
  * documentation updates
     o xgnokii requires now glib-2.0 and gtk+-2.0        (Pawel Kot)
     o CVS access has changed on savannah                (Pawel Kot)
+ * xgnokii updates
+    o make strings translatable                     (Daniele Forsi)
 
 0.6.10
 ======
