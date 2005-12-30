@@ -428,10 +428,11 @@ static void load_ringtone_list(void)
 gn_ringtone_info *get_selected_ringtone(void)
 {
 	GtkList *list;
-	int pos;
+	int pos = -1;
 
 	list = GTK_LIST(GTK_COMBO(gi.rlist_combo)->list);
-	pos = gtk_list_child_position(list, list->selection->data);
+	if (list && list->selection)
+		pos = gtk_list_child_position(list, list->selection->data);
 
 	if (pos < 0 || pos > gi.ringtone_list.count) return NULL;
 
@@ -726,6 +727,14 @@ static void get_ringtone(GtkWidget *w)
 	gn_ringtone_info *ri;
 
 	ri = get_selected_ringtone();
+	if (!ri) {
+		gchar *buf = g_strdup_printf(_("Empty ringtone list"));
+		gtk_label_set_text(GTK_LABEL(gi.error_dialog.text), buf);
+		gtk_widget_show(gi.error_dialog.dialog);
+		g_free(buf);
+		return;
+	}
+
 	gi.ringtone.location = ri->location;
 
 	if ((err = ringtone_event(Event_GetRingtone, &gi.ringtone)) != GN_ERR_NONE) {

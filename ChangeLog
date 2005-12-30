@@ -19,6 +19,8 @@
       more verbosly                                     (Pawel Kot)
  * xgnokii updates
     o make strings translatable                     (Daniele Forsi)
+    o avoid coredump on the empty ringtone list     (Daniele Forsi,
+                                                         Pawel Kot)
  * gnokiid updated
     o print strings more compliant to GSM standard  (Daniele Forsi)
 
