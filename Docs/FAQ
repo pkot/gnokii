@@ -24,7 +24,11 @@ A. You can pronounce gnokii as "gnooki" or "gnocki" as you prefer :-)
 -------------------------------------------------------------------------------
 Q. What models are supported?
 
-A. Currently the supported phones are (All Nokia models unless
+A. If you own not Nokia phone it will be probably supported by the AT driver
+   -- just try it. Nokia phones have limited AT command subset implemented
+   and it is recommended to try one of the drivers mentioned below.
+
+   Currently the supported phones are (All Nokia models unless
    noted otherwise):
     - nk6100 driver:
         + Nokia 6110, 6130, 6150, 6190

@@ -2,8 +2,6 @@
 =========================
  * nk6510 driver updates
     o Nokia 6015i support added                (gnokii@everets.org)
- * documentation updates
-    o Swedish translation added                   (Daniel Nylander)
  * link layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates
@@ -14,8 +12,11 @@
  * gnapplet driver updates
     o Nokia 6680 support added                     (BORBELY Zoltan)
  * documentation updates
+    o Swedish translation added                   (Daniel Nylander)
     o xgnokii requires now glib-2.0 and gtk+-2.0        (Pawel Kot)
     o CVS access has changed on savannah                (Pawel Kot)
+    o non Nokia phones are supported by AT driver -- express it
+      more verbosly                                     (Pawel Kot)
  * xgnokii updates
     o make strings translatable                     (Daniele Forsi)
  * gnokiid updated
