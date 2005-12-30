@@ -325,7 +325,7 @@ void	gn_atem_incoming_data_handle(char *buffer, int length)
 			if (ModemRegisters[REG_ECHO] & BIT_ECHO) {
 				out_buf[0] = buffer[count];
 				out_buf[1] = 0;
-				gn_atem_string_out(out_buf);
+				gn_atem_string_out((char *)out_buf);
 			}
 
 			/* Collect it to command buffer */
@@ -569,6 +569,7 @@ void	gn_atem_at_parse(char *cmd_buffer)
 				buf++;
 				/* Returns true if error occured */
 				if (gn_atem_command_plusc(&buf) == true) {
+					gn_atem_modem_result(MR_ERROR);
 					return;
 				}
 				break;
@@ -577,6 +578,7 @@ void	gn_atem_at_parse(char *cmd_buffer)
 				buf++;
 				/* Returns true if error occured */
 				if (gn_atem_command_plusg(&buf) == true) {
+					gn_atem_modem_result(MR_ERROR);
 					return;
 				}
 				break;
@@ -592,6 +594,7 @@ void	gn_atem_at_parse(char *cmd_buffer)
 			buf++;
 			/* Returns true if error occured */
 			if (gn_atem_command_diesis(&buf) == true) {
+				gn_atem_modem_result(MR_ERROR);
 				return;
 			}
 			break;
@@ -620,7 +623,7 @@ static void gn_atem_sms_print(char *line, gn_sms *message, int mode)
 		if ((message->dcs.type == GN_SMS_DCS_GeneralDataCoding) &&
 		    (message->dcs.u.general.alphabet == GN_SMS_DCS_8bit))
 			gsprintf(line, MAX_LINE_LENGTH,
-				_("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"%s\r\n"),
+				_("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\r\n%s"),
 				(message->status ? _("REC READ") : _("REC UNREAD")),
 				message->remote.number,
 				message->smsc_time.year, message->smsc_time.month, message->smsc_time.day,
@@ -628,7 +631,7 @@ static void gn_atem_sms_print(char *line, gn_sms *message, int mode)
 				message->time.timezone, _("<Not implemented>"));
 		else
 			gsprintf(line, MAX_LINE_LENGTH,
-				_("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"%s\r\n"),
+				_("\"%s\",\"%s\",,\"%02d/%02d/%02d,%02d:%02d:%02d+%02d\"\r\n%s"),
 				(message->status ? _("REC READ") : _("REC UNREAD")),
 				message->remote.number,
 				message->smsc_time.year, message->smsc_time.month, message->smsc_time.day,
@@ -636,7 +639,7 @@ static void gn_atem_sms_print(char *line, gn_sms *message, int mode)
 				message->time.timezone, message->user_data[0].u.text);
 		break;
 	case PDU_MODE:
-		gsprintf(line, MAX_LINE_LENGTH, _("<Not implemented>"));
+		gsprintf(line, MAX_LINE_LENGTH, _("0,<Not implemented>"));
 		break;
 	default:
 		gsprintf(line, MAX_LINE_LENGTH, _("<Unknown mode>"));
@@ -747,7 +750,7 @@ void	gn_atem_sms_parseText(char *buff)
 			error = gn_sms_send(&data, sm);
 
 			if (error == GN_ERR_NONE) {
-				gsprintf(buffer, MAX_LINE_LENGTH, "\r\n+CMGS: %d", data.sms->number);
+				gsprintf(buffer, MAX_LINE_LENGTH, "+CMGS: %d\r\n", data.sms->number);
 				gn_atem_string_out(buffer);
 				gn_atem_modem_result(MR_OK);
 			} else {
@@ -1042,7 +1045,7 @@ bool	gn_atem_command_plusg(char **buf)
 	if (strncasecmp(*buf, "MM", 3) == 0) {
 		buf[0] += 2;
 
-		gsprintf(buffer, MAX_LINE_LENGTH, _("ngnokii configured on %s for models %s\r\n"), sm->config.port_device, sm->driver.phone.models);
+		gsprintf(buffer, MAX_LINE_LENGTH, _("gnokii configured on %s for models %s\r\n"), sm->config.port_device, sm->driver.phone.models);
 		gn_atem_string_out(buffer);
 		return (false);
 	}
@@ -1081,14 +1084,13 @@ bool	gn_atem_command_diesis(char **buf)
 				return (false);
 			} else {
 				number = gn_atem_num_get(buf);
-				if ( number >= 0 && number <= 2 ) {
+				if ( number == 0 || number == 1 ) {
 					CallerIDMode = number;
 					return (false);
 				}
 			}
 		}
 	}
-	gn_atem_modem_result(MR_ERROR);
 	return (true);
 }
 

@@ -18,6 +18,8 @@
     o CVS access has changed on savannah                (Pawel Kot)
  * xgnokii updates
     o make strings translatable                     (Daniele Forsi)
+ * gnokiid updated
+    o print strings more compliant to GSM standard  (Daniele Forsi)
 
 0.6.10
 ======
