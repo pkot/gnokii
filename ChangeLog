@@ -6,6 +6,7 @@
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
+    o Nokia 6235 over IrDA support                      (Pawel Kot)
  * build system updates
     o AM_GNU_GETTEXT doesn't support use-libtool   (BORBELY Zoltan)
     o Makefile cleanup due to the gettext changes  (BORBELY Zoltan)
