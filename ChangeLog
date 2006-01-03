@@ -2,6 +2,9 @@
 =========================
  * nk6510 driver updates
     o Nokia 6015i support added                (gnokii@everets.org)
+    o fix number encapsulating in the FBUS frame: when the number
+      was too long the trailing digits where overwritten
+                                                        (Pawel Kot)
  * link layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates

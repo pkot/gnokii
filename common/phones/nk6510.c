@@ -5138,11 +5138,11 @@ static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned cha
 		if (len % 2) len++;
 		len /= 2;
 		req[pos] = 0x82; /* type: number */
-		req[pos + 1] = 0x0c; /* offset to next block starting from start of block (req[18]) */
+		req[pos + 1] = (len + 4 > 0x0c) ? (len + 4) : 0x0c; /* offset to next block starting from start of block (req[18]) */
 		req[pos + 2] = 0x01; /* first number field => remote_number */
 		req[pos + 3] = len; /* actual data length in this block */
 		memcpy(req + pos + 4, data->raw_sms->remote_number, len);
-		pos += 12;
+		pos += ((len + 4 > 0x0c) ? (len + 4) : 0x0c);
 	}
 
 	/* Block 2. SMSC Number */
@@ -5151,10 +5151,12 @@ static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned cha
 		pos += 16;
 	} else {
 		len = data->raw_sms->message_center[0] + 1;
-		memcpy(req + pos, "\x82\x0c\x02", 3); /* as above 0x02 => MessageCenterNumber */
+		req[pos] = 0x82; /* type: number */
+		req[pos + 1] = (len + 4 > 0x0c) ? (len + 4) : 0x0c; /* offset to next block starting from start of block (req[18]) */
+		req[pos + 2] = 0x02; /* first number field => remote_number */
 		req[pos + 3] = len;
 		memcpy(req + pos + 4, data->raw_sms->message_center, len);
-		pos += 12;
+		pos += ((len + 4 > 0x0c) ? (len + 4) : 0x0c);
 	}
 
 	/* Block 3. User Data */
