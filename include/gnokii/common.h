@@ -289,9 +289,11 @@ typedef struct {
 	int location;                                    /* The number of the note in the phone memory */
 	gn_calnote_type type;                            /* The type of the note */
 	gn_timestamp time;                               /* The time of the note */
+	gn_timestamp end_time;                           /* The end time of the note */
 	gn_calnote_alarm alarm;                          /* The alarm of the note */
 	char text[GN_CALNOTE_MAX_LENGTH];                /* The text of the note */
 	char phone_number[GN_CALNOTE_NUMBER_MAX_LENGTH]; /* For Call only: the phone number */
+	char mlocation[GN_CALNOTE_MAX_LENGTH];           /* For Meeting only: the location field */
 	gn_calnote_recurrence recurrence;                /* Recurrence of the note */
 } gn_calnote;
 

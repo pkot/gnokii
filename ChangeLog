@@ -15,6 +15,8 @@
     o Makefile cleanup due to the gettext changes  (BORBELY Zoltan)
  * gnapplet driver updates
     o Nokia 6680 support added                     (BORBELY Zoltan)
+    o end time and location support added to the calendar
+                                                   (BORBELY Zoltan)
  * documentation updates
     o Swedish translation added                   (Daniel Nylander)
     o xgnokii requires now glib-2.0 and gtk+-2.0        (Pawel Kot)
@@ -27,6 +29,9 @@
                                                          Pawel Kot)
  * gnokiid updated
     o print strings more compliant to GSM standard  (Daniele Forsi)
+ * libgnokii updates
+    o end time and location support added to the calendar
+                                                   (BORBELY Zoltan)
 
 0.6.10
 ======

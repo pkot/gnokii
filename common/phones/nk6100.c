@@ -2574,6 +2574,9 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 			} else {
 				note->phone_number[0] = 0;
 			}
+
+			memset(&note->end_time, 0, sizeof(note->end_time));
+			note->mlocation[0] = 0;
 		}
 		break;
 

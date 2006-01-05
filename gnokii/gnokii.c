@@ -2442,6 +2442,16 @@ static int getcalendarnote(int argc, char *argv[])
 					calnote.time.minute,
 					calnote.time.second);
 
+				if (calnote.end_time.year) {
+					fprintf(stdout, _("   End date: %d-%02d-%02d\n"), calnote.end_time.year,
+						calnote.end_time.month,
+						calnote.end_time.day);
+
+					fprintf(stdout, _("   End time: %02d:%02d:%02d\n"), calnote.end_time.hour,
+						calnote.end_time.minute,
+						calnote.end_time.second);
+				}
+
 				if (calnote.alarm.enabled) {
 					fprintf(stdout, _("   Alarm date: %d-%02d-%02d\n"),
 						calnote.alarm.timestamp.year,
@@ -2479,8 +2489,14 @@ static int getcalendarnote(int argc, char *argv[])
 
 				fprintf(stdout, _("   Text: %s\n"), calnote.text);
 
-				if (calnote.type == GN_CALNOTE_CALL)
+				switch (calnote.type) {
+				case GN_CALNOTE_CALL:
 					fprintf(stdout, _("   Phone: %s\n"), calnote.phone_number);
+					break;
+				case GN_CALNOTE_MEETING:
+					fprintf(stdout, _("   Location: %s\n"), calnote.mlocation);
+					break;
+				}
 			}
 
 		} else { /* error != GN_ERR_NONE */
@@ -2503,6 +2519,7 @@ static int writecalendarnote(char *argv[])
 	int location;
 	FILE *f;
 
+	memset(&calnote, 0, sizeof(calnote));
 	gn_data_clear(&data);
 	data.calnote = &calnote;
 

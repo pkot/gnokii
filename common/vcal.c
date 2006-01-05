@@ -74,9 +74,9 @@ static inline const char *get_prodid()
 API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 {
 #ifdef HAVE_LIBICAL
-#  define MAX_PROP_INDEX 4
+#  define MAX_PROP_INDEX 5
 	icalcomponent *pIcal = NULL;
-	struct icaltimetype atime = {0};
+	struct icaltimetype stime = {0}, etime = {0}, atime = {0};
 	icalproperty *properties[MAX_PROP_INDEX+1] = {0}; /* order and number of properties vary */
 	int iprop = 0;
 	char compuid[64];
@@ -85,14 +85,40 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	   birth, in this case year == 0xffff, so we set it to the arbitrary
 	   value of 1800 */
 
-	atime.year = (calnote->time.year == 0xffff ? 1800 : calnote->time.year);
-	atime.month = calnote->time.month;
-	atime.day = calnote->time.day;
-	atime.hour = calnote->time.hour;
-	atime.minute = calnote->time.minute;
-	atime.second = calnote->time.second;
+	stime.year = (calnote->time.year == 0xffff ? 1800 : calnote->time.year);
+	stime.month = calnote->time.month;
+	stime.day = calnote->time.day;
+	stime.hour = calnote->time.hour;
+	stime.minute = calnote->time.minute;
+	stime.second = calnote->time.second;
 
-	atime.is_daylight = 1;
+	stime.is_daylight = 1;
+
+	if (calnote->end_time.year) {
+		etime.year = (calnote->end_time.year == 0xffff ? 1800 : calnote->end_time.year);
+		etime.month = calnote->end_time.month;
+		etime.day = calnote->end_time.day;
+		etime.hour = calnote->end_time.hour;
+		etime.minute = calnote->end_time.minute;
+		etime.second = calnote->end_time.second;
+		etime.is_daylight = 1;
+
+		properties[iprop++] = icalpropery_new_dtend(etime);
+	}
+
+	/* FIXME: how to set alarm?
+	if (calnote->alarm.enabled) {
+		atime.year = (calnote->alarm.timestamp.year == 0xffff ? 1800 : calnote->alarm.timestamp.year);
+		atime.month = calnote->alarm.timestamp.month;
+		atime.day = calnote->alarm.timestamp.day;
+		atime.hour = calnote->alarm.timestamp.hour;
+		atime.minute = calnote->alarm.timestamp.minute;
+		atime.second = calnote->alarm.timestamp.second;
+		atime.is_daylight = 1;
+
+		properties[iprop++] = icalpropery_new_FIXME(atime);
+	}
+	*/
 
 	/* TODO: should the strings be configurable? */
 	switch(calnote->type) {
@@ -108,16 +134,18 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	case GN_CALNOTE_MEETING:
 		properties[iprop++] = icalproperty_new_categories("MEETING");
 		properties[iprop++] = icalproperty_new_summary(calnote->text);
+		if (calnote->mlocation[0])
+			properties[iprop++] = icalproperty_new_location(calnote->mlocation);
 		break;
 	case GN_CALNOTE_BIRTHDAY:
 		properties[iprop++] = icalproperty_new_categories("ANNIVERSARY");
 		properties[iprop++] = icalproperty_new_summary(calnote->text);
 		do {
 			char rrule[64];
-			sprintf(rrule, "FREQ=YEARLY;INTERVAL=1;BYMONTH=%d", atime.month);
+			sprintf(rrule, "FREQ=YEARLY;INTERVAL=1;BYMONTH=%d", stime.month);
 			properties[iprop++] = icalproperty_new_rrule(icalrecurrencetype_from_string(rrule));
 		} while (0);
-		atime.is_date = 1;
+		stime.is_date = 1;
 		calnote->recurrence = GN_CALNOTE_YEARLY;
 		break;
 	default:
@@ -132,13 +160,14 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 				    icalproperty_new_version("2.0"),
 				    icalproperty_new_prodid(get_prodid()),
 				    icalcomponent_vanew(ICAL_VEVENT_COMPONENT,
-							icalproperty_new_dtstart(atime),
+							icalproperty_new_dtstart(stime),
 							icalproperty_new_uid(compuid),
 							icalproperty_new_categories("GNOKII"),
 							properties[0],
 							properties[1],
 							properties[2],
 							properties[3],
+							properties[4],
 							0),
 				    0);
 
@@ -181,6 +210,8 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 		break; 	 
 	case GN_CALNOTE_MEETING: 	 
 		fprintf(f, "MEETING\r\n"); 	 
+		if (calnote->mlocation[0])
+			fprintf(f, "LOCATION:%s\r\n", calnote->mlocation);
 		break; 	 
 	case GN_CALNOTE_BIRTHDAY: 	 
 		fprintf(f, "SPECIAL OCCASION\r\n"); 	 
@@ -194,7 +225,12 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	fprintf(f, "DTSTART:%04d%02d%02dT%02d%02d%02d\r\n", calnote->time.year, 	 
 		calnote->time.month, calnote->time.day, calnote->time.hour, 	 
 		calnote->time.minute, calnote->time.second); 	 
-	if (calnote->alarm.enabled) { 	 
+	if (calnote->end_time.year) {
+		fprintf(f, "DTEND:%04d%02d%02dT%02d%02d%02d\r\n", calnote->end_time.year, 	 
+			calnote->end_time.month, calnote->end_time.day, calnote->end_time.hour, 	 
+			calnote->end_time.minute, calnote->end_time.second); 	 
+	}
+	if (calnote->alarm.enabled) {
 		fprintf(f, "AALARM:%04d%02d%02dT%02d%02d%02d\r\n", calnote->alarm.timestamp.year, 	 
 		calnote->alarm.timestamp.month, calnote->alarm.timestamp.day, calnote->alarm.timestamp.hour, 	 
 		calnote->alarm.timestamp.minute, calnote->alarm.timestamp.second); 	 
@@ -248,7 +284,7 @@ API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 #ifdef HAVE_LIBICAL
 	icalparser *parser = NULL;
 	icalcomponent *comp = NULL, *compresult = NULL;
-	struct icaltimetype dtstart = {0};
+	struct icaltimetype dtstart = {0}, dtend = {0};
 
 	parser = icalparser_new();
 	if (!parser) {
@@ -311,6 +347,21 @@ API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 			}
 		}
 
+		/* end time */
+		memset(&calnote->end_time, 0, sizeof(calnote->end_time));
+		dtend = icalcomponent_get_dtend(compresult);
+		if (!icaltime_is_null_time(dtend)) {
+			calnote->end_time.year = dtend.year;
+			calnote->end_time.month = dtend.month;
+			calnote->end_time.day = dtend.day;
+			if (!icaltime_is_date(dtend)) {
+				calnote->end_time.hour = dtend.hour;
+				calnote->end_time.minute = dtend.minute;
+				calnote->end_time.second = dtend.second;
+				/* TODO: what about time zones? */
+			}
+		}
+
 		/* alarm */
 		alarm = icalcomponent_get_first_component(comp, ICAL_VALARM_COMPONENT);
 		if (alarm) {
@@ -346,6 +397,10 @@ API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 				}
 			}
 		}
+
+		str = icalcomponent_get_location(compresult);
+		if (!str) str = "";
+		snprintf(calnote->mlocation, sizeof(calnote->mlocation), "%s", str);
 
 		fprintf(stderr, _("Component found\n%s\n"), icalcomponent_as_ical_string(compresult));
 
