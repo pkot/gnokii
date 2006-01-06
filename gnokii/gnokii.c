@@ -3417,7 +3417,7 @@ static int getphonebook(int argc, char *argv[])
 				     entry.memory_type == GN_MT_DC ||
 				     entry.memory_type == GN_MT_RC) &&
 				    entry.date.year)
-					fprintf(stdout, _("Date: %02u.%02u.%04u %02u:%02u:%02u\n"), entry.date.year, entry.date.month, entry.date.day, entry.date.hour, entry.date.minute, entry.date.second);
+					fprintf(stdout, _("Date: %04u.%02u.%02u %02u:%02u:%02u\n"), entry.date.year, entry.date.month, entry.date.day, entry.date.hour, entry.date.minute, entry.date.second);
 				break;
 			}
 			break;
@@ -4520,12 +4520,12 @@ static int getringtonelist(void)
 		return GN_ERR_UNKNOWN;
 	}
 
-	printf("First user defined ringtone location: %3d\n", ringtone_list.userdef_location);
-	printf("Number of user defined ringtones: %d\n\n", ringtone_list.userdef_count);
-	printf("loc   rwu   name\n");
-	printf("===============================\n");
+	printf(_("First user defined ringtone location: %3d\n"), ringtone_list.userdef_location);
+	printf(_("Number of user defined ringtones: %d\n\n"), ringtone_list.userdef_count);
+	printf(_("loc   rwu   name\n"));
+	printf(_("===============================\n"));
 	for (i = 0; i < ringtone_list.count; i++) {
-		printf("%3d   %d%d%d   %-20s\n", ringtone_list.ringtone[i].location,
+		printf(_("%3d   %d%d%d   %-20s\n"), ringtone_list.ringtone[i].location,
 			ringtone_list.ringtone[i].readable,
 			ringtone_list.ringtone[i].writable,
 			ringtone_list.ringtone[i].user_defined,
@@ -4878,10 +4878,10 @@ static void list_gsm_networks(void)
 	gn_network network;
 	int i = 0;
 
-	printf("Network  Name\n");
-	printf("-----------------------------------------\n");
+	printf(_("Network  Name\n"));
+	printf(_("-----------------------------------------\n"));
 	while (gn_network_get(&network, i++))
-		printf("%-7s  %s\n", network.code, network.name);
+		printf(_("%-7s  %s\n"), network.code, network.name);
 }
 
 static int getnetworkinfo(void)
