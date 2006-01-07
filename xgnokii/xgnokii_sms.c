@@ -357,18 +357,18 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 
 		if (dt) {
 			if (dt->timezone)
-				row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d %c%02d00",
+				row[1] = g_strdup_printf(_("%02d/%02d/%04d %02d:%02d:%02d %c%02d00"),
 							 dt->day, dt->month, dt->year,
 							 dt->hour, dt->minute, dt->second,
 							 dt->timezone > 0 ? '+' : '-',
 							 abs(dt->timezone));
 			else
-				row[1] = g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d",
+				row[1] = g_strdup_printf(_("%02d/%02d/%04d %02d:%02d:%02d"),
 							 dt->day, dt->month, dt->year,
 							 dt->hour, dt->minute, dt->second);
 		} else {
 			row[1] =
-			    g_strdup_printf("%02d/%02d/%04d %02d:%02d:%02d", 01, 01, 0001, 01, 01,
+			    g_strdup_printf(_("%02d/%02d/%04d %02d:%02d:%02d"), 01, 01, 0001, 01, 01,
 					    01);
 		}
 
@@ -376,7 +376,7 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		if (row[2] == NULL)
 			row[2] = data->remote.number;
 		if ((data->type == GN_SMS_MT_Picture) || (data->type == GN_SMS_MT_PictureTemplate))
-			row[3] = g_strdup_printf("Picture Message: %s", data->user_data[1].u.text);
+			row[3] = g_strdup_printf(_("Picture Message: %s"), data->user_data[1].u.text);
 		else
 			row[3] = data->user_data[0].u.text;
 
@@ -875,7 +875,7 @@ static inline void InitAddressLine(gpointer d, gpointer userData)
 #ifdef XDEBUG
 static inline void PrintAddressLine(gpointer d, gpointer userData)
 {
-	g_print("Name: %s\nNumber: %s\nUsed: %d\n",
+	g_print(_("Name: %s\nNumber: %s\nUsed: %d\n"),
 		((AddressPar *) d)->name, ((AddressPar *) d)->number, ((AddressPar *) d)->used);
 }
 #endif
@@ -1084,7 +1084,7 @@ static gint Sendsmscore(gn_sms * sms)
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
 	} else
-		g_print("Message sent to: %s\n", sms->remote.number);
+		g_print(_("Message sent to: %s\n"), sms->remote.number);
 
 	return (error);
 }

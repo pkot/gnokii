@@ -579,7 +579,7 @@ static void OkNewEntryDialog(GtkWidget * widget, gpointer data)
 		if (strlen(gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name))) >
 		    max_phonebook_sim_name_length) {
 			gtk_label_set_text(GTK_LABEL(errorDialog.text),
-					   _("Sorry, phonebook name will be truncated\n\
+					   _("Sorry, phonebook name will be truncated,\n\
 because you save it into SIM memory!"));
 			gtk_widget_show(errorDialog.dialog);
 		}
@@ -623,7 +623,7 @@ because you save it into SIM memory!"));
 			if (strlen(gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name))) >
 			    max_phonebook_sim_name_length) {
 				gtk_label_set_text(GTK_LABEL(errorDialog.text),
-						   _("Sorry, phonebook name will be truncated\n\
+						   _("Sorry, phonebook name will be truncated,\n\
 because you save it into SIM memory!"));
 				gtk_widget_show(errorDialog.dialog);
 			}
@@ -914,55 +914,55 @@ void CreateTypeMenu(EditEntryData * data)
 
 	data->groupMenu = gtk_menu_new();
 
-	item = gtk_menu_item_new_with_label("General");
+	item = gtk_menu_item_new_with_label(_("General"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType0), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Mobile");
+	item = gtk_menu_item_new_with_label(_("Mobile"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType1), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Work");
+	item = gtk_menu_item_new_with_label(_("Work"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType2), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Fax");
+	item = gtk_menu_item_new_with_label(_("Fax"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType3), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Home");
+	item = gtk_menu_item_new_with_label(_("Home"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType4), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Note");
+	item = gtk_menu_item_new_with_label(_("Note"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType5), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Postal");
+	item = gtk_menu_item_new_with_label(_("Postal"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType6), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("E-Mail");
+	item = gtk_menu_item_new_with_label(_("E-Mail"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType7), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Name");
+	item = gtk_menu_item_new_with_label(_("Name"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType8), (gpointer) data);
 	gtk_widget_show(item);
@@ -971,14 +971,14 @@ void CreateTypeMenu(EditEntryData * data)
 	if  ((g_strncasecmp(xgnokiiConfig.model, "6210", 4) != 0) &&
 	     (g_strncasecmp(xgnokiiConfig.model, "7110", 4) != 0) &&
 	     (g_strncasecmp(xgnokiiConfig.model, "6250", 4) != 0)) {
-		item = gtk_menu_item_new_with_label("URL");
+		item = gtk_menu_item_new_with_label(_("URL"));
 		gtk_signal_connect(GTK_OBJECT(item), "activate",
 				   GTK_SIGNAL_FUNC(SetType9), (gpointer) data);
 		gtk_widget_show(item);
 		gtk_menu_append(GTK_MENU(data->groupMenu), item);
 	}
 
-	item = gtk_menu_item_new_with_label("Unknown");
+	item = gtk_menu_item_new_with_label(_("Unknown"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType10), (gpointer) data);
 	gtk_widget_show(item);
@@ -1004,37 +1004,37 @@ void inttotype(gint int_type, gchar *type)
 {
 	switch (int_type) {
 	case 0:
-		strcpy(type, "General");
+		strcpy(type, _("General"));
 		return;
 	case 1:
-		strcpy(type, "Mobile");
+		strcpy(type, _("Mobile"));
 		return;
 	case 2:
-		strcpy(type, "Work");
+		strcpy(type, _("Work"));
 		return;
 	case 3:
-		strcpy(type, "Fax");
+		strcpy(type, _("Fax"));
 		return;
 	case 4:
-		strcpy(type, "Home");
+		strcpy(type, _("Home"));
 		return;
 	case 5:
-		strcpy(type, "Note");
+		strcpy(type, _("Note"));
 		return;
 	case 6:
-		strcpy(type, "Postal");
+		strcpy(type, _("Postal"));
 		return;
 	case 7:
-		strcpy(type, "E-Mail");
+		strcpy(type, _("E-Mail"));
 		return;
 	case 8:
-		strcpy(type, "Name");
+		strcpy(type, _("Name"));
 		return;
 	case 9:
-		strcpy(type, "URL");
+		strcpy(type, _("URL"));
 		return;
 	case 10:
-		strcpy(type, "Unknown");
+		strcpy(type, _("Unknown"));
 		return;
 	default:
 		strcpy(type, "");
@@ -1151,17 +1151,17 @@ static void CreateSubEntriesDialog(EditEntryData * editSubEntriesData, gchar * t
 
 gint typetoint(gchar *type)
 {
-	if (g_strcasecmp(type, "General") == 0) return (0);
-	if (g_strcasecmp(type, "Mobile") == 0) return (1);
-	if (g_strcasecmp(type, "Work") == 0) return (2);
-	if (g_strcasecmp(type, "Fax") == 0) return (3);
-	if (g_strcasecmp(type, "Home") == 0) return (4);
-	if (g_strcasecmp(type, "Note") == 0) return (5);
-	if (g_strcasecmp(type, "Postal") == 0) return (6);
-	if (g_strcasecmp(type, "E-Mail") == 0) return (7);
-	if (g_strcasecmp(type, "Name") == 0) return (8);
-	if (g_strcasecmp(type, "URL") == 0) return (9);
-	if (g_strcasecmp(type, "Unknown") == 0) return (10);
+	if (g_strcasecmp(type, _("General")) == 0) return (0);
+	if (g_strcasecmp(type, _("Mobile")) == 0) return (1);
+	if (g_strcasecmp(type, _("Work")) == 0) return (2);
+	if (g_strcasecmp(type, _("Fax")) == 0) return (3);
+	if (g_strcasecmp(type, _("Home")) == 0) return (4);
+	if (g_strcasecmp(type, _("Note")) == 0) return (5);
+	if (g_strcasecmp(type, _("Postal")) == 0) return (6);
+	if (g_strcasecmp(type, _("E-Mail")) == 0) return (7);
+	if (g_strcasecmp(type, _("Name")) == 0) return (8);
+	if (g_strcasecmp(type, _("URL")) == 0) return (9);
+	if (g_strcasecmp(type, _("Unknown")) == 0) return (10);
 	return(-1);
 }
 
@@ -1193,17 +1193,17 @@ static void EditSubEntries(GtkWidget * clist,
 
 gint typetohex(gchar *type)
 {
-	if (g_strcasecmp(type, "General") == 0) return (0x0a);
-	if (g_strcasecmp(type, "Mobile") == 0) return (0x03);
-	if (g_strcasecmp(type, "Work") == 0) return (0x06);
-	if (g_strcasecmp(type, "Fax") == 0) return (0x04);
-	if (g_strcasecmp(type, "Home") == 0) return (0x02);
-	if (g_strcasecmp(type, "Note") == 0) return (0x0a);
-	if (g_strcasecmp(type, "Postal") == 0) return (0x09);
-	if (g_strcasecmp(type, "E-Mail") == 0) return (0x08);
-	if (g_strcasecmp(type, "Name") == 0) return (0x07);
-	if (g_strcasecmp(type, "URL") == 0) return (0x2c);
-	if (g_strcasecmp(type, "Unknown") == 0) return (0x00);
+	if (g_strcasecmp(type, _("General")) == 0) return (0x0a);
+	if (g_strcasecmp(type, _("Mobile")) == 0) return (0x03);
+	if (g_strcasecmp(type, _("Work")) == 0) return (0x06);
+	if (g_strcasecmp(type, _("Fax")) == 0) return (0x04);
+	if (g_strcasecmp(type, _("Home")) == 0) return (0x02);
+	if (g_strcasecmp(type, _("Note")) == 0) return (0x0a);
+	if (g_strcasecmp(type, _("Postal")) == 0) return (0x09);
+	if (g_strcasecmp(type, _("E-Mail")) == 0) return (0x08);
+	if (g_strcasecmp(type, _("Name")) == 0) return (0x07);
+	if (g_strcasecmp(type, _("URL")) == 0) return (0x2c);
+	if (g_strcasecmp(type, _("Unknown")) == 0) return (0x00);
 	return(-1);
 }
 
@@ -1234,12 +1234,12 @@ static void OkEditNumbersDialog(GtkWidget * c_list, EditEntryData * editEntryDat
 		switch (type) {
 			/* FIXME: replace constants with the macros */
 		case 0x0a:
-			if (g_strcasecmp(row_data, "General") == 0) {
+			if (g_strcasecmp(row_data, _("General")) == 0) {
 				editEntryData->pbEntry->entry.subentries
 					[editEntryData->pbEntry->entry.subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number;
 				editEntryData->pbEntry->entry.subentries
 					[editEntryData->pbEntry->entry.subentries_count].number_type = type;
-			} else if (g_strcasecmp(row_data, "Note") == 0) {
+			} else if (g_strcasecmp(row_data, _("Note")) == 0) {
 				editEntryData->pbEntry->entry.subentries
 					[editEntryData->pbEntry->entry.subentries_count].entry_type = type;
 				editEntryData->pbEntry->entry.subentries
@@ -1307,7 +1307,7 @@ static void NewEditNumbersDialog(GtkWidget * c_list, EditEntryData * editEntryDa
 	}
 
 	row[1] = "";
-	row[2] = "General";
+	row[2] = _("General");
 	gtk_clist_append(GTK_CLIST(editNumbersData.clist), row);
 	strcpy(editNumbersData.pbEntry->entry.subentries[editNumbersData.pbEntry->entry.subentries_count].data.number, "");
 	editNumbersData.pbEntry->entry.subentries[editNumbersData.pbEntry->entry.subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number;
@@ -1397,51 +1397,51 @@ static void EditNumbers(GtkWidget * widget, EditEntryData *editEntryData)
 		case GN_PHONEBOOK_ENTRY_Number:
 			switch (editNumbersData.pbEntry->entry.subentries[i].number_type) {
 			case GN_PHONEBOOK_NUMBER_General:
-				row[2] = "General";
+				row[2] = _("General");
 				break;
 
 			case GN_PHONEBOOK_NUMBER_Mobile:
-				row[2] = "Mobile";
+				row[2] = _("Mobile");
 				break;
 
 			case GN_PHONEBOOK_NUMBER_Work:
-				row[2] = "Work";
+				row[2] = _("Work");
 				break;
 
 			case GN_PHONEBOOK_NUMBER_Fax:
-				row[2] = "Fax";
+				row[2] = _("Fax");
 				break;
 
 			case GN_PHONEBOOK_NUMBER_Home:
-				row[2] = "Home";
+				row[2] = _("Home");
 				break;
 
 			default:
-				row[2] = "Unknown";
+				row[2] = _("Unknown");
 				break;
 			}
 			break;
 
 		case GN_PHONEBOOK_ENTRY_Note:
-			row[2] = "Note";
+			row[2] = _("Note");
 			break;
 
 		case GN_PHONEBOOK_ENTRY_Postal:
-			row[2] = "Postal";
+			row[2] = _("Postal");
 			break;
 
 		case GN_PHONEBOOK_ENTRY_Email:
-			row[2] = "E-Mail";
+			row[2] = _("E-Mail");
 			break;
 
 		case GN_PHONEBOOK_ENTRY_Name:
-			row[2] = "Name";
+			row[2] = _("Name");
 			break;
 		case GN_PHONEBOOK_ENTRY_URL:
-			row[2] = "URL";
+			row[2] = _("URL");
 			break;
 		default:
-			row[2] = "Unknown";
+			row[2] = _("Unknown");
 			break;
 		}
 
@@ -2225,7 +2225,7 @@ static void SaveContacts(void)
 
 				if (ml->status != GN_ERR_NONE) {
 					g_print(_
-						("%s: line %d:Can't write SM memory entry number %d! Error: %d\n"),
+						("%s: line %d: Can't write SM memory entry number %d! Error: %d\n"),
 						__FILE__, __LINE__, i - memoryStatus.MaxME + 1,
 						ml->status);
 				}
@@ -3141,7 +3141,7 @@ SelectContactData *GUI_SelectContactDialog(void)
 	PhonebookEntry *pbEntry;
 	static SelectContactData selectContactData;
 	SortColumn *sColumn;
-	gchar *titles[4] = { "Name", "Number", "Memory", "Group" };
+	gchar *titles[4] = { _("Name"), _("Number"), _("Memory"), _("Group") };
 	gint row_i = 0;
 	register gint i;
 	gchar string[100];

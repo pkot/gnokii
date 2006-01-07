@@ -128,7 +128,7 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 						{
 							return 0;
 						}
-						fprintf(stderr, "Error: Invalid calendar note number!\n");
+						fprintf(stderr, _("Error: Invalid calendar note number!\n"));
 						return -1;
 					}
 
@@ -284,7 +284,7 @@ int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number)
 	FILE *file;
 	char type[21] = "", text[258] = "", desc[258] = "", time[16] = "", alarm[16] = "", todo_priority[3] = "";
 
-	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead"));
+	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead."));
 	file = fopen(filename, "r");
 	if (!file) {
 		fprintf(stderr, _("File cannot be opened!\n"));

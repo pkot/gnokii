@@ -68,7 +68,7 @@ static int xwrite(unsigned char *d, int len, struct gn_statemachine *sm)
 		res = device_write(d, len, sm);
 		if (res == -1) {
 			if (errno != EAGAIN) {
-				perror("gnokii I/O error ");
+				perror(_("gnokii I/O error"));
 				return -1;
 			}
 		} else {

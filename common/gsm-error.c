@@ -39,36 +39,36 @@
 API char *gn_error_print(gn_error e)
 {
 	switch (e) {
-	case GN_ERR_NONE:                  return "No error.";
-	case GN_ERR_FAILED:                return "Command failed.";
-	case GN_ERR_UNKNOWNMODEL:          return "Model specified isn't known/supported.";
-	case GN_ERR_INVALIDSECURITYCODE:   return "Invalid Security code.";
-	case GN_ERR_INTERNALERROR:         return "Problem occured internal to model specific code.";
-	case GN_ERR_NOTIMPLEMENTED:        return "Command called isn't implemented in model.";
-	case GN_ERR_NOTSUPPORTED:          return "Function or connection type not supported by the phone.";
-	case GN_ERR_USERCANCELED:          return "User aborted the action.";
-	case GN_ERR_UNKNOWN:               return "Unknown error - well better than nothing!!";
-	case GN_ERR_MEMORYFULL:            return "The specified memory is full.";
-	case GN_ERR_NOLINK:                return "Couldn't establish link with phone.";
-	case GN_ERR_TIMEOUT:               return "Command timed out.";
-	case GN_ERR_TRYAGAIN:              return "Try again.";
-	case GN_ERR_WAITING:               return "Waiting for the next part of the message.";
-	case GN_ERR_NOTREADY:              return "Device not ready.";
-	case GN_ERR_BUSY:                  return "Command is still being executed.";
-	case GN_ERR_INVALIDLOCATION:       return "The given memory location is invalid.";
-	case GN_ERR_INVALIDMEMORYTYPE:     return "Invalid type of memory.";
-	case GN_ERR_EMPTYLOCATION:         return "The given location is empty.";
-	case GN_ERR_ENTRYTOOLONG:          return "The given entry is too long.";
-	case GN_ERR_WRONGDATAFORMAT:       return "Data format is not valid.";
-	case GN_ERR_INVALIDSIZE:           return "Wrong size of the object.";
-	case GN_ERR_LINEBUSY:              return "Outgoing call requested reported line busy.";
-	case GN_ERR_NOCARRIER:             return "No Carrier error during data call setup?";
-	case GN_ERR_UNHANDLEDFRAME:        return "The current frame isn't handled by the incoming function.";
-	case GN_ERR_UNSOLICITED:           return "Unsolicited message received.";
-	case GN_ERR_NONEWCBRECEIVED:       return "Attempt to read CB when no new CB received.";
-	case GN_ERR_SIMPROBLEM:            return "SIM card missing or damaged.";
-	case GN_ERR_CODEREQUIRED:          return "PIN or PUK code required.";
-	default:                           return "Unknown error.";
+	case GN_ERR_NONE:                  return _("No error.");
+	case GN_ERR_FAILED:                return _("Command failed.");
+	case GN_ERR_UNKNOWNMODEL:          return _("Model specified isn't known/supported.");
+	case GN_ERR_INVALIDSECURITYCODE:   return _("Invalid Security code.");
+	case GN_ERR_INTERNALERROR:         return _("Problem occured internal to model specific code.");
+	case GN_ERR_NOTIMPLEMENTED:        return _("Command called isn't implemented in model.");
+	case GN_ERR_NOTSUPPORTED:          return _("Function or connection type not supported by the phone.");
+	case GN_ERR_USERCANCELED:          return _("User aborted the action.");
+	case GN_ERR_UNKNOWN:               return _("Unknown error - well better than nothing!!");
+	case GN_ERR_MEMORYFULL:            return _("The specified memory is full.");
+	case GN_ERR_NOLINK:                return _("Couldn't establish link with phone.");
+	case GN_ERR_TIMEOUT:               return _("Command timed out.");
+	case GN_ERR_TRYAGAIN:              return _("Try again.");
+	case GN_ERR_WAITING:               return _("Waiting for the next part of the message.");
+	case GN_ERR_NOTREADY:              return _("Device not ready.");
+	case GN_ERR_BUSY:                  return _("Command is still being executed.");
+	case GN_ERR_INVALIDLOCATION:       return _("The given memory location is invalid.");
+	case GN_ERR_INVALIDMEMORYTYPE:     return _("Invalid type of memory.");
+	case GN_ERR_EMPTYLOCATION:         return _("The given location is empty.");
+	case GN_ERR_ENTRYTOOLONG:          return _("The given entry is too long.");
+	case GN_ERR_WRONGDATAFORMAT:       return _("Data format is not valid.");
+	case GN_ERR_INVALIDSIZE:           return _("Wrong size of the object.");
+	case GN_ERR_LINEBUSY:              return _("Outgoing call requested reported line busy.");
+	case GN_ERR_NOCARRIER:             return _("No Carrier error during data call setup?");
+	case GN_ERR_UNHANDLEDFRAME:        return _("The current frame isn't handled by the incoming function.");
+	case GN_ERR_UNSOLICITED:           return _("Unsolicited message received.");
+	case GN_ERR_NONEWCBRECEIVED:       return _("Attempt to read CB when no new CB received.");
+	case GN_ERR_SIMPROBLEM:            return _("SIM card missing or damaged.");
+	case GN_ERR_CODEREQUIRED:          return _("PIN or PUK code required.");
+	default:                           return _("Unknown error.");
 	}
 }
 

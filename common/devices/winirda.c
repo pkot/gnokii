@@ -166,7 +166,7 @@ int irda_open(struct gn_statemachine *state)
 			}
 		}
 	} else {
-		fprintf(stderr, "Not WINSOCK2 :( - Get an upgrade dude!");
+		fprintf(stderr, _("Not WINSOCK2 :( - Get an upgrade dude!"));
 	}
 	return (int)fd;
 }

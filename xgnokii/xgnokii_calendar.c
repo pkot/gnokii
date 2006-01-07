@@ -142,7 +142,7 @@ static gint InsertCalendarEntry(gn_calnote * note)
 	switch (note->type) {
 	case GN_CALNOTE_REMINDER:
 		row[1] = _("Reminder");
-		row[2] = g_strdup_printf("%02d/%02d/%04d", note->time.day,
+		row[2] = g_strdup_printf(_("%02d/%02d/%04d"), note->time.day,
 					 note->time.month, note->time.year);
 		row[5] = "";
 		switch (note->recurrence / 60) {
@@ -162,13 +162,13 @@ static gint InsertCalendarEntry(gn_calnote * note)
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d minutes", note->recurrence);
+			row[6] = g_strdup_printf(_("every %d minutes"), note->recurrence);
 		}
 		break;
 
 	case GN_CALNOTE_CALL:
 		row[1] = _("Call");
-		row[2] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->time.day,
+		row[2] = g_strdup_printf(_("%02d/%02d/%04d  %02d:%02d"), note->time.day,
 					 note->time.month, note->time.year,
 					 note->time.hour, note->time.minute);
 		row[5] = note->phone_number;
@@ -189,13 +189,13 @@ static gint InsertCalendarEntry(gn_calnote * note)
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d minutes", note->recurrence);
+			row[6] = g_strdup_printf(_("every %d minutes"), note->recurrence);
 		}
 		break;
 
 	case GN_CALNOTE_MEETING:
 		row[1] = _("Meeting");
-		row[2] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->time.day,
+		row[2] = g_strdup_printf(_("%02d/%02d/%04d  %02d:%02d"), note->time.day,
 					 note->time.month, note->time.year,
 					 note->time.hour, note->time.minute);
 		row[5] = "";
@@ -216,13 +216,13 @@ static gint InsertCalendarEntry(gn_calnote * note)
 			row[6] = _("yearly");
 			break;
 		default:
-			row[6] = g_strdup_printf("every %d minutes", note->recurrence);
+			row[6] = g_strdup_printf(_("every %d minutes"), note->recurrence);
 		}
 		break;
 
 	case GN_CALNOTE_BIRTHDAY:
 		row[1] = _("Birthday");
-		row[2] = g_strdup_printf("%02d/%02d/%04d", note->time.day,
+		row[2] = g_strdup_printf(_("%02d/%02d/%04d"), note->time.day,
 					 note->time.month, note->time.year);
 		row[5] = "";
 		row[6] = "";
@@ -239,7 +239,7 @@ static gint InsertCalendarEntry(gn_calnote * note)
 	if (note->alarm.timestamp.year == 0)
 		row[4] = "";
 	else
-		row[4] = g_strdup_printf("%02d/%02d/%04d  %02d:%02d", note->alarm.timestamp.day,
+		row[4] = g_strdup_printf(_("%02d/%02d/%04d  %02d:%02d"), note->alarm.timestamp.day,
 					 note->alarm.timestamp.month, note->alarm.timestamp.year,
 					 note->alarm.timestamp.hour, note->alarm.timestamp.minute);
 
@@ -521,7 +521,7 @@ static gint AddCalendarNote(gn_calnote * cnote)
 	g_free(dnote);
 
 	if (error != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Saving failed failed\n(error=%d)"), error);
+		gchar *buf = g_strdup_printf(_("Saving failed\n(error=%d)"), error);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
@@ -648,7 +648,7 @@ static void OkAddBdayDialog(GtkWidget * widget, gpointer data)
 
 static inline void SetDateButton(Date * date)
 {
-	gchar *buf = g_strdup_printf("%d-%02d-%02d", date->year,
+	gchar *buf = g_strdup_printf(_("%d-%02d-%02d"), date->year,
 				     date->month, date->day);
 	gtk_label_set_text(GTK_LABEL(date->button), buf);
 	g_free(buf);
@@ -657,7 +657,7 @@ static inline void SetDateButton(Date * date)
 
 static inline void SetDateTimeButton(DateTime * date)
 {
-	gchar *buf = g_strdup_printf("%d-%02d-%02d  %02d:%02d", date->date.year,
+	gchar *buf = g_strdup_printf(_("%d-%02d-%02d  %02d:%02d"), date->date.year,
 				     date->date.month, date->date.day,
 				     date->hours, date->minutes);
 	gtk_label_set_text(GTK_LABEL(date->button), buf);
@@ -847,31 +847,31 @@ void CreateRecurrenceMenu(AddDialogData * data)
 
 	data->groupMenu = gtk_menu_new();
 
-	item = gtk_menu_item_new_with_label("Never");
+	item = gtk_menu_item_new_with_label(_("Never"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetRecurrence0), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Every Day");
+	item = gtk_menu_item_new_with_label(_("Every Day"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetRecurrence1), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Every Week");
+	item = gtk_menu_item_new_with_label(_("Every Week"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetRecurrence2), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Every 2 Weeks");
+	item = gtk_menu_item_new_with_label(_("Every 2 Weeks"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetRecurrence3), (gpointer) data);
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label("Every Year");
+	item = gtk_menu_item_new_with_label(_("Every Year"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetRecurrence4), (gpointer) data);
 	gtk_widget_show(item);

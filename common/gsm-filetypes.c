@@ -594,7 +594,7 @@ gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info)
 		error = file_xpm_load(filename, bitmap);
 		break;
 #else
-		fprintf(stderr, "Sorry, gnokii was not compiled with XPM support.\n");
+		fprintf(stderr, _("Sorry, gnokii was not compiled with XPM support.\n"));
 		/* FALLTHRU */
 #endif
 	default:
@@ -1538,11 +1538,11 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		STORE_TOKEN(number);
 		switch (o) {
 		case 0:
-			fprintf(stderr, "Formatting error: unknown error while reading subentry type\n");
+			fprintf(stderr, _("Formatting error: unknown error while reading subentry type\n"));
 			error = GN_ERR_WRONGDATAFORMAT;
 			goto endloop;
 		case 1:
-			fprintf(stderr, "Formatting error: empty entry type\n");
+			fprintf(stderr, _("Formatting error: empty entry type\n"));
 			entry->subentries[entry->subentries_count].entry_type = 0;
 			break;
 		default:
@@ -1552,7 +1552,7 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		offset += o;
 
 		if (offset > length) {
-			fprintf(stderr, "Formatting error: subentry has only entry type field\n");
+			fprintf(stderr, _("Formatting error: subentry has only entry type field\n"));
 			break;
 		}
 
@@ -1561,11 +1561,11 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		STORE_TOKEN(number);
 		switch (o) {
 		case 0:
-			fprintf(stderr, "Formatting error: unknown error while reading subentry number type\n");
+			fprintf(stderr, _("Formatting error: unknown error while reading subentry number type\n"));
 			error = GN_ERR_WRONGDATAFORMAT;
 			goto endloop;
 		case 1:
-			fprintf(stderr, "Formatting error: empty number type\n");
+			fprintf(stderr, _("Formatting error: empty number type\n"));
 			entry->subentries[entry->subentries_count].number_type = 0;
 			/* Number type is required with Number entry type */
 			if (entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Number) {
@@ -1580,7 +1580,7 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		offset += o;
 
 		if (offset > length) {
-			fprintf(stderr, "Formatting error: subentry has only entry and number type fields\n");
+			fprintf(stderr, _("Formatting error: subentry has only entry and number type fields\n"));
 			break;
 		}
 
@@ -1589,11 +1589,11 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		STORE_TOKEN(number);
 		switch (o) {
 		case 0:
-			fprintf(stderr, "Formatting error: unknown error while reading subentry id\n");
+			fprintf(stderr, _("Formatting error: unknown error while reading subentry id\n"));
 			error = GN_ERR_WRONGDATAFORMAT;
 			goto endloop;
 		case 1:
-			fprintf(stderr, "Formatting error: empty id\n");
+			fprintf(stderr, _("Formatting error: empty id\n"));
 			entry->subentries[entry->subentries_count].id = 0;
 			break;
 		default:
@@ -1603,7 +1603,7 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		offset += o;
 
 		if (offset > length) {
-			fprintf(stderr, "Formatting error: subentry has only entry and number type fields\n");
+			fprintf(stderr, _("Formatting error: subentry has only entry and number type fields\n"));
 			break;
 		}
 
@@ -1611,15 +1611,15 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 		STORE_TOKEN(entry->subentries[entry->subentries_count].data.number);
 		switch (o) {
 		case 0:
-			fprintf(stderr, "Formatting error: unknown error while reading subentry contents\n");
+			fprintf(stderr, _("Formatting error: unknown error while reading subentry contents\n"));
 			error = GN_ERR_WRONGDATAFORMAT;
 			goto endloop;
 		case 1:
-			fprintf(stderr, "Formatting error: empty subentry contents\n");
+			fprintf(stderr, _("Formatting error: empty subentry contents\n"));
 			/* 0x13 Date Type; it is only for Dialed Numbers, etc.
 			   we don't store to this memories so it's an error to use it. */
 			if (entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Date) {
-				fprintf(stderr, "Cannot write to read-only memory (Dialed Numbers)\n");
+				fprintf(stderr, _("Cannot write to read-only memory (Dialed Numbers)\n"));
 				error = GN_ERR_WRONGDATAFORMAT;
 				/* With this error do not write a fake subentry (see below) */
 				goto endfunc;

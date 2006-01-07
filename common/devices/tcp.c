@@ -78,7 +78,7 @@ static int tcp_open(const char *file)
 
 	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1) {
-		perror("Gnokii tcp_open: socket()");
+		perror(_("Gnokii tcp_open: socket()"));
 		return -1;
 	}
 	if (!(filedup = strdup(file))) {
@@ -87,7 +87,7 @@ static int tcp_open(const char *file)
 		return -1;
 	}
 	if (!(portstr = strchr(filedup, ':'))) {
-		fprintf(stderr, "Gnokii tcp_open: colon (':') not found in connect strings \"%s\"!\n", filedup);
+		fprintf(stderr, _("Gnokii tcp_open: colon (':') not found in connect strings \"%s\"!\n"), filedup);
 	fail_free:
 		free(filedup);
 		goto fail_close;
@@ -95,15 +95,15 @@ static int tcp_open(const char *file)
 	*portstr++ = '\0';
 	portul = strtoul(portstr, &end, 0);
 	if ((end && *end) || portul >= 0x10000) {
-		fprintf(stderr, "Gnokii tcp_open: Port string \"%s\" not valid for IPv4 connection!\n", portstr);
+		fprintf(stderr, _("Gnokii tcp_open: Port string \"%s\" not valid for IPv4 connection!\n"), portstr);
 		goto fail_free;
 	}
 	if (!(hostent = gethostbyname(filedup))) {
-		fprintf(stderr, "Gnokii tcp_open: Unknown host \"%s\"!\n", filedup);
+		fprintf(stderr, _("Gnokii tcp_open: Unknown host \"%s\"!\n"), filedup);
 		goto fail_free;
 	}
 	if (hostent->h_addrtype != AF_INET || hostent->h_length != sizeof(addr.sin_addr) || !hostent->h_addr_list[0]) {
-		fprintf(stderr, "Gnokii tcp_open: Address resolve for host \"%s\" not compatible!\n", filedup);
+		fprintf(stderr, _("Gnokii tcp_open: Address resolve for host \"%s\" not compatible!\n"), filedup);
 		goto fail_free;
 	}
 	free(filedup);
@@ -113,7 +113,7 @@ static int tcp_open(const char *file)
 	memcpy(&addr.sin_addr, hostent->h_addr_list[0], sizeof(addr.sin_addr));
 
 	if (connect(fd, (struct sockaddr *)&addr, sizeof(addr))) {
-		perror("Gnokii tcp_open: connect()");
+		perror(_("Gnokii tcp_open: connect()"));
 		goto fail_close;
 	}
 
@@ -125,7 +125,7 @@ int tcp_close(int fd, struct gn_statemachine *state)
 	/* handle config file disconnect_script:
 	 */
 	if (device_script(fd, "disconnect_script", state) == -1)
-		fprintf(stderr, "Gnokii tcp_close: disconnect_script\n");
+		fprintf(stderr, _("Gnokii tcp_close: disconnect_script\n"));
 
 	return close(fd);
 }
@@ -148,7 +148,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 	/* handle config file connect_script:
 	 */
 	if (device_script(fd, "connect_script", state) == -1) {
-		fprintf(stderr, "Gnokii tcp_opendevice: connect_script\n");
+		fprintf(stderr, _("Gnokii tcp_opendevice: connect_script\n"));
 		tcp_close(fd, state);
 		return -1;
 	}
@@ -158,7 +158,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 #if !(__unices__)
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1){
-		perror("Gnokii tcp_opendevice: fnctl(F_SETOWN)");
+		perror(_("Gnokii tcp_opendevice: fnctl(F_SETOWN)"));
 		tcp_close(fd, state);
 		return -1;
 	}
@@ -181,7 +181,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 #  endif
 #endif
 	if (retcode == -1) {
-		perror("Gnokii tcp_opendevice: fnctl(F_SETFL)");
+		perror(_("Gnokii tcp_opendevice: fnctl(F_SETFL)"));
 		tcp_close(fd, state);
 		return -1;
 	}

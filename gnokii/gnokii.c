@@ -1934,7 +1934,7 @@ static gn_error SaveBitmapFileDialog(char *FileName, gn_bmp *bitmap, gn_phone *i
 
 	switch (error) {
 	case GN_ERR_FAILED:
-		fprintf(stderr, _("Failed to write file \"%s\"\n"), FileName);
+		fprintf(stderr, _("Failed to write file %s\n"), FileName);
 		break;
 	default:
 		break;
@@ -1988,7 +1988,7 @@ static int getlogo(int argc, char *argv[])
 			case GN_BMP_NewOperatorLogo:
 				if (!bitmap.width)
 					goto empty_bitmap;
-				fprintf(stdout, _("Operator logo for %s (%s) network got succesfully\n"),
+				fprintf(stdout, _("Operator logo for %s (%s) network got successfully\n"),
 						bitmap.netcode, gn_network_name_get(bitmap.netcode));
 				if (argc == 3) {
 					strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
@@ -2338,7 +2338,7 @@ static int writetodo(char *argv[])
 	error = gn_sm_functions(GN_OP_WriteToDo, &data, &state);
 
 	if (error == GN_ERR_NONE) {
-		fprintf(stderr, _("Succesfully written!\n"));
+		fprintf(stderr, _("Successfully written!\n"));
 		fprintf(stderr, _("Priority %d. %s\n"), data.todo->priority, data.todo->text);
 	} else
 		fprintf(stderr, _("Failed to write todo note: %s\n"), gn_error_print(error));
@@ -2355,7 +2355,7 @@ static int deletealltodos()
 
 	error = gn_sm_functions(GN_OP_DeleteAllToDos, &data, &state);
 	if (error == GN_ERR_NONE)
-		fprintf(stderr, _("Succesfully deleted all ToDo notes!\n"));
+		fprintf(stderr, _("Successfully deleted all ToDo notes!\n"));
 	else
 		fprintf(stderr, _("Failed to delete todo note: %s\n"), gn_error_print(error));
 	return error;
@@ -2554,7 +2554,7 @@ static int writecalendarnote(char *argv[])
 	error = gn_sm_functions(GN_OP_WriteCalendarNote, &data, &state);
 
 	if (error == GN_ERR_NONE)
-		fprintf(stderr, _("Succesfully written!\n"));
+		fprintf(stderr, _("Successfully written!\n"));
 	else
 		fprintf(stderr, _("Failed to write calendar note: %s\n"), gn_error_print(error));
 	return error;
@@ -3715,7 +3715,7 @@ static int writewapbookmark(int nargc, char *nargv[])
 
 	switch (error) {
 	case GN_ERR_NONE:
-		fprintf(stderr, _("WAP bookmark nr. %d succesfully written!\n"), wapbookmark.location);
+		fprintf(stderr, _("WAP bookmark nr. %d successfully written!\n"), wapbookmark.location);
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
@@ -4059,7 +4059,7 @@ static int setspeeddial(char *argv[])
 	entry.location = atoi(argv[2]);
 
 	if ((error = gn_sm_functions(GN_OP_SetSpeedDial, &data, &state)) == GN_ERR_NONE )
-		fprintf(stderr, _("Succesfully written!\n"));
+		fprintf(stderr, _("Successfully written!\n"));
 
 	return error;
 }
@@ -5326,7 +5326,7 @@ static int install_log_handler(void)
 	snprintf(logname, sizeof(logname), "%s/%s", home, file);
 
 	if ((logfile = fopen(logname, "a")) == NULL) {
-		perror("fopen");
+		perror(_("Cannot open logfile"));
 		return -1;
 	}
 

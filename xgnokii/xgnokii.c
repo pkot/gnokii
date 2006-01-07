@@ -406,7 +406,6 @@ static gint Update(gpointer data)
 	static gchar lastCallNum[20] = "";
 	static gchar callBuf[80];
 	static gchar timeBuf[10];
-	static gchar *anonym = "anonymous";
 	static struct tm stm;
 	static gint callTimerStart = 0;
 	gint callTimer = 0;
@@ -465,7 +464,7 @@ static gint Update(gpointer data)
 			outgoing = FALSE;
 
 			if (*phoneMonitor.call.callNum == '\0')
-				name = anonym;
+				name = _("anonymous");
 			else if (strncmp(phoneMonitor.call.callNum, lastCallNum, 20)) {
 				strncpy(lastCallNum, phoneMonitor.call.callNum, 20);
 				lastCallNum[19] = '\0';
@@ -480,7 +479,7 @@ static gint Update(gpointer data)
 		if (outgoing)
 			g_snprintf(callBuf, 80, _("Outgoing call in progress:\nTime: %s"), timeBuf);
 		else
-			g_snprintf(callBuf, 80, _("Incomming call from: %s\nTime: %s"), name,
+			g_snprintf(callBuf, 80, _("Incoming call from: %s\nTime: %s"), name,
 				   timeBuf);
 
 		gtk_label_set_text(GTK_LABEL(inCallDialog.label), callBuf);
@@ -1204,8 +1203,8 @@ static GtkWidget *CreateAboutDialog(void)
 Copyright (C) 1999-2004 Pavel Janik ml.,\nHugh Blemings, Jan Derfinak,\n\
 Pawel Kot and others\n\
 xgnokii is free software, covered by the GNU General Public License,\n\
-d you are welcome to change it and/or distribute copies of it under\n\
-certain conditions. There is absolutely no waranty for xgnokii.\n\
+and you are welcome to change it and/or distribute copies of it under\n\
+certain conditions. There is absolutely no warranty for xgnokii.\n\
 See GPL for details.\n"), XVERSION, VERSION);
 	label = gtk_label_new((gchar *) buf);
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 0);

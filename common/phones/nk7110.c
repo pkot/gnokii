@@ -757,7 +757,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		break;
 	case 0x10:
-		dprintf("Entry succesfully deleted!\n");
+		dprintf("Entry successfully deleted!\n");
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x03 (%d)\n", message[3]);
@@ -2208,14 +2208,14 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("URL: %s\n", data->wap_bookmark->URL);
 		break;
 	case 0x0a:
-		dprintf("WAP bookmark succesfully set!\n");
+		dprintf("WAP bookmark successfully set!\n");
 		data->wap_bookmark->location = message[5];
 		break;
 	case 0x0d:
-		dprintf("WAP bookmark succesfully deleted!\n");
+		dprintf("WAP bookmark successfully deleted!\n");
 		break;
 	case 0x13:
-		dprintf("WAP setting succesfully activated!\n");
+		dprintf("WAP setting successfully activated!\n");
 		break;
 	case 0x16:
 		if (!data->wap_setting) return GN_ERR_INTERNALERROR;
@@ -2309,7 +2309,7 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 		break;
 	case 0x1f:
 	case 0x19:
-		dprintf("WAP setting succesfully written!\n");
+		dprintf("WAP setting successfully written!\n");
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x3f (%d)\n", message[3]);
@@ -2583,10 +2583,10 @@ static gn_error NK7110_IncomingKeypress(int messagetype, unsigned char *message,
 {
 	switch(message[2]) {
 	case 0x46:
-		dprintf("Key succesfully pressed\n");
+		dprintf("Key successfully pressed\n");
 		break;
 	case 0x47:
-		dprintf("Key succesfully released\n");
+		dprintf("Key successfully released\n");
 		break;
 	default:
 		dprintf("Unknown keypress command\n");

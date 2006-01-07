@@ -170,7 +170,7 @@ struct gn_cfg_header *cfg_memory_read(const char **lines)
 		}
 
 			/* Line not part of any heading */
-		fprintf(stderr, "Orphaned line: %s\n", line);
+		fprintf(stderr, _("Orphaned line: %s\n"), line);
 
 		free(buf);
 	}
@@ -606,7 +606,7 @@ static int cfg_file_or_memory_read(const char *file, const char **lines)
 	gn_config_default.sm_retry = 0;
 
 	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default)) {
-		fprintf(stderr, _("No global section in %s config file.\n"), file);
+		fprintf(stderr, _("No [global] section in %s config file.\n"), file);
 		return -2;
 	}
 

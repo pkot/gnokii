@@ -102,12 +102,12 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	int fd;
 
 	if (str2ba((char *)addr, &bdaddr)) {
-		fprintf(stderr, "Invalid bluetooth address \"%s\"\n", addr);
+		fprintf(stderr, _("Invalid bluetooth address \"%s\"\n"), addr);
 		return -1;
 	}
 
 	if ((fd = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0) {
-		perror("Can't create socket");
+		perror(_("Can't create socket"));
 		return -1;
 	}
 
@@ -115,7 +115,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	laddr.rc_family = AF_BLUETOOTH;
 	bacpy(&laddr.rc_bdaddr, BDADDR_ANY);
 	if (bind(fd, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
-		perror("Can't bind socket");
+		perror(_("Can't bind socket"));
 		close(fd);
 		return -1;
 	}
@@ -125,7 +125,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	bacpy(&raddr.rc_bdaddr, &bdaddr);
 	raddr.rc_channel = channel;
 	if (connect(fd, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
-		perror("Can't connect");
+		perror(_("Can't connect"));
 		close(fd);
 		return -1;
 	}

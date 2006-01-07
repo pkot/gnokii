@@ -2420,10 +2420,10 @@ reply: 0x19 / 0x0012
 	if (!data) return GN_ERR_INTERNALERROR;
 	switch (message[3]) {
 	case NK6510_SUBCLO_SET_DATE_RCVD:
-		dprintf("Date/Time succesfully set!\n");
+		dprintf("Date/Time successfully set!\n");
 		break;
 	case NK6510_SUBCLO_SET_ALARM_RCVD:
-		dprintf("Alarm succesfully set!\n");
+		dprintf("Alarm successfully set!\n");
 		break;
 	case NK6510_SUBCLO_DATE_RCVD:
 		if (!data->datetime) return GN_ERR_INTERNALERROR;
@@ -3376,7 +3376,7 @@ reply: 0x7a / 0x0036
 		switch (message[4]) {
 		case 0x0f:
 			if (message[5] == 0)
-				dprintf("Operator logo succesfully set!\n");
+				dprintf("Operator logo successfully set!\n");
 			else
 				dprintf("Setting operator logo failed!\n");
 			return GN_ERR_NONE;
@@ -4225,13 +4225,13 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("URL: %s\n", data->wap_bookmark->URL);
 		break;
 	case 0x0a:
-		dprintf("WAP bookmark succesfully set!\n");
+		dprintf("WAP bookmark successfully set!\n");
 		break;
 	case 0x0d:
-		dprintf("WAP bookmark succesfully deleted!\n");
+		dprintf("WAP bookmark successfully deleted!\n");
 		break;
 	case 0x13:
-		dprintf("WAP setting succesfully activated!\n");
+		dprintf("WAP setting successfully activated!\n");
 		break;
 	case 0x16:
 		if (!data->wap_setting) return GN_ERR_INTERNALERROR;
@@ -4332,7 +4332,7 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 
 		break;
 	case 0x19:
-		dprintf("WAP setting succesfully written!\n");
+		dprintf("WAP setting successfully written!\n");
 		break;
 	default:
 		dprintf("Unknown subtype of type 0x3f (%d)\n", message[3]);

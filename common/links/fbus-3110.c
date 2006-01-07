@@ -401,7 +401,7 @@ static void fb3110_sequence_number_update(struct gn_statemachine *state)
 }
 
 /* The 3110 protocol has a tendency to use different message types to
- * indicate succesful and failed actions. These are not handled very well by
+ * indicate successful and failed actions. These are not handled very well by
  * the gnokii internals, so they are "folded" together and dealt with in the
  * 3110 code instead. The logic is that each success/failure message type
  * pair is reported as the type of the message to indicate success.
