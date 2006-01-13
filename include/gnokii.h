@@ -40,7 +40,7 @@ extern "C" {
 #endif
 
 /* Some portability definitions first */
-#if defined(__linux__)
+#if defined(__linux__) || defined(__GLIBC__)
 #  include <stdint.h>
 #  include <sys/time.h>
 #elif defined(__svr4__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__bsdi__) || defined(__MACH__)
