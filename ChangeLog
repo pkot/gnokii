@@ -27,11 +27,13 @@
     o make strings translatable                     (Daniele Forsi)
     o avoid coredump on the empty ringtone list     (Daniele Forsi,
                                                          Pawel Kot)
- * gnokiid updated
+ * gnokiid updates
     o print strings more compliant to GSM standard  (Daniele Forsi)
  * libgnokii updates
     o end time and location support added to the calendar
                                                    (BORBELY Zoltan)
+    o support for caller groups in ldif output (patch #4794)
+                                                    (str at msm.ru)
 
 0.6.10
 ======

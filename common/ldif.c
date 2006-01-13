@@ -142,6 +142,7 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 }
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
+#define STOREINT(a, b) if (BEGINS(a)) { b = atoi(buf+strlen(a)); continue; }
 #define STORE2(a, b, c) if (BEGINS(a)) { c; strncpy(b, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
 #define STORE2_BASE64(a, b, c) if (BEGINS(a)) { c; utf8_base64_decode(b, GN_PHONEBOOK_NAME_MAX_LENGTH, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
 
@@ -158,7 +159,6 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 #define STORENUM_BASE64(a, c) STORE2_BASE64(a, entry->subentries[entry->subentries_count++].data.number, \
 					entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
 					entry->subentries[entry->subentries_count].number_type = c);
-
 #undef ERROR
 #define ERROR(a) fprintf(stderr, "%s\n", a)
 
@@ -203,6 +203,8 @@ API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 		STORENUM_BASE64("workPhone:: ", GN_PHONEBOOK_NUMBER_Work);
 		STORENUM("telephoneNumber: ", GN_PHONEBOOK_NUMBER_General);
 		STORENUM_BASE64("telephoneNumber:: ", GN_PHONEBOOK_NUMBER_General);
+		
+		STOREINT("callerGroup: ", entry->caller_group);
 
 		if (BEGINS("\n"))
 			break;
