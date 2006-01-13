@@ -34,6 +34,7 @@
                                                    (BORBELY Zoltan)
     o support for caller groups in ldif output (patch #4794)
                                                     (str at msm.ru)
+    o fix calnote alarm reading                       (Dan Oetting)
  * gnokii updates
     o putfile() should use binary open() mode (bug #15031)
                                                         (Pawel Kot)

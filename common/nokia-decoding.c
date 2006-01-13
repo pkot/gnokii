@@ -234,8 +234,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 
 static gn_error calnote_get_alarm(int alarmdiff, gn_timestamp *time, gn_timestamp *alarm)
 {
-	time_t t_alarm;
-	struct tm tm_time, *tm_alarm;
+	struct tm tm_time;
 
 	if (!time || !alarm) return GN_ERR_INTERNALERROR;
 
@@ -246,19 +245,16 @@ static gn_error calnote_get_alarm(int alarmdiff, gn_timestamp *time, gn_timestam
 	tm_time.tm_hour = time->hour;
 	tm_time.tm_min = time->minute;
 
-	tzset();
-	t_alarm = mktime(&tm_time);
-	t_alarm -= alarmdiff;
-	t_alarm += timezone;
+	tm_time.tm_sec -= alarmdiff;
 
-	tm_alarm = localtime(&t_alarm);
+	timegm(&tm_time);
 
-	alarm->year = tm_alarm->tm_year + 1900;
-	alarm->month = tm_alarm->tm_mon + 1;
-	alarm->day = tm_alarm->tm_mday;
-	alarm->hour = tm_alarm->tm_hour;
-	alarm->minute = tm_alarm->tm_min;
-	alarm->second = tm_alarm->tm_sec;
+	alarm->year = tm_time.tm_year + 1900;
+	alarm->month = tm_time.tm_mon + 1;
+	alarm->day = tm_time.tm_mday;
+	alarm->hour = tm_time.tm_hour;
+	alarm->minute = tm_time.tm_min;
+	alarm->second = tm_time.tm_sec;
 
 	return GN_ERR_NONE;
 }
