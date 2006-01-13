@@ -48,6 +48,10 @@
     o with multiple entries for --writephonebook when no locations
       are given don't write them all to the same location
                                                         (Pawel Kot)
+ * utils updates
+    o add ldiffix.pl script for ldif entries normalization: number
+      formats, delete empty entries, encode base64 (Michale Klemme)
+
 0.6.10
 ======
  * nk6510 driver updates
