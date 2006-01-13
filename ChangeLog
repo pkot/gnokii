@@ -37,14 +37,17 @@
     o fix calnote alarm reading                       (Dan Oetting)
     o fix building on GNU/kFreeBSD (bug #14389)         (Pawel Kot)
     o make matching of ldif fields case insensitive (bug #14689)
-                                                        (Pawel Kot)
-    o use more fields from Mozilla ldif (bug #14689)    (Pawel Kot)
+                                                   (Michael Klemme)
+    o use more fields from Mozilla ldif (bug #14689)
+                                                   (Michael Klemme)
     o use first ldif subentry number as the default number
-      (bug #14689)                                      (Pawel Kot)
+      (bug #14689)                                 (Michael Klemme)
  * gnokii updates
     o putfile() should use binary open() mode (bug #15031)
                                                         (Pawel Kot)
-
+    o with multiple entries for --writephonebook when no locations
+      are given don't write them all to the same location
+                                                        (Pawel Kot)
 0.6.10
 ======
  * nk6510 driver updates
