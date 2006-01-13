@@ -5263,7 +5263,7 @@ static int putfile(int nargc, char *nargv[])
 	gn_data_clear(&data);
 	data.file = &fi;
 
-	f = fopen(nargv[0],"r");
+	f = fopen(nargv[0], "rb");
 	if (!f || fseek(f, 0, SEEK_END)) {
 		fprintf(stderr, _("Cannot open file %s\n"), nargv[0]);
 		return GN_ERR_FAILED;

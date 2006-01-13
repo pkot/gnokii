@@ -34,6 +34,9 @@
                                                    (BORBELY Zoltan)
     o support for caller groups in ldif output (patch #4794)
                                                     (str at msm.ru)
+ * gnokii updates
+    o putfile() should use binary open() mode (bug #15031)
+                                                        (Pawel Kot)
 
 0.6.10
 ======
