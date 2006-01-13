@@ -141,7 +141,7 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 	return 0;
 }
 
-#define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
+#define BEGINS(a) ( !strncasecmp(buf, a, strlen(a)) )
 #define STOREINT(a, b) if (BEGINS(a)) { b = atoi(buf+strlen(a)); continue; }
 #define STORE2(a, b, c) if (BEGINS(a)) { c; strncpy(b, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
 #define STORE2_BASE64(a, b, c) if (BEGINS(a)) { c; utf8_base64_decode(b, GN_PHONEBOOK_NAME_MAX_LENGTH, buf+strlen(a), strlen(buf)-strlen(a)-1); continue; }
