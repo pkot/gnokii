@@ -166,6 +166,7 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 {
 	char buf[10240];
+	int i;
 
 	while (1) {
 		if (!fgets(buf, 1024, f))
@@ -181,8 +182,6 @@ API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 		}
 		STORE("cn: ", entry->name);
 		STORE_BASE64("cn:: ", entry->name);
-		STORE("telephoneNumber: ", entry->number);
-		STORE_BASE64("telephoneNumber:: ", entry->number);
 
 		STORESUB("homeurl: ", GN_PHONEBOOK_ENTRY_URL);
 		STORESUB_BASE64("homeurl:: ", GN_PHONEBOOK_ENTRY_URL);
@@ -210,6 +209,23 @@ API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 
 		if (BEGINS("\n"))
 			break;
+	}
+	/* set entry->number from the first sub-entry that is a number */
+	for (i = 0; i < entry->subentries_count && entry->number[0] == 0; i++) {
+		if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number) {
+			switch (entry->subentries[i].number_type) {
+			case GN_PHONEBOOK_NUMBER_General:
+			case GN_PHONEBOOK_NUMBER_Work: 
+			case GN_PHONEBOOK_NUMBER_Home:
+			case GN_PHONEBOOK_NUMBER_Mobile:
+				dprintf("setting default number to %s\n", entry->subentries[i].data.number);
+				strncpy(entry->number, entry->subentries[i].data.number, sizeof(entry->number));
+				break;
+			default:
+				dprintf("unknown type\n");
+				break;
+			}
+		}
 	}
 	return 0;
 }

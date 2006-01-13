@@ -39,6 +39,8 @@
     o make matching of ldif fields case insensitive (bug #14689)
                                                         (Pawel Kot)
     o use more fields from Mozilla ldif (bug #14689)    (Pawel Kot)
+    o use first ldif subentry number as the default number
+      (bug #14689)                                      (Pawel Kot)
  * gnokii updates
     o putfile() should use binary open() mode (bug #15031)
                                                         (Pawel Kot)
