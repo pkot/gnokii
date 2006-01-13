@@ -13,6 +13,8 @@
  * build system updates
     o AM_GNU_GETTEXT doesn't support use-libtool   (BORBELY Zoltan)
     o Makefile cleanup due to the gettext changes  (BORBELY Zoltan)
+    o added LDFLAGS when linking libgnokii libraries
+                                     (Luke Kenneth Casson Leighton)
  * gnapplet driver updates
     o Nokia 6680 support added                     (BORBELY Zoltan)
     o end time and location support added to the calendar
