@@ -5,6 +5,7 @@
     o fix number encapsulating in the FBUS frame: when the number
       was too long the trailing digits where overwritten
                                                         (Pawel Kot)
+    o Nokia 6101 support added                          (Pawel Kot)
  * link layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates
