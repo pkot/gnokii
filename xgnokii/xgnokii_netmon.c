@@ -399,7 +399,7 @@ void GUI_CreateNetmonWindow()
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), "5", _("NCELL list III"),
 				NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 5);
 
-	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), "6", _("Prefered/Denied networks"),
+	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), "6", _("Preferred/Denied networks"),
 				NULL, NULL, (GtkSignalFunc) SetDisplay, (gpointer) 6);
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), "7", _("System information bits"),

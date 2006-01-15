@@ -43,7 +43,7 @@ API char *gn_error_print(gn_error e)
 	case GN_ERR_FAILED:                return _("Command failed.");
 	case GN_ERR_UNKNOWNMODEL:          return _("Model specified isn't known/supported.");
 	case GN_ERR_INVALIDSECURITYCODE:   return _("Invalid Security code.");
-	case GN_ERR_INTERNALERROR:         return _("Problem occured internal to model specific code.");
+	case GN_ERR_INTERNALERROR:         return _("Problem occurred internal to model specific code.");
 	case GN_ERR_NOTIMPLEMENTED:        return _("Command called isn't implemented in model.");
 	case GN_ERR_NOTSUPPORTED:          return _("Function or connection type not supported by the phone.");
 	case GN_ERR_USERCANCELED:          return _("User aborted the action.");

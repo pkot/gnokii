@@ -1081,7 +1081,7 @@ int gn_file_text_save(char *filename, char *text, int mode)
 	else file = fopen(filename, "w");
 
 	if (!file) {
-		fprintf(stderr, _("Failed to write file %s\n"),  filename);
+		fprintf(stderr, _("Can't open file %s for writing!\n"),  filename);
 		return -1;
 	}
 	fprintf(file, "%s\n", text);

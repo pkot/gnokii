@@ -141,7 +141,7 @@ static gn_error fbusinit (const char * const iname)
     lockfile = gn_device_lock (sm.config.port_device);
     if (lockfile == NULL)
     {
-      fprintf (stderr, _("Lock file error. Exiting\n"));
+      fprintf (stderr, _("Lock file error. Exiting.\n"));
       exit(1);
     }
   }
@@ -162,7 +162,7 @@ static gn_error fbusinit (const char * const iname)
 
   if (error != GN_ERR_NONE)
   {
-    g_print (_("GSM/FBUS init failed! (Unknown model ?). Quitting.\n"));
+    g_print (_("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
     return (error);
   }
 

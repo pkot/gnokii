@@ -990,7 +990,7 @@ void GetNetworkInfoEvent(GtkWidget * widget)
 
 	/* watch for errors */
 	if (error != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error getting network info\n(error=%s)"), gn_error_print(error));
+		gchar *buf = g_strdup_printf(_("Error getting network info\n%s"), gn_error_print(error));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
@@ -1034,7 +1034,7 @@ void GetLogoEvent(GtkWidget * widget)
 
 	/* watch for errors */
 	if (error != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error getting bitmap\n(error=%s)"), gn_error_print(error));
+		gchar *buf = g_strdup_printf(_("Error getting bitmap\n%s"), gn_error_print(error));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
@@ -1084,7 +1084,7 @@ void SetLogoEvent(GtkWidget * widget)
 
 	/* watch for errors */
 	if (error != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error setting bitmap\n(error=%s)"), gn_error_print(error));
+		gchar *buf = g_strdup_printf(_("Error setting bitmap\n%s"), gn_error_print(error));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
@@ -1339,7 +1339,7 @@ void ExportLogoFileMain(gchar * name)
 
 	error = gn_file_bitmap_save(name, &tbitmap, &statemachine.driver.phone);
 	if (error != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error writing file\n(error=%s)"), gn_error_print(error));
+		gchar *buf = g_strdup_printf(_("Error writing file\n%s"), gn_error_print(error));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
@@ -1367,7 +1367,7 @@ static void ExportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesLogoFileExportDialog, (GtkSignalFunc) CancelDialog,
 					  GUI_LogosWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
-			g_snprintf(err, 255, _("File %s already exist.\nOverwrite?"),
+			g_snprintf(err, 255, _("File %s already exists.\nOverwrite?"),
 				   exportDialogData.fileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
 		}
@@ -1388,7 +1388,7 @@ void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(fileName, "r")) == NULL) {
-		gchar *buf = g_strdup_printf(_("Can't open file %s for reading!"), fileName);
+		gchar *buf = g_strdup_printf(_("Can't open file %s for reading!\n"), fileName);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
@@ -1398,7 +1398,7 @@ void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 
 	error = gn_file_bitmap_read(fileName, &tbitmap, &statemachine.driver.phone);
 	if (error != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error reading file\n(error=%s)"), gn_error_print(error));
+		gchar *buf = g_strdup_printf(_("Error reading file\n%s"), gn_error_print(error));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);

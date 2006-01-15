@@ -194,7 +194,7 @@ static void LogFile (gchar *str, ...)
     f = stdout;
   else if ((f = fopen (smsdConfig.logFile, "a")) == NULL)
   {
-    g_print (_("Warning: Cannot open file %s for appending.\n"), smsdConfig.logFile);
+    g_print (_("WARNING: Cannot open file %s for appending.\n"), smsdConfig.logFile);
     return;
   }
 
@@ -331,7 +331,7 @@ static void ReadConfig (gint argc, gchar *argv[])
   
   if ((argc - optind) != 0)
   {
-    g_print (_("Wrong argument number!\n"));
+    g_print (_("Wrong number of arguments\n"));
     Usage (argv[0]);
     exit (1);
   }

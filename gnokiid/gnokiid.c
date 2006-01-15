@@ -133,7 +133,7 @@ int main(int argc, char *argv[])
 	if (aux && !strcmp(aux, "yes")) {
 		lockfile = gn_device_lock(temp_state.config.port_device);
 		if (lockfile == NULL) {
-			fprintf(stderr, _("Lock file error. Exiting\n"));
+			fprintf(stderr, _("Lock file error. Exiting.\n"));
 			exit(1);
 		}
 	}

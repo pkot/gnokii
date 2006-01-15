@@ -956,7 +956,7 @@ void CreateTypeMenu(EditEntryData * data)
 	gtk_widget_show(item);
 	gtk_menu_append(GTK_MENU(data->groupMenu), item);
 
-	item = gtk_menu_item_new_with_label(_("E-Mail"));
+	item = gtk_menu_item_new_with_label(_("Email"));
 	gtk_signal_connect(GTK_OBJECT(item), "activate",
 			   GTK_SIGNAL_FUNC(SetType7), (gpointer) data);
 	gtk_widget_show(item);
@@ -1025,7 +1025,7 @@ void inttotype(gint int_type, gchar *type)
 		strcpy(type, _("Postal"));
 		return;
 	case 7:
-		strcpy(type, _("E-Mail"));
+		strcpy(type, _("Email"));
 		return;
 	case 8:
 		strcpy(type, _("Name"));
@@ -1158,7 +1158,7 @@ gint typetoint(gchar *type)
 	if (g_strcasecmp(type, _("Home")) == 0) return (4);
 	if (g_strcasecmp(type, _("Note")) == 0) return (5);
 	if (g_strcasecmp(type, _("Postal")) == 0) return (6);
-	if (g_strcasecmp(type, _("E-Mail")) == 0) return (7);
+	if (g_strcasecmp(type, _("Email")) == 0) return (7);
 	if (g_strcasecmp(type, _("Name")) == 0) return (8);
 	if (g_strcasecmp(type, _("URL")) == 0) return (9);
 	if (g_strcasecmp(type, _("Unknown")) == 0) return (10);
@@ -1200,7 +1200,7 @@ gint typetohex(gchar *type)
 	if (g_strcasecmp(type, _("Home")) == 0) return (0x02);
 	if (g_strcasecmp(type, _("Note")) == 0) return (0x0a);
 	if (g_strcasecmp(type, _("Postal")) == 0) return (0x09);
-	if (g_strcasecmp(type, _("E-Mail")) == 0) return (0x08);
+	if (g_strcasecmp(type, _("Email")) == 0) return (0x08);
 	if (g_strcasecmp(type, _("Name")) == 0) return (0x07);
 	if (g_strcasecmp(type, _("URL")) == 0) return (0x2c);
 	if (g_strcasecmp(type, _("Unknown")) == 0) return (0x00);
@@ -1431,7 +1431,7 @@ static void EditNumbers(GtkWidget * widget, EditEntryData *editEntryData)
 			break;
 
 		case GN_PHONEBOOK_ENTRY_Email:
-			row[2] = _("E-Mail");
+			row[2] = _("Email");
 			break;
 
 		case GN_PHONEBOOK_ENTRY_Name:
@@ -2188,7 +2188,7 @@ static void SaveContacts(void)
 
 				if (ml->status != GN_ERR_NONE) {
 					g_print(_
-						("%s: line: %d: Can't write ME memory entry number %d! Error: %d\n"),
+						("%s: line %d: Can't write ME memory entry number %d! Error: %d\n"),
 						__FILE__, __LINE__, i + 1, ml->status);
 				}
 				g_free(ml);
@@ -2346,7 +2346,7 @@ static gint InsertPBEntryME(gn_phonebook_entry * entry)
 	PhonebookEntry *pbEntry;
 
 	if ((pbEntry = (PhonebookEntry *) g_malloc(sizeof(PhonebookEntry))) == NULL) {
-		g_print(_("%s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
+		g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 		g_ptr_array_free(contactsMemory, TRUE);
 		gtk_widget_hide(progressDialog.dialog);
 		return (-1);
@@ -2372,7 +2372,7 @@ static gint InsertPBEntrySM(gn_phonebook_entry * entry)
 	PhonebookEntry *pbEntry;
 
 	if ((pbEntry = (PhonebookEntry *) g_malloc(sizeof(PhonebookEntry))) == NULL) {
-		g_print(_("%s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
+		g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 		g_ptr_array_free(contactsMemory, TRUE);
 		gtk_widget_hide(progressDialog.dialog);
 		return (-1);
@@ -2725,7 +2725,7 @@ static void ExportContactsMain(gchar * name)
 	gchar buf[IO_BUF_LEN];
 
 	if ((f = fopen(name, "w")) == NULL) {
-		g_snprintf(buf, IO_BUF_LEN, _("Can't open file %s for writing!"), name);
+		g_snprintf(buf, IO_BUF_LEN, _("Can't open file %s for writing!\n"), name);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		return;
@@ -2760,7 +2760,7 @@ static void OkExportDialog(GtkWidget * w, GtkFileSelection * fs)
 			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesExportDialog, (GtkSignalFunc) CancelDialog,
 					  GUI_ContactsWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
-			g_snprintf(err, 255, _("File %s already exist.\nOverwrite?"),
+			g_snprintf(err, 255, _("File %s already exists.\nOverwrite?"),
 				   exportDialogData.fileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
 		}
@@ -2776,7 +2776,7 @@ static void ExportContacts(void)
 
 	if (contactsMemoryInitialized) {
 		if (fileDialog == NULL) {
-			fileDialog = gtk_file_selection_new(_("Export"));
+			fileDialog = gtk_file_selection_new(_("Export to file"));
 			gtk_signal_connect(GTK_OBJECT(fileDialog), "delete_event",
 					   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 			gtk_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fileDialog)->ok_button),
@@ -2807,7 +2807,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(fileName, "r")) == NULL) {
-		g_snprintf(buf, IO_BUF_LEN, _("Can't open file %s for reading!"), fileName);
+		g_snprintf(buf, IO_BUF_LEN, _("Can't open file %s for reading!\n"), fileName);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		return;
@@ -2876,7 +2876,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	for (i = 1; i <= memoryStatus.MaxME; i++) {
 		if ((pbEntry = (PhonebookEntry *) g_malloc(sizeof(PhonebookEntry))) == NULL) {
 			fclose(f);
-			g_print(_("%s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
+			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 			g_ptr_array_free(contactsMemory, TRUE);
 			return;
 		}
@@ -2898,7 +2898,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	for (i = 1; i <= memoryStatus.MaxSM; i++) {
 		if ((pbEntry = (PhonebookEntry *) g_malloc(sizeof(PhonebookEntry))) == NULL) {
 			fclose(f);
-			g_print(_("%s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
+			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 			g_ptr_array_free(contactsMemory, TRUE);
 			return;
 		}
@@ -2958,7 +2958,7 @@ static void ImportContactsFileDialog()
 	static GtkWidget *fileDialog = NULL;
 
 	if (fileDialog == NULL) {
-		fileDialog = gtk_file_selection_new(_("Import"));
+		fileDialog = gtk_file_selection_new(_("Import from file"));
 		gtk_signal_connect(GTK_OBJECT(fileDialog), "delete_event",
 				   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 		gtk_signal_connect(GTK_OBJECT(GTK_FILE_SELECTION(fileDialog)->ok_button),

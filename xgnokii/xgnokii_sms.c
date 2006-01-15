@@ -1078,8 +1078,8 @@ static gint Sendsmscore(gn_sms * sms)
 	g_free(m);
 
 	if (error != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("SMS send to %s failed\n(error=%d)"),
-					     sms->remote.number, error);
+		gchar *buf = g_strdup_printf(_("Error sending SMS to %s\n%s"),
+					     sms->remote.number, gn_error_print(error));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		g_free(buf);
@@ -1222,7 +1222,7 @@ static void DoSendSMS(void)
 			strncpy(sms.user_data[0].u.text, text, GN_SMS_MAX_LENGTH + 1);
 			sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';
 
-			buf = g_strdup_printf(_("Sending SMS to %s ...\n"), sms.remote.number);
+			buf = g_strdup_printf(_("Sending SMS to %s (%d/%d) ...\n"), sms.remote.number, 1, 1);
 			gtk_label_set_text(GTK_LABEL(infoDialog.text), buf);
 			gtk_widget_show_now(infoDialog.dialog);
 			g_free(buf);
@@ -1669,7 +1669,7 @@ static void InitMainMenu(void)
 	menu_items[i++].path = g_strdup(_("/File/Sep1"));
 	menu_items[i++].path = g_strdup(_("/File/_Close"));
 	menu_items[i++].path = g_strdup(_("/_Messages"));
-	menu_items[i++].path = g_strdup(_("/_Messages/(De)_Activate SMS reading"));
+	menu_items[i++].path = g_strdup(_("/_Messages/_Activate SMS reading"));
 	menu_items[i++].path = g_strdup(_("/_Messages/_New"));
 	menu_items[i++].path = g_strdup(_("/_Messages/_Forward"));
 	menu_items[i++].path = g_strdup(_("/_Messages/_Reply"));

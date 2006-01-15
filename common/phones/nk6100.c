@@ -915,7 +915,7 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 	case 0x08:
-		dprintf("\tMemory location: %d\n", data->memory_status->memory_type);
+		dprintf("\tMemory location: %d\n", message[4]);
 		dprintf("\tUsed: %d\n", message[6]);
 		dprintf("\tFree: %d\n", message[5]);
 		if (data->memory_status) {
@@ -3488,7 +3488,7 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 		case GN_SCT_Puk:  dprintf("waiting for PUK.\n"); break;
 		case GN_SCT_Puk2: dprintf("waiting for PUK2.\n"); break;
 		case GN_SCT_None: dprintf("nothing to enter.\n"); break;
-		default: dprintf("Unknown!\n"); return GN_ERR_UNHANDLEDFRAME;
+		default: dprintf("unknown\n"); return GN_ERR_UNHANDLEDFRAME;
 		}
 		if (data->security_code) data->security_code->type = message[4];
 		break;

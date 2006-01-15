@@ -383,7 +383,7 @@ static gn_error VM_GSMInitialise(struct gn_statemachine *sm)
 	error = gn_gsm_initialise(sm);
 
 	if (error != GN_ERR_NONE)
-		fprintf(stderr, _("GSM/FBUS init failed!\n"));
+		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
 
 	return (error);
 }

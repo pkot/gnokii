@@ -246,7 +246,7 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	{
 		int i;
 		u8  b;
-		fprintf( stderr, _("PC   : ") );
+		fprintf( stderr, "PC   : " );
 		for( i = 0; i < current; i++ ) {
 			b = pkt[i];
 			fprintf( stderr, "[%02X %c]", b, b > 0x20 ? b : '.' );
@@ -285,7 +285,7 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 		int j;
 		char b;
 		dprintf("Spurious? (%d)", time);
-					dprintf( _("Phone: ") );
+					dprintf( "Phone: " );
 					for( j = 0; j < time; j++ ) {
 						b = pkt[j];
 						dprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
@@ -743,7 +743,7 @@ SigHandler(int status)
 			}
 			if(Index >= Length) {
 				if((pkt[0] == MYID || pkt[0]==0xf8) && pkt[1] == 0x00) /* packet from phone */ {
-					ddprintf("Phone: ");
+					ddprintf( "Phone: " );
 					for( j = 0; j < Length; j++ ) {
 						b = pkt[j];
 						ddprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
@@ -775,7 +775,7 @@ SigHandler(int status)
 							ack[2] = 0x7F;                     /* Set special size value  */
 							ack[3] = pkt[Length - 2];          /* Send back packet number */
 							ack[4] = GetChecksum( ack, 4); /* Set checksum            */
-							ddprintf( _("PC   : ") );
+							ddprintf("PC   : ");
 							for( j = 0; j < 5; j++ ) {
 								b = ack[j];
 								ddprintf( "[%02X %c]", b, b >= 0x20 ? b : '.' );
@@ -813,7 +813,7 @@ bool OpenSerial(void)
 {
 	int result;
 
-	ddprintf(_("Setting MBUS communication with 2110...\n"));
+	ddprintf("Setting MBUS communication with 2110...\n");
 
 	result = device_open(PortDevice, true, false, false, GCT_Serial);
 	if (!result) {

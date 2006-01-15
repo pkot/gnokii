@@ -180,7 +180,7 @@ void DB_Look (const gchar * const phone)
     
     if ((smsFile = fopen (buf->str, "r")) == NULL)
     {
-      g_print (_("Cannot open %s.\n"), buf->str);
+      g_print (_("Can't open file %s for reading!\n"), buf->str);
       continue;
     }
     

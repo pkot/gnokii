@@ -605,7 +605,7 @@ static void read_ringtone(GtkWidget *w, GtkFileSelection *fs)
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((err = gn_file_ringtone_read(file_name, &gi.ringtone)) != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error reading file\n(error=%s)"), gn_error_print(err));
+		gchar *buf = g_strdup_printf(_("Error reading file\n%s"), gn_error_print(err));
 		gtk_label_set_text(GTK_LABEL(gi.error_dialog.text), buf);
 		gtk_widget_show(gi.error_dialog.dialog);
 		g_free(buf);
@@ -642,7 +642,7 @@ static void write_ringtone(GtkWidget *w, GtkFileSelection *fs)
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((err = gn_file_ringtone_save(file_name, &gi.ringtone)) != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error writing file\n(error=%s)"), gn_error_print(err));
+		gchar *buf = g_strdup_printf(_("Error writing file\n%s"), gn_error_print(err));
 		gtk_label_set_text(GTK_LABEL(gi.error_dialog.text), buf);
 		gtk_widget_show(gi.error_dialog.dialog);
 		g_free(buf);
@@ -685,7 +685,7 @@ static void save_ringtone(GtkWidget *w)
 	}
 
 	if ((err = gn_file_ringtone_save(gi.file_name, &gi.ringtone)) != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error writing file\n(error=%s)"), gn_error_print(err));
+		gchar *buf = g_strdup_printf(_("Error writing file\n%s"), gn_error_print(err));
 		gtk_label_set_text(GTK_LABEL(gi.error_dialog.text), buf);
 		gtk_widget_show(gi.error_dialog.dialog);
 		g_free(buf);
@@ -738,7 +738,7 @@ static void get_ringtone(GtkWidget *w)
 	gi.ringtone.location = ri->location;
 
 	if ((err = ringtone_event(Event_GetRingtone, &gi.ringtone)) != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error getting ringtone\n(error=%s)"), gn_error_print(err));
+		gchar *buf = g_strdup_printf(_("Error getting ringtone\n%s"), gn_error_print(err));
 		gtk_label_set_text(GTK_LABEL(gi.error_dialog.text), buf);
 		gtk_widget_show(gi.error_dialog.dialog);
 		g_free(buf);
@@ -755,7 +755,7 @@ static void set_ringtone(GtkWidget *w)
 	get_ringtone_info(&gi.ringtone);
 
 	if ((err = ringtone_event(Event_SetRingtone, &gi.ringtone)) != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error setting ringtone\n(error=%s)"), gn_error_print(err));
+		gchar *buf = g_strdup_printf(_("Error setting ringtone\n%s"), gn_error_print(err));
 		gtk_label_set_text(GTK_LABEL(gi.error_dialog.text), buf);
 		gtk_widget_show(gi.error_dialog.dialog);
 		g_free(buf);
@@ -774,7 +774,7 @@ static void delete_ringtone(GtkWidget *w)
 	get_ringtone_info(&ringtone);
 
 	if ((err = ringtone_event(Event_DeleteRingtone, &ringtone)) != GN_ERR_NONE) {
-		gchar *buf = g_strdup_printf(_("Error deleting ringtone\n(error=%s)"), gn_error_print(err));
+		gchar *buf = g_strdup_printf(_("Error deleting ringtone\n%s"), gn_error_print(err));
 		gtk_label_set_text(GTK_LABEL(gi.error_dialog.text), buf);
 		gtk_widget_show(gi.error_dialog.dialog);
 		g_free(buf);

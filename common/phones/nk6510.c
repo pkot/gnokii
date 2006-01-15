@@ -857,10 +857,10 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			data->raw_sms->number = message[6] * 256 + message[7];
 			break;
 		case 0x02:
-			printf("SMS saving failed: Invalid location\n");
+			dprintf("SMS saving failed: Invalid location\n");
 			return GN_ERR_INVALIDLOCATION;
 		case 0x05:
-			printf("SMS saving failed: Incorrect folder\n");
+			dprintf("SMS saving failed: Incorrect folder\n");
 			return GN_ERR_INVALIDMEMORYTYPE;
 		default:
 			dprintf("ERROR: unknown (%02x)\n",message[4]);
@@ -892,10 +892,10 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			break;
 		case 0x02:
 		case 0x0a:
-			printf("SMS deleting failed: Invalid location?\n");
+			dprintf("SMS deleting failed: Invalid location?\n");
 			return GN_ERR_INVALIDLOCATION;
 		case 0x05:
-			printf("SMS saving failed: Incorrect folder\n");
+			dprintf("SMS saving failed: Incorrect folder\n");
 			return GN_ERR_INVALIDLOCATION;
 		default:
 			dprintf("ERROR: unknown %i\n",message[4]);
@@ -3868,7 +3868,7 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 			data->security_code->type = GN_SCT_None;
 			break;
 		default:
-			dprintf(_("Unknown!\n"));
+			dprintf("Unknown!\n");
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;

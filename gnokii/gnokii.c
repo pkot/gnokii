@@ -666,7 +666,7 @@ static int sendsms(int argc, char *argv[])
 		case '3': /* we send long message */
 			input_len = atoi(optarg);
 			if (input_len > 255 * GN_SMS_MAX_LENGTH) {
-				fprintf(stderr, _("Input too long!\n"));
+				fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), input_len, 255 * GN_SMS_MAX_LENGTH);
 				return -1;
 			}
 			break;
@@ -987,7 +987,7 @@ static int savesms(int argc, char *argv[])
 
 	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
 	if (chars_read < 1) {
-		fprintf(stderr, _("Empty message. Quitting"));
+		fprintf(stderr, _("Empty message. Quitting.\n"));
 		return -1;
 	}
 	if (memory_type[0] != '\0')
@@ -1409,11 +1409,10 @@ static int getsms(int argc, char *argv[])
 						fprintf(stdout,_("%02d00"), message.smsc_time.timezone);
 				}
 				fprintf(stdout, "\n");
-				fprintf(stdout, _("Sender: %s Msg center: %s\n"), message.remote.number, message.smsc.number);
+				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
 				fprintf(stdout, _("Bitmap:\n"));
 				gn_bmp_print(&message.user_data[0].u.bitmap, stdout);
-				fprintf(stdout, _("Text:\n"));
-				fprintf(stdout, "%s\n", message.user_data[1].u.text);
+				fprintf(stdout, _("Text: %s\n\n"), message.user_data[1].u.text);
 				break;
 			default:
 				fprintf(stdout, _("%d. Inbox Message "), message.number);
@@ -1680,7 +1679,7 @@ static int getsecuritycodestatus(void)
 			fprintf(stdout, _("nothing to enter.\n"));
 			break;
 		default:
-			fprintf(stdout, _("Unknown!\n"));
+			fprintf(stdout, _("Unknown\n"));
 			break;
 		}
 	} else
@@ -1934,7 +1933,7 @@ static gn_error SaveBitmapFileDialog(char *FileName, gn_bmp *bitmap, gn_phone *i
 
 	switch (error) {
 	case GN_ERR_FAILED:
-		fprintf(stderr, _("Failed to write file %s\n"), FileName);
+		fprintf(stderr, _("Can't open file %s for writing!\n"), FileName);
 		break;
 	default:
 		break;
@@ -2310,7 +2309,7 @@ static int writetodo(char *argv[])
 
 	f = fopen(argv[0], "r");
 	if (!f) {
-		fprintf(stderr, _("Cannot read file %s\n"), argv[0]);
+		fprintf(stderr, _("Can't open file %s for reading!\n"), argv[0]);
 		return GN_ERR_FAILED;
 	}
 
@@ -2525,7 +2524,7 @@ static int writecalendarnote(char *argv[])
 
 	f = fopen(argv[0], "r");
 	if (f == NULL) {
-		fprintf(stderr, _("Cannot read file %s\n"), argv[0]);
+		fprintf(stderr, _("Can't open file %s for reading!\n"), argv[0]);
 		return GN_ERR_FAILED;
 	}
 
@@ -3593,7 +3592,7 @@ static int writephonebook(int argc, char *args[])
 					confirm = 0;
 				}
 			} else {
-				fprintf(stderr, _("Error (%s)\n"), gn_error_print(error));
+				fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 				return -1;
 			}
 		}
@@ -4055,7 +4054,7 @@ static int setspeeddial(char *argv[])
 		entry.memory_type = GN_MT_SM;
 		memory_type_string = "SM";
 	} else {
-		fprintf(stderr, _("Unknown memory type %s!\n"), argv[1]);
+		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[1]);
 		return -1;
 	}
 
@@ -5153,7 +5152,7 @@ static int getfile(int nargc, char *nargv[])
 			f = fopen(nargv[1], "w");
 		}
 		if (!f) {
-			fprintf(stderr, _("Cannot open file %s\n"), filename2);
+			fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 			return GN_ERR_FAILED;
 		}
 		fwrite(fi.file, fi.file_length, 1, f);
@@ -5196,7 +5195,7 @@ static int getfilebyid(int nargc, char *nargv[])
 				f = fopen(nargv[1], "w");
 			}
 			if (!f) {
-				fprintf(stderr, _("Cannot open file %s\n"), filename2);
+				fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 				return GN_ERR_FAILED;
 			}
 			fwrite(fi.file, fi.file_length, 1, f);
@@ -5238,7 +5237,7 @@ static int getallfiles(char *path)
 				fprintf(stdout, _("Got file %s.\n"),filename2);
 				f = fopen(filename2, "w");
 				if (!f) {
-					fprintf(stderr, _("Cannot open file %s\n"), filename2);
+					fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 					return GN_ERR_FAILED;
 				}
 				fwrite(data.file->file, data.file->file_length, 1, f);
@@ -5269,14 +5268,14 @@ static int putfile(int nargc, char *nargv[])
 
 	f = fopen(nargv[0], "rb");
 	if (!f || fseek(f, 0, SEEK_END)) {
-		fprintf(stderr, _("Cannot open file %s\n"), nargv[0]);
+		fprintf(stderr, _("Can't open file %s for reading!\n"), nargv[0]);
 		return GN_ERR_FAILED;
 	}
 	fi.file_length = ftell(f);
 	rewind(f);
 	fi.file = malloc(fi.file_length);
 	if (fread(fi.file, 1, fi.file_length, f) != fi.file_length) {
-		fprintf(stderr, _("Cannot read file %s\n"), nargv[0]);
+		fprintf(stderr, _("Can't open file %s for reading!\n"), nargv[0]);
 		return GN_ERR_FAILED;
 	}
 
@@ -5322,7 +5321,7 @@ static int install_log_handler(void)
 #ifdef WIN32
 		home = ".";
 #else
-		fprintf(stderr, _("HOME variable missing\n"));
+		fprintf(stderr, _("ERROR: Can't find HOME environment variable!\n"));
 		return -1;
 #endif
 	}

@@ -229,7 +229,7 @@ int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number)
 	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead."));
 	file = fopen(filename, "r");
 	if (!file) {
-		fprintf(stderr, _("File cannot be opened!\n"));
+		fprintf(stderr, _("Can't open file %s for reading!\n"), filename);
 		return -1;
 	}
 
@@ -287,7 +287,7 @@ int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number)
 	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead."));
 	file = fopen(filename, "r");
 	if (!file) {
-		fprintf(stderr, _("File cannot be opened!\n"));
+		fprintf(stderr, _("Can't open file %s for reading!\n"), filename);
 		return -1;
 	}
 

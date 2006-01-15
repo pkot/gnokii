@@ -360,7 +360,7 @@ static inline void DrawSMSReceived(GtkWidget * data)
 
 static inline void DrawWorking(GtkWidget * data)
 {
-	DrawText(data, 40, _("Working ..."));
+	DrawText(data, 40, _("Working..."));
 }
 
 
@@ -549,7 +549,7 @@ static void ParseSMSCenters(void)
 
 		case GN_SMS_MF_Email:
 		case GN_SMS_MF_UCI:
-			row[2] = g_strdup(_("E-Mail"));
+			row[2] = g_strdup(_("Email"));
 			break;
 
 		case GN_SMS_MF_ERMES:
@@ -571,19 +571,19 @@ static void ParseSMSCenters(void)
 
 		switch (configDialogData.sms.smsSetting[i].validity) {
 		case GN_SMS_VP_1H:
-			row[3] = g_strdup(_("1 h"));
+			row[3] = g_strdup(_("1 hour"));
 			break;
 
 		case GN_SMS_VP_6H:
-			row[3] = g_strdup(_("6 h"));
+			row[3] = g_strdup(_("6 hours"));
 			break;
 
 		case GN_SMS_VP_24H:
-			row[3] = g_strdup(_("24 h"));
+			row[3] = g_strdup(_("24 hours"));
 			break;
 
 		case GN_SMS_VP_72H:
-			row[3] = g_strdup(_("72 h"));
+			row[3] = g_strdup(_("72 hours"));
 			break;
 
 		case GN_SMS_VP_1W:
@@ -591,11 +591,11 @@ static void ParseSMSCenters(void)
 			break;
 
 		case GN_SMS_VP_Max:
-			row[3] = g_strdup(_("Max. time"));
+			row[3] = g_strdup(_("Max. Time"));
 			break;
 
 		default:
-			row[3] = g_strdup(_("24 h"));
+			row[3] = g_strdup(_("24 hours"));
 			break;
 		}
 
@@ -1435,7 +1435,7 @@ static void ShowEditSMSSetDialog(GtkWidget * w, gpointer data)
 		gtk_widget_show(item);
 		gtk_menu_append(GTK_MENU(menu), item);
 
-		item = gtk_menu_item_new_with_label(_("E-Mail"));
+		item = gtk_menu_item_new_with_label(_("Email"));
 		gtk_signal_connect(GTK_OBJECT(item), "activate",
 				   GTK_SIGNAL_FUNC(SetFormat), (gpointer) GN_SMS_MF_Email);
 		gtk_widget_show(item);
@@ -1463,25 +1463,25 @@ static void ShowEditSMSSetDialog(GtkWidget * w, gpointer data)
 		gtk_widget_show(item);
 		gtk_menu_append(GTK_MENU(menu), item);
 
-		item = gtk_menu_item_new_with_label(_("1 h"));
+		item = gtk_menu_item_new_with_label(_("1 hour"));
 		gtk_signal_connect(GTK_OBJECT(item), "activate",
 				   GTK_SIGNAL_FUNC(SetValidity), (gpointer) GN_SMS_VP_1H);
 		gtk_widget_show(item);
 		gtk_menu_append(GTK_MENU(menu), item);
 
-		item = gtk_menu_item_new_with_label(_("6 h"));
+		item = gtk_menu_item_new_with_label(_("6 hours"));
 		gtk_signal_connect(GTK_OBJECT(item), "activate",
 				   GTK_SIGNAL_FUNC(SetValidity), (gpointer) GN_SMS_VP_6H);
 		gtk_widget_show(item);
 		gtk_menu_append(GTK_MENU(menu), item);
 
-		item = gtk_menu_item_new_with_label(_("24 h"));
+		item = gtk_menu_item_new_with_label(_("24 hours"));
 		gtk_signal_connect(GTK_OBJECT(item), "activate",
 				   GTK_SIGNAL_FUNC(SetValidity), (gpointer) GN_SMS_VP_24H);
 		gtk_widget_show(item);
 		gtk_menu_append(GTK_MENU(menu), item);
 
-		item = gtk_menu_item_new_with_label(_("72 h"));
+		item = gtk_menu_item_new_with_label(_("72 hours"));
 		gtk_signal_connect(GTK_OBJECT(item), "activate",
 				   GTK_SIGNAL_FUNC(SetValidity), (gpointer) GN_SMS_VP_72H);
 		gtk_widget_show(item);
@@ -2038,7 +2038,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 2);
 	gtk_widget_show(hbox);
 
-	label = gtk_label_new(_("E-Mail:"));
+	label = gtk_label_new(_("Email:"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
