@@ -492,6 +492,15 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 		return false;
 	}
 
+	/* There is no global setting. You need to set irda_string
+	 * in each section if you want it working */
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "irda_string")))
+		strcpy(cfg->irda_string, "");
+	else {
+		snprintf(cfg->irda_string, sizeof(cfg->irda_string), "%s", val);
+		printf("Setting irda_string in section %s to %s\n", section, cfg->irda_string);
+	}
+
 	return true;
 }
 
@@ -600,6 +609,7 @@ static int cfg_file_or_memory_read(const char *file, const char **lines)
 	gn_config_default.hardware_handshake = false;
 	gn_config_default.require_dcd = false;
 	gn_config_default.smsc_timeout = -1;
+	strcpy(gn_config_default.irda_string, "");
 	strcpy(gn_config_default.connect_script, "");
 	strcpy(gn_config_default.disconnect_script, "");
 	gn_config_default.rfcomm_cn = 1;

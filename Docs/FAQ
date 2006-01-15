@@ -290,13 +290,10 @@ nk7110.c:1610:  /* 6210/7110 needs to seek the first free pos to inhabit with ne
 
 {"6211",  "NPL-3", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS }
 
-   This is almost everything. If you have Linux and need to enable the IrDA
-   connection, edit the common/devices/unixirda.c file. Find there the
-   phone[] table. It contains the numerous Nokia models mentioned. Add your
-   phone name there. In our case: "Nokia 6211". Recompile the sources and
-   add "model = 6211" (according to your Nokia model) to the config and try
-   if it works. In any case let us know (to the gnokii mailing list) about
-   the result.
+   This is almost everything. Now recompile the sources and add
+   "model = 6211" (according to your Nokia model) to the config and try if
+   it works. In any case let us know (to the gnokii mailing list) about the
+   result.
 
 -------------------------------------------------------------------------------
 Q. I'm using the Win32 gnokii distribution and got the error "Couldn't open

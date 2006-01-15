@@ -49,6 +49,17 @@ model = 6510
 # There are few main models that should make use of the certain drivers.
 # These are: 6110, 7110, 6510, 3110, 2110, 6160.
 
+# Set IrDA device name.
+# If you use irda connection you may want gnokii to autodetect the irda
+# device it connects to. This is fine for most of the cases. if you have
+# more than one device in range you may want to give manually the device
+# name so gnokii correctly recognizes it. Use the name that you can see
+# in the discovery log when the phone with infrared is in the range of
+# your irda port.
+# Note that you need to set this for each phone_ section separately. It
+# isn't nested from the global section.
+# irda_string = Nokia 6610i
+
 # Initlength controls the number of characters sent to the
 # phone during initialisation.  You can either set it to
 # the word "default" or a positive integer.

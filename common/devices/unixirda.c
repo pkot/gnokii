@@ -56,49 +56,8 @@
 #define DISCOVERY_TIMEOUT	60.0
 #define DISCOVERY_SLEEP		0.4
 
-static char *phone[] = {
-	"Nokia 3360",
-	"Nokia 3650",
-	"Nokia 5100",
-	"Nokia 5140",
-	"Nokia 5140i",
-	"Nokia 6020",
-	"Nokia 6021",
-	"Nokia 6100",
-	"Nokia 6101",
-	"Nokia 6170",
-	"Nokia 6210",
-	"Nokia 6220",
-	"Nokia 6230",
-	"Nokia 6230i",
-	"Nokia 6235",
-	"Nokia 6250",
-	"Nokia 6310",
-	"Nokia 6310i",
-	"Nokia 6360",
-	"Nokia 6500",
-	"Nokia 6510",
-	"Nokia 6610",
-	"Nokia 6610i",
-	"Nokia 6650",
-	"Nokia 6800",
-	"Nokia 6810",
-	"Nokia 6820",
-	"Nokia 6820b",
-	"Nokia 7110",
-	"Nokia 7190",
-	"Nokia 7210",
-	"Nokia 7250",
-	"Nokia 7250i",
-	"Nokia 7650",
-	"Nokia 8210",
-	"Nokia 8250",
-	"Nokia 8290",
-	"Nokia 8310",
-	"Nokia 8850",
-	"Nokia 9110",
-	"Nokia 9210"
-};
+/* Maximum number of devices we look for */
+#define MAX_DEVICES		20
 
 static double d_time(void)
 {
@@ -126,38 +85,42 @@ static double d_sleep(double s)
 	return time;
 }
 
-static int irda_discover_device(void)
+static int irda_discover_device(struct gn_statemachine *state)
 {
-	struct irda_device_list	*list;
-	struct irda_device_info	*dev;
-	unsigned char		*buf;
-	int			s, len, i, j, daddr = -1, fd;
-	double			t1, t2;
-	int phones = sizeof(phone) / sizeof(*phone);
+	struct irda_device_list *list;
+	struct irda_device_info *dev;
+	unsigned char *buf;
+	int s, len, i, daddr = -1, fd;
+	double t1, t2;
 
 	fd = socket(AF_IRDA, SOCK_STREAM, 0);
 
-	len = sizeof(*list) + sizeof(*dev) * 10;	/* 10 = max devices in discover */
+	len = sizeof(*list) + sizeof(*dev) * MAX_DEVICES;
 	buf = malloc(len);
 	list = (struct irda_device_list *)buf;
 	dev = list->dev;
 
 	t1 = d_time();
 
+	dprintf("Expecting: %s\n", state->config.irda_string);
+
 	do {
 		s = len;
 		memset(buf, 0, s);
 
-		if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &s) == 0) {
+		if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, (socklen_t *)&s) == 0) {
 			for (i = 0; (i < list->len) && (daddr == -1); i++) {
-				for (j = 0; (j < phones) && (daddr == -1); j++) {
-					if (strncmp(dev[i].info, phone[j], INFO_LEN) == 0) {
+				if (strlen(state->config.irda_string) == 0) {
+					/* We take first entry */
+					daddr = dev[i].daddr;
+					dprintf("Default: %s\t%x\n", dev[i].info, dev[i].daddr);
+				} else {
+					if (strncmp(dev[i].info, state->config.irda_string, INFO_LEN) == 0) {
 						daddr = dev[i].daddr;
-						dprintf("%s\t%x\n", dev[i].info, dev[i].daddr);
+						dprintf("Matching: %s\t%x\n", dev[i].info, dev[i].daddr);
+					} else {
+						dprintf("Not matching: %s\t%x\n", dev[i].info, dev[i].daddr);
 					}
-				}
-				if (daddr == -1) {
-					dprintf("unknown: %s\t%x\n", dev[i].info, dev[i].daddr);
 				}
 			}
 		}
@@ -177,10 +140,10 @@ static int irda_discover_device(void)
 
 int irda_open(struct gn_statemachine *state)
 {
-	struct sockaddr_irda	peer;
-	int			fd = -1, daddr;
+	struct sockaddr_irda peer;
+	int fd = -1, daddr;
 
-	daddr = irda_discover_device();			/* discover the devices */
+	daddr = irda_discover_device(state); /* discover the devices */
 
 	if (daddr != -1)  {
 		if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {

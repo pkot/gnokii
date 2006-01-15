@@ -26,6 +26,7 @@
     o CVS access has changed on savannah                (Pawel Kot)
     o non Nokia phones are supported by AT driver -- express it
       more verbosly                                     (Pawel Kot)
+    o document irda_string variable                     (Pawel Kot)
  * xgnokii updates
     o make strings translatable                     (Daniele Forsi)
     o avoid coredump on the empty ringtone list     (Daniele Forsi,
@@ -45,6 +46,8 @@
                                                    (Michael Klemme)
     o use first ldif subentry number as the default number
       (bug #14689)                                 (Michael Klemme)
+    o get rid of the irda phones[] table; either autodetect or
+      use the config variale (irda_string)              (Pawel Kot)
  * gnokii updates
     o putfile() should use binary open() mode (bug #15031)
                                                         (Pawel Kot)

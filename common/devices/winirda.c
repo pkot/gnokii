@@ -43,68 +43,28 @@
 #define DISCOVERY_TIMEOUT	60000
 #define DISCOVERY_SLEEP		400
 
-static char *phone[] = {
-	"Nokia 3360",
-	"Nokia 3650",
-	"Nokia 5100",
-	"Nokia 5140",
-	"Nokia 5140i",
-	"Nokia 6020",
-	"Nokia 6021",
-	"Nokia 6100",
-	"Nokia 6101",
-	"Nokia 6170",
-	"Nokia 6210",
-	"Nokia 6220",
-	"Nokia 6230",
-	"Nokia 6230i",
-	"Nokia 6235",
-	"Nokia 6250",
-	"Nokia 6310",
-	"Nokia 6310i",
-	"Nokia 6360",
-	"Nokia 6500",
-	"Nokia 6510",
-	"Nokia 6610",
-	"Nokia 6610i",
-	"Nokia 6650",
-	"Nokia 6800",
-	"Nokia 6810",
-	"Nokia 6820",
-	"Nokia 6820b",
-	"Nokia 7110",
-	"Nokia 7190",
-	"Nokia 7210",
-	"Nokia 7250",
-	"Nokia 7250i",
-	"Nokia 7650",
-	"Nokia 8210",
-	"Nokia 8250",
-	"Nokia 8290",
-	"Nokia 8310",
-	"Nokia 8850",
-	"Nokia 9110",
-	"Nokia 9210"
-};
+/* Maximum number of devices we look for */
+#define MAX_DEVICES		20
 
 #define INVALID_DADDR	((DWORD)-1L)
 
-static DWORD irda_discover_device(SOCKET fd)
+static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
 {
-	DEVICELIST			*list;
-	IRDA_DEVICE_INFO	*dev;
-	unsigned char		*buf;
-	int			s, len, i, j;
-	DWORD		daddr = INVALID_DADDR;
-	DWORD		t1, t2;
-	int phones = sizeof(phone) / sizeof(*phone);
+	DEVICELIST *list;
+	IRDA_DEVICE_INFO *dev;
+	unsigned char *buf;
+	int s, len, i;
+	DWORD daddr = INVALID_DADDR;
+	DWORD t1, t2;
 
-	len = sizeof(*list) + sizeof(*dev) * 9;	/* 10 = max devices in discover */
+	len = sizeof(*list) + sizeof(*dev) * MAX_DEVICES;
 	buf = malloc(len);
 	list = (DEVICELIST *)buf;
 	dev = list->Device;
 
 	t1 = timeGetTime();
+
+	dprintf("Expecting: %s\n", state->config.irda_string);
 
 	do {
 		s = len;
@@ -112,13 +72,17 @@ static DWORD irda_discover_device(SOCKET fd)
 
 		if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &s) != SOCKET_ERROR) {
 			for (i = 0; (i < list->numDevice) && (daddr == INVALID_DADDR); i++) {
-				for (j = 0; (j < phones) && (daddr == INVALID_DADDR); j++) {
-					if (strncmp(dev[i].irdaDeviceName, phone[j], INFO_LEN) == 0) {
+				if (strlen(state->config.irda_string) == 0) {
+					/* We take first entry */
+					daddr = *(DWORD*)dev[i].irdaDeviceID;
+					dprintf("Default: %s\t%x\n", dev[i].irdaDeviceName, *(DWORD*)dev[i].irdaDeviceID);
+				} else {
+					if (strncmp(dev[i].irdaDeviceName, state->config.irda_string, INFO_LEN) == 0) {
 						daddr = *(DWORD*)dev[i].irdaDeviceID;
+						dprintf("Matching: %s\t%x\n", dev[i].irdaDeviceName, *(DWORD*)dev[i].irdaDeviceID);
+					} else {
+						dprintf("Not matching: %s\t%x\n", dev[i].irdaDeviceName, *(DWORD*)dev[i].irdaDeviceID);
 					}
-				}
-				if (daddr == INVALID_DADDR) {
-					dprintf("unknown: %s\n", dev[i].irdaDeviceName);
 				}
 			}
 		}
@@ -138,14 +102,14 @@ static DWORD irda_discover_device(SOCKET fd)
 int irda_open(struct gn_statemachine *state)
 {
 	WSADATA wsaData;
-	SOCKADDR_IRDA	peer;
+	SOCKADDR_IRDA peer;
 	SOCKET fd = INVALID_SOCKET;
 	DWORD daddr = INVALID_DADDR;
 	int x;
 
 	if (WSAStartup(MAKEWORD(2,0), &wsaData) == 0) {
-		fd = socket(AF_IRDA, SOCK_STREAM, 0);	/* Create socket */
-		daddr = irda_discover_device(fd);			/* discover the devices */
+		fd = socket(AF_IRDA, SOCK_STREAM, 0); /* Create socket */
+		daddr = irda_discover_device(state, fd); /* discover the devices */
 		if (daddr != INVALID_DADDR)  {
 			peer.irdaAddressFamily = AF_IRDA;
 			*(DWORD*)peer.irdaDeviceID = daddr;
