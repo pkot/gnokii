@@ -1,3 +1,13 @@
+* Sun Jan 15 2006 Daniele Forsi
+- Changed again some messages to be consistent across the whole project
+
+
+* Sat Jan  7 2006 Daniele Forsi
+- Added smsd/file.c smsd/mysql.c smsd/pq.c smsd/smsd.c to the list of
+  translatable files in po/POTFILES.in (they were already gettextized)
+- Changed some messages to be consistent across the whole project
+
+
 * Wed Aug 10 2005 Jan Derfinak
 - Switch to glib2.
 

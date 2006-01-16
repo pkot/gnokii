@@ -1,3 +1,9 @@
+* Sun 15 Jan 2006 Daniele Forsi
+- Changed again some messages to be consistent across the whole project
+
+* Sat 07 Jan 2006 Daniele Forsi
+- Changed some messages to be consistent across the whole project
+
 * Wed 10 Aug 2005 Jan Derfinak
 - First phase of moving to gtk2. -DGTK_ENABLE_BROKEN is needed to compile.
   Based on patch from Bastien Nocera.

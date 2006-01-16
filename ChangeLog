@@ -28,12 +28,17 @@
       more verbosly                                     (Pawel Kot)
     o document irda_string variable                     (Pawel Kot)
  * xgnokii updates
-    o make strings translatable                     (Daniele Forsi)
+    o make strings translatable and change some to be consistent
+      across the whole project                      (Daniele Forsi)
     o avoid coredump on the empty ringtone list     (Daniele Forsi,
                                                          Pawel Kot)
  * gnokiid updates
+    o add gnokiid/gnokiid.c to the list of translatable files in
+      po/POTFILES.in                                (Daniele Forsi)
     o print strings more compliant to GSM standard  (Daniele Forsi)
  * libgnokii updates
+    o change some translatable strings to be consistent across the
+      whole project and add files to po/POTFILES.in (Daniele Forsi)
     o end time and location support added to the calendar
                                                    (BORBELY Zoltan)
     o support for caller groups in ldif output (patch #4794)
@@ -49,7 +54,9 @@
     o get rid of the irda phones[] table; either autodetect or
       use the config variale (irda_string)              (Pawel Kot)
  * gnokii updates
-    o putfile() should use binary open() mode (bug #15031)
+    o change some translatable strings to be consistent across the
+      whole project                                 (Daniele Forsi)
+   o putfile() should use binary open() mode (bug #15031)
                                                         (Pawel Kot)
     o with multiple entries for --writephonebook when no locations
       are given don't write them all to the same location
