@@ -28,6 +28,8 @@
       more verbosly                                     (Pawel Kot)
     o document irda_string variable                     (Pawel Kot)
  * xgnokii updates
+    o make the progress dialog while loading the phonebook more
+      compatible with gtk+-2.0                      (Daniele Forsi)
     o make strings translatable and change some to be consistent
       across the whole project                      (Daniele Forsi)
     o avoid coredump on the empty ringtone list     (Daniele Forsi,

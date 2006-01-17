@@ -1,3 +1,8 @@
+* Tue 17 Jan 2006 Daniele Forsi
+- Changed CreateProgressDialog() to use the vbox provided by the dialog,
+  since creating a new vbox was no more possible (a GtkDialog is a subclass
+  of GtkBin and can only contain one widget, the warning said).
+
 * Sun 15 Jan 2006 Daniele Forsi
 - Changed again some messages to be consistent across the whole project
 
