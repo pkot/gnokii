@@ -21,7 +21,8 @@
     o end time and location support added to the calendar
                                                    (BORBELY Zoltan)
  * documentation updates
-    o Swedish translation added                   (Daniel Nylander)
+    o Italian translation updated                   (Daniele Forsi)
+    o Swedish translation added and updated       (Daniel Nylander)
     o xgnokii requires now glib-2.0 and gtk+-2.0        (Pawel Kot)
     o CVS access has changed on savannah                (Pawel Kot)
     o non Nokia phones are supported by AT driver -- express it

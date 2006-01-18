@@ -5,22 +5,20 @@
 #
 msgid ""
 msgstr ""
-"Project-Id-Version: gnokii 0.6.10\n"
+"Project-Id-Version: gnokii cvs\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2006-01-15 15:28+0100\n"
-"PO-Revision-Date: 2005-11-21 23:21+0100\n"
+"POT-Creation-Date: 2006-01-18 22:44+0100\n"
+"PO-Revision-Date: 2006-01-17 23:33+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
-"Language-Team: Swedish <sv@li.org>\n"
+"Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Poedit-Language: swe\n"
-"X-Poedit-Country: swe\n"
 
 #: common/cfgreader.c:173
-#, fuzzy, c-format
+#, c-format
 msgid "Orphaned line: %s\n"
-msgstr "Knappsignaler: %s\n"
+msgstr ""
 
 #: common/cfgreader.c:413 common/cfgreader.c:424 common/cfgreader.c:432
 #: common/cfgreader.c:439 common/cfgreader.c:458 common/cfgreader.c:467
@@ -34,28 +32,28 @@ msgstr "Inget stöd för [%s] %s värde \"%s\"\n"
 msgid "Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value\n"
 msgstr "Okänd [%s] inställning \"%s\", använd värdet \"%s\" eller \"%s\"\n"
 
-#: common/cfgreader.c:510
+#: common/cfgreader.c:519
 #, c-format
 msgid "Unrecognized [logging] option \"%s\", use \"off\" or \"on\" value\n"
 msgstr ""
 "Okänd [logging] flagga \"%s\", använd \"off\" eller \"on\" som värden\n"
 
-#: common/cfgreader.c:543
+#: common/cfgreader.c:552
 #, c-format
 msgid "Couldn't open %s or %s.\n"
 msgstr "Kunde inte öppna %s eller %s.\n"
 
-#: common/cfgreader.c:609
-#, fuzzy, c-format
+#: common/cfgreader.c:619
+#, c-format
 msgid "No [global] section in %s config file.\n"
-msgstr "Ingen global sektion i konfigurationsfilen %s,\n"
+msgstr "Ingen [global]-sektion i konfigurationsfil %s.\n"
 
-#: common/cfgreader.c:654
+#: common/cfgreader.c:664
 #, c-format
 msgid "Config error - no model specified.\n"
 msgstr "Konfigurationsfel - ingen modell angiven.\n"
 
-#: common/cfgreader.c:658
+#: common/cfgreader.c:668
 #, c-format
 msgid "Config error - no port specified.\n"
 msgstr "Konfigurationsfel - ingen port angiven.\n"
@@ -98,74 +96,73 @@ msgstr "Initiering av GSM/FBUS misslyckades! (Okänd modell?). Avslutar.\n"
 
 #: common/devices/tcp.c:81
 msgid "Gnokii tcp_open: socket()"
-msgstr ""
+msgstr "Gnokii tcp_open: socket()"
 
 #: common/devices/tcp.c:90
 #, c-format
 msgid "Gnokii tcp_open: colon (':') not found in connect strings \"%s\"!\n"
 msgstr ""
+"Gnokii tcp_open: kolon (\":\") hittades inte i anslutningssträngarna \"%s"
+"\"!\n"
 
 #: common/devices/tcp.c:98
 #, c-format
 msgid "Gnokii tcp_open: Port string \"%s\" not valid for IPv4 connection!\n"
-msgstr ""
+msgstr "Gnokii tcp_open: Portsträng \"%s\" ogiltig för IPv4-anslutning!\n"
 
 #: common/devices/tcp.c:102
 #, c-format
 msgid "Gnokii tcp_open: Unknown host \"%s\"!\n"
-msgstr ""
+msgstr "Gnokii tcp_open: Okänd värd \"%s\"!\n"
 
 #: common/devices/tcp.c:106
 #, c-format
 msgid "Gnokii tcp_open: Address resolve for host \"%s\" not compatible!\n"
-msgstr ""
+msgstr "Gnokii tcp_open: Adressuppslag för värd \"%s\" ej kompatibel!\n"
 
 #: common/devices/tcp.c:116
 msgid "Gnokii tcp_open: connect()"
-msgstr ""
+msgstr "Gnokii tcp_open: connect()"
 
 #: common/devices/tcp.c:128
 #, c-format
 msgid "Gnokii tcp_close: disconnect_script\n"
-msgstr ""
+msgstr "Gnokii tcp_close: disconnect_script\n"
 
 #: common/devices/tcp.c:151
 #, c-format
 msgid "Gnokii tcp_opendevice: connect_script\n"
-msgstr ""
+msgstr "Gnokii tcp_opendevice: connect_script\n"
 
 #: common/devices/tcp.c:161
 msgid "Gnokii tcp_opendevice: fnctl(F_SETOWN)"
-msgstr ""
+msgstr "Gnokii tcp_opendevice: fnctl(F_SETOWN)"
 
 #: common/devices/tcp.c:184
 msgid "Gnokii tcp_opendevice: fnctl(F_SETFL)"
-msgstr ""
+msgstr "Gnokii tcp_opendevice: fnctl(F_SETFL)"
 
 #: common/devices/unixbluetooth.c:105
 #, c-format
 msgid "Invalid bluetooth address \"%s\"\n"
-msgstr ""
+msgstr "Ogiltig bluetooth-adress \"%s\"\n"
 
 #: common/devices/unixbluetooth.c:110
-#, fuzzy
 msgid "Can't create socket"
-msgstr "Kan inte starta %s\n"
+msgstr "Kan inte skapa uttag"
 
 #: common/devices/unixbluetooth.c:118
-#, fuzzy
 msgid "Can't bind socket"
-msgstr "Kan inte hitta mönster!"
+msgstr "Kan inte binda uttag"
 
 #: common/devices/unixbluetooth.c:128
-#, fuzzy
 msgid "Can't connect"
-msgstr "Anslutning"
+msgstr "Kan inte ansluta"
 
-#: common/devices/unixirda.c:187
+#: common/devices/unixirda.c:150
 #, c-format
 msgid "Virtual IrCOMM device unsupported under Linux\n"
-msgstr ""
+msgstr "Virtuell IrCOMM-enhet stöds inte under Linux\n"
 
 #: common/devices/unixserial.c:129
 #, c-format
@@ -178,7 +175,7 @@ msgid "device_script(\"%s\"): file descriptor preparation failure: %s\n"
 msgstr "device_script(\"%s\"): fel vid förberedning av file descriptor: %s\n"
 
 #: common/devices/unixserial.c:142
-#, fuzzy, c-format
+#, c-format
 msgid "device_script(\"%s\"): script execution failure: %s\n"
 msgstr "device_script(\"%s\"): fel vid start av skript: %s\n"
 
@@ -206,15 +203,15 @@ msgstr "Seriellportshastigheten %d stöds inte!\n"
 msgid "ERROR: Modem DCD is down and global/require_dcd parameter is set!\n"
 msgstr "FEL: Modem DCD är nere och global/require_dcd-parametern är satt!\n"
 
-#: common/devices/winirda.c:170
+#: common/devices/winirda.c:134
 #, c-format
 msgid "Not WINSOCK2 :( - Get an upgrade dude!"
-msgstr ""
+msgstr "Ingen WINSOCK2 :( - Uppgradera!"
 
 #: vcal.lx:131 common/vcal.lx:131
 #, c-format
 msgid "Error: Invalid calendar note number!\n"
-msgstr ""
+msgstr "Fel: Ogiltigt nummer för kalendernotering!\n"
 
 #: vcal.lx:229 vcal.lx:287 common/vcal.lx:229 common/vcal.lx:287
 #, c-format
@@ -227,12 +224,12 @@ msgstr ""
 
 #: vcal.lx:232 vcal.lx:290 common/vcal.lx:232 common/vcal.lx:290
 #: gnokii/gnokii.c:2312 gnokii/gnokii.c:2527 gnokii/gnokii.c:5271
-#: gnokii/gnokii.c:5278 smsd/file.c:183 xgnokii/xgnokii_contacts.c:2810
+#: gnokii/gnokii.c:5278 smsd/file.c:183 xgnokii/xgnokii_contacts.c:2806
 #: xgnokii/xgnokii_dtmf.c:99 xgnokii/xgnokii_logos.c:1391
 #: xgnokii/xgnokii_speed.c:332
-#, fuzzy, c-format
+#, c-format
 msgid "Can't open file %s for reading!\n"
-msgstr "Kan inte öppna filen %s för läsning!"
+msgstr "Kan inte öppna filen %s för läsning!\n"
 
 #: vcal.lx:241 vcal.lx:299 common/vcal.lx:241 common/vcal.lx:299
 #, c-format
@@ -240,157 +237,148 @@ msgid "Error parsing vCalendar file!\n"
 msgstr "Fel vid tolkning av vCalendar-fil!\n"
 
 #: common/gsm-common.c:86
-#, fuzzy
 msgid "Internal memory"
-msgstr "Telefonminne..."
+msgstr "Internminne"
 
 #: common/gsm-common.c:87
 msgid "SIM card"
-msgstr ""
+msgstr "SIM-kort"
 
 #: common/gsm-common.c:88
-#, fuzzy
 msgid "Fixed dial numbers"
-msgstr "Faxnummer: "
+msgstr ""
 
 #: common/gsm-common.c:89
-#, fuzzy
 msgid "Own numbers"
-msgstr "Nummer"
+msgstr "Egna nummer"
 
 #: common/gsm-common.c:90
-#, fuzzy
 msgid "Emergency numbers"
-msgstr "Centernummer"
+msgstr "Larmnummer"
 
 #: common/gsm-common.c:91
-#, fuzzy
 msgid "Dialed numbers"
-msgstr "Faxnummer: "
+msgstr "Ringda nummer"
 
 #: common/gsm-common.c:92
-#, fuzzy
 msgid "Received numbers"
-msgstr "SMS mottaget från nummer: %s\n"
+msgstr "Mottagna nummer"
 
 #: common/gsm-common.c:93
-#, fuzzy
 msgid "Missed numbers"
-msgstr "Arbetsnummer: "
+msgstr "Missade nummer"
 
 #: common/gsm-common.c:94
 msgid "Last dialed"
-msgstr ""
+msgstr "Senaste uppringda"
 
 #: common/gsm-common.c:95
 msgid "Combined ME and SIM phonebook"
-msgstr ""
+msgstr "Kombinerade ME- och SIM-kontakter"
 
 #: common/gsm-common.c:96
-#, fuzzy
 msgid "Computer memory"
-msgstr "Telefonminne..."
+msgstr "Datorminne"
 
 #: common/gsm-common.c:97
-#, fuzzy
 msgid "Currently selected memory"
-msgstr "Kan inte allokera minne!"
+msgstr "Aktuellt minne"
 
 #: common/gsm-common.c:98
 msgid "SMS Inbox"
-msgstr ""
+msgstr "SMS-inkorg"
 
 #: common/gsm-common.c:99
 msgid "SMS Outbox"
-msgstr ""
+msgstr "SMS-utkorg"
 
 #: common/gsm-common.c:100
 msgid "SMS Archive"
-msgstr ""
+msgstr "SMS-arkiv"
 
 #: common/gsm-common.c:101
 msgid "SMS Templates"
-msgstr ""
+msgstr "SMS-mallar"
 
 #: common/gsm-common.c:102
 msgid "SMS Folder 1"
-msgstr ""
+msgstr "SMS-mapp 1"
 
 #: common/gsm-common.c:103
 msgid "SMS Folder 2"
-msgstr ""
+msgstr "SMS-mapp 2"
 
 #: common/gsm-common.c:104
 msgid "SMS Folder 3"
-msgstr ""
+msgstr "SMS-mapp 3"
 
 #: common/gsm-common.c:105
 msgid "SMS Folder 4"
-msgstr ""
+msgstr "SMS-mapp 4"
 
 #: common/gsm-common.c:106
 msgid "SMS Folder 5"
-msgstr ""
+msgstr "SMS-mapp 5"
 
 #: common/gsm-common.c:107
 msgid "SMS Folder 6"
-msgstr ""
+msgstr "SMS-mapp 6"
 
 #: common/gsm-common.c:108
 msgid "SMS Folder 7"
-msgstr ""
+msgstr "SMS-mapp 7"
 
 #: common/gsm-common.c:109
 msgid "SMS Folder 8"
-msgstr ""
+msgstr "SMS-mapp 8"
 
 #: common/gsm-common.c:110
 msgid "SMS Folder 9"
-msgstr ""
+msgstr "SMS-mapp 9"
 
 #: common/gsm-common.c:111
 msgid "SMS Folder 10"
-msgstr ""
+msgstr "SMS-mapp 10"
 
 #: common/gsm-common.c:112
 msgid "SMS Folder 11"
-msgstr ""
+msgstr "SMS-mapp 11"
 
 #: common/gsm-common.c:113
 msgid "SMS Folder 12"
-msgstr ""
+msgstr "SMS-mapp 12"
 
 #: common/gsm-common.c:114
 msgid "SMS Folder 13"
-msgstr ""
+msgstr "SMS-mapp 13"
 
 #: common/gsm-common.c:115
 msgid "SMS Folder 14"
-msgstr ""
+msgstr "SMS-mapp 14"
 
 #: common/gsm-common.c:116
 msgid "SMS Folder 15"
-msgstr ""
+msgstr "SMS-mapp 15"
 
 #: common/gsm-common.c:117
 msgid "SMS Folder 16"
-msgstr ""
+msgstr "SMS-mapp 16"
 
 #: common/gsm-common.c:118
 msgid "SMS Folder 17"
-msgstr ""
+msgstr "SMS-mapp 17"
 
 #: common/gsm-common.c:119
 msgid "SMS Folder 18"
-msgstr ""
+msgstr "SMS-mapp 18"
 
 #: common/gsm-common.c:120
 msgid "SMS Folder 19"
-msgstr ""
+msgstr "SMS-mapp 19"
 
 #: common/gsm-common.c:121
 msgid "SMS Folder 20"
-msgstr ""
+msgstr "SMS-mapp 20"
 
 #: common/gsm-common.c:122 common/gsm-sms.c:384 gnokii/gnokii.c:208
 #: gnokii/gnokii.c:220 gnokii/gnokii.c:231 gnokii/gnokii.c:243
@@ -405,134 +393,128 @@ msgstr "Okänd"
 
 #: common/gsm-error.c:42
 msgid "No error."
-msgstr ""
+msgstr "Inga fel."
 
 #: common/gsm-error.c:43
 msgid "Command failed."
-msgstr ""
+msgstr "Kommando misslyckades."
 
 #: common/gsm-error.c:44
 msgid "Model specified isn't known/supported."
-msgstr ""
+msgstr "Angiven modell är inte känd eller finns stöd för."
 
 #: common/gsm-error.c:45
-#, fuzzy
 msgid "Invalid Security code."
-msgstr "väntar på säkerhetskod.\n"
+msgstr "Ogiltig säkerhetskod."
 
 #: common/gsm-error.c:46
 msgid "Problem occurred internal to model specific code."
-msgstr ""
+msgstr "Internt problem inträffade i modellspecifik kod."
 
 #: common/gsm-error.c:47
 msgid "Command called isn't implemented in model."
-msgstr ""
+msgstr "Anropat kommando är inte implementerat i den här modellen."
 
 #: common/gsm-error.c:48
 msgid "Function or connection type not supported by the phone."
-msgstr ""
+msgstr "Funktion eller anslutningstyp stöds inte av telefonen."
 
 #: common/gsm-error.c:49
 msgid "User aborted the action."
-msgstr ""
+msgstr "Användaren avbröt åtgärden."
 
 #: common/gsm-error.c:50
 msgid "Unknown error - well better than nothing!!"
-msgstr ""
+msgstr "Okänt fel - bättre än inget!!"
 
 #: common/gsm-error.c:51
 msgid "The specified memory is full."
-msgstr ""
+msgstr "Det angivna minnet är fullt."
 
 #: common/gsm-error.c:52
 msgid "Couldn't establish link with phone."
-msgstr ""
+msgstr "Kunde inte etablera länk med telefon."
 
 #: common/gsm-error.c:53
 msgid "Command timed out."
-msgstr ""
+msgstr "Kommando överskred tidsgräns."
 
 #: common/gsm-error.c:54
 msgid "Try again."
-msgstr ""
+msgstr "Försök igen."
 
 #: common/gsm-error.c:55
 msgid "Waiting for the next part of the message."
-msgstr ""
+msgstr "Väntar på nästa del av meddelandet."
 
 #: common/gsm-error.c:56
-#, fuzzy
 msgid "Device not ready."
-msgstr "Enhet redan låst.\n"
+msgstr "Enhet inte klar."
 
 #: common/gsm-error.c:57
 msgid "Command is still being executed."
-msgstr ""
+msgstr "Kommandot körs fortfarande."
 
 #: common/gsm-error.c:58
-#, fuzzy
 msgid "The given memory location is invalid."
-msgstr "Tom minnesplats. Hoppar över.\n"
+msgstr "Angiven minnesplats är ogiltig."
 
 #: common/gsm-error.c:59
 msgid "Invalid type of memory."
-msgstr ""
+msgstr "Ogiltig minnestyp."
 
 #: common/gsm-error.c:60
 msgid "The given location is empty."
-msgstr ""
+msgstr "Den angivna platsen är tom."
 
 #: common/gsm-error.c:61
 msgid "The given entry is too long."
-msgstr ""
+msgstr "Den angivna posten är för lång."
 
 #: common/gsm-error.c:62
-#, fuzzy
 msgid "Data format is not valid."
-msgstr "Format på inmatningsraden är ogiltig\n"
+msgstr "Dataformat är ogiltigt."
 
 #: common/gsm-error.c:63
 msgid "Wrong size of the object."
-msgstr ""
+msgstr "Fel objektstorlek."
 
 #: common/gsm-error.c:64
 msgid "Outgoing call requested reported line busy."
-msgstr ""
+msgstr "Utgående samtal begärdes på upptagen linje."
 
 #: common/gsm-error.c:65
 msgid "No Carrier error during data call setup?"
-msgstr ""
+msgstr "Ingen bärare vid inställning av datasamtal?"
 
 #: common/gsm-error.c:66
 msgid "The current frame isn't handled by the incoming function."
 msgstr ""
 
 #: common/gsm-error.c:67
-#, fuzzy
 msgid "Unsolicited message received."
-msgstr "SMS mottaget"
+msgstr ""
 
 #: common/gsm-error.c:68
 msgid "Attempt to read CB when no new CB received."
-msgstr ""
+msgstr "Försök att läsa CB när ingen ny CB mottogs."
 
 #: common/gsm-error.c:69
 msgid "SIM card missing or damaged."
-msgstr ""
+msgstr "SIM-kort saknas eller är skadat."
 
 #: common/gsm-error.c:70
 msgid "PIN or PUK code required."
-msgstr ""
+msgstr "PIN- eller PUK-kod krävs."
 
 #: common/gsm-error.c:71
-#, fuzzy
 msgid "Unknown error."
-msgstr "Okänd"
+msgstr "Okänt fel."
 
 #: common/gsm-filetypes.c:597
 #, c-format
 msgid "Sorry, gnokii was not compiled with XPM support.\n"
-msgstr ""
+msgstr "Tyvärr, gnokii byggdes inte med stöd för XPM.\n"
 
 #: common/gsm-filetypes.c:1070 gnokii/gnokii.c:1466
 #, c-format
@@ -555,11 +537,11 @@ msgid "no"
 msgstr "nej"
 
 #: common/gsm-filetypes.c:1084 gnokii/gnokii.c:1936 gnokii/gnokii.c:5155
-#: gnokii/gnokii.c:5198 gnokii/gnokii.c:5240 xgnokii/xgnokii_contacts.c:2728
+#: gnokii/gnokii.c:5198 gnokii/gnokii.c:5240 xgnokii/xgnokii_contacts.c:2724
 #: xgnokii/xgnokii_dtmf.c:135 xgnokii/xgnokii_speed.c:425
-#, fuzzy, c-format
+#, c-format
 msgid "Can't open file %s for writing!\n"
-msgstr "Kan inte öppna filen %s för skrivning!"
+msgstr "Kan inte öppna filen %s för skrivning!\n"
 
 #: common/gsm-filetypes.c:1495
 #, c-format
@@ -569,57 +551,57 @@ msgstr "Formatproblem på rad [%s]\n"
 #: common/gsm-filetypes.c:1541
 #, c-format
 msgid "Formatting error: unknown error while reading subentry type\n"
-msgstr ""
+msgstr "Formatfel: okänt fel vid läsning av underposttyp\n"
 
 #: common/gsm-filetypes.c:1545
 #, c-format
 msgid "Formatting error: empty entry type\n"
-msgstr ""
+msgstr "Formatfel: tom posttyp\n"
 
 #: common/gsm-filetypes.c:1555
 #, c-format
 msgid "Formatting error: subentry has only entry type field\n"
-msgstr ""
+msgstr "Formatfel: underpost har endast fält för posttyp\n"
 
 #: common/gsm-filetypes.c:1564
 #, c-format
 msgid "Formatting error: unknown error while reading subentry number type\n"
-msgstr ""
+msgstr "Formatfel: okänt fel vid läsning av typ av underpostnummer\n"
 
 #: common/gsm-filetypes.c:1568
 #, c-format
 msgid "Formatting error: empty number type\n"
-msgstr ""
+msgstr "Formatfel: tom nummertyp\n"
 
 #: common/gsm-filetypes.c:1583 common/gsm-filetypes.c:1606
 #, c-format
 msgid "Formatting error: subentry has only entry and number type fields\n"
-msgstr ""
+msgstr "Formatfel: underpost har endast fält för post och nummertyp\n"
 
 #: common/gsm-filetypes.c:1592
 #, c-format
 msgid "Formatting error: unknown error while reading subentry id\n"
-msgstr ""
+msgstr "Formatfel: okänt fel vid läsning av underpost-id\n"
 
 #: common/gsm-filetypes.c:1596
 #, c-format
 msgid "Formatting error: empty id\n"
-msgstr ""
+msgstr "Formatfel: tomt id\n"
 
 #: common/gsm-filetypes.c:1614
 #, c-format
 msgid "Formatting error: unknown error while reading subentry contents\n"
-msgstr ""
+msgstr "Formatfel: okänt fel vid läsning av underpostens innehåll\n"
 
 #: common/gsm-filetypes.c:1618
 #, c-format
 msgid "Formatting error: empty subentry contents\n"
-msgstr ""
+msgstr "Formatfel: tomt innehåll i underpost\n"
 
 #: common/gsm-filetypes.c:1622
 #, c-format
 msgid "Cannot write to read-only memory (Dialed Numbers)\n"
-msgstr ""
+msgstr "Kan inte skriva till skrivskyddat minne (Ringda nummer)\n"
 
 #: common/gsm-networks.c:795 common/gsm-networks.c:829 smsd/lowlevel.c:101
 #: smsd/lowlevel.c:181 smsd/lowlevel.c:183 xgnokii/xgnokii_lowlevel.c:168
@@ -631,24 +613,20 @@ msgstr "okänd"
 
 #: common/gsm-networks.c:805 common/gsm-networks.c:819
 #: common/gsm-networks.c:839
-#, fuzzy
 msgid "undefined"
-msgstr " (namn definierat)\n"
+msgstr "odefinierad"
 
 #: common/gsm-sms.c:277
-#, fuzzy
 msgid "Delivered"
-msgstr "Leveransrapport"
+msgstr "Levererad"
 
 #: common/gsm-sms.c:290
-#, fuzzy
 msgid "Failed"
-msgstr "/_Fil"
+msgstr "Misslyckades"
 
 #: common/gsm-sms.c:357
-#, fuzzy
 msgid "Pending"
-msgstr "Stigande"
+msgstr "Avvaktar"
 
 #: common/gsm-statemachine.c:377
 msgid ""
@@ -658,20 +636,19 @@ msgstr ""
 
 #: common/gsm-statemachine.c:380
 msgid "reply: "
-msgstr ""
+msgstr "svar: "
 
 #: common/gsm-statemachine.c:383 common/phones/nokia.c:669
 msgid "Please read Docs/Bugs and send a bug report!\n"
-msgstr ""
+msgstr "Vänligen läs Docs/Bugs och skicka in en felrapport!\n"
 
 #: common/links/atbus.c:71
 msgid "gnokii I/O error"
-msgstr ""
+msgstr "gnokii in/ut-fel"
 
 #: common/links/atbus.c:87
-#, fuzzy
 msgid "Couldn't open ATBUS device"
-msgstr "Kunde inte öppna FBUS-enhet"
+msgstr "Kunde inte öppna ATBUS-enhet"
 
 #: common/links/cbus.c:290
 msgid "Couldn't open CBUS device"
@@ -685,21 +662,19 @@ msgstr "Kunde inte öppna FBUS-enhet"
 #: common/links/fbus-3110.c:258
 #, c-format
 msgid "fb3110_tx_frame_send - message too long!\n"
-msgstr ""
+msgstr "fb3110_tx_frame_send - meddelande för långt!\n"
 
 #: common/links/fbus-phonet.c:90
 msgid "Couldn't open PHONET device"
 msgstr "Kunde inte öppna PHONET-enhet"
 
 #: common/links/gnbus.c:299
-#, fuzzy
 msgid "Couldn't open GNBUS device"
-msgstr "Kunde inte öppna FBUS-enhet"
+msgstr "Kunde inte öppna GNBUS-enhet"
 
 #: common/links/m2bus.c:77
-#, fuzzy
 msgid "Couldn't open M2BUS device"
-msgstr "Kunde inte öppna FBUS-enhet"
+msgstr "Kunde inte öppna M2BUS-enhet"
 
 #: common/misc.c:413
 #, c-format
@@ -857,6 +832,13 @@ msgid ""
 "org.\n"
 "See also http://thread.gmane.org/gmane.linux.drivers.gnokii/3195\n"
 msgstr ""
+"Tyvärr, denna funktion är känd att trasa sönder din telefon (Nokia-telefoner "
+"serie 40 v1).\n"
+"Vägrar göra det här. Du kan försöka att använda AT-drivaren. Om du är "
+"tillräckligt modig\n"
+"att testa drivaren, kontakta utvecklarna på adressen gnokii-users@nongnu."
+"org.\n"
+"Se också http://thread.gmane.org/gmane.linux.drivers.gnokii/3195\n"
 
 #: common/phones/nk6510.c:1366
 #, c-format
@@ -865,16 +847,19 @@ msgid ""
 "It may have to be sent to Nokia Service if something fails!\n"
 "Do you really want to continue? "
 msgstr ""
+"Telefoner ur 6510-serien verkar vara känsliga mot felaktiga SMS-meddelanden\n"
+"Den kan behöva skickas in i Nokia för service om något går fel!\n"
+"Vill du verkligen fortsätta?"
 
 #: common/phones/nk6510.c:1369
-#, fuzzy, c-format
+#, c-format
 msgid "(yes/no) "
-msgstr "Skriva över? (ja/nej) "
+msgstr "(ja/nej) "
 
 #: common/phones/nk6510.c:1677 common/phones/nk6510.c:1728
 #, c-format
 msgid "Progress: %d%% completed\n"
-msgstr ""
+msgstr "Förlopp: %d%% klar\n"
 
 #: common/phones/nokia.c:328
 msgid "Tried to activate CONTACT SERVICE\n"
@@ -889,7 +874,7 @@ msgstr ""
 #: common/phones/nokia.c:668
 #, c-format
 msgid "offset: %04x\n"
-msgstr ""
+msgstr "offset: %04x\n"
 
 #: gnokii/gnokii.c:202
 msgid "Ringing"
@@ -1868,7 +1853,7 @@ msgstr "SAMTAL %d PLACERAD PÅ VÄNT\n"
 #: gnokii/gnokii.c:1759
 #, c-format
 msgid "CALL %d RETRIEVED FROM HOLD\n"
-msgstr "SAMTAL %d ÅTERGICK FRÅN VÄNT\n"
+msgstr "SAMTAL %d UPPHÄMTAD FRÅN VÄNT\n"
 
 #: gnokii/gnokii.c:1784
 #, c-format
@@ -1954,7 +1939,7 @@ msgstr "Ange namn på ny fil: "
 #: gnokii/gnokii.c:1973
 #, c-format
 msgid "Dealer welcome note "
-msgstr ""
+msgstr "Förhandlarens välkomstnotering "
 
 #: gnokii/gnokii.c:1975 gnokii/gnokii.c:1982
 #, c-format
@@ -1972,9 +1957,9 @@ msgid "Welcome note "
 msgstr "Välkomstnotering "
 
 #: gnokii/gnokii.c:1990
-#, fuzzy, c-format
+#, c-format
 msgid "Operator logo for %s (%s) network got successfully\n"
-msgstr "Operatörslogo för %s nätverket (%s) hämtades korrekt\n"
+msgstr "Operatörslogo för nätverket %s (%s) hämtades korrekt\n"
 
 #: gnokii/gnokii.c:1995 gnokii/gnokii.c:2007 gnokii/gnokii.c:2022
 #: gnokii/gnokii.c:2106
@@ -1985,7 +1970,7 @@ msgstr "Ledsen, gnokii känner inte till nätverket %s !\n"
 #: gnokii/gnokii.c:2003
 #, c-format
 msgid "Startup logo got successfully\n"
-msgstr ""
+msgstr "Hämtning av uppstartslogo lyckades\n"
 
 #: gnokii/gnokii.c:2014 gnokii/gnokii.c:2031
 #, c-format
@@ -1995,7 +1980,7 @@ msgstr "Din telefon har ingen logo uppladdad !\n"
 #: gnokii/gnokii.c:2016
 #, c-format
 msgid "Caller logo got successfully\n"
-msgstr ""
+msgstr "Hämtning av logo lyckades\n"
 
 #: gnokii/gnokii.c:2017
 #, c-format
@@ -2111,7 +2096,7 @@ msgid "Failed to load vCalendar file: %s\n"
 msgstr "Misslyckades att läsa in vCalendar-fil: %s\n"
 
 #: gnokii/gnokii.c:2340 gnokii/gnokii.c:2556 gnokii/gnokii.c:4065
-#, fuzzy, c-format
+#, c-format
 msgid "Successfully written!\n"
 msgstr "Skrivning lyckades!\n"
 
@@ -2126,7 +2111,7 @@ msgid "Failed to write todo note: %s\n"
 msgstr "Misslyckades att skriva Att Göra-notering: %s\n"
 
 #: gnokii/gnokii.c:2357
-#, fuzzy, c-format
+#, c-format
 msgid "Successfully deleted all ToDo notes!\n"
 msgstr "Borttagning av alla Att Göra-noteringar lyckades!\n"
 
@@ -2171,14 +2156,14 @@ msgid "   Time: %02d:%02d:%02d\n"
 msgstr "   Tid: %02d:%02d:%02d\n"
 
 #: gnokii/gnokii.c:2445
-#, fuzzy, c-format
+#, c-format
 msgid "   End date: %d-%02d-%02d\n"
-msgstr "   Datum: %d-%02d-%02d\n"
+msgstr "   Slutdatum: %d-%02d-%02d\n"
 
 #: gnokii/gnokii.c:2449
-#, fuzzy, c-format
+#, c-format
 msgid "   End time: %02d:%02d:%02d\n"
-msgstr "   Tid: %02d:%02d:%02d\n"
+msgstr "   Sluttid: %02d:%02d:%02d\n"
 
 #: gnokii/gnokii.c:2455
 #, c-format
@@ -2231,9 +2216,9 @@ msgid "   Phone: %s\n"
 msgstr "   Telefon: %s\n"
 
 #: gnokii/gnokii.c:2496
-#, fuzzy, c-format
+#, c-format
 msgid "   Location: %s\n"
-msgstr "   anslutning: "
+msgstr "   Plats: %s\n"
 
 #: gnokii/gnokii.c:2502
 #, c-format
@@ -2403,7 +2388,7 @@ msgstr "Nätverk: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"
 #: gnokii/gnokii.c:2909
 #, c-format
 msgid "Cell broadcast received on channel %d: %s\n"
-msgstr ""
+msgstr "Cell-broadcast mottogs på kanal %d: %s\n"
 
 #: gnokii/gnokii.c:2918
 #, c-format
@@ -2683,9 +2668,9 @@ msgid "URL: %s\n"
 msgstr "URL: %s\n"
 
 #: gnokii/gnokii.c:3721
-#, fuzzy, c-format
+#, c-format
 msgid "WAP bookmark nr. %d successfully written!\n"
-msgstr "WAP-bokmärke nr. %d nedskriven korrekt!\n"
+msgstr "WAP-bokmärke nr. %d skrevs korrekt!\n"
 
 #: gnokii/gnokii.c:3747
 #, c-format
@@ -2965,7 +2950,7 @@ msgstr "Misslyckades att hämta lista över ringsignaler\n"
 #: gnokii/gnokii.c:4526
 #, c-format
 msgid "First user defined ringtone location: %3d\n"
-msgstr ""
+msgstr "Plats för första användardefinierade ringsignalen: %3d\n"
 
 #: gnokii/gnokii.c:4527
 #, c-format
@@ -2973,21 +2958,23 @@ msgid ""
 "Number of user defined ringtones: %d\n"
 "\n"
 msgstr ""
+"Antal användardefinierade ringsignaler: %d\n"
+"\n"
 
 #: gnokii/gnokii.c:4528
 #, c-format
 msgid "loc   rwu   name\n"
-msgstr ""
+msgstr "plat  rwu   namn\n"
 
 #: gnokii/gnokii.c:4529
-#, fuzzy, c-format
+#, c-format
 msgid "===============================\n"
-msgstr "============================================\n"
+msgstr "===============================\n"
 
 #: gnokii/gnokii.c:4531
 #, c-format
 msgid "%3d   %d%d%d   %-20s\n"
-msgstr ""
+msgstr "%3d   %d%d%d   %-20s\n"
 
 #: gnokii/gnokii.c:4568
 #, c-format
@@ -3120,19 +3107,19 @@ msgid "Security code is: %s\n"
 msgstr "Säkerhetskod är: %s\n"
 
 #: gnokii/gnokii.c:4884
-#, fuzzy, c-format
+#, c-format
 msgid "Network  Name\n"
-msgstr "Nätverkskod : %s\n"
+msgstr "Nätverksnamn\n"
 
 #: gnokii/gnokii.c:4885
 #, c-format
 msgid "-----------------------------------------\n"
-msgstr ""
+msgstr "-----------------------------------------\n"
 
 #: gnokii/gnokii.c:4887
-#, fuzzy, c-format
+#, c-format
 msgid "%-7s  %s\n"
-msgstr "  %s\n"
+msgstr "%-7s  %s\n"
 
 #: gnokii/gnokii.c:4909
 #, c-format
@@ -3152,7 +3139,7 @@ msgstr "LAC          : %04x\n"
 #: gnokii/gnokii.c:4914
 #, c-format
 msgid "Cell id      : %04x\n"
-msgstr ""
+msgstr "Cell-id      : %04x\n"
 
 #: gnokii/gnokii.c:4934
 #, c-format
@@ -3230,14 +3217,13 @@ msgid "Failed to put file to %s: %s\n"
 msgstr "Misslyckades att spara filen till %s: %s\n"
 
 #: gnokii/gnokii.c:5324 xgnokii/xgnokii_cfg.c:208
-#, fuzzy, c-format
+#, c-format
 msgid "ERROR: Can't find HOME environment variable!\n"
 msgstr "FEL: Kan inte hitta miljövariabeln HOME!\n"
 
 #: gnokii/gnokii.c:5332
-#, fuzzy
 msgid "Cannot open logfile"
-msgstr "Kan inte öppna fil %s\n"
+msgstr "Kan inte öppna loggfil"
 
 #: gnokii/gnokii.c:5653
 #, c-format
@@ -3290,9 +3276,9 @@ msgstr ""
 "          --debug           använder stdin/stdout för virtuell modemkomm\n"
 
 #: smsd/file.c:59 smsd/file.c:90
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot stat file %s!\n"
-msgstr "Kan inte läsa filen %s\n"
+msgstr "Kan inte läsa status på fil %s!\n"
 
 #: smsd/file.c:68
 #, c-format
@@ -3300,10 +3286,12 @@ msgid ""
 "File %s is not regular file or\n"
 "you have not executable permission to this file!\n"
 msgstr ""
+"Fil %s är inte en vanlig fil eller\n"
+"du har inte rättighet att starta denna fil!\n"
 
 #: smsd/file.c:85
 msgid "You have not set spool directory, sms sending is disabled!\n"
-msgstr ""
+msgstr "Du har inte ställt in kökatalog, sändning av sms avstängd!\n"
 
 #: smsd/file.c:99
 #, c-format
@@ -3313,26 +3301,30 @@ msgid ""
 "sms sending is disabled!\n"
 "!"
 msgstr ""
+"Fil %s är ingen katalog eller\n"
+"du har inte läs- eller skrivrättigheter på denna katalog,\n"
+"sändning av sms avstängd!\n"
+"!"
 
 #: smsd/file.c:165
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot open directory %s\n"
-msgstr "Kan inte öppna fil %s\n"
+msgstr "Kan inte öppna katalog %s\n"
 
 #: smsd/file.c:227 smsd/file.c:242
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot unlink %s."
-msgstr "Kan inte låsa upp postlåda %s!"
+msgstr "Kan inte avlänka %s."
 
 #: smsd/file.c:236
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot send sms from file %s\n"
-msgstr "Kan inte sätta profil: %s\n"
+msgstr "Kan inte skicka sms från fil %s\n"
 
 #: smsd/file.c:239
 #, c-format
 msgid "Cannot rename file %s to %s. Trying to unlink it.\n"
-msgstr ""
+msgstr "Kan inte byta namn på fil %s till %s. Försöker att avlänka den.\n"
 
 #: smsd/lowlevel.c:133
 #, c-format
@@ -3369,27 +3361,27 @@ msgstr "Händelsen %d misslyckades med svarskoden %d!\n"
 #: smsd/mysql.c:59 smsd/mysql.c:78 smsd/pq.c:65 smsd/pq.c:87
 #, c-format
 msgid "Connection to database '%s' on host '%s' failed.\n"
-msgstr ""
+msgstr "Anslutning till databas \"%s\" på värd \"%s\" misslyckades.\n"
 
 #: smsd/mysql.c:122 smsd/pq.c:128
 #, c-format
 msgid "%d: INSERT INTO inbox failed.\n"
-msgstr ""
+msgstr "%d: INSERT INTO inbox misslyckades.\n"
 
 #: smsd/mysql.c:158 smsd/pq.c:168
 #, c-format
 msgid "%d: SELECT FROM outbox command failed.\n"
-msgstr ""
+msgstr "%d: SELECT FROM outbox - kommando misslyckades.\n"
 
 #: smsd/mysql.c:166
 #, c-format
 msgid "%d: Store Mysql Result Failed.\n"
-msgstr ""
+msgstr "%d: Lagring av MySQL-resultat misslyckades.\n"
 
 #: smsd/mysql.c:217 smsd/pq.c:217
 #, c-format
 msgid "%d: UPDATE command failed.\n"
-msgstr ""
+msgstr "%d: UPDATE-kommandot misslyckades.\n"
 
 #: smsd/smsd.c:167
 #, c-format
@@ -3409,41 +3401,55 @@ msgid ""
 "            -v, --version\n"
 "            -h, --help\n"
 msgstr ""
+"\n"
+"Användning:  %s [flaggor]\n"
+"            -u, --user db_användare ELLER åtgärd om -m file\n"
+"            -p, --password db_lösenord\n"
+"            -d, --db db_namn\n"
+"            -c, --host db_värdnamn ELLER kökatalog om -m file\n"
+"            -m, --module dbmodul (pq, mysql, file)\n"
+"            -l, --libdir sökväg_till_dbmodul\n"
+"            -f, --logfile fil\n"
+"            -t, --phone telefonnummer\n"
+"            -i, --interval avläsningsintervall_för_inkommande_sms_i_sek\n"
+"            -s, --maxsms antal_sms (endast i dumb-läget)\n"
+"            -v, --version\n"
+"            -h, --help\n"
 
 #: smsd/smsd.c:197
-#, fuzzy, c-format
+#, c-format
 msgid "WARNING: Cannot open file %s for appending.\n"
-msgstr "Kan inte öppna postlådan %s för inläggning av data!"
+msgstr "VARNING: Kan inte öppna fil %s för att lägga till data.\n"
 
 #: smsd/smsd.c:341
 #, c-format
 msgid "Cannot load database module %s in directory %s!\n"
-msgstr ""
+msgstr "Kan inte läsa in databasmodul %s i katalog %s!\n"
 
 #: smsd/smsd.c:401
 #, c-format
 msgid "Sending to %s unsuccessful. Error %d\n"
-msgstr ""
+msgstr "Sändning till %s misslyckades. Fel %d\n"
 
 #: smsd/smsd.c:403
-#, fuzzy, c-format
+#, c-format
 msgid "Sending to %s successful.\n"
-msgstr "Skickar SMS till %s ...\n"
+msgstr "Sändning till %s lyckades.\n"
 
 #: smsd/smsd.c:436
 #, c-format
 msgid "Inserting sms from %s unsuccessful.\n"
-msgstr ""
+msgstr "Inmatning av sms från %s misslyckades.\n"
 
 #: smsd/smsd.c:438
 #, c-format
 msgid "Inserting sms from %s successful.\n"
-msgstr ""
+msgstr "Inmatning av sms från %s lyckades.\n"
 
 #: utils/mgnokiidev.c:172
 #, c-format
 msgid "mgnokiidev takes one and only one argument!\n"
-msgstr ""
+msgstr "mgnokiidev tar endast ett argument!\n"
 
 #: xgnokii/xgnokii.c:227
 msgid "Reading caller groups names ..."
@@ -3471,7 +3477,7 @@ msgstr "Göm"
 
 #: xgnokii/xgnokii.c:467
 msgid "anonymous"
-msgstr ""
+msgstr "anonym"
 
 #: xgnokii/xgnokii.c:480
 #, c-format
@@ -3483,7 +3489,7 @@ msgstr ""
 "Tid: %s"
 
 #: xgnokii/xgnokii.c:482
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Incoming call from: %s\n"
 "Time: %s"
@@ -3519,7 +3525,7 @@ msgstr "Kalender stöds inte!"
 msgid "Error writing configuration file!"
 msgstr "Fel vid skrivning av konfigurationsfil!"
 
-#: xgnokii/xgnokii.c:1100 xgnokii/xgnokii_contacts.c:3336
+#: xgnokii/xgnokii.c:1100 xgnokii/xgnokii_contacts.c:3332
 msgid "Contacts"
 msgstr "Kontakter"
 
@@ -3578,12 +3584,12 @@ msgstr "Om"
 #: xgnokii/xgnokii_calendar.c:1450 xgnokii/xgnokii_contacts.c:1091
 #: xgnokii/xgnokii_contacts.c:1335 xgnokii/xgnokii_contacts.c:1469
 #: xgnokii/xgnokii_contacts.c:1620 xgnokii/xgnokii_contacts.c:1998
-#: xgnokii/xgnokii_contacts.c:3157 xgnokii/xgnokii_sms.c:585
+#: xgnokii/xgnokii_contacts.c:3153 xgnokii/xgnokii_sms.c:585
 msgid "Ok"
 msgstr "Ok"
 
 #: xgnokii/xgnokii.c:1202
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "xgnokii version: %s\n"
 "gnokii version: %s\n"
@@ -3602,10 +3608,9 @@ msgstr ""
 "Copyright (C) 1999-2004 Pavel Janik ml.,\n"
 "Hugh Blemings, Jan Derfinak,\n"
 "Pawel Kot och andra\n"
-"xgnokii är fri programvara som täcks av GNU\n"
-"General Public License och du är välkommen att ändra den och/eller\n"
-"distribuera kopior av den under vissa villkor. Det finns absolut ingen\n"
-"garanti för gnokii.\n"
+"xgnokii är fri programvara som täcks av GNU General Public License\n"
+"och du är välkommen att ändra den och/eller distribuera kopior av den\n"
+"under vissa villkor. Det finns absolut ingen garanti för xgnokii.\n"
 "Se GPL för detaljer.\n"
 
 #: xgnokii/xgnokii.c:1357
@@ -3620,7 +3625,7 @@ msgstr "Redigera SMS-inställningar"
 #: xgnokii/xgnokii_contacts.c:1102 xgnokii/xgnokii_contacts.c:1477
 #: xgnokii/xgnokii_contacts.c:1628 xgnokii/xgnokii_contacts.c:1865
 #: xgnokii/xgnokii_contacts.c:1912 xgnokii/xgnokii_contacts.c:2008
-#: xgnokii/xgnokii_contacts.c:2272 xgnokii/xgnokii_contacts.c:3164
+#: xgnokii/xgnokii_contacts.c:2268 xgnokii/xgnokii_contacts.c:3160
 #: xgnokii/xgnokii_sms.c:593
 msgid "Cancel"
 msgstr "Avbryt"
@@ -3661,7 +3666,7 @@ msgstr "Giltighet"
 msgid "Apply"
 msgstr "Verkställ"
 
-#: xgnokii/xgnokii.c:1593 xgnokii/xgnokii_contacts.c:2258
+#: xgnokii/xgnokii.c:1593 xgnokii/xgnokii_contacts.c:2254
 #: xgnokii/xgnokii_dtmf.c:181
 msgid "Save"
 msgstr "Spara"
@@ -3792,9 +3797,8 @@ msgid "Fax:"
 msgstr "Fax:"
 
 #: xgnokii/xgnokii.c:2041
-#, fuzzy
 msgid "Email:"
-msgstr "E-post"
+msgstr "E-post:"
 
 #: xgnokii/xgnokii.c:2066
 msgid "Address:"
@@ -3838,9 +3842,9 @@ msgid "Reminder"
 msgstr "Påminnelse"
 
 #: xgnokii/xgnokii_calendar.c:145 xgnokii/xgnokii_calendar.c:225
-#, fuzzy, c-format
+#, c-format
 msgid "%02d/%02d/%04d"
-msgstr "Datum: %4d/%02d/%02d\n"
+msgstr "%02d/%02d/%04d"
 
 #: xgnokii/xgnokii_calendar.c:150 xgnokii/xgnokii_calendar.c:177
 #: xgnokii/xgnokii_calendar.c:204
@@ -3871,7 +3875,7 @@ msgstr "per år"
 #: xgnokii/xgnokii_calendar.c:219
 #, c-format
 msgid "every %d minutes"
-msgstr ""
+msgstr "var %d minut"
 
 #: xgnokii/xgnokii_calendar.c:170
 msgid "Call"
@@ -3879,9 +3883,9 @@ msgstr "Samtal"
 
 #: xgnokii/xgnokii_calendar.c:171 xgnokii/xgnokii_calendar.c:198
 #: xgnokii/xgnokii_calendar.c:242
-#, fuzzy, c-format
+#, c-format
 msgid "%02d/%02d/%04d  %02d:%02d"
-msgstr "Datum/tid: %02d/%02d/%04d %02d:%02d:%02d "
+msgstr "%02d/%02d/%04d  %02d:%02d"
 
 #: xgnokii/xgnokii_calendar.c:224
 msgid "Birthday"
@@ -3912,21 +3916,23 @@ msgid "Text: "
 msgstr "Text: "
 
 #: xgnokii/xgnokii_calendar.c:524
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error saving calendar note\n"
 "%s"
-msgstr "Fel vid tolkning av vCalendar-fil!\n"
+msgstr ""
+"Fel vid lagring av kalendernotering\n"
+"%s"
 
 #: xgnokii/xgnokii_calendar.c:651
-#, fuzzy, c-format
+#, c-format
 msgid "%d-%02d-%02d"
-msgstr "   Datum: %d-%02d-%02d\n"
+msgstr "%d-%02d-%02d"
 
 #: xgnokii/xgnokii_calendar.c:660
 #, c-format
 msgid "%d-%02d-%02d  %02d:%02d"
-msgstr ""
+msgstr "%d-%02d-%02d  %02d:%02d"
 
 #: xgnokii/xgnokii_calendar.c:700 xgnokii/xgnokii_calendar.c:746
 msgid "Choose date"
@@ -3937,27 +3943,24 @@ msgid "Alarm time:"
 msgstr "Alarmtid:"
 
 #: xgnokii/xgnokii_calendar.c:850
-#, fuzzy
 msgid "Never"
-msgstr "aldrig"
+msgstr "Aldrig"
 
 #: xgnokii/xgnokii_calendar.c:856
 msgid "Every Day"
-msgstr ""
+msgstr "Varje dag"
 
 #: xgnokii/xgnokii_calendar.c:862
-#, fuzzy
 msgid "Every Week"
-msgstr "varannan vecka"
+msgstr "Varje vecka"
 
 #: xgnokii/xgnokii_calendar.c:868
-#, fuzzy
 msgid "Every 2 Weeks"
-msgstr "varannan vecka"
+msgstr "Varannan vecka"
 
 #: xgnokii/xgnokii_calendar.c:874
 msgid "Every Year"
-msgstr ""
+msgstr "Varje år"
 
 #: xgnokii/xgnokii_calendar.c:893 xgnokii/xgnokii_calendar.c:1620
 msgid "Add reminder"
@@ -4005,64 +4008,64 @@ msgstr "Ta bort kalendernotering"
 msgid "Do you want to delete selected note(s)?"
 msgstr "Vill du ta bort valda notering(ar)?"
 
-#: xgnokii/xgnokii_calendar.c:1512 xgnokii/xgnokii_contacts.c:3290
+#: xgnokii/xgnokii_calendar.c:1512 xgnokii/xgnokii_contacts.c:3286
 #: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1493
 #: xgnokii/xgnokii_netmon.c:265 xgnokii/xgnokii_sms.c:1260
 #: xgnokii/xgnokii_sms.c:1665 xgnokii/xgnokii_speed.c:525
 #: xgnokii/xgnokii_xkeyb.c:242 xgnokii/xgnokii_xring.c:821
 msgid "/_File"
-msgstr "/_Fil"
+msgstr "/_Arkiv"
 
-#: xgnokii/xgnokii_calendar.c:1513 xgnokii/xgnokii_contacts.c:3291
+#: xgnokii/xgnokii_calendar.c:1513 xgnokii/xgnokii_contacts.c:3287
 #: xgnokii/xgnokii_speed.c:526
 msgid "/File/_Read from phone"
-msgstr "/Fil/Läs f_rån telefon"
+msgstr "/Arkiv/Läs f_rån telefon"
 
-#: xgnokii/xgnokii_calendar.c:1514 xgnokii/xgnokii_contacts.c:3292
+#: xgnokii/xgnokii_calendar.c:1514 xgnokii/xgnokii_contacts.c:3288
 #: xgnokii/xgnokii_speed.c:527
 msgid "/File/_Save to phone"
-msgstr "/Fil/_Spara till telefon"
+msgstr "/Arkiv/_Spara till telefon"
 
-#: xgnokii/xgnokii_calendar.c:1515 xgnokii/xgnokii_contacts.c:3293
+#: xgnokii/xgnokii_calendar.c:1515 xgnokii/xgnokii_contacts.c:3289
 #: xgnokii/xgnokii_dtmf.c:223 xgnokii/xgnokii_logos.c:1497
 #: xgnokii/xgnokii_sms.c:1263 xgnokii/xgnokii_sms.c:1669
 #: xgnokii/xgnokii_speed.c:528
 msgid "/File/Sep1"
-msgstr "/Fil/Sep1"
+msgstr "/Arkiv/Sep1"
 
 #: xgnokii/xgnokii_calendar.c:1516
 msgid "/File/Send via S_MS"
-msgstr "/Fil/Skicka via S_MS"
+msgstr "/Arkiv/Skicka via S_MS"
 
-#: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3296
+#: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3292
 #: xgnokii/xgnokii_logos.c:1501 xgnokii/xgnokii_sms.c:1266
 #: xgnokii/xgnokii_speed.c:531
 msgid "/File/Sep2"
-msgstr "/Fil/Sep2"
+msgstr "/Arkiv/Sep2"
 
-#: xgnokii/xgnokii_calendar.c:1518 xgnokii/xgnokii_contacts.c:3294
+#: xgnokii/xgnokii_calendar.c:1518 xgnokii/xgnokii_contacts.c:3290
 #: xgnokii/xgnokii_speed.c:529
 msgid "/File/_Import from file"
-msgstr "/Fil/_Importera från fil"
+msgstr "/Arkiv/_Importera från fil"
 
-#: xgnokii/xgnokii_calendar.c:1519 xgnokii/xgnokii_contacts.c:3295
+#: xgnokii/xgnokii_calendar.c:1519 xgnokii/xgnokii_contacts.c:3291
 #: xgnokii/xgnokii_speed.c:530
 msgid "/File/_Export to file"
-msgstr "/Fil/_Exportera till fil"
+msgstr "/Arkiv/_Exportera till fil"
 
 #: xgnokii/xgnokii_calendar.c:1520
 msgid "/File/Sep3"
-msgstr "/Fil/Sep3"
+msgstr "/Arkiv/Sep3"
 
-#: xgnokii/xgnokii_calendar.c:1521 xgnokii/xgnokii_contacts.c:3297
+#: xgnokii/xgnokii_calendar.c:1521 xgnokii/xgnokii_contacts.c:3293
 #: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1502
 #: xgnokii/xgnokii_netmon.c:266 xgnokii/xgnokii_sms.c:1267
 #: xgnokii/xgnokii_sms.c:1670 xgnokii/xgnokii_speed.c:532
 #: xgnokii/xgnokii_xkeyb.c:243 xgnokii/xgnokii_xring.c:831
 msgid "/File/_Close"
-msgstr "/Fil/Stäng"
+msgstr "/Arkiv/Stäng"
 
-#: xgnokii/xgnokii_calendar.c:1522 xgnokii/xgnokii_contacts.c:3298
+#: xgnokii/xgnokii_calendar.c:1522 xgnokii/xgnokii_contacts.c:3294
 #: xgnokii/xgnokii_logos.c:1503 xgnokii/xgnokii_speed.c:533
 #: xgnokii/xgnokii_xring.c:832
 msgid "/_Edit"
@@ -4084,34 +4087,34 @@ msgstr "/Redigera/Lägg till _möte"
 msgid "/Edit/Add _birthday"
 msgstr "/Redigera/Lägg till födelsedag"
 
-#: xgnokii/xgnokii_calendar.c:1530 xgnokii/xgnokii_contacts.c:3302
+#: xgnokii/xgnokii_calendar.c:1530 xgnokii/xgnokii_contacts.c:3298
 msgid "/Edit/_Delete"
 msgstr "/Redigera/Ta bort"
 
-#: xgnokii/xgnokii_calendar.c:1531 xgnokii/xgnokii_contacts.c:3305
+#: xgnokii/xgnokii_calendar.c:1531 xgnokii/xgnokii_contacts.c:3301
 #: xgnokii/xgnokii_logos.c:1511
 msgid "/Edit/Sep4"
 msgstr "/Redigera/Sep4"
 
-#: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3309
+#: xgnokii/xgnokii_calendar.c:1532 xgnokii/xgnokii_contacts.c:3305
 msgid "/Edit/Select _all"
 msgstr "/Redigera/Välj _alla"
 
-#: xgnokii/xgnokii_calendar.c:1533 xgnokii/xgnokii_contacts.c:3312
+#: xgnokii/xgnokii_calendar.c:1533 xgnokii/xgnokii_contacts.c:3308
 #: xgnokii/xgnokii_dtmf.c:225 xgnokii/xgnokii_netmon.c:270
 #: xgnokii/xgnokii_sms.c:1268 xgnokii/xgnokii_sms.c:1679
 #: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:244
 msgid "/_Help"
 msgstr "/_Hjälp"
 
-#: xgnokii/xgnokii_calendar.c:1534 xgnokii/xgnokii_contacts.c:3313
+#: xgnokii/xgnokii_calendar.c:1534 xgnokii/xgnokii_contacts.c:3309
 #: xgnokii/xgnokii_dtmf.c:226 xgnokii/xgnokii_netmon.c:271
 #: xgnokii/xgnokii_sms.c:1269 xgnokii/xgnokii_sms.c:1680
 #: xgnokii/xgnokii_speed.c:536 xgnokii/xgnokii_xkeyb.c:245
 msgid "/Help/_Help"
 msgstr "/Hjälp/_Hjälp"
 
-#: xgnokii/xgnokii_calendar.c:1535 xgnokii/xgnokii_contacts.c:3314
+#: xgnokii/xgnokii_calendar.c:1535 xgnokii/xgnokii_contacts.c:3310
 #: xgnokii/xgnokii_dtmf.c:227 xgnokii/xgnokii_netmon.c:272
 #: xgnokii/xgnokii_sms.c:1270 xgnokii/xgnokii_sms.c:1681
 #: xgnokii/xgnokii_speed.c:537 xgnokii/xgnokii_xkeyb.c:246
@@ -4131,7 +4134,7 @@ msgid "Date"
 msgstr "Datum"
 
 #: xgnokii/xgnokii_calendar.c:1551 xgnokii/xgnokii_contacts.c:1951
-#: xgnokii/xgnokii_contacts.c:3144 xgnokii/xgnokii_contacts.c:3330
+#: xgnokii/xgnokii_contacts.c:3140 xgnokii/xgnokii_contacts.c:3326
 #: xgnokii/xgnokii_speed.c:552
 msgid "Number"
 msgstr "Nummer"
@@ -4140,12 +4143,12 @@ msgstr "Nummer"
 msgid "Recurrence"
 msgstr "Återkommande"
 
-#: xgnokii/xgnokii_calendar.c:1586 xgnokii/xgnokii_contacts.c:3367
+#: xgnokii/xgnokii_calendar.c:1586 xgnokii/xgnokii_contacts.c:3363
 #: xgnokii/xgnokii_speed.c:589
 msgid "Read from phone"
 msgstr "Läs från telefon"
 
-#: xgnokii/xgnokii_calendar.c:1590 xgnokii/xgnokii_contacts.c:3371
+#: xgnokii/xgnokii_calendar.c:1590 xgnokii/xgnokii_contacts.c:3367
 #: xgnokii/xgnokii_speed.c:593
 msgid "Save to phone"
 msgstr "Spara till telefon"
@@ -4154,15 +4157,15 @@ msgstr "Spara till telefon"
 msgid "Send via SMS"
 msgstr "Skicka via SMS"
 
-#: xgnokii/xgnokii_calendar.c:1604 xgnokii/xgnokii_contacts.c:2961
-#: xgnokii/xgnokii_contacts.c:3378 xgnokii/xgnokii_logos.c:1591
+#: xgnokii/xgnokii_calendar.c:1604 xgnokii/xgnokii_contacts.c:2957
+#: xgnokii/xgnokii_contacts.c:3374 xgnokii/xgnokii_logos.c:1591
 #: xgnokii/xgnokii_speed.c:403 xgnokii/xgnokii_speed.c:600
 #: xgnokii/xgnokii_xring.c:889
 msgid "Import from file"
 msgstr "Importera från fil"
 
-#: xgnokii/xgnokii_calendar.c:1608 xgnokii/xgnokii_contacts.c:2779
-#: xgnokii/xgnokii_contacts.c:3382 xgnokii/xgnokii_logos.c:1595
+#: xgnokii/xgnokii_calendar.c:1608 xgnokii/xgnokii_contacts.c:2775
+#: xgnokii/xgnokii_contacts.c:3378 xgnokii/xgnokii_logos.c:1595
 #: xgnokii/xgnokii_speed.c:482 xgnokii/xgnokii_speed.c:604
 #: xgnokii/xgnokii_xring.c:893
 msgid "Export to file"
@@ -4176,10 +4179,10 @@ msgstr "Lägg till samtal"
 msgid "Delete note"
 msgstr "Ta bort notering"
 
-#: xgnokii/xgnokii_calendar.c:1699 xgnokii/xgnokii_contacts.c:2349
-#: xgnokii/xgnokii_contacts.c:2375 xgnokii/xgnokii_contacts.c:2879
-#: xgnokii/xgnokii_contacts.c:2901 xgnokii/xgnokii_contacts.c:3187
-#: xgnokii/xgnokii_contacts.c:3435 xgnokii/xgnokii_sms.c:1835
+#: xgnokii/xgnokii_calendar.c:1699 xgnokii/xgnokii_contacts.c:2345
+#: xgnokii/xgnokii_contacts.c:2371 xgnokii/xgnokii_contacts.c:2875
+#: xgnokii/xgnokii_contacts.c:2897 xgnokii/xgnokii_contacts.c:3183
+#: xgnokii/xgnokii_contacts.c:3431 xgnokii/xgnokii_sms.c:1835
 #: xgnokii/xgnokii_speed.c:634
 #, c-format
 msgid "Error: %s: line %d: Can't allocate memory!\n"
@@ -4190,7 +4193,6 @@ msgid "couldn't allocate colour"
 msgstr "kunde inte allokera färg"
 
 #: xgnokii/xgnokii_cfg.c:104
-#, fuzzy
 msgid "WARNING: Can't find HOME environment variable!\n"
 msgstr "VARNING: Kan inte hitta miljövariabeln HOME!\n"
 
@@ -4235,7 +4237,7 @@ msgstr "Kan inte starta %s\n"
 #: xgnokii/xgnokii_contacts.c:150
 #, c-format
 msgid "SIM: %d/%d%c  Phone: %d/%d%c"
-msgstr ""
+msgstr "SIM: %d/%d%c  Telefon: %d/%d%c"
 
 #: xgnokii/xgnokii_contacts.c:311 xgnokii/xgnokii_contacts.c:351
 #: xgnokii/xgnokii_contacts.c:544 xgnokii/xgnokii_contacts.c:570
@@ -4259,29 +4261,26 @@ msgstr "Kan inte hitta mönster!"
 #: xgnokii/xgnokii_contacts.c:923 xgnokii/xgnokii_contacts.c:1010
 #: xgnokii/xgnokii_contacts.c:1155 xgnokii/xgnokii_contacts.c:1197
 #: xgnokii/xgnokii_contacts.c:1404
-#, fuzzy
 msgid "Mobile"
-msgstr "Post"
+msgstr "Mobil"
 
 #: xgnokii/xgnokii_contacts.c:929 xgnokii/xgnokii_contacts.c:1013
 #: xgnokii/xgnokii_contacts.c:1156 xgnokii/xgnokii_contacts.c:1198
 #: xgnokii/xgnokii_contacts.c:1408
 msgid "Work"
-msgstr ""
+msgstr "Arbete"
 
 #: xgnokii/xgnokii_contacts.c:941 xgnokii/xgnokii_contacts.c:1019
 #: xgnokii/xgnokii_contacts.c:1158 xgnokii/xgnokii_contacts.c:1200
 #: xgnokii/xgnokii_contacts.c:1416
-#, fuzzy
 msgid "Home"
-msgstr "Hem: %s\n"
+msgstr "Hem"
 
 #: xgnokii/xgnokii_contacts.c:947 xgnokii/xgnokii_contacts.c:1022
 #: xgnokii/xgnokii_contacts.c:1159 xgnokii/xgnokii_contacts.c:1201
 #: xgnokii/xgnokii_contacts.c:1242 xgnokii/xgnokii_contacts.c:1426
-#, fuzzy
 msgid "Note"
-msgstr "Ingen signal"
+msgstr "Notering"
 
 #: xgnokii/xgnokii_contacts.c:953 xgnokii/xgnokii_contacts.c:1025
 #: xgnokii/xgnokii_contacts.c:1160 xgnokii/xgnokii_contacts.c:1202
@@ -4292,7 +4291,7 @@ msgstr ""
 #: xgnokii/xgnokii_contacts.c:965 xgnokii/xgnokii_contacts.c:1031
 #: xgnokii/xgnokii_contacts.c:1162 xgnokii/xgnokii_contacts.c:1204
 #: xgnokii/xgnokii_contacts.c:1438 xgnokii/xgnokii_contacts.c:1943
-#: xgnokii/xgnokii_contacts.c:3144 xgnokii/xgnokii_contacts.c:3330
+#: xgnokii/xgnokii_contacts.c:3140 xgnokii/xgnokii_contacts.c:3326
 #: xgnokii/xgnokii_speed.c:552
 msgid "Name"
 msgstr "Namn"
@@ -4301,12 +4300,11 @@ msgstr "Namn"
 #: xgnokii/xgnokii_contacts.c:1163 xgnokii/xgnokii_contacts.c:1205
 #: xgnokii/xgnokii_contacts.c:1441
 msgid "URL"
-msgstr ""
+msgstr "URL"
 
 #: xgnokii/xgnokii_contacts.c:1085
-#, fuzzy
 msgid "Edit subentries"
-msgstr "Redigera post"
+msgstr "Redigera underposter"
 
 #: xgnokii/xgnokii_contacts.c:1110
 msgid "Delete"
@@ -4321,7 +4319,7 @@ msgid "Type:"
 msgstr "Typ:"
 
 #: xgnokii/xgnokii_contacts.c:1176 xgnokii/xgnokii_contacts.c:1570
-#: xgnokii/xgnokii_contacts.c:3397 xgnokii/xgnokii_speed.c:611
+#: xgnokii/xgnokii_contacts.c:3393 xgnokii/xgnokii_speed.c:611
 msgid "Edit entry"
 msgstr "Redigera post"
 
@@ -4353,11 +4351,11 @@ msgstr "Ta bort poster"
 msgid "Do you want to delete selected entries?"
 msgstr "Vill du ta bort valda poster?"
 
-#: xgnokii/xgnokii_contacts.c:1663 xgnokii/xgnokii_contacts.c:3389
+#: xgnokii/xgnokii_contacts.c:1663 xgnokii/xgnokii_contacts.c:3385
 msgid "New entry"
 msgstr "Ny post"
 
-#: xgnokii/xgnokii_contacts.c:1707 xgnokii/xgnokii_contacts.c:3393
+#: xgnokii/xgnokii_contacts.c:1707 xgnokii/xgnokii_contacts.c:3389
 msgid "Duplicate entry"
 msgstr "Post är en dubblett"
 
@@ -4390,41 +4388,41 @@ msgstr "Sök"
 msgid "Pattern:"
 msgstr "Mönster:"
 
-#: xgnokii/xgnokii_contacts.c:1992 xgnokii/xgnokii_contacts.c:3408
+#: xgnokii/xgnokii_contacts.c:1992 xgnokii/xgnokii_contacts.c:3404
 msgid "Dial voice"
 msgstr "Ring röstsamtal"
 
-#: xgnokii/xgnokii_contacts.c:2124
+#: xgnokii/xgnokii_contacts.c:2120
 msgid "Phone memory..."
 msgstr "Telefonminne..."
 
-#: xgnokii/xgnokii_contacts.c:2135
+#: xgnokii/xgnokii_contacts.c:2131
 msgid "SIM memory..."
 msgstr "SIM-minne..."
 
-#: xgnokii/xgnokii_contacts.c:2162
+#: xgnokii/xgnokii_contacts.c:2158
 msgid "Saving entries"
 msgstr "Sparar poster"
 
-#: xgnokii/xgnokii_contacts.c:2191
-#, fuzzy, c-format
+#: xgnokii/xgnokii_contacts.c:2187
+#, c-format
 msgid "%s: line %d: Can't write ME memory entry number %d! Error: %d\n"
-msgstr "%s: rad: %d: Kan inte skriva ME minnespost nummer %d! Fel: %d\n"
+msgstr "%s: rad: %d: Kan inte skriva ME-minnespost nummer %d! Fel: %d\n"
 
-#: xgnokii/xgnokii_contacts.c:2228
-#, fuzzy, c-format
+#: xgnokii/xgnokii_contacts.c:2224
+#, c-format
 msgid "%s: line %d: Can't write SM memory entry number %d! Error: %d\n"
-msgstr "%s: rad %d:Kan inte skriva SM minnespost nummer %d! Fel: %d\n"
+msgstr "%s: rad %d: Kan inte skriva SM-minnespost nummer %d! Fel: %d\n"
 
-#: xgnokii/xgnokii_contacts.c:2252
+#: xgnokii/xgnokii_contacts.c:2248
 msgid "Save changes?"
 msgstr "Spara ändringar?"
 
-#: xgnokii/xgnokii_contacts.c:2266
+#: xgnokii/xgnokii_contacts.c:2262
 msgid "Don't save"
 msgstr "Spara inte"
 
-#: xgnokii/xgnokii_contacts.c:2288
+#: xgnokii/xgnokii_contacts.c:2284
 msgid ""
 "You have made changes in your\n"
 "contacts directory.\n"
@@ -4438,18 +4436,18 @@ msgstr ""
 "\n"
 "Vill du spara dessa ändringar i telefonen?\n"
 
-#: xgnokii/xgnokii_contacts.c:2479
+#: xgnokii/xgnokii_contacts.c:2475
 msgid "Getting entries"
 msgstr "Hämtar poster"
 
-#: xgnokii/xgnokii_contacts.c:2762 xgnokii/xgnokii_dtmf.c:166
+#: xgnokii/xgnokii_contacts.c:2758 xgnokii/xgnokii_dtmf.c:166
 #: xgnokii/xgnokii_logos.c:1369 xgnokii/xgnokii_speed.c:465
 msgid "Overwrite file?"
 msgstr "Skriv över fil?"
 
-#: xgnokii/xgnokii_contacts.c:2763 xgnokii/xgnokii_dtmf.c:167
+#: xgnokii/xgnokii_contacts.c:2759 xgnokii/xgnokii_dtmf.c:167
 #: xgnokii/xgnokii_logos.c:1370 xgnokii/xgnokii_speed.c:466
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "File %s already exists.\n"
 "Overwrite?"
@@ -4457,59 +4455,59 @@ msgstr ""
 "Filen %s finns redan.\n"
 "Skriva över?"
 
-#: xgnokii/xgnokii_contacts.c:3144 xgnokii/xgnokii_contacts.c:3330
+#: xgnokii/xgnokii_contacts.c:3140 xgnokii/xgnokii_contacts.c:3326
 msgid "Memory"
 msgstr "Minne"
 
-#: xgnokii/xgnokii_contacts.c:3144 xgnokii/xgnokii_contacts.c:3330
+#: xgnokii/xgnokii_contacts.c:3140 xgnokii/xgnokii_contacts.c:3326
 msgid "Group"
 msgstr "Grupp"
 
-#: xgnokii/xgnokii_contacts.c:3154 xgnokii/xgnokii_sms.c:1375
+#: xgnokii/xgnokii_contacts.c:3150 xgnokii/xgnokii_sms.c:1375
 msgid "Select contacts"
 msgstr "Välj kontakter"
 
-#: xgnokii/xgnokii_contacts.c:3299
+#: xgnokii/xgnokii_contacts.c:3295
 msgid "/Edit/_New"
 msgstr "/Redigera/_Ny"
 
-#: xgnokii/xgnokii_contacts.c:3300
+#: xgnokii/xgnokii_contacts.c:3296
 msgid "/Edit/D_uplicate"
 msgstr "/Redigera/Kopiera"
 
-#: xgnokii/xgnokii_contacts.c:3301 xgnokii/xgnokii_speed.c:534
+#: xgnokii/xgnokii_contacts.c:3297 xgnokii/xgnokii_speed.c:534
 msgid "/Edit/_Edit"
 msgstr "/Redigera/R_edigera"
 
-#: xgnokii/xgnokii_contacts.c:3303 xgnokii/xgnokii_logos.c:1506
+#: xgnokii/xgnokii_contacts.c:3299 xgnokii/xgnokii_logos.c:1506
 msgid "/Edit/Sep3"
 msgstr "/Redigera/Sep3"
 
-#: xgnokii/xgnokii_contacts.c:3304
+#: xgnokii/xgnokii_contacts.c:3300
 msgid "/Edit/_Change memory type"
 msgstr "/Redigera/Ändra minnestyp"
 
-#: xgnokii/xgnokii_contacts.c:3306
+#: xgnokii/xgnokii_contacts.c:3302
 msgid "/Edit/_Find"
 msgstr "/Redigera/Sök"
 
-#: xgnokii/xgnokii_contacts.c:3307
+#: xgnokii/xgnokii_contacts.c:3303
 msgid "/Edit/Find ne_xt"
 msgstr "/Redigera/Sök nästa"
 
-#: xgnokii/xgnokii_contacts.c:3308
+#: xgnokii/xgnokii_contacts.c:3304
 msgid "/Edit/Sep5"
 msgstr "/Redigera/Sep5"
 
-#: xgnokii/xgnokii_contacts.c:3310
+#: xgnokii/xgnokii_contacts.c:3306
 msgid "/_Dial"
 msgstr "/Ring"
 
-#: xgnokii/xgnokii_contacts.c:3311
+#: xgnokii/xgnokii_contacts.c:3307
 msgid "/Dial/Dial _voice"
 msgstr "/Ring/Ring röst"
 
-#: xgnokii/xgnokii_contacts.c:3401
+#: xgnokii/xgnokii_contacts.c:3397
 msgid "Delete entry"
 msgstr "Ta bort post"
 
@@ -4552,79 +4550,80 @@ msgstr "Ladda"
 #: xgnokii/xgnokii_dtmf.c:221 xgnokii/xgnokii_logos.c:1494
 #: xgnokii/xgnokii_xring.c:822
 msgid "/File/_Open"
-msgstr "/Fil/Öppna"
+msgstr "/Arkiv/Öppna"
 
 #: xgnokii/xgnokii_dtmf.c:222 xgnokii/xgnokii_logos.c:1495
 #: xgnokii/xgnokii_sms.c:1262 xgnokii/xgnokii_sms.c:1666
 #: xgnokii/xgnokii_xring.c:823
 msgid "/File/_Save"
-msgstr "/Fil/_Spara"
+msgstr "/Arkiv/_Spara"
 
 #: xgnokii/xgnokii_dtmf.c:249
 msgid "Dial Tone"
 msgstr "Ringsignal"
 
 #: xgnokii/xgnokii_dtmf.c:314
-#, fuzzy
 msgid "Pause"
-msgstr "Sida:"
+msgstr "Paus"
 
 #: xgnokii/xgnokii_dtmf.c:319
 msgid "Wait"
-msgstr ""
+msgstr "Vänta"
 
 #: xgnokii/xgnokii_logos.c:993
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error getting network info\n"
 "%s"
 msgstr ""
 "Fel vid hämtning av nätverksinfo\n"
-"(fel=%d)"
+"%s"
 
 #: xgnokii/xgnokii_logos.c:1037
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error getting bitmap\n"
 "%s"
 msgstr ""
 "Fel vid hämtning av bild\n"
-"(fel=%d)"
+"%s"
 
 #: xgnokii/xgnokii_logos.c:1087
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error setting bitmap\n"
 "%s"
 msgstr ""
-"Fel vid sändning av bild\n"
-"(fel=%d)"
+"Fel vid skrivning av bild\n"
+"%s"
 
 #: xgnokii/xgnokii_logos.c:1276
 msgid "LogoTypeEvent called!\n"
-msgstr ""
+msgstr "LogoTypeEvent anropades!\n"
 
 #: xgnokii/xgnokii_logos.c:1277 xgnokii/xgnokii_logos.c:1850
 #, c-format
 msgid "width: %i, height: %i\n"
-msgstr ""
+msgstr "bredd: %i, höjd: %i\n"
 
 #: xgnokii/xgnokii_logos.c:1342 xgnokii/xgnokii_xring.c:645
 #: xgnokii/xgnokii_xring.c:688
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error writing file\n"
 "%s"
 msgstr ""
 "Fel vid skrivning av fil\n"
-"(fel=%s)"
+"%s"
 
 #: xgnokii/xgnokii_logos.c:1401 xgnokii/xgnokii_xring.c:608
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error reading file\n"
 "%s"
-msgstr "Fel vid läsning av fil!"
+msgstr ""
+"Fel vid läsning av fil\n"
+"%s"
 
 #: xgnokii/xgnokii_logos.c:1428
 msgid "Save logo as ..."
@@ -4636,19 +4635,19 @@ msgstr "Öppna logo..."
 
 #: xgnokii/xgnokii_logos.c:1496 xgnokii/xgnokii_xring.c:824
 msgid "/File/Save _as ..."
-msgstr "/Fil/Spar_a som ..."
+msgstr "/Arkiv/Spar_a som ..."
 
 #: xgnokii/xgnokii_logos.c:1498
 msgid "/File/_Get operator"
-msgstr "/Fil/Hämta operatör"
+msgstr "/Arkiv/Hämta operatör"
 
 #: xgnokii/xgnokii_logos.c:1499
 msgid "/File/Get _logo"
-msgstr "/Fil/Hämta _logo"
+msgstr "/Arkiv/Hämta _logo"
 
 #: xgnokii/xgnokii_logos.c:1500
 msgid "/File/Se_t logo"
-msgstr "/Fil/Sät_t logo"
+msgstr "/Arkiv/Skr_iv logo"
 
 #: xgnokii/xgnokii_logos.c:1504 xgnokii/xgnokii_xring.c:833
 msgid "/Edit/_Clear"
@@ -4789,7 +4788,6 @@ msgid "NCELL list III"
 msgstr "NCELL lista III"
 
 #: xgnokii/xgnokii_netmon.c:402
-#, fuzzy
 msgid "Preferred/Denied networks"
 msgstr "Föredragna/Nekade nätverk"
 
@@ -4863,7 +4861,7 @@ msgstr ""
 
 #: xgnokii/xgnokii_netmon.c:473
 msgid "L2-Timeouts"
-msgstr ""
+msgstr "L2-Timeouter"
 
 #: xgnokii/xgnokii_netmon.c:476
 msgid "SIM"
@@ -4883,7 +4881,7 @@ msgstr "Återställ räknare"
 
 #: xgnokii/xgnokii_netmon.c:492
 msgid "Counter for PLMN Search and Cell reselection (Singleband)"
-msgstr ""
+msgstr "Räknare för PLMN-sök och Cell-återval (Enkelband)"
 
 #: xgnokii/xgnokii_netmon.c:503
 msgid "Neighbourhood measurement"
@@ -5005,7 +5003,7 @@ msgstr "sedd bild"
 
 #: xgnokii/xgnokii_sms.c:326
 msgid "unseen picture"
-msgstr "osedd bild"
+msgstr "ej sedd bild"
 
 #: xgnokii/xgnokii_sms.c:329
 msgid "sent picture"
@@ -5013,26 +5011,26 @@ msgstr "skickad bild"
 
 #: xgnokii/xgnokii_sms.c:332
 msgid "not sent picture"
-msgstr "inte skickad bild"
+msgstr "ej skickad bild"
 
 #: xgnokii/xgnokii_sms.c:335
 msgid "unknown picture"
 msgstr "okänd bild"
 
 #: xgnokii/xgnokii_sms.c:360
-#, fuzzy, c-format
+#, c-format
 msgid "%02d/%02d/%04d %02d:%02d:%02d %c%02d00"
-msgstr "Datum/tid: %02d/%02d/%04d %02d:%02d:%02d "
+msgstr "%02d/%02d/%04d %02d:%02d:%02d %c%02d00"
 
 #: xgnokii/xgnokii_sms.c:366 xgnokii/xgnokii_sms.c:371
-#, fuzzy, c-format
+#, c-format
 msgid "%02d/%02d/%04d %02d:%02d:%02d"
-msgstr "Datum/tid: %02d/%02d/%04d %02d:%02d:%02d "
+msgstr "%02d/%02d/%04d %02d:%02d:%02d"
 
 #: xgnokii/xgnokii_sms.c:379
-#, fuzzy, c-format
+#, c-format
 msgid "Picture Message: %s"
-msgstr "Bildmeddelande\n"
+msgstr "Bildmeddelande: %s"
 
 #: xgnokii/xgnokii_sms.c:473
 msgid "From: "
@@ -5075,31 +5073,33 @@ msgid "Choose Mailbox File"
 msgstr "Välj postlådefil"
 
 #: xgnokii/xgnokii_sms.c:878
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Name: %s\n"
 "Number: %s\n"
 "Used: %d\n"
 msgstr ""
-"%d. Namn: %s\n"
+"Namn: %s\n"
 "Nummer: %s\n"
-"Grupp ID: %d\n"
+"Använde: %d\n"
 
 #: xgnokii/xgnokii_sms.c:977 xgnokii/xgnokii_sms.c:1108
 msgid "Address line contains illegal address!"
 msgstr "Addressraden innehåller en felaktig address!"
 
 #: xgnokii/xgnokii_sms.c:1081
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error sending SMS to %s\n"
 "%s"
-msgstr "Skickar SMS till %s ...\n"
+msgstr ""
+"Fel vid sändning av SMS till %s\n"
+"%s"
 
 #: xgnokii/xgnokii_sms.c:1087
-#, fuzzy, c-format
+#, c-format
 msgid "Message sent to: %s\n"
-msgstr "Larmsignal för meddelande: %s\n"
+msgstr "Meddelande skickades till: %s\n"
 
 #: xgnokii/xgnokii_sms.c:1167 xgnokii/xgnokii_sms.c:1199
 #: xgnokii/xgnokii_sms.c:1225
@@ -5109,15 +5109,15 @@ msgstr "Skickar SMS till %s (%d/%d) ...\n"
 
 #: xgnokii/xgnokii_sms.c:1261
 msgid "/File/Sen_d"
-msgstr "/Fil/Skicka"
+msgstr "/Arkiv/Skicka"
 
 #: xgnokii/xgnokii_sms.c:1264
 msgid "/File/Check _Names"
-msgstr "/Fil/Kontrollera namn"
+msgstr "/Arkiv/Kontrollera namn"
 
 #: xgnokii/xgnokii_sms.c:1265
 msgid "/File/C_ontacts"
-msgstr "/Fil/Kontakter"
+msgstr "/Arkiv/Kontakter"
 
 #: xgnokii/xgnokii_sms.c:1327
 msgid "Send message"
@@ -5161,20 +5161,19 @@ msgstr "Svara på meddelande"
 
 #: xgnokii/xgnokii_sms.c:1667
 msgid "/File/Save to mailbo_x"
-msgstr "/Fil/Spara till postlåda"
+msgstr "/Arkiv/Spara till postlåda"
 
 #: xgnokii/xgnokii_sms.c:1668
 msgid "/File/Save to _file"
-msgstr "/Fil/Spara till _fil"
+msgstr "/Arkiv/Spara till _fil"
 
 #: xgnokii/xgnokii_sms.c:1671
 msgid "/_Messages"
 msgstr "/_Meddelanden"
 
 #: xgnokii/xgnokii_sms.c:1672
-#, fuzzy
 msgid "/_Messages/_Activate SMS reading"
-msgstr "/_Meddelanden/(Av)_Aktivera SMS-läsning"
+msgstr "/_Meddelanden/_Aktivera SMS-läsning"
 
 #: xgnokii/xgnokii_sms.c:1673
 msgid "/_Messages/_New"
@@ -5246,9 +5245,9 @@ msgid "Cannot allocate memory!\n"
 msgstr "Kunde inte allokera minne!\n"
 
 #: xgnokii/xgnokii_speed.c:215
-#, fuzzy, c-format
+#, c-format
 msgid "Cannot read speed dial key %d!\n"
-msgstr "Kan inte läsa filen %s\n"
+msgstr "Kan inte läsa av snabbknapp %d!\n"
 
 #: xgnokii/xgnokii_speed.c:276
 #, c-format
@@ -5290,60 +5289,59 @@ msgid "Save ringtone as..."
 msgstr "Spara ringsignal som..."
 
 #: xgnokii/xgnokii_xring.c:731
-#, fuzzy
 msgid "Empty ringtone list"
-msgstr "Sätt ringsignal"
+msgstr "Tom ringsignalslista"
 
 #: xgnokii/xgnokii_xring.c:741
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error getting ringtone\n"
 "%s"
 msgstr ""
 "Fel vid hämtning av ringsignal\n"
-"(fel=%s)"
+"%s"
 
 #: xgnokii/xgnokii_xring.c:758
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error setting ringtone\n"
 "%s"
 msgstr ""
-"Fel vid inställning av ringsignal\n"
-"(fel=%s)"
+"Fel vid skrivning av ringsignal\n"
+"%s"
 
 #: xgnokii/xgnokii_xring.c:777
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Error deleting ringtone\n"
 "%s"
 msgstr ""
 "Fel vid borttagning av ringsignal\n"
-"(fel=%s)"
+"%s"
 
 #: xgnokii/xgnokii_xring.c:825
 msgid "/File/S1"
-msgstr "/Fil/S1"
+msgstr "/Arkiv/S1"
 
 #: xgnokii/xgnokii_xring.c:826
 msgid "/File/_Get ringtone"
-msgstr "/Fil/Hämta rin_gsignal"
+msgstr "/Arkiv/Hämta rin_gsignal"
 
 #: xgnokii/xgnokii_xring.c:827
 msgid "/File/Se_t ringtone"
-msgstr "/Fil/Sät_t ringsignal"
+msgstr "/Arkiv/Sät_t ringsignal"
 
 #: xgnokii/xgnokii_xring.c:828
 msgid "/File/Delete ringtone"
-msgstr "/Fil/Ta bort ringsignal"
+msgstr "/Arkiv/Ta bort ringsignal"
 
 #: xgnokii/xgnokii_xring.c:829
 msgid "/File/_Play"
-msgstr "/Fil/S_pela upp"
+msgstr "/Arkiv/S_pela upp"
 
 #: xgnokii/xgnokii_xring.c:830
 msgid "/File/S2"
-msgstr "/Fil/S2"
+msgstr "/Arkiv/S2"
 
 #: xgnokii/xgnokii_xring.c:869
 msgid "Clear ringtone"
