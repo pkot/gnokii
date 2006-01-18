@@ -247,7 +247,7 @@ install the cvs package for your distribution and follow these steps:
 
 If you prefer, there is a WWW interface to the CVS server at
 
-http://cvs.savannah.nongnu.org/cgi-bin/viewcvs/gnokii/
+http://cvs.savannah.nongnu.org/viewcvs/?root=gnokii
 
 Once you have the sources, you will need to run the following commands
 
