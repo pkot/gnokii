@@ -899,18 +899,26 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 		case 0x74:
 		case 0x7d:
 			return GN_ERR_INVALIDLOCATION;
+		case 0x8d: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 	case 0x05:
 		break;
+		case 0x6f: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
 	case 0x06:
 		switch (message[4]) {
+		case 0x6f: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
 		case 0x7d:
 		case 0x90:
 			return GN_ERR_ENTRYTOOLONG;
 		case 0x74:
 			return GN_ERR_INVALIDLOCATION;
+		case 0x8d: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -1426,12 +1434,20 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 	/* Set SMS center OK */
 	case 0x31:
 		break;
+		case 0x06: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
+		case 0x0c: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 
 	/* Set SMS center error */
 	case 0x32:
 		switch (message[4]) {
 		case 0x02:
 			return GN_ERR_EMPTYLOCATION;
+		case 0x06: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
+		case 0x0c: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -1471,6 +1487,10 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 		switch (message[4]) {
 		case 0x01:
 			return GN_ERR_EMPTYLOCATION;
+		case 0x06: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
+		case 0x0c: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -1579,6 +1599,12 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 		case 0x03:
 			dprintf("\tInvalid location!\n");
 			return GN_ERR_INVALIDLOCATION;
+		case 0x06:
+			dprintf("\tInsert SIM card!\n");
+			return GN_ERR_NOTREADY;
+		case 0x0c: /* waiting for PIN */
+			dprintf("\tPIN or PUK code required.\n");
+			return GN_ERR_CODEREQUIRED;
 		default:
 			dprintf("\tUnknown reason.\n");
 			return GN_ERR_UNHANDLEDFRAME;
@@ -1639,6 +1665,9 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 		case 0x07:
 			dprintf("\tEmpty SMS location.\n");
 			return GN_ERR_EMPTYLOCATION;
+		case 0x0c:
+			dprintf("\tPIN or PUK code required.\n");
+			return GN_ERR_CODEREQUIRED;
 		default:
 			dprintf("\tUnknown reason.\n");
 			return GN_ERR_UNHANDLEDFRAME;
@@ -1656,6 +1685,10 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 			return GN_ERR_UNKNOWN;
 		case 0x02:
 			return GN_ERR_INVALIDLOCATION;
+		case 0x06: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
+		case 0x0c: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -1697,7 +1730,7 @@ static gn_error IncomingNetworkInfo(int messagetype, unsigned char *message, int
 	switch (message[3]) {
 	/* Network info */
 	case 0x71:
-		if (data->network_info) {
+		if (data->network_info && message[7] >= 9) {
 			data->network_info->cell_id[0] = message[10];
 			data->network_info->cell_id[1] = message[11];
 			data->network_info->LAC[0] = message[12];
@@ -1709,6 +1742,13 @@ static gn_error IncomingNetworkInfo(int messagetype, unsigned char *message, int
 			data->network_info->network_code[4] = '0' + (message[16] & 0x0f);
 			data->network_info->network_code[5] = '0' + (message[16] >> 4);
 			data->network_info->network_code[6] = 0;
+		} else {
+			/* This can happen if handset has not (yet) registered with network (e.g. waiting for PIN code) */
+			/* FIXME: print error messages instead of numeric codes, see Docs/protocol/nk6110.txt */
+			if (message[7] >= 2) {
+				dprintf("netstatus 0x%02x netsel 0x%02x\n", message[8], message[9]);
+			}
+			return GN_ERR_UNKNOWN;
 		}
 		break;
 	default:
@@ -2084,9 +2124,13 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 	/* Set profile feat. ERR */
 	case 0x12:
 		switch (message[4]) {
+		case 0x6f: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
 		case 0x7d:
 			dprintf("Cannot set profile feature\n");
 			return GN_ERR_INVALIDLOCATION;
+		case 0x8d: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -2099,6 +2143,17 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 			switch (message[6]) {
 			case 0x00:
 				prof->keypad_tone = message[8];
+	/* Get profile feat. ERR */
+	case 0x15:
+		switch (message[4]) {	
+			case 0x6f: /* Insert SIM card */
+				return GN_ERR_NOTREADY;
+			case 0x8d: /* waiting for PIN */
+				return GN_ERR_CODEREQUIRED;
+			default:
+				return GN_ERR_UNHANDLEDFRAME;
+			}
+
 				break;
 			case 0x01:
 				prof->lights = message[8];
@@ -2135,6 +2190,17 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 			}
 		}
 		break;
+
+	/* Get profile feat. ERR */
+	case 0x15:
+		switch (message[4]) {	
+			case 0x6f: /* Insert SIM card */
+				return GN_ERR_NOTREADY;
+			case 0x8d: /* waiting for PIN */
+				return GN_ERR_CODEREQUIRED;
+			default:
+				return GN_ERR_UNHANDLEDFRAME;
+			}
 
 	/* Get Welcome Message */
 	case 0x17:
@@ -2352,6 +2418,10 @@ static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *messa
 		switch (message[4]) {
 		case 0x01:
 			break;
+		case 0x6f: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
+		case 0x8d: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -2381,6 +2451,10 @@ static gn_error IncomingPhoneClockAndAlarm(int messagetype, unsigned char *messa
 		switch (message[4]) {
 		case 0x01:
 			break;
+		case 0x6f: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
+		case 0x8d: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -2510,12 +2584,13 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 		switch (message[4]) {
 			case 0x01:
 				return GN_ERR_NONE;
-			case 0x73:
 			case 0x7d:
 				return GN_ERR_UNKNOWN;
 		        case 0x81:
 		        	/* calendar functions are busy. well, this status code is better than nothing */
 		        	return GN_ERR_LINEBUSY;
+			case 0x8d: /* waiting for PIN */
+				return GN_ERR_CODEREQUIRED;
 			default:
 				return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -2526,6 +2601,8 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 		switch (message[4]) {
 		case 0x01:
 			break;
+		case 0x8d: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		case 0x93:
 			return GN_ERR_EMPTYLOCATION;
 		default:
@@ -2588,6 +2665,8 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 		case 0x81:
 			/* calendar functions are busy. well, this status code is better than nothing */
 			return GN_ERR_LINEBUSY;
+		case 0x8d: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
 		case 0x93:
 			return GN_ERR_EMPTYLOCATION;
 		default:

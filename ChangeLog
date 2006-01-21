@@ -68,6 +68,12 @@
     o add ldiffix.pl script for ldif entries normalization: number
       formats, delete empty entries, encode base64 (Michale Klemme)
 
+ * nk6100 driver updates
+    o in more places make it return error code GN_ERR_NOTREADY when
+      phone is displaying "Insert SIM card" and GN_ERR_CODEREQUIRED
+      when it is displaying "Enter PIN code" instead of
+      GN_ERR_UNHANDLEDFRAME                         (Daniele Forsi)
+
 0.6.10
 ======
  * nk6510 driver updates
