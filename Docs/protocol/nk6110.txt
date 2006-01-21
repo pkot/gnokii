@@ -526,6 +526,9 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
 		                  netsel: 0x00: manual
 				          0x01: automatic
 					  0xff: unknown
+      when waiting for PIN code the reply is shorter
+    r { 0x0071, ?,?,?,length==2,netstatus?,netsel? }
+
 0x0c: Keys (Nokia 3310 seems to not respond to these frames)
     s Get key assignments   { 0x0040, 0x01 }
     r Get key assignments   { 0x0041, {key '1'}, 0x00, {key '2'} ... {key '0'}, 0,0,0, {symbols}, 0 }

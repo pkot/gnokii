@@ -28,6 +28,9 @@
     o non Nokia phones are supported by AT driver -- express it
       more verbosly                                     (Pawel Kot)
     o document irda_string variable                     (Pawel Kot)
+    o noted in Docs/protocol/nk6110.txt that reply for packet 0x0a
+      (Network status) is shorter when there is no network
+      registration                                  (Daniele Forsi)
  * xgnokii updates
     o make the progress dialog while loading the phonebook more
       compatible with gtk+-2.0                      (Daniele Forsi)
@@ -73,6 +76,10 @@
       phone is displaying "Insert SIM card" and GN_ERR_CODEREQUIRED
       when it is displaying "Enter PIN code" instead of
       GN_ERR_UNHANDLEDFRAME                         (Daniele Forsi)
+    o make --writecalendarnote return error GN_ERR_MEMORYFULL when
+      appropriate, instead of GN_ERR_UNHANDLEDFRAME (Daniele Forsi)
+    o make --getsms and --deletesms return GN_ERR_INVALIDMEMORYTYPE
+      if memory_type is not SM                      (Daniele Forsi)
 
 0.6.10
 ======
