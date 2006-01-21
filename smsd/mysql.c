@@ -103,8 +103,8 @@ gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 /* MySQL has own escape function.    
   text = strEscape (data->UserData[0].u.Text);
 */
-  text = g_malloc (strlen (data->user_data[0].u.text) * 2 + 1);
-  mysql_real_escape_string (&mysqlIn, text, data->user_data[0].u.text, strlen (data->user_data[0].u.text));
+  text = g_malloc (strlen ((gchar *) data->user_data[0].u.text) * 2 + 1);
+  mysql_real_escape_string (&mysqlIn, text, data->user_data[0].u.text, strlen ((gchar *) data->user_data[0].u.text));
   
   buf = g_string_sized_new (256);
   g_string_sprintf (buf, "INSERT INTO inbox (number, smsdate, \
@@ -188,11 +188,11 @@ void DB_Look (const gchar * const phone)
       sms.remote.type = GN_GSM_NUMBER_Unknown;
     
     if (row[2] != NULL)
-      strncpy (sms.user_data[0].u.text, row[2], GN_SMS_MAX_LENGTH + 1);
+      strncpy ((gchar *) sms.user_data[0].u.text, row[2], GN_SMS_MAX_LENGTH + 1);
     else
       *sms.user_data[0].u.text = '\0';
     sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';
-    sms.user_data[0].length = strlen (sms.user_data[0].u.text);
+    sms.user_data[0].length = strlen ((gchar *) sms.user_data[0].u.text);
     sms.user_data[0].type = GN_SMS_DATA_Text;
     sms.user_data[1].type = GN_SMS_DATA_None;
     if (!gn_char_def_alphabet (sms.user_data[0].u.text))

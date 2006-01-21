@@ -1,3 +1,7 @@
+* Sat Jan 21 2006 Jan Derfinak
+- Fix gcc 4 type check warnings.
+
+
 * Sun Jan 15 2006 Daniele Forsi
 - Changed again some messages to be consistent across the whole project
 

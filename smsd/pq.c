@@ -108,7 +108,7 @@ gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
     g_string_sprintf (phnStr, "'%s',", phone);
   }
 
-  text = strEscape (data->user_data[0].u.text);
+  text = strEscape ((gchar *) data->user_data[0].u.text);
   
   buf = g_string_sized_new (256);
   g_string_sprintf (buf, "INSERT INTO inbox (\"number\", \"smsdate\", \"insertdate\",\
@@ -189,9 +189,9 @@ void DB_Look (const gchar * const phone)
     else
       sms.remote.type = GN_GSM_NUMBER_Unknown;
     
-    strncpy (sms.user_data[0].u.text, PQgetvalue (res1, i, 2), GN_SMS_MAX_LENGTH + 1);
+    strncpy ((gchar *) sms.user_data[0].u.text, PQgetvalue (res1, i, 2), GN_SMS_MAX_LENGTH + 1);
     sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';
-    sms.user_data[0].length = strlen (sms.user_data[0].u.text);
+    sms.user_data[0].length = strlen ((gchar *) sms.user_data[0].u.text);
     sms.user_data[0].type = GN_SMS_DATA_Text;
     sms.user_data[1].type = GN_SMS_DATA_None;
     if (!gn_char_def_alphabet (sms.user_data[0].u.text))

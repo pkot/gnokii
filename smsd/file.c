@@ -114,7 +114,7 @@ gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
   GString *buf;
   gchar *text;
     
-  text = strEscape (data->user_data[0].u.text);
+  text = strEscape ((gchar *) data->user_data[0].u.text);
   
   if (action[0] == '\0')
     g_print ("Number: %s, Date: %02d-%02d-%02d %02d:%02d:%02d\nText:\n%s\n", \
@@ -191,9 +191,9 @@ void DB_Look (const gchar * const phone)
     if (sms.remote.number[strlen (sms.remote.number) - 1] == '\n')
       sms.remote.number[strlen (sms.remote.number) - 1] = '\0';
     
-    fgets (sms.user_data[0].u.text, GN_SMS_MAX_LENGTH + 1, smsFile);
-    if (sms.user_data[0].u.text[strlen (sms.user_data[0].u.text) - 1] == '\n')
-      sms.user_data[0].u.text[strlen (sms.user_data[0].u.text) - 1] = '\0';
+    fgets ((gchar *) sms.user_data[0].u.text, GN_SMS_MAX_LENGTH + 1, smsFile);
+    if (sms.user_data[0].u.text[strlen ((gchar *) sms.user_data[0].u.text) - 1] == '\n')
+      sms.user_data[0].u.text[strlen ((gchar *) sms.user_data[0].u.text) - 1] = '\0';
      
     fclose (smsFile);
     
@@ -204,7 +204,7 @@ void DB_Look (const gchar * const phone)
     else
       sms.remote.type = GN_GSM_NUMBER_Unknown;
     
-    sms.user_data[0].length = strlen (sms.user_data[0].u.text);
+    sms.user_data[0].length = strlen ((gchar *) sms.user_data[0].u.text);
     sms.user_data[0].type = GN_SMS_DATA_Text;
     sms.user_data[1].type = GN_SMS_DATA_None;
     if (!gn_char_def_alphabet (sms.user_data[0].u.text))
