@@ -2433,22 +2433,24 @@ static int getcalendarnote(int argc, char *argv[])
 					break;
 				}
 
-				fprintf(stdout, _("   Date: %d-%02d-%02d\n"), calnote.time.year,
+				fprintf(stdout, _("   Start date: %d-%02d-%02d\n"), calnote.time.year,
 					calnote.time.month,
 					calnote.time.day);
 
-				fprintf(stdout, _("   Time: %02d:%02d:%02d\n"), calnote.time.hour,
-					calnote.time.minute,
-					calnote.time.second);
+				if (calnote.type != GN_CALNOTE_BIRTHDAY) {
+					fprintf(stdout, _("   Start time: %02d:%02d:%02d\n"), calnote.time.hour,
+						calnote.time.minute,
+						calnote.time.second);
 
-				if (calnote.end_time.year) {
-					fprintf(stdout, _("   End date: %d-%02d-%02d\n"), calnote.end_time.year,
-						calnote.end_time.month,
-						calnote.end_time.day);
+					if (calnote.end_time.year) {
+						fprintf(stdout, _("   End date: %d-%02d-%02d\n"), calnote.end_time.year,
+							calnote.end_time.month,
+							calnote.end_time.day);
 
-					fprintf(stdout, _("   End time: %02d:%02d:%02d\n"), calnote.end_time.hour,
-						calnote.end_time.minute,
-						calnote.end_time.second);
+						fprintf(stdout, _("   End time: %02d:%02d:%02d\n"), calnote.end_time.hour,
+							calnote.end_time.minute,
+							calnote.end_time.second);
+					}
 				}
 
 				if (calnote.alarm.enabled) {
@@ -2461,6 +2463,8 @@ static int getcalendarnote(int argc, char *argv[])
 						calnote.alarm.timestamp.hour,
 						calnote.alarm.timestamp.minute,
 						calnote.alarm.timestamp.second);
+					fprintf(stdout, _("   Alarm tone %s\n"),
+						calnote.alarm.tone ? _("enabled") : _("disabled"));
 				}
 
 				switch (calnote.recurrence) {

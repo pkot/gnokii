@@ -2539,14 +2539,17 @@ static gn_error NK6510_SetAlarm(gn_data *data, struct gn_statemachine *state)
 
 static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	gn_error			e = GN_ERR_NONE;
-	int				i;
+	gn_error e = GN_ERR_NONE;
+	int i;
 
 	if (!data || !data->calnote) return GN_ERR_INTERNALERROR;
 
 	switch (message[3]) {
 	case NK6510_SUBCAL_NOTE_RCVD:
-		return calnote_decode(message, length, data);
+		e = calnote_decode(message, length, data);
+		break;
+	case NK6510_SUBCAL_NOTE2_RCVD:
+		e = calnote2_decode(message, length, data);
 		break;
 	case NK6510_SUBCAL_INFO_RCVD:
 		dprintf("Calendar Notes Info received!\n Total count: %i\n", message[4] * 256 + message[5]);
@@ -2611,11 +2614,13 @@ static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachin
 
 static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error	error = GN_ERR_NOTREADY;
-	unsigned char	req[] = { FBUS_FRAME_HEADER, NK6510_SUBCAL_GET_NOTE, 0x00, 0x00 };
-	unsigned char	date[] = { FBUS_FRAME_HEADER, NK6510_SUBCLO_GET_DATE };
+	gn_error error = GN_ERR_NOTREADY;
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x7d, 0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00, /* Location */
+				0xff, 0xff, 0xff, 0xff };
+	unsigned char date[] = { FBUS_FRAME_HEADER, NK6510_SUBCLO_GET_DATE };
 	gn_data	tmpdata;
-	gn_timestamp	tmptime;
+	gn_timestamp tmptime;
 
 	dprintf("Getting calendar note...\n");
 	if (data->calnote->location < 1) {
@@ -2631,11 +2636,11 @@ static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 				error = sm_message_send(4, NK6510_MSG_CLOCK, date, state);
 				if (error == GN_ERR_NONE) {
 					sm_block(NK6510_MSG_CLOCK, &tmpdata, state);
-					req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
-					req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+					req[8] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+					req[9] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
 					data->calnote->time.year = tmptime.year;
 
-					error = sm_message_send(6, NK6510_MSG_CALENDAR, req, state);
+					error = sm_message_send(14, NK6510_MSG_CALENDAR, req, state);
 					if (error == GN_ERR_NONE) {
 						error = sm_block(NK6510_MSG_CALENDAR, data, state);
 					}

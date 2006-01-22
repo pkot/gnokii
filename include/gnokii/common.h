@@ -280,7 +280,8 @@ typedef enum {
 #define GN_CALNOTE_NUMBER_MAX_LENGTH  49
 
 typedef struct {
-	int enabled; /* Is alarm set ? */
+	int enabled; /* Is alarm set? */
+	int tone; /* Is alarm tone enabled? */
 	gn_timestamp timestamp;
 } gn_calnote_alarm;
 

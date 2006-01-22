@@ -281,6 +281,137 @@ static gn_error calnote_get_times(unsigned char *block, gn_calnote *c)
 	return e;
 }
 
+/* Calendar note new frame description:
+ * [00 - 03] xx xx xx xx	FBUS specific (type, etc)
+ * [04 - 07] 00 00 00 00	unknown (4 octets)
+ * [08 - 11] 00 00 00 00	unknown (4 octets)
+ * [12 - 13] xx xx		location (2 octets)
+ * [14 - 17] xx xx xx xx	alarm (4 octets):	ff ff ff ff - no alarm,
+ *							00 00 00 00 - alarm at event time
+ *							00 00 00 05 - 5 minuted before
+ *							...
+ * [18 - 20] 80 00 00		unknown (3 octets)
+ * [21 - 21] xx			icon id (1 octet)
+ * [22 - 25] xx xx xx xx	tone (4 octets):	ff ff ff ff - tone
+ *							00 00 00 00 - no tone
+ * [26 - 26] xx			unknown (1 octet)
+ * [27 - 27] xx			note type (1 octet):	01
+ *							02
+ *							04
+ *							08
+ * [28 - 33] xx xx xx xx xx xx	start date (6 octets):	YY YY MM DD HH MM
+ * [34 - 39] xx xx xx xx xx xx	end date (6 octets):	YY YY MM DD HH MM
+ * [40 - 41] xx xx		recurrence (2 octets):	00 - no recurrence
+ *							18 - every day
+ *							a8 - every week
+ *							...
+ * [42 - 43] xx xx		in case of Birthday: year of birth; otherwise unknown (ff ff)
+ * [44 - 45] 20 00		unknown (2 octets)
+ * [46 - 49] 00 00 00 00	unknown (4 octets)
+ * [50 - 51] xx xx		first text field length (2 octets) [L1]
+ * [52 - 52] xx			second text field length (1 octet) [L2]
+ * [53 - 53] 00			unknown (1 octet)
+ * [54 - AA] xx xx xx ...	first text field (unicode)
+ * [BB - CC] xx xx xx ...	second text field (unicode)
+ *
+ * AA = 54 + 2 * L1 - 1
+ * BB = AA + 1
+ * CC = BB + 2 * L2 - 1
+ */
+gn_error calnote2_decode(unsigned char *message, int length, gn_data *data)
+{
+	gn_error e = GN_ERR_NONE;
+	int alarm_mark, alarm;
+	int len1, len2;
+	int tone1, tone2;
+
+	if (!data->calnote) {
+		e = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+	/* Type */
+	data->calnote->type = message[27];
+	/* Location */
+	data->calnote->location = message[11] * 256 + message[12];
+	/* Start time */
+	data->calnote->time.year = message[28] * 256 + message[29];
+	data->calnote->time.month = message[30];
+	data->calnote->time.day = message[31];
+	data->calnote->time.hour = message[32];
+	data->calnote->time.minute = message[33];
+	data->calnote->time.second = 0;
+	/* End time */
+	data->calnote->end_time.year = message[34] * 256 + message[35];
+	data->calnote->end_time.month = message[36];
+	data->calnote->end_time.day = message[37];
+	data->calnote->end_time.hour = message[38];
+	data->calnote->end_time.minute = message[39];
+	data->calnote->end_time.second = 0;
+	/* For Birthday and Call types end date does not have sense.
+	 * And you cannot set it in the phone. */
+	switch (data->calnote->type) {
+	case GN_CALNOTE_BIRTHDAY:
+		data->calnote->time.year = message[42] * 256 + message[43];
+	case GN_CALNOTE_CALL:
+		data->calnote->end_time.year = 0;
+		break;
+	default:
+		break;
+	}
+	/* Recurrence */
+	data->calnote->recurrence = 256 * message[40] + message[41];
+	/* Alarm */
+	alarm_mark = 256 * message[14] + message[15];
+	alarm = 256 * message[16] + message[17];
+	if (alarm_mark == 0xffff && alarm == 0xffff) {
+		data->calnote->alarm.enabled = false;
+	} else {
+		data->calnote->alarm.enabled = true;
+		e = calnote_get_alarm(60 * (alarm + 65536 * alarm_mark),
+					&(data->calnote->time),
+					&(data->calnote->alarm.timestamp));
+		if (e != GN_ERR_NONE)
+			goto out;
+	}
+	/* Alarm tone */
+	tone1 = 256 * message[22] + message[23];
+	tone2 = 256 * message[24] + message[25];
+	switch (65536 * tone1 + tone2) {
+	case 0x00:
+		data->calnote->alarm.tone = 0;
+		break;
+	case 0xffffffff:
+		data->calnote->alarm.tone = 1;
+		break;
+	default:
+		data->calnote->alarm.tone = 1;
+		break;
+	}
+	/* Main text */
+	len1 = 256 * message[50] + message[51];
+	char_unicode_decode(data->calnote->text, message + 54, len1 * 2);
+	/* Additional text: location or number */
+	len2 = message[52];
+	if (len2) {
+		switch (data->calnote->type) {
+		case GN_CALNOTE_MEETING:
+			char_unicode_decode(data->calnote->mlocation,
+					message + 54 + len1 * 2, len2 * 2);
+			break;
+		case GN_CALNOTE_CALL:
+			char_unicode_decode(data->calnote->phone_number,
+					message + 54 + len1 * 2, len2 * 2);
+			break;
+		default: /* Not sure about this one */
+			/* ignore */
+			dprintf("some extra text here\n");
+			break;
+		}
+	}
+out:
+	return e;
+}
+ 
 gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 {
 	unsigned char *block;
