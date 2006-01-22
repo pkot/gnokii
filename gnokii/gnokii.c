@@ -4089,8 +4089,16 @@ static int setspeeddial(char *argv[])
 	entry.number = atoi(argv[0]);
 	entry.location = atoi(argv[2]);
 
-	if ((error = gn_sm_functions(GN_OP_SetSpeedDial, &data, &state)) == GN_ERR_NONE )
+	error = gn_sm_functions(GN_OP_SetSpeedDial, &data, &state);
+
+	switch (error) {
+	case GN_ERR_NONE:
 		fprintf(stderr, _("Successfully written!\n"));
+		break;
+	default:
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
+		break;
+	}
 
 	return error;
 }
