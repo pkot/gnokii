@@ -41,6 +41,7 @@
     o avoid coredump on the empty ringtone list     (Daniele Forsi,
                                                          Pawel Kot)
     o support for calendar extended parameters          (Pawel Kot)
+    o dialpad for dial voice dialog                     (Pawel Kot)
  * gnokiid updates
     o add gnokiid/gnokiid.c to the list of translatable files in
       po/POTFILES.in                                (Daniele Forsi)

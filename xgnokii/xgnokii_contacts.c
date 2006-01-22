@@ -1980,52 +1980,192 @@ static inline void OkDialVoiceDialog(GtkWidget * w, gpointer data)
 	gtk_widget_hide(((DialVoiceDialog *) data)->dialog);
 }
 
-
-static void DialVoice(void)
+static void ClickPad(GtkWidget *w, gpointer data)
 {
-	static DialVoiceDialog dialVoiceDialog = { NULL, NULL };
+	gchar *label = (char *)gtk_button_get_label(GTK_BUTTON(w));
+	gtk_entry_append_text(GTK_ENTRY(data), label);
+}
+
+static void DialPad(void)
+{
+	static DialVoiceDialog dialPadDialog = { NULL, NULL };
 	GtkWidget *button, *label;
+	GtkWidget *d1, *d2, *d3, *d4, *d5, *d6, *d7, *d8, *d9, *d0 /* digits */,
+		*p /* plus (+) */, *h /* hash (#) */, *s /* star (*) */,
+		*wt /* wait (w) */, *ps /* pause (p) */;
+	GtkWidget *row1, *row2, *row3, *row4, *row5;
 	PhonebookEntry *pbEntry;
 
-	if (dialVoiceDialog.dialog == NULL) {
-		dialVoiceDialog.dialog = gtk_dialog_new();
-		gtk_window_set_title(GTK_WINDOW(dialVoiceDialog.dialog), _("Dial voice"));
-		gtk_window_set_modal(GTK_WINDOW(dialVoiceDialog.dialog), TRUE);
-		gtk_container_set_border_width(GTK_CONTAINER(dialVoiceDialog.dialog), 10);
-		gtk_signal_connect(GTK_OBJECT(dialVoiceDialog.dialog), "delete_event",
+	if (dialPadDialog.dialog == NULL) {
+		dialPadDialog.dialog = gtk_dialog_new();
+		gtk_window_set_title(GTK_WINDOW(dialPadDialog.dialog), _("Dial pad"));
+		gtk_window_set_modal(GTK_WINDOW(dialPadDialog.dialog), TRUE);
+		gtk_container_set_border_width(GTK_CONTAINER(dialPadDialog.dialog), 10);
+		gtk_signal_connect(GTK_OBJECT(dialPadDialog.dialog), "delete_event",
 				   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 
-		button = gtk_button_new_with_label(_("Ok"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialVoiceDialog.dialog)->action_area),
+		button = gtk_button_new_with_label(_("Dial"));
+		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->action_area),
 				   button, TRUE, TRUE, 10);
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
 				   GTK_SIGNAL_FUNC(OkDialVoiceDialog),
-				   (gpointer) & dialVoiceDialog);
+				   (gpointer) & dialPadDialog);
 		GTK_WIDGET_SET_FLAGS(button, GTK_CAN_DEFAULT);
 		gtk_widget_grab_default(button);
 		gtk_widget_show(button);
 
 		button = gtk_button_new_with_label(_("Cancel"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialVoiceDialog.dialog)->action_area),
+		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->action_area),
 				   button, TRUE, TRUE, 10);
 		gtk_signal_connect(GTK_OBJECT(button), "clicked",
 				   GTK_SIGNAL_FUNC(CancelDialog),
-				   (gpointer) dialVoiceDialog.dialog);
+				   (gpointer) dialPadDialog.dialog);
 		gtk_widget_show(button);
 
 		gtk_container_set_border_width(GTK_CONTAINER
-					       (GTK_DIALOG(dialVoiceDialog.dialog)->vbox), 5);
+					       (GTK_DIALOG(dialPadDialog.dialog)->vbox), 5);
 
 		label = gtk_label_new(_("Number:"));
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialVoiceDialog.dialog)->vbox), label, FALSE,
+		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->vbox), label, FALSE,
 				   FALSE, 5);
 		gtk_widget_show(label);
 
-		dialVoiceDialog.entry =
+		dialPadDialog.entry =
 		    gtk_entry_new_with_max_length(GN_PHONEBOOK_NUMBER_MAX_LENGTH);
-		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialVoiceDialog.dialog)->vbox),
-				   dialVoiceDialog.entry, FALSE, FALSE, 5);
-		gtk_widget_show(dialVoiceDialog.entry);
+		gtk_box_pack_start(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->vbox),
+				   dialPadDialog.entry, FALSE, FALSE, 5);
+		gtk_widget_show(dialPadDialog.entry);
+
+		row1 = gtk_hbox_new(FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->vbox)), row1);
+		gtk_widget_show(row1);
+
+		/* dial pad */
+		d1 = gtk_button_new_with_label(_("1"));
+		gtk_box_pack_start(GTK_BOX(row1),
+				   d1, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d1), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d1);
+		d2 = gtk_button_new_with_label(_("2"));
+		gtk_box_pack_start(GTK_BOX(row1),
+				   d2, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d2), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d2);
+		d3 = gtk_button_new_with_label(_("3"));
+		gtk_box_pack_start(GTK_BOX(row1),
+				   d3, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d3), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d3);
+
+		row2 = gtk_hbox_new(FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->vbox)), row2);
+		gtk_widget_show(row2);
+
+		d4 = gtk_button_new_with_label(_("4"));
+		gtk_box_pack_start(GTK_BOX(row2),
+				   d4, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d4), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d4);
+		d5 = gtk_button_new_with_label(_("5"));
+		gtk_box_pack_start(GTK_BOX(row2),
+				   d5, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d5), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d5);
+		d6 = gtk_button_new_with_label(_("6"));
+		gtk_box_pack_start(GTK_BOX(row2),
+				   d6, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d6), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d6);
+
+		row3 = gtk_hbox_new(FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->vbox)), row3);
+		gtk_widget_show(row3);
+
+		d7 = gtk_button_new_with_label(_("7"));
+		gtk_box_pack_start(GTK_BOX(row3),
+				   d7, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d7), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d7);
+		d8 = gtk_button_new_with_label(_("8"));
+		gtk_box_pack_start(GTK_BOX(row3),
+				   d8, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d8), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d8);
+		d9 = gtk_button_new_with_label(_("9"));
+		gtk_box_pack_start(GTK_BOX(row3),
+				   d9, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d9), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d9);
+
+		row4 = gtk_hbox_new(FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->vbox)), row4);
+		gtk_widget_show(row4);
+
+		p = gtk_button_new_with_label(_("+"));
+		gtk_box_pack_start(GTK_BOX(row4),
+				   p, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(p), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(p);
+		d0 = gtk_button_new_with_label(_("0"));
+		gtk_box_pack_start(GTK_BOX(row4),
+				   d0, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(d0), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(d0);
+		h = gtk_button_new_with_label(_("#"));
+		gtk_box_pack_start(GTK_BOX(row4),
+				   h, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(h), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(h);
+
+		row5 = gtk_hbox_new(FALSE, 0);
+		gtk_container_add(GTK_CONTAINER(GTK_BOX(GTK_DIALOG(dialPadDialog.dialog)->vbox)), row5);
+		gtk_widget_show(row4);
+
+		s = gtk_button_new_with_label(_("*"));
+		gtk_box_pack_start(GTK_BOX(row5),
+				   s, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(s), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(s);
+		ps = gtk_button_new_with_label(_("p"));
+		gtk_box_pack_start(GTK_BOX(row5),
+				   ps, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(ps), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(ps);
+		wt = gtk_button_new_with_label(_("w"));
+		gtk_box_pack_start(GTK_BOX(row5),
+				   wt, TRUE, TRUE, 10);
+		gtk_signal_connect(GTK_OBJECT(wt), "clicked",
+				   GTK_SIGNAL_FUNC(ClickPad),
+				   (gpointer) dialPadDialog.entry);
+		gtk_widget_show(h);
 	}
 
 	if (GTK_CLIST(clist)->selection != NULL) {
@@ -2035,10 +2175,10 @@ static void DialVoice(void)
 										    selection->
 										    data));
 
-		gtk_entry_set_text(GTK_ENTRY(dialVoiceDialog.entry), pbEntry->entry.number);
+		gtk_entry_set_text(GTK_ENTRY(dialPadDialog.entry), pbEntry->entry.number);
 	}
 
-	gtk_widget_show(dialVoiceDialog.dialog);
+	gtk_widget_show(dialPadDialog.dialog);
 }
 
 
@@ -3274,7 +3414,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>A", SelectAll, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
-	{NULL, "<control>V", DialVoice, 0, NULL},
+	{NULL, "<control>V", DialPad, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
 	{NULL, NULL, Help1, 0, NULL},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
@@ -3404,7 +3544,7 @@ void GUI_CreateContactsWindow(void)
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Dial voice"), NULL,
 				NewPixmap(Dial_xpm, GUI_ContactsWindow->window,
 					  &GUI_ContactsWindow->style->bg[GTK_STATE_NORMAL]),
-				(GtkSignalFunc) DialVoice, NULL);
+				(GtkSignalFunc) DialPad, NULL);
 
 //  gtk_toolbar_set_style (GTK_TOOLBAR (toolbar), GTK_TOOLBAR_ICONS);
 
