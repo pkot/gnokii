@@ -2548,6 +2548,8 @@ static int calnote_type_map(int type)
 		return GN_CALNOTE_BIRTHDAY;
 	case NK6510_NOTE_MEMO:
 		return GN_CALNOTE_MEMO;
+	case NK6510_NOTE_REMINDER:
+		return GN_CALNOTE_REMINDER;
 	default:
 		return type;
 	}
@@ -2640,6 +2642,7 @@ static gn_error calnote2_decode(unsigned char *message, int length, gn_data *dat
 	case GN_CALNOTE_BIRTHDAY:
 		data->calnote->time.year = message[42] * 256 + message[43];
 	case GN_CALNOTE_CALL:
+	case GN_CALNOTE_REMINDER:
 		data->calnote->end_time.year = 0;
 		break;
 	default:
@@ -2683,7 +2686,9 @@ static gn_error calnote2_decode(unsigned char *message, int length, gn_data *dat
 out:
 	return e;
 }
- 
+
+#define NEXT_CALNOTE data->calnote_list->location[data->calnote_list->last+i] 
+
 static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error e = GN_ERR_NONE;
@@ -2698,14 +2703,36 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 	case NK6510_SUBCAL_NOTE2_RCVD:
 		e = calnote2_decode(message, length, data);
 		break;
+	case 0x9f:
+		/* message[4]	- number of notes locations in this frame
+		 * message[5]	- 0x07
+		 * message[6-7] - 0x00 0x00
+		 * message[8-9] - number of all notes
+		 * ...		- notes location (each is 4 octets)
+		 */
+		dprintf("Calendar Notes Info received!\n Total count: %i\n", message[8] * 256 + message[9]);
+		data->calnote_list->number = message[8] * 256 + message[9];
+		dprintf("Location of Notes: ");
+		for (i = 0; i < message[4]; i++) {
+			if (10 + 4 * i >= length)
+				break;
+			NEXT_CALNOTE = message[12 + 4 * i] * 256 + message[13 + 4 * i];
+			dprintf("%i ", NEXT_CALNOTE);
+		}
+		dprintf("\n");
+		data->calnote_list->last += i;
+		if (message[4] == 0)
+			data->calnote_list->number = data->calnote_list->last;
+		break;
 	case NK6510_SUBCAL_INFO_RCVD:
 		dprintf("Calendar Notes Info received!\n Total count: %i\n", message[4] * 256 + message[5]);
 		data->calnote_list->number = message[4] * 256 + message[5];
 		dprintf("Location of Notes: ");
 		for (i = 0; i < message[6]; i++) {
-			if (8 + 2 * i >= length) break;
-			data->calnote_list->location[data->calnote_list->last+i] = message[8 + 2 * i] * 256 + message[9 + 2 * i];
-			dprintf("%i ", data->calnote_list->location[data->calnote_list->last+i]);
+			if (8 + 2 * i >= length)
+				break;
+			NEXT_CALNOTE = message[8 + 2 * i] * 256 + message[9 + 2 * i];
+			dprintf("%i ", NEXT_CALNOTE);
 		}
 		dprintf("\n");
 		data->calnote_list->last += i;
@@ -2740,20 +2767,23 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 #define LAST_INDEX (data->calnote_list->last > 0 ? data->calnote_list->last - 1 : 0)
 static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, NK6510_SUBCAL_GET_INFO, 0xff, 0xfe};
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x9e, 0xff, 0xff, 0x00, 0x00,
+				0x00, 0x00, /* start looking with this position */
+				0x00};
 	gn_error error;
 
-	/* Some magic: we need to set req[4-5] to {0xff, 0xfe} with the first loop */
-	data->calnote_list->location[0] = 0xff * 256 + 0xfe;
+	data->calnote_list->location[0] = 0;
 	/* Be sure it is 0 */
 	data->calnote_list->last = 0;
 	do {
 		dprintf("Read %d of %d calendar entries\n", data->calnote_list->last, data->calnote_list->number);
-		req[4] = data->calnote_list->location[LAST_INDEX] / 256;
-		req[5] = data->calnote_list->location[LAST_INDEX] % 256;
-		if (sm_message_send(6, NK6510_MSG_CALENDAR, req, state)) return GN_ERR_NOTREADY;
+		req[8] = data->calnote_list->location[LAST_INDEX] / 256;
+		req[9] = data->calnote_list->location[LAST_INDEX] % 256;
+		if (sm_message_send(11, NK6510_MSG_CALENDAR, req, state))
+			return GN_ERR_NOTREADY;
 		error = sm_block(NK6510_MSG_CALENDAR, data, state);
-		if (error != GN_ERR_NONE) return error;
+		if (error != GN_ERR_NONE)
+			return error;
 	} while (data->calnote_list->last < data->calnote_list->number);
 	return error;
 }

@@ -8,6 +8,7 @@
     o Nokia 6101 support added                          (Pawel Kot)
     o end time and location support added to calendar   (Pawel Kot)
     o map nk6510 calnote types to libgnokii types       (Pawel Kot)
+    o add reminder support                              (Pawel Kot)
  * link layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates
