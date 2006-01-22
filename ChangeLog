@@ -64,6 +64,7 @@
       (bug #14689)                                 (Michael Klemme)
     o get rid of the irda phones[] table; either autodetect or
       use the config variale (irda_string)              (Pawel Kot)
+    o add memo support to iCal output                   (Pawel Kot)
  * gnokii updates
     o change some translatable strings to be consistent across the
       whole project                                 (Daniele Forsi)

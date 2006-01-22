@@ -122,6 +122,7 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 
 	/* TODO: should the strings be configurable? */
 	switch(calnote->type) {
+	case GN_CALNOTE_MEMO:
 	case GN_CALNOTE_REMINDER:
 		properties[iprop++] = icalproperty_new_categories("MISCELLANEOUS");
 		properties[iprop++] = icalproperty_new_summary(calnote->text);
@@ -200,6 +201,7 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	fprintf(f, "BEGIN:VEVENT\r\n");
 	fprintf(f, "CATEGORIES:");
 	switch (calnote->type) {
+	case GN_CALNOTE_MEMO:
 	case GN_CALNOTE_REMINDER:
 		fprintf(f, "MISCELLANEOUS\r\n");
 		break;
