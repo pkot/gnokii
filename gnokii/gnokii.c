@@ -2428,6 +2428,9 @@ static int getcalendarnote(int argc, char *argv[])
 				case GN_CALNOTE_BIRTHDAY:
 					fprintf(stdout, _("Birthday\n"));
 					break;
+				case GN_CALNOTE_MEMO:
+					fprintf(stdout, _("Memo\n"));
+					break;
 				default:
 					fprintf(stdout, _("Unknown\n"));
 					break;

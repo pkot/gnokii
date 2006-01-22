@@ -264,6 +264,7 @@ typedef enum {
 	GN_CALNOTE_CALL     = 0x02, /* Call */
 	GN_CALNOTE_BIRTHDAY = 0x04, /* Birthday */
 	GN_CALNOTE_REMINDER = 0x08, /* Reminder */
+	GN_CALNOTE_MEMO     = 0x16, /* Memo */
 } gn_calnote_type;
 
 typedef enum {
