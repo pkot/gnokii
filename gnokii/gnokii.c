@@ -2413,7 +2413,7 @@ static int getcalendarnote(int argc, char *argv[])
 			if (vcal) {
 				gn_calnote2ical(stdout, &calnote);
 			} else {  /* plaint text output */
-				fprintf(stdout, _("   Type of the note: "));
+				fprintf(stdout, _("%d (%d). Type: "), i, calnote.location);
 
 				switch (calnote.type) {
 				case GN_CALNOTE_REMINDER:

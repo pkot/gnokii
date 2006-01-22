@@ -74,6 +74,7 @@
     o support for memo calendar type                    (Pawel Kot)
     o for birthday calendar entries don't output year for the
       alarm                                             (Pawel Kot)
+    o output calnote location (virtual and physical)    (Pawel Kot)
  * utils updates
     o add ldiffix.pl script for ldif entries normalization: number
       formats, delete empty entries, encode base64 (Michale Klemme)
