@@ -72,6 +72,8 @@
     o support for end date and location for calendar
                                         (BORBELY Zoltan, Pawel Kot)
     o support for memo calendar type                    (Pawel Kot)
+    o for birthday calendar entries don't output year for the
+      alarm                                             (Pawel Kot)
  * utils updates
     o add ldiffix.pl script for ldif entries normalization: number
       formats, delete empty entries, encode base64 (Michale Klemme)
