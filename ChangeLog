@@ -90,6 +90,8 @@
       appropriate, instead of GN_ERR_UNHANDLEDFRAME (Daniele Forsi)
     o make --getsms and --deletesms return GN_ERR_INVALIDMEMORYTYPE
       if memory_type is not SM                      (Daniele Forsi)
+ * atgen driver updates
+    o unsolicited RING and +CRING message handling (BORBELY Zoltan)
 
 0.6.10
 ======

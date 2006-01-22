@@ -52,6 +52,9 @@
 
 #include "device.h"
 
+/* ugly hack, but we need GN_OP_AT_Ring -- bozo */
+#include "phones/atgen.h"
+
 /* 
  * FIXME - when sending an AT command while another one is still in progress,
  * the old command is aborted and the new ignored. the result is _one_ error
@@ -187,6 +190,10 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 			bi->rbuf[0] = GN_AT_CME;
 			bi->rbuf[1] = error / 256;
 			bi->rbuf[2] = error % 256;
+		} else if (!strncmp(start, "RING", 4)) {
+			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+			*start = '\0';
+			bi->rbuf_pos = start - bi->rbuf;
 		} else if (*start == '+') {
 			/* check for possible unsolicited responses */
 			unsolicited = 0;
@@ -195,6 +202,10 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 				if (count == 0 || count == 2) unsolicited = 1;
 			} else if (!strncmp(start + 1, "CPIN:", 5))
 				bi->rbuf[0] = GN_AT_OK;
+			else if (!strncmp(start + 1, "CRING:", 6)) {
+				sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+				unsolicited = 1;
+			}
 			if (unsolicited) {
 				*start = '\0';
 				bi->rbuf_pos = start - bi->rbuf;

@@ -70,6 +70,7 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_error AT_Identify(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state);
@@ -100,6 +101,7 @@ static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_AnswerCall(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_CancelCall(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -140,6 +142,8 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_MakeCall,              AT_DialVoice,             Reply },
 	{ GN_OP_AnswerCall,            AT_AnswerCall,            Reply },
 	{ GN_OP_CancelCall,            AT_CancelCall,            Reply },
+	{ GN_OP_AT_Ring,               NULL,                     ReplyRing },
+	{ GN_OP_SetCallNotification,   AT_SetCallNotification,   Reply },
 	{ GN_OP_GetNetworkInfo,        AT_GetNetworkInfo,        ReplyGetNetworkInfo },
 };
 
@@ -1053,6 +1057,26 @@ static gn_error AT_CancelCall(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_CancelCall, data, state);
 }
 
+static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	gn_error err;
+
+	if (!drvinst->call_notification && !data->call_notification)
+		return GN_ERR_NONE;
+
+	if (!drvinst->call_notification) {
+		if (sm_message_send(9, GN_OP_SetCallNotification, "AT+CRC=1\r", state))
+			return GN_ERR_NOTREADY;
+		if ((err = sm_block_no_retry(GN_OP_SetCallNotification, data, state)) != GN_ERR_NONE)
+			return err;
+	}
+
+	drvinst->call_notification = data->call_notification;
+
+	return GN_ERR_NONE;
+}
+
 static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
@@ -1557,6 +1581,21 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
 	return GN_ERR_NONE;
 }
 
+static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	gn_call_info cinfo;
+
+	if (!drvinst->call_notification) return GN_ERR_UNSOLICITED;
+
+	memset(&cinfo, 0, sizeof(cinfo));
+	cinfo.call_id = 1;
+
+	drvinst->call_notification(GN_CALL_Incoming, &cinfo, state);
+
+	return GN_ERR_UNSOLICITED;
+}
+
 static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -1696,6 +1735,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->defaultcharset = AT_CHAR_UNKNOWN;
 	drvinst->charset = AT_CHAR_UNKNOWN;
 	drvinst->no_smsc = 0;
+	drvinst->call_notification = NULL;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {

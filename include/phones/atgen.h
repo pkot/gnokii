@@ -44,6 +44,7 @@ typedef enum {
 	GN_OP_AT_SetPDUMode,
 	GN_OP_AT_Prompt,
 	GN_OP_AT_GetMemoryRange,
+	GN_OP_AT_Ring,
 	GN_OP_AT_Max	/* don't append anything after this entry */
 } at_operation;
 
@@ -78,6 +79,8 @@ typedef struct {
 	at_charset availcharsets;
 	at_charset defaultcharset;
 	at_charset charset;
+
+	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
 } at_driver_instance;
 
 #define AT_DRVINST(s) (*((at_driver_instance **)(&(s)->driver.driver_instance)))
