@@ -6,6 +6,8 @@
       was too long the trailing digits where overwritten
                                                         (Pawel Kot)
     o Nokia 6101 support added                          (Pawel Kot)
+    o end time and location support added to calendar   (Pawel Kot)
+    o map nk6510 calnote types to libgnokii types       (Pawel Kot)
  * link layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates
@@ -62,11 +64,14 @@
  * gnokii updates
     o change some translatable strings to be consistent across the
       whole project                                 (Daniele Forsi)
-   o putfile() should use binary open() mode (bug #15031)
+    o putfile() should use binary open() mode (bug #15031)
                                                         (Pawel Kot)
     o with multiple entries for --writephonebook when no locations
       are given don't write them all to the same location
                                                         (Pawel Kot)
+    o support for end date and location for calendar
+                                        (BORBELY Zoltan, Pawel Kot)
+    o support for memo calendar type                    (Pawel Kot)
  * utils updates
     o add ldiffix.pl script for ldif entries normalization: number
       formats, delete empty entries, encode base64 (Michale Klemme)

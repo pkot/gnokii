@@ -2537,6 +2537,22 @@ static gn_error NK6510_SetAlarm(gn_data *data, struct gn_statemachine *state)
 /* CALENDAR HANDLING */
 /********************/
 
+static int calnote_type_map(int type)
+{
+	switch (type) {
+	case NK6510_NOTE_MEETING:
+		return GN_CALNOTE_MEETING;
+	case NK6510_NOTE_CALL:
+		return GN_CALNOTE_CALL;
+	case NK6510_NOTE_BIRTHDAY:
+		return GN_CALNOTE_BIRTHDAY;
+	case NK6510_NOTE_MEMO:
+		return GN_CALNOTE_MEMO;
+	default:
+		return type;
+	}
+}
+
 /* Calendar note new frame description:
  * [00 - 03] xx xx xx xx	FBUS specific (type, etc)
  * [04 - 07] 00 00 00 00	unknown (4 octets)
@@ -2574,7 +2590,7 @@ static gn_error NK6510_SetAlarm(gn_data *data, struct gn_statemachine *state)
  * BB = AA + 1
  * CC = BB + 2 * L2 - 1
  */
-gn_error calnote2_decode(unsigned char *message, int length, gn_data *data)
+static gn_error calnote2_decode(unsigned char *message, int length, gn_data *data)
 {
 	gn_error e = GN_ERR_NONE;
 	int alarm_mark, alarm;
@@ -2586,7 +2602,7 @@ gn_error calnote2_decode(unsigned char *message, int length, gn_data *data)
 		goto out;
 	}
 	/* Type */
-	data->calnote->type = message[27];
+	data->calnote->type = calnote_type_map(message[27]);
 	/* Location */
 	data->calnote->location = message[11] * 256 + message[12];
 	/* Start time */
