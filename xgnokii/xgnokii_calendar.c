@@ -50,6 +50,17 @@
 #include "xpm/NewRem.xpm"
 #include "xpm/quest.xpm"
 
+/* Calendar entry columns */
+#define ENTRY_COLUMNS		9
+#define ENTRY_ID		0
+#define ENTRY_TYPE		1
+#define ENTRY_SDATE		2
+#define ENTRY_EDATE		3
+#define ENTRY_TEXT		4
+#define ENTRY_NUMBER		5 /* Just for calls */
+#define ENTRY_LOCATION		6 /* Just for meetings */
+#define ENTRY_ALARM		7
+#define ENTRY_RECURRENCE	8
 
 typedef struct {
 	GtkWidget *calendar;
@@ -135,123 +146,121 @@ inline void GUI_ShowCalendar()
 
 static gint InsertCalendarEntry(gn_calnote * note)
 {
-	gchar *row[7];
+	gchar *row[ENTRY_COLUMNS];
+	int free_recur = 0;
 
-	row[0] = g_strdup_printf("%d", note->location);
+	row[ENTRY_ID] = g_strdup_printf("%d", note->location);
 
 	switch (note->type) {
+	case GN_CALNOTE_MEMO:
+		row[ENTRY_TYPE] = _("Memo");
+		row[ENTRY_NUMBER] = "";
+		row[ENTRY_LOCATION] = "";
+		break;
+
 	case GN_CALNOTE_REMINDER:
-		row[1] = _("Reminder");
-		row[2] = g_strdup_printf(_("%02d/%02d/%04d"), note->time.day,
-					 note->time.month, note->time.year);
-		row[5] = "";
-		switch (note->recurrence / 60) {
-		case GN_CALNOTE_NEVER:
-			row[6] = _("never");
-			break;
-		case GN_CALNOTE_DAILY:
-			row[6] = _("daily");
-			break;
-		case GN_CALNOTE_WEEKLY:
-			row[6] = _("weekly");
-			break;
-		case GN_CALNOTE_2WEEKLY:
-			row[6] = _("every two weeks");
-			break;
-		case GN_CALNOTE_YEARLY:
-			row[6] = _("yearly");
-			break;
-		default:
-			row[6] = g_strdup_printf(_("every %d minutes"), note->recurrence);
-		}
+		row[ENTRY_TYPE] = _("Reminder");
+		row[ENTRY_NUMBER] = "";
+		row[ENTRY_LOCATION] = "";
 		break;
 
 	case GN_CALNOTE_CALL:
-		row[1] = _("Call");
-		row[2] = g_strdup_printf(_("%02d/%02d/%04d  %02d:%02d"), note->time.day,
-					 note->time.month, note->time.year,
-					 note->time.hour, note->time.minute);
-		row[5] = note->phone_number;
-		switch (note->recurrence / 60) {
-		case GN_CALNOTE_NEVER:
-			row[6] = _("never");
-			break;
-		case GN_CALNOTE_DAILY:
-			row[6] = _("daily");
-			break;
-		case GN_CALNOTE_WEEKLY:
-			row[6] = _("weekly");
-			break;
-		case GN_CALNOTE_2WEEKLY:
-			row[6] = _("every two weeks");
-			break;
-		case GN_CALNOTE_YEARLY:
-			row[6] = _("yearly");
-			break;
-		default:
-			row[6] = g_strdup_printf(_("every %d minutes"), note->recurrence);
-		}
+		row[ENTRY_TYPE] = _("Call");
+		row[ENTRY_NUMBER] = note->phone_number;
+		row[ENTRY_LOCATION] = "";
 		break;
 
 	case GN_CALNOTE_MEETING:
-		row[1] = _("Meeting");
-		row[2] = g_strdup_printf(_("%02d/%02d/%04d  %02d:%02d"), note->time.day,
-					 note->time.month, note->time.year,
-					 note->time.hour, note->time.minute);
-		row[5] = "";
-		switch (note->recurrence / 60) {
-		case GN_CALNOTE_NEVER:
-			row[6] = _("never");
-			break;
-		case GN_CALNOTE_DAILY:
-			row[6] = _("daily");
-			break;
-		case GN_CALNOTE_WEEKLY:
-			row[6] = _("weekly");
-			break;
-		case GN_CALNOTE_2WEEKLY:
-			row[6] = _("every two weeks");
-			break;
-		case GN_CALNOTE_YEARLY:
-			row[6] = _("yearly");
-			break;
-		default:
-			row[6] = g_strdup_printf(_("every %d minutes"), note->recurrence);
-		}
+		row[ENTRY_TYPE] = _("Meeting");
+		row[ENTRY_NUMBER] = "";
+		row[ENTRY_LOCATION] = note->mlocation;
 		break;
 
 	case GN_CALNOTE_BIRTHDAY:
-		row[1] = _("Birthday");
-		row[2] = g_strdup_printf(_("%02d/%02d/%04d"), note->time.day,
-					 note->time.month, note->time.year);
-		row[5] = "";
-		row[6] = "";
+		row[ENTRY_TYPE] = _("Birthday");
+		row[ENTRY_NUMBER] = "";
+		row[ENTRY_LOCATION] = "";
 		break;
 
 	default:
-		row[1] = _("Unknown");
-		row[5] = "";
+		row[ENTRY_TYPE] = _("Unknown");
+		row[ENTRY_NUMBER] = "";
+		row[ENTRY_LOCATION] = "";
 		break;
 	}
 
-	row[3] = note->text;
+	if (note->type == GN_CALNOTE_BIRTHDAY) {
+		row[ENTRY_SDATE] = g_strdup_printf(_("%04d/%02d/%02d"),
+					note->time.year, note->time.month, note->time.day);
+	} else {
+		row[ENTRY_SDATE] = g_strdup_printf(_("%04d/%02d/%02d %02d:%02d"),
+					note->time.year, note->time.month, note->time.day,
+					note->time.hour, note->time.minute);
+	}
 
-	if (note->alarm.timestamp.year == 0)
-		row[4] = "";
-	else
-		row[4] = g_strdup_printf(_("%02d/%02d/%04d  %02d:%02d"), note->alarm.timestamp.day,
-					 note->alarm.timestamp.month, note->alarm.timestamp.year,
-					 note->alarm.timestamp.hour, note->alarm.timestamp.minute);
+	if (note->end_time.year) {
+		row[ENTRY_EDATE] = g_strdup_printf(_("%04d/%02d/%02d %02d:%02d"),
+					note->end_time.year, note->end_time.month, note->end_time.day,
+					note->end_time.hour, note->end_time.minute);
+	} else {
+		row[ENTRY_EDATE] = "";
+	}
+	if (note->alarm.enabled) {
+		if (note->type == GN_CALNOTE_BIRTHDAY) {
+			row[ENTRY_ALARM] = g_strdup_printf(_("%02d/%02d %02d:%02d tone %s"),
+						note->alarm.timestamp.month, note->alarm.timestamp.day,
+						note->alarm.timestamp.hour, note->alarm.timestamp.minute,
+						note->alarm.tone ? _("enabled") : _("disabled"));
+		} else {
+			row[ENTRY_ALARM] = g_strdup_printf(_("%04d/%02d/%02d %02d:%02d tone %s"),
+						note->alarm.timestamp.year, note->alarm.timestamp.month,
+						note->alarm.timestamp.day, note->alarm.timestamp.hour,
+						note->alarm.timestamp.minute,
+						note->alarm.tone ? _("enabled") : _("disabled"));
+		}
+	} else {
+		row[ENTRY_ALARM] = "";
+	}
+	row[ENTRY_TEXT] = note->text;
+
+	switch (note->recurrence) {
+	case GN_CALNOTE_NEVER:
+		row[ENTRY_RECURRENCE] = _("never");
+		break;
+	case GN_CALNOTE_DAILY:
+		row[ENTRY_RECURRENCE] = _("daily");
+		break;
+	case GN_CALNOTE_WEEKLY:
+		row[ENTRY_RECURRENCE] = _("weekly");
+		break;
+	case GN_CALNOTE_2WEEKLY:
+		row[ENTRY_RECURRENCE] = _("every two weeks");
+		break;
+	case GN_CALNOTE_MONTHLY:
+		row[ENTRY_RECURRENCE] = _("monthly");
+		break;
+	case GN_CALNOTE_YEARLY:
+		row[ENTRY_RECURRENCE] = _("yearly");
+		break;
+	default:
+		row[ENTRY_RECURRENCE] = g_strdup_printf(_("every %d minutes"), note->recurrence * 60);
+		free_recur = 1;
+		break;
+	}
 
 	gtk_clist_freeze(GTK_CLIST(cal.notesClist));
 	gtk_clist_append(GTK_CLIST(cal.notesClist), row);
 	gtk_clist_sort(GTK_CLIST(cal.notesClist));
 	gtk_clist_thaw(GTK_CLIST(cal.notesClist));
 
-	g_free(row[0]);
-	g_free(row[2]);
-	if (*row[4] != '\0')
-		g_free(row[4]);
+	g_free(row[ENTRY_ID]);
+	g_free(row[ENTRY_SDATE]);
+	if (*row[ENTRY_EDATE] != '\0')
+		g_free(row[ENTRY_EDATE]);
+	if (*row[ENTRY_ALARM] != '\0')
+		g_free(row[ENTRY_ALARM]);
+	if (free_recur)
+		g_free(row[ENTRY_RECURRENCE]);
 
 	return GN_ERR_NONE;
 }
@@ -260,6 +269,8 @@ static void ClickEntry(GtkWidget * clist,
 		       gint row, gint column, GdkEventButton * event, gpointer data)
 {
 	gchar *buf;
+	int birthday = 0;
+	int year, month, day;
 
 	gtk_text_freeze(GTK_TEXT(cal.noteText));
 
@@ -268,21 +279,54 @@ static void ClickEntry(GtkWidget * clist,
 				gtk_text_get_length(GTK_TEXT(cal.noteText)));
 
 	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL, _("Type: "), -1);
-	gtk_clist_get_text(GTK_CLIST(clist), row, 1, &buf);
+	gtk_clist_get_text(GTK_CLIST(clist), row, ENTRY_TYPE, &buf);
 	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL, buf, -1);
 	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
 			"\n", -1);
 
-	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL, _("Date: "), -1);
-	gtk_clist_get_text(GTK_CLIST(clist), row, 2, &buf);
+	if (!strcmp(buf, _("Birthday"))) {
+		birthday = 1;
+	}
+
+	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL, _("Start date: "), -1);
+	gtk_clist_get_text(GTK_CLIST(clist), row, ENTRY_SDATE, &buf);
 	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL, buf, -1);
 	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
 			"\n", -1);
 
-	gtk_calendar_select_month(GTK_CALENDAR(cal.calendar), atoi(buf + 3) - 1, atoi(buf + 6));
-	gtk_calendar_select_day(GTK_CALENDAR(cal.calendar), atoi(buf));
+	year = atoi(buf);
+	month = atoi(buf + 5) - 1;
+	day = atoi(buf + 8);
+	if (birthday) {
+		time_t t;
+		struct tm *tm;
+		
+		t = time(NULL);
+		tm = localtime(&t);
+		if ((tm->tm_mon > month) ||
+		    ((tm->tm_mon == month) &&
+		     (tm->tm_mday > day))) {
+			year = tm->tm_year + 1;
+		} else {
+			year = tm->tm_year;
+		}
+		year += 1900;
+	}
+	gtk_calendar_select_month(GTK_CALENDAR(cal.calendar), month, year);
+	gtk_calendar_select_day(GTK_CALENDAR(cal.calendar), day);
 
-	gtk_clist_get_text(GTK_CLIST(clist), row, 4, &buf);
+	gtk_clist_get_text(GTK_CLIST(clist), row, ENTRY_EDATE, &buf);
+	if (*buf != '\0') {
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL,
+				_("End date: "), -1);
+
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
+				buf, -1);
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
+				"\n", -1);
+	}
+
+	gtk_clist_get_text(GTK_CLIST(clist), row, ENTRY_ALARM, &buf);
 	if (*buf != '\0') {
 		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL,
 				_("Alarm: "), -1);
@@ -293,7 +337,7 @@ static void ClickEntry(GtkWidget * clist,
 				"\n", -1);
 	}
 
-	gtk_clist_get_text(GTK_CLIST(clist), row, 5, &buf);
+	gtk_clist_get_text(GTK_CLIST(clist), row, ENTRY_NUMBER, &buf);
 	if (*buf != '\0') {
 		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL,
 				_("Number: "), -1);
@@ -304,7 +348,18 @@ static void ClickEntry(GtkWidget * clist,
 				"\n", -1);
 	}
 
-	gtk_clist_get_text(GTK_CLIST(clist), row, 6, &buf);
+	gtk_clist_get_text(GTK_CLIST(clist), row, ENTRY_LOCATION, &buf);
+	if (*buf != '\0') {
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL,
+				_("Location: "), -1);
+
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
+				buf, -1);
+		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL,
+				"\n", -1);
+	}
+
+	gtk_clist_get_text(GTK_CLIST(clist), row, ENTRY_RECURRENCE, &buf);
 	if (*buf != '\0') {
 		gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL,
 				_("Recurrence: "), -1);
@@ -316,7 +371,7 @@ static void ClickEntry(GtkWidget * clist,
 	}
 
 	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.colour), NULL, _("Text: "), -1);
-	gtk_clist_get_text(GTK_CLIST(clist), row, 3, &buf);
+	gtk_clist_get_text(GTK_CLIST(clist), row, ENTRY_TEXT, &buf);
 	gtk_text_insert(GTK_TEXT(cal.noteText), NULL, &(cal.noteText->style->black), NULL, buf, -1);
 
 	gtk_text_thaw(GTK_TEXT(cal.noteText));
@@ -387,7 +442,7 @@ static gint CListCompareFunc(GtkCList * clist, gconstpointer ptr1, gconstpointer
 	if (*text1 == '\0')
 		return (-1);
 
-	if (clist->sort_column == 0) {
+	if (clist->sort_column == ENTRY_ID) {
 		gint n1 = atoi(text1);
 		gint n2 = atoi(text2);
 
@@ -397,82 +452,6 @@ static gint CListCompareFunc(GtkCList * clist, gconstpointer ptr1, gconstpointer
 			return (-1);
 		else
 			return 0;
-	}
-
-	if (clist->sort_column == 2 || clist->sort_column == 4) {
-		GDate *date1, *date2;
-		gint time1, time2;
-		gint ret;
-
-		date1 = g_date_new_dmy(atoi(text1), atoi(text1 + 3), atoi(text1 + 6));
-		date2 = g_date_new_dmy(atoi(text2), atoi(text2 + 3), atoi(text2 + 6));
-
-		ret = g_date_compare(date1, date2);
-
-		g_date_free(date1);
-		g_date_free(date2);
-
-		if (ret)
-			return (ret);
-
-		if (strlen(text1) > 10)
-			time1 = atoi(text1 + 11) * 60 + atoi(text1 + 14);
-		else
-			time1 = 0;
-
-		if (strlen(text2) > 10)
-			time2 = atoi(text2 + 11) * 60 + atoi(text2 + 14);
-		else
-			time2 = 0;
-
-		if (time1 > time2)
-			return (1);
-		else if (time1 < time2)
-			return (-1);
-		else
-			return 0;
-
-/*    struct tm bdTime;
-    time_t time1, time2;
-
-    bdTime.tm_sec  = 0;
-    if (strlen (text1) > 10)
-    {
-      bdTime.tm_min  = atoi (text1 + 14);
-      bdTime.tm_hour = atoi (text1 + 11);
-    }
-    else
-      bdTime.tm_min  = bdTime.tm_hour = 0;
-    bdTime.tm_mday = atoi (text1);
-    bdTime.tm_mon  = atoi (text1 + 3);
-    bdTime.tm_year = atoi (text1 + 6) - 1900;
-    bdTime.tm_isdst = -1;
-
-    time1 = mktime (&bdTime);
-
-    bdTime.tm_sec  = 0;
-    if (strlen (text2) > 10)
-    {
-      bdTime.tm_min  = atoi (text2 + 14);
-      bdTime.tm_hour = atoi (text2 + 11);
-    }
-    else
-      bdTime.tm_min  = bdTime.tm_hour = 0;
-    bdTime.tm_mday = atoi (text2);
-    bdTime.tm_mon  = atoi (text2 + 3);
-    bdTime.tm_year = atoi (text2 + 6) - 1900;
-    bdTime.tm_isdst = -1;
-
-    time2 = mktime (&bdTime);
-
-    g_print ("Cas1: %s - %d, Cas2: %s - %d\n", text1, time1, text2, time2);
-
-    if (time1 > time2)
-      return (1);
-    else if (time1 < time2)
-      return (-1);
-    else 
-      return 0; */
 	}
 
 	return (g_strcasecmp(text1, text2));
@@ -1547,15 +1526,22 @@ void GUI_CreateCalendarWindow()
 	struct tm *tm;
 	SortColumn *sColumn;
 	register gint i;
-	gchar *titles[7] = { _("#"), _("Type"), _("Date"), _("Text"),
-			     _("Alarm"), _("Number"), _("Recurrence")
-	};
+	gchar *titles[ENTRY_COLUMNS];
 
+	titles[ENTRY_ID]		= _("#");
+	titles[ENTRY_TYPE]		= _("Type");
+	titles[ENTRY_SDATE]		= _("Start date");
+	titles[ENTRY_EDATE]		= _("End date");
+	titles[ENTRY_TEXT]		= _("Text");
+	titles[ENTRY_NUMBER]		= _("Number");
+	titles[ENTRY_LOCATION]		= _("Location");
+	titles[ENTRY_ALARM]		= _("Alarm");
+	titles[ENTRY_RECURRENCE]	= _("Recurrence");
 	InitMainMenu();
 	GUI_CalendarWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_wmclass(GTK_WINDOW(GUI_CalendarWindow), "CalendarWindow", "Xgnokii");
 	gtk_window_set_title(GTK_WINDOW(GUI_CalendarWindow), _("Calendar"));
-	gtk_widget_set_usize (GTK_WIDGET (GUI_CalendarWindow), 640, 320);
+	gtk_widget_set_usize (GTK_WIDGET (GUI_CalendarWindow), 1000, 400);
 	gtk_signal_connect(GTK_OBJECT(GUI_CalendarWindow), "delete_event",
 			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 	gtk_widget_realize(GUI_CalendarWindow);
@@ -1655,7 +1641,7 @@ void GUI_CreateCalendarWindow()
 	gtk_text_set_word_wrap(GTK_TEXT(cal.noteText), TRUE);
 
 	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
-	gtk_widget_set_usize (GTK_WIDGET (scrolledWindow), 200, 120);
+	gtk_widget_set_usize (GTK_WIDGET (scrolledWindow), 250, 120);
 
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
 				       GTK_POLICY_NEVER, GTK_POLICY_AUTOMATIC);
@@ -1677,7 +1663,7 @@ void GUI_CreateCalendarWindow()
 	gtk_widget_show(cal.calendar);
 
 	/* Notes list */
-	cal.notesClist = gtk_clist_new_with_titles(7, titles);
+	cal.notesClist = gtk_clist_new_with_titles(ENTRY_COLUMNS, titles);
 	gtk_clist_set_shadow_type(GTK_CLIST(cal.notesClist), GTK_SHADOW_OUT);
 	gtk_clist_set_compare_func(GTK_CLIST(cal.notesClist), CListCompareFunc);
 	gtk_clist_set_sort_column(GTK_CLIST(cal.notesClist), 0);
@@ -1685,16 +1671,18 @@ void GUI_CreateCalendarWindow()
 	gtk_clist_set_auto_sort(GTK_CLIST(cal.notesClist), FALSE);
 	gtk_clist_set_selection_mode(GTK_CLIST(cal.notesClist), GTK_SELECTION_EXTENDED);
 
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 0, 15);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 1, 52);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 2, 110);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 3, 100);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 4, 110);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 5, 90);
-	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), 6, 80);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_ID, 17);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_TYPE, 55);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_SDATE, 115);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_EDATE, 115);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_TEXT, 130);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_LOCATION, 80);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_NUMBER, 80);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_ALARM, 210);
+	gtk_clist_set_column_width(GTK_CLIST(cal.notesClist), ENTRY_RECURRENCE, 120);
 	gtk_clist_set_column_justification(GTK_CLIST(cal.notesClist), 0, GTK_JUSTIFY_RIGHT);
 
-	for (i = 0; i < 7; i++) {
+	for (i = 0; i < ENTRY_COLUMNS; i++) {
 		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
 			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__,
 				__LINE__);
@@ -1710,7 +1698,7 @@ void GUI_CreateCalendarWindow()
 			   GTK_SIGNAL_FUNC(ClickEntry), NULL);
 
 	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
-	gtk_widget_set_usize(scrolledWindow, 600, 150);
+	gtk_widget_set_usize(scrolledWindow, 900, 200);
 	gtk_container_add(GTK_CONTAINER(scrolledWindow), cal.notesClist);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),
 				       GTK_POLICY_AUTOMATIC, GTK_POLICY_AUTOMATIC);
