@@ -232,7 +232,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 	return GN_ERR_NONE;
 }
 
-static gn_error calnote_get_alarm(int alarmdiff, gn_timestamp *time, gn_timestamp *alarm)
+gn_error calnote_get_alarm(int alarmdiff, gn_timestamp *time, gn_timestamp *alarm)
 {
 	struct tm tm_time;
 
