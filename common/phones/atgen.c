@@ -1584,14 +1584,48 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
 static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
+	at_line_buffer buf;
+	char *pos;
 	gn_call_info cinfo;
 
 	if (!drvinst->call_notification) return GN_ERR_UNSOLICITED;
 
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+
 	memset(&cinfo, 0, sizeof(cinfo));
 	cinfo.call_id = 1;
 
-	drvinst->call_notification(GN_CALL_Incoming, &cinfo, state);
+	if (!strncmp(buf.line1, "RING", 4))
+		return GN_ERR_INTERNALERROR; /* AT+CRC=1 disables RING */
+
+	else if (!strncmp(buf.line1, "+CRING: ", 8)) {
+		pos = buf.line1 + 8;
+		if (!strncmp(pos, "VOICE", 5))
+			cinfo.type = GN_CALL_Voice;
+		else
+			return GN_ERR_UNHANDLEDFRAME;
+
+		drvinst->call_notification(GN_CALL_Incoming, &cinfo, state);
+
+	} else if (!strncmp(buf.line1, "CONNECT", 7))
+		drvinst->call_notification(GN_CALL_Established, &cinfo, state);
+
+	else if (!strncmp(buf.line1, "BUSY", 4))
+		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state);
+
+	else if (!strncmp(buf.line1, "NO ANSWER", 9))
+		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state);
+
+	else if (!strncmp(buf.line1, "NO CARRIER", 10))
+		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state);
+
+	else if (!strncmp(buf.line1, "NO DIALTONE", 11))
+		drvinst->call_notification(GN_CALL_LocalHangup, &cinfo, state);
+
+	else
+		return GN_ERR_UNHANDLEDFRAME;
 
 	return GN_ERR_UNSOLICITED;
 }

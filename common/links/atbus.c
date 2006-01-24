@@ -171,6 +171,7 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 		bi->rbuf[1] = '\0';
 	}
 	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 2, "\r\n", 2)) {
+		unsolicited = 0;
 		/* try to find previous <cr><lf> */
 		char *start = findcrlfbw(bi->rbuf + bi->rbuf_pos - 2, bi->rbuf_pos - 1);
 		/* if not found, start at buffer beginning */
@@ -192,11 +193,24 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 			bi->rbuf[2] = error % 256;
 		} else if (!strncmp(start, "RING", 4)) {
 			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
-			*start = '\0';
-			bi->rbuf_pos = start - bi->rbuf;
+			unsolicited = 1;
+		} else if (!strncmp(start, "CONNECT", 7)) {
+			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+			unsolicited = 1;
+		} else if (!strncmp(start, "BUSY", 4)) {
+			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+			unsolicited = 1;
+		} else if (!strncmp(start, "NO ANSWER", 9)) {
+			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+			unsolicited = 1;
+		} else if (!strncmp(start, "NO CARRIER", 10)) {
+			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+			unsolicited = 1;
+		} else if (!strncmp(start, "NO DIALTONE", 11)) {
+			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+			unsolicited = 1;
 		} else if (*start == '+') {
 			/* check for possible unsolicited responses */
-			unsolicited = 0;
 			if (!strncmp(start + 1, "CREG:", 5)) {
 				count = numchar(start, ',');
 				if (count == 0 || count == 2) unsolicited = 1;
@@ -206,10 +220,10 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 				sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
 				unsolicited = 1;
 			}
-			if (unsolicited) {
-				*start = '\0';
-				bi->rbuf_pos = start - bi->rbuf;
-			}
+		}
+		if (unsolicited) {
+			*start = '\0';
+			bi->rbuf_pos = start - bi->rbuf;
 		}
 	}
 	/* check if SMS prompt is found */
