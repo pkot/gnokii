@@ -19,6 +19,7 @@
     o Makefile cleanup due to the gettext changes  (BORBELY Zoltan)
     o added LDFLAGS when linking libgnokii libraries
                                      (Luke Kenneth Casson Leighton)
+    o change libgnokii parts compilation order          (Pawel Kot)
  * gnapplet driver updates
     o Nokia 6680 support added                     (BORBELY Zoltan)
     o end time and location support added to the calendar

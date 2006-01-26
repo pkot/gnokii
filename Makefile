@@ -26,9 +26,9 @@ DIRS += common/phones \
 	common/links \
 	common/devices \
 	$(DATA_DIR) \
-	po \
 	common \
-	$(BIN_DIRS)
+	$(BIN_DIRS) \
+	po
 
 GTK_DIRS =	xgnokii
 
