@@ -1273,8 +1273,8 @@ gint ToolTypeEvent(GtkWidget * widget)
 gint LogoTypeEvent(GtkWidget * widget)
 {
 	int clear = 0;
-	g_print(_("LogoTypeEvent called!\n"));
-	g_print(_("width: %i, height: %i\n"), statemachine.driver.phone.startup_logo_width,
+	g_print("LogoTypeEvent called!\n");
+	g_print("width: %i, height: %i\n", statemachine.driver.phone.startup_logo_width,
 		statemachine.driver.phone.startup_logo_height);
 	/* is startupLogo? */
 	/* Resize and clear anyway - CK */
