@@ -44,6 +44,7 @@
                                                          Pawel Kot)
     o support for calendar extended parameters          (Pawel Kot)
     o dialpad for dial voice dialog                     (Pawel Kot)
+    o bump xgnokii version                              (Pawel Kot)
  * gnokiid updates
     o add gnokiid/gnokiid.c to the list of translatable files in
       po/POTFILES.in                                (Daniele Forsi)
