@@ -4293,7 +4293,7 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_ENTRYTOOLONG;
 	}
 	len = char_unicode_encode(req + pos + 1, data->call_info->number, len);
-	req[pos++] = len;
+	req[pos++] = len / 2;
 	pos += len;
 
 	switch (data->call_info->send_number) {	
