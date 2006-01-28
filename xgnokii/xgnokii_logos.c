@@ -91,7 +91,7 @@ GdkPixmap *greenPixelPixmap;
 int previewPixmapWidth, previewPixmapHeight;
 int previewAvailable = 1, showPreviewErrorDialog = 1;
 int previewPixmapNumber = 0, pixmapFiles = 0;
-int pixmapsInitialized = 0, pixmapDefaultId = -1;
+int pixmapsInitialized = FALSE, pixmapDefaultId = -1;
 gchar *pixmapNames[MAX_PIXMAPS];
 
 gn_bmp bitmap, oldBitmap;
@@ -169,7 +169,7 @@ static void GetPixmaps(gchar *path)
 			pixmapFiles++;
 		}
 	}
-	pixmapsInitialized = 1;
+	pixmapsInitialized = TRUE;
 }
 
 /* Get the pixmap that filename contains model string. If there's none, get
