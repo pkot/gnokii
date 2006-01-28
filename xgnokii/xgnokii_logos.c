@@ -25,7 +25,7 @@
   Copyright (C) 1999      Pavel Janík ml., Hugh Blemings
   Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2000-2001 Marcin Wiacek, Chris Kemp
-  Copyright (C) 2002-2003 Pawel Kot
+  Copyright (C) 2002-2006 Pawel Kot
   Copyright (C) 2002      Markus Plail
 
 */
@@ -36,6 +36,8 @@
 #include <signal.h>
 #include <sys/types.h>
 #include <string.h>
+#include <dirent.h>
+
 #include <gtk/gtk.h>
 
 #include "misc.h"
@@ -82,12 +84,15 @@ int drawingAreaWidth, drawingAreaHeight;	/* in pixels */
 int mouseButtonPushed = 0;
 
 /* stuff for previewArea */
+#define MAX_PIXMAPS 100
 GtkWidget *previewArea = NULL;
 GdkPixmap *previewPixmap = NULL;
 GdkPixmap *greenPixelPixmap;
 int previewPixmapWidth, previewPixmapHeight;
 int previewAvailable = 1, showPreviewErrorDialog = 1;
-int previewPixmapNumber = 0;
+int previewPixmapNumber = 0, pixmapFiles = 0;
+int pixmapsInitialized = 0, pixmapDefaultId = -1;
+gchar *pixmapNames[MAX_PIXMAPS];
 
 gn_bmp bitmap, oldBitmap;
 gn_network_info networkInfo;
@@ -146,94 +151,66 @@ int GetMaxFrom3(int a, int b, int c)
 	}
 }
 
-/* load preview pixmap from file */
-GdkPixmap *GetPreviewPixmap(GtkWidget * widget)
+/* Read all Preview* files from the given path and put them into pixmapNames
+ * array. We support no more than MAX_PIXMAP files. */
+static void GetPixmaps(gchar *path)
 {
-	GdkPixmap *pixmap;
+	DIR *dir;
+	struct dirent *de;
+
+	dir = opendir(path);
+	while (de = readdir(dir)) {
+		if (pixmapFiles == MAX_PIXMAPS)
+			break;
+		if (!strncmp(de->d_name, "Preview_", 8)) {
+			pixmapNames[pixmapFiles] = g_strdup(de->d_name);
+			if (!strcmp(de->d_name, "Preview_default.xpm"))
+				pixmapDefaultId = pixmapFiles;
+			pixmapFiles++;
+		}
+	}
+	pixmapsInitialized = 1;
+}
+
+/* Get the pixmap that filename contains model string. If there's none, get
+ * default one. */
+static int GetPixmapId(gchar *model)
+{
+	int i, pos = pixmapDefaultId;
+
+	for (i = 0; i < pixmapFiles; i++) {
+		if (strstr(pixmapNames[i], model)) {
+			pos = i;
+			break;
+		}
+	}
+	return pos;
+}
+
+/* Load preview pixmap from file. On the first run do the initialization.
+ * Next runs are after clicking on the preview area that should switch to the
+ * next pixmap. In case none is available NULL is returned. */
+GdkPixmap *GetPreviewPixmap(GtkWidget *widget)
+{
+	GdkPixmap *pixmap = NULL;
 	GdkBitmap *mask;
-	gchar *file;
+	gchar *file, *dirname;
+	struct stat *buf;
 
-	if (previewPixmapNumber == 0) {
-		if (!strcmp(xgnokiiConfig.model, "6110") || !strcmp(xgnokiiConfig.model, "6120")) {
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_6110.xpm");
-			previewPixmapNumber = 1;
-		} else if (!strcmp(xgnokiiConfig.model, "6130") ||
-			   !strcmp(xgnokiiConfig.model, "6150") ||
-			   !strcmp(xgnokiiConfig.model, "616x") ||
-			   !strcmp(xgnokiiConfig.model, "6185") ||
-			   !strcmp(xgnokiiConfig.model, "6190")) {
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_6150.xpm");
-			previewPixmapNumber = 2;
-		} else if (!strcmp(xgnokiiConfig.model, "3210")) {
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_3210.xpm");
-			previewPixmapNumber = 3;
-		} else if (!strcmp(xgnokiiConfig.model, "3310") ||
-			   !strcmp(xgnokiiConfig.model, "3330")) {
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_3310.xpm");
-			previewPixmapNumber = 4;
-		} else if (!strcmp(xgnokiiConfig.model, "5110") ||
-			   !strcmp(xgnokiiConfig.model, "5130")) {
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_5110.xpm");
-			previewPixmapNumber = 5;
-		} else if (!strcmp(xgnokiiConfig.model, "6250")) {
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_6250.xpm");
-			previewPixmapNumber = 6;
-		} else if (!strcmp(xgnokiiConfig.model, "7110")) {
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_7110.xpm");
-			previewPixmapNumber = 7;
-		} else {
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_6210.xpm");
-			previewPixmapNumber = 8;
-		}
-	} else
-		switch (previewPixmapNumber) {
-		case 1:
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_6110.xpm");
-			break;
-		case 2:
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_6150.xpm");
-			break;
-		case 3:
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_3210.xpm");
-			break;
-		case 4:
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_3310.xpm");
-			break;
-		case 5:
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_5110.xpm");
-			break;
-		case 6:
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_6250.xpm");
-			break;
-		case 7:
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_7110.xpm");
-			break;
-		default:
-			file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir,
-					       "/xpm/Preview_6210.xpm");
-			break;
-		}
+	dirname = g_strdup_printf("%s/xpm/", xgnokiiConfig.xgnokiidir);
+	if (!pixmapsInitialized) {
+		GetPixmaps(dirname);
+		previewPixmapNumber = GetPixmapId(xgnokiiConfig.model);
+	}
 
-	pixmap = gdk_pixmap_create_from_xpm(widget->window, &mask,
+	if (previewPixmapNumber >= 0) {
+		file = g_strdup_printf("%s%s", dirname,
+					pixmapNames[previewPixmapNumber]);
+		pixmap = gdk_pixmap_create_from_xpm(widget->window, &mask,
 					    &widget->style->bg[GTK_STATE_NORMAL], file);
-
-	g_free(file);
-
+		g_free(file);
+	}
+	g_free(dirname);
 	return pixmap;
 }
 
@@ -733,7 +710,7 @@ void UpdateToolScreen(GtkWidget * widget, int x1, int y1, int x2, int y2)
 
 gint PreviewAreaButtonPressEvent(GtkWidget * widget, GdkEventButton * event)
 {
-	previewPixmapNumber = (previewPixmapNumber % 8) + 1;
+	previewPixmapNumber = ((previewPixmapNumber + 1) % pixmapFiles);
 
 	gtk_drawing_area_size(GTK_DRAWING_AREA(previewArea),
 			      previewPixmapWidth, previewPixmapHeight);

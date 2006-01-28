@@ -47,6 +47,8 @@
     o dialpad for dial voice dialog                     (Pawel Kot)
     o bump xgnokii version                              (Pawel Kot)
     o added default preview image for logos             (Pawel Kot)
+    o don't hardcode preview pixmap names (except for default)
+                                                        (Pawel Kot)
  * gnokiid updates
     o add gnokiid/gnokiid.c to the list of translatable files in
       po/POTFILES.in                                (Daniele Forsi)
