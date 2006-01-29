@@ -10,6 +10,8 @@
     o map nk6510 calnote types to libgnokii types       (Pawel Kot)
     o add reminder support                              (Pawel Kot)
     o fix MakeCall                                      (Pawel Kot)
+    o fix Subscribe: use just few channels, don't wait for the
+      reply (it won't come)                             (Pawel Kot)
  * link layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates

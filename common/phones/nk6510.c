@@ -4103,16 +4103,20 @@ static gn_error NK6510_IncomingSubscribe(int messagetype, unsigned char *message
 	return GN_ERR_NONE;
 }
 
+/* FIXME: make it configurable */
 static gn_error NK6510_Subscribe(gn_data *data, struct gn_statemachine *state)
 {
 	int i;
 	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x10,
-			       0x34, /* number of groups */
-			       0x01, 0x0a, 0x02, 0x14, 0x15};
+			       0x06, /* number of groups */
+			       NK6510_MSG_COMMSTATUS, NK6510_MSG_SMS,
+			       NK6510_MSG_NETSTATUS, NK6510_MSG_FOLDER,
+			       NK6510_MSG_RESET, NK6510_MSG_BATTERY};
 
 	dprintf("Subscribing to various channels!\n");
-	for (i = 1; i < 35; i++) req[4 + i] = i;
-	SEND_MESSAGE_BLOCK(NK6510_MSG_SUBSCRIBE, 39);
+	if (sm_message_send(11, NK6510_MSG_SUBSCRIBE, req, state))
+		return GN_ERR_NOTREADY;
+	return sm_block_ack(state);
 }
 
 /*************/
