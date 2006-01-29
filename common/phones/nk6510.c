@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2002      Markus Plail
-  Copyright (C) 2002-2004 Pawel Kot, BORBELY Zoltan
+  Copyright (C) 2002-2006 Pawel Kot, BORBELY Zoltan
 
   This file provides functions specific to the 6510 series.
   See README for more details on supported mobile phones.
@@ -4162,9 +4162,8 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 	gn_call_active *ca;
 
 	switch (message[3]) {
-	case 0x02: /* Error? */  
-		dprintf("Error?\n");
-		error = GN_ERR_NOTSUPPORTED;
+	case 0x02: /* Call estabilished */  
+		dprintf("Call estabilished\n");
 		break;
 
 	case 0x03: /* Call started */
@@ -4196,6 +4195,11 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 
 	case 0x0c: /* Dialling */
 		dprintf("Dialling\n");
+		break;
+
+	case 0x10: /* Error? */  
+		dprintf("Error?\n");
+		error = GN_ERR_NOTSUPPORTED;
 		break;
 
 	case 0x21: /* Call status */
