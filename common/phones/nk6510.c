@@ -4156,23 +4156,65 @@ static gn_error NK6510_Reset(gn_data *data, struct gn_statemachine *state)
 
 static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
+	gn_error error = GN_ERR_NONE;
 	unsigned char *pos;
 	int i;
 	gn_call_active *ca;
 
 	switch (message[3]) {
-	/* get call status */
-	case 0x21:
-		if (!data->call_active)
-			return GN_ERR_INTERNALERROR;
-		if (message[5] != 0xff)
-			return GN_ERR_UNHANDLEDFRAME;
+	case 0x02: /* Error? */  
+		dprintf("Error?\n");
+		error = GN_ERR_NOTSUPPORTED;
+		break;
+
+	case 0x03: /* Call started */
+		dprintf("Call started\n");
+		break;
+
+	case 0x04: /* Call hangup */
+		dprintf("Call hangup (remote)\n");
+		dprintf("Call ID: %i\n", message[4]);
+		dprintf("Cause Type: %i\n", message[5]);
+		dprintf("Cause ID: %i\n", message[6]);
+		break;
+
+	case 0x05: /* Incoming call */
+		dprintf("Incoming call\n");
+		break;
+
+	case 0x07: /* Call answer initiated */
+		dprintf("Call answer initiated\n");
+		break;
+
+	case 0x09: /* Call hangup */
+		dprintf("Call hangup (local)\n");
+		break;
+
+	case 0x0a: /* Hanguping */
+		dprintf("Hanguping call (locally)\n");  
+		break;
+
+	case 0x0c: /* Dialling */
+		dprintf("Dialling\n");
+		break;
+
+	case 0x21: /* Call status */
+		if (!data->call_active) {
+			error = GN_ERR_INTERNALERROR;
+			break;
+		}
+		if (message[5] != 0xff) {
+			error = GN_ERR_UNHANDLEDFRAME;
+			break;
+		}
 		pos = message + 6;
 		ca = data->call_active;
 		memset(ca, 0x00, 2 * sizeof(gn_call_active));
 		for (i = 0; i < message[4]; i++) {
-			if (pos[0] != 0x64)
-				return GN_ERR_UNHANDLEDFRAME;
+			if (pos[0] != 0x64) {
+				error = GN_ERR_UNHANDLEDFRAME;
+				goto out;
+			}
 			ca[i].call_id = pos[2];
 			ca[i].channel = pos[3];
 			switch (pos[4]) {
@@ -4198,7 +4240,9 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 				ca[i].state = GN_CALL_RemoteHangup;
 				break;
 			default:
-				return GN_ERR_UNHANDLEDFRAME;
+				dprintf("Unknown call state in frame: %d\n", pos[4]);
+				error = GN_ERR_UNHANDLEDFRAME;
+				goto out;
 			}
 			switch (pos[5]) {
 			case 0x00:
@@ -4223,7 +4267,9 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 				ca[i].prev_state = GN_CALL_RemoteHangup;
 				break;
 			default:
-				return GN_ERR_UNHANDLEDFRAME;
+				dprintf("Unknown previous call state in frame: %d\n", pos[5]);				
+				error = GN_ERR_UNHANDLEDFRAME;
+				goto out;
 			}
 			char_unicode_decode(ca[i].name, pos + 12, 2 * pos[10]);
 			char_unicode_decode(ca[i].number, pos + 112, 2 * pos[11]);
@@ -4238,22 +4284,33 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		}
 		break;
 
-	/* hangup */
-	case 0x04:
-		dprintf("Hangup!\n");
-		dprintf("Call ID: %i\n", message[4]);
-		dprintf("Cause Type: %i\n", message[5]);
-		dprintf("Cause ID: %i\n", message[6]);
-		return GN_ERR_UNKNOWN;
+	case 0x23: /* Call on hold */
+		dprintf("Call on hold\n");
+		break;
+
+	case 0x25: /* Call resumed */
+		dprintf("Call resumed\n");
+		break;
+
+	case 0x27: /* Call switched */
+		dprintf("Call switched\n");
+		break;
+
+	case 0x53: /* Outgoing call */
+		dprintf("Outgoing call\n");
+		break;
 
 	case 0xf0:
-		return GN_ERR_UNHANDLEDFRAME;
+		error = GN_ERR_UNHANDLEDFRAME;
+		break;
 
 	default:
 		dprintf("Unknown subtype of type 0x01 (0x%02x)\n", message[3]);
-		return GN_ERR_UNHANDLEDFRAME;
+		error = GN_ERR_UNHANDLEDFRAME;
+		break;
 	}
-	return GN_ERR_NONE;
+out:
+	return error;
 }
 
 static gn_error NK6510_GetActiveCalls(gn_data *data, struct gn_statemachine *state)
@@ -4266,16 +4323,61 @@ static gn_error NK6510_GetActiveCalls(gn_data *data, struct gn_statemachine *sta
 	SEND_MESSAGE_BLOCK(NK6510_MSG_COMMSTATUS, 4);
 }
 
+static gn_error NK6510_MakeCall2(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error = GN_ERR_NONE;
+	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01,
+				0x00, 0x02, 0x07, 0x04,
+				0x01, /* 0x01 voice, 0x02 data */
+				0x00, 0x03,
+				0x00, /* Length of the block*/
+				0x00, 0x00, 0x00};
+				/* Next fields are number length and number itself */
+	int len;
+
+	if (!data->call_info) {
+		error = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+
+	len = strlen(data->call_info->number);
+	if (len > GN_PHONEBOOK_NUMBER_MAX_LENGTH) {
+		dprintf("number too long\n");
+		error = GN_ERR_ENTRYTOOLONG;
+		goto out;
+	}
+	len = char_unicode_encode(req + 16, data->call_info->number, len);
+	req[11] = len + 6;
+	req[15] = len / 2;
+
+	if (sm_message_send(16 + len, NK6510_MSG_COMMSTATUS, req, state)) {
+		error = GN_ERR_NOTREADY;
+		goto out;
+	}
+	error = sm_block(NK6510_MSG_COMMSTATUS, data, state);
+
+out:
+	return error;
+}
+ 
 static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error error = GN_ERR_NONE;
 	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01};
 	unsigned char voice_end[] = {0x05, 0x01, 0x05, 0x00, 0x02, 0x00, 0x00, 0x00};
 	int pos = 4, len;
 	gn_call_active active[2];
 	gn_data d;
 
-	if (!data->call_info)
-		return GN_ERR_INTERNALERROR;
+	if (!data->call_info) {
+		error = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+
+	/* We need to subscribe to the call channel */
+	error = NK6510_Subscribe(data, state);
+	if (error != GN_ERR_NONE)
+		goto out;
 
 	switch (data->call_info->type) {
 	case GN_CALL_Voice:
@@ -4284,17 +4386,20 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 	case GN_CALL_NonDigitalData:
 	case GN_CALL_DigitalData:
 		dprintf("Unsupported call type %d\n", data->call_info->type);
-		return GN_ERR_NOTSUPPORTED;
+		error = GN_ERR_NOTSUPPORTED;
+		goto out;
 
 	default:
 		dprintf("Invalid call type %d\n", data->call_info->type);
-		return GN_ERR_INTERNALERROR;
+		error = GN_ERR_INTERNALERROR;
+		goto out;
 	}
 
 	len = strlen(data->call_info->number);
 	if (len > GN_PHONEBOOK_NUMBER_MAX_LENGTH) {
 		dprintf("number too long\n");
-		return GN_ERR_ENTRYTOOLONG;
+		error = GN_ERR_ENTRYTOOLONG;
+		goto out;
 	}
 	len = char_unicode_encode(req + pos + 1, data->call_info->number, len);
 	req[pos++] = len / 2;
@@ -4311,24 +4416,42 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 		voice_end[5] = 0x00;
 		break;
 	default:
-		return GN_ERR_INTERNALERROR;
+		error = GN_ERR_INTERNALERROR;
+		goto out;
 	}
 	memcpy(req + pos, voice_end, sizeof(voice_end));
 	pos += sizeof(voice_end);
 
-	if (sm_message_send(pos, NK6510_MSG_COMMSTATUS, req, state))
-		return GN_ERR_NOTREADY;
-	if (sm_block_ack(state) != GN_ERR_NONE)
-		return GN_ERR_NOTREADY;
+	/* Reported by kam on IRC channel. Nokia 7600 does not work with
+	 * the above frame. Return GN_ERR_NOTSUPPORTED to retry with
+	 * another frame.
+	 * FIXME: do the per-model configuration which frame should
+	 * be used. */
+	if (sm_message_send(pos, NK6510_MSG_COMMSTATUS, req, state)) {
+		error = GN_ERR_NOTREADY;
+		goto out;
+	}
+	error = sm_block(NK6510_MSG_COMMSTATUS, data, state);
 
+	if (error == GN_ERR_NOTSUPPORTED)
+		error = NK6510_MakeCall2(data, state);
+
+	if (error != GN_ERR_NONE) {
+		goto out;
+	}
+
+	/* Get active calls detais */
 	memset(active, 0, sizeof(*active));
 	gn_data_clear(&d);
 	d.call_active = active;
-	if (NK6510_GetActiveCalls(&d, state) != GN_ERR_NONE)
-		return GN_ERR_NOTREADY;
+	error = NK6510_GetActiveCalls(&d, state);
+	if (error != GN_ERR_NONE)
+		goto out;
+		
 	data->call_info->call_id = active[0].call_id;
 
-	return GN_ERR_NONE;
+out:
+	return error;
 }
 
 static gn_error NK6510_CancelCall(gn_data *data, struct gn_statemachine *state)

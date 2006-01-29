@@ -12,6 +12,8 @@
     o fix MakeCall                                      (Pawel Kot)
     o fix Subscribe: use just few channels, don't wait for the
       reply (it won't come)                             (Pawel Kot)
+    o not all models support the same frames for MakeCall, fix it
+      for them (at least Nokia 7600)                    (Pawel Kot)
  * link layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
  * device layer updates
