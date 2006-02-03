@@ -40,6 +40,8 @@
     o noted in Docs/protocol/nk6110.txt that reply for packet 0x0a
       (Network status) is shorter when there is no network
       registration                                  (Daniele Forsi)
+    o updated French translation                (Olivier Kaloudoff)
+    o updated Polish translation                        (Pawel Kot)
  * xgnokii updates
     o make the progress dialog while loading the phonebook more
       compatible with gtk+-2.0                      (Daniele Forsi)
