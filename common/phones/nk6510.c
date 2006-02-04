@@ -4161,6 +4161,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 	int i;
 	gn_call_active *ca;
 
+	/* Please note that most of the meaning is wild guess */
 	switch (message[3]) {
 	case 0x02: /* Call estabilished */  
 		dprintf("Call estabilished\n");
@@ -4197,9 +4198,20 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		dprintf("Dialling\n");
 		break;
 
-	case 0x10: /* Error? */  
-		dprintf("Error?\n");
-		error = GN_ERR_NOTSUPPORTED;
+	case 0x10: /* Indicator whether the make call request was successful (?) */
+		switch (message[4]) {
+		case 0x00:
+			dprintf("Make call succeeded.\n");
+			break;
+		/* Some of dct4 phones respond with this to NK6510_MakeCall()
+		 * frames. Let's repond with the error code to retry with 
+		 * NK6510_MakeCall2(). The exact meaning is not known.
+		 */
+		case 0x01:
+			dprintf("Make call failed.\n");
+			error = GN_ERR_NOTSUPPORTED;
+			break;
+		}
 		break;
 
 	case 0x21: /* Call status */
@@ -4302,6 +4314,12 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 
 	case 0x53: /* Outgoing call */
 		dprintf("Outgoing call\n");
+		break;
+
+	case 0x32:
+	case 0xd2:
+	case 0x0f:
+		dprintf("Unknown\n");
 		break;
 
 	case 0xf0:
