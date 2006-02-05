@@ -16,6 +16,8 @@
       for them (at least Nokia 7600)                    (Pawel Kot)
  * link layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
+    o fix FBUS mode initialization for slow responding devices
+      (like Nokia 6020)                                 (Pawel Kot)
  * device layer updates
     o virtual IrCOMM device support                (BORBELY Zoltan)
     o Nokia 6235 over IrDA support                      (Pawel Kot)

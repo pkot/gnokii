@@ -92,12 +92,38 @@ static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 	return true;
 }
 
+static int send_command(char *cmd, int len, struct gn_statemachine *state)
+{
+	struct timeval timeout;
+	unsigned char buffer[255];
+	int res, i;
+	int select_ok = 0;
+
+	/* Communication with the phone looks strange here. I am unable to
+	 * read the whole answer from the port with DKU-5 cable and
+	 * Nokia 6020. The following code seems to work reliable.
+	 */
+	device_write(cmd, len, state);
+	/* Experimental timeout */
+	timeout.tv_sec	= 0;
+	timeout.tv_usec	= 500000;
+	res = device_select(&timeout, state);
+	if (res > 0) {
+		/* Read from the port only when select succeeds */
+		while (res > 0) {
+			/* Avoid 'device temporarily unavailable' error */
+			usleep(50);
+			res = device_read(buffer, 255, state);
+		}
+	}
+	return res;
+}
+
 static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_type type)
 {
 	unsigned char init_char = 0x55;
 	unsigned char end_init_char = 0xc1;
-	int count, res;
-	unsigned char buffer[255];
+	int count, res, i;
 
 	if (!state)
 		return false;
@@ -109,20 +135,17 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
 	}
  
 	device_setdtrrts(0, 0, state);
-	sleep(1);
+	usleep(1000000);
 	device_setdtrrts(1, 1, state);
+	usleep(1000000);
 	device_changespeed(19200, state);
-	sleep(1);
-	device_write("AT\r", 3, state);
-	sleep(1);
-	res = device_read(buffer, 255, state);
-	device_write("AT&F\r", 5, state);
-	usleep(100000);
-	res = device_read(buffer, 255, state);
-	device_write("AT*NOKIAFBUS\r", 13, state);
-	usleep(100000);
-	res = device_read(buffer, 255, state);
- 
+	dprintf("Switching to FBUS mode\n");
+	/* Here we can be either switch to FBUS or not. Assume 0.5 second
+	 * timeout for the answer.
+	 */
+	res = send_command("AT\r\n", 4, state);
+	res = send_command("AT&F\r\n", 6, state);
+	res = send_command("AT*NOKIAFBUS\r\n", 14, state);
 	device_changespeed(115200, state);
 
 	if (type != GN_CT_Bluetooth && type != GN_CT_TCP) { 
