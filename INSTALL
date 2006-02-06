@@ -47,6 +47,11 @@ http://www.kernel.org/					Linux kernel includes
 http://bluez.sf.net/					bluez (Linux Bluetooth stack)
 http://sourceforge.net/projects/freeassociation/	libical
 
+For xgnokii you may want download gnokii-artwork package from
+http://www.gnokii.org/download/gnokii, the package containing mobile
+phone pixmaps to be used with xgnokii keyboard simulator and operator
+logo previewer.
+
 Verbose instructions
 ====================
 
