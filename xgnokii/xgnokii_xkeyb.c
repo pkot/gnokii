@@ -138,20 +138,20 @@ static GtkWidget *GetPixmap(void)
 
 	if (!strcmp(phoneMonitor.phone.model, "6110") || !strcmp(phoneMonitor.phone.model, "6120")) {
 		button = button_6110;
-		file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/6110.xpm");
+		file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/keyb_6110.xpm");
 	} else if (!strcmp(phoneMonitor.phone.model, "6130") ||
 		   !strcmp(phoneMonitor.phone.model, "6150") ||
 		   !strcmp(phoneMonitor.phone.model, "616x") ||
 		   !strcmp(phoneMonitor.phone.model, "6185") ||
 		   !strcmp(phoneMonitor.phone.model, "6190")) {
 		button = button_6150;
-		file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/6150.xpm");
+		file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/keyb_6150.xpm");
 	} else if (!strcmp(phoneMonitor.phone.model, "5110") ||
 		   !strcmp(phoneMonitor.phone.model, "5130") ||
 		   !strcmp(phoneMonitor.phone.model, "5160") ||
 		   !strcmp(phoneMonitor.phone.model, "5190")) {
 		button = button_5110;
-		file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/5110.xpm");
+		file = g_strdup_printf("%s%s", xgnokiiConfig.xgnokiidir, "/xpm/keyb_5110.xpm");
 	} else
 		return NULL;
 
