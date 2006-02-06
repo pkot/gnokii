@@ -57,6 +57,7 @@
     o added default preview image for logos             (Pawel Kot)
     o don't hardcode preview pixmap names (except for default)
                                                         (Pawel Kot)
+    o added xgnokii pkg-config file                     (Pawel Kot)
  * gnokiid updates
     o add gnokiid/gnokiid.c to the list of translatable files in
       po/POTFILES.in                                (Daniele Forsi)

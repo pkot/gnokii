@@ -50,6 +50,7 @@ clean:
 install: all
 	$(INSTALL) -d $(DESTDIR)$(xbindir)
 	$(LIBTOOL) --mode=install $(INSTALL) xgnokii $(DESTDIR)$(xbindir)
+	$(INSTALL_DATA) xgnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -82,6 +83,7 @@ install: all
 install-strip: all
 	$(INSTALL) -d $(DESTDIR)$(xbindir)
 	$(LIBTOOL) --mode=install $(INSTALL) -s xgnokii $(DESTDIR)$(xbindir)
+	$(INSTALL_DATA) xgnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -116,6 +118,7 @@ install-suid: all
 	fi
 	$(INSTALL) -d $(DESTDIR)$(xbindir)
 	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 0750 xgnokii $(DESTDIR)$(xbindir)
+	$(INSTALL_DATA) xgnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \
@@ -150,6 +153,7 @@ install-ss: all
 	fi
 	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xbindir)
 	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 0750 -s xgnokii $(DESTDIR)$(xbindir)
+	$(INSTALL_DATA) xgnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xgnokii_libdir)/help
 	( cd $(HELP_DIR); \
 	  $(FIND) . -type d \! -path "*CVS*" \

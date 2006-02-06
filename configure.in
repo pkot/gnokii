@@ -673,6 +673,7 @@ AC_OUTPUT(
    packaging/Slackware/SlackBuild
    packaging/Slackware/SlackBuild-xgnokii
    common/gnokii.pc
+   xgnokii/xgnokii.pc
    )
 
 
