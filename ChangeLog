@@ -58,6 +58,8 @@
     o don't hardcode preview pixmap names (except for default)
                                                         (Pawel Kot)
     o added xgnokii pkg-config file                     (Pawel Kot)
+    o move phone pixmaps to the separate package (gnokii-artwork)
+                                                        (Pawel Kot)
  * gnokiid updates
     o add gnokiid/gnokiid.c to the list of translatable files in
       po/POTFILES.in                                (Daniele Forsi)
