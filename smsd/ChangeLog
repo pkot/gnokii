@@ -1,3 +1,7 @@
+* Mon Jan 30 2006 Jan Derfinak
+- Added schema support for PostgreSQL.
+
+
 * Sat Jan 21 2006 Jan Derfinak
 - Fix gcc 4 type check warnings.
 

@@ -39,6 +39,7 @@
 
 static PGconn *connIn = NULL;
 static PGconn *connOut = NULL;
+static gchar *schema = NULL;		/* database schema */
 
 void DB_Bye (void)
 {
@@ -68,6 +69,9 @@ gint DB_ConnectInbox (DBConfig connect)
     return (1);
   }
 
+  if (schema == NULL)
+    schema = g_strdup (connect.schema);
+
   return (0);
 }
 
@@ -90,6 +94,9 @@ gint DB_ConnectOutbox (DBConfig connect)
     return (1);
   }
 
+  if (schema == NULL)
+    schema = g_strdup (connect.schema);
+
   return (0);
 }
 
@@ -111,9 +118,10 @@ gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
   text = strEscape ((gchar *) data->user_data[0].u.text);
   
   buf = g_string_sized_new (256);
-  g_string_sprintf (buf, "INSERT INTO inbox (\"number\", \"smsdate\", \"insertdate\",\
+  g_string_sprintf (buf, "INSERT INTO %s.inbox (\"number\", \"smsdate\", \"insertdate\",\
                     \"text\", %s \"processed\") VALUES ('%s', \
                     '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', %s 'f')",
+                    schema,
                     phone[0] != '\0' ? "\"phone\"," : "", data->remote.number,
                     data->smsc_time.year, data->smsc_time.month,
                     data->smsc_time.day, data->smsc_time.hour,
@@ -125,7 +133,7 @@ gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
   g_string_free(buf, TRUE);
   if (!res || PQresultStatus(res) != PGRES_COMMAND_OK)
   {
-    g_print (_("%d: INSERT INTO inbox failed.\n"), __LINE__);
+    g_print (_("%d: INSERT INTO %s.inbox failed.\n"), __LINE__, schema);
     g_print (_("Error: %s\n"), PQerrorMessage (connIn));
     PQclear (res);
     return (1);
@@ -157,15 +165,16 @@ void DB_Look (const gchar * const phone)
   res1 = PQexec (connOut, "BEGIN");
   PQclear (res1);
 
-  g_string_sprintf (buf, "SELECT id, number, text, dreport FROM outbox \
+  g_string_sprintf (buf, "SELECT id, number, text, dreport FROM %s.outbox \
                           WHERE processed='f' AND localtime(0) >= not_before \
-                          AND localtime(0) <= not_after %s FOR UPDATE", phnStr->str);
+                          AND localtime(0) <= not_after %s FOR UPDATE",
+                          schema, phnStr->str);
   g_string_free (phnStr, TRUE);
 
   res1 = PQexec (connOut, buf->str);
   if (!res1 || PQresultStatus (res1) != PGRES_TUPLES_OK)
   {
-    g_print (_("%d: SELECT FROM outbox command failed.\n"), __LINE__);
+    g_print (_("%d: SELECT FROM %s.outbox command failed.\n"), __LINE__, schema);
     g_print (_("Error: %s\n"), PQerrorMessage (connOut));
     PQclear (res1);
     res1 = PQexec (connOut, "ROLLBACK TRANSACTION");
@@ -207,9 +216,9 @@ void DB_Look (const gchar * const phone)
     }
     while ((error == GN_ERR_TIMEOUT || error == GN_ERR_FAILED) && numError++ < 3);
 
-    g_string_sprintf (buf, "UPDATE outbox SET processed='t', error='%d', \
+    g_string_sprintf (buf, "UPDATE %s.outbox SET processed='t', error='%d', \
                             processed_date='now' WHERE id='%s'",
-                      error, PQgetvalue (res1, i, 0));
+                      schema, error, PQgetvalue (res1, i, 0));
 
     res2 = PQexec (connOut, buf->str);
     if (!res2 || PQresultStatus (res2) != PGRES_COMMAND_OK)

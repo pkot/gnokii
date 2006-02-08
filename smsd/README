@@ -104,6 +104,9 @@ Options:
 -c, --host db_hostname
 	Specify database server host name.
 
+-s, --schema db_schema
+	Specify database schema.
+
 -m, --module db_module
 	Specify which module to use for connection to DB server.
 	Currently supported are pq for PostgreSQL, mysql for MySQL and file
@@ -165,7 +168,7 @@ Options:
 -i, --interval interval    
 	Polling interval for incoming sms's in seconds. Default is 1 second.
 
--s, --maxsms number    
+-S, --maxsms number    
 	When phone driver doesn't support sms status it is possible
 	to specify number of sms's supported by phone. Default is 10.
 	If driver support sms status this option is ignored.

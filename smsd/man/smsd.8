@@ -163,6 +163,10 @@ Specify database name.
 Specify database server host name.
 
 .TP
+.BR -s,\ --schema\ db_hostname
+Specify database schema.
+
+.TP
 .BR -m,\ --module\ db_module
 Specify which module to use for connection to DB server. Currently supported are pq for PostgreSQL and mysql for MySQL.
 
@@ -254,7 +258,7 @@ of smsd for every phone you have at the same time.
 Polling interval for incoming sms's in seconds. Default is 1 second.
 
 .TP
-.BR -s,\ --maxsms\ number
+.BR -S,\ --maxsms\ number
 When phone driver doesn't support sms status it is possible to specify
 number of sms's supported by phone. Default is 10. If driver support
 sms status this option is ignored.

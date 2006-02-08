@@ -169,12 +169,13 @@ static void Usage (gchar *p)
              "            -p, --password db_password\n"
              "            -d, --db db_name\n"
              "            -c, --host db_hostname OR spool directory if -m file\n"
+             "            -s, --schema db_schema\n"
              "            -m, --module db_module (pq, mysql, file)\n"
              "            -l, --libdir path_to_db_module\n"
              "            -f, --logfile file\n"
              "            -t, --phone phone_number\n"
              "            -i, --interval polling_interval_for_incoming_sms's_in_seconds\n"
-             "            -s, --maxsms number_of_sms's (only in dumb mode)\n"
+             "            -S, --maxsms number_of_sms's (only in dumb mode)\n"
              "            -v, --version\n"
              "            -h, --help\n"), p);
 }
@@ -219,6 +220,7 @@ static void ReadConfig (gint argc, gchar *argv[])
   connection.password = g_strdup ("");
   connection.db = g_strdup ("sms");
   connection.host = g_strdup ("");
+  connection.schema = g_strdup ("public");
   smsdConfig.dbMod = g_strdup ("pq");
   smsdConfig.libDir = g_strdup (MODULES_DIR);
   smsdConfig.logFile = NULL;
@@ -238,19 +240,20 @@ static void ReadConfig (gint argc, gchar *argv[])
       {"password", 1, 0, 'p'},
       {"db", 1, 0, 'd'},
       {"host", 1, 0, 'c'},
+      {"schema", 1, 0, 's'},
       {"module", 1, 0, 'm'},
       {"libdir", 1, 0, 'l'},
       {"logfile", 1, 0, 'f'},
       {"phone", 1, 0, 't'},
       {"version", 0, 0, 'v'},
       {"interval", 1, 0, 'i'},
-      {"maxsms", 1, 0, 's'},
+      {"maxsms", 1, 0, 'S'},
       {"inbox", 1, 0, 'b'},
       {"help", 0, 0, 'h'},
       {0, 0, 0, 0}
     };
     
-    c = getopt_long (argc, argv, "u:p:d:c:m:l:f:t:vi:s:b:h", longOptions, &optionIndex);
+    c = getopt_long (argc, argv, "u:p:d:c:s:m:l:f:t:vi:S:b:h", longOptions, &optionIndex);
     if (c == EOF)
       break;
     switch (c)
@@ -276,6 +279,12 @@ static void ReadConfig (gint argc, gchar *argv[])
       case 'c':
         g_free (connection.host);
         connection.host = g_strdup (optarg);
+        memset (optarg, 'x', strlen (optarg));
+        break;
+      
+      case 's':
+        g_free (connection.schema);
+        connection.schema = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
         
@@ -305,7 +314,7 @@ static void ReadConfig (gint argc, gchar *argv[])
         smsdConfig.refreshInt = atoi (optarg);
         break;
 
-      case 's':
+      case 'S':
         smsdConfig.maxSMS = atoi (optarg);
         break;
 

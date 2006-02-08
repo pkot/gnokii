@@ -54,6 +54,7 @@ typedef struct {
   gchar *password;
   gchar *db;
   gchar *host;
+  gchar *schema;
 } DBConfig;
 
 extern gchar *strEscape (const gchar *const);
