@@ -113,6 +113,8 @@
       if memory_type is not SM                      (Daniele Forsi)
  * atgen driver updates
     o unsolicited RING and +CRING message handling (BORBELY Zoltan)
+    o identify should work on phones not supporting "AT+CGxx"
+      commands                                     (BORBELY Zoltan)
 
 0.6.10
 ======

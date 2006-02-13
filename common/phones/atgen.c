@@ -175,11 +175,12 @@ static char *strip_brackets(char *s)
 
 static void reply_simpletext(char *l1, char *l2, char *c, char *t)
 {
-	int i;
+	int i, n;
 
-	if ((strncmp(l1, c, 5) == 0) && (t != NULL)) {
-		if (strncmp(l2, c, 7) == 0)  {
-			for (i = 7; isspace(l2[i]); i++) ;
+	n = strlen(c);
+	if ((strncmp(l1, c, n - 2) == 0) && (t != NULL)) {
+		if (strncmp(l2, c, n) == 0)  {
+			for (i = n; isspace(l2[i]); i++) ;
 			strcpy(t, strip_quotes(l2 + i));
 		} else {
 			for (i = 0; isspace(l2[i]); i++) ;
@@ -671,30 +672,70 @@ static gn_error AT_Identify(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error err;
+
 	if (sm_message_send(8, GN_OP_Identify, "AT+CGMM\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_Identify, data, state);
+	if ((err=sm_block_no_retry(GN_OP_Identify, data, state)) == GN_ERR_NONE)
+		return GN_ERR_NONE;
+
+	if (sm_message_send(7, GN_OP_Identify, "AT+GMM\r", state))
+		return GN_ERR_NOTREADY;
+	if (sm_block_no_retry(GN_OP_Identify, data, state) == GN_ERR_NONE)
+		return GN_ERR_NONE;
+
+	return err;
 }
 
 static gn_error AT_GetManufacturer(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error err;
+
 	if (sm_message_send(8, GN_OP_Identify, "AT+CGMI\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_Identify, data, state);
+	if ((err = sm_block_no_retry(GN_OP_Identify, data, state)) == GN_ERR_NONE)
+		return GN_ERR_NONE;
+
+	if (sm_message_send(7, GN_OP_Identify, "AT+GMI\r", state))
+		return GN_ERR_NOTREADY;
+	if (sm_block_no_retry(GN_OP_Identify, data, state) == GN_ERR_NONE)
+		return GN_ERR_NONE;
+
+	return err;
 }
 
 static gn_error AT_GetRevision(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error err;
+
 	if (sm_message_send(8, GN_OP_Identify, "AT+CGMR\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_Identify, data, state);
+	if ((err = sm_block_no_retry(GN_OP_Identify, data, state)) == GN_ERR_NONE)
+		return GN_ERR_NONE;
+
+	if (sm_message_send(7, GN_OP_Identify, "AT+GMR\r", state))
+		return GN_ERR_NOTREADY;
+	if (sm_block_no_retry(GN_OP_Identify, data, state) == GN_ERR_NONE)
+		return GN_ERR_NONE;
+
+	return err;
 }
 
 static gn_error AT_GetIMEI(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error err;
+
 	if (sm_message_send(8, GN_OP_Identify, "AT+CGSN\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_Identify, data, state);
+	if ((err = sm_block_no_retry(GN_OP_Identify, data, state)) == GN_ERR_NONE)
+		return GN_ERR_NONE;
+
+	if (sm_message_send(7, GN_OP_Identify, "AT+GSN\r", state))
+		return GN_ERR_NOTREADY;
+	if (sm_block_no_retry(GN_OP_Identify, data, state) == GN_ERR_NONE)
+		return GN_ERR_NONE;
+
+	return err;
 }
 
 /* gets battery level and power source */
@@ -1345,6 +1386,11 @@ static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length
 		reply_simpletext(buf.line1+2, buf.line2, "+CGMM: ", data->model);
 		reply_simpletext(buf.line1+2, buf.line2, "+CGMI: ", data->manufacturer);
 		reply_simpletext(buf.line1+2, buf.line2, "+CGMR: ", data->revision);
+	} else if (!strncmp(buf.line1, "AT+G", 4)) {
+		reply_simpletext(buf.line1+2, buf.line2, "+GSN: ", data->imei);
+		reply_simpletext(buf.line1+2, buf.line2, "+GMM: ", data->model);
+		reply_simpletext(buf.line1+2, buf.line2, "+GMI: ", data->manufacturer);
+		reply_simpletext(buf.line1+2, buf.line2, "+GMR: ", data->revision);
 	}
 	return GN_ERR_NONE;
 }
