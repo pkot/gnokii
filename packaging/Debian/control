@@ -2,11 +2,12 @@ Source: gnokii
 Section: comm
 Priority: optional
 Maintainer: Bradley Marshall <brad@humbug.org.au>
-Build-Depends: debhelper (>> 3.0.0), xlibs-dev, xutils, libglib1.2-dev, libgtk1.2-dev, gettext, flex, libmysqlclient10-dev, postgresql-dev, autotools-dev (>=20020621)
+Build-Depends: debhelper (>> 3.0.0), libxpm-dev, libxt-dev, xutils, libglib2.0-dev, libgtk2.0-dev, gettext, flex, libmysqlclient15-dev | libmysqlclient-dev, postgresql-dev, autotools-dev (>=20020621)
 Standards-Version: 3.6.1.0
 
 Package: gnokii
 Architecture: any
+Pre-Depends: adduser
 Depends: ${shlibs:Depends}, liblockfile1, timeout
 Conflicts: smstools
 Description: Datasuite for the mobile phones (console & X)
@@ -26,8 +27,9 @@ Description: SMS Daemon for the mobile phones
  using an SQL backend. It is designed to use modules (plugins) to work with the
  SQL server, and shares Gnokii's runtime configuration and libraries.
  .
- This package contains the actual daemon. You will need to install the
- appropriate module packages to add support for a particular RDBMS.
+ This package contains the actual daemon and the file based backend.
+ You will need to install the appropriate module packages to add support
+ for a particular RDBMS.
 
 Package: gnokii-smsd-mysql
 Architecture: any
@@ -57,16 +59,24 @@ Description: SMSD plugin for the PostgreSQL RDBMS
  .
  This package provides support for the PostgreSQL RDBMS.
 
-Package: gnokii-smsd-file
+Package: libgnokii2
 Architecture: any
-Depends: ${shlibs:Depends}, gnokii-smsd (= ${Source-Version})
-Description: SMSD plugin for the plain files
+Depends: ${shlibs:Depends}
+Replaces: gnokii (<< 0.6.1-1)
+Description: Gnokii library
  Gnokii is a suite of programs linked against a backend library that allows
  communication with the phones. It current supports the most mobile phones,
  all AT capable mobiles as well as Symbian phones.
  .
- The SMSD (SMS daemon) handles automated sending and receiving of short messages
- using an SQL or a file backend. It is designed to use modules (plugins) to work
- with the SQL server, and shares Gnokii's runtime configuration and libraries.
+ This package provides the library used by gnokii.
+
+Package: libgnokii2-dev
+Architecture: any
+Depends: ${shlibs:Depends}, libgnokii2 (= ${Source-Version})
+Replaces: gnokii (<< 0.6.1-1), libgnokii2 (<< 0.6.8-0.1)
+Description: Gnokii library
+ Gnokii is a suite of programs linked against a backend library that allows
+ communication with the phones. It current supports the most mobile phones,
+ all AT capable mobiles as well as Symbian phones.
  .
- This package provides support for the plain files.
+ This package provides the devel headers used by gnokii.

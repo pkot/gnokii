@@ -1,3 +1,9 @@
+gnokii (0.6.11) unstable; urgency=low
+
+  * align with Debian mainline
+
+ -- Pawel Kot <gnokii@gmail.com>  Mon,  6 Feb 2006 23:58:46 +0100
+
 gnokii (0.6.5) unstable; urgency=low
 
   * updates to new gnokii version
@@ -7,7 +13,7 @@ gnokii (0.6.5) unstable; urgency=low
   * add ppm2nokia and todologo to the installable files
   * update package descrptions
 
- - Pawel Kot  Thu, 28 Apr 2005 22:53:34 +0200
+ -- Pawel Kot  Thu, 28 Apr 2005 22:53:34 +0200
 
 gnokii (0.6.0) unstable; urgency=low
 

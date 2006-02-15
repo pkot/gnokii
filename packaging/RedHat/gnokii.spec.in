@@ -52,7 +52,7 @@ Requires:	gnokii = %{version}-%{release}
 
 %description -n gnokii-smsd
 The SMSD (SMS daemon) program is intended for receiving and sending
-SMSes
+SMSes with plain file plugin
 
 %package -n gnokii-smsd-mysql
 Summary:	mysql plugin for gnokii-smsd
@@ -71,14 +71,6 @@ Requires:	postgresql-devel
 
 %description -n gnokii-smsd-psql
 PostgreSQL plugin for gnokii-smsd
-
-%package -n gnokii-smsd-file
-Summary:	file plugin for gnokii-smsd
-Group:		Daemons
-Requires:	gnokii-smsd = %{version}-%{release}
-
-%description -n gnokii-smsd-file
-Plain file plugin for gnokii-smsd
 
 %prep
 %setup
@@ -179,6 +171,7 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(644,root,root,755)
 %doc smsd/ChangeLog smsd/README smsd/README.MySQL smsd/README.Tru64 smsd/action smsd/*.sql
 %{_sbindir}/smsd
+%{_libdir}/smsd/libfile.la
 %{_mandir}/man8/smsd.*
 
 %files -n gnokii-smsd-mysql
@@ -189,11 +182,10 @@ rm -rf ${RPM_BUILD_ROOT}
 %defattr(644,root,root,755)
 %{_libdir}/smsd/libpq.la
 
-%files -n gnokii-smsd-file
-%defattr(644,root,root,755)
-%{_libdir}/smsd/libfile.la
-
 %changelog
+
+* Mon Feb  6 2006 Pawel Kot
+- merge gnokii-smsd and gnokii-smsd-file
 
 * Thu Apr 30 2005 Pawel Kot
 - split the package for gnokii, libgnokii, libgnokii-devel, xgnokii,
