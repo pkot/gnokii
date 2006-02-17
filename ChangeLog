@@ -1,3 +1,9 @@
+0.6.12
+======
+ * xgnokii updates
+    o make Keyboard and Ringtone Editor more compatible with
+      gtk+-2.0 adding gtk_fixed_set_has_window()    (Daniele Forsi)
+
 0.6.11
 ======
  * nk6510 driver updates

@@ -283,6 +283,7 @@ void GUI_CreateXkeybWindow(void)
 	gtk_widget_show(menubar);
 
 	pixArea = gtk_fixed_new();
+	gtk_fixed_set_has_window(GTK_FIXED(pixArea), TRUE);
 	gtk_signal_connect(GTK_OBJECT(pixArea), "button_press_event",
 			   (GtkSignalFunc) ButtonEvent, NULL);
 	gtk_signal_connect(GTK_OBJECT(pixArea), "button_release_event",
