@@ -3,6 +3,8 @@
  * xgnokii updates
     o make Keyboard and Ringtone Editor more compatible with
       gtk+-2.0 adding gtk_fixed_set_has_window()    (Daniele Forsi)
+    o in xgnokii/xgnokii_lowlevel.c use gdat.model as phone.version
+      and remove some unneeded g_malloc()'s         (Daniele Forsi)
 
 0.6.11
 ======

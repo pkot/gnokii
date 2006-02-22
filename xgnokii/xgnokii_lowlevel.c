@@ -161,7 +161,7 @@ static gn_error InitModelInf(void)
 	gdat.model = buf;
 	error = gn_sm_functions(GN_OP_GetModel, &gdat, &statemachine);
 	if (error != GN_ERR_NONE) return error;
-	phoneMonitor.phone.version = g_malloc(sizeof(gdat.model));
+	phoneMonitor.phone.version = g_strdup(gdat.model);
 	phoneMonitor.phone.model = gn_model_get(gdat.model);
 
 	if (phoneMonitor.phone.model == NULL)
@@ -172,9 +172,6 @@ static gn_error InitModelInf(void)
 	gdat.model = NULL;
 	error = gn_sm_functions(GN_OP_GetRevision, &gdat, &statemachine);
 	if (error != GN_ERR_NONE) return error;
-	phoneMonitor.phone.version = g_malloc(sizeof(gdat.revision));
-	phoneMonitor.phone.revision = g_malloc(sizeof(gdat.revision));
-	phoneMonitor.phone.version = g_strdup(gdat.revision);
 	phoneMonitor.phone.revision = g_strdup(gdat.revision);
 
 	gdat.revision = NULL;
@@ -182,7 +179,6 @@ static gn_error InitModelInf(void)
 	gdat.imei = buf;
 	error = gn_sm_functions(GN_OP_GetImei, &gdat, &statemachine);
 	if (error != GN_ERR_NONE) return error;
-	phoneMonitor.phone.imei = g_malloc(sizeof(gdat.imei));
 	phoneMonitor.phone.imei = g_strdup(gdat.imei);
 
 	for (i = 0; i < GN_SMS_FOLDER_MAX_NUMBER; i++) {
