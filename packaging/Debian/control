@@ -1,23 +1,23 @@
 Source: gnokii
 Section: comm
 Priority: optional
-Maintainer: Bradley Marshall <brad@humbug.org.au>
-Build-Depends: debhelper (>> 3.0.0), libxpm-dev, libxt-dev, xutils, libglib2.0-dev, libgtk2.0-dev, gettext, flex, libmysqlclient15-dev | libmysqlclient-dev, postgresql-dev, autotools-dev (>=20020621)
+Maintainer: Pawel Kot <gnokii@gmail.com>
+Build-Depends: debhelper (>> 3.0.0), libxpm-dev, libxt-dev, xutils, libglib2.0-dev, libgtk2.0-dev, gettext, flex, libmysqlclient-dev, postgresql-dev, autotools-dev (>=20020621)
 Standards-Version: 3.6.1.0
 
 Package: gnokii
 Architecture: any
 Pre-Depends: adduser
-Depends: ${shlibs:Depends}, liblockfile1, timeout
+Depends: ${shlibs:Depends}
 Conflicts: smstools
-Description: Datasuite for the mobile phones (console & X)
+Description: Datasuite for the mobile phones (console)
  Gnokii is a suite of programs linked against a backend library that allows
  communication with the phones. It current supports the most mobile phones,
  all AT capable mobiles as well as Symbian phones.
 
 Package: gnokii-smsd
 Architecture: any
-Depends: ${shlibs:Depends}, gnokii (= ${Source-Version})
+Depends: ${shlibs:Depends}, libgnokii2 (= ${Source-Version})
 Description: SMS Daemon for the mobile phones
  Gnokii is a suite of programs linked against a backend library that allows
  communication with the phones. It current supports the most mobile phones,
@@ -33,7 +33,7 @@ Description: SMS Daemon for the mobile phones
 
 Package: gnokii-smsd-mysql
 Architecture: any
-Depends: ${shlibs:Depends}, gnokii-smsd (= ${Source-Version})
+Depends: gnokii-smsd (= ${Source-Version}), libmysqlcient
 Description: SMSD plugin for the MySQL RDBMS
  Gnokii is a suite of programs linked against a backend library that allows
  communication with the phones. It current supports the most mobile phones,
@@ -47,7 +47,7 @@ Description: SMSD plugin for the MySQL RDBMS
 
 Package: gnokii-smsd-pgsql
 Architecture: any
-Depends: ${shlibs:Depends}, gnokii-smsd (= ${Source-Version})
+Depends: gnokii-smsd (= ${Source-Version}), postgresql-client
 Description: SMSD plugin for the PostgreSQL RDBMS
  Gnokii is a suite of programs linked against a backend library that allows
  communication with the phones. It current supports the most mobile phones,
@@ -72,7 +72,7 @@ Description: Gnokii library
 
 Package: libgnokii2-dev
 Architecture: any
-Depends: ${shlibs:Depends}, libgnokii2 (= ${Source-Version})
+Depends: libgnokii2 (= ${Source-Version})
 Replaces: gnokii (<< 0.6.1-1), libgnokii2 (<< 0.6.8-0.1)
 Description: Gnokii library
  Gnokii is a suite of programs linked against a backend library that allows
@@ -80,3 +80,11 @@ Description: Gnokii library
  all AT capable mobiles as well as Symbian phones.
  .
  This package provides the devel headers used by gnokii.
+
+Package: xgnokii
+Architecture: any
+Depends: ${shlibs:Depends}
+Description: Datasuite for the mobile phones (X11/GTK2)
+ Xgnokii is a suite of programs linked against a backend library that allows
+ communication with the phones. It current supports the most mobile phones,
+ all AT capable mobiles as well as Symbian phones.

@@ -1,0 +1,1 @@
+shlibs:Depends=libbluetooth1 (>= 2.15), libc6 (>= 2.3.4-1), libx11-6, libxpm4

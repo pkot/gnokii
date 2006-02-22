@@ -96,14 +96,14 @@ install: build
 	mkdir -p $(CURDIR)/debian/libgnokii2-dev/usr/lib
 	mv $(CURDIR)/debian/gnokii/usr/lib/libgnokii.{so,a,la} $(CURDIR)/debian/libgnokii2-dev/usr/lib
 	mv $(CURDIR)/debian/gnokii/usr/lib/pkgconfig $(CURDIR)/debian/libgnokii2-dev/usr/lib
-	
+
 
 	# Install xgnokii stuff into debian/xgnokii
-	#mkdir -p $(CURDIR)/debian/xgnokii
-	#mkdir -p $(CURDIR)/debian/xgnokii/usr/share
-	#mv $(CURDIR)/debian/gnokii/usr/share/xgnokii/ $(CURDIR)/debian/xgnokii/usr/share/xgnokii
-	#mkdir -p $(CURDIR)/debian/xgnokii/usr/bin
-	#mv $(CURDIR)/debian/gnokii/usr/bin/xgnokii $(CURDIR)/debian/xgnokii/usr/bin
+	mkdir -p $(CURDIR)/debian/xgnokii
+	mkdir -p $(CURDIR)/debian/xgnokii/usr/share
+	mv $(CURDIR)/debian/gnokii/usr/share/xgnokii/ $(CURDIR)/debian/xgnokii/usr/share/xgnokii
+	mkdir -p $(CURDIR)/debian/xgnokii/usr/bin
+	mv $(CURDIR)/debian/gnokii/usr/bin/xgnokii $(CURDIR)/debian/xgnokii/usr/bin
 
 
 # Build architecture-independent files here.
@@ -140,6 +140,7 @@ binary-arch: build install
 	dh_installchangelogs -p gnokii-smsd smsd/ChangeLog
 	dh_installchangelogs -p gnokii-smsd-pgsql -p gnokii-smsd-mysql
 	dh_installchangelogs -p libgnokii2 -p libgnokii2-dev
+	dh_installchangelogs -p xgnokii xgnokii/ChangeLog
 	dh_link
 	dh_strip
 	dh_compress
