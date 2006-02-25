@@ -137,10 +137,26 @@ typedef struct {
    not support these lengths so they have their own limits set. */
 #define GN_PHONEBOOK_NAME_MAX_LENGTH            61   /* For 6510 */
 #define GN_PHONEBOOK_NUMBER_MAX_LENGTH          49   /* For 6510 */
-#define GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER      20   /* it was 10 for 6510, but modern phones supports more */
+#define GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER      64   /* it was 10 for 6510, but modern phones supports more */
 						     /* 7110 is able to have in one
 						      * entry 5 numbers and 4
-						      * texts [email,notice,postal,url] */
+						      * texts [email,notice,postal,url].
+						      * Dirk reported on gnokii-users that N70 has the following additional fields:
+						      * - Company
+						      * - Position
+						      * - Aliasname
+						      * - DTMF
+						      * - Benutzerkennung (user id?)
+						      * - all postal fields:
+						      *  - PO Box
+						      *  - Zusatz (additional?)
+						      *  - Street
+						      *  - Zip Code
+						      *  - City
+						      *  - State/Province
+						      *  - Country
+						      *  - Birthday
+						      */
 #define GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER    5
 #define GN_PHONEBOOK_ENTRY_MAX_LENGTH 1024
 

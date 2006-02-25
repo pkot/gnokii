@@ -11,6 +11,8 @@
     o return appropriate error code when setting too long ringtone
       (actual tested max notes in ringtone is 69 notes in
        Nokia 6310)                                      (Pawel Kot)
+ * libgnokii updates
+    o extend GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER to 64        (Dirk)
 
 0.6.11
 ======
