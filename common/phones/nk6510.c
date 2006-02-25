@@ -3355,9 +3355,16 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 	case 0x0f:
 		if (message[5] != 0x00) return GN_ERR_UNHANDLEDFRAME;
 		switch (message[4]) {
-		case 0x00: break;
-		case 0x03: return GN_ERR_INVALIDLOCATION;
-		default:   return GN_ERR_UNHANDLEDFRAME;
+		case 0x00:
+			break;
+		case 0x03:
+			dprintf("Invalid location\n");
+			return GN_ERR_INVALIDLOCATION;
+		case 0x0e:
+			dprintf("Ringtone too long. Max is 69 notes.\n");
+			return GN_ERR_ENTRYTOOLONG;
+		default:
+			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
 
@@ -3377,10 +3384,15 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 		if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
 		pos = message + 8;
 		char_unicode_decode(data->ringtone->name, pos, 2 * message[7]);
+		dprintf("Got ringtone: %s\n", data->ringtone->name);
 		pos += 2 * message[7];
 		i = (pos[0] << 8) + pos[1];
 		pos += 2;
-		if (data->raw_data->length < i) return GN_ERR_INVALIDSIZE;
+		dprintf("Ringtone size: %d\n", i);
+		if (data->raw_data->length < i) {
+			dprintf("Expected max %d bytes, got %d bytes\n", data->raw_data->length, i);
+			return GN_ERR_INVALIDSIZE;
+		}
 		data->raw_data->length = i;
 		memcpy(data->raw_data->data, pos, i);
 		break;

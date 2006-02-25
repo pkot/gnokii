@@ -7,6 +7,10 @@
       and remove some unneeded g_malloc()'s         (Daniele Forsi)
  * build system updates
     o update Debian build scripts                       (Pawel Kot)
+ * nk6510 driver updates
+    o return appropriate error code when setting too long ringtone
+      (actual tested max notes in ringtone is 69 notes in
+       Nokia 6310)                                      (Pawel Kot)
 
 0.6.11
 ======
