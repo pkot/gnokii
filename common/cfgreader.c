@@ -498,7 +498,7 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 		strcpy(cfg->irda_string, "");
 	else {
 		snprintf(cfg->irda_string, sizeof(cfg->irda_string), "%s", val);
-		printf("Setting irda_string in section %s to %s\n", section, cfg->irda_string);
+		dprintf("Setting irda_string in section %s to %s\n", section, cfg->irda_string);
 	}
 
 	return true;
