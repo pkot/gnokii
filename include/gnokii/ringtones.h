@@ -42,7 +42,7 @@
 /* ie. c#=1 and 5 and 13 are invalid */
 /* note=255 means a pause */
 
-#define GN_RINGTONE_MAX_NOTES 256
+#define GN_RINGTONE_MAX_NOTES 1024
 
 /* Structure to hold note of ringtone. */
 

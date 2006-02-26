@@ -13,6 +13,8 @@
        Nokia 6310)                                      (Pawel Kot)
  * libgnokii updates
     o extend GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER to 64        (Dirk)
+    o extend GN_RINGTONE_MAX_NOTES to 1024 (it happend that there
+      are longer ringtones in the phone)        (Alexey I. Froloff)
 
 0.6.11
 ======
