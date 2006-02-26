@@ -24,7 +24,7 @@
 
   Copyright (C) 2000      Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2000-2001 Chris Kemp
-  Copyright (C) 2001-2004 Pawel Kot
+  Copyright (C) 2001-2006 Pawel Kot
   Copyright (C) 2001      Manfred Jonsson, Pavel Machek
   Copyright (C) 2001-2002 Ladis Michl
   Copyright (C) 2002-2004 BORBELY Zoltan
@@ -107,14 +107,13 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
 	/* Experimental timeout */
 	timeout.tv_sec	= 0;
 	timeout.tv_usec	= 500000;
+        
 	res = device_select(&timeout, state);
-	if (res > 0) {
-		/* Read from the port only when select succeeds */
-		while (res > 0) {
-			/* Avoid 'device temporarily unavailable' error */
-			usleep(50);
-			res = device_read(buffer, 255, state);
-		}
+	/* Read from the port only when select succeeds */
+	while (res > 0) {
+		/* Avoid 'device temporarily unavailable' error */
+		usleep(50);
+		res = device_read(buffer, 255, state);
 	}
 	return res;
 }
@@ -380,7 +379,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 							m->message_buffer = NULL;
 						}
 						m->malloced = frm_num * m->message_length;
-						m->message_buffer = (char *) malloc(m->malloced);
+						m->message_buffer = (unsigned char *)malloc(m->malloced);
 
 					} else if (m->frames_to_go != frm_num) {
 						dprintf("Missed a frame in a multiframe message.\n");
@@ -389,7 +388,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 
 					if (m->malloced < m->message_length + i->frame_length) {
 						m->malloced = m->message_length + i->frame_length;
-						m->message_buffer = (char *) realloc(m->message_buffer, m->malloced);
+						m->message_buffer = (unsigned char *)realloc(m->message_buffer, m->malloced);
 					}
 
 					memcpy(m->message_buffer + m->message_length, i->message_buffer,
