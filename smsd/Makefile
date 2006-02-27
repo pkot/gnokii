@@ -86,7 +86,7 @@ $(TOPDIR)/common/libgnokii.la:
 
 clean:
 	$(LIBTOOL) --mode=clean $(RM) smsd $(DB_LIBS) $(OBJS) $(DB_OBJS)
-	$(RM) *~ depend *.so core*
+	$(RM) *~ depend core*
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(sbindir)
