@@ -5,6 +5,8 @@
       gtk+-2.0 adding gtk_fixed_set_has_window()    (Daniele Forsi)
     o in xgnokii/xgnokii_lowlevel.c use gdat.model as phone.version
       and remove some unneeded g_malloc()'s         (Daniele Forsi)
+    o avoid segfault when gnokii-artwork is not installed
+                                                        (Pawel Kot)
  * build system updates
     o update Debian build scripts                       (Pawel Kot)
  * nk6510 driver updates

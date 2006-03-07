@@ -159,7 +159,7 @@ static void GetPixmaps(gchar *path)
 	struct dirent *de;
 
 	dir = opendir(path);
-	while (de = readdir(dir)) {
+	while (dir && (de = readdir(dir))) {
 		if (pixmapFiles == MAX_PIXMAPS)
 			break;
 		if (!strncmp(de->d_name, "Preview_", 8)) {
