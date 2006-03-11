@@ -1,5 +1,5 @@
-0.6.12 (not released yet)
-=========================
+0.6.12
+======
  * xgnokii updates
     o make Keyboard and Ringtone Editor more compatible with
       gtk+-2.0 adding gtk_fixed_set_has_window()    (Daniele Forsi)
