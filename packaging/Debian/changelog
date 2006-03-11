@@ -1,3 +1,9 @@
+gnokii (0.6.12) unstable; urgency=low
+
+  * update to gnokii 0.6.12
+
+ -- Pawel Kot <gnokii@gmail.com>  Sat, 11 Mar 2006 22:36:03 +0100
+
 gnokii (0.6.11) unstable; urgency=low
 
   * align with Debian mainline
