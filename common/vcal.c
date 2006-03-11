@@ -103,7 +103,7 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 		etime.second = calnote->end_time.second;
 		etime.is_daylight = 1;
 
-		properties[iprop++] = icalpropery_new_dtend(etime);
+		properties[iprop++] = icalproperty_new_dtend(etime);
 	}
 
 	/* FIXME: how to set alarm?
@@ -116,7 +116,7 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 		atime.second = calnote->alarm.timestamp.second;
 		atime.is_daylight = 1;
 
-		properties[iprop++] = icalpropery_new_FIXME(atime);
+		properties[iprop++] = icalproperty_new_FIXME(atime);
 	}
 	*/
 
