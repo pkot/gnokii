@@ -2341,6 +2341,11 @@ static void ReadConfig(void)
 	xgnokiiConfig.port = statemachine.config.port_device;
 	asprintf(&xgnokiiConfig.initlength, "%d", statemachine.config.init_length);
 	xgnokiiConfig.connection = statemachine.config.connection_type;
+	xgnokiiConfig.bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
+	if (!xgnokiiConfig.bindir)
+		xgnokiiConfig.bindir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
+	if (!xgnokiiConfig.bindir)
+		xgnokiiConfig.bindir = g_strdup("/usr/local/sbin");
 
 	max_phonebook_number_length = max_phonebook_sim_number_length =
 	    GN_PHONEBOOK_NUMBER_MAX_LENGTH;
