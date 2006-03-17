@@ -50,8 +50,6 @@ ConfigEntry config[] = {
 	,
 	{"address", &(xgnokiiConfig.user.address)}
 	,
-	{"bindir", &(xgnokiiConfig.bindir)}
-	,
 	{"viewer", &(xgnokiiConfig.helpviewer)}
 	,
 	{"mailbox", &(xgnokiiConfig.mailbox)}
@@ -59,6 +57,8 @@ ConfigEntry config[] = {
 	{"simlen", &(xgnokiiConfig.maxSIMLen)}
 	,
 	{"phonelen", &(xgnokiiConfig.maxPhoneLen)}
+	,
+	{"bindir", &(xgnokiiConfig.bindir)}
 	,
 	{"", NULL}
 };
@@ -177,6 +177,11 @@ void GUI_ReadXConfig()
 						v = atoi(current);
 						if (v > 0 && v < 100)
 							*config[i].value = g_strndup(current, 3);
+						break;
+
+					case 11:
+						*config[i].value =
+						    g_strndup(current, 220);
 						break;
 
 					default:
