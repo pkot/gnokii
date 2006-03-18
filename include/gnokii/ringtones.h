@@ -56,7 +56,7 @@ typedef struct {
 	int location;
 	char name[20];
 	unsigned char tempo;
-	unsigned char notes_count;
+	unsigned int notes_count;
 	gn_ringtone_note notes[GN_RINGTONE_MAX_NOTES];
 } gn_ringtone;
 
