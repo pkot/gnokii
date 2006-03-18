@@ -3,6 +3,8 @@
  * xgnokii updates
     o avoid segfault when enabling or disabling data calls, read
       bindir parameter from .gnokiirc               (Daniele Forsi)
+ * libgnokii updates
+    o fix --smsreader for nk6100 driver             (Daniele Forsi)
  
 0.6.12
 ======

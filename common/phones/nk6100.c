@@ -1577,7 +1577,7 @@ static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x0a, 0x02, 0x00 /* Location */ };
 
 	if (!data->sms) return GN_ERR_INTERNALERROR;
-	if (data->raw_sms->memory_type != GN_MT_SM) return GN_ERR_INVALIDMEMORYTYPE;
+	if (data->sms->memory_type != GN_MT_SM) return GN_ERR_INVALIDMEMORYTYPE;
 
 	req[5] = data->sms->number;
 	if (sm_message_send(6, 0x14, req, state)) return GN_ERR_NOTREADY;
