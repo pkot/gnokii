@@ -5,6 +5,7 @@
       bindir parameter from .gnokiirc               (Daniele Forsi)
  * libgnokii updates
     o fix --smsreader for nk6100 driver             (Daniele Forsi)
+    o Nokia 3310 does not support GetPhoneStatus    (Daniele Forsi)
  
 0.6.12
 ======
