@@ -58,7 +58,7 @@ show settings for selected(all) profile(s).
 sets settings for selected(all) profile(s).
 .TP 
 .BR "\-\-getactiveprofile"
-reads the activer profile.
+reads the active profile.
 .TP 
 .BR "\-\-setactiveprofile \fIprofile_no\fR"
 sets active profile to the profile number \fIprofile_no\fR.
@@ -103,7 +103,7 @@ delete the note with numbers from \fIstart\fR to \fIend\fR from calendar. \fIend
 gets SMS messages from specified \fImemory type\fR starting at entry \fIstart\fR and ending at \fIend\fR.
 For the \fImemory types\fR you usually use SM for the SIM card and ME for the phone memory. The exception are the phones supported by nk7110 (Nokia 7110/6210/6250) and nk6510 (Nokia 6310/6510/8310) drivers. For these you should use IN for the Inbox, OU for the Outbox, AR for the Archive, TE for the Templates and F1, F2, ... for your own folders.
 If \fIend\fR is not specified only one location \- \fIstart\fR is read.
-If \-f \fIfile\fR is used entries are saved in \fIfile\fR. If the file already existis, user is prompted whether to overwrite the file. \-F option forces gnokii to overwrite the file without asking. If none of these switches is used entries are dumped to stdout.
+If \-f \fIfile\fR is used entries are saved in \fIfile\fR. If the file already exists, user is prompted whether to overwrite the file. \-F option forces gnokii to overwrite the file without asking. If none of these switches is used entries are dumped to stdout.
 If \-d switch is used, a message is deleted after reading.
 .TP 
 .BR "\-\-deletesms \fImemory_type\fP \fIstart\fP [\fIend\fP]"
@@ -112,7 +112,7 @@ If \fIend\fI is not specified only one location \- \fIstart\fR is read.
 .TP 
 .BR "\-\-sendsms \fIdestination\fP [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-r] [\-C \fIn\fP] [\-v \fIn\fP] [\-\-long \fIn\fP] [\-i]"
 sends an SMS message to \fIdestination\fR via \fImessage_center_number\fR or SMSC number taken from phone memory from address \fImessage_center_index\fR.
-If this argument is ommited SMSC number is taken from phone memory from location 1.
+If this argument is omitted SMSC number is taken from phone memory from location 1.
 Message text is taken from STDIN.
 Meaning of other optional parameters:
 .PP 
@@ -163,7 +163,7 @@ delete folder # \fInumber\fR of 'My Folders'.
 
 .TP 
 .BR "\-\-smsreader"
-keeps readning incoming SMS and saves them into the mailbox.
+keeps reading incoming SMS and saves them into the mailbox.
 
 .SS LOGOS
 .TP 
@@ -193,7 +193,7 @@ set the \fIrtttlfile\fR as ringtone (on 6110).
 .SS PHONEBOOK
 .TP 
 .BR "\-\-getphonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP] [\fI\-r|\-\-raw\fP]"
-reads specificed memory location from phone.
+reads specified memory location from phone.
 If \fIend_number\fR is not specified only one location \- \fIstart\fR is read.
 If instead of \fIend_number\fR the text \fIend\fR is specified then gnokii
 will read from \fIstart_number\fR until it encounters a non\-existant location.
@@ -246,7 +246,7 @@ in the input data.
 The phonebook format is very simple.  Each line represents one entry.  Fields
 are separated by semicolons.  Semicolons aren't allowed inside a field.  The
 fields have to be in this order (the subentries are optional, ie. you can
-repeat all subetry field multiple times, but they have to be alltogether in
+repeat all subentry field multiple times, but they have to be alltogether in
 the given order):
 .IP "" .5i
 name
@@ -347,7 +347,7 @@ number is the work phone number
 .B 10
 number is the general number
 .PP
-For the subentry types that don't care about number type (at text files)
+For the subentry types that don't care about number type (as text files)
 this should be set to 0. 
 
 .BR "\-\-deletephonebook  \fImemory_type\fP \fIstart_number\fP [\fIend_number\fP]"
@@ -412,7 +412,7 @@ the lock data, whether a lock is open or closed, whether it is a user or
 factory lock and the number of unlock attempts.
 
 .SS FILE
-Not that some phones (like Nokia 6610i) support only id based operations
+Note that some phones (like Nokia 6610i) support only id based operations
 (gnokii options with "byid" suffix). Use gnokiifs for the transparent support.
 .TP
 .BR "\-\-getfilelist \fIremote_path\fP"
