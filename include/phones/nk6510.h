@@ -194,4 +194,6 @@ typedef enum {
 
 #define	NK6510_RINGTONE_USERDEF_LOCATION	231
 
+#define NK6510_FILE_ID_LENGTH 6
+
 #endif  /* _gnokii_phones_nk6510_h */

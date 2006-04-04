@@ -1657,7 +1657,7 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 	while (data->file->togo > 0) {
 		int progress;
 
-		memcpy(req3+4,data->file->id,6);
+		memcpy(req3+4, data->file->id, NK6510_FILE_ID_LENGTH);
 		i = data->file->file_length - data->file->togo;
 		req3[11] = (i & 0xff0000) >> 16;
 		req3[12] = (i & 0xff00) >> 8;
@@ -1679,7 +1679,7 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 	}
 	
 	/* Finish the transfer */
-	memcpy(req4+4,data->file->id,6);
+	memcpy(req4+4, data->file->id, NK6510_FILE_ID_LENGTH);
 	if (sm_message_send(sizeof(req4), NK6510_MSG_FILE, req4, state))
 		return GN_ERR_NOTREADY;
 	return sm_block(NK6510_MSG_FILE, data, state);
@@ -1759,7 +1759,7 @@ static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
 
 	/* Put the data */
 	while (data->file->togo > 0) {
-	        memcpy(req2+4,data->file->id,6);
+	        memcpy(req2+4, data->file->id, NK6510_FILE_ID_LENGTH);
 		i = data->file->togo;
 		if (data->file->togo > 0x100) {
 			req2[12] = 0x01;
@@ -1781,7 +1781,7 @@ static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
 	}
 
 	/* Finish the transfer */
-	memcpy(req3+4,data->file->id,6);
+	memcpy(req3+4, data->file->id, NK6510_FILE_ID_LENGTH);
 	if (sm_message_send(sizeof(req3), NK6510_MSG_FILE, req3, state)) return GN_ERR_NOTREADY;
 	return sm_block(NK6510_MSG_FILE, data, state);
 }
@@ -1998,8 +1998,8 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 				data->file->togo = data->file->file_length;
 			}
                          
-			data->file->id = calloc(7, sizeof(char));
-			for (i = 0; i < 6; i++) {
+			data->file->id = calloc(NK6510_FILE_ID_LENGTH+1, sizeof(char));
+			for (i = 0; i < NK6510_FILE_ID_LENGTH; i++) {
 			        data->file->id[i] = message[4 + i];
 			}
 		}
@@ -2011,8 +2011,8 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		if (data->file) {
 			int i;
 
-			data->file->id = calloc(7, sizeof(char));
-			for (i = 0; i < 6; i++) {
+			data->file->id = calloc(NK6510_FILE_ID_LENGTH+1 , sizeof(char));
+			for (i = 0; i < NK6510_FILE_ID_LENGTH; i++) {
 				data->file->id[i] = message[4 + i];
 			}
 		}
