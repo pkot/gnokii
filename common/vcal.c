@@ -123,8 +123,11 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	/* TODO: should the strings be configurable? */
 	switch(calnote->type) {
 	case GN_CALNOTE_MEMO:
-	case GN_CALNOTE_REMINDER:
 		properties[iprop++] = icalproperty_new_categories("MISCELLANEOUS");
+		properties[iprop++] = icalproperty_new_summary(calnote->text);
+		break;
+	case GN_CALNOTE_REMINDER:
+		properties[iprop++] = icalproperty_new_categories("REMINDER");
 		properties[iprop++] = icalproperty_new_summary(calnote->text);
 		break;
 	case GN_CALNOTE_CALL:
@@ -202,8 +205,10 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	fprintf(f, "CATEGORIES:");
 	switch (calnote->type) {
 	case GN_CALNOTE_MEMO:
-	case GN_CALNOTE_REMINDER:
 		fprintf(f, "MISCELLANEOUS\r\n");
+		break;
+	case GN_CALNOTE_REMINDER:
+		fprintf(f, "REMINDER\r\n");
 		break;
 	case GN_CALNOTE_CALL: 
 		fprintf(f, "PHONE CALL\r\n");
@@ -233,7 +238,9 @@ API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 			calnote->end_time.minute, calnote->end_time.second); 
 	}
 	if (calnote->alarm.enabled) {
-		fprintf(f, "AALARM:%04d%02d%02dT%02d%02d%02d\r\n", calnote->alarm.timestamp.year, 
+		fprintf(f, "%sALARM:%04d%02d%02dT%02d%02d%02d\r\n",
+		(calnote->alarm.tone ? "A" : "D"),
+		calnote->alarm.timestamp.year, 
 		calnote->alarm.timestamp.month, calnote->alarm.timestamp.day, calnote->alarm.timestamp.hour, 
 		calnote->alarm.timestamp.minute, calnote->alarm.timestamp.second); 
 	} 
@@ -275,6 +282,8 @@ static inline gn_calnote_type str2calnote_type(const char *str)
 		return GN_CALNOTE_MEETING;
 	} else if (!strncasecmp("ANNIVERSARY", str, 11)) {
 		return GN_CALNOTE_BIRTHDAY;
+	} else if (!strncasecmp("MISCELLANOUS", str, 12)) {
+		return GN_CALNOTE_MEMO;
 	}
 	return GN_CALNOTE_REMINDER;
 }

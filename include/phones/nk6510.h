@@ -119,8 +119,10 @@ typedef enum {
 #define NK6510_SUBCAL_DEL_NOTE_RESP	0x0c	/* Dletete note response */
 #define NK6510_SUBCAL_NOTE_RCVD		0x1a	/* Received note */
 #define NK6510_SUBCAL_FREEPOS_RCVD	0x32	/* Received first free position */
-#define NK6510_SUBCAL_INFO_RCVD		0x3b	/* Received calendar summary*/
+#define NK6510_SUBCAL_INFO_RCVD		0x3b	/* Received calendar summary */
 #define NK6510_SUBCAL_NOTE2_RCVD	0x7e	/* Received note (with more detailes) */
+#define NK6510_SUBCAL_ADD_NOTE_RESP	0x66	/* Add calendar note response */
+
 /* Calendar note types */
 #define NK6510_NOTE_REMINDER		0x00	/* Reminder */
 #define NK6510_NOTE_MEETING		0x01	/* Meeting */

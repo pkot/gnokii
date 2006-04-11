@@ -1,12 +1,15 @@
-0.6.13
-======
+0.6.13 (not released yet)
+=========================
  * xgnokii updates
     o avoid segfault when enabling or disabling data calls, read
       bindir parameter from .gnokiirc               (Daniele Forsi)
  * libgnokii updates
     o fix --smsreader for nk6100 driver             (Daniele Forsi)
+    o increase max sms and smsc phone number to 20      (Pawel Kot)
     o Nokia 3310 does not support GetPhoneStatus    (Daniele Forsi)
- 
+ * nk6510 driver updates
+    o handle calendar extended parameters writing       (Pawel Kot)
+
 0.6.12
 ======
  * xgnokii updates

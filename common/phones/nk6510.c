@@ -92,6 +92,7 @@ static gn_error NK6510_SetDateTime(gn_data *data, struct gn_statemachine *state)
 static gn_error NK6510_SetAlarm(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK6510_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state);
@@ -306,7 +307,7 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 	case GN_OP_GetCalendarNote:
 		return NK6510_GetCalendarNote(data, state);
 	case GN_OP_WriteCalendarNote:
-		return NK6510_WriteCalendarNote(data, state);
+		return NK6510_WriteCalendarNote2(data, state);
 	case GN_OP_DeleteCalendarNote:
 		return NK6510_DeleteCalendarNote(data, state);
 	case GN_OP_DeleteWAPBookmark:
@@ -2422,7 +2423,7 @@ UNHANDLED FRAME RECEIVED
 request: 0x19 / 0x0004
 00 01 00 1b                                     |                
 reply: 0x19 / 0x0012
-01 23 00 1c 06 01 ff ff ff ff 00 00 49 4c 01 3e |  #    ÿÿÿÿ  IL >
+01 23 00 1c 06 01 ff ff ff ff 00 00 49 4c 01 3e |
 01 56
 	*/
 
@@ -2765,6 +2766,21 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 			message[4] * 256 + message[5],
 			1 - message[6]);
 		break;
+	case NK6510_SUBCAL_ADD_NOTE_RESP:
+		switch (message[4]) {
+		case 0x00:
+			dprintf("Calendar note written at %d location\n", message[8] * 256 + message[9]);
+			break;
+		case 0x04:
+			dprintf("Incorrect icon type\n");
+			e = GN_ERR_FAILED;
+			break;
+		default:
+			dprintf("Unknown error\n");
+			e = GN_ERR_FAILED;
+			break;
+		}
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", NK6510_MSG_CALENDAR, message[3]);
 		e = GN_ERR_UNHANDLEDFRAME;
@@ -2791,10 +2807,13 @@ static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachin
 		req[9] = data->calnote_list->location[LAST_INDEX] % 256;
 		if (sm_message_send(11, NK6510_MSG_CALENDAR, req, state))
 			return GN_ERR_NOTREADY;
+		dprintf("Message sent.\n");
 		error = sm_block(NK6510_MSG_CALENDAR, data, state);
 		if (error != GN_ERR_NONE)
 			return error;
+		dprintf("Message received\n");
 	} while (data->calnote_list->last < data->calnote_list->number);
+	dprintf("Loop exited\n");
 	return error;
 }
 #undef LAST_INDEX
@@ -2814,7 +2833,9 @@ static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 		error = GN_ERR_INVALIDLOCATION;
 	} else {
 		tmpdata.datetime = &tmptime;
+		dprintf("Getting notes info\n");
 		error = NK6510_GetCalendarNotesInfo(data, state);
+		dprintf("Got calendar info\n");
 		if (error == GN_ERR_NONE) {
 			if (!data->calnote_list->number ||
 			    data->calnote->location > data->calnote_list->number) {
@@ -2883,6 +2904,134 @@ static gn_error NK6510_FirstCalendarFreePos(gn_data *data, struct gn_statemachin
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 4);
 }
 
+
+static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error = GN_ERR_NONE;
+	gn_calnote *calnote;
+	int len, count = 54;
+	unsigned char req[1024] = { FBUS_FRAME_HEADER,
+				    0x65,
+				    0x00, /* category: 0x00 calendar, 0x01 todo */
+				    0x00, 0x00, 0x00,
+				    0x00, 0x00, /* location */
+				    0x00, 0x00, 0x00, 0x00,
+				    0xff, 0xff, 0xff, 0xff, /* alarm */
+				    0x00, 0x00, 0x00,
+				    0x00, /* note icon */
+				    0xff, 0xff, 0xff, 0xff, /* alarm tone */
+				    0x00, /* 0x02 for reminder */
+				    0x00, /* note type: 0x00 - reminder
+							0x01 - meeting
+							0x02 - call
+							0x04 - birthday
+							0x08 - memo */
+				    0x07, 0xd0, 0x01, 0x12, 0x0c, 0x00, /* start datetime */
+				    0x07, 0xd0, 0x01, 0x12, 0x0c, 0x00, /* end datetime */
+				    0x00, 0x00, /* recurrence */
+				    0xff, 0xff, /* birth year */
+				    0x20, /* todo priority */
+				    0x00, /* todo completed */
+				    0x00, 0x00, /* number of occuriences */
+				    0x00,
+				    0x00, /* text length */
+				    0x00, /* phone length/meeting location */
+				    0x00, 0x00, 0x00};
+
+	if (!data->calnote) return GN_ERR_INTERNALERROR;
+
+	calnote = data->calnote;
+
+	/* 6510 needs to seek the first free pos to inhabit with next note */
+	error = NK6510_FirstCalendarFreePos(data, state);
+	if (error != GN_ERR_NONE) return error;
+
+	/* Set location */
+	req[8] = calnote->location / 256;
+	req[9] = calnote->location % 256;
+
+	/* text */
+	req[49] = strlen(calnote->text);
+	len = char_unicode_encode(req + 54, calnote->text, strlen(calnote->text));
+	count += len;
+
+	/* Set calnote types */
+	switch (calnote->type) {
+	case GN_CALNOTE_REMINDER:
+		req[26] = 0x02;
+		/* end date == start date */
+		memcpy(&(calnote->end_time), &(calnote->time), sizeof(calnote->time));
+		break;
+	case GN_CALNOTE_MEETING:
+		req[27] = 0x01;
+		req[50] = strlen(calnote->mlocation);
+		count += char_unicode_encode(req + 54 + len, calnote->mlocation, strlen(calnote->mlocation));
+		break;
+	case GN_CALNOTE_CALL:
+		req[27] = 0x02;
+		req[50] = strlen(calnote->phone_number);
+		count += char_unicode_encode(req + 54 + len, calnote->phone_number, strlen(calnote->phone_number));
+		break;
+	case GN_CALNOTE_BIRTHDAY:
+		req[27] = 0x04;
+		/* Birthday year */
+		req[42] = calnote->time.year / 256;
+		req[43] = calnote->time.year % 256;
+		/* Event time: 2005 */
+		calnote->time.year = 2005;
+		/* end date == start date */
+		memcpy(&(calnote->end_time), &(calnote->time), sizeof(calnote->time));
+		break;
+	case GN_CALNOTE_MEMO:
+		req[27] = 0x08;
+		break;
+	}
+
+	/* Recurrence */
+	if (calnote->recurrence >= 8760)
+		calnote->recurrence = 0xffff; /* setting 1 year repeat */
+	req[40] = calnote->recurrence / 256;
+	req[41] = calnote->recurrence % 256;
+
+	/* Set start time and end time */
+	req[28] = calnote->time.year / 256;
+	req[29] = calnote->time.year % 256;
+	req[30] = calnote->time.month;
+	req[31] = calnote->time.day;
+	req[32] = calnote->time.hour;
+	req[33] = calnote->time.minute;
+
+	req[34] = calnote->end_time.year / 256;
+	req[35] = calnote->end_time.year % 256;
+	req[36] = calnote->end_time.month;
+	req[37] = calnote->end_time.day;
+	req[38] = calnote->end_time.hour;
+	req[39] = calnote->end_time.minute;
+
+	/* Alarm */
+	if (calnote->alarm.enabled) {
+		long seconds;
+
+		/* Alarm for birtday is special. We need to set for the same
+		 * year we set the start date. */
+		if (calnote->type == GN_CALNOTE_BIRTHDAY)
+			calnote->time.year = calnote->alarm.timestamp.year;
+		seconds = NK6510_GetNoteAlarmDiff(&calnote->time,
+						 &calnote->alarm.timestamp);
+		if (seconds >= 0) { /* Otherwise it's an error condition.... */
+			req[14] = (seconds / 60) >> 24;
+			req[15] = (seconds / 60) >> 16;
+			req[16] = (seconds / 60) >> 8;
+			req[17] = (seconds / 60);
+		}
+
+		if (!calnote->alarm.tone) {
+			req[22] = req[23] = req[24] = req[25] = 0;
+		}
+	}
+
+	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, count);
+}
 
 static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {

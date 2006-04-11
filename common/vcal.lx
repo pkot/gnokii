@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999-2000  Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999-2000  Hugh Blemings & Pavel Janï¿½ ml.
 
 */
 
@@ -35,8 +35,8 @@
 #include "gnokii.h"
 #include "gsm-filetypes.h"
 
-#define YY_DECL int yylex(char *type, char *text, char *desc, char *time, char *alarm, char *todo_priority, int lexnumber)
-int veventcounter = 0, vtodocounter = 0;
+#define YY_DECL int yylex(char *type, char *text, char *meeting_location, char *desc, char *time, char *endtime, char *alarm, char *todo_priority, int lexnumber)
+int veventcounter = 0, vtodocounter = 0, alarmtone = 0;
 
 %}
 
@@ -48,7 +48,9 @@ int veventcounter = 0, vtodocounter = 0;
 %x todosummary
 %x description
 %x ttime
+%x etime
 %x aalarm
+%x loc
 %x tpriority
 %option noyywrap
 %option nounput
@@ -109,7 +111,25 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 						BEGIN(vevent);
 					}
 
-<vevent>AALARM[ \t\n\r]*:			BEGIN(aalarm);
+<vevent>DTEND[ \t\n\r]*:		BEGIN(etime);
+
+<etime>[0-9]{8}[tT][0-9]{6}		{
+						if (veventcounter == lexnumber)
+							snprintf(endtime, 16, "%s", yytext);
+						BEGIN(vevent);
+					}
+
+<vevent>AALARM[ \t\n\r]*:		{
+						BEGIN(aalarm);
+						dprintf("Alarm tone enabled\n");
+						alarmtone = 1;
+					}
+
+<vevent>DALARM[ \t\n\r]*:		{
+						BEGIN(aalarm);
+						dprintf("Alarm tone disabled\n");
+						alarmtone = 0;
+					}
 
 <aalarm>[0-9]{8}[tT][0-9]{6}		{
 						if (veventcounter == lexnumber)
@@ -117,6 +137,14 @@ BEGIN:VCALENDAR				BEGIN(vcalendar);
 						BEGIN(vevent);
 					}
 
+
+<vevent>LOCATION[ \t\n\r]*:		BEGIN(loc);
+
+<loc>[[:print:]]+			{
+						if (veventcounter == lexnumber)
+							snprintf(meeting_location, 64, "%s", yytext);
+						BEGIN(vevent);
+					}
 
 <vevent>END:VEVENT			BEGIN(vcalendar);
 
@@ -157,6 +185,8 @@ int vcal_time_get(gn_timestamp *dt, char *time)
 	snprintf(minute, 3, "%s", time + 11);
 	snprintf(second, 3, "%s", time + 13);
 
+	dprintf("\t%s-%s-%s %s:%s:%s\n", year, month, day, hour, minute, second);
+
 	/* FIXME: Should check ranges... */
 	dt->year = atoi(year);
 	dt->month = atoi(month);
@@ -184,11 +214,19 @@ int vcal_time_get(gn_timestamp *dt, char *time)
 * out:
 *   <>0 if error
 */
-static int gn_calnote_fill(gn_calnote *note, char *type, char *text,
-		    char *desc, char *time, char *alarm)
+static int gn_calnote_fill(gn_calnote *note, char *type, char *text, char *meeting_location,
+		    char *desc, char *time, char *endtime, char *alarm)
 {
+	dprintf("Start time (YYYY-MM-DD HH:MM:SS):\n");
 	vcal_time_get(&note->time, time);
+	dprintf("End time (YYYY-MM-DD HH:MM:SS):\n");
+	vcal_time_get(&note->end_time, endtime);
+	dprintf("Alarm time (YYYY-MM-DD HH:MM:SS):\n");
 	vcal_time_get(&note->alarm.timestamp, alarm);
+	if (note->alarm.timestamp.year) {
+		note->alarm.enabled = 1;
+		note->alarm.tone = alarmtone;
+	}
 
 	snprintf(note->text, 256, "%s", text);
 	note->phone_number[0] = 0;
@@ -197,14 +235,24 @@ static int gn_calnote_fill(gn_calnote *note, char *type, char *text,
 	/* FIXME: Handle additional strings, maybe from configuration file */
 	if (!strcmp(type, "PHONE CALL")) {
 		snprintf(note->phone_number, 48, "%s", text);
-		if (desc[0] != 0) snprintf(note->text, 256, "%s", desc);
+		dprintf("Phone: %s\n", note->phone_number);
+		if (desc[0] != 0) {
+			snprintf(note->text, 256, "%s", desc);
+			dprintf("Desc: %s\n", note->text);
+		}
 		note->type = GN_CALNOTE_CALL;
-	} else if (!strcmp(type, "MEETING"))
+	} else if (!strcmp(type, "MEETING")) {
 		note->type = GN_CALNOTE_MEETING;
-	else if (!strcmp(type, "SPECIAL OCCASION"))
+		if (meeting_location[0] != 0) {
+			snprintf(note->mlocation, 64, "%s", meeting_location);
+			dprintf("Location: %s\n", note->mlocation);
+		}
+	} else if (!strcmp(type, "SPECIAL OCCASION"))
 		note->type = GN_CALNOTE_BIRTHDAY;
-	else
+	else if (!strcmp(type, "REMINDER"))
 		note->type = GN_CALNOTE_REMINDER;
+	else
+		note->type = GN_CALNOTE_MEMO;
 
 	return 0;
 }
@@ -224,9 +272,11 @@ static int gn_calnote_fill(gn_calnote *note, char *type, char *text,
 int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number)
 {
 	FILE *file;
-	char type[21] = "", text[257] = "", desc[257] = "", time[16] = "", alarm[16] = "", todo_priority[2] = "";
+	char type[21] = "", text[257] = "", desc[257] = "", meeting_location[64] = "";
+	char time[16] = "", endtime[16] = "", alarm[16] = "";
+	char todo_priority[2] = "";
 
-	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead."));
+	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead.\n"));
 	file = fopen(filename, "r");
 	if (!file) {
 		fprintf(stderr, _("Can't open file %s for reading!\n"), filename);
@@ -237,11 +287,11 @@ int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number)
 
 	memset(cnote, 0, sizeof(gn_calnote));
 
-	if (yylex(type, text, desc, time, alarm, todo_priority, number)) {
+	if (yylex(type, text, meeting_location, desc, time, endtime, alarm, todo_priority, number)) {
 		fprintf(stderr, _("Error parsing vCalendar file!\n"));
 		return -1;
 	}
-	gn_calnote_fill(cnote, type, text, desc, time, alarm);
+	gn_calnote_fill(cnote, type, text, meeting_location, desc, time, endtime, alarm);
 
 	fclose(file);
 	return 0;
@@ -282,9 +332,11 @@ static int gn_todo_fill(gn_todo *todonote, char *text, char *todo_priority)
 int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number)
 {
 	FILE *file;
-	char type[21] = "", text[258] = "", desc[258] = "", time[16] = "", alarm[16] = "", todo_priority[3] = "";
+	char type[21] = "", text[258] = "", desc[258] = "";
+	char time[16] = "", endtime[16] = "", alarm[16] = "";
+	char todo_priority[3] = "", meeting_location[64] = "";
 
-	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead."));
+	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead.\n"));
 	file = fopen(filename, "r");
 	if (!file) {
 		fprintf(stderr, _("Can't open file %s for reading!\n"), filename);
@@ -295,7 +347,7 @@ int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number)
 
 	memset(ctodo, 0, sizeof(gn_todo));
 
-	if (yylex(type, text, desc, time, alarm, todo_priority, number)) {
+	if (yylex(type, text, meeting_location, desc, time, endtime, alarm, todo_priority, number)) {
 		fprintf(stderr, _("Error parsing vCalendar file!\n"));
 		return -1;
 	}
