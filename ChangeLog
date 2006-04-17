@@ -9,6 +9,8 @@
     o Nokia 3310 does not support GetPhoneStatus    (Daniele Forsi)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
+ * build system updates
+    o fix typo in smsd-mysql Debian pacakge depedencies (Pawel Kot)
 
 0.6.12
 ======

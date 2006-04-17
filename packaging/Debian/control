@@ -33,7 +33,7 @@ Description: SMS Daemon for the mobile phones
 
 Package: gnokii-smsd-mysql
 Architecture: any
-Depends: gnokii-smsd (= ${Source-Version}), libmysqlcient
+Depends: gnokii-smsd (= ${Source-Version}), libmysqlclient
 Description: SMSD plugin for the MySQL RDBMS
  Gnokii is a suite of programs linked against a backend library that allows
  communication with the phones. It current supports the most mobile phones,
