@@ -409,8 +409,8 @@ static int usage(FILE *f, int retval)
 /* businit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
 
-static struct gn_statemachine state;
-static gn_data data;
+static struct gn_statemachine *state;
+static gn_data *data;
 static gn_cb_message cb_queue[16];
 static int cb_ridx = 0;
 static int cb_widx = 0;
@@ -420,41 +420,23 @@ static int ringtone_list_initialised = 0;
 
 static void busterminate(void)
 {
-	gn_sm_functions(GN_OP_Terminate, NULL, &state);
-	if (lockfile) gn_device_unlock(lockfile);
+	gn_lib_phone_close(state,&data);
+	gn_lib_phoneprofile_free(&state);
+	if (logfile)
+		fclose(logfile);
 }
 
 static void businit(void)
 {
-	gn_error error;
-	char *aux;
-	static bool atexit_registered = false;
-
-	gn_data_clear(&data);
-
-	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
-	/* Defaults to 'no' */
-	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_device_lock(state.config.port_device);
-		if (lockfile == NULL) {
-			fprintf(stderr, _("Lock file error. Exiting.\n"));
-			exit(1);
-		}
-	}
+	if (GN_ERR_NONE != gn_lib_phoneprofile_load(NULL,&state))
+		exit(2);
 
 	/* register cleanup function */
-	if (!atexit_registered) {
-		atexit_registered = true;
-		atexit(busterminate);
-	}
+	atexit(busterminate);
 	/* signal(SIGINT, bussignal); */
 
-	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(&state);
-	if (error != GN_ERR_NONE) {
-		fprintf(stderr, _("Telephone interface init failed: %s\nQuitting.\n"), gn_error_print(error));
+	if (GN_ERR_NONE != gn_lib_phone_open(state,&data))
 		exit(2);
-	}
 }
 
 /* This function checks that the argument count for a given options is withing
@@ -520,7 +502,7 @@ static void getcalendarnote_usage(FILE *f, int exitval)
 
 static gn_error readtext(gn_sms_user_data *udata, int input_len)
 {
-	char message_buffer[255 * GN_SMS_MAX_LENGTH];
+	unsigned char message_buffer[255 * GN_SMS_MAX_LENGTH];
 	int chars_read;
 
 #ifndef	WIN32
@@ -554,12 +536,12 @@ static gn_error loadbitmap(gn_bmp *bitmap, char *s, int type)
 {
 	gn_error error;
 	bitmap->type = type;
-	error = gn_bmp_null(bitmap, &state.driver.phone);
+	error = gn_bmp_null(bitmap, &state->driver.phone);
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Could not null bitmap: %s\n"), gn_error_print(error));
 		return error;
 	}
-	error = gn_file_bitmap_read(s, bitmap, &state.driver.phone);
+	error = gn_file_bitmap_read(s, bitmap, &state->driver.phone);
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Could not load bitmap from %s: %s\n"), s, gn_error_print(error));
 		return error;
@@ -574,11 +556,11 @@ static void init_ringtone_list(void)
 	if (ringtone_list_initialised) return;
 
 	memset(&ringtone_list, 0, sizeof(ringtone_list));
-	data.ringtone_list = &ringtone_list;
+	data->ringtone_list = &ringtone_list;
 
-	error = gn_sm_functions(GN_OP_GetRingtoneList, &data, &state);
+	error = gn_sm_functions(GN_OP_GetRingtoneList, data, state);
 
-	data.ringtone_list = NULL;
+	data->ringtone_list = NULL;
 
 	if (error != GN_ERR_NONE) {
 		ringtone_list.count = 0;
@@ -650,17 +632,17 @@ static int sendsms(int argc, char *argv[])
 			break;
 
 		case '2': /* SMSC number index in phone memory */
-			data.message_center = calloc(1, sizeof(gn_sms_message_center));
-			data.message_center->id = atoi(optarg);
-			if (data.message_center->id < 1 || data.message_center->id > 5) {
-				free(data.message_center);
+			data->message_center = calloc(1, sizeof(gn_sms_message_center));
+			data->message_center->id = atoi(optarg);
+			if (data->message_center->id < 1 || data->message_center->id > 5) {
+				free(data->message_center);
 				sendsms_usage(stderr, -1);
 			}
-			if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
-				strcpy(sms.smsc.number, data.message_center->smsc.number);
-				sms.smsc.type = data.message_center->smsc.type;
+			if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
+				strcpy(sms.smsc.number, data->message_center->smsc.number);
+				sms.smsc.type = data->message_center->smsc.type;
 			}
-			free(data.message_center);
+			free(data->message_center);
 			break;
 
 		case '3': /* we send long message */
@@ -746,15 +728,15 @@ static int sendsms(int argc, char *argv[])
 	}
 
 	if (!sms.smsc.number[0]) {
-		data.message_center = calloc(1, sizeof(gn_sms_message_center));
-		data.message_center->id = 1;
-		if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
-			strcpy(sms.smsc.number, data.message_center->smsc.number);
-			sms.smsc.type = data.message_center->smsc.type;
+		data->message_center = calloc(1, sizeof(gn_sms_message_center));
+		data->message_center->id = 1;
+		if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
+			strcpy(sms.smsc.number, data->message_center->smsc.number);
+			sms.smsc.type = data->message_center->smsc.type;
 		} else {
 			fprintf(stderr, _("Cannot read the SMSC number from your phone. If the sms send will fail, please use --smsc option explicitely giving the number.\n"));
 		}
-		free(data.message_center);
+		free(data->message_center);
 	}
 
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
@@ -772,10 +754,10 @@ static int sendsms(int argc, char *argv[])
 		sms.user_data[++curpos].type = GN_SMS_DATA_None;
 	}
 
-	data.sms = &sms;
+	data->sms = &sms;
 
 	/* Send the message. */
-	error = gn_sms_send(&data, &state);
+	error = gn_sms_send(data, state);
 
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Send succeeded!\n"));
@@ -856,17 +838,17 @@ static int savesms(int argc, char *argv[])
 				sms.smsc.type = GN_GSM_NUMBER_Unknown;
 			break;
 		case '1': /* SMSC number index in phone memory */
-			data.message_center = calloc(1, sizeof(gn_sms_message_center));
-			data.message_center->id = atoi(optarg);
-			if (data.message_center->id < 1 || data.message_center->id > 5) {
-				free(data.message_center);
+			data->message_center = calloc(1, sizeof(gn_sms_message_center));
+			data->message_center->id = atoi(optarg);
+			if (data->message_center->id < 1 || data->message_center->id > 5) {
+				free(data->message_center);
 				sendsms_usage(stderr, -1);
 			}
-			if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
-				strcpy(sms.smsc.number, data.message_center->smsc.number);
-				sms.smsc.type = data.message_center->smsc.type;
+			if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
+				strcpy(sms.smsc.number, data->message_center->smsc.number);
+				sms.smsc.type = data->message_center->smsc.type;
 			}
-			free(data.message_center);
+			free(data->message_center);
 			break;
 		case '2': /* sender number */
 			if (*optarg == '+')
@@ -935,8 +917,8 @@ static int savesms(int argc, char *argv[])
 		gn_sms aux;
 
 		aux.number = sms.number;
-		data.sms = &aux;
-		error = gn_sm_functions(GN_OP_GetSMSnoValidate, &data, &state);
+		data->sms = &aux;
+		error = gn_sm_functions(GN_OP_GetSMSnoValidate, data, state);
 		switch (error) {
 		case GN_ERR_NONE:
 			fprintf(stderr, _("Message at specified location exists. "));
@@ -959,14 +941,14 @@ static int savesms(int argc, char *argv[])
 	}
 #endif
 	if ((!sms.smsc.number[0]) && (sms.type == GN_SMS_MT_Deliver)) {
-		data.message_center = calloc(1, sizeof(gn_sms_message_center));
-		data.message_center->id = 1;
-		if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
-			snprintf(sms.smsc.number, GN_BCD_STRING_MAX_LENGTH, "%s", data.message_center->smsc.number);
+		data->message_center = calloc(1, sizeof(gn_sms_message_center));
+		data->message_center->id = 1;
+		if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
+			snprintf(sms.smsc.number, GN_BCD_STRING_MAX_LENGTH, "%s", data->message_center->smsc.number);
 			dprintf("SMSC number: %s\n", sms.smsc.number);
-			sms.smsc.type = data.message_center->smsc.type;
+			sms.smsc.type = data->message_center->smsc.type;
 		}
-		free(data.message_center);
+		free(data->message_center);
 	}
 
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
@@ -1000,8 +982,8 @@ static int savesms(int argc, char *argv[])
 	if (!gn_char_def_alphabet(sms.user_data[0].u.text))
 		sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2;
 
-	data.sms = &sms;
-	error = gn_sms_save(&data, &state);
+	data->sms = &sms;
+	error = gn_sms_save(data, state);
 
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Saved to %d!\n"), sms.number);
@@ -1015,7 +997,6 @@ static int savesms(int argc, char *argv[])
 static int getsmsc(int argc, char *argv[])
 {
 	gn_sms_message_center message_center;
-	gn_data data;
 	gn_error error;
 	int start, stop, i;
 	bool raw = false;
@@ -1058,14 +1039,14 @@ static int getsmsc(int argc, char *argv[])
 		stop = 5;	/* FIXME: determine it */
 	}
 
-	gn_data_clear(&data);
-	data.message_center = &message_center;
+	gn_data_clear(data);
+	data->message_center = &message_center;
 
 	for (i = start; i <= stop; i++) {
 		memset(&message_center, 0, sizeof(message_center));
 		message_center.id = i;
 
-		error = gn_sm_functions(GN_OP_GetSMSCenter, &data, &state);
+		error = gn_sm_functions(GN_OP_GetSMSCenter, data, state);
 		switch (error) {
 		case GN_ERR_NONE:
 			break;
@@ -1153,13 +1134,12 @@ static int getsmsc(int argc, char *argv[])
 static int setsmsc()
 {
 	gn_sms_message_center message_center;
-	gn_data data;
 	gn_error error;
 	char line[256], ch;
 	int n;
 
-	gn_data_clear(&data);
-	data.message_center = &message_center;
+	gn_data_clear(data);
+	data->message_center = &message_center;
 
 	while (fgets(line, sizeof(line), stdin)) {
 		n = strlen(line);
@@ -1187,7 +1167,7 @@ static int setsmsc()
 			return -1;
 		}
 
-		error = gn_sm_functions(GN_OP_SetSMSCenter, &data, &state);
+		error = gn_sm_functions(GN_OP_SetSMSCenter, data, state);
 		if (error != GN_ERR_NONE) {
 			fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 			return error;
@@ -1201,15 +1181,14 @@ static int setsmsc()
 static int createsmsfolder(char *name)
 {
 	gn_sms_folder	folder;
-	gn_data		data;
 	gn_error	error;
 
-	gn_data_clear(&data);
+	gn_data_clear(data);
 
 	snprintf(folder.name, GN_SMS_FOLDER_NAME_MAX_LENGTH, "%s", name);
-	data.sms_folder = &folder;
+	data->sms_folder = &folder;
 
-	error = gn_sm_functions(GN_OP_CreateSMSFolder, &data, &state);
+	error = gn_sm_functions(GN_OP_CreateSMSFolder, data, state);
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 	else 
@@ -1221,18 +1200,17 @@ static int createsmsfolder(char *name)
 static int deletesmsfolder(char *number)
 {
 	gn_sms_folder	folder;
-	gn_data		data;
 	gn_error	error;
 
-	gn_data_clear(&data);
+	gn_data_clear(data);
 
 	folder.folder_id = atoi(number);
 	if (folder.folder_id > 0 && folder.folder_id <= GN_SMS_FOLDER_MAX_NUMBER)
-		data.sms_folder = &folder;
+		data->sms_folder = &folder;
 	else
 		fprintf(stderr, _("Error: Number must be between 1 and %i!\n"), GN_SMS_FOLDER_MAX_NUMBER);
 
-	error = gn_sm_functions(GN_OP_DeleteSMSFolder, &data, &state);
+	error = gn_sm_functions(GN_OP_DeleteSMSFolder, data, state);
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 	else 
@@ -1243,15 +1221,14 @@ static int deletesmsfolder(char *number)
 static int showsmsfolderstatus(void)
 {
 	gn_sms_folder_list folders;
-	gn_data data;
 	gn_error error;
 	int i;
 
 	memset(&folders, 0, sizeof(folders));
-	gn_data_clear(&data);
-	data.sms_folder_list = &folders;
+	gn_data_clear(data);
+	data->sms_folder_list = &folders;
 
-	if ((error = gn_sm_functions(GN_OP_GetSMSFolders, &data, &state)) != GN_ERR_NONE) {
+	if ((error = gn_sm_functions(GN_OP_GetSMSFolders, data, state)) != GN_ERR_NONE) {
 		fprintf(stderr, _("Cannot list available folders: %s\n"), gn_error_print(error));
 		return error;
 	}
@@ -1259,8 +1236,8 @@ static int showsmsfolderstatus(void)
 	fprintf(stdout, _("No. Name                             Id #Msg\n"));
 	fprintf(stdout, _("============================================\n"));
 	for (i = 0; i < folders.number; i++) {
-		data.sms_folder = folders.folder + i;
-		if ((error = gn_sm_functions(GN_OP_GetSMSFolderStatus, &data, &state)) != GN_ERR_NONE) {
+		data->sms_folder = folders.folder + i;
+		if ((error = gn_sm_functions(GN_OP_GetSMSFolderStatus, data, state)) != GN_ERR_NONE) {
 			fprintf(stderr, _("Cannot stat folder \"%s\": %s\n"), folders.folder[i].name, gn_error_print(error));
 			return error;
 		}
@@ -1283,7 +1260,7 @@ static int getsms(int argc, char *argv[])
 	char filename[64];
 	gn_error error = GN_ERR_NONE;
 	gn_bmp bitmap;
-	gn_phone *phone = &state.driver.phone;
+	gn_phone *phone = &state->driver.phone;
 	char ans[5];
 	struct stat buf;
 
@@ -1331,8 +1308,8 @@ static int getsms(int argc, char *argv[])
 		}
 	}
 	folder.folder_id = 0;
-	data.sms_folder = &folder;
-	data.sms_folder_list = &folderlist;
+	data->sms_folder = &folder;
+	data->sms_folder_list = &folderlist;
 	/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
 		bool done = false;
@@ -1341,9 +1318,9 @@ static int getsms(int argc, char *argv[])
 		memset(&message, 0, sizeof(gn_sms));
 		message.memory_type = gn_str2memory_type(memory_type_string);
 		message.number = count;
-		data.sms = &message;
+		data->sms = &message;
 
-		error = gn_sms_get(&data, &state);
+		error = gn_sms_get(data, state);
 		switch (error) {
 		case GN_ERR_NONE:
 			switch (message.type) {
@@ -1509,8 +1486,8 @@ static int getsms(int argc, char *argv[])
 				break;
 			}
 			if (del) {
-				data.sms = &message;
-				if (GN_ERR_NONE != gn_sms_delete(&data, &state))
+				data->sms = &message;
+				if (GN_ERR_NONE != gn_sms_delete(data, state))
 					fprintf(stderr, _("(delete failed)\n"));
 				else
 					fprintf(stderr, _("(message deleted)\n"));
@@ -1561,10 +1538,10 @@ static int deletesms(int argc, char *argv[])
 	/* Now delete the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
 		message.number = count;
-		data.sms = &message;
-		data.sms_folder = &folder;
-		data.sms_folder_list = &folderlist;
-		error = gn_sms_delete(&data, &state);
+		data->sms = &message;
+		data->sms_folder = &folder;
+		data->sms_folder_list = &folderlist;
+		error = gn_sms_delete(data, state);
 
 		if (error == GN_ERR_NONE)
 			fprintf(stderr, _("Deleted SMS %s %d\n"), memory_type_string, count);
@@ -1631,10 +1608,10 @@ static int entersecuritycode(char *type)
 	memset(&security_code.code, 0, sizeof(security_code.code));
 	get_password(_("Enter your code: "), security_code.code, sizeof(security_code.code));
 
-	gn_data_clear(&data);
-	data.security_code = &security_code;
+	gn_data_clear(data);
+	data->security_code = &security_code;
 
-	error = gn_sm_functions(GN_OP_EnterSecurityCode, &data, &state);
+	error = gn_sm_functions(GN_OP_EnterSecurityCode, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -1652,10 +1629,10 @@ static int getsecuritycodestatus(void)
 	gn_security_code security_code;
 	gn_error err;
 
-	gn_data_clear(&data);
-	data.security_code = &security_code;
+	gn_data_clear(data);
+	data->security_code = &security_code;
 
-	err = gn_sm_functions(GN_OP_GetSecurityCodeStatus, &data, &state);
+	err = gn_sm_functions(GN_OP_GetSecurityCodeStatus, data, state);
 	if (err == GN_ERR_NONE) {
 		fprintf(stdout, _("Security code status: "));
 
@@ -1719,10 +1696,10 @@ static int changesecuritycode(char *type)
 		return -1;
 	}
 
-	gn_data_clear(&data);
-	data.security_code = &security_code;
+	gn_data_clear(data);
+	data->security_code = &security_code;
 
-	error = gn_sm_functions(GN_OP_ChangeSecurityCode, &data, &state);
+	error = gn_sm_functions(GN_OP_ChangeSecurityCode, data, state);
 	switch (error) {
 	case GN_ERR_NONE:
 		fprintf(stderr, _("Code changed.\n"));
@@ -1777,10 +1754,10 @@ static int dialvoice(char *number)
 	call_info.type = GN_CALL_Voice;
 	call_info.send_number = GN_CALL_Default;
 
-	gn_data_clear(&data);
-	data.call_info = &call_info;
+	gn_data_clear(data);
+	data->call_info = &call_info;
 
-	if ((error = gn_call_dial(&call_id, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_call_dial(&call_id, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Dialing failed: %s\n"), gn_error_print(error));
 	else
 		fprintf(stdout, _("Dialled call, id: %d (lowlevel id: %d)\n"), call_id, call_info.call_id);
@@ -1796,10 +1773,10 @@ static int answercall(char *callid)
 	memset(&callinfo, 0, sizeof(callinfo));
 	callinfo.call_id = atoi(callid);
 
-	gn_data_clear(&data);
-	data.call_info = &callinfo;
+	gn_data_clear(data);
+	data->call_info = &callinfo;
 
-	return gn_sm_functions(GN_OP_AnswerCall, &data, &state);
+	return gn_sm_functions(GN_OP_AnswerCall, data, state);
 }
 
 /* Hangup the call */
@@ -1810,10 +1787,10 @@ static int hangup(char *callid)
 	memset(&callinfo, 0, sizeof(callinfo));
 	callinfo.call_id = atoi(callid);
 
-	gn_data_clear(&data);
-	data.call_info = &callinfo;
+	gn_data_clear(data);
+	data->call_info = &callinfo;
 
-	return gn_sm_functions(GN_OP_CancelCall, &data, &state);
+	return gn_sm_functions(GN_OP_CancelCall, data, state);
 }
 
 
@@ -1883,19 +1860,19 @@ static int sendlogo(int argc, char *argv[])
 		sms.user_data[2].type = GN_SMS_DATA_None;
 	}
 
-	data.message_center = calloc(1, sizeof(gn_sms_message_center));
-	data.message_center->id = 1;
-	if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
-		strcpy(sms.smsc.number, data.message_center->smsc.number);
-		sms.smsc.type = data.message_center->smsc.type;
+	data->message_center = calloc(1, sizeof(gn_sms_message_center));
+	data->message_center->id = 1;
+	if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
+		strcpy(sms.smsc.number, data->message_center->smsc.number);
+		sms.smsc.type = data->message_center->smsc.type;
 	}
-	free(data.message_center);
+	free(data->message_center);
 
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
 
 	/* Send the message. */
-	data.sms = &sms;
-	error = gn_sms_send(&data, &state);
+	data->sms = &sms;
+	error = gn_sms_send(data, state);
 
 	if (error == GN_ERR_NONE) fprintf(stderr, _("Send succeeded!\n"));
 	else fprintf(stderr, _("SMS Send failed (%s)\n"), gn_error_print(error));
@@ -1946,7 +1923,7 @@ static int getlogo(int argc, char *argv[])
 {
 	gn_bmp bitmap;
 	gn_error error;
-	gn_phone *info = &state.driver.phone;
+	gn_phone *info = &state->driver.phone;
 
 	memset(&bitmap, 0, sizeof(gn_bmp));
 	bitmap.type = set_bitmap_type(argv[0]);
@@ -1961,9 +1938,9 @@ static int getlogo(int argc, char *argv[])
 	}
 
 	if (bitmap.type != GN_BMP_None) {
-		data.bitmap = &bitmap;
+		data->bitmap = &bitmap;
 
-		error = gn_sm_functions(GN_OP_GetBitmap, &data, &state);
+		error = gn_sm_functions(GN_OP_GetBitmap, data, state);
 
 		gn_bmp_print(&bitmap, stderr);
 		switch (error) {
@@ -2069,14 +2046,13 @@ static int setlogo(int argc, char *argv[])
 	gn_bmp bitmap, oldbit;
 	gn_network_info networkinfo;
 	gn_error error = GN_ERR_NOTSUPPORTED;
-	gn_phone *phone = &state.driver.phone;
-	gn_data data;
+	gn_phone *phone = &state->driver.phone;
 	bool ok = true;
 	int i;
 
-	gn_data_clear(&data);
-	data.bitmap = &bitmap;
-	data.network_info = &networkinfo;
+	gn_data_clear(data);
+	data->bitmap = &bitmap;
+	data->network_info = &networkinfo;
 
 	memset(&bitmap.text, 0, sizeof(bitmap.text));
 
@@ -2092,10 +2068,10 @@ static int setlogo(int argc, char *argv[])
 			
 		memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
 		if (argc < 3)
-			if (gn_sm_functions(GN_OP_GetNetworkInfo, &data, &state) == GN_ERR_NONE)
+			if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE)
 				strncpy(bitmap.netcode, networkinfo.network_code, sizeof(bitmap.netcode) - 1);
 
-		if (!strncmp(state.driver.phone.models, "6510", 4))
+		if (!strncmp(state->driver.phone.models, "6510", 4))
 			gn_bmp_resize(&bitmap, GN_BMP_NewOperatorLogo, phone);
 		else
 			gn_bmp_resize(&bitmap, GN_BMP_OperatorLogo, phone);
@@ -2121,8 +2097,8 @@ static int setlogo(int argc, char *argv[])
 			dprintf("%i \n", bitmap.number);
 			oldbit.type = GN_BMP_CallerLogo;
 			oldbit.number = bitmap.number;
-			data.bitmap = &oldbit;
-			if (gn_sm_functions(GN_OP_GetBitmap, &data, &state) == GN_ERR_NONE) {
+			data->bitmap = &oldbit;
+			if (gn_sm_functions(GN_OP_GetBitmap, data, state) == GN_ERR_NONE) {
 				/* We have to get the old name and ringtone!! */
 				bitmap.ringtone = oldbit.ringtone;
 				strncpy(bitmap.text, oldbit.text, sizeof(bitmap.text) - 1);
@@ -2135,15 +2111,15 @@ static int setlogo(int argc, char *argv[])
 		return -1;
 	}
 
-	data.bitmap = &bitmap;
-	error = gn_sm_functions(GN_OP_SetBitmap, &data, &state);
+	data->bitmap = &bitmap;
+	error = gn_sm_functions(GN_OP_SetBitmap, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
 		oldbit.type = bitmap.type;
 		oldbit.number = bitmap.number;
-		data.bitmap = &oldbit;
-		if (gn_sm_functions(GN_OP_GetBitmap, &data, &state) == GN_ERR_NONE) {
+		data->bitmap = &oldbit;
+		if (gn_sm_functions(GN_OP_GetBitmap, data, state) == GN_ERR_NONE) {
 			switch (bitmap.type) {
 			case GN_BMP_WelcomeNoteText:
 			case GN_BMP_DealerNoteText:
@@ -2166,16 +2142,16 @@ static int setlogo(int argc, char *argv[])
 					 */
 
 					strcpy(oldbit.text, "!");
-					data.bitmap = &oldbit;
-					gn_sm_functions(GN_OP_SetBitmap, &data, &state);
-					gn_sm_functions(GN_OP_GetBitmap, &data, &state);
+					data->bitmap = &oldbit;
+					gn_sm_functions(GN_OP_SetBitmap, data, state);
+					gn_sm_functions(GN_OP_GetBitmap, data, state);
 					if (oldbit.text[0] != '!') {
 						fprintf(stderr, _("SIM card and PIN is required\n"));
 					} else {
-						data.bitmap = &bitmap;
-						gn_sm_functions(GN_OP_SetBitmap, &data, &state);
-						data.bitmap = &oldbit;
-						gn_sm_functions(GN_OP_GetBitmap, &data, &state);
+						data->bitmap = &bitmap;
+						gn_sm_functions(GN_OP_SetBitmap, data, state);
+						data->bitmap = &oldbit;
+						gn_sm_functions(GN_OP_GetBitmap, data, state);
 						fprintf(stderr, _("too long, truncated to \"%s\" (length %i)\n"),oldbit.text,strlen(oldbit.text));
 					}
 					ok = false;
@@ -2220,7 +2196,6 @@ static int gettodo(int argc, char *argv[])
 {
 	gn_todo_list	todolist;
 	gn_todo		todo;
-	gn_data		data;
 	gn_error	error = GN_ERR_NONE;
 	bool		vcal = false;
 	int		i, first_location, last_location;
@@ -2257,11 +2232,11 @@ static int gettodo(int argc, char *argv[])
 	for (i = first_location; i <= last_location; i++) {
 		todo.location = i;
 
-		gn_data_clear(&data);
-		data.todo = &todo;
-		data.todo_list = &todolist;
+		gn_data_clear(data);
+		data->todo = &todo;
+		data->todo_list = &todolist;
 
-		error = gn_sm_functions(GN_OP_GetToDo, &data, &state);
+		error = gn_sm_functions(GN_OP_GetToDo, data, state);
 		switch (error) {
 		case GN_ERR_NONE:
 			if (vcal) {
@@ -2299,13 +2274,12 @@ static int gettodo(int argc, char *argv[])
 static int writetodo(char *argv[])
 {
 	gn_todo todo;
-	gn_data data;
 	gn_error error;
 	int location;
 	FILE *f;
 
-	gn_data_clear(&data);
-	data.todo = &todo;
+	gn_data_clear(data);
+	data->todo = &todo;
 
 	f = fopen(argv[0], "r");
 	if (!f) {
@@ -2334,11 +2308,11 @@ static int writetodo(char *argv[])
 		return error;
 	}
 
-	error = gn_sm_functions(GN_OP_WriteToDo, &data, &state);
+	error = gn_sm_functions(GN_OP_WriteToDo, data, state);
 
 	if (error == GN_ERR_NONE) {
 		fprintf(stderr, _("Successfully written!\n"));
-		fprintf(stderr, _("Priority %d. %s\n"), data.todo->priority, data.todo->text);
+		fprintf(stderr, _("Priority %d. %s\n"), data->todo->priority, data->todo->text);
 	} else
 		fprintf(stderr, _("Failed to write todo note: %s\n"), gn_error_print(error));
 	return error;
@@ -2347,12 +2321,11 @@ static int writetodo(char *argv[])
 /* Deleting all ToDo notes */
 static int deletealltodos()
 {
-	gn_data data;
 	gn_error error;
 
-	gn_data_clear(&data);
+	gn_data_clear(data);
 
-	error = gn_sm_functions(GN_OP_DeleteAllToDos, &data, &state);
+	error = gn_sm_functions(GN_OP_DeleteAllToDos, data, state);
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Successfully deleted all ToDo notes!\n"));
 	else
@@ -2365,7 +2338,6 @@ static int getcalendarnote(int argc, char *argv[])
 {
 	gn_calnote_list		calnotelist;
 	gn_calnote		calnote;
-	gn_data			data;
 	gn_error		error = GN_ERR_NONE;
 	int			i, first_location, last_location;
 	bool			vcal = false;
@@ -2403,11 +2375,11 @@ static int getcalendarnote(int argc, char *argv[])
 		memset(&calnotelist, 0, sizeof(calnotelist));
 		calnote.location = i;
 
-		gn_data_clear(&data);
-		data.calnote = &calnote;
-		data.calnote_list = &calnotelist;
+		gn_data_clear(data);
+		data->calnote = &calnote;
+		data->calnote_list = &calnotelist;
 
-		error = gn_sm_functions(GN_OP_GetCalendarNote, &data, &state);
+		error = gn_sm_functions(GN_OP_GetCalendarNote, data, state);
 
 		if (error == GN_ERR_NONE) {
 			if (vcal) {
@@ -2525,14 +2497,13 @@ static int getcalendarnote(int argc, char *argv[])
 static int writecalendarnote(char *argv[])
 {
 	gn_calnote calnote;
-	gn_data data;
 	gn_error error;
 	int location;
 	FILE *f;
 
 	memset(&calnote, 0, sizeof(calnote));
-	gn_data_clear(&data);
-	data.calnote = &calnote;
+	gn_data_clear(data);
+	data->calnote = &calnote;
 
 	f = fopen(argv[0], "r");
 	if (f == NULL) {
@@ -2562,7 +2533,7 @@ static int writecalendarnote(char *argv[])
 		return error;
 	}
 	
-	error = gn_sm_functions(GN_OP_WriteCalendarNote, &data, &state);
+	error = gn_sm_functions(GN_OP_WriteCalendarNote, data, state);
 
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Successfully written!\n"));
@@ -2577,13 +2548,12 @@ static int deletecalendarnote(int argc, char *argv[])
 	gn_calnote calnote;
 	gn_calnote_list clist;
 	int i, first_location, last_location;
-	gn_data data;
 	gn_error error = GN_ERR_NONE;
 
-	gn_data_clear(&data);
+	gn_data_clear(data);
 	memset(&calnote, 0, sizeof(gn_calnote));
-	data.calnote = &calnote;
-	data.calnote_list = &clist;
+	data->calnote = &calnote;
+	data->calnote_list = &clist;
 
 	first_location = last_location = atoi(argv[0]);
 	if ((argc > 1) && (argv[1][0] != '-')) {
@@ -2599,7 +2569,7 @@ static int deletecalendarnote(int argc, char *argv[])
 
 		calnote.location = i;
 
-		error = gn_sm_functions(GN_OP_DeleteCalendarNote, &data, &state);
+		error = gn_sm_functions(GN_OP_DeleteCalendarNote, data, state);
 		if (error == GN_ERR_NONE)
 			fprintf(stderr, _("Calendar note deleted.\n"));
 		else {
@@ -2650,9 +2620,9 @@ static int setdatetime(int argc, char *argv[])
 			date.year = date.year + 2000;
 	}
 
-	gn_data_clear(&data);
-	data.datetime = &date;
-	error = gn_sm_functions(GN_OP_SetDateTime, &data, &state);
+	gn_data_clear(data);
+	data->datetime = &date;
+	error = gn_sm_functions(GN_OP_SetDateTime, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -2668,14 +2638,13 @@ static int setdatetime(int argc, char *argv[])
 /* In this mode we receive the date and time from mobile phone. */
 static int getdatetime(void)
 {
-	gn_data	data;
 	gn_timestamp	date_time;
 	gn_error	error;
 
-	gn_data_clear(&data);
-	data.datetime = &date_time;
+	gn_data_clear(data);
+	data->datetime = &date_time;
 
-	error = gn_sm_functions(GN_OP_GetDateTime, &data, &state);
+	error = gn_sm_functions(GN_OP_GetDateTime, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -2708,10 +2677,10 @@ static int setalarm(int argc, char *argv[])
 		alarm.enabled = false;
 	}
 
-	gn_data_clear(&data);
-	data.alarm = &alarm;
+	gn_data_clear(data);
+	data->alarm = &alarm;
 
-	error = gn_sm_functions(GN_OP_SetAlarm, &data, &state);
+	error = gn_sm_functions(GN_OP_SetAlarm, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -2730,10 +2699,10 @@ static int getalarm(void)
 	gn_error error;
 	gn_calnote_alarm alarm;
 
-	gn_data_clear(&data);
-	data.alarm = &alarm;
+	gn_data_clear(data);
+	data->alarm = &alarm;
 
-	error = gn_sm_functions(GN_OP_GetAlarm, &data, &state);
+	error = gn_sm_functions(GN_OP_GetAlarm, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -2824,7 +2793,6 @@ static int monitormode(int argc, char *argv[])
 	gn_power_source powersource = -1;
 	gn_rf_unit rfunit = GN_RF_Arbitrary;
 	gn_battery_unit battunit = GN_BU_Arbitrary;
-	gn_data data;
 	gn_error error;
 	int i, d;
 
@@ -2844,7 +2812,7 @@ static int monitormode(int argc, char *argv[])
 	/*
 	char Number[20];
 	*/
-	gn_data_clear(&data);
+	gn_data_clear(data);
 
 	/* We do not want to monitor serial line forever - press Ctrl+C to stop the
 	   monitoring mode. */
@@ -2855,22 +2823,22 @@ static int monitormode(int argc, char *argv[])
 	/* Loop here indefinitely - allows you to see messages from GSM code in
 	   response to unknown messages etc. The loops ends after pressing the
 	   Ctrl+C. */
-	data.rf_unit = &rfunit;
-	data.rf_level = &rflevel;
-	data.battery_unit = &battunit;
-	data.battery_level = &batterylevel;
-	data.power_source = &powersource;
-	data.sms_status = &smsstatus;
-	data.network_info = &networkinfo;
-	data.on_cell_broadcast = storecbmessage;
-	data.call_notification = callnotifier;
+	data->rf_unit = &rfunit;
+	data->rf_level = &rflevel;
+	data->battery_unit = &battunit;
+	data->battery_level = &batterylevel;
+	data->power_source = &powersource;
+	data->sms_status = &smsstatus;
+	data->network_info = &networkinfo;
+	data->on_cell_broadcast = storecbmessage;
+	data->call_notification = callnotifier;
 
-	gn_sm_functions(GN_OP_SetCallNotification, &data, &state);
+	gn_sm_functions(GN_OP_SetCallNotification, data, state);
 
 	memset(cb_queue, 0, sizeof(cb_queue));
 	cb_ridx = 0;
 	cb_widx = 0;
-	gn_sm_functions(GN_OP_SetCellBroadcast, &data, &state);
+	gn_sm_functions(GN_OP_SetCellBroadcast, data, state);
 
 	if (argc)
 		d = !strcasecmp(argv[0], "once") ? -1 : atoi(argv[0]);
@@ -2878,58 +2846,58 @@ static int monitormode(int argc, char *argv[])
 		d = 1;
 
 	while (!bshutdown) {
-		if (gn_sm_functions(GN_OP_GetRFLevel, &data, &state) == GN_ERR_NONE)
+		if (gn_sm_functions(GN_OP_GetRFLevel, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("RFLevel: %d\n"), (int)rflevel);
 
-		if (gn_sm_functions(GN_OP_GetBatteryLevel, &data, &state) == GN_ERR_NONE)
+		if (gn_sm_functions(GN_OP_GetBatteryLevel, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("Battery: %d\n"), (int)batterylevel);
 
-		if (gn_sm_functions(GN_OP_GetPowersource, &data, &state) == GN_ERR_NONE)
+		if (gn_sm_functions(GN_OP_GetPowersource, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("Power Source: %s\n"), (powersource == GN_PS_ACDC) ? _("AC/DC") : _("battery"));
 
-		data.memory_status = &simmemorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &simmemorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("SIM: Used %d, Free %d\n"), simmemorystatus.used, simmemorystatus.free);
 
-		data.memory_status = &phonememorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &phonememorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("Phone: Used %d, Free %d\n"), phonememorystatus.used, phonememorystatus.free);
 
-		data.memory_status = &dc_memorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &dc_memorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("DC: Used %d, Free %d\n"), dc_memorystatus.used, dc_memorystatus.free);
 
-		data.memory_status = &en_memorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &en_memorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("EN: Used %d, Free %d\n"), en_memorystatus.used, en_memorystatus.free);
 
-		data.memory_status = &fd_memorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &fd_memorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("FD: Used %d, Free %d\n"), fd_memorystatus.used, fd_memorystatus.free);
 
-		data.memory_status = &ld_memorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &ld_memorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("LD: Used %d, Free %d\n"), ld_memorystatus.used, ld_memorystatus.free);
 
-		data.memory_status = &mc_memorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &mc_memorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("MC: Used %d, Free %d\n"), mc_memorystatus.used, mc_memorystatus.free);
 
-		data.memory_status = &on_memorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &on_memorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("ON: Used %d, Free %d\n"), on_memorystatus.used, on_memorystatus.free);
 
-		data.memory_status = &rc_memorystatus;
-		if (gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state) == GN_ERR_NONE)
+		data->memory_status = &rc_memorystatus;
+		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("RC: Used %d, Free %d\n"), rc_memorystatus.used, rc_memorystatus.free);
 
-		if (gn_sm_functions(GN_OP_GetSMSStatus, &data, &state) == GN_ERR_NONE)
+		if (gn_sm_functions(GN_OP_GetSMSStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("SMS Messages: Unread %d, Number %d\n"), smsstatus.unread, smsstatus.number);
 
-		if (gn_sm_functions(GN_OP_GetNetworkInfo, &data, &state) == GN_ERR_NONE)
+		if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("Network: %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"), gn_network_name_get(networkinfo.network_code), gn_country_name_get(networkinfo.network_code), networkinfo.LAC[0], networkinfo.LAC[1], networkinfo.cell_id[0], networkinfo.cell_id[1]);
 
-		gn_call_check_active(&state);
+		gn_call_check_active(state);
 		for (i = 0; i < GN_CALL_MAX_PARALLEL; i++)
 			displaycall(i);
 
@@ -2940,8 +2908,8 @@ static int monitormode(int argc, char *argv[])
 		sleep(d);
 	}
 
-	data.on_cell_broadcast = NULL;
-	error = gn_sm_functions(GN_OP_SetCellBroadcast, &data, &state);
+	data->on_cell_broadcast = NULL;
+	error = gn_sm_functions(GN_OP_SetCellBroadcast, data, state);
 
 	fprintf(stderr, _("Leaving monitor mode...\n"));
 
@@ -3046,16 +3014,15 @@ static void console_raw(void)
 
 static int displayoutput(void)
 {
-	gn_data data;
 	gn_error error;
 	gn_display_output output;
 
-	gn_data_clear(&data);
+	gn_data_clear(data);
 	memset(&output, 0, sizeof(output));
 	output.output_fn = newoutputfn;
-	data.display_output = &output;
+	data->display_output = &output;
 
-	error = gn_sm_functions(GN_OP_DisplayOutput, &data, &state);
+	error = gn_sm_functions(GN_OP_DisplayOutput, data, state);
 	console_raw();
 #ifndef WIN32
 	fcntl(fileno(stdin), F_SETFL, O_NONBLOCK);
@@ -3080,15 +3047,15 @@ static int displayoutput(void)
 					fprintf(stdout, _("Key press simulation failed.\n"));
 				memset(buf, 0, 102);
 			}*/
-			gn_sm_loop(1, &state);
-			gn_sm_functions(GN_OP_PollDisplay, &data, &state);
+			gn_sm_loop(1, state);
+			gn_sm_functions(GN_OP_PollDisplay, data, state);
 		}
 		fprintf (stderr, _("Shutting down\n"));
 
 		fprintf (stderr, _("Leaving display monitor mode...\n"));
 
 		output.output_fn = NULL;
-		error = gn_sm_functions(GN_OP_DisplayOutput, &data, &state);
+		error = gn_sm_functions(GN_OP_DisplayOutput, data, state);
 		if (error != GN_ERR_NONE)
 			fprintf (stderr, _("Error: %s\n"), gn_error_print(error));
 		break;
@@ -3107,7 +3074,6 @@ static int getprofile(int argc, char *argv[])
 	int start, stop, i;
 	gn_profile p;
 	gn_error error = GN_ERR_NOTSUPPORTED;
-	gn_data data;
 
 	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
 	char model[64];
@@ -3133,15 +3099,15 @@ static int getprofile(int argc, char *argv[])
 		}
 	}
 
-	gn_data_clear(&data);
-	data.model = model;
-	while (gn_sm_functions(GN_OP_GetModel, &data, &state) != GN_ERR_NONE)
+	gn_data_clear(data);
+	data->model = model;
+	while (gn_sm_functions(GN_OP_GetModel, data, state) != GN_ERR_NONE)
 		sleep(1);
 
 	p.number = 0;
-	gn_data_clear(&data);
-	data.profile = &p;
-	error = gn_sm_functions(GN_OP_GetProfile, &data, &state);
+	gn_data_clear(data);
+	data->profile = &p;
+	error = gn_sm_functions(GN_OP_GetProfile, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -3182,14 +3148,14 @@ static int getprofile(int argc, char *argv[])
 		stop = max_profiles - 1;
 	}
 
-	gn_data_clear(&data);
-	data.profile = &p;
+	gn_data_clear(data);
+	data->profile = &p;
 
 	for (i = start; i <= stop; i++) {
 		p.number = i;
 
 		if (p.number != 0) {
-			error = gn_sm_functions(GN_OP_GetProfile, &data, &state);
+			error = gn_sm_functions(GN_OP_GetProfile, data, state);
 			if (error != GN_ERR_NONE) {
 				fprintf(stderr, _("Cannot get profile %d\n"), i);
 				return error;
@@ -3234,11 +3200,10 @@ static int setprofile()
 	int n;
 	gn_profile p;
 	gn_error error = GN_ERR_NONE;
-	gn_data data;
 	char line[256], ch;
 
-	gn_data_clear(&data);
-	data.profile = &p;
+	gn_data_clear(data);
+	data->profile = &p;
 
 	while (fgets(line, sizeof(line), stdin)) {
 		n = strlen(line);
@@ -3256,7 +3221,7 @@ static int setprofile()
 			return GN_ERR_UNKNOWN;
 		}
 
-		error = gn_sm_functions(GN_OP_SetProfile, &data, &state);
+		error = gn_sm_functions(GN_OP_SetProfile, data, state);
 		if (error != GN_ERR_NONE) {
 			fprintf(stderr, _("Cannot set profile: %s\n"), gn_error_print(error));
 			return error;
@@ -3271,18 +3236,17 @@ static int getactiveprofile()
 {
 	gn_profile p;
 	gn_error error;
-	gn_data data;
 
-	gn_data_clear(&data);
-	data.profile = &p;
+	gn_data_clear(data);
+	data->profile = &p;
 
-	error = gn_sm_functions(GN_OP_GetActiveProfile, &data, &state);
+	error = gn_sm_functions(GN_OP_GetActiveProfile, data, state);
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Cannot get active profile: %s\n"), gn_error_print(error));
 		return error;
 	}
 
-	error = gn_sm_functions(GN_OP_GetProfile, &data, &state);
+	error = gn_sm_functions(GN_OP_GetProfile, data, state);
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Cannot get profile %d\n"), p.number);
 	else
@@ -3296,13 +3260,12 @@ static int setactiveprofile(int argc, char *argv[])
 {
 	gn_profile p;
 	gn_error error;
-	gn_data data;
 
-	gn_data_clear(&data);
-	data.profile = &p;
+	gn_data_clear(data);
+	data->profile = &p;
 	p.number = atoi(argv[0]);
 
-	error = gn_sm_functions(GN_OP_SetActiveProfile, &data, &state);
+	error = gn_sm_functions(GN_OP_SetActiveProfile, data, state);
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Cannot set active profile to %d: %s\n"), p.number, gn_error_print(error));
 	return error;
@@ -3359,9 +3322,9 @@ static int getphonebook(int argc, char *argv[])
 	}
 
 	if (end_entry == INT_MAX) {
-		data.memory_status = &memstat;
+		data->memory_status = &memstat;
 		memstat.memory_type = entry.memory_type;
-		if ((error = gn_sm_functions(GN_OP_GetMemoryStatus, &data, &state)) == GN_ERR_NONE) {
+		if ((error = gn_sm_functions(GN_OP_GetMemoryStatus, data, state)) == GN_ERR_NONE) {
 			num_entries = memstat.used;
 		}
 	}
@@ -3371,8 +3334,8 @@ static int getphonebook(int argc, char *argv[])
 	while (num_entries > 0 && count <= end_entry) {
 		entry.location = count;
 
-		data.phonebook_entry = &entry;
-		error = gn_sm_functions(GN_OP_ReadPhonebook, &data, &state);
+		data->phonebook_entry = &entry;
+		error = gn_sm_functions(GN_OP_ReadPhonebook, data, state);
 
 		switch (error) {
 			int i;
@@ -3564,16 +3527,16 @@ static int writephonebook(int argc, char *args[])
 
 		if (find_free) {
 #if 0
-			error = gn_sm_functions(GN_OP_FindFreePhonebookEntry, &data, &state);
+			error = gn_sm_functions(GN_OP_FindFreePhonebookEntry, data, state);
 			if (error == GN_ERR_NOTIMPLEMENTED) {
 #endif
 			for (i = 1; ; i++) {
 				gn_phonebook_entry aux;
 
 				memcpy(&aux, &entry, sizeof(gn_phonebook_entry));
-				data.phonebook_entry = &aux;
-				data.phonebook_entry->location = i;
-				error = gn_sm_functions(GN_OP_ReadPhonebook, &data, &state);
+				data->phonebook_entry = &aux;
+				data->phonebook_entry->location = i;
+				error = gn_sm_functions(GN_OP_ReadPhonebook, data, state);
 				if (error != GN_ERR_NONE && error != GN_ERR_EMPTYLOCATION) {
 					break;
 				}
@@ -3596,8 +3559,8 @@ static int writephonebook(int argc, char *args[])
 			gn_phonebook_entry aux;
 
 			memcpy(&aux, &entry, sizeof(gn_phonebook_entry));
-			data.phonebook_entry = &aux;
-			error = gn_sm_functions(GN_OP_ReadPhonebook, &data, &state);
+			data->phonebook_entry = &aux;
+			error = gn_sm_functions(GN_OP_ReadPhonebook, data, state);
 
 			if (error == GN_ERR_NONE || error == GN_ERR_EMPTYLOCATION) {
 				if (!aux.empty && error != GN_ERR_EMPTYLOCATION) {
@@ -3627,8 +3590,8 @@ static int writephonebook(int argc, char *args[])
 
 		/* Do write and report success/failure. */
 		gn_phonebook_entry_sanitize(&entry);
-		data.phonebook_entry = &entry;
-		error = gn_sm_functions(GN_OP_WritePhonebook, &data, &state);
+		data->phonebook_entry = &entry;
+		error = gn_sm_functions(GN_OP_WritePhonebook, data, state);
 
 		if (error == GN_ERR_NONE) {
 			fprintf (stderr, 
@@ -3678,8 +3641,8 @@ static int deletephonebook(int argc, char *argv[])
 	for (i = first_location; i <= last_location; i++) {
 		entry.location = i;
 		entry.empty = true;
-		data.phonebook_entry = &entry;
-		error = gn_sm_functions(GN_OP_DeletePhonebook, &data, &state);
+		data->phonebook_entry = &entry;
+		error = gn_sm_functions(GN_OP_DeletePhonebook, data, state);
 		switch (error) {
 		case GN_ERR_NONE:
 			fprintf (stderr, _("Phonebook entry removed: memory type: %s, loc: %d\n"), 
@@ -3701,15 +3664,14 @@ static int deletephonebook(int argc, char *argv[])
 static int getwapbookmark(char *number)
 {
 	gn_wap_bookmark	wapbookmark;
-	gn_data	data;
 	gn_error	error;
 
 	wapbookmark.location = atoi(number);
 
-	gn_data_clear(&data);
-	data.wap_bookmark = &wapbookmark;
+	gn_data_clear(data);
+	data->wap_bookmark = &wapbookmark;
 
-	error = gn_sm_functions(GN_OP_GetWAPBookmark, &data, &state);
+	error = gn_sm_functions(GN_OP_GetWAPBookmark, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -3730,19 +3692,18 @@ static int getwapbookmark(char *number)
 static int writewapbookmark(int nargc, char *nargv[])
 {
 	gn_wap_bookmark	wapbookmark;
-	gn_data		data;
 	gn_error	error;
 
 
-	gn_data_clear(&data);
-	data.wap_bookmark = &wapbookmark;
+	gn_data_clear(data);
+	data->wap_bookmark = &wapbookmark;
 
 	if (nargc != 2) usage(stderr, -1);
 
 	snprintf(&wapbookmark.name[0], WAP_NAME_MAX_LENGTH, nargv[0]);
 	snprintf(&wapbookmark.URL[0], WAP_URL_MAX_LENGTH, nargv[1]);
 
-	error = gn_sm_functions(GN_OP_WriteWAPBookmark, &data, &state);
+	error = gn_sm_functions(GN_OP_WriteWAPBookmark, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -3760,15 +3721,14 @@ static int writewapbookmark(int nargc, char *nargv[])
 static int deletewapbookmark(char *number)
 {
 	gn_wap_bookmark	wapbookmark;
-	gn_data		data;
 	gn_error	error;
 
 	wapbookmark.location = atoi(number);
 
-	gn_data_clear(&data);
-	data.wap_bookmark = &wapbookmark;
+	gn_data_clear(data);
+	data->wap_bookmark = &wapbookmark;
 
-	error = gn_sm_functions(GN_OP_DeleteWAPBookmark, &data, &state);
+	error = gn_sm_functions(GN_OP_DeleteWAPBookmark, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -3786,7 +3746,6 @@ static int deletewapbookmark(char *number)
 static int getwapsetting(int argc, char *argv[])
 {
 	gn_wap_setting	wapsetting;
-	gn_data		data;
 	gn_error	error;
 	bool		raw = false;
 
@@ -3802,10 +3761,10 @@ static int getwapsetting(int argc, char *argv[])
 		break;
 	}
 
-	gn_data_clear(&data);
-	data.wap_setting = &wapsetting;
+	gn_data_clear(data);
+	data->wap_setting = &wapsetting;
 
-	error = gn_sm_functions(GN_OP_GetWAPSetting, &data, &state);
+	error = gn_sm_functions(GN_OP_GetWAPSetting, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -3973,11 +3932,10 @@ static int writewapsetting()
 	int n;
 	gn_wap_setting wapsetting;
 	gn_error error = GN_ERR_NONE;
-	gn_data data;
 	char line[1000];
 
-	gn_data_clear(&data);
-	data.wap_setting = &wapsetting;
+	gn_data_clear(data);
+	data->wap_setting = &wapsetting;
 
 	while (fgets(line, sizeof(line), stdin)) {
 		n = strlen(line);
@@ -4003,7 +3961,7 @@ static int writewapsetting()
 			return GN_ERR_UNKNOWN;
 		}
 
-		error = gn_sm_functions(GN_OP_WriteWAPSetting, &data, &state);
+		error = gn_sm_functions(GN_OP_WriteWAPSetting, data, state);
 		if (error != GN_ERR_NONE) 
 			fprintf(stderr, _("Cannot write WAP setting: %s\n"), gn_error_print(error));
 	}
@@ -4014,15 +3972,14 @@ static int writewapsetting()
 static int activatewapsetting(char *number)
 {
 	gn_wap_setting	wapsetting;
-	gn_data		data;
 	gn_error	error;
 
 	wapsetting.location = atoi(number);
 
-	gn_data_clear(&data);
-	data.wap_setting = &wapsetting;
+	gn_data_clear(data);
+	data->wap_setting = &wapsetting;
 
-	error = gn_sm_functions(GN_OP_ActivateWAPSetting, &data, &state);
+	error = gn_sm_functions(GN_OP_ActivateWAPSetting, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -4040,15 +3997,14 @@ static int activatewapsetting(char *number)
 static int getspeeddial(char *number)
 {
 	gn_speed_dial	speeddial;
-	gn_data		data;
 	gn_error	error;
 
 	speeddial.number = atoi(number);
 
-	gn_data_clear(&data);
-	data.speed_dial = &speeddial;
+	gn_data_clear(data);
+	data->speed_dial = &speeddial;
 
-	error = gn_sm_functions(GN_OP_GetSpeedDial, &data, &state);
+	error = gn_sm_functions(GN_OP_GetSpeedDial, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -4066,12 +4022,11 @@ static int getspeeddial(char *number)
 static int setspeeddial(char *argv[])
 {
 	gn_speed_dial entry;
-	gn_data data;
 	gn_error error;
 	char *memory_type_string;
 
-	gn_data_clear(&data);
-	data.speed_dial = &entry;
+	gn_data_clear(data);
+	data->speed_dial = &entry;
 
 	/* Handle command line args that set type, start and end locations. */
 
@@ -4089,7 +4044,7 @@ static int setspeeddial(char *argv[])
 	entry.number = atoi(argv[0]);
 	entry.location = atoi(argv[2]);
 
-	error = gn_sm_functions(GN_OP_SetSpeedDial, &data, &state);
+	error = gn_sm_functions(GN_OP_SetSpeedDial, data, state);
 
 	switch (error) {
 	case GN_ERR_NONE:
@@ -4108,12 +4063,11 @@ static int getdisplaystatus(void)
 {
 	gn_error error = GN_ERR_INTERNALERROR;
 	int status;
-	gn_data data;
 
-	gn_data_clear(&data);
-	data.display_status = &status;
+	gn_data_clear(data);
+	data->display_status = &status;
 
-	error = gn_sm_functions(GN_OP_GetDisplayStatus, &data, &state);
+	error = gn_sm_functions(GN_OP_GetDisplayStatus, data, state);
 	if (error == GN_ERR_NONE) printdisplaystatus(status);
 
 	return error;
@@ -4138,9 +4092,9 @@ static int netmonitor(char *m)
 
 	nm.field = mode;
 	memset(&nm.screen, 0, 50);
-	data.netmonitor = &nm;
+	data->netmonitor = &nm;
 
-	error = gn_sm_functions(GN_OP_NetMonitor, &data, &state);
+	error = gn_sm_functions(GN_OP_NetMonitor, data, state);
 
 	if (nm.screen) fprintf(stdout, "%s\n", nm.screen);
 
@@ -4154,10 +4108,10 @@ static int identify(void)
 	/* Hopefully 64 is enough */
 	char imei[64], model[64], rev[64], manufacturer[64];
 
-	data.manufacturer = manufacturer;
-	data.model = model;
-	data.revision = rev;
-	data.imei = imei;
+	data->manufacturer = manufacturer;
+	data->model = model;
+	data->revision = rev;
+	data->imei = imei;
 
 	/* Retrying is bad idea: what if function is simply not implemented?
 	   Anyway let's wait 2 seconds for the right packet from the phone. */
@@ -4168,7 +4122,7 @@ static int identify(void)
 	strcpy(model, _("(unknown)"));
 	strcpy(rev, _("(unknown)"));
 
-	error = gn_sm_functions(GN_OP_Identify, &data, &state);
+	error = gn_sm_functions(GN_OP_Identify, data, state);
 
 	fprintf(stdout, _("IMEI         : %s\n"), imei);
 	fprintf(stdout, _("Manufacturer : %s\n"), manufacturer);
@@ -4180,31 +4134,31 @@ static int identify(void)
 
 static int senddtmf(char *string)
 {
-	gn_data_clear(&data);
-	data.dtmf_string = string;
+	gn_data_clear(data);
+	data->dtmf_string = string;
 
-	return gn_sm_functions(GN_OP_SendDTMF, &data, &state);
+	return gn_sm_functions(GN_OP_SendDTMF, data, state);
 }
 
 /* Resets the phone */
 static int reset(char *type)
 {
-	gn_data_clear(&data);
-	data.reset_type = 0x03;
+	gn_data_clear(data);
+	data->reset_type = 0x03;
 
 	if (type) {
 		if (!strcmp(type, "soft"))
-			data.reset_type = 0x03;
+			data->reset_type = 0x03;
 		else
 			if (!strcmp(type, "hard")) {
-				data.reset_type = 0x04;
+				data->reset_type = 0x04;
 			} else {
 				fprintf(stderr, _("What kind of reset do you want??\n"));
 				return -1;
 			}
 	}
 
-	return gn_sm_functions(GN_OP_Reset, &data, &state);
+	return gn_sm_functions(GN_OP_Reset, data, state);
 }
 
 /* pmon allows fbus code to run in a passive state - it doesn't worry about
@@ -4215,7 +4169,7 @@ static int pmon(void)
 	gn_error error;
 
 	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(&state);
+	error = gn_gsm_initialise(state);
 
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
@@ -4253,20 +4207,20 @@ static int sendringtone(int argc, char *argv[])
 
 	/* Get the SMS Center */
 	if (!sms.smsc.number[0]) {
-		data.message_center = calloc(1, sizeof(gn_sms_message_center));
-		data.message_center->id = 1;
-		if (gn_sm_functions(GN_OP_GetSMSCenter, &data, &state) == GN_ERR_NONE) {
-			strcpy(sms.smsc.number, data.message_center->smsc.number);
-			sms.smsc.type = data.message_center->smsc.type;
+		data->message_center = calloc(1, sizeof(gn_sms_message_center));
+		data->message_center->id = 1;
+		if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
+			strcpy(sms.smsc.number, data->message_center->smsc.number);
+			sms.smsc.type = data->message_center->smsc.type;
 		}
-		free(data.message_center);
+		free(data->message_center);
 	}
 
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
 
 	/* Send the message. */
-	data.sms = &sms;
-	error = gn_sms_send(&data, &state);
+	data->sms = &sms;
+	error = gn_sms_send(data, state);
 
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Send succeeded!\n"));
@@ -4309,9 +4263,9 @@ static int getringtone(int argc, char *argv[])
 	memset(&ringtone, 0, sizeof(ringtone));
 	rawdata.data = buff;
 	rawdata.length = sizeof(buff);
-	gn_data_clear(&data);
-	data.ringtone = &ringtone;
-	data.raw_data = &rawdata;
+	gn_data_clear(data);
+	data->ringtone = &ringtone;
+	data->raw_data = &rawdata;
 
 	if (argc <= optind) {
 		usage(stderr, -1);
@@ -4326,9 +4280,9 @@ static int getringtone(int argc, char *argv[])
 	}
 
 	if (raw)
-		error = gn_sm_functions(GN_OP_GetRawRingtone, &data, &state);
+		error = gn_sm_functions(GN_OP_GetRawRingtone, data, state);
 	else
-		error = gn_sm_functions(GN_OP_GetRingtone, &data, &state);
+		error = gn_sm_functions(GN_OP_GetRingtone, data, state);
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Getting ringtone %d failed: %s\n"), ringtone.location, gn_error_print(error));
 		return error;
@@ -4392,9 +4346,9 @@ static int setringtone(int argc, char *argv[])
 	memset(&ringtone, 0, sizeof(ringtone));
 	rawdata.data = buff;
 	rawdata.length = sizeof(buff);
-	gn_data_clear(&data);
-	data.ringtone = &ringtone;
-	data.raw_data = &rawdata;
+	gn_data_clear(data);
+	data->ringtone = &ringtone;
+	data->raw_data = &rawdata;
 
 	if (argc <= optind) {
 		usage(stderr, -1);
@@ -4417,7 +4371,7 @@ static int setringtone(int argc, char *argv[])
 			snprintf(ringtone.name, sizeof(ringtone.name), "%s", name);
 		else
 			snprintf(ringtone.name, sizeof(ringtone.name), "GNOKII");
-		error = gn_sm_functions(GN_OP_SetRawRingtone, &data, &state);
+		error = gn_sm_functions(GN_OP_SetRawRingtone, data, state);
 	} else {
 		if ((error = gn_file_ringtone_read(argv[optind], &ringtone))) {
 			fprintf(stderr, _("Failed to load ringtone.\n"));
@@ -4425,7 +4379,7 @@ static int setringtone(int argc, char *argv[])
 		}
 		ringtone.location = location;
 		if (*name) snprintf(ringtone.name, sizeof(ringtone.name), "%s", name);
-		error = gn_sm_functions(GN_OP_SetRingtone, &data, &state);
+		error = gn_sm_functions(GN_OP_SetRingtone, data, state);
 	}
 
 	if (error == GN_ERR_NONE)
@@ -4471,9 +4425,9 @@ static int playringtone(int argc, char *argv[])
 
 	memset(&ringtone, 0, sizeof(ringtone));
 	memset(&tone, 0, sizeof(tone));
-	gn_data_clear(&data);
-	data.ringtone = &ringtone;
-	data.tone = &tone;
+	gn_data_clear(data);
+	data->ringtone = &ringtone;
+	data->tone = &tone;
 
 	if (argc <= optind) {
 		usage(stderr, -1);
@@ -4489,7 +4443,7 @@ static int playringtone(int argc, char *argv[])
 	gettimeofday(&t1, NULL);
 	tone.frequency = 0;
 	tone.volume = 0;
-	gn_sm_functions(GN_OP_PlayTone, &data, &state);
+	gn_sm_functions(GN_OP_PlayTone, data, state);
 	gettimeofday(&t2, NULL);
 	timersub(&t2, &t1, &dt);
 #else
@@ -4501,16 +4455,16 @@ static int playringtone(int argc, char *argv[])
 	for (i = 0; !bshutdown && i < ringtone.notes_count; i++) {
 		tone.volume = volume;
 		gn_ringtone_get_tone(&ringtone, i, &tone.frequency, &ulen);
-		if ((error = gn_sm_functions(GN_OP_PlayTone, &data, &state)) != GN_ERR_NONE) break;
+		if ((error = gn_sm_functions(GN_OP_PlayTone, data, state)) != GN_ERR_NONE) break;
 		if (ulen > 2 * dt.tv_usec + 20000)
 			usleep(ulen - 2 * dt.tv_usec - 20000);
 		tone.volume = 0;
-		if ((error = gn_sm_functions(GN_OP_PlayTone, &data, &state)) != GN_ERR_NONE) break;
+		if ((error = gn_sm_functions(GN_OP_PlayTone, data, state)) != GN_ERR_NONE) break;
 		usleep(20000);
 	}
 	tone.frequency = 0;
 	tone.volume = 0;
-	gn_sm_functions(GN_OP_PlayTone, &data, &state);
+	gn_sm_functions(GN_OP_PlayTone, data, state);
 
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Play succeeded!\n"));
@@ -4526,8 +4480,8 @@ static int ringtoneconvert(int argc, char *argv[])
 	gn_error error;
 
 	memset(&ringtone, 0, sizeof(ringtone));
-	gn_data_clear(&data);
-	data.ringtone = &ringtone;
+	gn_data_clear(data);
+	data->ringtone = &ringtone;
 
 	if (argc != 2) {
 		usage(stderr, -1);
@@ -4581,8 +4535,8 @@ static gn_error deleteringtone(int argc, char *argv[])
 	int i, start, end;
 
 	memset(&ringtone, 0, sizeof(ringtone));
-	gn_data_clear(&data);
-	data.ringtone = &ringtone;
+	gn_data_clear(data);
+	data->ringtone = &ringtone;
 
 	switch (argc) {
 	case 1:
@@ -4600,7 +4554,7 @@ static gn_error deleteringtone(int argc, char *argv[])
 
 	for (i = start; i <= end; i++) {
 		ringtone.location = i;
-		if ((error = gn_sm_functions(GN_OP_DeleteRingtone, &data, &state)) == GN_ERR_NONE)
+		if ((error = gn_sm_functions(GN_OP_DeleteRingtone, data, state)) == GN_ERR_NONE)
 			printf(_("Ringtone %d deleted\n"), i);
 		else
 			printf(_("Failed to delete ringtone %d: %s\n"), i, gn_error_print(error));
@@ -4612,9 +4566,9 @@ static gn_error deleteringtone(int argc, char *argv[])
 static int presskey(void)
 {
 	gn_error error;
-	error = gn_sm_functions(GN_OP_PressPhoneKey, &data, &state);
+	error = gn_sm_functions(GN_OP_PressPhoneKey, data, state);
 	if (error == GN_ERR_NONE)
-		error = gn_sm_functions(GN_OP_ReleasePhoneKey, &data, &state);
+		error = gn_sm_functions(GN_OP_ReleasePhoneKey, data, state);
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to press key: %s\n"), gn_error_print(error));
 	return error;
@@ -4633,12 +4587,12 @@ static int presskeysequence(void)
 			      GN_KEY_MENU, GN_KEY_NAMES};
 	unsigned char ch, *pos;
 
-	gn_data_clear(&data);
+	gn_data_clear(data);
 	console_raw();
 
 	while (read(0, &ch, 1) > 0) {
 		if ((pos = strchr(syms, toupper(ch))) != NULL)
-			data.key_code = keys[pos - syms];
+			data->key_code = keys[pos - syms];
 		else
 			continue;
 		error = presskey();
@@ -4652,7 +4606,7 @@ static int enterchar(void)
 	unsigned char ch;
 	gn_error error = GN_ERR_NONE;
 
-	gn_data_clear(&data);
+	gn_data_clear(data);
 	console_raw();
 
 	while (read(0, &ch, 1) > 0) {
@@ -4660,7 +4614,7 @@ static int enterchar(void)
 		case '\r':
 			break;
 		case '\n':
-			data.key_code = GN_KEY_MENU;
+			data->key_code = GN_KEY_MENU;
 			presskey();
 			break;
 #ifdef WIN32
@@ -4668,12 +4622,12 @@ static int enterchar(void)
 #else
 		case '\e':
 #endif
-			data.key_code = GN_KEY_NAMES;
+			data->key_code = GN_KEY_NAMES;
 			presskey();
 			break;
 		default:
-			data.character = ch;
-			error = gn_sm_functions(GN_OP_EnterChar, &data, &state);
+			data->character = ch;
+			error = gn_sm_functions(GN_OP_EnterChar, data, state);
 			if (error != GN_ERR_NONE)
 				fprintf(stderr, _("Error entering char: %s\n"), gn_error_print(error));
 			break;
@@ -4694,7 +4648,6 @@ static int divert(int argc, char **argv)
 {
 	int opt;
 	gn_call_divert cd;
-	gn_data data;
 	gn_error error;
 	struct option options[] = {
 		{ "op",      required_argument, NULL, 'o'},
@@ -4774,8 +4727,8 @@ static int divert(int argc, char **argv)
 			return -1;
 		}
 	}
-	data.call_divert = &cd;
-	error = gn_sm_functions(GN_OP_CallDivert, &data, &state);
+	data->call_divert = &cd;
+	error = gn_sm_functions(GN_OP_CallDivert, data, state);
 
 	if (error == GN_ERR_NONE) {
 		fprintf(stdout, _("Divert type: "));
@@ -4866,28 +4819,27 @@ static gn_error smsslave(gn_sms *message)
 
 static int smsreader(void)
 {
-	gn_data data;
 	gn_error error;
 
-	data.on_sms = smsslave;
-	error = gn_sm_functions(GN_OP_OnSMS, &data, &state);
+	data->on_sms = smsslave;
+	error = gn_sm_functions(GN_OP_OnSMS, data, state);
 	if (!error) {
 		/* We do not want to see texts forever - press Ctrl+C to stop. */
 		signal(SIGINT, interrupted);
 		fprintf(stderr, _("Entered sms reader mode...\n"));
 
 		while (!bshutdown) {
-			gn_sm_loop(1, &state);
+			gn_sm_loop(1, state);
 			/* Some phones may not be able to notify us, thus we give
 			   lowlevel chance to poll them */
-			error = gn_sm_functions(GN_OP_PollSMS, &data, &state);
+			error = gn_sm_functions(GN_OP_PollSMS, data, state);
 		}
 		fprintf(stderr, _("Shutting down\n"));
 
 		fprintf(stderr, _("Exiting sms reader mode...\n"));
-		data.on_sms = NULL;
+		data->on_sms = NULL;
 
-		error = gn_sm_functions(GN_OP_OnSMS, &data, &state);
+		error = gn_sm_functions(GN_OP_OnSMS, data, state);
 		if (error != GN_ERR_NONE)
 			fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 	} else
@@ -4898,15 +4850,14 @@ static int smsreader(void)
 
 static int getsecuritycode()
 {
-	gn_data data;
 	gn_error error;
 	gn_security_code sc;
 
 	memset(&sc, 0, sizeof(sc));
 	sc.type = GN_SCT_SecurityCode;
-	data.security_code = &sc;
+	data->security_code = &sc;
 	fprintf(stderr, _("Getting security code... \n"));
-	error = gn_sm_functions(GN_OP_GetSecurityCode, &data, &state);
+	error = gn_sm_functions(GN_OP_GetSecurityCode, data, state);
 	fprintf(stdout, _("Security code is: %s\n"), sc.code);
 	return error;
 }
@@ -4926,15 +4877,14 @@ static void list_gsm_networks(void)
 static int getnetworkinfo(void)
 {
 	gn_network_info networkinfo;
-	gn_data data;
 	gn_error error;
 	int cid, lac;
 	char country[4] = {0, 0, 0, 0};
 
-	gn_data_clear(&data);
-	data.network_info = &networkinfo;
+	gn_data_clear(data);
+	data->network_info = &networkinfo;
 
-	if ((error = gn_sm_functions(GN_OP_GetNetworkInfo, &data, &state)) != GN_ERR_NONE) {
+	if ((error = gn_sm_functions(GN_OP_GetNetworkInfo, data, state)) != GN_ERR_NONE) {
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 		return error;
 	}
@@ -4960,10 +4910,10 @@ static int getlocksinfo(void)
 	char *locks_names[] = {"MCC+MNC", "GID1", "GID2", "MSIN"};
 	int i;
 
-	gn_data_clear(&data);
-	data.locks_info = locks_info;
+	gn_data_clear(data);
+	data->locks_info = locks_info;
 
-	if ((error = gn_sm_functions(GN_OP_GetLocksInfo, &data, &state)) != GN_ERR_NONE) {
+	if ((error = gn_sm_functions(GN_OP_GetLocksInfo, data, state)) != GN_ERR_NONE) {
 		return error;
 	}
 
@@ -5006,10 +4956,10 @@ static int getfilelist(char *path)
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.path, sizeof(fi.path), "%s", path);
 
-	gn_data_clear(&data);
-	data.file_list = &fi;
+	gn_data_clear(data);
+	data->file_list = &fi;
 
-	if ((error = gn_sm_functions(GN_OP_GetFileList, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_GetFileList, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get info for %s: %s\n"), path, gn_error_print(error));
 	else {
 		fprintf(stdout, _("Filelist for path %s:\n"), path);
@@ -5031,9 +4981,9 @@ static int getfiledetailsbyid(int nargc, char *nargv[])
 	memset(&fi, 0, sizeof(fi));
 	memset(&fil, 0, sizeof(fil));
 
-	gn_data_clear(&data);
-	data.file = &fi;
-	data.file_list = &fil;
+	gn_data_clear(data);
+	data->file = &fi;
+	data->file_list = &fil;
 	/* default parameter is root == 0x01 */
 	if (nargc == 0) {
 		fi.id = calloc(3, sizeof(char));
@@ -5044,7 +4994,7 @@ static int getfiledetailsbyid(int nargc, char *nargv[])
 		set_fileid(&fi, nargv[0]);
 	}
 
-	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get filename: %s\n"), gn_error_print(error));
 	else {
 		int fileid = 0, counter = 16;
@@ -5062,12 +5012,12 @@ static int getfiledetailsbyid(int nargc, char *nargv[])
 			memset(&fi2, 0, sizeof(fi2));
 			memset(&fil2, 0, sizeof(fil2));
 
-			gn_data_clear(&data);
-			data.file = &fi2;
-			data.file_list = &fil2;
+			gn_data_clear(data);
+			data->file = &fi2;
+			data->file_list = &fil2;
 			fi2.id = fil.files[i]->id;
 
-			error2 = gn_sm_functions(GN_OP_GetFileDetailsById, &data, &state);
+			error2 = gn_sm_functions(GN_OP_GetFileDetailsById, data, state);
 			switch (error2) {
 			case GN_ERR_NONE:
 				fileid = 0;
@@ -5096,10 +5046,10 @@ static int getfileid(char *filename)
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", filename);
 
-	gn_data_clear(&data);
-	data.file = &fi;
+	gn_data_clear(data);
+	data->file = &fi;
 
-	if ((error = gn_sm_functions(GN_OP_GetFileId, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_GetFileId, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get info for %s: %s\n"),filename, gn_error_print(error));
 	else {
 		fprintf(stdout, _("Fileid for file %s is %02x %02x %02x %02x %02x %02x\n"), filename, fi.id[0], fi.id[1], fi.id[2], fi.id[3], fi.id[4], fi.id[5]);
@@ -5116,10 +5066,10 @@ static int deletefile(char *filename)
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", filename);
 
-	gn_data_clear(&data);
-	data.file = &fi;
+	gn_data_clear(data);
+	data->file = &fi;
 
-	if ((error = gn_sm_functions(GN_OP_DeleteFile, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_DeleteFile, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to delete %s: %s\n"), filename, gn_error_print(error));
 	else {
 		fprintf(stdout, _("Deleted: %s\n"), filename);
@@ -5136,10 +5086,10 @@ static int deletefilebyid(char *id)
 	memset(&fi, 0, sizeof(fi));
 	set_fileid(&fi, id);
 
-	gn_data_clear(&data);
-	data.file = &fi;
+	gn_data_clear(data);
+	data->file = &fi;
 
-	if ((error = gn_sm_functions(GN_OP_DeleteFileById, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_DeleteFileById, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to delete %s: %s\n"), id, gn_error_print(error));
 	else {
 		fprintf(stdout, _("Deleted: %s\n"), id);
@@ -5161,10 +5111,10 @@ static int getfile(int nargc, char *nargv[])
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", nargv[0]);
 
-	gn_data_clear(&data);
-	data.file = &fi;
+	gn_data_clear(data);
+	data->file = &fi;
 
-	if ((error = gn_sm_functions(GN_OP_GetFile, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_GetFile, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get file %s: %s\n"), nargv[0], gn_error_print(error));
 	else {
 		if (nargc == 1) {
@@ -5214,16 +5164,16 @@ static int getfilebyid(int nargc, char *nargv[])
 	memset(&fi, 0, sizeof(fi));
 	set_fileid(&fi, nargv[0]);
 
-	gn_data_clear(&data);
-	data.file = &fi;
-	data.file_list = &fil;
+	gn_data_clear(data);
+	data->file = &fi;
+	data->file_list = &fil;
 
-	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get file: %s\n"), gn_error_print(error));
 	else {
 		dprintf("File is %s\n", fi.name);
 		fi.file = malloc(fi.file_length);
-		error = gn_sm_functions(GN_OP_GetFileById, &data, &state);
+		error = gn_sm_functions(GN_OP_GetFileById, data, state);
 		if (error == GN_ERR_NONE) {
 			if (nargc == 1) {
 				strncpy(filename2, fi.name, 512);
@@ -5257,19 +5207,19 @@ static int getallfiles(char *path)
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.path, sizeof(fi.path), "%s", path);
 
-	gn_data_clear(&data);
-	data.file_list = &fi;
+	gn_data_clear(data);
+	data->file_list = &fi;
 
-	if ((error = gn_sm_functions(GN_OP_GetFileList, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_GetFileList, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get info for %s: %s\n"), path, gn_error_print(error));
 	else {
 		*(strrchr(path,'/')+1) = 0;
 		for (i = 0; i < fi.file_count; i++) {
-			data.file = fi.files[i];
+			data->file = fi.files[i];
 			strncpy(filename2, fi.files[i]->name, 512);
 			snprintf(fi.files[i]->name, 512, "%s%s", path, filename2);
-			if ((error = gn_sm_functions(GN_OP_GetFile, &data, &state)) != GN_ERR_NONE)
-				fprintf(stderr, _("Failed to get file %s: %s\n"), data.file->name, gn_error_print(error));
+			if ((error = gn_sm_functions(GN_OP_GetFile, data, state)) != GN_ERR_NONE)
+				fprintf(stderr, _("Failed to get file %s: %s\n"), data->file->name, gn_error_print(error));
 			else {
 				fprintf(stdout, _("Got file %s.\n"),filename2);
 				f = fopen(filename2, "w");
@@ -5277,9 +5227,9 @@ static int getallfiles(char *path)
 					fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 					return GN_ERR_FAILED;
 				}
-				fwrite(data.file->file, data.file->file_length, 1, f);
+				fwrite(data->file->file, data->file->file_length, 1, f);
 				fclose(f);
-				free(data.file->file);
+				free(data->file->file);
 			}
 			free(fi.files[i]);
 		}
@@ -5300,8 +5250,8 @@ static int putfile(int nargc, char *nargv[])
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", nargv[1]);
 
-	gn_data_clear(&data);
-	data.file = &fi;
+	gn_data_clear(data);
+	data->file = &fi;
 
 	f = fopen(nargv[0], "rb");
 	if (!f || fseek(f, 0, SEEK_END)) {
@@ -5316,7 +5266,7 @@ static int putfile(int nargc, char *nargv[])
 		return GN_ERR_FAILED;
 	}
 
-	if ((error = gn_sm_functions(GN_OP_PutFile, &data, &state)) != GN_ERR_NONE)
+	if ((error = gn_sm_functions(GN_OP_PutFile, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to put file to %s: %s\n"), nargv[1], gn_error_print(error));
 
 	free(fi.file);
@@ -5719,13 +5669,6 @@ int main(int argc, char *argv[])
 		version();
 		exit(0);
 	}
-
-	/* Read config file */
-	if (gn_cfg_read_default() < 0)
-		exit(1);
-
-	if (!gn_cfg_phone_load("", &state))
-		exit(1);
 
 	/* We have to build an array of the arguments which will be passed to the
 	   functions.  Please note that every text after the --command will be
