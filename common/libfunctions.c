@@ -46,15 +46,23 @@ API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statema
 {
 	/* allocate and initialize data structures */
 	*state = malloc(sizeof(*state));
+	if (!*state)
+		return GN_ERR_MEMORYFULL;
 	memset(*state, 0, sizeof(*state));
 
 	/* Read config file */
-        if (gn_cfg_read_default() < 0)
-                return GN_ERR_INTERNALERROR;
+	if (gn_cfg_read_default() < 0) {
+		free(*state);
+		*state = NULL;
+		return GN_ERR_INTERNALERROR;
+	}
 
 	/* Load the phone configuration */
-	if (!gn_cfg_phone_load(configname, *state))
-                return GN_ERR_UNKNOWNMODEL;
+	if (!gn_cfg_phone_load(configname, *state)) {
+		free(*state);
+		*state = NULL;
+		return GN_ERR_UNKNOWNMODEL;
+	}
 
 	return GN_ERR_NONE;
 }
@@ -75,6 +83,8 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state, gn_data **data )
 
 	/* allocate and initialize data structures */
 	*data = malloc(sizeof(*data));
+	if (!*data)
+		return GN_ERR_MEMORYFULL;
 	gn_data_clear(*data);
 
 	/* should the device be locked with a lockfile ? */
