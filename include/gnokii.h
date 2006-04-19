@@ -61,10 +61,10 @@ typedef unsigned char uint8_t;
 #  endif
 #endif
 
-#define LIBGNOKII_VERSION_STRING "2.0.2"
+#define LIBGNOKII_VERSION_STRING "2.0.7"
 #define LIBGNOKII_VERSION_MAJOR 2
 #define LIBGNOKII_VERSION_MINOR 0
-#define LIBGNOKII_VERSION_RELEASE 2
+#define LIBGNOKII_VERSION_RELEASE 7
 #define LIBGNOKII_MAKE_VERSION( a,b,c ) (((a) << 16) | ((b) << 8) | (c))
 
 #define LIBGNOKII_VERSION \
@@ -89,6 +89,24 @@ struct gn_statemachine;
 /* The global variable that keeps the current configuration. This should be
  * filled in before the phone initialization */
 extern API struct gn_cfg_header *gn_cfg_info;
+
+/* Gnokii library functions - they all start with gn_lib_ */
+/* Get the current runtime version (LIBGNOKII_VERSION) of libgnokii - see LIBGNOKII_MAKE_VERSION() */
+API unsigned int gn_lib_version();
+
+/* initialize gnokii library and structures for given phone.
+   configname is the name of the profile, if empty or NULL, [global] will be taken  */
+API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statemachine **state );
+
+/* Free any structures and ressources which were loaded in this state machine. */
+API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state );
+
+/* opens connection to the phone. Necessary locking will be made */
+API gn_error gn_lib_phone_open( struct gn_statemachine *state, gn_data **data );
+
+/* closes the connection to the phone */
+API gn_error gn_lib_phone_close( struct gn_statemachine *state,  gn_data **data );
+
 
 /* Files */
 API int gn_file_text_save(char *filename, char *text, int mode);

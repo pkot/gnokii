@@ -29,7 +29,8 @@ LIBTOOL_VER = -version-info $(MAJOR_NUMBER):$(MINOR_NUMBER):0
 LIBTOOL_RPATH=-rpath $(libdir)
 endif
 
-OBJS =	gsm-api.lo \
+OBJS =	libfunctions.lo \
+	gsm-api.lo \
 	gsm-error.lo \
 	gsm-statemachine.lo \
 	cfgreader.lo \
