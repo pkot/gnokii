@@ -80,8 +80,10 @@ struct gn_cfg_header *cfg_memory_read(const char **lines)
 			line[strlen(line) - 1] = '\0';
 
 		/* Ignore blank lines and comments */
-		if ((*line == '\n') || (*line == '\0') || (*line == '#'))
+		if ((*line == '\n') || (*line == '\0') || (*line == '#')) {
+			free(buf);
 			continue;
+		}
 
 		/* Look for "headings" enclosed in square brackets */
 		if ((line[0] == '[') && (line[strlen(line) - 1] == ']')) {

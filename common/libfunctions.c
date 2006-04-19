@@ -45,10 +45,10 @@ API unsigned int gn_lib_version()
 API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statemachine **state )
 {
 	/* allocate and initialize data structures */
-	*state = malloc(sizeof(*state));
+	*state = malloc(sizeof(**state));
 	if (!*state)
 		return GN_ERR_MEMORYFULL;
-	memset(*state, 0, sizeof(*state));
+	memset(*state, 0, sizeof(**state));
 
 	/* Read config file */
 	if (gn_cfg_read_default() < 0) {
@@ -82,7 +82,7 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state, gn_data **data )
 	gn_error error;
 
 	/* allocate and initialize data structures */
-	*data = malloc(sizeof(*data));
+	*data = malloc(sizeof(**data));
 	if (!*data)
 		return GN_ERR_MEMORYFULL;
 	gn_data_clear(*data);
