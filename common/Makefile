@@ -17,15 +17,17 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-MAJOR_NUMBER = 2
-MINOR_NUMBER = 7
+# REMEMBER: if you change the numbers below, please change them in gnokii.h as well.
+GNOKII_MAJOR = 3
+GNOKII_MINOR = 0
+GNOKII_RELEASE = 0
 ifdef WIN32_CROSS
 LIBTOOL_UNDEF = -no-undefined
-LIBTOOL_VER = -version-info $(MAJOR_NUMBER):$(MINOR_NUMBER):0 -avoid-version
+LIBTOOL_VER = -version-info $(GNOKII_MAJOR):$(GNOKII_RELEASE):$(GNOKII_MINOR) -avoid-version
 LIBTOOL_RPATH=-rpath $(libdir)
 LDLIBS += -lws2_32 -lwinmm
 else
-LIBTOOL_VER = -version-info $(MAJOR_NUMBER):$(MINOR_NUMBER):0
+LIBTOOL_VER = -version-info $(GNOKII_MAJOR):$(GNOKII_RELEASE):$(GNOKII_MINOR)
 LIBTOOL_RPATH=-rpath $(libdir)
 endif
 
