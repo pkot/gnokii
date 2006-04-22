@@ -15,6 +15,8 @@
     o handle calendar extended parameters writing       (Pawel Kot)
  * build system updates
     o fix typo in smsd-mysql Debian pacakge depedencies (Pawel Kot)
+ * dku2 kernel driver updates
+    o fix version for Linux 2.4                         (Pawel Kot)
 
 0.6.12
 ======
