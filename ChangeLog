@@ -18,6 +18,8 @@
  * dku2 kernel driver updates
     o fix version for Linux 2.4                         (Pawel Kot)
     o update documentation                              (Pawel Kot)
+    o update Linux 2.6 driver to support 2.6.16 kernel (internal
+      structures changed again)                         (Pawel Kot)
 
 0.6.12
 ======

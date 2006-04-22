@@ -31,6 +31,7 @@
 #include <linux/tty_flip.h>
 #include <linux/module.h>
 #include <linux/usb.h>
+#include <linux/version.h>
 
 #ifdef CONFIG_USB_SERIAL_DEBUG
 	static int debug = 1;
@@ -64,16 +65,19 @@ static struct usb_device_id id_table [] = {
 MODULE_DEVICE_TABLE(usb, id_table);
 
 static struct usb_driver nokia_driver = {
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,16))
 	.owner =	THIS_MODULE,
+#endif
 	.name =		"Nokia DKU2",
 	.probe =	usb_serial_probe,
 	.disconnect =	usb_serial_disconnect,
 	.id_table =	id_table,
 };
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,15))
 static struct usb_serial_device_type nokia_device = {
 	.owner =		THIS_MODULE,
-	.name =			"Nokia 7600/6230(i)/6170/66x0 DKU2 driver",
+	.name =			"Nokia DKU2 driver",
 	.short_name =		"Nokia DKU2",
 	.id_table =		id_table,
 	.num_interrupt_in =	1,
@@ -82,6 +86,21 @@ static struct usb_serial_device_type nokia_device = {
 	.num_ports =		1,
 	.probe =		nokia_probe
 };
+#else
+static struct usb_serial_driver nokia_device = {
+        .driver = {
+	        .owner =	THIS_MODULE,
+	        .name =	        "Nokia DKU2 driver",
+        },
+	.description =          "Nokia DKU2",
+	.id_table =		id_table,
+	.num_interrupt_in =	1,
+	.num_bulk_in =		1,
+	.num_bulk_out =		1,
+	.num_ports =		1,
+	.probe =		nokia_probe
+};
+#endif
 
 /* The only thing which makes this device different from a generic device is that */
 /* we have to set an alternative configuration to make the relevant endpoints available */
