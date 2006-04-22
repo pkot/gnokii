@@ -20,6 +20,9 @@ The driver connects two ttys - after connecting the phone dmesg gives:
   usbserial.c: Nokia 7600/6230 DKU2 driver converter now attached to ttyUSB1 (or usb/tts/1 for devfs)
 gnokii must be configured to use the second of these - in this case /dev/ttyUSB1
 
+Note, that you need kernel sources installed in your system and the kernel
+needs support for usb-serial.
+
 
 * Install *
 
@@ -44,7 +47,8 @@ $ make
 
 * Known Bugs *
 
-None...let me know!
+nokia_dku2 module may interfere with OBEX in some cases, ie. the driver claims
+the OBEX endpoint which leads OBEX communication not to work.
 
 
 * Disclaimer *

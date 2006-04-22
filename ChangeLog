@@ -17,6 +17,7 @@
     o fix typo in smsd-mysql Debian pacakge depedencies (Pawel Kot)
  * dku2 kernel driver updates
     o fix version for Linux 2.4                         (Pawel Kot)
+    o update documentation                              (Pawel Kot)
 
 0.6.12
 ======
