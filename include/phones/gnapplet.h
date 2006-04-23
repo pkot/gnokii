@@ -130,7 +130,7 @@
 typedef struct {
 	int proto_major;
 	int proto_minor;
-	char manufacturer[20];
+	char manufacturer[GN_MANUFACTURER_MAX_LENGTH];
 	char model[GN_MODEL_MAX_LENGTH];
 	char imei[GN_IMEI_MAX_LENGTH];
 	char sw_version[GN_REVISION_MAX_LENGTH];

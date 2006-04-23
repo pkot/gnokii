@@ -524,10 +524,11 @@ typedef struct {
 	int automatic_answer; /* Does the phone auto-answer incoming call? */
 } gn_profile;
 
-/* Limits for IMEI, Revision and Model string storage. */
-#define GN_IMEI_MAX_LENGTH     20
-#define GN_REVISION_MAX_LENGTH 20
-#define GN_MODEL_MAX_LENGTH    20
+/* Limits for IMEI, Revision, Model and Manufacturer string storage. */
+#define GN_IMEI_MAX_LENGTH         20
+#define GN_REVISION_MAX_LENGTH     20
+#define GN_MODEL_MAX_LENGTH        32
+#define GN_MANUFACTURER_MAX_LENGTH 32
 
 #define GN_BCD_STRING_MAX_LENGTH 40
 

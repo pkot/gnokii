@@ -102,10 +102,16 @@ API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statema
 API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state );
 
 /* opens connection to the phone. Necessary locking will be made */
-API gn_error gn_lib_phone_open( struct gn_statemachine *state, gn_data **data );
+API gn_error gn_lib_phone_open( struct gn_statemachine *state );
 
 /* closes the connection to the phone */
-API gn_error gn_lib_phone_close( struct gn_statemachine *state,  gn_data **data );
+API gn_error gn_lib_phone_close( struct gn_statemachine *state );
+
+/* ask phone for static information (model, manufacturer, revision and imei) */
+API const char *gn_lib_get_phone_model       ( struct gn_statemachine *state );
+API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state );
+API const char *gn_lib_get_phone_revision    ( struct gn_statemachine *state );
+API const char *gn_lib_get_phone_imei        ( struct gn_statemachine *state );
 
 
 /* Files */

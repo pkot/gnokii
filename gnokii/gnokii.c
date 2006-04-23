@@ -420,7 +420,7 @@ static int ringtone_list_initialised = 0;
 
 static void busterminate(void)
 {
-	gn_lib_phone_close(state,&data);
+	gn_lib_phone_close(state);
 	gn_lib_phoneprofile_free(&state);
 	if (logfile)
 		fclose(logfile);
@@ -435,8 +435,9 @@ static void businit(void)
 	atexit(busterminate);
 	/* signal(SIGINT, bussignal); */
 
-	if (GN_ERR_NONE != gn_lib_phone_open(state,&data))
+	if (GN_ERR_NONE != gn_lib_phone_open(state))
 		exit(2);
+	data = &state->sm_data;
 }
 
 /* This function checks that the argument count for a given options is withing

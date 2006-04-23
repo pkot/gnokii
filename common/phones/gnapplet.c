@@ -570,7 +570,7 @@ static gn_error gnapplet_identify(gn_data *data, struct gn_statemachine *state)
 			return error;
 	}
 
-	if (data->manufacturer) snprintf(data->manufacturer, 20, "%s", drvinst->manufacturer);
+	if (data->manufacturer) snprintf(data->manufacturer, GN_MANUFACTURER_MAX_LENGTH, "%s", drvinst->manufacturer);
 	if (data->model) snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", drvinst->model);
 	if (data->imei) snprintf(data->imei, GN_IMEI_MAX_LENGTH, "%s", drvinst->imei);
 	if (data->revision) snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", drvinst->sw_version, drvinst->hw_version);

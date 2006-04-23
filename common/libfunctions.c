@@ -33,6 +33,7 @@
   of this gnokii CVS package.
   One of those external programs is e.g. the Mobile Phone import/export
   filter of the KDE Adressbook (kaddressbook).
+  Helge Deller - April 2006
 
 */
 
@@ -82,16 +83,10 @@ API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
 	return GN_ERR_NONE;
 }
 
-API gn_error gn_lib_phone_open( struct gn_statemachine *state, gn_data **data )
+API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 {
 	char *aux;
 	gn_error error;
-
-	/* allocate and initialize data structures */
-	*data = malloc(sizeof(**data));
-	if (!*data)
-		return GN_ERR_MEMORYFULL;
-	gn_data_clear(*data);
 
 	/* should the device be locked with a lockfile ? */
 	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
@@ -99,8 +94,6 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state, gn_data **data )
 		state->lockfile = gn_device_lock(state->config.port_device);
 		if (state->lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting.\n"));
-			free(*data);
-			*data = NULL;
 			return GN_ERR_BUSY;
 		}
 	}
@@ -110,15 +103,13 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state, gn_data **data )
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Telephone interface init failed: %s\nQuitting.\n"),
 			gn_error_print(error));
-		free(*data);
-		*data = NULL;
 		return error;
 	}
 
 	return GN_ERR_NONE;
 }
 
-API gn_error gn_lib_phone_close( struct gn_statemachine *state,  gn_data **data )
+API gn_error gn_lib_phone_close( struct gn_statemachine *state )
 {
 	/* close phone connection */
 	gn_sm_functions(GN_OP_Terminate, NULL, state);
@@ -130,10 +121,54 @@ API gn_error gn_lib_phone_close( struct gn_statemachine *state,  gn_data **data 
 	}
 	state->lockfile = NULL;
 
-	/* free data structure */
-	free(*data);
-	*data = NULL;
-
 	return GN_ERR_NONE;
+}
+
+static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
+{
+	gn_data *data = &state->sm_data;
+	const char *unknown = _("Unknown");
+
+	if (state->config.m_model[0])
+		return GN_ERR_NONE;
+
+	// identify phone
+	gn_data_clear(data);
+	data->model        = state->config.m_model;
+	data->manufacturer = state->config.m_manufacturer;
+	data->revision     = state->config.m_revision;
+	data->imei         = state->config.m_imei;
+
+	strcpy(data->model,        unknown);
+	strcpy(data->manufacturer, unknown);
+	strcpy(data->revision,     unknown);
+	strcpy(data->imei,         unknown);
+
+	return gn_sm_functions(GN_OP_Identify, data, state);
+}
+
+/* ask phone for static information (model, manufacturer, revision and imei) */
+API const char *gn_lib_get_phone_model( struct gn_statemachine *state )
+{
+	gn_lib_get_phone_information(state);
+	return state->config.m_model;
+}
+
+API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state )
+{
+	gn_lib_get_phone_information(state);
+	return state->config.m_manufacturer;
+}
+
+API const char *gn_lib_get_phone_revision( struct gn_statemachine *state )
+{
+	gn_lib_get_phone_information(state);
+	return state->config.m_revision;
+}
+
+API const char *gn_lib_get_phone_imei( struct gn_statemachine *state )
+{
+	gn_lib_get_phone_information(state);
+	return state->config.m_imei;
 }
 

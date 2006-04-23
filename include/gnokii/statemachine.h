@@ -87,6 +87,8 @@ struct gn_statemachine {
 	gn_error response_error[GN_SM_WAITINGFOR_MAX_NUMBER];
 	/* Data structure to be filled in with the response */
 	gn_data *data[GN_SM_WAITINGFOR_MAX_NUMBER];
+	/* libfunctions internal data structure */
+	gn_data sm_data;
 };
 
 API gn_state gn_sm_loop(int timeout, struct gn_statemachine *state);

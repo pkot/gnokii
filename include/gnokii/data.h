@@ -104,7 +104,6 @@ typedef struct {
 	gn_call_active *call_active;
 	gn_file_list *file_list;
 	gn_file *file;
-	
 } gn_data;
 
 /* 
@@ -136,7 +135,15 @@ typedef struct {
 	char connect_script[256];			/* Script to run when device connection established */
 	char disconnect_script[256];			/* Script to run when device connection closed */
 	uint8_t rfcomm_cn;				/* RFCOMM channel number to connect */
-	unsigned int sm_retry;				/* Indicates whether statemachine should to retries. Defaults to off. Use with caution -- may break newer DCT4 phones */
+	unsigned int sm_retry;				/* Indicates whether statemachine should to retries. Defaults to off. */
+							/* Use with caution -- may break newer DCT4 phones */
+
+	/* do not change the following values from userspace */
+	char m_model[GN_MODEL_MAX_LENGTH];
+	char m_manufacturer[GN_MANUFACTURER_MAX_LENGTH];
+	char m_revision[GN_REVISION_MAX_LENGTH];
+	char m_imei[GN_IMEI_MAX_LENGTH];
+	
 } gn_config;
 
 typedef struct {
