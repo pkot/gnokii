@@ -39,8 +39,8 @@
 
 /* For models table */
 typedef struct {
-	char *model;
-	char *number;
+	const char *model;	  /* e.g. 6310 */
+	const char *product_name; /* e.g. NPE-4 */
 	int flags;
 } gn_phone_model;
 

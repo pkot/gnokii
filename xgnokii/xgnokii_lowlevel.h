@@ -176,7 +176,7 @@ typedef struct {
 		gchar *model;
 		gchar *imei;
 		gchar *revision;
-		gchar *version;
+		gchar *product_name;
 	} phone;
 	struct {
 		gint unRead;
@@ -225,7 +225,6 @@ extern pthread_mutex_t getNetworkInfoMutex;
 extern pthread_cond_t getNetworkInfoCond;
 extern pthread_mutex_t ringtoneMutex;
 extern pthread_cond_t ringtoneCond;
-extern struct gn_statemachine statemachine;
 extern void GUI_InitPhoneMonitor(void);
 extern void *GUI_Connect(void *a);
 extern void GUI_InsertEvent(PhoneEvent * event);

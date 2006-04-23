@@ -43,8 +43,16 @@
 #include "gnokii.h"
 #include "device.h"
 
+/* static "last" error code */
+static gn_error lasterror;
+
+/* this macro sets the "lasterror" code */
+#define LASTERROR(nr)	((lasterror = nr)) /* do not delete the double brackets! */
+
 API unsigned int gn_lib_version()
 {
+	lasterror = GN_ERR_NONE;
+
 	/* return the library version number at compile time of libgnokii */
 	return LIBGNOKII_VERSION;
 }
@@ -54,24 +62,24 @@ API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statema
 	/* allocate and initialize data structures */
 	*state = malloc(sizeof(**state));
 	if (!*state)
-		return GN_ERR_MEMORYFULL;
+		return LASTERROR(GN_ERR_MEMORYFULL);
 	memset(*state, 0, sizeof(**state));
 
 	/* Read config file */
 	if (gn_cfg_read_default() < 0) {
 		free(*state);
 		*state = NULL;
-		return GN_ERR_INTERNALERROR;
+		return LASTERROR(GN_ERR_INTERNALERROR);
 	}
 
 	/* Load the phone configuration */
 	if (!gn_cfg_phone_load(configname, *state)) {
 		free(*state);
 		*state = NULL;
-		return GN_ERR_UNKNOWNMODEL;
+		return LASTERROR(GN_ERR_UNKNOWNMODEL);
 	}
 
-	return GN_ERR_NONE;
+	return LASTERROR(GN_ERR_NONE);
 }
 
 API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
@@ -80,8 +88,15 @@ API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
 	free(*state);
 	*state = NULL;
 
-	return GN_ERR_NONE;
+	return LASTERROR(GN_ERR_NONE);
 }
+
+/* return last error code */
+API gn_error gn_lib_lasterror( void )
+{
+	return lasterror;
+}
+
 
 API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 {
@@ -94,7 +109,7 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 		state->lockfile = gn_device_lock(state->config.port_device);
 		if (state->lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting.\n"));
-			return GN_ERR_BUSY;
+			return LASTERROR(GN_ERR_BUSY);
 		}
 	}
 
@@ -103,10 +118,10 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Telephone interface init failed: %s\nQuitting.\n"),
 			gn_error_print(error));
-		return error;
+		return LASTERROR(error);
 	}
 
-	return GN_ERR_NONE;
+	return LASTERROR(GN_ERR_NONE);
 }
 
 API gn_error gn_lib_phone_close( struct gn_statemachine *state )
@@ -121,16 +136,17 @@ API gn_error gn_lib_phone_close( struct gn_statemachine *state )
 	}
 	state->lockfile = NULL;
 
-	return GN_ERR_NONE;
+	return LASTERROR(GN_ERR_NONE);
 }
 
 static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 {
 	gn_data *data = &state->sm_data;
 	const char *unknown = _("Unknown");
+	gn_error error;
 
 	if (state->config.m_model[0])
-		return GN_ERR_NONE;
+		return LASTERROR(GN_ERR_NONE);
 
 	// identify phone
 	gn_data_clear(data);
@@ -144,14 +160,26 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	strcpy(data->revision,     unknown);
 	strcpy(data->imei,         unknown);
 
-	return gn_sm_functions(GN_OP_Identify, data, state);
+	error = gn_sm_functions(GN_OP_Identify, data, state);
+
+	/* Retrying is bad idea: what if function is simply not implemented?
+	   Anyway let's wait 2 seconds for the right packet from the phone. */
+	sleep(2);
+
+	return LASTERROR(error);
 }
 
-/* ask phone for static information (model, manufacturer, revision and imei) */
+/* ask phone for static information (model, version, manufacturer, revision and imei) */
 API const char *gn_lib_get_phone_model( struct gn_statemachine *state )
 {
 	gn_lib_get_phone_information(state);
-	return state->config.m_model;
+	return gn_model_get(state->config.m_model); /* e.g. 6310 */
+}
+
+API const char *gn_lib_get_phone_product_name( struct gn_statemachine *state )
+{
+	gn_lib_get_phone_information(state);
+	return state->config.m_model; /* e.g. NPE-4 */
 }
 
 API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state )

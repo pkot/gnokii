@@ -4104,33 +4104,13 @@ static int netmonitor(char *m)
 
 static int identify(void)
 {
-	gn_error error;
+	fprintf(stdout, _("IMEI         : %s\n"), gn_lib_get_phone_imei(state));
+	fprintf(stdout, _("Manufacturer : %s\n"), gn_lib_get_phone_manufacturer(state));
+	fprintf(stdout, _("Model        : %s\n"), gn_lib_get_phone_model(state));
+	fprintf(stdout, _("Product name : %s\n"), gn_lib_get_phone_product_name(state));
+	fprintf(stdout, _("Revision     : %s\n"), gn_lib_get_phone_revision(state));
 
-	/* Hopefully 64 is enough */
-	char imei[64], model[64], rev[64], manufacturer[64];
-
-	data->manufacturer = manufacturer;
-	data->model = model;
-	data->revision = rev;
-	data->imei = imei;
-
-	/* Retrying is bad idea: what if function is simply not implemented?
-	   Anyway let's wait 2 seconds for the right packet from the phone. */
-	sleep(2);
-
-	strcpy(imei, _("(unknown)"));
-	strcpy(manufacturer, _("(unknown)"));
-	strcpy(model, _("(unknown)"));
-	strcpy(rev, _("(unknown)"));
-
-	error = gn_sm_functions(GN_OP_Identify, data, state);
-
-	fprintf(stdout, _("IMEI         : %s\n"), imei);
-	fprintf(stdout, _("Manufacturer : %s\n"), manufacturer);
-	fprintf(stdout, _("Model        : %s\n"), model);
-	fprintf(stdout, _("Revision     : %s\n"), rev);
-
-	return error;
+	return gn_lib_lasterror();
 }
 
 static int senddtmf(char *string)

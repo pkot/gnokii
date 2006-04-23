@@ -70,13 +70,11 @@ pthread_cond_t ringtoneCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
 
-static char *lockfile = NULL;
-
 gn_sms_status SMSStatus = {0,0,0,0};
 gn_sms_folder_stats FolderStats[GN_SMS_FOLDER_MAX_NUMBER];
 gn_sms_message_list MessagesList[GN_SMS_MESSAGE_MAX_NUMBER][GN_SMS_FOLDER_MAX_NUMBER];
 
-struct gn_statemachine statemachine;
+struct gn_statemachine *statemachine;
 /* FIXME - don't really know what should own the statemachine in */
 /* the xgnokii scheme of things - Chris */
 int isSMSactivated = 0;
@@ -121,7 +119,7 @@ gn_error GUI_InitSMSFolders(void)
 
 		gdat.sms_folder_list = &list;
 
-		if ((error = gn_sm_functions(GN_OP_GetSMSFolders, &gdat, &statemachine)) != GN_ERR_NONE)
+		if ((error = gn_sm_functions(GN_OP_GetSMSFolders, &gdat, statemachine)) != GN_ERR_NONE)
 			return error;
 		foldercount = gdat.sms_folder_list->number;
 		for (i = 0; i < gdat.sms_folder_list->number; i++) {
@@ -151,35 +149,16 @@ static inline void FreeArray(GSList ** array)
 
 static gn_error InitModelInf(void)
 {
-	gn_data gdat;
-	gn_error error;
-	gchar buf[64];
 	gint i, j;
 
-	gn_data_clear(&gdat);
+	phoneMonitor.phone.model = g_strdup(gn_lib_get_phone_model(statemachine));
+	if (gn_lib_lasterror() != GN_ERR_NONE)
+		return gn_lib_lasterror();
 
-	gdat.model = buf;
-	error = gn_sm_functions(GN_OP_GetModel, &gdat, &statemachine);
-	if (error != GN_ERR_NONE) return error;
-	phoneMonitor.phone.version = g_strdup(gdat.model);
-	phoneMonitor.phone.model = gn_model_get(gdat.model);
-
-	if (phoneMonitor.phone.model == NULL)
-		phoneMonitor.phone.model = g_strdup(_("unknown"));
-	phoneMonitor.supported = gn_phone_model_get(buf)->flags;
-
-	gdat.revision = buf;
-	gdat.model = NULL;
-	error = gn_sm_functions(GN_OP_GetRevision, &gdat, &statemachine);
-	if (error != GN_ERR_NONE) return error;
-	phoneMonitor.phone.revision = g_strdup(gdat.revision);
-
-	gdat.revision = NULL;
-	gdat.model = NULL;
-	gdat.imei = buf;
-	error = gn_sm_functions(GN_OP_GetImei, &gdat, &statemachine);
-	if (error != GN_ERR_NONE) return error;
-	phoneMonitor.phone.imei = g_strdup(gdat.imei);
+	phoneMonitor.phone.product_name = g_strdup(gn_lib_get_phone_product_name(statemachine));
+	phoneMonitor.phone.revision = g_strdup(gn_lib_get_phone_revision(statemachine));
+	phoneMonitor.phone.imei = g_strdup(gn_lib_get_phone_imei(statemachine));
+	phoneMonitor.supported = gn_phone_model_get(phoneMonitor.phone.product_name)->flags;
 
 	for (i = 0; i < GN_SMS_FOLDER_MAX_NUMBER; i++) {
 		FolderStats[i].number = 0;
@@ -193,8 +172,8 @@ static gn_error InitModelInf(void)
 		}
 	}
 
-	gn_log_xdebug("Version: %s\n", phoneMonitor.phone.version);
 	gn_log_xdebug("Model: %s\n", phoneMonitor.phone.model);
+	gn_log_xdebug("Product: %s\n", phoneMonitor.phone.product_name);
 	gn_log_xdebug("IMEI: %s\n", phoneMonitor.phone.imei);
 	gn_log_xdebug("Revision: %s\n", phoneMonitor.phone.revision);
 	return GN_ERR_NONE;
@@ -203,41 +182,29 @@ static gn_error InitModelInf(void)
 
 static void busterminate(void)
 {
-	gn_sm_functions(GN_OP_Terminate, NULL, &statemachine);
-	if (lockfile) gn_device_unlock(lockfile);
+	gn_lib_phone_close(statemachine);
+	gn_lib_phoneprofile_free(&statemachine);
 }
 
-
-static gn_error fbusinit(bool enable_monitoring)
+static gn_error fbusinit()
 {
-	static gn_error error = GN_ERR_NOLINK;
-	static bool atexit_registered = false;
-	char *aux;
+	gn_error error;
 
-	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
-	/* Defaults to 'no' */
-	if (aux && !strcmp(aux, "yes")) {
-		lockfile = gn_device_lock(xgnokiiConfig.port);
-		if (lockfile == NULL) {
-			fprintf(stderr, _("Lock file error. Exiting.\n"));
-			MainExit();
-		}
-	}
-
-	/* register cleanup function */
-	if (!atexit_registered) {
-		atexit_registered = true;
-		atexit(busterminate);
-	}
-
-	/* Initialise the code for the GSM interface. */
-	error = gn_gsm_initialise(&statemachine);
-
+	error = gn_lib_phoneprofile_load(NULL, &statemachine);
 	gn_log_xdebug("fbusinit: error %d\n", error);
 
 	if (error != GN_ERR_NONE) {
 		g_print(_("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
 		/* FIXME: should popup some message... */
+		return (error);
+	}
+
+	/* register cleanup function */
+	atexit(busterminate);
+
+	error = gn_lib_phone_open(statemachine);
+	if (error != GN_ERR_NONE) {
+		g_print(_("Failed to open the phone. Quitting.\n"));
 		return (error);
 	}
 
@@ -248,7 +215,7 @@ static gn_error fbusinit(bool enable_monitoring)
 void GUI_InitPhoneMonitor(void)
 {
 	phoneMonitor.phone.model = g_strdup(_("unknown"));
-	phoneMonitor.phone.version = phoneMonitor.phone.model;
+	phoneMonitor.phone.product_name = g_strdup(_("unknown"));
 	phoneMonitor.phone.revision = g_strdup(_("unknown"));
 	phoneMonitor.phone.imei = g_strdup(_("unknown"));
 	phoneMonitor.supported = 0;
@@ -370,7 +337,7 @@ static void RefreshSMS(const gint number)
 					gdat.sms->number = MessagesList[j][i].location;
 					gdat.sms->memory_type =(gn_memory_type) i + 12 ;
 					dprintf("#: %i, mt: %i\n", gdat.sms->number, gdat.sms->memory_type);
-					if ((error = gn_sms_get_no_validate(&gdat, &statemachine)) == GN_ERR_NONE) {
+					if ((error = gn_sms_get_no_validate(&gdat, statemachine)) == GN_ERR_NONE) {
 						dprintf("Found valid SMS ...\n %s\n",
 							msg->user_data[0].u.text);
 						pthread_mutex_lock(&smsMutex);
@@ -409,7 +376,7 @@ static void RefreshSMS(const gint number)
 			msg->number = i;
 
 			gdat.sms = msg;
-			if ((error = gn_sms_get(&gdat, &statemachine)) == GN_ERR_NONE) {
+			if ((error = gn_sms_get(&gdat, statemachine)) == GN_ERR_NONE) {
 				dprintf("Found valid SMS ...\n");
 				pthread_mutex_lock(&smsMutex);
 				phoneMonitor.sms.messages =
@@ -453,7 +420,7 @@ static gint A_GetMemoryStatus(gpointer data)
 	if (ms) {
 		pthread_mutex_lock(&memoryMutex);
 		gdat.memory_status = &(ms->memoryStatus);
-		error = ms->status = gn_sm_functions(GN_OP_GetMemoryStatus, &gdat, &statemachine);
+		error = ms->status = gn_sm_functions(GN_OP_GetMemoryStatus, &gdat, statemachine);
 		pthread_cond_signal(&memoryCond);
 		pthread_mutex_unlock(&memoryMutex);
 	}
@@ -474,7 +441,7 @@ static gint A_GetMemoryLocation(gpointer data)
 	if (ml) {
 		pthread_mutex_lock(&memoryMutex);
 		gdat.phonebook_entry = (ml->entry);
-		error = ml->status = gn_sm_functions(GN_OP_ReadPhonebook, &gdat, &statemachine);
+		error = ml->status = gn_sm_functions(GN_OP_ReadPhonebook, &gdat, statemachine);
 		pthread_cond_signal(&memoryCond);
 		pthread_mutex_unlock(&memoryMutex);
 	}
@@ -500,7 +467,7 @@ static gint A_GetMemoryLocationAll(gpointer data)
 	pthread_mutex_lock(&memoryMutex);
 	for (i = mla->min; i <= mla->max; i++) {
 		entry.location = i;
-		error = gn_sm_functions(GN_OP_ReadPhonebook, &gdat, &statemachine);
+		error = gn_sm_functions(GN_OP_ReadPhonebook, &gdat, statemachine);
 		if (error != GN_ERR_NONE && error != GN_ERR_INVALIDLOCATION &&
 		    error != GN_ERR_EMPTYLOCATION && error != GN_ERR_INVALIDMEMORYTYPE) {
 			gint err_count = 0;
@@ -516,7 +483,7 @@ static gint A_GetMemoryLocationAll(gpointer data)
 					pthread_mutex_unlock(&memoryMutex);
 					return (error);
 				}
-				error = gn_sm_functions(GN_OP_ReadPhonebook, &gdat, &statemachine);
+				error = gn_sm_functions(GN_OP_ReadPhonebook, &gdat, statemachine);
 				sleep(2);
 			}
 		} else {
@@ -575,7 +542,7 @@ static gint A_WriteMemoryLocation(gpointer data)
 		gn_phonebook_entry_sanitize(ml->entry);
 		gdat.phonebook_entry = (ml->entry);
 		pthread_mutex_lock(&memoryMutex);
-		error = ml->status = gn_sm_functions(GN_OP_WritePhonebook, &gdat, &statemachine);
+		error = ml->status = gn_sm_functions(GN_OP_WritePhonebook, &gdat, statemachine);
 		pthread_cond_signal(&memoryCond);
 		pthread_mutex_unlock(&memoryMutex);
 	}
@@ -609,7 +576,7 @@ static gint A_GetCalendarNote(gpointer data)
 	if (cn) {
 		pthread_mutex_lock(&calendarMutex);
 		gdat.calnote = cn->entry;
-		error = cn->status = gn_sm_functions(GN_OP_GetCalendarNote, &gdat, &statemachine);
+		error = cn->status = gn_sm_functions(GN_OP_GetCalendarNote, &gdat, statemachine);
 		pthread_cond_signal(&calendarCond);
 		pthread_mutex_unlock(&calendarMutex);
 	}
@@ -635,7 +602,7 @@ static gint A_GetCalendarNoteAll(gpointer data)
 
 		gdat.calnote = &entry;
 		gdat.calnote_list = &list;
-		if ((error = gn_sm_functions(GN_OP_GetCalendarNote, &gdat, &statemachine)) != GN_ERR_NONE)
+		if ((error = gn_sm_functions(GN_OP_GetCalendarNote, &gdat, statemachine)) != GN_ERR_NONE)
 			break;
 		/* This is necessary for phones with calendar notes index (7110/6510) */
 		entry.location = i++;
@@ -665,7 +632,7 @@ static gint A_WriteCalendarNote(gpointer data)
 	if (cn) {
 		pthread_mutex_lock(&calendarMutex);
 		gdat.calnote = cn->entry;
-		error = cn->status = gn_sm_functions(GN_OP_WriteCalendarNote, &gdat, &statemachine);
+		error = cn->status = gn_sm_functions(GN_OP_WriteCalendarNote, &gdat, statemachine);
 		pthread_cond_signal(&calendarCond);
 		pthread_mutex_unlock(&calendarMutex);
 	}
@@ -684,7 +651,7 @@ static gint A_DeleteCalendarNote(gpointer data)
 
 	if (note) {
 		gdat.calnote = note;
-		error = gn_sm_functions(GN_OP_DeleteCalendarNote, &gdat, &statemachine);
+		error = gn_sm_functions(GN_OP_DeleteCalendarNote, &gdat, statemachine);
 		g_free(note);
 	}
 
@@ -708,7 +675,7 @@ static gint A_GetCallerGroup(gpointer data)
 
 		pthread_mutex_lock(&callerGroupMutex);
 		gdat.bitmap = &bitmap;
-		error = cg->status = gn_sm_functions(GN_OP_GetBitmap, &gdat, &statemachine);
+		error = cg->status = gn_sm_functions(GN_OP_GetBitmap, &gdat, statemachine);
 		snprintf(cg->text, 256, "%s", bitmap.text);
 		pthread_cond_signal(&callerGroupCond);
 		pthread_mutex_unlock(&callerGroupMutex);
@@ -732,14 +699,14 @@ static gint A_SendCallerGroup(gpointer data)
 	bitmap.type = GN_BMP_CallerLogo;
 	bitmap.number = cg->number;
 	gdat.bitmap = &bitmap;
-	if ((error = gn_sm_functions(GN_OP_GetBitmap, &gdat, &statemachine)) != GN_ERR_NONE) {
+	if ((error = gn_sm_functions(GN_OP_GetBitmap, &gdat, statemachine)) != GN_ERR_NONE) {
 		g_free(cg);
 		return (error);
 	}
 	strncpy(bitmap.text, cg->text, 256);
 	bitmap.text[255] = '\0';
 	g_free(cg);
-	return (gn_sm_functions(GN_OP_SetBitmap, &gdat, &statemachine));
+	return (gn_sm_functions(GN_OP_SetBitmap, &gdat, statemachine));
 }
 
 
@@ -755,7 +722,7 @@ static gint A_GetSMSCenter(gpointer data)
 	if (c) {
 		pthread_mutex_lock(&smsCenterMutex);
 		gdat.message_center = c->center;
-		error = c->status = gn_sm_functions(GN_OP_GetSMSCenter, &gdat, &statemachine);
+		error = c->status = gn_sm_functions(GN_OP_GetSMSCenter, &gdat, statemachine);
 		pthread_cond_signal(&smsCenterCond);
 		pthread_mutex_unlock(&smsCenterMutex);
 	}
@@ -775,7 +742,7 @@ static gint A_SetSMSCenter(gpointer data)
 	if (smsc) {
 		gdat.message_center = smsc->center;
 		pthread_mutex_lock(&smsCenterMutex);
-		error = smsc->status = gn_sm_functions(GN_OP_GetSMSCenter, &gdat, &statemachine);
+		error = smsc->status = gn_sm_functions(GN_OP_GetSMSCenter, &gdat, statemachine);
 		g_free(smsc);
 		pthread_cond_signal(&smsCenterCond);
 		pthread_mutex_unlock(&smsCenterMutex);
@@ -796,7 +763,7 @@ static gint A_SendSMSMessage(gpointer data)
 	if (d) {
 		gdat.sms = d->sms;
 		pthread_mutex_lock(&sendSMSMutex);
-		error = d->status = gn_sms_send(&gdat, &statemachine);
+		error = d->status = gn_sms_send(&gdat, statemachine);
 		pthread_cond_signal(&sendSMSCond);
 		pthread_mutex_unlock(&sendSMSMutex);
 	}
@@ -815,9 +782,9 @@ static gint A_DeleteSMSMessage(gpointer data)
 	if (sms) {
 		gdat.sms = sms;
 		if (phoneMonitor.supported & PM_FOLDERS)
-			error = gn_sms_delete_no_validate(&gdat, &statemachine);
+			error = gn_sms_delete_no_validate(&gdat, statemachine);
 		else
-			error = gn_sms_delete(&gdat, &statemachine);
+			error = gn_sms_delete(&gdat, statemachine);
 		g_free(sms);
 	}
 	return (error);
@@ -837,7 +804,7 @@ static gint A_GetSpeedDial(gpointer data)
 	if (d) {
 		gdat.speed_dial = &d->entry;
 		pthread_mutex_lock(&speedDialMutex);
-		error = d->status = gn_sm_functions(GN_OP_GetSpeedDial, &gdat, &statemachine);
+		error = d->status = gn_sm_functions(GN_OP_GetSpeedDial, &gdat, statemachine);
 		pthread_cond_signal(&speedDialCond);
 		pthread_mutex_unlock(&speedDialMutex);
 	}
@@ -859,7 +826,7 @@ static gint A_SendSpeedDial(gpointer data)
 	if (d) {
 		gdat.speed_dial = &d->entry;
 		pthread_mutex_lock(&speedDialMutex);
-		error = d->status = gn_sm_functions(GN_OP_SetSpeedDial, &gdat, &statemachine);
+		error = d->status = gn_sm_functions(GN_OP_SetSpeedDial, &gdat, statemachine);
 		pthread_cond_signal(&speedDialCond);
 		pthread_mutex_unlock(&speedDialMutex);
 	}
@@ -878,7 +845,7 @@ static gint A_SendDTMF(gpointer data)
 
 	if (buf) {
 		gdat.dtmf_string = buf;
-		error = gn_sm_functions(GN_OP_SendDTMF, &gdat, &statemachine);
+		error = gn_sm_functions(GN_OP_SendDTMF, &gdat, statemachine);
 		gdat.dtmf_string = NULL;
 		g_free(buf);
 	}
@@ -900,7 +867,7 @@ static gint A_NetMonOnOff(gpointer data)
 		nm.field = 0xf3;
 	else
 		nm.field = 0xf1;
-	return gn_sm_functions(GN_OP_NetMonitor, &gdat, &statemachine);
+	return gn_sm_functions(GN_OP_NetMonitor, &gdat, statemachine);
 }
 
 
@@ -936,7 +903,7 @@ static gint A_DialVoice(gpointer data)
 	g_free(number);
 
 	gdat.call_info = &CallInfo;
-	error = gn_call_dial(&CallId, &gdat, &statemachine);
+	error = gn_call_dial(&CallId, &gdat, statemachine);
 	gdat.call_info = NULL;
 
 	return (error);
@@ -958,7 +925,7 @@ static gint A_GetAlarm(gpointer data)
 		pthread_mutex_lock(&alarmMutex);
 		gdat.datetime = &a->alarm.timestamp;
 		gdat.alarm = &a->alarm;
-		error = a->status = gn_sm_functions(GN_OP_GetAlarm, &gdat, &statemachine);
+		error = a->status = gn_sm_functions(GN_OP_GetAlarm, &gdat, statemachine);
 		pthread_cond_signal(&alarmCond);
 		pthread_mutex_unlock(&alarmMutex);
 	}
@@ -979,7 +946,7 @@ static gint A_SetAlarm(gpointer data)
 
 	if (a) {
 		gdat.alarm = &a->alarm;
-		error = a->status = gn_sm_functions(GN_OP_SetAlarm, &gdat, &statemachine);
+		error = a->status = gn_sm_functions(GN_OP_SetAlarm, &gdat, statemachine);
 		g_free(a);
 	}
 	return (error);
@@ -993,7 +960,7 @@ static gint A_PressKey(gpointer data)
 	gn_data_clear(&gdat);
 	gdat.key_code = GPOINTER_TO_INT(data);
 
-	return gn_sm_functions(GN_OP_PressPhoneKey, &gdat, &statemachine);
+	return gn_sm_functions(GN_OP_PressPhoneKey, &gdat, statemachine);
 }
 
 static gint A_ReleaseKey(gpointer data)
@@ -1003,7 +970,7 @@ static gint A_ReleaseKey(gpointer data)
 	gn_data_clear(&gdat);
 	gdat.key_code = GPOINTER_TO_INT(data);
 
-	return gn_sm_functions(GN_OP_ReleasePhoneKey, &gdat, &statemachine);
+	return gn_sm_functions(GN_OP_ReleasePhoneKey, &gdat, statemachine);
 }
 
 static gint A_GetBitmap(gpointer data)
@@ -1016,7 +983,7 @@ static gint A_GetBitmap(gpointer data)
 
 	pthread_mutex_lock(&getBitmapMutex);
 	gdat.bitmap = d->bitmap;
-	error = d->status = gn_sm_functions(GN_OP_GetBitmap, &gdat, &statemachine);
+	error = d->status = gn_sm_functions(GN_OP_GetBitmap, &gdat, statemachine);
 	pthread_cond_signal(&getBitmapCond);
 	pthread_mutex_unlock(&getBitmapMutex);
 	return error;
@@ -1036,16 +1003,16 @@ static gint A_SetBitmap(gpointer data)
 		bitmap.type = d->bitmap->type;
 		bitmap.number = d->bitmap->number;
 		gdat.bitmap = &bitmap;
-		error = d->status = gn_sm_functions(GN_OP_GetBitmap, &gdat, &statemachine);
+		error = d->status = gn_sm_functions(GN_OP_GetBitmap, &gdat, statemachine);
 		if (error == GN_ERR_NONE) {
 			strncpy(d->bitmap->text, bitmap.text, sizeof(bitmap.text));
 			d->bitmap->ringtone = bitmap.ringtone;
 			gdat.bitmap = d->bitmap;
-			error = d->status = gn_sm_functions(GN_OP_SetBitmap, &gdat, &statemachine);
+			error = d->status = gn_sm_functions(GN_OP_SetBitmap, &gdat, statemachine);
 		}
 	} else {
 		gdat.bitmap = d->bitmap;
-		error = d->status = gn_sm_functions(GN_OP_SetBitmap, &gdat, &statemachine);
+		error = d->status = gn_sm_functions(GN_OP_SetBitmap, &gdat, statemachine);
 	}
 	pthread_cond_signal(&setBitmapCond);
 	pthread_mutex_unlock(&setBitmapMutex);
@@ -1062,7 +1029,7 @@ static gint A_GetNetworkInfo(gpointer data)
 
 	pthread_mutex_lock(&getNetworkInfoMutex);
 	gdat.network_info = d->info;
-	error = d->status = gn_sm_functions(GN_OP_GetNetworkInfo, &gdat, &statemachine);
+	error = d->status = gn_sm_functions(GN_OP_GetNetworkInfo, &gdat, statemachine);
 	pthread_cond_signal(&getNetworkInfoCond);
 	pthread_mutex_unlock(&getNetworkInfoMutex);
 	return error;
@@ -1087,18 +1054,18 @@ static gint A_PlayTone(gpointer data)
 		struct timeval t1, t2, dt;
 
 		gettimeofday(&t1, NULL);
-		error = gn_sm_functions(GN_OP_PlayTone, &gdat, &statemachine);
+		error = gn_sm_functions(GN_OP_PlayTone, &gdat, statemachine);
 		gettimeofday(&t2, NULL);
 		timersub(&t2, &t1, &dt);
 		uadj = 2 * dt.tv_usec;
 	} else {
-		error = gn_sm_functions(GN_OP_PlayTone, &gdat, &statemachine);
+		error = gn_sm_functions(GN_OP_PlayTone, &gdat, statemachine);
 	}
 	if (d->usec > 0) {
 		if (d->usec > uadj) usleep(d->usec - uadj);
 		tone.frequency = 0;
 		tone.volume = 0;
-		gn_sm_functions(GN_OP_PlayTone, &gdat, &statemachine);
+		gn_sm_functions(GN_OP_PlayTone, &gdat, statemachine);
 	}
 
 	pthread_cond_signal(&ringtoneCond);
@@ -1117,7 +1084,7 @@ static gint A_GetRingtone(gpointer data)
 	pthread_mutex_lock(&ringtoneMutex);
 	gdat.ringtone = d->ringtone;
 
-	d->status = gn_sm_functions(GN_OP_GetRingtone, &gdat, &statemachine);
+	d->status = gn_sm_functions(GN_OP_GetRingtone, &gdat, statemachine);
 
 	pthread_cond_signal(&ringtoneCond);
 	pthread_mutex_unlock(&ringtoneMutex);
@@ -1135,7 +1102,7 @@ static gint A_SetRingtone(gpointer data)
 	pthread_mutex_lock(&ringtoneMutex);
 	gdat.ringtone = d->ringtone;
 
-	d->status = gn_sm_functions(GN_OP_SetRingtone, &gdat, &statemachine);
+	d->status = gn_sm_functions(GN_OP_SetRingtone, &gdat, statemachine);
 
 	pthread_cond_signal(&ringtoneCond);
 	pthread_mutex_unlock(&ringtoneMutex);
@@ -1153,7 +1120,7 @@ static gint A_DeleteRingtone(gpointer data)
 	pthread_mutex_lock(&ringtoneMutex);
 	gdat.ringtone = d->ringtone;
 
-	d->status = gn_sm_functions(GN_OP_DeleteRingtone, &gdat, &statemachine);
+	d->status = gn_sm_functions(GN_OP_DeleteRingtone, &gdat, statemachine);
 
 	pthread_cond_signal(&ringtoneCond);
 	pthread_mutex_unlock(&ringtoneMutex);
@@ -1171,7 +1138,7 @@ static gint A_GetRingtoneList(gpointer data)
 	pthread_mutex_lock(&ringtoneMutex);
 	gdat.ringtone_list = d;
 
-	if (gn_sm_functions(GN_OP_GetRingtoneList, &gdat, &statemachine) != GN_ERR_NONE) {
+	if (gn_sm_functions(GN_OP_GetRingtoneList, &gdat, statemachine) != GN_ERR_NONE) {
 		d->count = 0;
 		d->userdef_location = 0;
 		d->userdef_count = 0;
@@ -1244,7 +1211,7 @@ void *GUI_Connect(void *a)
 	gn_log_xdebug("Initializing connection...\n");
 
 	phoneMonitor.working = _("Connecting...");
-	if (fbusinit(true) != GN_ERR_NONE) {
+	if (fbusinit() != GN_ERR_NONE) {
 		gn_log_xdebug("Initialization failed...\n");
 		MainExit();
 	}
@@ -1274,7 +1241,7 @@ void *GUI_Connect(void *a)
 		if ((call = gn_call_get_active(0)) != NULL) {
 			gn_log_xdebug("Call in progress: %s\n", phoneMonitor.call.callNum);
 			gdat.display_status = &displaystatus;
-			gn_sm_functions(GN_OP_GetDisplayStatus, &gdat, &statemachine);
+			gn_sm_functions(GN_OP_GetDisplayStatus, &gdat, statemachine);
 			if (displaystatus & (1<<GN_DISP_Call_In_Progress)) {
 				pthread_mutex_lock (&callMutex);
 				phoneMonitor.call.callInProgress = CS_InProgress;
@@ -1298,22 +1265,22 @@ void *GUI_Connect(void *a)
 
 			gdat.netmonitor = &netmonitor;
 			gdat.netmonitor->field = phoneMonitor.netmonitor.number;
-			gn_sm_functions(GN_OP_NetMonitor, &gdat, &statemachine);
+			gn_sm_functions(GN_OP_NetMonitor, &gdat, statemachine);
 			memcpy(phoneMonitor.netmonitor.screen, gdat.netmonitor->screen,
 			       sizeof(gdat.netmonitor->screen));
 
 			gdat.netmonitor->field = 3;
-			gn_sm_functions(GN_OP_NetMonitor, &gdat, &statemachine);
+			gn_sm_functions(GN_OP_NetMonitor, &gdat, statemachine);
 			memcpy(phoneMonitor.netmonitor.screen3, gdat.netmonitor->screen,
 			       sizeof(gdat.netmonitor->screen));
 
 			gdat.netmonitor->field = 4;
-			gn_sm_functions(GN_OP_NetMonitor, &gdat, &statemachine);
+			gn_sm_functions(GN_OP_NetMonitor, &gdat, statemachine);
 			memcpy(phoneMonitor.netmonitor.screen4, gdat.netmonitor->screen,
 			       sizeof(gdat.netmonitor->screen));
 
 			gdat.netmonitor->field = 5;
-			gn_sm_functions(GN_OP_NetMonitor, &gdat, &statemachine);
+			gn_sm_functions(GN_OP_NetMonitor, &gdat, statemachine);
 			memcpy(phoneMonitor.netmonitor.screen5, gdat.netmonitor->screen,
 			       sizeof(gdat.netmonitor->screen));
 
@@ -1339,14 +1306,14 @@ void *GUI_Connect(void *a)
 		if (newtime < oldtime + 2)  continue;
 		oldtime = newtime;
 
-		if (gn_sm_functions(GN_OP_GetRFLevel, &gdat, &statemachine) != GN_ERR_NONE)
+		if (gn_sm_functions(GN_OP_GetRFLevel, &gdat, statemachine) != GN_ERR_NONE)
 			phoneMonitor.rfLevel = -1;
 
-		if (gn_sm_functions(GN_OP_GetPowersource, &gdat, &statemachine) == GN_ERR_NONE
+		if (gn_sm_functions(GN_OP_GetPowersource, &gdat, statemachine) == GN_ERR_NONE
 		    && phoneMonitor.powerSource == GN_PS_ACDC)
 			phoneMonitor.batteryLevel = ((gint) phoneMonitor.batteryLevel + 25) % 125;
 		else {
-			if (gn_sm_functions(GN_OP_GetBatteryLevel, &gdat, &statemachine) != GN_ERR_NONE)
+			if (gn_sm_functions(GN_OP_GetBatteryLevel, &gdat, statemachine) != GN_ERR_NONE)
 				phoneMonitor.batteryLevel = -1;
 			if (batt_units == GN_BU_Arbitrary)
 				phoneMonitor.batteryLevel *= 25;
@@ -1355,7 +1322,7 @@ void *GUI_Connect(void *a)
 		if (rf_units == GN_RF_Arbitrary)
 			phoneMonitor.rfLevel *= 25;
 
-		if (gn_sm_functions(GN_OP_GetAlarm, &gdat, &statemachine) == GN_ERR_NONE &&
+		if (gn_sm_functions(GN_OP_GetAlarm, &gdat, statemachine) == GN_ERR_NONE &&
 		    Alarm.enabled != 0)
 			phoneMonitor.alarm = TRUE;
 		else
@@ -1371,7 +1338,7 @@ void *GUI_Connect(void *a)
 				gdat.message_list[j][i] = &MessagesList[j][i];
 		}
 
-		if ((gn_sms_get_folder_changes(&gdat, &statemachine, (phoneMonitor.supported & PM_FOLDERS))) == GN_ERR_NONE) {
+		if ((gn_sms_get_folder_changes(&gdat, statemachine, (phoneMonitor.supported & PM_FOLDERS))) == GN_ERR_NONE) {
 			dprintf("old UR: %i, new UR: %i, old total: %i, new total: %i\n",
 				phoneMonitor.sms.unRead, gdat.sms_status->unread,
 				phoneMonitor.sms.number, gdat.sms_status->number);

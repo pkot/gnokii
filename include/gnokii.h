@@ -86,13 +86,12 @@ struct gn_statemachine;
 
 #include <gnokii/statemachine.h>
 
-/* The global variable that keeps the current configuration. This should be
- * filled in before the phone initialization */
-extern API struct gn_cfg_header *gn_cfg_info;
-
 /* Gnokii library functions - they all start with gn_lib_ */
 /* Get the current runtime version (LIBGNOKII_VERSION) of libgnokii - see LIBGNOKII_MAKE_VERSION() */
 API unsigned int gn_lib_version();
+
+/* return last error code from functions below */
+API gn_error gn_lib_lasterror( void );
 
 /* initialize gnokii library and structures for given phone.
    configname is the name of the profile, if empty or NULL, [global] will be taken  */
@@ -108,11 +107,24 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state );
 API gn_error gn_lib_phone_close( struct gn_statemachine *state );
 
 /* ask phone for static information (model, manufacturer, revision and imei) */
-API const char *gn_lib_get_phone_model       ( struct gn_statemachine *state );
-API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state );
-API const char *gn_lib_get_phone_revision    ( struct gn_statemachine *state );
+API const char *gn_lib_get_phone_model       ( struct gn_statemachine *state ); /* e.g. 6310 */
+API const char *gn_lib_get_phone_product_name( struct gn_statemachine *state ); /* e.g. NPE-4 */
+API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state ); /* e.g. Nokia */
+API const char *gn_lib_get_phone_revision    ( struct gn_statemachine *state ); /* e.g. V 04.20 */
 API const char *gn_lib_get_phone_imei        ( struct gn_statemachine *state );
 
+
+
+
+
+
+/****************************************************************************/
+/* ALL FOLLOWING FUNCTIONS SHOULD BE USED BY GNOKII INTERNAL PROGRAMS ONLY  */
+/****************************************************************************/
+
+/* The global variable that keeps the current configuration. This should be
+ * filled in before the phone initialization */
+extern API struct gn_cfg_header *gn_cfg_info;
 
 /* Files */
 API int gn_file_text_save(char *filename, char *text, int mode);
@@ -185,8 +197,8 @@ API char *gn_device_lock(const char *);
 /* Remove a lock for the given device from /var/lock or /var/run */
 API int gn_device_unlock(char *);
 
-API char *gn_model_get(const char *);
-API gn_phone_model *gn_phone_model_get(const char *);
+API char *gn_model_get(const char *product_name);
+API gn_phone_model *gn_phone_model_get(const char *product_name);
 
 /* SMS */
 API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state);
