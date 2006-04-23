@@ -44,8 +44,7 @@ pthread_mutex_t sendSMSMutex;
 pthread_cond_t  sendSMSCond;
 static pthread_mutex_t eventsMutex;
 static GSList *ScheduledEvents = NULL;
-static struct gn_statemachine sm;
-static char *lockfile = NULL;
+static struct gn_statemachine *sm;
 
 
 inline void InsertEvent (PhoneEvent *event)
@@ -78,19 +77,18 @@ inline static PhoneEvent *RemoveEvent (void)
 
 static gn_error InitModelInf (void)
 {
-  gn_data *data;
+  gn_data data;
   gn_error error;
-  char model[64], rev[64], manufacturer[64];
+  char model[GN_MODEL_MAX_LENGTH], rev[GN_REVISION_MAX_LENGTH], 
+	manufacturer[GN_MANUFACTURER_MAX_LENGTH];
 
-  data = calloc (1,sizeof(gn_data));
-  data->manufacturer = manufacturer;
-  data->model = model;
-  data->revision = rev;
+  data.manufacturer = manufacturer;
+  data.model = model;
+  data.revision = rev;
                           
-  error = gn_sm_functions (GN_OP_GetModel, data, &sm);
+  error = gn_sm_functions (GN_OP_GetModel, &data, &sm);
   if (error != GN_ERR_NONE)
   {
-    free (data);
     return error;
   }
     
@@ -109,57 +107,31 @@ static gn_error InitModelInf (void)
   gn_log_xdebug ("Model: %s\n", phoneMonitor.phone.model);
   gn_log_xdebug ("Revision: %s\n", phoneMonitor.phone.revision);
 
-  free (data);
   return GN_ERR_NONE;
 }
 
-
 static void busterminate (void)
 {
-  gn_sm_functions (GN_OP_Terminate, NULL, &sm);
-  if (lockfile)
-    gn_device_unlock (lockfile);
+  gn_lib_phone_close(sm);
+  gn_lib_phoneprofile_free(&sm);
 }
-
 
 static gn_error fbusinit (const char * const iname)
 {
-  gn_error error = GN_ERR_NOLINK;
-  char *aux;
-  static bool atexit_registered = false;
-  
-  if (!gn_cfg_phone_load (iname, &sm))
+  gn_error error;
+
+  if (GN_ERR_NONE != gn_lib_phoneprofile_load(iname,&sm))
   {
     g_print (_("Cannot load phone %s!\nDo you have proper section in gnokiirc?\n"), iname);
     exit (-1);
   }
 
-  aux = gn_cfg_get (gn_cfg_info, "global", "use_locking");
-  /* Defaults to 'no' */
-  if (aux && !strcmp (aux, "yes"))
-  {
-    lockfile = gn_device_lock (sm.config.port_device);
-    if (lockfile == NULL)
-    {
-      fprintf (stderr, _("Lock file error. Exiting.\n"));
-      exit(1);
-    }
-  }
-
   /* register cleanup function */
-  if (!atexit_registered)
-  {
-    atexit_registered = true;
-    atexit (busterminate);
-  }
-  /* signal(SIGINT, bussignal); */
+  atexit(busterminate);
 
   /* Initialise the code for the GSM interface. */     
-
-  error = gn_gsm_initialise (&sm);
-
+  error = gn_lib_phone_open(sm);
   gn_log_xdebug ("fbusinit: error %d\n", error);
-
   if (error != GN_ERR_NONE)
   {
     g_print (_("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
@@ -171,7 +143,7 @@ static gn_error fbusinit (const char * const iname)
      try to increase number of seconds.
   */
   sleep (2);
-  
+
   return InitModelInf ();
 }
 
@@ -241,7 +213,7 @@ static void RefreshSMS (const gint number)
     msg->number = ++i;
     data.sms = msg;
     
-    if ((error = gn_sms_get (&data, &sm)) == GN_ERR_NONE)
+    if ((error = gn_sms_get (&data, sm)) == GN_ERR_NONE)
     {
       pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
@@ -285,7 +257,7 @@ static gint A_SendSMSMessage (gpointer data)
     {
       dt->message_center = calloc (1, sizeof (gn_sms_message_center));
       dt->message_center->id = 1;
-      if (gn_sm_functions (GN_OP_GetSMSCenter, dt, &sm) == GN_ERR_NONE)
+      if (gn_sm_functions (GN_OP_GetSMSCenter, dt, sm) == GN_ERR_NONE)
       {
         strcpy (d->sms->smsc.number, dt->message_center->smsc.number);
         d->sms->smsc.type = dt->message_center->smsc.type;
@@ -298,7 +270,7 @@ static gint A_SendSMSMessage (gpointer data)
       
     gn_data_clear (dt);
     dt->sms = d->sms;
-    error = d->status = gn_sms_send (dt, &sm);
+    error = d->status = gn_sms_send (dt, sm);
     free (dt);
     pthread_cond_signal (&sendSMSCond);
     pthread_mutex_unlock (&sendSMSMutex);
@@ -325,7 +297,7 @@ static gint A_DeleteSMSMessage (gpointer data)
   dt->sms_folder_list = &SMSFolderList;
   if (dt->sms)
   {
-    error = gn_sms_delete (dt, &sm);
+    error = gn_sms_delete (dt, sm);
 //    I don't use copy, I don't need free message.
 //    g_free (sms);
   }
@@ -385,7 +357,7 @@ void *Connect (void *phone)
     {
       data->sms_folder = &SMSFolder;
       SMSFolder.folder_id = smsdConfig.memoryType;
-      if (status && (error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, &sm)) == GN_ERR_NONE)
+      if (status && (error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.number != SMSFolder.number)
         {
@@ -414,7 +386,7 @@ void *Connect (void *phone)
 
       data->sms_status = &SMSStatus;
       data->memory_status = &dummy;
-      if (status && (error = gn_sm_functions (GN_OP_GetSMSStatus, data, &sm)) == GN_ERR_NONE)
+      if (status && (error = gn_sm_functions (GN_OP_GetSMSStatus, data, sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.unRead != SMSStatus.unread ||
             phoneMonitor.sms.number != SMSStatus.number)
