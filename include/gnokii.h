@@ -56,6 +56,8 @@ typedef unsigned char uint8_t;
 #ifndef API
 #  if defined(WIN32) && defined(GNOKIIDLL_IMPORTS)
 #    define API __declspec(dllimport)
+#  elif (__GNUC__ - 0 > 3)
+#    define API __attribute__ ((visibility("default")))
 #  else
 #    define API
 #  endif
@@ -123,9 +125,21 @@ API const char *gn_lib_cfg_get(const char *section, const char *key);
 /* ALL FOLLOWING FUNCTIONS SHOULD BE USED BY GNOKII INTERNAL PROGRAMS ONLY  */
 /****************************************************************************/
 
+#ifndef GNOKII_DEPRECATED
+#if __GNUC__ - 0 > 3 || (__GNUC__ - 0 == 3 && __GNUC_MINOR__ - 0 >= 2)
+  /* gcc >= 3.2 */
+# define GNOKII_DEPRECATED __attribute__ ((deprecated))
+#elif defined(_MSC_VER) && (_MSC_VER >= 1300)
+  /* msvc >= 7 */
+# define GNOKII_DEPRECATED __declspec(deprecated)
+#else
+# define GNOKII_DEPRECATED
+#endif
+#endif
+
 /* The global variable that keeps the current configuration. This should be
  * filled in before the phone initialization */
-extern API struct gn_cfg_header *gn_cfg_info;
+extern API struct gn_cfg_header *gn_cfg_info GNOKII_DEPRECATED;
 
 /* Files */
 API int gn_file_text_save(char *filename, char *text, int mode);
@@ -140,21 +154,21 @@ extern API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
 			 struct gn_statemachine *state);
 /* Initialise the connection and setup the driver according to the current
  * configuration */
-API gn_error gn_gsm_initialise(struct gn_statemachine *sm);
+API gn_error gn_gsm_initialise(struct gn_statemachine *sm) GNOKII_DEPRECATED;
 API int gn_timestamp_isvalid(gn_timestamp dt);
 
 /* Config handling */
 /* Get the key value from the given config, given section and the key name */
-API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key);
-API int gn_cfg_read(char **bindir); /* DEPRECATED */
+API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key) GNOKII_DEPRECATED;
+API int gn_cfg_read(char **bindir) GNOKII_DEPRECATED;
 /* Read the config from the file filename */
-API int gn_cfg_file_read(const char *filename);
+API int gn_cfg_file_read(const char *filename) GNOKII_DEPRECATED;
 /* Read the config from the file already put into the memory */
-API int gn_cfg_memory_read(const char **lines);
+API int gn_cfg_memory_read(const char **lines) GNOKII_DEPRECATED;
 /* Read the config from the standard $HOME/.gnokiirc or /etc/gnokiirc locations */
-API int gn_cfg_read_default();
+API int gn_cfg_read_default() GNOKII_DEPRECATED;
 /* Use phone_iname section for the communication. Default is the global section */
-API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state);
+API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state) GNOKII_DEPRECATED;
 
 /* In/Out routines, file formats */
 API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location);
@@ -189,7 +203,7 @@ API void gn_log_debug(const char *fmt, ...);
 API void gn_log_rlpdebug(const char *fmt, ...);
 API void gn_log_xdebug(const char *fmt, ...);
 API void gn_elog_write(const char *fmt, ...);
-typedef API void (*gn_log_func_t)(const char *fmt, ...);
+typedef void (*gn_log_func_t)(const char *fmt, ...);
 
 API int gn_line_get(FILE *file, char *line, int count);
 

@@ -15,6 +15,7 @@
       gn_lib_get_phone_model|manufact|... functions  (Helge Deller)
     o lots of changes all around to use new libgnokii
       functions					     (Helge Deller)
+    o add GNOKII_DEPRECATED and API for Linux        (Helge Deller)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
  * build system updates

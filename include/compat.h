@@ -111,8 +111,10 @@
 #  else
 #    define API
 #  endif
-#else /* !WIN32 */
-#  define API
+#elif (__GNUC__ - 0 > 3)
+#    define API __attribute__ ((visibility("default")))
+#else
+#    define API
 #endif /* WIN32 */
 
 #ifndef	HAVE_TIMEOPS
