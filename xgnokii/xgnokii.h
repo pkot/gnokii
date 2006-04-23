@@ -57,7 +57,7 @@ typedef struct {
 	gchar *model;		/* Model from .gnokiirc file. */
 	gchar *port;		/* Serial port from .gnokiirc file */
 	gn_connection_type connection;	/* Connection type from .gnokiirc file */
-	gchar *bindir;
+	const gchar *bindir;
 	gchar *xgnokiidir;
 	gchar *helpviewer;	/* Program to showing help files */
 	gchar *mailbox;		/* Mailbox, where we can save SMS's */

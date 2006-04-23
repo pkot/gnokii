@@ -113,7 +113,8 @@ API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state ); 
 API const char *gn_lib_get_phone_revision    ( struct gn_statemachine *state ); /* e.g. V 04.20 */
 API const char *gn_lib_get_phone_imei        ( struct gn_statemachine *state );
 
-
+/* Get the key value from the given section and the key name */
+API const char *gn_lib_cfg_get(const char *section, const char *key);
 
 
 

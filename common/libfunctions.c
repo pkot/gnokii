@@ -59,18 +59,20 @@ API unsigned int gn_lib_version()
 
 API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statemachine **state )
 {
+	*state = NULL;
+
+	if (!gn_cfg_info) {
+		lasterror = gn_cfg_read_default();
+		if (GN_ERR_NONE != lasterror)
+			return LASTERROR(lasterror);
+	}
+
 	/* allocate and initialize data structures */
 	*state = malloc(sizeof(**state));
 	if (!*state)
 		return LASTERROR(GN_ERR_MEMORYFULL);
 	memset(*state, 0, sizeof(**state));
 
-	/* Read config file */
-	if (gn_cfg_read_default() < 0) {
-		free(*state);
-		*state = NULL;
-		return LASTERROR(GN_ERR_INTERNALERROR);
-	}
 
 	/* Load the phone configuration */
 	if (!gn_cfg_phone_load(configname, *state)) {
@@ -100,11 +102,11 @@ API gn_error gn_lib_lasterror( void )
 
 API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 {
-	char *aux;
+	const char *aux;
 	gn_error error;
 
 	/* should the device be locked with a lockfile ? */
-	aux = gn_cfg_get(gn_cfg_info, "global", "use_locking");
+	aux = gn_lib_cfg_get("global", "use_locking");
 	if (aux && !strcmp(aux, "yes")) {
 		state->lockfile = gn_device_lock(state->config.port_device);
 		if (state->lockfile == NULL) {
@@ -200,3 +202,9 @@ API const char *gn_lib_get_phone_imei( struct gn_statemachine *state )
 	return state->config.m_imei;
 }
 
+API const char *gn_lib_cfg_get(const char *section, const char *key)
+{
+	if (!gn_cfg_info)
+		lasterror = gn_cfg_read_default();
+	return gn_cfg_get(gn_cfg_info, section, key);
+}
