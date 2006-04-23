@@ -46,7 +46,7 @@
 #include "devices/tekram.h"
 
 
-int device_getfd(struct gn_statemachine *state)
+API int device_getfd(struct gn_statemachine *state)
 {
 	return state->device.fd;
 }
