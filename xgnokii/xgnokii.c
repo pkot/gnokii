@@ -2332,10 +2332,8 @@ static bool LocaleHelpExists(gchar *help_locale)
 
 static void ReadConfig(void)
 {
-	if (gn_cfg_read_default() < 0) {
+	if (GN_ERR_NONE != gn_lib_phoneprofile_load( NULL, &statemachine ))
 		exit(-1);
-	}
-	if (!gn_cfg_phone_load("", statemachine)) exit(-1);
 
 	xgnokiiConfig.model = statemachine->config.model;
 	xgnokiiConfig.port = statemachine->config.port_device;
