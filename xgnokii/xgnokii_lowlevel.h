@@ -230,5 +230,6 @@ extern void *GUI_Connect(void *a);
 extern void GUI_InsertEvent(PhoneEvent * event);
 extern gn_error GUI_InitSMSFolders(void);
 extern int isSMSactivated;
+struct gn_statemachine *statemachine;
 
 #endif

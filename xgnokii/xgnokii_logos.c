@@ -1251,14 +1251,14 @@ gint LogoTypeEvent(GtkWidget * widget)
 {
 	int clear = 0;
 	g_print("LogoTypeEvent called!\n");
-	g_print("width: %i, height: %i\n", statemachine.driver.phone.startup_logo_width,
-		statemachine.driver.phone.startup_logo_height);
+	g_print("width: %i, height: %i\n", statemachine->driver.phone.startup_logo_width,
+		statemachine->driver.phone.startup_logo_height);
 	/* is startupLogo? */
 	/* Resize and clear anyway - CK */
 	if (GTK_TOGGLE_BUTTON(buttonStartup)->active) {
 		/* look for old bitmap type, clean if another */
 		clear = 1;
-		gn_bmp_resize(&bitmap, GN_BMP_StartupLogo, &statemachine.driver.phone);
+		gn_bmp_resize(&bitmap, GN_BMP_StartupLogo, &statemachine->driver.phone);
 	}
 
 	/* has phone support for callerGroups? */
@@ -1267,7 +1267,7 @@ gint LogoTypeEvent(GtkWidget * widget)
 			/* previous was startup? clear and draw batteries, signal, ... */
 			/* Clear anyway for 7110...CK */
 			clear = 1;
-			gn_bmp_resize(&bitmap, GN_BMP_CallerLogo, &statemachine.driver.phone);
+			gn_bmp_resize(&bitmap, GN_BMP_CallerLogo, &statemachine->driver.phone);
 		}
 	}
 
@@ -1277,10 +1277,10 @@ gint LogoTypeEvent(GtkWidget * widget)
 		/* previous startup? clear and draw batteries, signal, ... */
 		/* Clear anyway for 7110..CK */
 		clear = 1;
-		if (!strncmp(statemachine.driver.phone.models, "6510", 4))
-			gn_bmp_resize(&bitmap, GN_BMP_NewOperatorLogo, &statemachine.driver.phone);
+		if (!strncmp(statemachine->driver.phone.models, "6510", 4))
+			gn_bmp_resize(&bitmap, GN_BMP_NewOperatorLogo, &statemachine->driver.phone);
 		else
-			gn_bmp_resize(&bitmap, GN_BMP_OperatorLogo, &statemachine.driver.phone);
+			gn_bmp_resize(&bitmap, GN_BMP_OperatorLogo, &statemachine->driver.phone);
 	}
 
 	/* must clear? */
@@ -1314,7 +1314,7 @@ void ExportLogoFileMain(gchar * name)
 
 	strncpy(tbitmap.netcode, gn_network_code_get(networkInfo.network_code), 7);
 
-	error = gn_file_bitmap_save(name, &tbitmap, &statemachine.driver.phone);
+	error = gn_file_bitmap_save(name, &tbitmap, &statemachine->driver.phone);
 	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error writing file\n%s"), gn_error_print(error));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
@@ -1373,7 +1373,7 @@ void ImportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 	} else
 		fclose(f);
 
-	error = gn_file_bitmap_read(fileName, &tbitmap, &statemachine.driver.phone);
+	error = gn_file_bitmap_read(fileName, &tbitmap, &statemachine->driver.phone);
 	if (error != GN_ERR_NONE) {
 		gchar *buf = g_strdup_printf(_("Error reading file\n%s"), gn_error_print(error));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);

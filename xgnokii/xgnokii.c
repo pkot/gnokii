@@ -704,7 +704,7 @@ void GUI_ShowOptions(void)
 	/* Phone */
 	gtk_entry_set_text(GTK_ENTRY(configDialogData.phone.model), phoneMonitor.phone.model);
 
-	gtk_entry_set_text(GTK_ENTRY(configDialogData.phone.version), phoneMonitor.phone.version);
+	gtk_entry_set_text(GTK_ENTRY(configDialogData.phone.version), phoneMonitor.phone.product_name);
 
 	gtk_entry_set_text(GTK_ENTRY(configDialogData.phone.revision), phoneMonitor.phone.revision);
 
@@ -2335,12 +2335,12 @@ static void ReadConfig(void)
 	if (gn_cfg_read_default() < 0) {
 		exit(-1);
 	}
-	if (!gn_cfg_phone_load("", &statemachine)) exit(-1);
+	if (!gn_cfg_phone_load("", statemachine)) exit(-1);
 
-	xgnokiiConfig.model = statemachine.config.model;
-	xgnokiiConfig.port = statemachine.config.port_device;
-	asprintf(&xgnokiiConfig.initlength, "%d", statemachine.config.init_length);
-	xgnokiiConfig.connection = statemachine.config.connection_type;
+	xgnokiiConfig.model = statemachine->config.model;
+	xgnokiiConfig.port = statemachine->config.port_device;
+	asprintf(&xgnokiiConfig.initlength, "%d", statemachine->config.init_length);
+	xgnokiiConfig.connection = statemachine->config.connection_type;
 	xgnokiiConfig.bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
 	if (!xgnokiiConfig.bindir)
 		xgnokiiConfig.bindir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
