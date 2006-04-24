@@ -19,6 +19,7 @@ include $(TOPDIR)/Makefile.global
 
 OBJS =	tekram.lo \
 	irda.lo \
+	dku2libusb.lo \
 	bluetooth.lo
 
 ifdef WIN32

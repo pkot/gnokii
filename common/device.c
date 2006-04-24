@@ -80,6 +80,9 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 		state->device.fd = tcp_opendevice(file, with_async, state);
 		break;
 #endif
+	case GN_CT_DKU2LIBUSB:
+		state->device.fd = fbusdku2usb_open(state);
+		break;
 	default:
 		state->device.fd = -1;
 		break;
@@ -111,6 +114,9 @@ void device_close(struct gn_statemachine *state)
 		tcp_close(state->device.fd, state);
 		break;
 #endif
+	case GN_CT_DKU2LIBUSB:
+		fbusdku2usb_close(state);
+		break;
 	default:
 		break;
 	}
@@ -137,15 +143,12 @@ void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 		serial_setdtrrts(state->device.fd, dtr, rts, state);
 		break;
 	case GN_CT_Irda:
-		break;
 	case GN_CT_Bluetooth:
-		break;
 	case GN_CT_Tekram:
-		break;
 #ifndef WIN32
 	case GN_CT_TCP:
-		break;
 #endif
+	case GN_CT_DKU2LIBUSB:
 	default:
 		break;
 	}
@@ -161,17 +164,15 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 	case GN_CT_Infrared:
 		serial_changespeed(state->device.fd, speed, state);
 		break;
-	case GN_CT_Irda:
-		break;
-	case GN_CT_Bluetooth:
-		break;
 	case GN_CT_Tekram:
 		tekram_changespeed(state->device.fd, speed, state);
 		break;
+	case GN_CT_Irda:
+	case GN_CT_Bluetooth:
 #ifndef WIN32
 	case GN_CT_TCP:
-		break;
 #endif
+	case GN_CT_DKU2LIBUSB:
 	default:
 		break;
 	}
@@ -194,6 +195,8 @@ size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 	case GN_CT_TCP:
 		return tcp_read(state->device.fd, buf, nbytes, state);
 #endif
+	case GN_CT_DKU2LIBUSB:
+		return fbusdku2usb_read(buf, nbytes, state);
 	default:
 		break;
 	}
@@ -217,6 +220,8 @@ size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 	case GN_CT_TCP:
 		return tcp_write(state->device.fd, buf, n, state);
 #endif
+	case GN_CT_DKU2LIBUSB:
+		return fbusdku2usb_write(buf, n, state);
 	default:
 		break;
 	}
@@ -240,6 +245,8 @@ int device_select(struct timeval *timeout, struct gn_statemachine *state)
 	case GN_CT_TCP:
 		return tcp_select(state->device.fd, timeout, state);
 #endif
+	case GN_CT_DKU2LIBUSB:
+		return fbusdku2usb_select(timeout, state);
 	default:
 		break;
 	}

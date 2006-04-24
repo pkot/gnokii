@@ -516,6 +516,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 			state->config.rfcomm_cn = 14;
 		case GN_CT_Infrared:
 		case GN_CT_DKU2:
+		case GN_CT_DKU2LIBUSB:
 		case GN_CT_Irda:
 			err = phonet_initialise(state);
 			/* Don't loop forever */

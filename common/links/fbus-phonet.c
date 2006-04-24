@@ -303,6 +303,7 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	case GN_CT_Infrared:
 	case GN_CT_Irda:
 	case GN_CT_DKU2:
+	case GN_CT_DKU2LIBUSB:
 	case GN_CT_Bluetooth:
 		if (phonet_open(state) == true)
 			error = GN_ERR_NONE;

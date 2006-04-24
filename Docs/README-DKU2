@@ -10,7 +10,7 @@ the usb device exposes two endpoints which provide AT-like modem emulation.
 This kernel module sets an alternative configuration to enable two further
 endpoints which enable Fbus communication.
 
-Patches are in gnokii/patches.  There is one for 2.4.22 - I expect it'll
+Module sources are in gnokii/patches.  There is one for 2.4.22 - I expect it'll
 work with most 2.4 kernels, and one for 2.6.9.
 
 The driver connects two ttys - after connecting the phone dmesg gives:

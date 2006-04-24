@@ -54,19 +54,11 @@
 /* Use UNIX98 style pty support instead of the traditional */
 #undef USE_UNIX98PTYS
 
-/* Define if you have libical. */
-#undef HAVE_LIBICAL
-
 /* Define if you want IrDA support. Linux only */
 #undef HAVE_IRDA
 
 /* Define if you want Bluetooth support. Cross platform */
 #undef HAVE_BLUETOOTH
-
-/***** Compiler specific *****/
-
-/* Define if the `long long' type works.  */
-#undef HAVE_LONG_LONG
 
 
 /**** Platform specific *****/
@@ -90,12 +82,6 @@
 /* Define if you have c_ispeed and c_ospeed in struct termios */
 #undef HAVE_TERMIOS_CSPEED
 
-/* Define if you have snprintf prototype */
-#undef HAVE_SNPRINTF
-
-/* Define if you have vsnprintf prototype */
-#undef HAVE_VSNPRINTF
-
 /* Define if your snprintf implementation is fully C99 compliant */
 #undef HAVE_C99_SNPRINTF
 
@@ -115,11 +101,7 @@
 #undef XPM
 
 /* NLS support */
-#undef HAVE_STPCPY
-#undef ENABLE_NLS
 #undef HAVE_CATGETS
-#undef HAVE_GETTEXT
-#undef HAVE_LC_MESSAGES
 
 @BOTTOM@
 

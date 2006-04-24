@@ -1,5 +1,5 @@
-0.6.13 (not released yet)
-=========================
+0.7.0 (not released yet)
+========================
  * xgnokii updates
     o avoid segfault when enabling or disabling data calls, read
       bindir parameter from .gnokiirc               (Daniele Forsi)
@@ -25,6 +25,9 @@
     o update documentation                              (Pawel Kot)
     o update Linux 2.6 driver to support 2.6.16 kernel (internal
       structures changed again)                         (Pawel Kot)
+ * device layer updates
+    o new libusb driver for dku2 cable (connection = dku2libusb)
+                                                        (Pawel Kot)
 
 0.6.12
 ======

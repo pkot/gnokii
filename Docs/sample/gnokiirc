@@ -82,7 +82,10 @@ initlength = default
 # Note that it is recommended and currently the best way to use this
 # cable with nk6510 driver.
 connection = serial
-# With DKU-2 cable use the following setting
+# With DKU-2 cable use the following setting if you want to libusb driver
+# (recommended):
+# connection = dku2libusb
+# or the following setting if you want to use Linux kernel driver
 # connection = dku2
 # With DKU-5 cable use the following setting
 # connection = dlr3p
@@ -92,6 +95,7 @@ connection = serial
 # connection = bluetooth
 # For infraded connection with phones other then Nokia 6110/6130/6150 use
 # connection = irda
+
 
 # Set this to 'yes' if you want gnokii to set and check the lock file in
 # /var/lock directory. It avoids potential conflicts with other serial

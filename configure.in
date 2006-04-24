@@ -254,7 +254,21 @@ AC_TRY_LINK([
    ]
 )
 
-
+dnl ======================== Check for libusb
+USE_LIBUSB="no"
+AC_MSG_CHECKING(whether libusb is installed)
+AC_TRY_COMPILE([#include <usb.h>],
+	[struct usb_dev_handle *dev;],
+	[
+		AC_MSG_RESULT(yes)
+		AC_DEFINE([HAVE_LIBUSB],[1],[Use libusb])
+		USE_LIBUSB="yes"
+		LIBS="$LIBS -lusb"
+	],
+	[
+		AC_MSG_RESULT(no)
+	]
+)
 
 dnl ======================== Checks for gethostbyname support
 AC_CHECK_FUNC(gethostbyname, ,
@@ -664,6 +678,7 @@ AC_SUBST(WIN32)
 AC_SUBST(WIN32_CROSS)
 
 AC_SUBST(HAVE_LIBICAL)
+AC_SUBST(HAVE_LIBUSB)
 
 AC_OUTPUT(
    Makefile.global
@@ -705,6 +720,7 @@ echo "
     IrDA:               $USE_IRDA
     ical read support:  $USE_LIBICAL
     Bluetooth:          $USE_BLUETOOTH
+    libusb support:     $USE_LIBUSB
     Security:           $security
     Build Shared Lib:   $shared
     Build Static Lib:   $static
