@@ -26,6 +26,8 @@
     o update documentation                              (Pawel Kot)
     o update Linux 2.6 driver to support 2.6.16 kernel (internal
       structures changed again)                         (Pawel Kot)
+    o Symbian phones are not capable to use nokia_dku2 driver --
+      exclude their ids from the driver                 (Pawel Kot)
  * device layer updates
     o new libusb driver for dku2 cable (connection = dku2libusb)
                                                         (Pawel Kot)
