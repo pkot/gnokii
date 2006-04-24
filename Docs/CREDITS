@@ -180,6 +180,9 @@ Thank you to, in no particular order...
 *  Bastien Nocera for changes to the cfgreader, variuos other patches and
    work on integrating libgnokii with gnome-phone-manager
 
+*  Alex Kanavin for OBEX USB DKU2 support and patient help for Pawel while
+   porting it to gnokii
+
 *  Everyone chatting with us on IRC #gnokii at freenode.net
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
