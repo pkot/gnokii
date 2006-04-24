@@ -16,6 +16,7 @@
     o lots of changes all around to use new libgnokii
       functions					     (Helge Deller)
     o add GNOKII_DEPRECATED and API for Linux        (Helge Deller)
+    o avoid double free on lockfile unlock              (Pawel Kot)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
  * build system updates

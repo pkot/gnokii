@@ -133,8 +133,8 @@ API gn_error gn_lib_phone_close( struct gn_statemachine *state )
 
 	/* remove lockfile if it was created */
 	if (state->lockfile) {
+		/* gn_device_unlock frees state->lockfile */
 		gn_device_unlock(state->lockfile);
-		free(state->lockfile);
 	}
 	state->lockfile = NULL;
 
