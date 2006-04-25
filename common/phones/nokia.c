@@ -215,6 +215,13 @@ gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int 
 	int n;
 	char buf[1024];
 
+	/* the struct is not yet allocated if this is the first unsolicited call divert message */
+	if (!data->call_divert) {
+		data->call_divert = malloc(sizeof(gn_call_divert));
+		if (!data->call_divert) return GN_ERR_MEMORYFULL;
+		memset(data->call_divert, 0, sizeof(*data->call_divert));
+	}
+
 	switch (message[3]) {
 	/* Get call diverts ok */
 	case 0x02:
