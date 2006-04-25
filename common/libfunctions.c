@@ -43,45 +43,40 @@
 #include "gnokii.h"
 #include "device.h"
 
-/* static "last" error code */
-static gn_error lasterror;
-
 /* this macro sets the "lasterror" code */
-#define LASTERROR(nr)	((lasterror = nr)) /* do not delete the double brackets! */
+#define LASTERROR(state,nr)	((state->lasterror = nr)) /* do not delete the double brackets! */
 
 API unsigned int gn_lib_version()
 {
-	lasterror = GN_ERR_NONE;
-
 	/* return the library version number at compile time of libgnokii */
 	return LIBGNOKII_VERSION;
 }
 
 API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statemachine **state )
 {
+	gn_error error;
 	*state = NULL;
 
 	if (!gn_cfg_info) {
-		lasterror = gn_cfg_read_default();
-		if (GN_ERR_NONE != lasterror)
-			return LASTERROR(lasterror);
+		error = gn_cfg_read_default();
+		if (GN_ERR_NONE != error)
+			return error;
 	}
 
 	/* allocate and initialize data structures */
 	*state = malloc(sizeof(**state));
 	if (!*state)
-		return LASTERROR(GN_ERR_MEMORYFULL);
+		return GN_ERR_MEMORYFULL;
 	memset(*state, 0, sizeof(**state));
-
 
 	/* Load the phone configuration */
 	if (!gn_cfg_phone_load(configname, *state)) {
 		free(*state);
 		*state = NULL;
-		return LASTERROR(GN_ERR_UNKNOWNMODEL);
+		return GN_ERR_UNKNOWNMODEL;
 	}
 
-	return LASTERROR(GN_ERR_NONE);
+	return LASTERROR((*state),GN_ERR_NONE);
 }
 
 API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
@@ -90,13 +85,16 @@ API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
 	free(*state);
 	*state = NULL;
 
-	return LASTERROR(GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 /* return last error code */
-API gn_error gn_lib_lasterror( void )
+API gn_error gn_lib_lasterror( struct gn_statemachine *state )
 {
-	return lasterror;
+	if (state)
+		return state->lasterror;
+	else
+		return GN_ERR_INTERNALERROR;
 }
 
 
@@ -111,7 +109,7 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 		state->lockfile = gn_device_lock(state->config.port_device);
 		if (state->lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting.\n"));
-			return LASTERROR(GN_ERR_BUSY);
+			return LASTERROR(state,GN_ERR_BUSY);
 		}
 	}
 
@@ -120,10 +118,10 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Telephone interface init failed: %s\nQuitting.\n"),
 			gn_error_print(error));
-		return LASTERROR(error);
+		return LASTERROR(state,error);
 	}
 
-	return LASTERROR(GN_ERR_NONE);
+	return LASTERROR(state,GN_ERR_NONE);
 }
 
 API gn_error gn_lib_phone_close( struct gn_statemachine *state )
@@ -138,7 +136,7 @@ API gn_error gn_lib_phone_close( struct gn_statemachine *state )
 	}
 	state->lockfile = NULL;
 
-	return LASTERROR(GN_ERR_NONE);
+	return LASTERROR(state,GN_ERR_NONE);
 }
 
 static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
@@ -148,7 +146,7 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	gn_error error;
 
 	if (state->config.m_model[0])
-		return LASTERROR(GN_ERR_NONE);
+		return LASTERROR(state,GN_ERR_NONE);
 
 	// identify phone
 	gn_data_clear(data);
@@ -168,7 +166,7 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	   Anyway let's wait 2 seconds for the right packet from the phone. */
 	sleep(2);
 
-	return LASTERROR(error);
+	return LASTERROR(state,error);
 }
 
 /* ask phone for static information (model, version, manufacturer, revision and imei) */
@@ -205,6 +203,31 @@ API const char *gn_lib_get_phone_imei( struct gn_statemachine *state )
 API const char *gn_lib_cfg_get(const char *section, const char *key)
 {
 	if (!gn_cfg_info)
-		lasterror = gn_cfg_read_default();
+		gn_cfg_read_default();
 	return gn_cfg_get(gn_cfg_info, section, key);
+}
+
+
+
+/* Phone addressbook functions */
+
+API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
+	const gn_memory_type memory_type, int *num_used, int *num_free )
+{
+	gn_error lasterror;
+	gn_memory_status memstat;
+	gn_data *data = &state->sm_data;
+
+	gn_data_clear(data);
+	memset(&memstat, 0, sizeof(memstat));
+        memstat.memory_type = memory_type;
+        data->memory_status = &memstat;
+
+	lasterror = gn_sm_functions(GN_OP_GetMemoryStatus, data, state);
+	if (lasterror == GN_ERR_NONE) {
+		if (num_used) *num_used = memstat.used;
+		if (num_free) *num_free = memstat.free;
+	}
+
+	return LASTERROR(state,lasterror);
 }

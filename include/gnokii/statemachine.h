@@ -88,6 +88,7 @@ struct gn_statemachine {
 	/* Data structure to be filled in with the response */
 	gn_data *data[GN_SM_WAITINGFOR_MAX_NUMBER];
 	/* libfunctions internal data structure */
+	gn_error lasterror;
 	gn_data sm_data;
 };
 

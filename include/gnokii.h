@@ -93,7 +93,7 @@ struct gn_statemachine;
 API unsigned int gn_lib_version();
 
 /* return last error code from functions below */
-API gn_error gn_lib_lasterror( void );
+API gn_error gn_lib_lasterror( struct gn_statemachine *state );
 
 /* initialize gnokii library and structures for given phone.
    configname is the name of the profile, if empty or NULL, [global] will be taken  */
@@ -118,6 +118,11 @@ API const char *gn_lib_get_phone_imei        ( struct gn_statemachine *state );
 /* Get the key value from the given section and the key name */
 API const char *gn_lib_cfg_get(const char *section, const char *key);
 
+/* Phone Addressbook functions */
+/* get number of used/free phone addressbook memory slots */
+API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
+		const gn_memory_type memory_type,
+		int *num_used, int *num_free );
 
 
 
