@@ -4110,7 +4110,7 @@ static int identify(void)
 	fprintf(stdout, _("Product name : %s\n"), gn_lib_get_phone_product_name(state));
 	fprintf(stdout, _("Revision     : %s\n"), gn_lib_get_phone_revision(state));
 
-	return gn_lib_lasterror();
+	return gn_lib_lasterror(state);
 }
 
 static int senddtmf(char *string)
