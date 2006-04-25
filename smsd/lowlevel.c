@@ -114,6 +114,7 @@ static void busterminate (void)
 {
   gn_lib_phone_close(sm);
   gn_lib_phoneprofile_free(&sm);
+  gn_lib_library_free();
 }
 
 static gn_error fbusinit (const char * const iname)

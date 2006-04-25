@@ -88,6 +88,13 @@ API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
 	return GN_ERR_NONE;
 }
 
+API void gn_lib_library_free( void )
+{
+	if (gn_cfg_info) {
+		gn_cfg_free_default();
+	}
+}
+
 /* return last error code */
 API gn_error gn_lib_lasterror( struct gn_statemachine *state )
 {

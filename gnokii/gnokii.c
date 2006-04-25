@@ -424,6 +424,7 @@ static void busterminate(void)
 	gn_lib_phoneprofile_free(&state);
 	if (logfile)
 		fclose(logfile);
+	gn_lib_library_free();
 }
 
 static void businit(void)
@@ -5916,6 +5917,7 @@ int main(int argc, char *argv[])
 			break;
 
 		}
+		free(nargv);
 		exit(rc);
 	}
 

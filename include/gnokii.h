@@ -92,6 +92,9 @@ struct gn_statemachine;
 /* Get the current runtime version (LIBGNOKII_VERSION) of libgnokii - see LIBGNOKII_MAKE_VERSION() */
 API unsigned int gn_lib_version();
 
+/* free any ressources which were used by libgnokii */
+API void gn_lib_library_free( void );
+
 /* return last error code from functions below */
 API gn_error gn_lib_lasterror( struct gn_statemachine *state );
 
@@ -124,6 +127,13 @@ API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
 		const gn_memory_type memory_type,
 		int *num_used, int *num_free );
 
+/* check if given addressbook entry is empty. Returns "true" if empty, 0 if not. */
+API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
+		const gn_memory_type memory_type, const int index );
+
+/* read given addressbook entry into internal structure. Ask for values with functions below */
+API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
+		const gn_memory_type memory_type, const int index );
 
 
 /****************************************************************************/
@@ -172,6 +182,8 @@ API int gn_cfg_file_read(const char *filename) GNOKII_DEPRECATED;
 API int gn_cfg_memory_read(const char **lines) GNOKII_DEPRECATED;
 /* Read the config from the standard $HOME/.gnokiirc or /etc/gnokiirc locations */
 API int gn_cfg_read_default() GNOKII_DEPRECATED;
+/* free any ressources which were used by libgnokii */
+API void gn_cfg_free_default() GNOKII_DEPRECATED;
 /* Use phone_iname section for the communication. Default is the global section */
 API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state) GNOKII_DEPRECATED;
 

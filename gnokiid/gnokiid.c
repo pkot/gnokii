@@ -81,6 +81,7 @@ static void busterminate(void)
 {
 	gn_vm_terminate();
 	if (lockfile) gn_device_unlock(lockfile);
+	gn_lib_library_free();
 }
 
 /* Main function - handles command line arguments, passes them to separate
