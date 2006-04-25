@@ -214,7 +214,7 @@ API const char *gn_lib_cfg_get(const char *section, const char *key)
 API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
 	const gn_memory_type memory_type, int *num_used, int *num_free )
 {
-	gn_error lasterror;
+	gn_error error;
 	gn_memory_status memstat;
 	gn_data *data = &state->sm_data;
 
@@ -223,11 +223,39 @@ API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
         memstat.memory_type = memory_type;
         data->memory_status = &memstat;
 
-	lasterror = gn_sm_functions(GN_OP_GetMemoryStatus, data, state);
-	if (lasterror == GN_ERR_NONE) {
+	error = gn_sm_functions(GN_OP_GetMemoryStatus, data, state);
+	if (error == GN_ERR_NONE) {
 		if (num_used) *num_used = memstat.used;
 		if (num_free) *num_free = memstat.free;
 	}
 
-	return LASTERROR(state,lasterror);
+	return LASTERROR(state,error);
 }
+
+API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
+	const gn_memory_type memory_type, const int index )
+{
+	gn_error error;
+	gn_data *data = &state->sm_data;
+
+	state->u.pb_entry.memory_type = memory_type;
+	state->u.pb_entry.location = index;
+	data->phonebook_entry = &state->u.pb_entry;
+	error = gn_sm_functions(GN_OP_ReadPhonebook, data, state);
+	return LASTERROR(state,error);
+}
+
+API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
+	const gn_memory_type memory_type, const int index )
+{
+	gn_error error;
+
+	error = gn_lib_phonebook_read_entry(state, memory_type, index);
+	if (error == GN_ERR_EMPTYLOCATION)
+		return true;
+	if (error == GN_ERR_NONE && state->u.pb_entry.empty)
+		return true;
+	return false;
+}
+
+
