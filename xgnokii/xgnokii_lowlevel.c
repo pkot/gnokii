@@ -184,6 +184,7 @@ static void busterminate(void)
 {
 	gn_lib_phone_close(statemachine);
 	gn_lib_phoneprofile_free(&statemachine);
+	gn_lib_library_free();
 }
 
 static gn_error fbusinit()
