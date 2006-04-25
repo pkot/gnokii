@@ -152,8 +152,8 @@ static gn_error InitModelInf(void)
 	gint i, j;
 
 	phoneMonitor.phone.model = g_strdup(gn_lib_get_phone_model(statemachine));
-	if (gn_lib_lasterror() != GN_ERR_NONE)
-		return gn_lib_lasterror();
+	if (gn_lib_lasterror(statemachine) != GN_ERR_NONE)
+		return gn_lib_lasterror(statemachine);
 
 	phoneMonitor.phone.product_name = g_strdup(gn_lib_get_phone_product_name(statemachine));
 	phoneMonitor.phone.revision = g_strdup(gn_lib_get_phone_revision(statemachine));
