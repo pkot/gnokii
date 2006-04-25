@@ -1178,6 +1178,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 
 		/* store number */
 		pos = strchr(buf.line2, '\"');
+		dprintf("NUMBER: %s\n", pos);
 		endpos = NULL;
 		if (pos)
 			endpos = strchr(++pos, '\"');
@@ -1190,6 +1191,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 		pos = NULL;
 		if (endpos)
 			pos = strchr(endpos+2, ',');
+		dprintf("NAME: %s\n", pos);
 		endpos = NULL;
 		if (pos) {
 			pos = strip_quotes(pos+1);
@@ -1383,12 +1385,15 @@ static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length
 	splitlines(&buf);
 	if (!strncmp(buf.line1, "AT+CG", 5)) {
 		reply_simpletext(buf.line1+2, buf.line2, "+CGSN: ", data->imei);
-		reply_simpletext(buf.line1+2, buf.line2, "+CGMM: ", data->model);
+		if (!data->model[0])
+			reply_simpletext(buf.line1+2, buf.line2, "+CGMM: ", data->model);
 		reply_simpletext(buf.line1+2, buf.line2, "+CGMI: ", data->manufacturer);
 		reply_simpletext(buf.line1+2, buf.line2, "+CGMR: ", data->revision);
+		reply_simpletext(buf.line1+2, buf.line4, "+CGMR: ", data->model);
 	} else if (!strncmp(buf.line1, "AT+G", 4)) {
 		reply_simpletext(buf.line1+2, buf.line2, "+GSN: ", data->imei);
-		reply_simpletext(buf.line1+2, buf.line2, "+GMM: ", data->model);
+		if (!data->model[0])
+			reply_simpletext(buf.line1+2, buf.line2, "+GMM: ", data->model);
 		reply_simpletext(buf.line1+2, buf.line2, "+GMI: ", data->manufacturer);
 		reply_simpletext(buf.line1+2, buf.line2, "+GMR: ", data->revision);
 	}
@@ -1920,6 +1925,10 @@ void splitlines(at_line_buffer *buf)
 		buf->line4 = skipcrlf(++pos);
 	} else {
 		buf->line4 = buf->line3;
+	}
+	pos = findcrlf(buf->line4, 1, buf->length);
+	if (pos) {
+		*pos = 0;
 	}
 }
 

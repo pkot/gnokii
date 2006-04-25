@@ -38,6 +38,8 @@
  * device layer updates
     o new libusb driver for dku2 cable (connection = dku2libusb)
                                                         (Pawel Kot)
+ * atgen driver updates
+    o use model and product name correctly              (Pawel Kot)
 
 0.6.12
 ======

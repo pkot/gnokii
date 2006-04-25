@@ -155,12 +155,16 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	data->revision     = state->config.m_revision;
 	data->imei         = state->config.m_imei;
 
-	strcpy(data->model,        unknown);
-	strcpy(data->manufacturer, unknown);
-	strcpy(data->revision,     unknown);
-	strcpy(data->imei,         unknown);
-
 	error = gn_sm_functions(GN_OP_Identify, data, state);
+
+	if (!data->model[0])
+		strcpy(data->model,        unknown);
+	if (!data->manufacturer[0])
+		strcpy(data->manufacturer, unknown);
+	if (!data->revision[0])
+		strcpy(data->revision,     unknown);
+	if (!data->imei[0])
+		strcpy(data->imei,         unknown);
 
 	/* Retrying is bad idea: what if function is simply not implemented?
 	   Anyway let's wait 2 seconds for the right packet from the phone. */
@@ -172,8 +176,14 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 /* ask phone for static information (model, version, manufacturer, revision and imei) */
 API const char *gn_lib_get_phone_model( struct gn_statemachine *state )
 {
+	char *aux;
+
 	gn_lib_get_phone_information(state);
-	return gn_model_get(state->config.m_model); /* e.g. 6310 */
+	aux = gn_model_get(state->config.m_model); /* e.g. 6310 */
+	if (aux)
+		return aux;
+	else
+		return state->config.m_model;
 }
 
 API const char *gn_lib_get_phone_product_name( struct gn_statemachine *state )
