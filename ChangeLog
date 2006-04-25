@@ -4,9 +4,7 @@
     o avoid segfault when enabling or disabling data calls, read
       bindir parameter from .gnokiirc               (Daniele Forsi)
  * libgnokii updates
-    o fix --smsreader for nk6100 driver             (Daniele Forsi)
     o increase max sms and smsc phone number to 20      (Pawel Kot)
-    o Nokia 3310 does not support GetPhoneStatus    (Daniele Forsi)
     o add a library layer to make libgnokii more binary
       compatible between versions in the future      (Helge Deller)
     o change gnokii to use library layer             (Helge Deller)
@@ -17,8 +15,14 @@
       functions					     (Helge Deller)
     o add GNOKII_DEPRECATED and API for Linux        (Helge Deller)
     o avoid double free on lockfile unlock              (Pawel Kot)
+    o make pnok_call_divert_incoming() allocate the needed struct
+      when it is missing (e.g. when receiving unsolicited messages)
+                                                    (Daniele Forsi)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
+ * nk6100 driver updates
+    o fix --smsreader for nk6100 driver             (Daniele Forsi)
+    o Nokia 3310 does not support GetPhoneStatus    (Daniele Forsi)
  * build system updates
     o fix typo in smsd-mysql Debian pacakge depedencies (Pawel Kot)
  * dku2 kernel driver updates
