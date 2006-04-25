@@ -166,10 +166,6 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	if (!data->imei[0])
 		strcpy(data->imei,         unknown);
 
-	/* Retrying is bad idea: what if function is simply not implemented?
-	   Anyway let's wait 2 seconds for the right packet from the phone. */
-	sleep(2);
-
 	return LASTERROR(state,error);
 }
 
