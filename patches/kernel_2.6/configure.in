@@ -40,16 +40,19 @@ AC_OUTPUT(Makefile)
 
 dnl === Output the configuration paths and instruction for the next steps
 echo "
+
 Sources located at $SOURCESDIR will be used.
 Compiled kernel module will be installed into $MODULESDIR.
+
 Now type:
  $ make
 to compile the driver, and then become root and type:
  # make install
 to install the driver. Next step is to:
  # modprobe nokia_dku2
-and see the kernel logs to verify whether the driver works. If you have any problems
-doing this, consult gnokii FAQ (distributed withing gnokii tarball or online at
-http://www.gnokii.org/faq.shtml), gnokii wiki (http://wiki.gnokii.org) or gnokii
-users mailing list (http://lists.gnu.org/mailman/listinfo/gnokii-users).
+and see the kernel logs to verify whether the driver works. If you have any
+problems doing this, consult gnokii FAQ (distributed withing gnokii tarball
+or online at http://www.gnokii.org/faq.shtml), gnokii wiki
+(http://wiki.gnokii.org) or gnokii users mailing list
+(http://lists.gnu.org/mailman/listinfo/gnokii-users).
 "

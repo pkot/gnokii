@@ -39,6 +39,7 @@
       structures changed again)                         (Pawel Kot)
     o Symbian phones are not capable to use nokia_dku2 driver --
       exclude their ids from the driver                 (Pawel Kot)
+    o add Nokia 6265 support                          (Artur Souza)
  * device layer updates
     o new libusb driver for dku2 cable (connection = dku2libusb)
                                                         (Pawel Kot)
