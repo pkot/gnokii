@@ -1,8 +1,11 @@
-0.6.13 (not released yet)
+0.7.0 (not released yet)
 ========================
  * xgnokii updates
     o avoid segfault when enabling or disabling data calls, read
       bindir parameter from .gnokiirc               (Daniele Forsi)
+    o enable Speed Dial window for the following tested model and
+      product_name pairs: Nokia 3210 (NSE-8), Nokia 3310 (NHM-5)
+      and Nokia 3330 (NHM-6)                        (Daniele Forsi)
  * libgnokii updates
     o increase max sms and smsc phone number to 20      (Pawel Kot)
     o add a library layer to make libgnokii more binary
