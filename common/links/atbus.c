@@ -171,9 +171,9 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 		bi->rbuf[1] = '\0';
 	}
 	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 2, "\r\n", 2)) {
-		unsolicited = 0;
 		/* try to find previous <cr><lf> */
 		char *start = findcrlfbw(bi->rbuf + bi->rbuf_pos - 2, bi->rbuf_pos - 1);
+		unsolicited = 0;
 		/* if not found, start at buffer beginning */
 		if (!start)
 			start = bi->rbuf+1;
