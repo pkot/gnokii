@@ -265,14 +265,22 @@ PhonebookEntry *FindFreeEntry(gn_memory_type type)
 
 inline PhonebookEntry *GUI_GetEntry(gn_memory_type type, gint nr)
 {
-	if ((type == GN_MT_ME && (nr < 1 || nr >= memoryStatus.MaxME)) ||
-	    (type == GN_MT_SM && (nr < 1 || nr >= memoryStatus.MaxSM)))
-		return NULL;
+	if (nr < 1) return NULL;
 
-	if (type == GN_MT_ME)
-		return g_ptr_array_index(contactsMemory, nr - 1);
-	else
-		return g_ptr_array_index(contactsMemory, nr + memoryStatus.MaxME - 1);
+	switch (type) {
+		case GN_MT_ME:
+			if (nr >= memoryStatus.MaxME) return NULL;
+			break;
+		case GN_MT_SM:
+			if (nr >= memoryStatus.MaxSM) return NULL;
+			nr += memoryStatus.MaxME;
+			break;
+		default:
+			return NULL;
+	}
+
+	if (nr >= contactsMemory->len) return NULL;
+	return g_ptr_array_index(contactsMemory, nr - 1);
 }
 
 

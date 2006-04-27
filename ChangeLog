@@ -6,6 +6,10 @@
     o enable Speed Dial window for the following tested model and
       product_name pairs: Nokia 3210 (NSE-8), Nokia 3310 (NHM-5)
       and Nokia 3330 (NHM-6)                        (Daniele Forsi)
+    o don't segfault in Speed Dial window trying to associate a
+      speed dial to a phone number when the phonebook could not be
+      read because of an error (e.g. when pin code is required)
+                                                    (Daniele Forsi)
  * libgnokii updates
     o increase max sms and smsc phone number to 20      (Pawel Kot)
     o add a library layer to make libgnokii more binary
