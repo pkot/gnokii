@@ -238,9 +238,9 @@ static void ReadSpeedDial(void)
 		/*
 		GUI_Refresh ();
 		*/
-		gtk_widget_hide(infoDialog.dialog);
 	}
-
+	gtk_widget_hide(infoDialog.dialog);
+		
 	gtk_clist_sort(GTK_CLIST(clist));
 	gtk_clist_thaw(GTK_CLIST(clist));
 	speedDialInitialized = TRUE;
@@ -556,7 +556,7 @@ void GUI_CreateSpeedDialWindow(void)
 	GUI_SpeedDialWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_wmclass(GTK_WINDOW(GUI_SpeedDialWindow), "SpeedDialWindow", "Xgnokii");
 	gtk_window_set_title(GTK_WINDOW(GUI_SpeedDialWindow), _("Speed Dial"));
-	gtk_widget_set_usize(GTK_WIDGET(GUI_SpeedDialWindow), 332, 220);
+	gtk_widget_set_usize(GTK_WIDGET(GUI_SpeedDialWindow), 350, 220);
 	//gtk_container_set_border_width (GTK_CONTAINER (GUI_SpeedDialWindow), 10);
 	gtk_signal_connect(GTK_OBJECT(GUI_SpeedDialWindow), "delete_event",
 			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);

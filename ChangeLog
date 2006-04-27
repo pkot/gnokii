@@ -10,6 +10,9 @@
       speed dial to a phone number when the phonebook could not be
       read because of an error (e.g. when pin code is required)
                                                     (Daniele Forsi)
+    o make Speed Dial window a little wider to avoid the horizontal
+      scroll bar; hide "info" window only after reading all speed
+      dials, not just after the first one           (Daniele Forsi)
  * libgnokii updates
     o increase max sms and smsc phone number to 20      (Pawel Kot)
     o add a library layer to make libgnokii more binary
