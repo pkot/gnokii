@@ -241,18 +241,23 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 
 	/* Now construct the message header. */
 
-	if (state->config.connection_type == GN_CT_Bluetooth) {
+	switch (state->config.connection_type) {
+	case GN_CT_Bluetooth:
 		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_FRAME_ID;
 		out_buffer[current++] = FBUS_DEVICE_PHONE;
 		out_buffer[current++] = FBUS_PHONET_BLUETOOTH_DEVICE_PC;
-	} else if (state->config.connection_type == GN_CT_DKU2) {
+		break;
+	case GN_CT_DKU2:
+	case GN_CT_DKU2LIBUSB:
 		out_buffer[current++] = FBUS_PHONET_DKU2_FRAME_ID;
 		out_buffer[current++] = FBUS_DEVICE_PHONE;
 		out_buffer[current++] = FBUS_PHONET_DKU2_DEVICE_PC;
-	} else {
+		break;
+	default:
 		out_buffer[current++] = FBUS_PHONET_FRAME_ID;
 		out_buffer[current++] = FBUS_DEVICE_PHONE; /* Destination */
 		out_buffer[current++] = FBUS_DEVICE_PC;    /* Source */
+		break;
 	}
 
 	out_buffer[current++] = messagetype; /* Type */

@@ -1,5 +1,5 @@
-0.7.0 (not released yet)
-========================
+0.6.13 (not released yet)
+=========================
  * xgnokii updates
     o avoid segfault when enabling or disabling data calls, read
       bindir parameter from .gnokiirc               (Daniele Forsi)
@@ -50,6 +50,9 @@
  * device layer updates
     o new libusb driver for dku2 cable (connection = dku2libusb)
                                                         (Pawel Kot)
+ * link layer updates
+    o make new libusb driver work also for Symbian devices
+                                                     (Alex Kanavin)
  * atgen driver updates
     o use model and product name correctly              (Pawel Kot)
 
