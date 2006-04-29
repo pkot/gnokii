@@ -1,5 +1,5 @@
 -- README-Symbian
--- Notes, bugs and a todo list for the Series 60 phones --
+-- Notes, bugs and a todo list for the Symbian (Nokia Series 60) phones --
 
 * Notes *
 
@@ -35,7 +35,7 @@ Docs/ directory of the tarball (called gnapplet.sis).
 
 You can install the SIS file in the same way as another symbian application.
 You can transfer it to the phone over the OBEX protocol (OBEX is available
-over IrDA or Bluetooth).
+over IrDA or Bluetooth or cable connection).
 
 You can use the following settings in your gnokiirc to access the phone:
 
@@ -44,14 +44,14 @@ You can use the following settings in your gnokiirc to access the phone:
     [global]
     port = _bluetooth_address_
     rfcomm_channel = 14
-    model = series60
+    model = symbian
     connection = bluetooth
 
 - IrDA connection
 
     [global]
     port = /dev/ircomm0
-    model = series60
+    model = symbian
     connection = irda
 
 - TCP/IP connection (disabled by default, you have to edit gnapplet.ini
@@ -59,7 +59,7 @@ You can use the following settings in your gnokiirc to access the phone:
 
     [global]
     port = 169.254.1.68:1912	(put the IP address of your phone here)
-    model = series60
+    model = symbian
     connection = tcp
 
 You have to start gnapplet first (you'll find it in the menu), then start

@@ -147,7 +147,7 @@ gn_driver driver_gnapplet = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"gnapplet|series60|3650|6600|sx1|6680",	/* Supported models */
+		"gnapplet|symbian|3650|6600|sx1",	/* Supported models */
 		0,			/* Max RF Level */
 		100,			/* Min RF Level */
 		GN_RF_Percentage,	/* RF level units */
