@@ -323,23 +323,17 @@ gn_error sm_block_ack(struct gn_statemachine *state)
 			gettimeofday(&now, NULL);
 		} while (timercmp(&next, &now, >) && (s == GN_SM_MessageSent));
 
-		if (s == GN_SM_WaitingForResponse || s == GN_SM_ResponseReceived) {
-			dprintf("%s\n", gn_error_print(GN_ERR_NONE));
+		if (s == GN_SM_WaitingForResponse || s == GN_SM_ResponseReceived)
 			return GN_ERR_NONE;
-		}
 
 		dprintf("sm_block_ack Retry - %d\n", retry);
 		sm_reset(state);
 		err = sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
-		if (err != GN_ERR_NONE) {
-			dprintf("%s\n", gn_error_print(GN_ERR_NONE));
-			return err;
-		}
+		if (err != GN_ERR_NONE) return err;
 	}
 
 	sm_reset(state);
 
-	dprintf("timeout\n");
 	return GN_ERR_TIMEOUT;
 }
 
