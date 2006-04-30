@@ -32,6 +32,8 @@
     o make pnok_call_divert_incoming() allocate the needed struct
       when it is missing (e.g. when receiving unsolicited messages)
                                                     (Daniele Forsi)
+    o add timegm() function for the systems that do not have it
+                                                        (Pawel Kot)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
     o support for Symbian phones (identifier 'symbian'), generic

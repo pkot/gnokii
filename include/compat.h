@@ -181,6 +181,10 @@ int asprintf(char **ptr, const char *format, ...);
 int vasprintf(char **ptr, const char *format, va_list ap);
 #endif
 
+#ifndef HAVE_TIMEGM
+time_t timegm(struct tm *tm);
+#endif
+
 /*
  * The following code was taken from W. Richard Stevens'
  * "UNIX Network Programming", Volume 1, Second Edition.
