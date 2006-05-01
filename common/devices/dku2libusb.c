@@ -397,6 +397,9 @@ err1:
 static int usbfbus_disconnect_request(struct gn_statemachine *state)
 {
 	int ret;
+
+	if (state->device.fd < 0)
+		return 0;
 	ret = usb_set_altinterface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_idle_setting);
 	if (ret < 0)
 		dprintf("Can't set data idle setting %d\n", ret);
@@ -420,8 +423,9 @@ int fbusdku2usb_open(struct gn_statemachine *state)
 	int retval;
 
 	retval = usbfbus_find_interfaces(state);
-	retval = usbfbus_connect_request(state);
-	return retval ? 0 : 1;
+	if (retval)
+		retval = usbfbus_connect_request(state);
+	return (retval ? retval : -1);
 }
 
 int fbusdku2usb_close(struct gn_statemachine *state)
