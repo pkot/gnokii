@@ -1988,10 +1988,23 @@ static inline void OkDialVoiceDialog(GtkWidget * w, gpointer data)
 	gtk_widget_hide(((DialVoiceDialog *) data)->dialog);
 }
 
+static void EditableInsertText(GtkEditable *w, gpointer data)
+{
+	gint selection_start, selection_end, position;
+
+	if (gtk_editable_get_selection_bounds(w, &selection_start, &selection_end)) {
+		gtk_editable_delete_text(w, selection_start, selection_end);
+	}
+	position = gtk_editable_get_position(w);
+	gtk_editable_insert_text(w, data, strlen(data), &position);
+	gtk_editable_set_position(w, position);
+}
+
 static void ClickPad(GtkWidget *w, gpointer data)
 {
 	gchar *label = (char *)gtk_button_get_label(GTK_BUTTON(w));
-	gtk_entry_append_text(GTK_ENTRY(data), label);
+	
+	EditableInsertText(GTK_EDITABLE(data), label);
 }
 
 static void DialPad(void)

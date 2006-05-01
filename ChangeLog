@@ -13,6 +13,8 @@
     o make Speed Dial window a little wider to avoid the horizontal
       scroll bar; hide "info" window only after reading all speed
       dials, not just after the first one           (Daniele Forsi)
+    o make Dial Pad buttons insert digits at cursor position and
+      replace selected text                         (Daniele Forsi)
  * libgnokii updates
     o increase max sms and smsc phone number to 20      (Pawel Kot)
     o add a library layer to make libgnokii more binary
