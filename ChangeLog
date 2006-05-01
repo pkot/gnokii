@@ -64,6 +64,10 @@
     o remove 6680 from the supported models -- it is supported by
       genuine FBUS driver (use series60 for old behaviour)
                                                         (Pawel Kot)
+ * documentation updates
+    o add in Docs/protocol/nk6110.txt different netstatus/netsel
+      values for network registration message for Nokia 3210/3310/
+      3330                                          (Daniele Forsi)
 
 0.6.12
 ======

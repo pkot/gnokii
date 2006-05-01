@@ -526,6 +526,11 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
 		                  netsel: 0x00: manual
 				          0x01: automatic
 					  0xff: unknown
+                            observed values on Nokia 3210, 3310 and 3330
+                                  netstatus: 0x01 home network
+                                             0x03 no service (when powered off or waiting pincode or no signal or roaming refused)
+                                  netsel: 0x01 manual
+                                          0x02 automatic
       when waiting for PIN code the reply is shorter
     r { 0x0071, ?,?,?,length==2,netstatus?,netsel? }
 
