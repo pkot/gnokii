@@ -48,6 +48,27 @@ API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
 	fprintf(f, "TEL;VOICE:%s\n", entry->number);
 	fprintf(f, "X_GSM_STORE_AT:%s\n", location);
 	fprintf(f, "X_GSM_CALLERGROUP:%d\n", entry->caller_group);
+	fprintf(f, "CATEGORIES:");
+	switch (entry->caller_group) {
+	case GN_PHONEBOOK_GROUP_Family:
+		fprintf(f, "Family\n");
+		break;
+	case GN_PHONEBOOK_GROUP_Vips:
+		fprintf(f, "VIPs\n");	
+		break;
+	case GN_PHONEBOOK_GROUP_Friends:	
+		fprintf(f, "Friends\n");
+		break;
+	case GN_PHONEBOOK_GROUP_Work:
+		fprintf(f, "Work\n");
+		break;
+	case GN_PHONEBOOK_GROUP_Others:
+		fprintf(f, "Others\n");
+		break;
+	default:
+		fprintf(f, "Unkown\n");
+		break;	
+	}
 
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {

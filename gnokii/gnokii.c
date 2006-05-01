@@ -3357,7 +3357,32 @@ static int getphonebook(int argc, char *argv[])
 				gn_phonebook2ldif(stdout, &entry);
 				break;
 			default:
-				fprintf(stdout, _("%d. Name: %s\nNumber: %s\nGroup id: %d\n"), entry.location, entry.name, entry.number, entry.caller_group);
+				fprintf(stdout, _("%d. Name: %s\n"), entry.location, entry.name, entry.number, entry.caller_group);
+				fprintf(stdout, _("Group: "));
+				switch (entry.caller_group) {
+				case GN_PHONEBOOK_GROUP_Family:
+					fprintf(stdout, _("Family\n"));
+					break;
+				case GN_PHONEBOOK_GROUP_Vips:
+					fprintf(stdout, _("VIPs\n"));
+					break;	
+				case GN_PHONEBOOK_GROUP_Friends:
+					fprintf(stdout, _("Friends\n"));	
+					break;
+				case GN_PHONEBOOK_GROUP_Work:
+					fprintf(stdout, _("Work\n"));
+					break;
+				case GN_PHONEBOOK_GROUP_Others:
+					fprintf(stdout, _("Others\n"));
+					break;
+				case GN_PHONEBOOK_GROUP_None:
+					fprintf(stdout, _("None\n"));
+					break;
+				default:
+					fprintf(stdout, _("Unknown\n"));	
+					break;
+				}	
+
 				dprintf("subentries count: %d\n", entry.subentries_count);
 				for (i = 0; i < entry.subentries_count; i++) {
 					switch (entry.subentries[i].entry_type) {

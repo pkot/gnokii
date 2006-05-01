@@ -147,10 +147,10 @@ typedef struct {
 						      * - Position
 						      * - Aliasname
 						      * - DTMF
-						      * - Benutzerkennung (user id?)
+						      * - User ID 
 						      * - all postal fields:
 						      *  - PO Box
-						      *  - Zusatz (additional?)
+						      *  - Addition
 						      *  - Street
 						      *  - Zip Code
 						      *  - City
@@ -209,6 +209,15 @@ typedef enum {
 	GN_PHONEBOOK_ENTRY_RingtoneAdv= 0x37,
 } gn_phonebook_entry_type;
 
+typedef enum {
+	GN_PHONEBOOK_GROUP_Family,
+	GN_PHONEBOOK_GROUP_Vips,
+	GN_PHONEBOOK_GROUP_Friends,
+	GN_PHONEBOOK_GROUP_Work,
+	GN_PHONEBOOK_GROUP_Others, 
+	GN_PHONEBOOK_GROUP_None,
+} gn_phonebook_group_type;
+
 typedef struct {
 	gn_phonebook_entry_type entry_type;
 	gn_phonebook_number_type number_type;
@@ -227,7 +236,7 @@ typedef struct {
 							     nullterminator. */
 	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1];  /* Number */
 	gn_memory_type memory_type;                       /* Type of memory */
-	int caller_group;                                 /* Caller group */
+	gn_phonebook_group_type caller_group;             /* Caller group */
 	int location;                                     /* Location */
 	gn_timestamp date;                                /* The record date and time
 							     of the number. */
