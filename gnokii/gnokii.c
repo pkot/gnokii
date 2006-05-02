@@ -1658,7 +1658,7 @@ static int getsecuritycodestatus(void)
 			fprintf(stdout, _("nothing to enter.\n"));
 			break;
 		default:
-			fprintf(stdout, _("Unknown\n"));
+			fprintf(stdout, _("unknown\n"));
 			break;
 		}
 	} else
@@ -2316,7 +2316,7 @@ static int writetodo(char *argv[])
 		fprintf(stderr, _("Successfully written!\n"));
 		fprintf(stderr, _("Priority %d. %s\n"), data->todo->priority, data->todo->text);
 	} else
-		fprintf(stderr, _("Failed to write todo note: %s\n"), gn_error_print(error));
+		fprintf(stderr, _("Failed to write ToDo note: %s\n"), gn_error_print(error));
 	return error;
 }
 
@@ -2331,7 +2331,7 @@ static int deletealltodos()
 	if (error == GN_ERR_NONE)
 		fprintf(stderr, _("Successfully deleted all ToDo notes!\n"));
 	else
-		fprintf(stderr, _("Failed to delete todo note: %s\n"), gn_error_print(error));
+		fprintf(stderr, _("Failed to delete ToDo note: %s\n"), gn_error_print(error));
 	return error;
 }
 
@@ -3601,7 +3601,7 @@ static int writephonebook(int argc, char *args[])
 						if (!strcmp(ans, _("yes"))) confirm = 1;
 						else if (!strcmp(ans, _("no"))) confirm = 0;
 						else {
-							fprintf(stdout, "\nIncorrect answer [%s]. Assuming 'no'.\n", ans);
+							fprintf(stdout, _("\nIncorrect answer [%s]. Assuming 'no'.\n"), ans);
 							confirm = 0;
 						}
 					}
