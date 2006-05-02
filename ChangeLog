@@ -30,6 +30,7 @@
       gn_lib_phonebook_read_entry(),
       gn_lib_phonebook_entry_isempty()               (Helge Deller)
     o fix memory leaks				     (Helge Deller)
+    o add .cvsignore files                           (Helge Deller)
     o avoid double free on lockfile unlock              (Pawel Kot)
     o make pnok_call_divert_incoming() allocate the needed struct
       when it is missing (e.g. when receiving unsolicited messages)
