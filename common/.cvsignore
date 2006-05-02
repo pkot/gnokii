@@ -2,3 +2,6 @@
 *.o
 *.lo
 *.la
+gnokii.pc
+gnvcal.c
+
