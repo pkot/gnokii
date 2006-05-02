@@ -1,0 +1,13 @@
+*.gmo
+*.header
+*.sin
+*.sed
+Makefile
+Makefile.in
+Makefile.in.in
+Makevars.template
+POTFILES
+Rules-quot
+gnokii.pot
+stamp-po
+
