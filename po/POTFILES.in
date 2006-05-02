@@ -14,6 +14,7 @@ common/gsm-networks.c
 common/gsm-ringtones.c
 common/gsm-sms.c
 common/gsm-statemachine.c
+common/libfunctions.c
 common/links/atbus.c
 common/links/cbus.c
 common/links/fbus-3110.c
