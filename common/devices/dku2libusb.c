@@ -376,7 +376,7 @@ static int usbfbus_connect_request(struct gn_statemachine *state)
 		dprintf("Can't set data active setting %d\n", ret);
 		goto err3;
 	}
-	return 0;
+	return 1;
 
 err3:
 	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);	
@@ -385,7 +385,7 @@ err2:
 err1:
 	usb_close(DEVINSTANCE(state)->interface->dev_data);
 	usb_close(DEVINSTANCE(state)->interface->dev_control);
-	return ret;
+	return 0;
 }
 
 /*
