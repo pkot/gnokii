@@ -551,6 +551,8 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->smsmemorytype) {
+		if (mt >= NR_MEMORIES)
+			return GN_ERR_INVALIDMEMORYTYPE;
 		gn_data_clear(&data);
 		data.sms_status = &sms_status;
 		ret = AT_GetSMSStatus(&data, state);
