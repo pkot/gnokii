@@ -271,4 +271,47 @@ API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
 	return false;
 }
 
+/* after reading an entry with gn_lib_phonebook_read_entry() ask for the values of the phonebook entry */
+API const char *gn_lib_get_pb_name( struct gn_statemachine *state )
+{
+	return state->u.pb_entry.name;
+}
 
+API const char *gn_lib_get_pb_number( struct gn_statemachine *state )
+{
+	return state->u.pb_entry.number;
+}
+
+API const gn_phonebook_group_type gn_lib_get_pb_caller_group( struct gn_statemachine *state )
+{
+	return state->u.pb_entry.caller_group;
+}
+
+API const gn_memory_type gn_lib_get_pb_memtype( struct gn_statemachine *state )
+{
+	return state->u.pb_entry.memory_type;
+}
+
+API const int gn_lib_get_pb_location( struct gn_statemachine *state )
+{
+	return state->u.pb_entry.location;
+}
+
+API const gn_timestamp gn_lib_get_pb_date( struct gn_statemachine *state )
+{
+	return state->u.pb_entry.date;
+}
+
+API const int gn_lib_get_pb_num_subentries( struct gn_statemachine *state )
+{
+	return state->u.pb_entry.subentries_count;
+}
+
+API gn_error gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index,
+       gn_phonebook_entry_type *pbet, gn_phonebook_number_type *pbnt, char **number )
+{
+	if (pbet)	*pbet = state->u.pb_entry.subentries[index].entry_type;
+	if (pbnt)	*pbnt = state->u.pb_entry.subentries[index].number_type;
+	if (number)	*number = state->u.pb_entry.subentries[index].data.number;
+	return LASTERROR(state,GN_ERR_NONE);
+}
