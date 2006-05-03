@@ -89,6 +89,7 @@ static unsigned char gsm_default_alphabet[GN_CHAR_ALPHABET_SIZE] = {
 
 static unsigned char gsm_reverse_default_alphabet[256];
 static bool reversed = false;
+static char application_encoding[64] = "";
 
 static void tbl_setup_reverse()
 {
@@ -107,6 +108,86 @@ static bool char_is_escape(unsigned char value)
 	return (value == GN_CHAR_ESCAPE);
 }
 
+static const char *get_langinfo_codeset(void)
+{
+	static const char *codeset = NULL;
+
+	if (!codeset) {
+#ifdef HAVE_LANGINFO_CODESET
+		codeset = nl_langinfo(CODESET);
+#else
+		codeset = locale_charset();
+#endif
+	}
+	return codeset;
+}
+
+API const char *gn_char_get_encoding()
+{
+	if (*application_encoding)
+		return application_encoding; /* app has overriden encoding setting */
+	else
+		return get_langinfo_codeset(); /* return default codeset */
+}
+
+static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
+{
+#ifdef HAVE_ICONV
+	size_t nconv;
+	char *pin;
+	char *pout;
+	int inlen;
+	int outlen;
+	iconv_t cd;
+
+	pin = (char *)src;
+	pout = (char *)dst;
+	inlen = 4;
+	outlen = 4;
+
+	cd = iconv_open("WCHAR_T", gn_char_get_encoding());
+	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
+	iconv_close(cd);
+	
+	return (char*)dst == pout ? -1 : pin-src;
+#else
+#  ifdef HAVE_WCRTOMB
+        return mbrtowc(dst, src, maxlen, mbs);
+#  else
+        return mbtowc(dst, src, maxlen);
+#  endif
+#endif
+}
+
+static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
+{
+#ifdef HAVE_ICONV
+	size_t nconv;
+	char *pin;
+	char *pout;
+	int inlen;
+	int outlen;
+	iconv_t cd;
+
+	pin = (char *)&src;
+	pout = (char *)dst;
+	inlen = 4;
+	outlen = 4;
+	
+	cd = iconv_open(gn_char_get_encoding(), "WCHAR_T");
+	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
+	iconv_close(cd);
+	
+	return nconv == -1 ? -1 : pout-dst;
+#else
+    #ifdef HAVE_WCRTOMB
+	return wcrtomb(dst, src, mbs);
+    #else
+	return wctomb(dst, src);
+    #endif
+#endif
+}
+
 /*
  * In GSM specification there are 10 characters in the extension
  * of the default alphabet. Their values look a bit random, they are
@@ -118,7 +199,7 @@ static bool char_def_alphabet_ext(unsigned char value)
 {
 	wchar_t retval;
 
-	if (mbtowc(&retval, &value, 1) == -1) return false;
+	if (char_mbtowc(&retval, &value, 1, NULL) == -1) return false;
 	return (value == 0x0c ||
 		value == '^' ||
 		value == '{' ||
@@ -345,11 +426,7 @@ int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest, MBSTATE 
 {
 	int length;
 
-#ifdef HAVE_WCRTOMB
-	switch (length = mbrtowc(dest, value, MB_CUR_MAX, mbs)) {
-#else
-	switch (length = mbtowc(dest, value, MB_CUR_MAX)) {
-#endif
+	switch (length = char_mbtowc(dest, value, MB_CUR_MAX, mbs)) {
 	case -1:
 		dprintf("Error calling mctowb!\n");
 		*dest = '?';
@@ -363,11 +440,7 @@ int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs)
 {
 	int length;
 
-#ifdef HAVE_WCRTOMB
-	switch (length = wcrtomb(dest, value, mbs)) {
-#else
-	switch (length = wctomb(dest, value)) {
-#endif
+    switch (length = char_wctomb(dest, value, mbs)) {
 	case -1:
 		*dest = '?';
 		length = 1;
@@ -590,18 +663,10 @@ char *char_bcd_number_get(u8 *number)
 	return buffer;
 }
 
-static const char *get_langinfo_codeset(void)
+void gn_char_set_encoding(const char* encoding)
 {
-	static const char *codeset = NULL;
-
-	if (!codeset) {
-#ifdef HAVE_LANGINFO_CODESET
-		codeset = nl_langinfo(CODESET);
-#else
-		codeset = locale_charset();
-#endif
-	}
-	return codeset;
+	strncpy(application_encoding, encoding, sizeof(application_encoding) - 1);
+	application_encoding[sizeof(application_encoding) - 1] = 0;
 }
 
 /* UTF-8 conversion functions */
@@ -616,8 +681,8 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
 
 	pin = (char *)instring;
 	pout = outstring;
-
-	cd = iconv_open(get_langinfo_codeset(), "UTF-8");
+	
+	cd = iconv_open(gn_char_get_encoding(), "UTF-8");
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	iconv_close(cd);
 	*pout = 0;
@@ -673,7 +738,7 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 	pin = (char *)instring;
 	pout = outstring;
 
-	cd = iconv_open("UTF-8", get_langinfo_codeset());
+	cd = iconv_open("UTF-8", gn_char_get_encoding());
 
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
 	*pout = 0;
