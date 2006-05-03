@@ -812,9 +812,9 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			break;
 		case 0x80: /* User Data */
 			if ((data->raw_sms->type != GN_SMS_MT_Picture) && (data->raw_sms->type != GN_SMS_MT_PictureTemplate)) { 
-					/* Ignore the found user_data block for pictures */
+				/* Ignore the found user_data block for pictures */
 				data->raw_sms->length = block[3];
-				memcpy(data->raw_sms->user_data, block + 4, data->raw_sms->length);
+				memcpy(data->raw_sms->user_data, block + 4, block[2]);
 			}
 			break;
 		case 0x08: /* Time blocks (mainly at the end of submit sent messages */

@@ -45,6 +45,7 @@
     o support for Symbian phones (identifier 'symbian'), generic
       Series 40 phones (identifier 'series40') and Nokia 6680
                                                         (Pawel Kot)
+    o fix sms decoding                                  (Pawel Kot)
  * nk6100 driver updates
     o fix --smsreader for nk6100 driver             (Daniele Forsi)
     o Nokia 3310 does not support GetPhoneStatus    (Daniele Forsi)
