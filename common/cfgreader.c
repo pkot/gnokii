@@ -431,6 +431,8 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 			cfg->connection_type = GN_CT_Irda;
 		else if (!strcasecmp(val, "bluetooth"))
 			cfg->connection_type = GN_CT_Bluetooth;
+		else if (!strcasecmp(val, "dku5"))
+			cfg->connection_type = GN_CT_DLR3P;
 		else if (!strcasecmp(val, "dku2"))
 			cfg->connection_type = GN_CT_DKU2;
 		else if (!strcasecmp(val, "dku2libusb"))

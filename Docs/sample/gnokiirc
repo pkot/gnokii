@@ -88,7 +88,7 @@ connection = serial
 # or the following setting if you want to use Linux kernel driver
 # connection = dku2
 # With DKU-5 cable use the following setting
-# connection = dlr3p
+# connection = dku5
 # For Bluetooth and AT driver use the following setting
 # connection = serial
 # For other Bluetooth settings use
