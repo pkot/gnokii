@@ -1,3 +1,7 @@
+* Thu May  4 2006 Helge Deller, Pawel Kot
+- Switch smsd to new libgnokii functions
+
+
 * Mon Jan 30 2006 Jan Derfinak
 - Added schema support for PostgreSQL.
 

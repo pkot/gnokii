@@ -86,7 +86,7 @@ static gn_error InitModelInf (void)
   data.model = model;
   data.revision = rev;
                           
-  error = gn_sm_functions (GN_OP_GetModel, &data, &sm);
+  error = gn_sm_functions (GN_OP_GetModel, &data, sm);
   if (error != GN_ERR_NONE)
   {
     return error;

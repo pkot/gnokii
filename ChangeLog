@@ -84,6 +84,9 @@
       translatable files                            (Daniele Forsi)
     o add a missing string from gnokii/gnokii.c;
       change capitalization of some strings         (Daniele Forsi)
+ * smsd updates
+    o switch smsd to new libgnokii functions         (Helge Deller,
+                                                         Pawel Kot)
 
 0.6.12
 ======
