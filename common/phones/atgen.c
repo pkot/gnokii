@@ -1751,9 +1751,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		format = atoi(strings[1]);
 		switch (format) {
 		case 0: /* network operator name given */
-			pos = strings[2];
-			pos++;
-			pos = strtok(pos, "\"");
+			pos = strip_quotes(strings[2]);
 			at_decode(drvinst->charset, tmp, pos, strlen(pos));
 			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), gn_network_code_get(tmp));
 			break;
