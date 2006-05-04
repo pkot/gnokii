@@ -849,7 +849,7 @@ static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 {
-	char req[64];
+	char req[64], req2[64];
 
 	if (!data->call_divert) return GN_ERR_UNKNOWN;
 
@@ -872,14 +872,17 @@ static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 		dprintf("3. %d\n", data->call_divert->type);
 		return GN_ERR_NOTIMPLEMENTED;
 	}
-	if (data->call_divert->operation == GN_CDV_Register)
-		sprintf(req, "%s,%d,\"%s\",%d,,,%d", req,
+	if (data->call_divert->operation == GN_CDV_Register) {
+		sprintf(req2, ",%d,\"%s\",%d,,,%d",
 			data->call_divert->operation,
 			data->call_divert->number.number,
 			data->call_divert->number.type,
 			data->call_divert->timeout);
-	else
-		sprintf(req, "%s,%d", req, data->call_divert->operation);
+		strcat(req, req2);
+	} else {
+		sprintf(req2, ",%d", req, data->call_divert->operation);
+		strcat(req, req2);
+	}
 
 	strcat(req, "\r");
 

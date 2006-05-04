@@ -141,7 +141,9 @@ static char *sms_timestamp_print(u8 *number)
 {
 #ifdef DEBUG
 #define LOCAL_DATETIME_MAX_LENGTH 23
-	static unsigned char buffer[LOCAL_DATETIME_MAX_LENGTH] = "";
+	static char buffer[LOCAL_DATETIME_MAX_LENGTH];
+	char buf[5];
+	int i;
 
 	if (!number) return NULL;
 
@@ -154,22 +156,22 @@ static char *sms_timestamp_print(u8 *number)
 	else
 		sprintf(buffer, "19");
 
-	sprintf(buffer, "%s%d%d-", buffer, number[0] & 0x0f, number[0] >> 4);
-	sprintf(buffer, "%s%d%d-", buffer, number[1] & 0x0f, number[1] >> 4);
-	sprintf(buffer, "%s%d%d ", buffer, number[2] & 0x0f, number[2] >> 4);
-	sprintf(buffer, "%s%d%d:", buffer, number[3] & 0x0f, number[3] >> 4);
-	sprintf(buffer, "%s%d%d:", buffer, number[4] & 0x0f, number[4] >> 4);
-	sprintf(buffer, "%s%d%d",  buffer, number[5] & 0x0f, number[5] >> 4);
+	for (i = 0; i < 6; i++) {
+		char buf2[4];
+		snprintf(buf2, 4, "%d%d-", number[i] & 0x0f, number[i] >> 4);
+		strcat(buffer, buf2);
+	}
 
 	/* The GSM spec is not clear what is the sign of the timezone when the
 	 * 6th bit is set. Some SMSCs are compatible with our interpretation,
 	 * some are not. If your operator does use incompatible SMSC and wrong
 	 * sign disturbs you, change the sign here.
 	 */
-	if (number[6] & 0x08) sprintf(buffer, "%s-", buffer);
-	else sprintf(buffer, "%s+", buffer);
+	if (number[6] & 0x08) strcat(buffer, "-");
+	else strcat(buffer, "+");
 	/* The timezone is given in quarters. The base is GMT. */
-	sprintf(buffer, "%s%02d00", buffer, (10 * (number[6] & 0x07) + (number[6] >> 4)) / 4);
+	sprintf(buf, "%02d00", (10 * (number[6] & 0x07) + (number[6] >> 4)) / 4);
+	strcat(buffer, buf);
 
 	return buffer;
 #undef LOCAL_DATETIME_MAX_LENGTH
