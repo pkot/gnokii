@@ -93,7 +93,7 @@ connection = serial
 # connection = serial
 # For other Bluetooth settings use
 # connection = bluetooth
-# For infraded connection with phones other then Nokia 6110/6130/6150 use
+# For infrared connection with phones other than Nokia 6110/6130/6150 use
 # connection = irda
 
 
@@ -138,7 +138,7 @@ serial_baudrate = 19200
 #sm_retry = 1
 
 # Run the specified script(s) right after opening and initializing the device
-# and before any communucation (right before closing for disconnect_script).
+# and before any communication (right before closing for disconnect_script).
 # You may find handy to use it to connect your modem to SMS Center
 # when using BIP or CIMD protocols
 # Non-absolute path is relative to the specific directory where gnokii is run!
