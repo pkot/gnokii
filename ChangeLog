@@ -81,6 +81,8 @@
     o add in Docs/protocol/nk6110.txt different netstatus/netsel
       values for network registration message for Nokia 3210/3310/
       3330                                          (Daniele Forsi)
+    o fix threthrethree spelling mistakes in Docs/sample/gnokiirc
+                                                    (Daniele Forsi)
  * translation updates
     o add new file common/libfunctions.c to the list of
       translatable files                            (Daniele Forsi)
