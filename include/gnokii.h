@@ -152,10 +152,16 @@ API gn_error	gn_lib_get_pb_subentry( struct gn_statemachine *state, const int in
 API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
 		const gn_memory_type memory_type, const int index );
 
+
+
 /* standard helper functions */
 
 /* get user visible string for gn_memory_type */
 API const char *gn_lib_memtypestring( const gn_memory_type memory_type );
+
+/* use this function to get list of all supported phone models.
+   Just start with num=0 and increase until you get back NULL */
+API const char *gn_lib_get_supported_phone_model( const int num );
 
 
 /****************************************************************************/
@@ -251,7 +257,7 @@ API char *gn_device_lock(const char *);
 /* Remove a lock for the given device from /var/lock or /var/run */
 API int gn_device_unlock(char *);
 
-API char *gn_model_get(const char *product_name);
+API const char *gn_model_get(const char *product_name);
 API gn_phone_model *gn_phone_model_get(const char *product_name);
 
 /* SMS */

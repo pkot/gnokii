@@ -78,7 +78,6 @@ API int gn_line_get(FILE *file, char *line, int count)
 
 static gn_phone_model models[] = {
 	/* model, product_name, ... */
-	{NULL,    "", 0 },
 	{"2711",  "?????", PM_SMS },		/* Dancall */
 	{"2731",  "?????", PM_SMS },
 	{"11",    "TFF-3", 0 },
@@ -303,8 +302,19 @@ static gn_phone_model models[] = {
 	{"N-Gage", "NEM-4", 0},
 	{"RinGo", "NHX-7", 0},
 	{"sx1",  "SX1", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS },
-	{NULL,    NULL, 0 }
+	{NULL,    NULL, 0 } /* keep last one as NULL */
 };
+
+#define MODELS_NUM_ENTRIES (sizeof(models)/sizeof(models[0]))
+
+/* this should be in libfunctions - will move it there with next version of libgnokii */
+API const char *gn_lib_get_supported_phone_model( const int num )
+{
+	if (num < 0 || num >= MODELS_NUM_ENTRIES)
+		return NULL;
+	return models[num].model;
+}
+
 
 API gn_phone_model *gn_phone_model_get(const char *product_name)
 {
@@ -318,10 +328,10 @@ API gn_phone_model *gn_phone_model_get(const char *product_name)
 		i++;
 	}
 
-	return (&models[0]);
+	return (&models[MODELS_NUM_ENTRIES-1]); /* NULL entry */
 }
 
-API char *gn_model_get(const char *product_name)
+API const char *gn_model_get(const char *product_name)
 {
 	return (gn_phone_model_get(product_name)->model);
 }
