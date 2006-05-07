@@ -15,7 +15,7 @@
       dials, not just after the first one           (Daniele Forsi)
     o make Dial Pad buttons insert digits at cursor position and
       replace selected text                         (Daniele Forsi)
- * libgnokii updates
+ * libgnokii updates (libgnokii.so.3.0.0)
     o increase max sms and smsc phone number to 20      (Pawel Kot)
     o add a library layer to make libgnokii more binary
       compatible between versions in the future      (Helge Deller)
@@ -107,7 +107,7 @@
     o return appropriate error code when setting too long ringtone
       (actual tested max notes in ringtone is 69 notes in
        Nokia 6310)                                      (Pawel Kot)
- * libgnokii updates
+ * libgnokii updates (libgnokii.so.2.0.x)
     o extend GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER to 64        (Dirk)
     o extend GN_RINGTONE_MAX_NOTES to 1024 (it happend that there
       are longer ringtones in the phone)        (Alexey I. Froloff)

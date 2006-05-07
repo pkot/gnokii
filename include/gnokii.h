@@ -63,6 +63,7 @@ typedef unsigned char uint8_t;
 #  endif
 #endif
 
+/* if you change those numbers, change them in common/Makefile as well! */
 #define LIBGNOKII_VERSION_STRING "3.0.0"
 #define LIBGNOKII_VERSION_MAJOR 3
 #define LIBGNOKII_VERSION_MINOR 0
