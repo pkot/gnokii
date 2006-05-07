@@ -179,7 +179,7 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 /* ask phone for static information (model, version, manufacturer, revision and imei) */
 API const char *gn_lib_get_phone_model( struct gn_statemachine *state )
 {
-	char *aux;
+	const char *aux;
 
 	gn_lib_get_phone_information(state);
 	aux = gn_model_get(state->config.m_model); /* e.g. 6310 */
