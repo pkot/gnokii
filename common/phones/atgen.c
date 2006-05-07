@@ -173,7 +173,7 @@ static char *strip_brackets(char *s)
 	return s;
 }
 
-static void reply_simpletext(char *l1, char *l2, char *c, char *t)
+static void reply_simpletext(char *l1, char *l2, char *c, char *t, size_t maxlength)
 {
 	int i, n;
 
@@ -181,11 +181,12 @@ static void reply_simpletext(char *l1, char *l2, char *c, char *t)
 	if ((strncmp(l1, c, n - 2) == 0) && (t != NULL)) {
 		if (strncmp(l2, c, n) == 0)  {
 			for (i = n; isspace(l2[i]); i++) ;
-			strcpy(t, strip_quotes(l2 + i));
+			strncpy(t, strip_quotes(l2 + i), maxlength);
 		} else {
 			for (i = 0; isspace(l2[i]); i++) ;
-			strcpy(t, l2 + i);
+			strncpy(t, l2 + i, maxlength);
 		}
+		t[maxlength - 1] = '\0';
 	}
 }
 
@@ -1389,18 +1390,18 @@ static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length
 	buf.length = length;
 	splitlines(&buf);
 	if (!strncmp(buf.line1, "AT+CG", 5)) {
-		reply_simpletext(buf.line1+2, buf.line2, "+CGSN: ", data->imei);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGSN: ", data->imei, GN_IMEI_MAX_LENGTH);
 		if (!data->model[0])
-			reply_simpletext(buf.line1+2, buf.line2, "+CGMM: ", data->model);
-		reply_simpletext(buf.line1+2, buf.line2, "+CGMI: ", data->manufacturer);
-		reply_simpletext(buf.line1+2, buf.line2, "+CGMR: ", data->revision);
-		reply_simpletext(buf.line1+2, buf.line4, "+CGMR: ", data->model);
+			reply_simpletext(buf.line1+2, buf.line2, "+CGMM: ", data->model, GN_MODEL_MAX_LENGTH);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGMI: ", data->manufacturer, GN_MANUFACTURER_MAX_LENGTH);
+		reply_simpletext(buf.line1+2, buf.line2, "+CGMR: ", data->revision, GN_REVISION_MAX_LENGTH);
+		reply_simpletext(buf.line1+2, buf.line4, "+CGMR: ", data->model, GN_MODEL_MAX_LENGTH);
 	} else if (!strncmp(buf.line1, "AT+G", 4)) {
-		reply_simpletext(buf.line1+2, buf.line2, "+GSN: ", data->imei);
+		reply_simpletext(buf.line1+2, buf.line2, "+GSN: ", data->imei, GN_IMEI_MAX_LENGTH);
 		if (!data->model[0])
-			reply_simpletext(buf.line1+2, buf.line2, "+GMM: ", data->model);
-		reply_simpletext(buf.line1+2, buf.line2, "+GMI: ", data->manufacturer);
-		reply_simpletext(buf.line1+2, buf.line2, "+GMR: ", data->revision);
+			reply_simpletext(buf.line1+2, buf.line2, "+GMM: ", data->model, GN_MODEL_MAX_LENGTH);
+		reply_simpletext(buf.line1+2, buf.line2, "+GMI: ", data->manufacturer, GN_MANUFACTURER_MAX_LENGTH);
+		reply_simpletext(buf.line1+2, buf.line2, "+GMR: ", data->revision, GN_REVISION_MAX_LENGTH);
 	}
 	return GN_ERR_NONE;
 }

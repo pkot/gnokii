@@ -73,6 +73,7 @@
     o add memory type sanitization for --getsms         (Pawel Kot)
     o use strip_quotes() to correctly handle the empty string in
       +COPS: 0,0,"" for --getnetworkinfo            (Daniele Forsi)
+    o safely handle long strings in --identify      (Daniele Forsi)
  * gnapplet driver updates
     o remove 6680 from the supported models -- it is supported by
       genuine FBUS driver (use series60 for old behaviour)
