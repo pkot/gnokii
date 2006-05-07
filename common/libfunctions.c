@@ -308,10 +308,59 @@ API const int gn_lib_get_pb_num_subentries( struct gn_statemachine *state )
 }
 
 API gn_error gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index,
-       gn_phonebook_entry_type *pbet, gn_phonebook_number_type *pbnt, char **number )
+	gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, 
+	const char **number )
 {
-	if (pbet)	*pbet = state->u.pb_entry.subentries[index].entry_type;
-	if (pbnt)	*pbnt = state->u.pb_entry.subentries[index].number_type;
-	if (number)	*number = state->u.pb_entry.subentries[index].data.number;
+	if (entry_type)	 *entry_type  = state->u.pb_entry.subentries[index].entry_type;
+	if (number_type) *number_type = state->u.pb_entry.subentries[index].number_type;
+	if (number)	 *number      = state->u.pb_entry.subentries[index].data.number;
 	return LASTERROR(state,GN_ERR_NONE);
+}
+
+
+API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
+	const gn_memory_type memory_type, const int index )
+{
+	gn_error error;
+	gn_data *data = &state->sm_data;
+
+	state->u.pb_entry.memory_type = memory_type;
+	state->u.pb_entry.location = index;
+	data->phonebook_entry = &state->u.pb_entry;
+	memset(data->phonebook_entry, 0, sizeof(*data->phonebook_entry));
+	data->phonebook_entry->empty = 1;
+	error = gn_sm_functions(GN_OP_WritePhonebook, data, state);
+	return LASTERROR(state,error);
+}
+
+
+
+/* helper functions */
+
+API const char *gn_lib_memtypestring( const gn_memory_type memory_type )
+{
+	switch (memory_type) {
+	case GN_MT_ME: return _("Internal memory");
+	case GN_MT_SM: return _("SIM-card memory");
+	case GN_MT_FD: return _("Fixed dial numbers");
+	case GN_MT_ON: return _("Own numbers");
+	case GN_MT_EN: return _("Emergency numbers");
+	case GN_MT_DC: return _("Dialled numbers");
+	case GN_MT_RC: return _("Received numbers");
+	case GN_MT_MC: return _("Missed numbers");
+	case GN_MT_LD: return _("Lasted dialled numbers");
+	case GN_MT_MT: return _("Internal and SIM numbers");
+	/* GN_MT_TA,* for compatibility only: TA=computer memory */
+	case GN_MT_CB: return _("Currently selected memory");
+	case GN_MT_IN: return _("Inbox for folder aware phones");
+	case GN_MT_OU: return _("Outbox");
+	case GN_MT_AR: return _("Archive");
+	case GN_MT_TE: return _("Templates");
+	case GN_MT_F1: case GN_MT_F2: case GN_MT_F3: case GN_MT_F4: case GN_MT_F5:
+	case GN_MT_F6: case GN_MT_F7: case GN_MT_F8: case GN_MT_F9: case GN_MT_F10:
+	case GN_MT_F11: case GN_MT_F12: case GN_MT_F13: case GN_MT_F14: case GN_MT_F15:
+	case GN_MT_F16: case GN_MT_F17: case GN_MT_F18: case GN_MT_F19: case GN_MT_F20:
+			return _("Custom folder");
+	default:	return _("Unknown memory");
+	}
 }

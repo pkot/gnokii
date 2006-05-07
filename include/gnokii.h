@@ -145,7 +145,17 @@ API const int                     gn_lib_get_pb_location       ( struct gn_state
 API const gn_timestamp            gn_lib_get_pb_date           ( struct gn_statemachine *state ); /* */
 API const int                     gn_lib_get_pb_num_subentries ( struct gn_statemachine *state ); /* */
 API gn_error	gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index, 
-			gn_phonebook_entry_type *pbet, gn_phonebook_number_type *pbnt, char **number );
+			gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, const char **number );
+
+
+/* remove an addressbook entry from phone. */
+API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
+		const gn_memory_type memory_type, const int index );
+
+/* standard helper functions */
+
+/* get user visible string for gn_memory_type */
+API const char *gn_lib_memtypestring( const gn_memory_type memory_type );
 
 
 /****************************************************************************/
