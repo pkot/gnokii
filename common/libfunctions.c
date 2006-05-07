@@ -336,31 +336,3 @@ API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
 
 
 /* helper functions */
-
-API const char *gn_lib_memtypestring( const gn_memory_type memory_type )
-{
-	switch (memory_type) {
-	case GN_MT_ME: return _("Internal memory");
-	case GN_MT_SM: return _("SIM-card memory");
-	case GN_MT_FD: return _("Fixed dial numbers");
-	case GN_MT_ON: return _("Own numbers");
-	case GN_MT_EN: return _("Emergency numbers");
-	case GN_MT_DC: return _("Dialled numbers");
-	case GN_MT_RC: return _("Received numbers");
-	case GN_MT_MC: return _("Missed numbers");
-	case GN_MT_LD: return _("Lasted dialled numbers");
-	case GN_MT_MT: return _("Internal and SIM numbers");
-	/* GN_MT_TA,* for compatibility only: TA=computer memory */
-	case GN_MT_CB: return _("Currently selected memory");
-	case GN_MT_IN: return _("Inbox for folder aware phones");
-	case GN_MT_OU: return _("Outbox");
-	case GN_MT_AR: return _("Archive");
-	case GN_MT_TE: return _("Templates");
-	case GN_MT_F1: case GN_MT_F2: case GN_MT_F3: case GN_MT_F4: case GN_MT_F5:
-	case GN_MT_F6: case GN_MT_F7: case GN_MT_F8: case GN_MT_F9: case GN_MT_F10:
-	case GN_MT_F11: case GN_MT_F12: case GN_MT_F13: case GN_MT_F14: case GN_MT_F15:
-	case GN_MT_F16: case GN_MT_F17: case GN_MT_F18: case GN_MT_F19: case GN_MT_F20:
-			return _("Custom folder");
-	default:	return _("Unknown memory");
-	}
-}

@@ -28,6 +28,7 @@
   copyright (C) 2002      Markus Plail
   Copyright (C) 2002-2003 BORBELY Zoltan, Ladis Michl
   Copyright (C) 2004      Martin Goldhahn
+  Copyright (C) 2006      Helge Deller
   
   Main header file for gnokii. Include just this file in your app.
 */
@@ -156,12 +157,15 @@ API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
 
 /* standard helper functions */
 
-/* get user visible string for gn_memory_type */
-API const char *gn_lib_memtypestring( const gn_memory_type memory_type );
-
 /* use this function to get list of all supported phone models.
    Just start with num=0 and increase until you get back NULL */
 API const char *gn_lib_get_supported_phone_model( const int num );
+
+/* Misc */
+API gn_memory_type gn_str2memory_type(const char *s);
+API const char *gn_memory_type2str(gn_memory_type mt);
+API int gn_timestamp_isvalid(const gn_timestamp dt);
+
 
 
 /****************************************************************************/
@@ -185,11 +189,8 @@ API const char *gn_lib_get_supported_phone_model( const int num );
 extern API struct gn_cfg_header *gn_cfg_info GNOKII_DEPRECATED;
 
 /* Files */
-API int gn_file_text_save(char *filename, char *text, int mode);
+API int gn_file_text_save(char *filename, char *text, int mode) GNOKII_DEPRECATED;
 
-/* Misc */
-API gn_memory_type gn_str2memory_type(const char *s);
-API char *gn_memory_type2str(gn_memory_type mt);
 /* Zero the gn_data structure */
 API void gn_data_clear(gn_data *data);
 extern API gn_phone *gn_gsm_info;
@@ -198,7 +199,6 @@ extern API gn_error (*gn_gsm_f)(gn_operation op, gn_data *data,
 /* Initialise the connection and setup the driver according to the current
  * configuration */
 API gn_error gn_gsm_initialise(struct gn_statemachine *sm) GNOKII_DEPRECATED;
-API int gn_timestamp_isvalid(gn_timestamp dt);
 
 /* Config handling */
 /* Get the key value from the given config, given section and the key name */
@@ -227,8 +227,8 @@ API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *buffer
 API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, char *memory_type_string);
 
 /* DEPRECATED */
-API int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number);
-API int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number);
+API int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number) GNOKII_DEPRECATED;
+API int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number) GNOKII_DEPRECATED;
 
 API int gn_calnote2ical(FILE *f, gn_calnote *calnote);
 API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id);
@@ -250,12 +250,12 @@ API void gn_log_xdebug(const char *fmt, ...);
 API void gn_elog_write(const char *fmt, ...);
 typedef void (*gn_log_func_t)(const char *fmt, ...);
 
-API int gn_line_get(FILE *file, char *line, int count);
+API int gn_line_get(FILE *file, char *line, int count) GNOKII_DEPRECATED;
 
 /* Place a lock for the given device in /var/lock or /var/run */
-API char *gn_device_lock(const char *);
+API char *gn_device_lock(const char *) GNOKII_DEPRECATED;
 /* Remove a lock for the given device from /var/lock or /var/run */
-API int gn_device_unlock(char *);
+API int gn_device_unlock(char *) GNOKII_DEPRECATED;
 
 API const char *gn_model_get(const char *product_name);
 API gn_phone_model *gn_phone_model_get(const char *product_name);

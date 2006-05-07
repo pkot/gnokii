@@ -80,7 +80,7 @@ API gn_memory_type gn_str2memory_type(const char *s)
 #undef X
 }
 
-API char *gn_memory_type2str(gn_memory_type mt)
+API const char *gn_memory_type2str(gn_memory_type mt)
 {
 	switch (mt) {
 	case GN_MT_ME: return _("Internal memory");
