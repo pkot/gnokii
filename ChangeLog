@@ -89,9 +89,14 @@
       translatable files                            (Daniele Forsi)
     o add a missing string from gnokii/gnokii.c;
       change capitalization of some strings         (Daniele Forsi)
+    o change two error messages in gnokii/gnokii.c setlogo() to be
+      easier to translate                           (Daniele Forsi)
  * smsd updates
     o switch smsd to new libgnokii functions         (Helge Deller,
                                                          Pawel Kot)
+ * gnokii updates
+    o make --setlogo exit with a valid error code after all errors
+                                                    (Daniele Forsi)
 
 0.6.12
 ======

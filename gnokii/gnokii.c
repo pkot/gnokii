@@ -2049,7 +2049,6 @@ static int setlogo(int argc, char *argv[])
 	gn_network_info networkinfo;
 	gn_error error = GN_ERR_NOTSUPPORTED;
 	gn_phone *phone = &state->driver.phone;
-	bool ok = true;
 	int i;
 
 	gn_data_clear(data);
@@ -2082,7 +2081,7 @@ static int setlogo(int argc, char *argv[])
 			strncpy(bitmap.netcode, argv[2], sizeof(bitmap.netcode) - 1);
 			if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
 				fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
-				return -1;
+				return GN_ERR_UNKNOWN;
 			}
 		}
 		break;
@@ -2110,7 +2109,7 @@ static int setlogo(int argc, char *argv[])
 		break;
 	default:
 		fprintf(stderr, _("What kind of logo do you want to set ?\n"));
-		return -1;
+		return GN_ERR_UNKNOWN;
 	}
 
 	data->bitmap = &bitmap;
@@ -2126,10 +2125,6 @@ static int setlogo(int argc, char *argv[])
 			case GN_BMP_WelcomeNoteText:
 			case GN_BMP_DealerNoteText:
 				if (strcmp(bitmap.text, oldbit.text)) {
-					fprintf(stderr, _("Error setting"));
-					if (bitmap.type == GN_BMP_DealerNoteText) fprintf(stderr, _(" dealer"));
-					fprintf(stderr, _(" welcome note - "));
-
 					/* I know, it looks horrible, but...
 					 * I set it to the short string - if it won't be set
 					 * it means, PIN is required. If it will be correct, previous
@@ -2147,16 +2142,24 @@ static int setlogo(int argc, char *argv[])
 					data->bitmap = &oldbit;
 					gn_sm_functions(GN_OP_SetBitmap, data, state);
 					gn_sm_functions(GN_OP_GetBitmap, data, state);
+					
+					if (bitmap.type == GN_BMP_DealerNoteText) {
+						fprintf(stderr, _("Error setting dealer welcome note - "));
+					} else {
+						fprintf(stderr, _("Error setting welcome note - "));
+					}
+					
 					if (oldbit.text[0] != '!') {
 						fprintf(stderr, _("SIM card and PIN is required\n"));
+						return GN_ERR_UNKNOWN;
 					} else {
 						data->bitmap = &bitmap;
 						gn_sm_functions(GN_OP_SetBitmap, data, state);
 						data->bitmap = &oldbit;
 						gn_sm_functions(GN_OP_GetBitmap, data, state);
 						fprintf(stderr, _("too long, truncated to \"%s\" (length %i)\n"),oldbit.text,strlen(oldbit.text));
+						return GN_ERR_ENTRYTOOLONG;
 					}
-					ok = false;
 				}
 				break;
 			case GN_BMP_StartupLogo:
@@ -2164,8 +2167,7 @@ static int setlogo(int argc, char *argv[])
 					if (oldbit.bitmap[i] != bitmap.bitmap[i]) {
 						fprintf(stderr, _("Error setting startup logo - SIM card and PIN is required\n"));
 						fprintf(stderr, _("i: %i, %2x %2x\n"), i, oldbit.bitmap[i], bitmap.bitmap[i]);
-						ok = false;
-						break;
+						return GN_ERR_UNKNOWN;
 					}
 				}
 				break;
@@ -2174,7 +2176,7 @@ static int setlogo(int argc, char *argv[])
 
 			}
 		}
-		if (ok) fprintf(stderr, _("Done.\n"));
+		fprintf(stderr, _("Done.\n"));
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
