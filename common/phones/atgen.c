@@ -881,7 +881,7 @@ static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 			data->call_divert->timeout);
 		strcat(req, req2);
 	} else {
-		sprintf(req2, ",%d", req, data->call_divert->operation);
+		sprintf(req2, ",%d", data->call_divert->operation);
 		strcat(req, req2);
 	}
 
