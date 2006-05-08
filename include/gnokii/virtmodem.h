@@ -44,7 +44,7 @@ extern struct vm_queue queue;
 
 /* Prototypes */
 API int gn_vm_initialise(const char *iname,
-			 char *bindir,
+			 const char *bindir,
 			 int debug_mode,
 			 int gn_init);
 API void gn_vm_loop(void);

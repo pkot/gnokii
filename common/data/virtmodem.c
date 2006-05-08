@@ -102,7 +102,7 @@
 #endif
 
 /* Prototypes */
-static int  VM_PtySetup(char *bindir);
+static int  VM_PtySetup(const char *bindir);
 static gn_error VM_GSMInitialise(struct gn_statemachine *sm);
 
 /* Global variables */
@@ -122,7 +122,7 @@ struct vm_queue queue;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
-bool gn_vm_initialise(const char *iname, char *bindir, bool debug_mode, bool GSMInit)
+bool gn_vm_initialise(const char *iname, const char *bindir, bool debug_mode, bool GSMInit)
 {
 	static struct gn_statemachine State;
 	sm = &State;
@@ -342,7 +342,7 @@ static int gopen(const char *command)
 
 /* Open pseudo tty interface and (in due course create a symlink
    to be /dev/gnokii etc. ) */
-static int VM_PtySetup(char *bindir)
+static int VM_PtySetup(const char *bindir)
 {
 	char mgnokiidev[200];
 

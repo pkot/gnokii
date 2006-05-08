@@ -36,6 +36,8 @@
 
 */
 
+#define GNOKII_DEPRECATED /* do not warn about deprecated functions here */
+
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
