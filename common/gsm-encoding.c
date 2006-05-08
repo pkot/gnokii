@@ -634,7 +634,7 @@ char *char_bcd_number_get(u8 *number)
 {
 	static char buffer[GN_BCD_STRING_MAX_LENGTH] = "";
 	int length = number[0]; /* This is the length of BCD coded number */
-	int count, digit;
+	int count, digit, i = 0;
 
 	if (length > GN_BCD_STRING_MAX_LENGTH) length = GN_BCD_STRING_MAX_LENGTH;
 	memset(buffer, 0, GN_BCD_STRING_MAX_LENGTH);
@@ -645,6 +645,7 @@ char *char_bcd_number_get(u8 *number)
 		break;
 	case GN_GSM_NUMBER_International:
 		sprintf(buffer, "+");
+		i++;
 		if (length == GN_BCD_STRING_MAX_LENGTH) length--; /* avoid overflow */
 	case GN_GSM_NUMBER_Unknown:
 	case GN_GSM_NUMBER_National:
@@ -654,9 +655,11 @@ char *char_bcd_number_get(u8 *number)
 	default:
 		for (count = 0; count < length - 1; count++) {
 			digit = number[count+2] & 0x0f;
-			if (digit < 10) sprintf(buffer, "%s%d", buffer, digit);
+			if (digit < 10)
+				buffer[i++] = digit + '0';
 			digit = number[count+2] >> 4;
-			if (digit < 10) sprintf(buffer, "%s%d", buffer, digit);
+			if (digit < 10)
+				buffer[i++] = digit + '0';
 		}
 		break;
 	}
