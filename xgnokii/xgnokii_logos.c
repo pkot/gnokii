@@ -195,7 +195,6 @@ GdkPixmap *GetPreviewPixmap(GtkWidget *widget)
 	GdkPixmap *pixmap = NULL;
 	GdkBitmap *mask;
 	gchar *file, *dirname;
-	struct stat *buf;
 
 	dirname = g_strdup_printf("%s/xpm/", xgnokiiConfig.xgnokiidir);
 	if (!pixmapsInitialized) {

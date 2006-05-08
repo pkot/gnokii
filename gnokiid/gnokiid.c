@@ -47,7 +47,7 @@
 
 /* Global variables */
 bool DebugMode;		/* When true, run in debug mode */
-char *BinDir;		/* Directory of the mgnokiidev command */
+const char *BinDir;	/* Directory of the mgnokiidev command */
 char *lockfile = NULL;
 bool GTerminateThread;
 
@@ -89,7 +89,7 @@ static void busterminate(void)
 
 int main(int argc, char *argv[])
 {
-	char *aux;
+	const char *aux;
 	static bool atexit_registered = false;
 	struct gn_statemachine temp_state;
 

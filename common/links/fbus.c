@@ -96,8 +96,7 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
 {
 	struct timeval timeout;
 	unsigned char buffer[255];
-	int res, i;
-	int select_ok = 0;
+	int res;
 
 	/* Communication with the phone looks strange here. I am unable to
 	 * read the whole answer from the port with DKU-5 cable and
@@ -122,7 +121,7 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
 {
 	unsigned char init_char = 0x55;
 	unsigned char end_init_char = 0xc1;
-	int count, res, i;
+	int count, res;
 
 	if (!state)
 		return false;
