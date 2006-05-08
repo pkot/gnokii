@@ -138,13 +138,13 @@ API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
 		const gn_memory_type memory_type, const int index );
 
 /* after reading an entry with gn_lib_phonebook_read_entry() ask for the values of the phonebook entry */
-API const char *                  gn_lib_get_pb_name           ( struct gn_statemachine *state ); /* Mr. Miller */
-API const char *                  gn_lib_get_pb_number         ( struct gn_statemachine *state ); /* +18001189383 */
-API const gn_phonebook_group_type gn_lib_get_pb_caller_group   ( struct gn_statemachine *state ); /* */
-API const gn_memory_type          gn_lib_get_pb_memtype        ( struct gn_statemachine *state ); /* */
-API const int                     gn_lib_get_pb_location       ( struct gn_statemachine *state ); /* 1*/
-API const gn_timestamp            gn_lib_get_pb_date           ( struct gn_statemachine *state ); /* */
-API const int                     gn_lib_get_pb_num_subentries ( struct gn_statemachine *state ); /* */
+API const char *            gn_lib_get_pb_name           ( struct gn_statemachine *state ); /* Mr. Miller */
+API const char *            gn_lib_get_pb_number         ( struct gn_statemachine *state ); /* +18001189383 */
+API gn_phonebook_group_type gn_lib_get_pb_caller_group   ( struct gn_statemachine *state ); /* */
+API gn_memory_type          gn_lib_get_pb_memtype        ( struct gn_statemachine *state ); /* */
+API int                     gn_lib_get_pb_location       ( struct gn_statemachine *state ); /* 1*/
+API gn_timestamp            gn_lib_get_pb_date           ( struct gn_statemachine *state ); /* */
+API int                     gn_lib_get_pb_num_subentries ( struct gn_statemachine *state ); /* */
 API gn_error	gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index, 
 			gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, const char **number );
 
