@@ -193,7 +193,6 @@ static gn_memory_type get_gn_memory_type(int memory_type);
 
 /* Some globals */
 
-static bool sms_loop = false; /* Are we in infinite SMS reading loop? */
 static bool new_sms  = false; /* Do we have a new SMS? */
 
 static gn_incoming_function_type nk6510_incoming_functions[] = {
@@ -4278,7 +4277,6 @@ static gn_error NK6510_IncomingSubscribe(int messagetype, unsigned char *message
 /* FIXME: make it configurable */
 static gn_error NK6510_Subscribe(gn_data *data, struct gn_statemachine *state)
 {
-	int i;
 	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x10,
 			       0x06, /* number of groups */
 			       NK6510_MSG_COMMSTATUS, NK6510_MSG_SMS,
@@ -5221,9 +5219,11 @@ static gn_error GetNextFreeToDoLocation(gn_data *data, struct gn_statemachine *s
 
 static gn_error NK6510_GetToDo(gn_data *data, struct gn_statemachine *state)
 {
+#if 0
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03,
 			       0x00, 0x00, 0x80, 0x00,
 			       0x00, 0x01};		/* Location */
+#endif
 	gn_error error;
 
 	if (data->todo->location < 1) {
