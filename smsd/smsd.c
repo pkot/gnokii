@@ -36,6 +36,7 @@
 #include <time.h>
 #include <dlfcn.h>
 
+
 #ifndef WIN32
 # include <unistd.h>  /* for usleep */
 # include <signal.h>
@@ -52,9 +53,14 @@
 #include "misc.h"
 
 #include "gnokii.h"
+#include "config.h"
 #include "smsd.h"
 #include "lowlevel.h"
 #include "db.h"
+
+#ifdef ENABLE_NLS
+#  include <locale.h>
+#endif
 
 
 /* Hold main configuration data for smsd */
