@@ -521,7 +521,8 @@ static void Run (void)
 int main (int argc, char *argv[])
 {
 #ifdef ENABLE_NLS
-  textdomain("gnokii");
+  textdomain ("gnokii");
+  setlocale (LC_ALL, "");
 #endif
 
   gn_elog_handler = NULL;
