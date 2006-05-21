@@ -91,6 +91,7 @@
       change capitalization of some strings         (Daniele Forsi)
     o change two error messages in gnokii/gnokii.c setlogo() to be
       easier to translate                           (Daniele Forsi)
+    * update Italian translation and fix charset    (Daniele Forsi)
  * smsd updates
     o switch smsd to new libgnokii functions         (Helge Deller,
                                                          Pawel Kot)
