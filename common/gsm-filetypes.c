@@ -1656,6 +1656,9 @@ API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, cha
 	for (i = 0; i < entry->subentries_count; i++) {
 		switch (entry->subentries[i].entry_type) {
 		case GN_PHONEBOOK_ENTRY_Date:
+			fprintf(f, ";%d;0;0;%04u%02u%02u%02u%02u%02u", GN_PHONEBOOK_ENTRY_Date,
+				entry->subentries[i].data.date.year, entry->subentries[i].data.date.month, entry->subentries[i].data.date.day,
+				entry->subentries[i].data.date.hour, entry->subentries[i].data.date.minute, entry->subentries[i].data.date.second);
 			break;
 		default:
 			add_slashes(escaped_name, entry->subentries[i].data.number, sizeof(escaped_name), strlen(entry->subentries[i].data.number));
@@ -1667,9 +1670,12 @@ API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, cha
 			break;
 		}
 	}
-	if (entry->memory_type == GN_MT_MC || entry->memory_type == GN_MT_DC || entry->memory_type == GN_MT_RC)
-		fprintf(f, "%d;0;0;%02u.%02u.%04u %02u:%02u:%02u", GN_PHONEBOOK_ENTRY_Date,
-			entry->date.day, entry->date.month, entry->date.year, entry->date.hour, entry->date.minute, entry->date.second);
+	if ((entry->memory_type == GN_MT_MC ||
+		entry->memory_type == GN_MT_DC ||
+		entry->memory_type == GN_MT_RC) &&
+		entry->date.day != 0)
+		fprintf(f, ";%d;0;0;%04u%02u%02u%02u%02u%02u", GN_PHONEBOOK_ENTRY_Date,
+			entry->date.year, entry->date.month, entry->date.day, entry->date.hour, entry->date.minute, entry->date.second);
 	fprintf(f, "\n");
 	return GN_ERR_NONE;
 }
