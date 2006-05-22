@@ -34,6 +34,17 @@
 #  include <time.h>
 #  define ftime _ftime
 #  define timeb _timeb
+
+int setenv(const char *name, const char *value, int overwrite)
+{
+	return (int)SetEnvironmentVariable(name, value);
+}
+
+void unsetenv(const char *name)
+{
+	SetEnvironmentVariable(name, NULL);
+}
+
 #endif
 
 #ifdef HAVE_SYS_TIME_H

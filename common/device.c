@@ -44,6 +44,7 @@
 #  include "devices/winserial.h"
 #endif
 #include "devices/tekram.h"
+#include "devices/dku2libusb.h"
 
 
 API int device_getfd(struct gn_statemachine *state)

@@ -176,9 +176,12 @@ API int gn_timestamp_isvalid(const gn_timestamp dt);
 #if __GNUC__ - 0 > 3 || (__GNUC__ - 0 == 3 && __GNUC_MINOR__ - 0 >= 2)
   /* gcc >= 3.2 */
 # define GNOKII_DEPRECATED __attribute__ ((deprecated))
-#elif defined(_MSC_VER) && (_MSC_VER >= 1300)
+#elif defined(_MSC_VER) && (_MSC_VER >= 1300) && (_MSC_VER < 1400)
   /* msvc >= 7 */
 # define GNOKII_DEPRECATED __declspec(deprecated)
+#elif defined(_MSV_VER) && (_MSC_VER >= 1400)
+  /* MS Visual Studio 2005 */
+# define GNOKII_DEPRECATED
 #else
 # define GNOKII_DEPRECATED
 #endif

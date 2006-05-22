@@ -73,7 +73,7 @@
 #  include <windows.h>
 #  include <process.h>
 #  include <io.h>
-#  include "win32/getopt.h"
+#  include <getopt.h>
 
 #else
 

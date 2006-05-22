@@ -40,6 +40,7 @@
 
 #ifdef WIN32
 #  include <windows.h>
+#  include <locale.h>
 #  ifdef HAVE_DIRECT_H
 #    include <direct.h>
 #  endif

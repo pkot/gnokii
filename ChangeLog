@@ -54,6 +54,7 @@
     o Nokia 3310 does not support GetPhoneStatus    (Daniele Forsi)
  * build system updates
     o fix typo in smsd-mysql Debian pacakge depedencies (Pawel Kot)
+    o support for MS Visual Studio 2005               (Jari Turkia)
  * dku2 kernel driver updates
     o fix version for Linux 2.4                         (Pawel Kot)
     o update documentation                              (Pawel Kot)
