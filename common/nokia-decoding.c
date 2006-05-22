@@ -146,6 +146,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			dprintf("   Number: %s\n", subentry->data.number);
 			subblock_count++;
 			data->phonebook_entry->subentries_count++;
+			data->phonebook_entry->empty = false;
 			break;
 		case GN_PHONEBOOK_ENTRY_Ringtone:  /* Ringtone */
 			if (data->bitmap) {

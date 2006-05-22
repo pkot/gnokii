@@ -43,6 +43,8 @@
     o add support for connection=dku5 setting           (Pawel Kot)
     o avoid using sprintf(buf, "%s...", buf, ...) as it doesn't
       work on some systems                              (Pawel Kot)
+    o show the entries when there is no name given (for example in
+      missed calls or dialled numbers)                  (Pawel Kot)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
     o support for Symbian phones (identifier 'symbian'), generic
