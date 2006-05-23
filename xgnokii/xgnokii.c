@@ -31,17 +31,17 @@
 
 */
 
-#include <gdk/gdkkeysyms.h>
-#include <gtk/gtk.h>
-
 #include "config.h"
-#include "compat.h"
-#include "misc.h"
-
 #ifdef HAVE_ASPRINTF
 #  define _GNU_SOURCE
 #  include <stdio.h>
 #endif
+
+#include <gdk/gdkkeysyms.h>
+#include <gtk/gtk.h>
+
+#include "compat.h"
+#include "misc.h"
 
 #include <stdlib.h>		/* for getenv */
 #include <locale.h>
