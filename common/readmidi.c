@@ -253,7 +253,7 @@ static int readmt(struct MF *mf, char *s)
 {
 	int n = 0;
 	char *p = s;
-	int c;
+	int c = 0;
 
 	while (n++ < 4 && (c = mf->Mf_getc(mf)) != EOF) {
 		if (c != *p++) {

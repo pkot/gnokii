@@ -2482,6 +2482,11 @@ static int getcalendarnote(int argc, char *argv[])
 				case GN_CALNOTE_MEETING:
 					fprintf(stdout, _("   Location: %s\n"), calnote.mlocation);
 					break;
+				case GN_CALNOTE_BIRTHDAY:
+				case GN_CALNOTE_REMINDER:
+				case GN_CALNOTE_MEMO:
+					/* was already printed as calnote.text above */
+					break;
 				}
 			}
 

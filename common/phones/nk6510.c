@@ -1693,7 +1693,7 @@ static gn_error NK6510_GetFileById(gn_data *data, struct gn_statemachine *state)
 				0x00, 0x00, /* Location */
 				0x00, 0x00, 0x00, 0x00, /* Start position */
 				0x00, 0x00, 0x00, 0x00}; /* Size */
-	gn_error err;
+	gn_error err = GN_ERR_NONE;
 	int i, length;
 
   	if (!data->file)
@@ -1826,7 +1826,7 @@ static gn_error NK6510_DeleteFileById(gn_data *data, struct gn_statemachine *sta
 static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int i, j, frame_length;
-	gn_file *file;
+	gn_file *file = NULL;
 	gn_file_list *fll;
 	gn_error error = GN_ERR_NONE;
 
@@ -3079,6 +3079,8 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		req[6] = 0x08;
 		req[3] = 0x07;
 		break;
+	case GN_CALNOTE_MEMO:
+		return GN_ERR_INTERNALERROR; /* not yet implemented! */
 	}
 
 	req[8]  = calnote->time.year >> 8;
@@ -3210,6 +3212,8 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		len = char_unicode_encode(req + count, calnote->text, strlen(calnote->text)); /* Fields 16->N */
 		count += len;
 		break;
+	case GN_CALNOTE_MEMO:
+		return GN_ERR_INTERNALERROR; /* not yet implemented! */
 	}
 
 	/* padding */

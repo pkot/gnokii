@@ -79,10 +79,10 @@ void pkt_put_int32(pkt_buffer *buf, int32_t x)
 {
 	uint8_t *b = buffer_expand(buf, 4);
 
-	buf->addr[0] = (uint8_t)((x >> 24) & 0xff);
-	buf->addr[1] = (uint8_t)((x >> 16) & 0xff);
-	buf->addr[2] = (uint8_t)((x >> 8) & 0xff);
-	buf->addr[3] = (uint8_t)(x & 0xff);
+	b[0] = (uint8_t)((x >> 24) & 0xff);
+	b[1] = (uint8_t)((x >> 16) & 0xff);
+	b[2] = (uint8_t)((x >> 8) & 0xff);
+	b[3] = (uint8_t)(x & 0xff);
 }
 
 void pkt_put_uint8(pkt_buffer *buf, uint8_t x)

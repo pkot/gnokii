@@ -33,6 +33,9 @@
 #ifndef XGNOKII_H
 #define XGNOKII_H
 
+#define _GNU_SOURCE  /* for asprintf() in stdio.h */
+#include <stdio.h>
+
 #include <gtk/gtk.h>
 #include "config.h"
 #include "misc.h"

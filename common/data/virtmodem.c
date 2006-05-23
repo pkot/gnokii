@@ -294,7 +294,8 @@ static int gread(int fd, void *ptr, size_t nbytes, int *recvfd)
 
 static int gopen(const char *command)
 {
-	int fd, sockfd[2], status;
+	int fd = -1;
+	int sockfd[2], status;
 	pid_t childpid;
 	char c, argsockfd[10];
 
