@@ -129,11 +129,15 @@ API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
 		const gn_memory_type memory_type,
 		int *num_used, int *num_free );
 
+/* remove an addressbook entry physically from phone. */
+API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
+		const gn_memory_type memory_type, const int index );
+
 /* check if given addressbook entry is empty. Returns "true" if empty, 0 if not. */
 API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
 		const gn_memory_type memory_type, const int index );
 
-/* read given addressbook entry into internal structure. Ask for values with functions below */
+/* read given addressbook entry into internal structure. Afterwards ask for each value with functions below */
 API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
 		const gn_memory_type memory_type, const int index );
 
@@ -148,10 +152,28 @@ API int                     gn_lib_get_pb_num_subentries ( struct gn_statemachin
 API gn_error	gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index, 
 			gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, const char **number );
 
+/* How to write to a phonebook entry with 3 steps:
+   a) call gn_lib_phonebook_prepare_write_entry() to initialize structures
+   b) call gn_lib_set_pb_*() to set values (do this for each value you want to set)
+   c) call gn_lib_phonebook_write_entry() to write it physically to phone
+ */
 
-/* remove an addressbook entry from phone. */
-API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
-		const gn_memory_type memory_type, const int index );
+/* initialize gnokii internal phonebook structure */
+API gn_error gn_lib_phonebook_prepare_write_entry( struct gn_statemachine *state );
+
+/* call each of the functions to set a specific value in current internal memory */
+API gn_error gn_lib_set_pb_name        ( struct gn_statemachine *state, const char *name ); /* Mr. Miller */
+API gn_error gn_lib_set_pb_number      ( struct gn_statemachine *state, const char *number ); /* +18001189383 */
+API gn_error gn_lib_set_pb_caller_group( struct gn_statemachine *state, gn_phonebook_group_type grouptype ); /* */
+API gn_error gn_lib_set_pb_memtype     ( struct gn_statemachine *state, gn_memory_type memtype ); /* */
+API gn_error gn_lib_set_pb_location    ( struct gn_statemachine *state, int location ); /* 1*/
+API gn_error gn_lib_set_pb_date        ( struct gn_statemachine *state, gn_timestamp timestamp ); /* */
+API gn_error gn_lib_set_pb_subentry    ( struct gn_statemachine *state, const int index, /* index=-1 appends it */
+	gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type, const char *number );
+
+/* and now write the addressbook entry physically to phone. */
+API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
+        const gn_memory_type memory_type, const int index );
 
 
 

@@ -78,7 +78,7 @@ API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statema
 		return GN_ERR_UNKNOWNMODEL;
 	}
 
-	return LASTERROR((*state),GN_ERR_NONE);
+	return LASTERROR((*state), GN_ERR_NONE);
 }
 
 API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
@@ -118,7 +118,7 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 		state->lockfile = gn_device_lock(state->config.port_device);
 		if (state->lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting.\n"));
-			return LASTERROR(state,GN_ERR_BUSY);
+			return LASTERROR(state, GN_ERR_BUSY);
 		}
 	}
 
@@ -127,10 +127,10 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Telephone interface init failed: %s\nQuitting.\n"),
 			gn_error_print(error));
-		return LASTERROR(state,error);
+		return LASTERROR(state, error);
 	}
 
-	return LASTERROR(state,GN_ERR_NONE);
+	return LASTERROR(state, GN_ERR_NONE);
 }
 
 API gn_error gn_lib_phone_close( struct gn_statemachine *state )
@@ -145,7 +145,7 @@ API gn_error gn_lib_phone_close( struct gn_statemachine *state )
 	}
 	state->lockfile = NULL;
 
-	return LASTERROR(state,GN_ERR_NONE);
+	return LASTERROR(state, GN_ERR_NONE);
 }
 
 static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
@@ -155,7 +155,7 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	gn_error error;
 
 	if (state->config.m_model[0])
-		return LASTERROR(state,GN_ERR_NONE);
+		return LASTERROR(state, GN_ERR_NONE);
 
 	// identify phone
 	gn_data_clear(data);
@@ -175,7 +175,7 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	if (!data->imei[0])
 		strcpy(data->imei,         unknown);
 
-	return LASTERROR(state,error);
+	return LASTERROR(state, error);
 }
 
 /* ask phone for static information (model, version, manufacturer, revision and imei) */
@@ -244,7 +244,7 @@ API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
 		if (num_free) *num_free = memstat.free;
 	}
 
-	return LASTERROR(state,error);
+	return LASTERROR(state, error);
 }
 
 API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
@@ -257,7 +257,7 @@ API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
 	state->u.pb_entry.location = index;
 	data->phonebook_entry = &state->u.pb_entry;
 	error = gn_sm_functions(GN_OP_ReadPhonebook, data, state);
-	return LASTERROR(state,error);
+	return LASTERROR(state, error);
 }
 
 API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
@@ -316,7 +316,7 @@ API gn_error gn_lib_get_pb_subentry( struct gn_statemachine *state, const int in
 	if (entry_type)	 *entry_type  = state->u.pb_entry.subentries[index].entry_type;
 	if (number_type) *number_type = state->u.pb_entry.subentries[index].number_type;
 	if (number)	 *number      = state->u.pb_entry.subentries[index].data.number;
-	return LASTERROR(state,GN_ERR_NONE);
+	return LASTERROR(state, GN_ERR_NONE);
 }
 
 
@@ -332,9 +332,81 @@ API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
 	memset(data->phonebook_entry, 0, sizeof(*data->phonebook_entry));
 	data->phonebook_entry->empty = 1;
 	error = gn_sm_functions(GN_OP_WritePhonebook, data, state);
-	return LASTERROR(state,error);
+	return LASTERROR(state, error);
 }
 
+API gn_error gn_lib_phonebook_prepare_write_entry( struct gn_statemachine *state )
+{
+	gn_data *data = &state->sm_data;
+	gn_data_clear(data);
+	memset(&state->u, 0, sizeof(state->u));
+	return LASTERROR(state, GN_ERR_NONE);
+}
+
+API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
+	const gn_memory_type memory_type, const int index )
+{
+	gn_error error;
+	gn_data *data = &state->sm_data;
+
+	state->u.pb_entry.memory_type = memory_type;
+	state->u.pb_entry.location = index;
+	data->phonebook_entry = &state->u.pb_entry;
+	error = gn_sm_functions(GN_OP_WritePhonebook, data, state);
+	return LASTERROR(state, error);
+}
+
+API gn_error gn_lib_set_pb_name( struct gn_statemachine *state, const char *name )
+{
+	strncpy(state->u.pb_entry.name, name, sizeof(state->u.pb_entry.name)-1);
+	return LASTERROR(state, GN_ERR_NONE);
+}
+
+API gn_error gn_lib_set_pb_number( struct gn_statemachine *state, const char *number )
+{
+	strncpy(state->u.pb_entry.number, number, sizeof(state->u.pb_entry.number)-1);
+	return LASTERROR(state, GN_ERR_NONE);
+}
+
+API gn_error gn_lib_set_pb_caller_group( struct gn_statemachine *state, gn_phonebook_group_type grouptype )
+{
+	state->u.pb_entry.caller_group = grouptype;
+	return LASTERROR(state, GN_ERR_NONE);
+}
+
+API gn_error gn_lib_set_pb_memtype( struct gn_statemachine *state, gn_memory_type memtype )
+{
+	state->u.pb_entry.memory_type = memtype;
+	return LASTERROR(state, GN_ERR_NONE);
+}
+
+API gn_error gn_lib_set_pb_location( struct gn_statemachine *state, int location )
+{
+	state->u.pb_entry.location = location;
+	return LASTERROR(state, GN_ERR_NONE);
+}
+
+API gn_error gn_lib_set_pb_date( struct gn_statemachine *state, gn_timestamp timestamp )
+{
+	state->u.pb_entry.date = timestamp;
+	return LASTERROR(state, GN_ERR_NONE);
+}
+
+API gn_error gn_lib_set_pb_subentry( struct gn_statemachine *state, const int index, /* index=-1 appends it */
+        gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type, const char *number )
+{
+	int i = (index==-1) ? gn_lib_get_pb_num_subentries(state) : index;
+	if (i<0 || i>=GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER)
+		return LASTERROR(state, GN_ERR_INVALIDLOCATION);
+
+	if (index == -1)
+		++state->u.pb_entry.subentries_count;
+
+	state->u.pb_entry.subentries[i].entry_type  = entry_type;
+	state->u.pb_entry.subentries[i].number_type = number_type;
+	strncpy(state->u.pb_entry.subentries[i].data.number, number, sizeof(state->u.pb_entry.subentries[i].data.number)-1);
+	return LASTERROR(state, GN_ERR_NONE);
+}
 
 
 /* helper functions */
