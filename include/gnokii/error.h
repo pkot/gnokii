@@ -81,6 +81,6 @@ typedef enum {
 	GN_ERR_CODEREQUIRED		/* PIN or PUK code required */
 } gn_error;
 
-API char *gn_error_print(gn_error e);
+GNOKII_API char *gn_error_print(gn_error e);
 
 #endif /* _gnokii_error_h */

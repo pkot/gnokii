@@ -50,13 +50,13 @@
 /* this macro sets the "lasterror" code */
 #define LASTERROR(state,nr)	((state->lasterror = nr)) /* do not delete the double brackets! */
 
-API unsigned int gn_lib_version()
+GNOKII_API unsigned int gn_lib_version()
 {
 	/* return the library version number at compile time of libgnokii */
 	return LIBGNOKII_VERSION;
 }
 
-API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statemachine **state )
+GNOKII_API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statemachine **state )
 {
 	gn_error error;
 	*state = NULL;
@@ -83,7 +83,7 @@ API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statema
 	return LASTERROR((*state), GN_ERR_NONE);
 }
 
-API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
+GNOKII_API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
 {
 	/* free data structure */
 	free(*state);
@@ -92,7 +92,7 @@ API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
 	return GN_ERR_NONE;
 }
 
-API void gn_lib_library_free( void )
+GNOKII_API void gn_lib_library_free( void )
 {
 	if (gn_cfg_info) {
 		gn_cfg_free_default();
@@ -100,7 +100,7 @@ API void gn_lib_library_free( void )
 }
 
 /* return last error code */
-API gn_error gn_lib_lasterror( struct gn_statemachine *state )
+GNOKII_API gn_error gn_lib_lasterror( struct gn_statemachine *state )
 {
 	if (state)
 		return state->lasterror;
@@ -109,7 +109,7 @@ API gn_error gn_lib_lasterror( struct gn_statemachine *state )
 }
 
 
-API gn_error gn_lib_phone_open( struct gn_statemachine *state )
+GNOKII_API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 {
 	const char *aux;
 	gn_error error;
@@ -135,7 +135,7 @@ API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-API gn_error gn_lib_phone_close( struct gn_statemachine *state )
+GNOKII_API gn_error gn_lib_phone_close( struct gn_statemachine *state )
 {
 	/* close phone connection */
 	gn_sm_functions(GN_OP_Terminate, NULL, state);
@@ -181,7 +181,7 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 }
 
 /* ask phone for static information (model, version, manufacturer, revision and imei) */
-API const char *gn_lib_get_phone_model( struct gn_statemachine *state )
+GNOKII_API const char *gn_lib_get_phone_model( struct gn_statemachine *state )
 {
 	const char *aux;
 
@@ -193,31 +193,31 @@ API const char *gn_lib_get_phone_model( struct gn_statemachine *state )
 		return state->config.m_model;
 }
 
-API const char *gn_lib_get_phone_product_name( struct gn_statemachine *state )
+GNOKII_API const char *gn_lib_get_phone_product_name( struct gn_statemachine *state )
 {
 	gn_lib_get_phone_information(state);
 	return state->config.m_model; /* e.g. NPE-4 */
 }
 
-API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state )
+GNOKII_API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state )
 {
 	gn_lib_get_phone_information(state);
 	return state->config.m_manufacturer;
 }
 
-API const char *gn_lib_get_phone_revision( struct gn_statemachine *state )
+GNOKII_API const char *gn_lib_get_phone_revision( struct gn_statemachine *state )
 {
 	gn_lib_get_phone_information(state);
 	return state->config.m_revision;
 }
 
-API const char *gn_lib_get_phone_imei( struct gn_statemachine *state )
+GNOKII_API const char *gn_lib_get_phone_imei( struct gn_statemachine *state )
 {
 	gn_lib_get_phone_information(state);
 	return state->config.m_imei;
 }
 
-API const char *gn_lib_cfg_get(const char *section, const char *key)
+GNOKII_API const char *gn_lib_cfg_get(const char *section, const char *key)
 {
 	if (!gn_cfg_info)
 		gn_cfg_read_default();
@@ -228,7 +228,7 @@ API const char *gn_lib_cfg_get(const char *section, const char *key)
 
 /* Phone addressbook functions */
 
-API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
+GNOKII_API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
 	const gn_memory_type memory_type, int *num_used, int *num_free )
 {
 	gn_error error;
@@ -249,7 +249,7 @@ API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
 	return LASTERROR(state, error);
 }
 
-API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
+GNOKII_API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
 	const gn_memory_type memory_type, const int index )
 {
 	gn_error error;
@@ -262,7 +262,7 @@ API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
 	return LASTERROR(state, error);
 }
 
-API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
+GNOKII_API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
 	const gn_memory_type memory_type, const int index )
 {
 	gn_error error;
@@ -276,42 +276,42 @@ API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
 }
 
 /* after reading an entry with gn_lib_phonebook_read_entry() ask for the values of the phonebook entry */
-API const char *gn_lib_get_pb_name( struct gn_statemachine *state )
+GNOKII_API const char *gn_lib_get_pb_name( struct gn_statemachine *state )
 {
 	return state->u.pb_entry.name;
 }
 
-API const char *gn_lib_get_pb_number( struct gn_statemachine *state )
+GNOKII_API const char *gn_lib_get_pb_number( struct gn_statemachine *state )
 {
 	return state->u.pb_entry.number;
 }
 
-API gn_phonebook_group_type gn_lib_get_pb_caller_group( struct gn_statemachine *state )
+GNOKII_API gn_phonebook_group_type gn_lib_get_pb_caller_group( struct gn_statemachine *state )
 {
 	return state->u.pb_entry.caller_group;
 }
 
-API gn_memory_type gn_lib_get_pb_memtype( struct gn_statemachine *state )
+GNOKII_API gn_memory_type gn_lib_get_pb_memtype( struct gn_statemachine *state )
 {
 	return state->u.pb_entry.memory_type;
 }
 
-API int gn_lib_get_pb_location( struct gn_statemachine *state )
+GNOKII_API int gn_lib_get_pb_location( struct gn_statemachine *state )
 {
 	return state->u.pb_entry.location;
 }
 
-API gn_timestamp gn_lib_get_pb_date( struct gn_statemachine *state )
+GNOKII_API gn_timestamp gn_lib_get_pb_date( struct gn_statemachine *state )
 {
 	return state->u.pb_entry.date;
 }
 
-API int gn_lib_get_pb_num_subentries( struct gn_statemachine *state )
+GNOKII_API int gn_lib_get_pb_num_subentries( struct gn_statemachine *state )
 {
 	return state->u.pb_entry.subentries_count;
 }
 
-API gn_error gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index,
+GNOKII_API gn_error gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index,
 	gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, 
 	const char **number )
 {
@@ -322,7 +322,7 @@ API gn_error gn_lib_get_pb_subentry( struct gn_statemachine *state, const int in
 }
 
 
-API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
+GNOKII_API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
 	const gn_memory_type memory_type, const int index )
 {
 	gn_error error;
@@ -337,7 +337,7 @@ API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
 	return LASTERROR(state, error);
 }
 
-API gn_error gn_lib_phonebook_prepare_write_entry( struct gn_statemachine *state )
+GNOKII_API gn_error gn_lib_phonebook_prepare_write_entry( struct gn_statemachine *state )
 {
 	gn_data *data = &state->sm_data;
 	gn_data_clear(data);
@@ -345,7 +345,7 @@ API gn_error gn_lib_phonebook_prepare_write_entry( struct gn_statemachine *state
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
+GNOKII_API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
 	const gn_memory_type memory_type, const int index )
 {
 	gn_error error;
@@ -358,43 +358,43 @@ API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
 	return LASTERROR(state, error);
 }
 
-API gn_error gn_lib_set_pb_name( struct gn_statemachine *state, const char *name )
+GNOKII_API gn_error gn_lib_set_pb_name( struct gn_statemachine *state, const char *name )
 {
 	strncpy(state->u.pb_entry.name, name, sizeof(state->u.pb_entry.name)-1);
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-API gn_error gn_lib_set_pb_number( struct gn_statemachine *state, const char *number )
+GNOKII_API gn_error gn_lib_set_pb_number( struct gn_statemachine *state, const char *number )
 {
 	strncpy(state->u.pb_entry.number, number, sizeof(state->u.pb_entry.number)-1);
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-API gn_error gn_lib_set_pb_caller_group( struct gn_statemachine *state, gn_phonebook_group_type grouptype )
+GNOKII_API gn_error gn_lib_set_pb_caller_group( struct gn_statemachine *state, gn_phonebook_group_type grouptype )
 {
 	state->u.pb_entry.caller_group = grouptype;
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-API gn_error gn_lib_set_pb_memtype( struct gn_statemachine *state, gn_memory_type memtype )
+GNOKII_API gn_error gn_lib_set_pb_memtype( struct gn_statemachine *state, gn_memory_type memtype )
 {
 	state->u.pb_entry.memory_type = memtype;
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-API gn_error gn_lib_set_pb_location( struct gn_statemachine *state, int location )
+GNOKII_API gn_error gn_lib_set_pb_location( struct gn_statemachine *state, int location )
 {
 	state->u.pb_entry.location = location;
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-API gn_error gn_lib_set_pb_date( struct gn_statemachine *state, gn_timestamp timestamp )
+GNOKII_API gn_error gn_lib_set_pb_date( struct gn_statemachine *state, gn_timestamp timestamp )
 {
 	state->u.pb_entry.date = timestamp;
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-API gn_error gn_lib_set_pb_subentry( struct gn_statemachine *state, const int index, /* index=-1 appends it */
+GNOKII_API gn_error gn_lib_set_pb_subentry( struct gn_statemachine *state, const int index, /* index=-1 appends it */
         gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type, const char *number )
 {
 	int i = (index==-1) ? gn_lib_get_pb_num_subentries(state) : index;
@@ -413,7 +413,7 @@ API gn_error gn_lib_set_pb_subentry( struct gn_statemachine *state, const int in
 
 /* helper functions */
 
-API void gn_timestamp_set(gn_timestamp *dt, int year, int month, int day,
+GNOKII_API void gn_timestamp_set(gn_timestamp *dt, int year, int month, int day,
 			int hour, int minute, int second, int timezone)
 {
 	dt->year = year;
@@ -425,7 +425,7 @@ API void gn_timestamp_set(gn_timestamp *dt, int year, int month, int day,
 	dt->timezone = timezone;
 }
 
-API void gn_timestamp_get(gn_timestamp *dt, int *year, int *month, int *day,
+GNOKII_API void gn_timestamp_get(gn_timestamp *dt, int *year, int *month, int *day,
 			int *hour, int *minute, int *second, int *timezone)
 {
 	if (year) *year = dt->year;

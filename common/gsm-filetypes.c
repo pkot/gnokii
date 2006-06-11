@@ -1434,7 +1434,7 @@ static int get_next_token(char *src, int delim)
 #define GET_NEXT_TOKEN()	o = get_next_token(line + offset, ';')
 #define STORE_TOKEN(a)		strip_slashes(a, line + offset, sizeof(a) - 1, o - 1)
 
-API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
+GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 {
 	char backline[MAX_INPUT_LINE_LEN];
 	char memory_type_char[3];
@@ -1644,7 +1644,7 @@ endfunc:
 	return error;
 }
 
-API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, char *memory_type_string)
+GNOKII_API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, char *memory_type_string)
 {
 	char escaped_name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
 	int i;

@@ -62,7 +62,7 @@ gn_error sm_message_send(u16 messagesize, u8 messagetype, void *message, struct 
 	else return GN_ERR_NOTREADY;
 }
 
-API gn_state gn_sm_loop(int timeout, struct gn_statemachine *state)
+GNOKII_API gn_state gn_sm_loop(int timeout, struct gn_statemachine *state)
 {
 	struct timeval loop_timeout;
 	int i;
@@ -338,7 +338,7 @@ gn_error sm_block_ack(struct gn_statemachine *state)
 }
 
 /* Just to do things neatly */
-API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemachine *sm)
+GNOKII_API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemachine *sm)
 {
 	if (!sm->driver.functions) {
 		dprintf("Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!\n");

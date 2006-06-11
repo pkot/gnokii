@@ -48,7 +48,7 @@
 
 /* A few useful functions for bitmaps */
 
-API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info)
+GNOKII_API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info)
 {
 	if (!bmp || !info) return GN_ERR_INTERNALERROR;
 	strcpy(bmp->netcode, "000 00");
@@ -59,7 +59,7 @@ API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info)
 	return GN_ERR_NONE;
 }
 
-API void gn_bmp_point_set(gn_bmp *bmp, int x, int y)
+GNOKII_API void gn_bmp_point_set(gn_bmp *bmp, int x, int y)
 {
 	switch (bmp->type) {
 	case GN_BMP_NewOperatorLogo:
@@ -81,7 +81,7 @@ API void gn_bmp_point_set(gn_bmp *bmp, int x, int y)
 	}
 }
 
-API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y)
+GNOKII_API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y)
 {
 	switch (bmp->type) {
 	case GN_BMP_StartupLogo:
@@ -103,7 +103,7 @@ API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y)
 	}
 }
 
-API bool gn_bmp_point(gn_bmp *bmp, int x, int y)
+GNOKII_API bool gn_bmp_point(gn_bmp *bmp, int x, int y)
 {
 	int i = 0;
 
@@ -127,12 +127,12 @@ API bool gn_bmp_point(gn_bmp *bmp, int x, int y)
 	return ((i == 0) ? false : true);
 }
 
-API void gn_bmp_clear(gn_bmp *bmp)
+GNOKII_API void gn_bmp_clear(gn_bmp *bmp)
 {
 	if (bmp) memset(bmp->bitmap, 0, (bmp->size > GN_BMP_MAX_SIZE) ? GN_BMP_MAX_SIZE : bmp->size);
 }
 
-API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info)
+GNOKII_API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info)
 {
 	gn_bmp backup;
 	int x, y, copywidth, copyheight;
@@ -195,7 +195,7 @@ API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info)
 	}
 }
 
-API void gn_bmp_print(gn_bmp *bitmap, FILE *f)
+GNOKII_API void gn_bmp_print(gn_bmp *bitmap, FILE *f)
 {
 	int x, y;
 
@@ -212,7 +212,7 @@ API void gn_bmp_print(gn_bmp *bitmap, FILE *f)
 }
 
 
-API gn_error gn_bmp_sms_read(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap)
+GNOKII_API gn_error gn_bmp_sms_read(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap)
 {
 	int offset = 0;
 
@@ -251,7 +251,7 @@ API gn_error gn_bmp_sms_read(int type, unsigned char *message, unsigned char *co
 
 
 /* Returns message length */
-API int gn_bmp_sms_encode(gn_bmp *bitmap, unsigned char *message)
+GNOKII_API int gn_bmp_sms_encode(gn_bmp *bitmap, unsigned char *message)
 {
 	unsigned int current = 0;
 

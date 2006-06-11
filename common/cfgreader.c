@@ -51,7 +51,7 @@
 #include "cfgreader.h"
 #include "gnokii-internal.h"
 
-API struct gn_cfg_header *gn_cfg_info;
+GNOKII_API struct gn_cfg_header *gn_cfg_info;
 static gn_config gn_config_default, gn_config_global;
 
 struct gn_cfg_header *cfg_memory_read(const char **lines)
@@ -183,7 +183,7 @@ struct gn_cfg_header *cfg_memory_read(const char **lines)
 	return cfg_head;
 }
 
-API void gn_cfg_free_default()
+GNOKII_API void gn_cfg_free_default()
 {
 	while (gn_cfg_info) {
 		struct gn_cfg_header *next;
@@ -319,7 +319,7 @@ int cfg_file_write(struct gn_cfg_header *cfg, const char *filename)
  * Find the value of a key in a config file.  Return value associated
  * with key or NULL if no such key exists.
  */
-API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key)
+GNOKII_API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key)
 {
 	struct gn_cfg_header *h;
 	struct gn_cfg_entry *e;
@@ -560,7 +560,7 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 }
 
 #define MAX_PATH_LEN 200
-API int gn_cfg_read_default()
+GNOKII_API int gn_cfg_read_default()
 {
 	char *homedir;
 	char rcfile[MAX_PATH_LEN];
@@ -593,7 +593,7 @@ API int gn_cfg_read_default()
 }
 
 /* DEPRECATED */
-API int gn_cfg_read(char **bindir)
+GNOKII_API int gn_cfg_read(char **bindir)
 {
 	int retval;
 
@@ -674,17 +674,17 @@ static int cfg_file_or_memory_read(const char *file, const char **lines)
 	return 0;
 }
 
-API int gn_cfg_file_read(const char *file)
+GNOKII_API int gn_cfg_file_read(const char *file)
 {
 	return cfg_file_or_memory_read(file, NULL);
 }
 
-API int gn_cfg_memory_read(const char **lines)
+GNOKII_API int gn_cfg_memory_read(const char **lines)
 {
 	return cfg_file_or_memory_read(NULL, lines);
 }
 
-API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state)
+GNOKII_API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state)
 {
 	char section[256];
 

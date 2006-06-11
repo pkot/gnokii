@@ -74,19 +74,19 @@ typedef struct {
 	unsigned char ringtone_id[6];
 } gn_bmp;
 
-API gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info);
-API gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info);
-API gn_error gn_file_bitmap_show(char *filename);
+GNOKII_API gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info);
+GNOKII_API gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info);
+GNOKII_API gn_error gn_file_bitmap_show(char *filename);
 
-API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info);
-API void gn_bmp_point_set(gn_bmp *bmp, int x, int y);
-API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y);
-API int  gn_bmp_point(gn_bmp *bmp, int x, int y);
-API void gn_bmp_clear(gn_bmp *bmp);
-API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info);
-API void gn_bmp_print(gn_bmp *bitmap, FILE *f);
+GNOKII_API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info);
+GNOKII_API void gn_bmp_point_set(gn_bmp *bmp, int x, int y);
+GNOKII_API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y);
+GNOKII_API int  gn_bmp_point(gn_bmp *bmp, int x, int y);
+GNOKII_API void gn_bmp_clear(gn_bmp *bmp);
+GNOKII_API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *info);
+GNOKII_API void gn_bmp_print(gn_bmp *bitmap, FILE *f);
 
-API int gn_bmp_sms_encode(gn_bmp *bitmap, unsigned char *message);
-API gn_error gn_bmp_sms_read(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap);
+GNOKII_API int gn_bmp_sms_encode(gn_bmp *bitmap, unsigned char *message);
+GNOKII_API gn_error gn_bmp_sms_read(int type, unsigned char *message, unsigned char *code, gn_bmp *bitmap);
 
 #endif /* _gnokii_bitmaps_h */

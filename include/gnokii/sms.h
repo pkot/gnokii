@@ -457,7 +457,7 @@ typedef struct {
 	int is_new;
 } gn_cb_message;
 
-API void gn_sms_default_submit(gn_sms *sms);
-API void gn_sms_default_deliver(gn_sms *sms);
+GNOKII_API void gn_sms_default_submit(gn_sms *sms);
+GNOKII_API void gn_sms_default_deliver(gn_sms *sms);
 
 #endif /* _gnokii_sms_h */

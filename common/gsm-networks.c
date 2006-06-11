@@ -784,7 +784,7 @@ static gn_network networks[] = {
 	{ NULL, NULL }
 };
 
-API char *gn_network_name_get(char *network_code)
+GNOKII_API char *gn_network_name_get(char *network_code)
 {
 	int index = 0;
 
@@ -795,7 +795,7 @@ API char *gn_network_name_get(char *network_code)
 	return networks[index].name ? networks[index].name : _("unknown");
 }
 
-API char *gn_network_code_get(char *network_name)
+GNOKII_API char *gn_network_code_get(char *network_name)
 {
 	int index = 0;
 
@@ -805,7 +805,7 @@ API char *gn_network_code_get(char *network_name)
 	return networks[index].code ? networks[index].code : _("undefined");
 }
 
-API char *gn_network_code_find(char *network_name, char *country_name)
+GNOKII_API char *gn_network_code_find(char *network_name, char *country_name)
 {
 	int index = 0;
 	char country_code[5];
@@ -819,7 +819,7 @@ API char *gn_network_code_find(char *network_name, char *country_name)
 	return networks[index].code ? networks[index].code : _("undefined");
 }
 
-API char *gn_country_name_get(char *country_code)
+GNOKII_API char *gn_country_name_get(char *country_code)
 {
 	int index = 0;
 
@@ -829,7 +829,7 @@ API char *gn_country_name_get(char *country_code)
 	return countries[index].name ? countries[index].name : _("unknown");
 }
 
-API char *gn_country_code_get(char *country_name)
+GNOKII_API char *gn_country_code_get(char *country_name)
 {
 	int index = 0;
 
@@ -839,7 +839,7 @@ API char *gn_country_code_get(char *country_name)
 	return countries[index].code ? countries[index].code : _("undefined");
 }
 
-API bool gn_network_get(gn_network *network, int index)
+GNOKII_API bool gn_network_get(gn_network *network, int index)
 {
 	if (index < 0 || index >= ARRAY_LEN(networks) - 1)
 		return false;
@@ -847,7 +847,7 @@ API bool gn_network_get(gn_network *network, int index)
 	return true;
 }
 
-API bool gn_country_get(gn_country *country, int index)
+GNOKII_API bool gn_country_get(gn_country *country, int index)
 {
 	if (index < 0 || index >= ARRAY_LEN(countries) - 1)
 		return false;
@@ -855,7 +855,7 @@ API bool gn_country_get(gn_country *country, int index)
 	return true;
 }
 
-API char *gn_network2country(char *network_code)
+GNOKII_API char *gn_network2country(char *network_code)
 {
 	char ccode[4];
 	

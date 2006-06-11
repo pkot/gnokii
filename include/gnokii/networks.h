@@ -44,16 +44,16 @@ typedef struct {
 	char *name; /* GSM country name */
 } gn_country;
 
-API char *gn_network_name_get(char *network_code);
-API char *gn_network_code_get(char *network_name);
-API char *gn_network_code_find(char *network_name, char *country_name);
+GNOKII_API char *gn_network_name_get(char *network_code);
+GNOKII_API char *gn_network_code_get(char *network_name);
+GNOKII_API char *gn_network_code_find(char *network_name, char *country_name);
 
-API char *gn_country_name_get(char *country_code);
-API char *gn_country_code_get(char *country_name);
+GNOKII_API char *gn_country_name_get(char *country_code);
+GNOKII_API char *gn_country_code_get(char *country_name);
 
-API int gn_network_get(gn_network *network, int index);
-API int gn_country_get(gn_country *country, int index);
+GNOKII_API int gn_network_get(gn_network *network, int index);
+GNOKII_API int gn_country_get(gn_country *country, int index);
 
-API char *gn_network2country(char *network);
+GNOKII_API char *gn_network2country(char *network);
 
 #endif	/* _gnokii_networks_h */

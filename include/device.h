@@ -40,7 +40,7 @@
 #  include <unistd.h>
 #endif
 
-API int device_getfd(struct gn_statemachine *state);
+GNOKII_API int device_getfd(struct gn_statemachine *state);
 
 int device_open(const char *file, int with_odd_parity, int with_async,
 		int with_hw_handshake, gn_connection_type device_type,

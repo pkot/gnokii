@@ -39,7 +39,7 @@ gn_error unimplemented(void)
 	return GN_ERR_NOTIMPLEMENTED;
 }
 
-API gn_memory_type gn_str2memory_type(const char *s)
+GNOKII_API gn_memory_type gn_str2memory_type(const char *s)
 {
 #define X(a) if (!strcmp(s, #a)) return GN_MT_##a;
 	X(ME);
@@ -80,7 +80,7 @@ API gn_memory_type gn_str2memory_type(const char *s)
 #undef X
 }
 
-API const char *gn_memory_type2str(gn_memory_type mt)
+GNOKII_API const char *gn_memory_type2str(gn_memory_type mt)
 {
 	switch (mt) {
 	case GN_MT_ME: return _("Internal memory");
@@ -131,7 +131,7 @@ API const char *gn_memory_type2str(gn_memory_type mt)
  * Use this function to sanitize GSM phone number format. It changes
  * number argument.
  */
-API void gn_number_sanitize(char *number, int maxlen)
+GNOKII_API void gn_number_sanitize(char *number, int maxlen)
 {
 	char *iter, *e;
 
@@ -156,7 +156,7 @@ API void gn_number_sanitize(char *number, int maxlen)
  *
  * Use this function before any attempt to write an entry to the phone.
  */
-API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry)
+GNOKII_API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry)
 {
 	int i;
 
@@ -171,7 +171,7 @@ API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry)
  * This very small function is just to make it easier to clear
  * the data struct every time one is created 
  */
-API void gn_data_clear(gn_data *data)
+GNOKII_API void gn_data_clear(gn_data *data)
 {
 	memset(data, 0, sizeof(gn_data));
 }

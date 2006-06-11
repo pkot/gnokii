@@ -46,7 +46,7 @@ static gn_call *search_call(int call_id, struct gn_statemachine *state)
 	return NULL;
 }
 
-API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state)
+GNOKII_API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state)
 {
 	gn_call *call;
 
@@ -112,7 +112,7 @@ API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_info, s
 	}
 }
 
-API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state)
+GNOKII_API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state)
 {
 	gn_call *call;
 	gn_error err;
@@ -141,7 +141,7 @@ API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *s
 	return GN_ERR_NONE;
 }
 
-API gn_error gn_call_answer(int call_id)
+GNOKII_API gn_error gn_call_answer(int call_id)
 {
 	gn_data data;
 	gn_call_info call_info;
@@ -156,7 +156,7 @@ API gn_error gn_call_answer(int call_id)
 	return gn_sm_functions(GN_OP_AnswerCall, &data, calltable[call_id].state);
 }
 
-API gn_error gn_call_cancel(int call_id)
+GNOKII_API gn_error gn_call_cancel(int call_id)
 {
 	gn_data data;
 	gn_call_info call_info;
@@ -171,14 +171,14 @@ API gn_error gn_call_cancel(int call_id)
 	return gn_sm_functions(GN_OP_AnswerCall, &data, calltable[call_id].state);
 }
 
-API gn_call *gn_call_get_active(int call_id)
+GNOKII_API gn_call *gn_call_get_active(int call_id)
 {
 	if (calltable[call_id].status == GN_CALL_Idle) return NULL;
 
 	return calltable + call_id;
 }
 
-API gn_error gn_call_check_active(struct gn_statemachine *state)
+GNOKII_API gn_error gn_call_check_active(struct gn_statemachine *state)
 {
 	gn_data data;
 	gn_call_active active[2];

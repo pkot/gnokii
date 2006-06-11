@@ -73,7 +73,7 @@ static int ldif_entry_write(FILE *f, const char *parameter, const char *value, i
 	return 1;
 }
 
-API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
+GNOKII_API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 {
 	char *aux;
 	int i;
@@ -163,7 +163,7 @@ API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 #define ERROR(a) fprintf(stderr, "%s\n", a)
 
 /* We assume gn_phonebook_entry is ready for writing in, ie. no rubbish inside */
-API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
+GNOKII_API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 {
 	char buf[10240];
 	int i;

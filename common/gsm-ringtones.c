@@ -193,7 +193,7 @@ int GSM_GetDuration(int number, unsigned char *spec)
 }
 
 
-API int gn_note_get(int number)
+GNOKII_API int gn_note_get(int number)
 {
 	int note = 0;
 
@@ -253,7 +253,7 @@ int GSM_GetScale(int number)
    Function returns number of packed notes and changes maxlength to
    number of used chars in "package" */
 
-API unsigned char gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength)
+GNOKII_API unsigned char gn_ringtone_pack(gn_ringtone *ringtone, unsigned char *package, int *maxlength)
 {
 	int StartBit=0;
 	int i;
@@ -414,7 +414,7 @@ int OctetUnAlign(int CurrentBit)
 
 /* TODO: better checking, if contents of ringtone is OK */
 
-API gn_error gn_ringtone_unpack(gn_ringtone *ringtone, unsigned char *package, int maxlength)
+GNOKII_API gn_error gn_ringtone_unpack(gn_ringtone *ringtone, unsigned char *package, int maxlength)
 {
 	int StartBit = 0;
 	int spec, duration, scale;
@@ -602,7 +602,7 @@ int imelody_sms_encode(unsigned char *imelody, unsigned char *message)
 	return (current + strlen(imelody));
 }
 
-API void gn_ringtone_get_tone(const gn_ringtone *ringtone, int n, int *freq, int *ulen)
+GNOKII_API void gn_ringtone_get_tone(const gn_ringtone *ringtone, int n, int *freq, int *ulen)
 {
 	float f;
 
@@ -641,7 +641,7 @@ API void gn_ringtone_get_tone(const gn_ringtone *ringtone, int n, int *freq, int
 	*ulen = 1875000 * ringtone->notes[n].duration / ringtone->tempo;
 }
 
-API void gn_ringtone_set_duration(gn_ringtone *ringtone, int n, int ulen)
+GNOKII_API void gn_ringtone_set_duration(gn_ringtone *ringtone, int n, int ulen)
 {
 	int l = ulen * ringtone->tempo / 240;
 	gn_ringtone_note *note = ringtone->notes + n;

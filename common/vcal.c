@@ -71,7 +71,7 @@ static inline const char *get_prodid()
 /*
 	ICALENDAR Reading functions
  */
-API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
+GNOKII_API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 {
 #ifdef HAVE_LIBICAL
 #  define MAX_PROP_INDEX 5
@@ -289,7 +289,7 @@ static inline gn_calnote_type str2calnote_type(const char *str)
 }
 
 /* read a vcalendar event given by id from file f and store the data in calnote */
-API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
+GNOKII_API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 {
 	int retval = GN_ERR_FAILED;
 #ifdef HAVE_LIBICAL
@@ -428,7 +428,7 @@ API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 	return retval;
 }
 
-API int gn_todo2ical(FILE *f, gn_todo *ctodo)
+GNOKII_API int gn_todo2ical(FILE *f, gn_todo *ctodo)
 {
 #ifdef HAVE_LIBICAL
 	icalcomponent *pIcal = NULL;
@@ -478,7 +478,7 @@ API int gn_todo2ical(FILE *f, gn_todo *ctodo)
 }
 
 /* read the entry identified by id from the vcal file f and write it to the phone */
-API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
+GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
 {
 #ifdef HAVE_LIBICAL
 	icalparser *parser = NULL;

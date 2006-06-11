@@ -32,7 +32,7 @@
 #ifndef _gnokii_encoding_h
 #define _gnokii_encoding_h
 
-API int gn_char_def_alphabet(unsigned char *string);
+GNOKII_API int gn_char_def_alphabet(unsigned char *string);
 
 /*
  *
@@ -52,7 +52,7 @@ API int gn_char_def_alphabet(unsigned char *string);
  *     encoding     The name of the encoding (length must not exceed 63 chars)
  *
  */
-API void gn_char_set_encoding(const char* encoding);
-API const char *gn_char_get_encoding();
+GNOKII_API void gn_char_set_encoding(const char* encoding);
+GNOKII_API const char *gn_char_get_encoding();
 
 #endif /* _gnokii_encoding_h */

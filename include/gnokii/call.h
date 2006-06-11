@@ -90,9 +90,9 @@ typedef struct {
 
 #define	GN_CALL_MAX_PARALLEL 2
 
-API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
-API gn_call *gn_call_get_active(int call_id);
-API gn_error gn_call_answer(int call_id);
-API gn_error gn_call_cancel(int call_id);
+GNOKII_API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
+GNOKII_API gn_call *gn_call_get_active(int call_id);
+GNOKII_API gn_error gn_call_answer(int call_id);
+GNOKII_API gn_error gn_call_cancel(int call_id);
 
 #endif /* _gnokii_call_h */

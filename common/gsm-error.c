@@ -36,7 +36,7 @@
 #include "misc.h"
 #include "gnokii.h"
 
-API char *gn_error_print(gn_error e)
+GNOKII_API char *gn_error_print(gn_error e)
 {
 	switch (e) {
 	case GN_ERR_NONE:                  return _("No error.");

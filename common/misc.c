@@ -55,12 +55,12 @@
 #include "misc.h"
 #include "gnokii.h"
 
-API gn_log_target gn_log_debug_mask = GN_LOG_T_NONE;
-API gn_log_target gn_log_rlpdebug_mask = GN_LOG_T_NONE;
-API gn_log_target gn_log_xdebug_mask = GN_LOG_T_NONE;
-API void (*gn_elog_handler)(const char *fmt, va_list ap) = NULL;
+GNOKII_API gn_log_target gn_log_debug_mask = GN_LOG_T_NONE;
+GNOKII_API gn_log_target gn_log_rlpdebug_mask = GN_LOG_T_NONE;
+GNOKII_API gn_log_target gn_log_xdebug_mask = GN_LOG_T_NONE;
+GNOKII_API void (*gn_elog_handler)(const char *fmt, va_list ap) = NULL;
 
-API int gn_line_get(FILE *file, char *line, int count)
+GNOKII_API int gn_line_get(FILE *file, char *line, int count)
 {
 	char *ptr;
 
@@ -308,7 +308,7 @@ static gn_phone_model models[] = {
 #define MODELS_NUM_ENTRIES (sizeof(models)/sizeof(models[0]))
 
 /* this should be in libfunctions - will move it there with next version of libgnokii */
-API const char *gn_lib_get_supported_phone_model( const int num )
+GNOKII_API const char *gn_lib_get_supported_phone_model( const int num )
 {
 	if (num < 0 || num >= MODELS_NUM_ENTRIES)
 		return NULL;
@@ -316,7 +316,7 @@ API const char *gn_lib_get_supported_phone_model( const int num )
 }
 
 
-API gn_phone_model *gn_phone_model_get(const char *product_name)
+GNOKII_API gn_phone_model *gn_phone_model_get(const char *product_name)
 {
 	int i = 0;
 
@@ -331,7 +331,7 @@ API gn_phone_model *gn_phone_model_get(const char *product_name)
 	return (&models[MODELS_NUM_ENTRIES-1]); /* NULL entry */
 }
 
-API const char *gn_model_get(const char *product_name)
+GNOKII_API const char *gn_model_get(const char *product_name)
 {
 	return (gn_phone_model_get(product_name)->model);
 }
@@ -344,7 +344,7 @@ static void log_printf(gn_log_target mask, const char *fmt, va_list ap)
 	}
 }
 
-API void gn_log_debug(const char *fmt, ...)
+GNOKII_API void gn_log_debug(const char *fmt, ...)
 {
 #ifdef DEBUG
 	va_list ap;
@@ -357,7 +357,7 @@ API void gn_log_debug(const char *fmt, ...)
 #endif
 }
 
-API void gn_log_rlpdebug(const char *fmt, ...)
+GNOKII_API void gn_log_rlpdebug(const char *fmt, ...)
 {
 #ifdef RLP_DEBUG
 	va_list ap;
@@ -370,7 +370,7 @@ API void gn_log_rlpdebug(const char *fmt, ...)
 #endif
 }
 
-API void gn_log_xdebug(const char *fmt, ...)
+GNOKII_API void gn_log_xdebug(const char *fmt, ...)
 {
 #ifdef XDEBUG
 	va_list ap;
@@ -383,7 +383,7 @@ API void gn_log_xdebug(const char *fmt, ...)
 #endif
 }
 
-API void gn_elog_write(const char *fmt, ...)
+GNOKII_API void gn_elog_write(const char *fmt, ...)
 {
 	va_list ap;
 
@@ -411,7 +411,7 @@ API void gn_elog_write(const char *fmt, ...)
 #endif
 
 /* Lock the device. Return allocated string with a lock name */
-API char *gn_device_lock(const char* port)
+GNOKII_API char *gn_device_lock(const char* port)
 {
 #ifndef WIN32
 	char *lock_file = NULL;
@@ -512,7 +512,7 @@ failed:
 }
 
 /* Removes lock and frees memory */
-API bool gn_device_unlock(char *lock_file)
+GNOKII_API bool gn_device_unlock(char *lock_file)
 {
 #ifndef WIN32
 	int err;
@@ -582,7 +582,7 @@ void gnokii_strfreev(char **str_array)
 /*
  * check if the timestamp in dt has valid date and time
  */
-API int gn_timestamp_isvalid(gn_timestamp dt)
+GNOKII_API int gn_timestamp_isvalid(gn_timestamp dt)
 {
 #define BETWEEN(a, x, y)	((a >= x) && (a <= y))
 	int daynum;

@@ -111,14 +111,14 @@ static void sms_default(gn_sms *sms)
 	sms->dcs.u.general.m_class = 0;
 }
 
-API void gn_sms_default_submit(gn_sms *sms)
+GNOKII_API void gn_sms_default_submit(gn_sms *sms)
 {
 	sms_default(sms);
 	sms->type = GN_SMS_MT_Submit;
 	sms->memory_type = GN_MT_SM;
 }
 
-API void gn_sms_default_deliver(gn_sms *sms)
+GNOKII_API void gn_sms_default_deliver(gn_sms *sms)
 {
 	sms_default(sms);
 	sms->type = GN_SMS_MT_Deliver;
@@ -698,7 +698,7 @@ static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
  * the highlevel SMS. In data->raw_sms there's SMS read by the phone
  * driver, data->sms is the place for the parsed SMS.
  */
-API gn_error gn_sms_parse(gn_data *data)
+GNOKII_API gn_error gn_sms_parse(gn_data *data)
 {
 	if (!data->raw_sms || !data->sms) return GN_ERR_INTERNALERROR;
 	/* Let's assume at the moment that all messages are PDU coded */
@@ -714,7 +714,7 @@ API gn_error gn_sms_parse(gn_data *data)
  * phone driver. Not that raw_sms field in the gn_data structure must
  * be initialized
  */
-API gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
+GNOKII_API gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
 {
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 	return gn_sm_functions(GN_OP_GetSMS, data, state);
@@ -728,7 +728,7 @@ API gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
  * This function is the frotnend for reading SMS. Note that SMS field
  * in the gn_data structure must be initialized.
  */
-API gn_error gn_sms_get(gn_data *data, struct gn_statemachine *state)
+GNOKII_API gn_error gn_sms_get(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	gn_sms_raw rawsms;
@@ -752,7 +752,7 @@ API gn_error gn_sms_get(gn_data *data, struct gn_statemachine *state)
  * This function is the frontend for deleting SMS. Note that SMS field
  * in the gn_data structure must be initialized.
  */
-API gn_error gn_sms_delete(gn_data *data, struct gn_statemachine *state)
+GNOKII_API gn_error gn_sms_delete(gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_raw rawsms;
 
@@ -773,7 +773,7 @@ static gn_error sms_request_no_validate(gn_data *data, struct gn_statemachine *s
 	return gn_sm_functions(GN_OP_GetSMSnoValidate, data, state);
 }
 
-API gn_error gn_sms_get_no_validate(gn_data *data, struct gn_statemachine *state)
+GNOKII_API gn_error gn_sms_get_no_validate(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	gn_sms_raw rawsms;
@@ -789,7 +789,7 @@ API gn_error gn_sms_get_no_validate(gn_data *data, struct gn_statemachine *state
 	return gn_sms_parse(data);
 }
 
-API gn_error gn_sms_delete_no_validate(gn_data *data, struct gn_statemachine *state)
+GNOKII_API gn_error gn_sms_delete_no_validate(gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_raw rawsms;
 
@@ -897,7 +897,7 @@ static gn_error sms_verify_status(gn_data *data)
 }
 
 
-API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemachine *state, int has_folders)
+GNOKII_API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemachine *state, int has_folders)
 {
 	gn_error error;
 	gn_sms_folder  sms_folder;
@@ -1277,7 +1277,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state);
  * and then phone driver takes the fields it needs and sends it in the
  * phone specific way to the phone.
  */
-API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
+GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 
@@ -1311,7 +1311,7 @@ API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-API int gn_sms_udh_add(gn_sms *sms, gn_sms_udh_type type)
+GNOKII_API int gn_sms_udh_add(gn_sms *sms, gn_sms_udh_type type)
 {
 	sms->udh.length += headers[type].length;
 	sms->udh.udh[sms->udh.number].type = type;
@@ -1411,7 +1411,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
-API gn_error gn_sms_save(gn_data *data, struct gn_statemachine *state)
+GNOKII_API gn_error gn_sms_save(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	gn_sms_raw rawsms;

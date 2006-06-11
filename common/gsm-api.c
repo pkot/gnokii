@@ -92,7 +92,7 @@ gn_error (*gn_gsm_f)(gn_operation op, gn_data *data, struct gn_statemachine *sta
 /* Define pointer to the gn_phone structure used by external code to
    obtain information that varies from model to model. This structure is also
    defined in gsm-common.h */
-API gn_phone *gn_gsm_info;
+GNOKII_API gn_phone *gn_gsm_info;
 
 /* Initialise interface to the phone. Model number should be a string such as
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
@@ -123,7 +123,7 @@ static gn_error register_driver(gn_driver *driver, const char *model, char *setu
 		return ret; \
 }
 
-API gn_error gn_gsm_initialise(struct gn_statemachine *sm)
+GNOKII_API gn_error gn_gsm_initialise(struct gn_statemachine *sm)
 {
 	gn_error ret;
 

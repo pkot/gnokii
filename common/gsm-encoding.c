@@ -122,7 +122,7 @@ static const char *get_langinfo_codeset(void)
 	return codeset;
 }
 
-API const char *gn_char_get_encoding()
+GNOKII_API const char *gn_char_get_encoding()
 {
 	if (*application_encoding)
 		return application_encoding; /* app has overriden encoding setting */
@@ -246,7 +246,7 @@ static unsigned char char_def_alphabet_ext_encode(unsigned char value)
 	}
 }
 
-API bool gn_char_def_alphabet(unsigned char *string)
+GNOKII_API bool gn_char_def_alphabet(unsigned char *string)
 {
 	unsigned int i, len = strlen(string);
 
