@@ -109,6 +109,7 @@
  * build environment updates
     o add checks for -Wno-pointer-sign and -fvisibility=hidden,
       add usage of __attribute__((deprecated)        (Helge Deller)
+    o replaced usage of "API" with "GNOKII_API"      (Helge Deller)
 
 0.6.12
 ======
