@@ -1,12 +1,6 @@
-# MySQL dump 8.13
-#
-# Host: localhost    Database: sms
-#--------------------------------------------------------
-# Server version	3.23.36
+-- CREATE DATABASE smsd;
 
-#
-# Table structure for table 'inbox'
-#
+-- USE smsd;
 
 CREATE TABLE inbox (
   id int(10) unsigned NOT NULL auto_increment,
@@ -17,16 +11,7 @@ CREATE TABLE inbox (
   phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
-
-#
-# Dumping data for table 'inbox'
-#
-
-
-#
-# Table structure for table 'outbox'
-#
+);
 
 CREATE TABLE outbox (
   id int(10) unsigned NOT NULL auto_increment,
@@ -41,10 +26,8 @@ CREATE TABLE outbox (
   not_before time NOT NULL default '00:00:00',
   not_after time  NOT NULL default '23:59:59',
   PRIMARY KEY  (id)
-) TYPE=MyISAM;
+);
 
-#
-# Dumping data for table 'outbox'
-#
-
-
+-- CREATE INDEX outbox_processed_ix ON outbox (processed);
+ 
+-- GRANT SELECT, INSERT, UPDATE, DELETE ON smsd.* TO smsd@localhost;

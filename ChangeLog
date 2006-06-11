@@ -98,6 +98,8 @@
       easier to translate                           (Daniele Forsi)
     * update Italian translation and fix charset    (Daniele Forsi)
  * smsd updates
+    o apply some patches by SUSE, RedHat and Debian which
+      makes packager's life easier                   (Helge Deller)
     o switch smsd to new libgnokii functions         (Helge Deller,
                                                          Pawel Kot)
  * gnokii updates
