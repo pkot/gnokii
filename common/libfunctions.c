@@ -436,3 +436,51 @@ GNOKII_API void gn_timestamp_get(gn_timestamp *dt, int *year, int *month, int *d
 	if (second) *second = dt->second;
 	if (timezone) *timezone = dt->timezone;
 }
+
+static struct { gn_connection_type ct; const char *str; } connectiontypes[] = {
+	{ GN_CT_Serial,     "serial" },
+	{ GN_CT_DAU9P,      "dau9p" },
+	{ GN_CT_DLR3P,      "dlr3p" },
+	{ GN_CT_Infrared,   "infrared" },
+	{ GN_CT_M2BUS,      "m2bus" },
+	{ GN_CT_Irda,       "irda" },
+	{ GN_CT_Bluetooth,  "bluetooth" },
+	{ GN_CT_DLR3P,      "dku5" },
+	{ GN_CT_DKU2,       "dku2" },
+	{ GN_CT_DKU2LIBUSB, "dku2libusb" },
+#ifndef WIN32
+	{ GN_CT_TCP,        "tcp" },
+#endif
+	{ GN_CT_Tekram,     "tekram" }
+};
+
+gn_connection_type gn_get_connectiontype(const char *connection_type_string)
+{ 
+	int i;
+	for (i = 0; i < sizeof(connectiontypes)/sizeof(connectiontypes[0]); i++)
+		if (!strcasecmp(connection_type_string, connectiontypes[i].str))
+			return connectiontypes[i].ct;
+	return GN_CT_NONE;
+}
+
+GNOKII_API const char *gn_lib_get_supported_connection(const int num)
+{
+	if (num < 0 || num >= sizeof(connectiontypes)/sizeof(connectiontypes[0]))
+		return NULL;
+	return connectiontypes[num].str;
+}
+
+
+GNOKII_API gn_error gn_lib_search_one_connected_phone(struct gn_statemachine **state)
+{
+	/* allocate and initialize data structures */
+	*state = malloc(sizeof(**state));
+	if (!*state)
+		return GN_ERR_MEMORYFULL;
+	memset(*state, 0, sizeof(**state));
+
+	/* not yet implemented */
+	free(*state);
+	return LASTERROR((*state), GN_ERR_UNKNOWNMODEL);
+}
+

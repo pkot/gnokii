@@ -40,6 +40,9 @@
 #include "misc.h"
 #include "gnokii.h"
 
+/* utils */
+gn_connection_type gn_get_connectiontype(const char *connection_type_string);
+
 /* SMS */
 gn_error sms_parse(int offset, gn_data *data);
 gn_error sms_request(gn_data *data, struct gn_statemachine *state);

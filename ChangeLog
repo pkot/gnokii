@@ -27,6 +27,8 @@
     o lots of changes all around to use new libgnokii
       functions					     (Helge Deller)
     o add GNOKII_DEPRECATED and API for Linux        (Helge Deller)
+    o add gn_lib_get_supported_connection() and 
+      gn_lib_search_one_connected_phone()            (Helge Deller)
     o added gn_lib_addressbook_memstat(),
       gn_lib_phonebook_read_entry(),
       gn_lib_phonebook_entry_isempty()               (Helge Deller)

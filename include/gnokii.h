@@ -183,6 +183,15 @@ GNOKII_API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
    Just start with num=0 and increase until you get back NULL */
 GNOKII_API const char *gn_lib_get_supported_phone_model( const int num );
 
+/* use this function to get list of all supported connection type strings.
+   Just start with num=0 and increase until you get back NULL */
+GNOKII_API const char *gn_lib_get_supported_connection( const int num );
+
+/* use this function to search for a phone which is connected to this
+   computer. Currently libgnokii will search only on IRDA and bluetooth.
+   The state variable will be initialized if a phone was found. */
+GNOKII_API gn_error gn_lib_search_one_connected_phone( struct gn_statemachine **state );
+
 /* Misc */
 GNOKII_API gn_memory_type gn_str2memory_type(const char *s);
 GNOKII_API const char *gn_memory_type2str(gn_memory_type mt);

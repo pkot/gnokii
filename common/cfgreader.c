@@ -419,33 +419,8 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "connection")))
 		cfg->connection_type = def->connection_type;
 	else {
-		if (!strcasecmp(val, "serial"))
-			cfg->connection_type = GN_CT_Serial;
-		else if (!strcasecmp(val, "dau9p"))
-			cfg->connection_type = GN_CT_DAU9P;
-		else if (!strcasecmp(val, "dlr3p"))
-			cfg->connection_type = GN_CT_DLR3P;
-		else if (!strcasecmp(val, "infrared"))
-			cfg->connection_type = GN_CT_Infrared;
-		else if (!strcasecmp(val, "m2bus"))
-			cfg->connection_type = GN_CT_M2BUS;
-		else if (!strcasecmp(val, "irda"))
-			cfg->connection_type = GN_CT_Irda;
-		else if (!strcasecmp(val, "bluetooth"))
-			cfg->connection_type = GN_CT_Bluetooth;
-		else if (!strcasecmp(val, "dku5"))
-			cfg->connection_type = GN_CT_DLR3P;
-		else if (!strcasecmp(val, "dku2"))
-			cfg->connection_type = GN_CT_DKU2;
-		else if (!strcasecmp(val, "dku2libusb"))
-			cfg->connection_type = GN_CT_DKU2LIBUSB;
-#ifndef WIN32
-		else if (!strcasecmp(val, "tcp"))
-			cfg->connection_type = GN_CT_TCP;
-#endif
-		else if (!strcasecmp(val, "tekram"))
-			cfg->connection_type = GN_CT_Tekram;
-		else {
+		cfg->connection_type = gn_get_connectiontype(val);
+		if (cfg->connection_type == GN_CT_NONE) {
 			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "connection", val);
 			return false;
 		}
