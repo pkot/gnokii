@@ -105,6 +105,9 @@
  * gnokii updates
     o make --setlogo exit with a valid error code after all errors
                                                     (Daniele Forsi)
+ * build environment updates
+    o add checks for -Wno-pointer-sign and -fvisibility=hidden,
+      add usage of __attribute__((deprecated)        (Helge Deller)
 
 0.6.12
 ======
