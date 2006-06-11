@@ -20,6 +20,7 @@
     o add a library layer to make libgnokii more binary
       compatible between versions in the future      (Helge Deller)
     o change gnokii to use library layer             (Helge Deller)
+    o add gn_timestamp_set() and gn_timestamp_get()  (Helge Deller)
     o change major number of libgnokii to 3          (Helge Deller)
     o added gn_lib_lasterror(), gn_lib_cfg_get() and
       gn_lib_get_phone_model|manufact|... functions  (Helge Deller)

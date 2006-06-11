@@ -187,6 +187,10 @@ API const char *gn_lib_get_supported_phone_model( const int num );
 API gn_memory_type gn_str2memory_type(const char *s);
 API const char *gn_memory_type2str(gn_memory_type mt);
 API int gn_timestamp_isvalid(const gn_timestamp dt);
+API void gn_timestamp_set(gn_timestamp *dt, int year, int month, int day,
+			int hour, int minute, int second, int timezone);
+API void gn_timestamp_get(gn_timestamp *dt, int *year, int *month, int *day,
+			int *hour, int *minute, int *second, int *timezone);
 
 
 

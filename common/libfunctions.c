@@ -412,3 +412,27 @@ API gn_error gn_lib_set_pb_subentry( struct gn_statemachine *state, const int in
 
 
 /* helper functions */
+
+API void gn_timestamp_set(gn_timestamp *dt, int year, int month, int day,
+			int hour, int minute, int second, int timezone)
+{
+	dt->year = year;
+	dt->month = month;
+	dt->day = day;
+	dt->hour = hour;
+	dt->minute = minute;
+	dt->second = second;
+	dt->timezone = timezone;
+}
+
+API void gn_timestamp_get(gn_timestamp *dt, int *year, int *month, int *day,
+			int *hour, int *minute, int *second, int *timezone)
+{
+	if (year) *year = dt->year;
+	if (month) *month = dt->month;
+	if (day) *day = dt->day;
+	if (hour) *hour = dt->hour;
+	if (minute) *minute = dt->minute;
+	if (second) *second = dt->second;
+	if (timezone) *timezone = dt->timezone;
+}
