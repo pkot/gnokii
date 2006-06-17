@@ -50,6 +50,8 @@
       missed calls or dialled numbers)                  (Pawel Kot)
     o support date fields in phonebook export and format them
       sanely in raw format                              (Pawel Kot)
+    o global gnokiirc-file is looked under %SYSTEMROOT%, looking
+      from current working directory is a bad idea    (Jari Turkia)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
     o support for Symbian phones (identifier 'symbian'), generic
