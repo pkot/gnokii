@@ -50,11 +50,6 @@
       missed calls or dialled numbers)                  (Pawel Kot)
     o support date fields in phonebook export and format them
       sanely in raw format                              (Pawel Kot)
-    o global gnokiirc-file is looked under %SYSTEMROOT%, looking
-      from current working directory is a bad idea    (Jari Turkia)
-    o locale charset win32 problem: return current code page as
-      codeset, also makes multibyte-functions work; there is pretty
-      much nothing else that can be done to the issue (Jari Turkia)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
     o support for Symbian phones (identifier 'symbian'), generic
@@ -117,6 +112,15 @@
     o add checks for -Wno-pointer-sign and -fvisibility=hidden,
       add usage of __attribute__((deprecated)        (Helge Deller)
     o replaced usage of "API" with "GNOKII_API"      (Helge Deller)
+ * compatibility updates
+    o global gnokiirc-file is looked under %SYSTEMROOT%, looking
+      from current working directory is a bad idea    (Jari Turkia)
+    o locale charset win32 problem: return current code page as
+      codeset, also makes multibyte-functions work; there is pretty
+      much nothing else that can be done to the issue (Jari Turkia)
+    o snprintf fix: there seems to be some a nasty side effect in
+      MSVC vsnprintf causing a couple of ugly strings. This makes
+      the snprintf work similarily to unix ones       (Jari Turkia)
 
 0.6.12
 ======

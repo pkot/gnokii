@@ -791,6 +791,9 @@ int snprintf(char *str,size_t count,const char *fmt,...)
 	va_start(ap, fmt);
 	ret = vsnprintf(str, count, fmt, ap);
 	va_end(ap);
+#ifdef WIN32
+	str[count-1] = 0;       /* Windows vsnprintf does NOT truncate str. We do it manually. */
+#endif
 	return ret;
 }
 #endif
