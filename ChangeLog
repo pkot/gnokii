@@ -52,6 +52,9 @@
       sanely in raw format                              (Pawel Kot)
     o global gnokiirc-file is looked under %SYSTEMROOT%, looking
       from current working directory is a bad idea    (Jari Turkia)
+    o locale charset win32 problem: return current code page as
+      codeset, also makes multibyte-functions work; there is pretty
+      much nothing else that can be done to the issue (Jari Turkia)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
     o support for Symbian phones (identifier 'symbian'), generic
