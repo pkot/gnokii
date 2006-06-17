@@ -50,6 +50,8 @@
       missed calls or dialled numbers)                  (Pawel Kot)
     o support date fields in phonebook export and format them
       sanely in raw format                              (Pawel Kot)
+    o the string length of strings with multibyte chars is not
+      calculated correctly by strlen()              (Daniel Gollub)
  * nk6510 driver updates
     o handle calendar extended parameters writing       (Pawel Kot)
     o support for Symbian phones (identifier 'symbian'), generic

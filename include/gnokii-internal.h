@@ -74,6 +74,8 @@ int char_7bit_unpack(unsigned int offset, unsigned int in_length, unsigned int o
 int char_7bit_pack(unsigned int offset, unsigned char *input, unsigned char *output,
 		   unsigned int *in_len);
 
+int char_mblen(const char *src);
+
 unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, int len);
 unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, int len);
 

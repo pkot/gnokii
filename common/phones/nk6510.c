@@ -2951,7 +2951,7 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 	req[9] = calnote->location % 256;
 
 	/* text */
-	req[49] = strlen(calnote->text);
+	req[49] = char_mblen(calnote->text);
 	len = char_unicode_encode(req + 54, calnote->text, strlen(calnote->text));
 	count += len;
 
@@ -2964,7 +2964,7 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 		break;
 	case GN_CALNOTE_MEETING:
 		req[27] = 0x01;
-		req[50] = strlen(calnote->mlocation);
+		req[50] = char_mblen(calnote->mlocation);
 		count += char_unicode_encode(req + 54 + len, calnote->mlocation, strlen(calnote->mlocation));
 		break;
 	case GN_CALNOTE_CALL:

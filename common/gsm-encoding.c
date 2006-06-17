@@ -137,6 +137,14 @@ GNOKII_API const char *gn_char_get_encoding()
 		return get_langinfo_codeset(); /* return default codeset */
 }
 
+/* detect the correct len of a string (also for multibyte chars like "umlaute") */
+int char_mblen(const char *src)
+{
+	int len = mbstowcs(NULL, src, 0);
+	dprintf("char_mblen(%s): %i\n", src, len);
+	return len;
+}
+
 static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 {
 #ifdef HAVE_ICONV
