@@ -3456,6 +3456,9 @@ static int getphonebook(int argc, char *argv[])
 				fprintf(stderr, _("Error reading from the location %d in memory %s\n"), count, memory_type_string);
 			}
 			break;
+		case GN_ERR_TIMEOUT:
+			/* On timeout just exit the loop */
+			num_entries = 0;
 		default:
 			fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 			break;

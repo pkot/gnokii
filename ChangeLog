@@ -110,6 +110,7 @@
  * gnokii updates
     o make --setlogo exit with a valid error code after all errors
                                                     (Daniele Forsi)
+    o exit the loop for getphonebook on timeout         (Pawel Kot)
  * build environment updates
     o add checks for -Wno-pointer-sign and -fvisibility=hidden,
       add usage of __attribute__((deprecated)        (Helge Deller)
