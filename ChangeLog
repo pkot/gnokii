@@ -1,3 +1,8 @@
+0.6.99 (Not released yet)
+=========================
+ * nk6510 driver updates
+    o fix getfiledetailsbyid (off-by-four bug)          (Pawel Kot)
+
 0.6.13
 ======
  * xgnokii updates
