@@ -133,7 +133,7 @@ if test "x$GCC" = "xyes"; then
 fi
 
 dnl ======================== avoid deprecated warnings here
-CFLAGS="$CFLAGS -DGNOKII_DEPRECATED=''"
+# CFLAGS="$CFLAGS -DGNOKII_DEPRECATED=''"
 
 dnl ======================== Checks for libraries.
 

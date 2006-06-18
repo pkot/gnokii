@@ -112,6 +112,9 @@
                                                     (Daniele Forsi)
     o exit the loop for getphonebook on timeout         (Pawel Kot)
  * build environment updates
+    o remove CFLAGS from gnokii.pc.in and xgnokii.pc.in,
+      keep includes only for compilation             (Helge Deller)
+    xgnokii/xgnokii.pc.in
     o add checks for -Wno-pointer-sign and -fvisibility=hidden,
       add usage of __attribute__((deprecated)        (Helge Deller)
     o replaced usage of "API" with "GNOKII_API"      (Helge Deller)
