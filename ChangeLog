@@ -2,6 +2,13 @@
 =========================
  * nk6510 driver updates
     o fix getfiledetailsbyid (off-by-four bug)          (Pawel Kot)
+ * gnokii updates
+    o change the error message in install_log_handler() to print
+      the name of the logfile that failed to open to easily detect
+      typos when changing the HOME variable in multiple phones
+      setups; also start NLS stuff before calling
+      install_log_handler() so this error message is translated
+                                                    (Daniele Forsi) 
 
 0.6.13
 ======
@@ -106,7 +113,7 @@
       change capitalization of some strings         (Daniele Forsi)
     o change two error messages in gnokii/gnokii.c setlogo() to be
       easier to translate                           (Daniele Forsi)
-    * update Italian translation and fix charset    (Daniele Forsi)
+    o update Italian translation and fix charset    (Daniele Forsi)
  * smsd updates
     o apply some patches by SUSE, RedHat and Debian which
       makes packager's life easier                   (Helge Deller)

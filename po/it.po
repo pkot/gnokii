@@ -3329,8 +3329,8 @@ msgid "ERROR: Can't find HOME environment variable!\n"
 msgstr "ERRORE: impossibile trovare la variabile di ambiente HOME\n"
 
 #: gnokii/gnokii.c:5327
-msgid "Cannot open logfile"
-msgstr "Impossibile aprire il file di log"
+msgid "Cannot open logfile %s\n"
+msgstr "Impossibile aprire il file di log %s\n"
 
 #: gnokii/gnokii.c:5648
 #, c-format
