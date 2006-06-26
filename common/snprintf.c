@@ -818,7 +818,7 @@ int vasprintf(char **ptr, const char *format, va_list ap)
 
 
 #ifndef HAVE_ASPRINTF
-API int asprintf(char **ptr, const char *format, ...)
+GNOKII_API int asprintf(char **ptr, const char *format, ...)
 {
 	va_list ap;
 	int ret;
