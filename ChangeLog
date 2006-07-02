@@ -9,6 +9,8 @@
       setups; also start NLS stuff before calling
       install_log_handler() so this error message is translated
                                                     (Daniele Forsi) 
+ * dku2 module updates
+    o fix module headers                                (Pawel Kot)
 
 0.6.13
 ======
