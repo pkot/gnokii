@@ -2597,6 +2597,7 @@ static int setdatetime(int argc, char *argv[])
 	time_t nowh;
 	gn_timestamp date;
 	gn_error error;
+	int i;
 
 	nowh = time(NULL);
 	now = localtime(&nowh);
@@ -2608,11 +2609,12 @@ static int setdatetime(int argc, char *argv[])
 	date.minute = now->tm_min;
 	date.second = now->tm_sec;
 
-	if (argc > 0) date.year = atoi(argv[0]);
-	if (argc > 1) date.month = atoi(argv[1]);
-	if (argc > 2) date.day = atoi(argv[2]);
-	if (argc > 3) date.hour = atoi (argv[3]);
-	if (argc > 4) date.minute = atoi(argv[4]);
+	i = 0;
+	if (argc > 4) date.year = atoi(argv[i++]);
+	if (argc > 3) date.month = atoi(argv[i++]);
+	if (argc > 2) date.day = atoi(argv[i++]);
+	if (argc > 1) date.hour = atoi(argv[i++]);
+	if (argc > 0) date.minute = atoi(argv[i++]);
 
 	if (date.year < 1900) {
 
