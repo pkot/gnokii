@@ -19,6 +19,7 @@
       messages encoding				       (Igor Popik)
     o added extra header file called "wappush.h" with definitions
       of binary tag tokens and some contstant values   (Igor Popik)
+    o use GN_OP_CancelCall in gn_call_cancel()      (Daniele Forsi)
     
 0.6.13
 ======

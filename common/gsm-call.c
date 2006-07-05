@@ -168,7 +168,7 @@ GNOKII_API gn_error gn_call_cancel(int call_id)
 	gn_data_clear(&data);
 	data.call_info = &call_info;
 
-	return gn_sm_functions(GN_OP_AnswerCall, &data, calltable[call_id].state);
+	return gn_sm_functions(GN_OP_CancelCall, &data, calltable[call_id].state);
 }
 
 GNOKII_API gn_call *gn_call_get_active(int call_id)
