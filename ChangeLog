@@ -9,8 +9,6 @@
       setups; also start NLS stuff before calling
       install_log_handler() so this error message is translated
                                                     (Daniele Forsi) 
-    o handle optional command line arguments for --setdatetime as
-      explained in the docs                         (Daniele Forsi)
     o added -w option to --sendsms to for push messages sending
       support (service indication - wap push)	       (Igor Popik)
  * dku2 module updates
