@@ -26,7 +26,8 @@
   Copyright (C) 2001-2002 Markus Plail, Pavel Machek <pavel@ucw.cz>
   Copyright (C) 2002-2003 Ladis Michl
   Copyright (C) 2003-2004 BORBELY Zoltan
-
+  Copyright (C) 2006      Igor Popik
+  
   Library for parsing and creating Short Messages (SMS).
 
 */
@@ -1450,4 +1451,146 @@ GNOKII_API gn_error gn_sms_save(gn_data *data, struct gn_statemachine *state)
 cleanup:
 	data->raw_sms = NULL;
 	return error;
+}
+
+/* WAPPush functions */
+
+char *encode_attr_inline_string(char token, char *string, int *data_len) 
+{
+	char *data = NULL;
+	
+	/* we need 3 extra bytes for tags */
+	*data_len = strlen(string) + 3;
+	data = malloc(*data_len);
+
+	if (!data) {
+	    return NULL;
+	}
+	
+	data[0] = token;
+	data[1] = TAG_INLINE;
+	memcpy(data + 2, string, strlen(string));
+	data[*data_len - 1] = 0x00;
+
+	return data;
+}
+
+char *encode_indication(gn_wap_push *wp, int *data_len) 
+{
+	char *data = NULL;
+	char *attr = NULL;
+	int attr_len = 0;
+	int offset = 0;
+	
+	/* encode tag attribute */
+	attr = encode_attr_inline_string(ATTR_HREF, wp->url, &attr_len);
+	
+	if (!attr || !attr_len) {
+	    return NULL;
+	}
+	
+	/* need 5 extra bytes for indication token & attributes */
+	*data_len = attr_len + strlen(wp->text) + 5;
+	data = malloc(*data_len);
+	
+	if (!data) {
+	    return NULL;
+	}
+	
+	/* indication tag token */
+	data[offset++] = TOKEN_KNOWN_AC | TAG_INDICATION;
+	
+	/* attribute */
+	memcpy(data + offset, attr, attr_len);
+	offset += attr_len;
+	data[offset++] = TAG_END;
+
+	/* wappush text */
+	data[offset++] = TAG_INLINE;
+	memcpy(data + offset, wp->text, strlen(wp->text));
+	offset += strlen(wp->text);
+	data[offset++] = 0x00;
+	
+	/* tag end */
+	data[offset++] = TAG_END;
+
+	free(attr);
+
+	return data;
+}
+
+char *encode_si(gn_wap_push *wp, int *data_len)
+{
+	char *data = NULL;
+	char *child = NULL;
+	int child_len = 0;
+	
+	child = encode_indication(wp, &child_len);
+
+	if (!child || !data_len) {
+	    return NULL;
+	}
+
+	/* we need extra 2 bytes for si token */
+	*data_len = child_len + 2;
+	data = malloc(*data_len);
+	
+	if (!data) {
+	    free(child);
+	    return NULL;
+	}
+	
+	data[0] = TOKEN_KNOWN_C | TAG_SI;
+	memcpy(data + 1, child, child_len);
+	data[*data_len - 1] = TAG_END;
+	
+	free(child);
+	
+	return data;
+}
+
+GNOKII_API gn_error gn_wap_push_encode(gn_wap_push *wp) 
+{
+	
+	char *data = NULL;
+	int data_len = 0;
+	
+	data = encode_si(wp, &data_len);
+	
+	if (!data || !data_len) {
+	    return GN_ERR_FAILED;
+	}
+	
+	wp->data = malloc(data_len + sizeof(gn_wap_push_header));
+
+	if (!wp->data) {
+	    return GN_ERR_FAILED;
+	}
+	
+	memcpy(wp->data, &wp->header, sizeof(gn_wap_push_header));
+	memcpy(wp->data + sizeof(gn_wap_push_header), data, data_len);
+	
+	wp->data_len = data_len + sizeof(gn_wap_push_header);
+
+	return GN_ERR_NONE;
+}
+
+GNOKII_API void gn_wap_push_init(gn_wap_push *wp) 
+{
+
+	if (!wp) {
+	    return;
+	}
+
+	memset(wp, 0, sizeof(gn_wap_push));
+	
+	wp->header.wsp_tid 		= 0x00;
+	wp->header.wsp_pdu 		= PDU_TYPE_Push;
+	wp->header.wsp_hlen 		= 0x01;
+	wp->header.wsp_content_type 	= CONTENT_TYPE;
+
+	wp->header.version 	= WBXML_VERSION;
+	wp->header.public_id 	= TAG_SI;
+	wp->header.charset 	= WAPPush_CHARSET;
+	wp->header.stl 		= 0x00; /* string table length */
 }

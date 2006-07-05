@@ -11,9 +11,17 @@
                                                     (Daniele Forsi) 
     o handle optional command line arguments for --setdatetime as
       explained in the docs                         (Daniele Forsi)
+    o added -w option to --sendsms to for push messages sending
+      support (service indication - wap push)	       (Igor Popik)
  * dku2 module updates
     o fix module headers                                (Pawel Kot)
-
+ * libgnokii updates
+    o added gn_wap_push_init() and gn_wap_push_encode() and 
+      gn_wap_push, gn_wap_push_header structures for binary push 
+      messages encoding				       (Igor Popik)
+    o added extra header file called "wappush.h" with definitions
+      of binary tag tokens and some contstant values   (Igor Popik)
+    
 0.6.13
 ======
  * xgnokii updates

@@ -87,6 +87,7 @@ struct gn_statemachine;
 #include <gnokii/ringtones.h>
 #include <gnokii/virtmodem.h>
 #include <gnokii/rlp-common.h>
+#include <gnokii/wappush.h>
 
 #include <gnokii/statemachine.h>
 

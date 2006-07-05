@@ -23,7 +23,8 @@ INSTALL_HEADERS = gnokii.h \
 		gnokii/encoding.h \
 		gnokii/networks.h \
 		gnokii/rlp-common.h \
-		gnokii/statemachine.h
+		gnokii/statemachine.h \
+		gnokii/wappush.h
 
 all:
 	@echo

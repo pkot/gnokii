@@ -295,7 +295,7 @@ static int usage(FILE *f, int retval)
 		     "          gnokii --deletesms memory_type start [end]\n"
 		     "          gnokii --sendsms destination [--smsc message_center_number |\n"
 		     "                 --smscno message_center_index] [-r] [-C n] [-v n]\n"
-		     "                 [--long n] [-i]\n"
+		     "                 [--long n] [-i] [-w wap_push_url]\n"
 		     "          gnokii --savesms [--sender from] [--smsc message_center_number |\n"
 		     "                 --smscno message_center_index] [--folder folder_id]\n"
 		     "                 [--location number] [--sent | --read] [--deliver] \n"
@@ -604,6 +604,7 @@ static int sendsms(int argc, char *argv[])
 		{ "imelody", 0,                 NULL, 'i'},
 		{ "animation",required_argument,NULL, 'a'},
 		{ "concat",  required_argument, NULL, 'o'},
+		{ "wappush", required_argument, NULL, 'w'},
 		{ NULL,      0,                 NULL, 0}
 	};
 
@@ -622,7 +623,7 @@ static int sendsms(int argc, char *argv[])
 	optarg = NULL;
 	optind = 0;
 
-	while ((i = getopt_long(argc, argv, "r8co:C:v:ip:", options, NULL)) != -1) {
+	while ((i = getopt_long(argc, argv, "r8co:C:v:ip:w:", options, NULL)) != -1) {
 		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
 			strncpy(sms.smsc.number, optarg, sizeof(sms.smsc.number) - 1);
@@ -723,6 +724,44 @@ static int sendsms(int argc, char *argv[])
 			}
 			curpos = -1;
 			break;
+		case 'w': {
+			gn_wap_push wp;
+			int chars_read;
+			char message_buffer[GN_SMS_MAX_LENGTH];
+			
+			
+			if (!optarg || strlen(optarg) > 255) {
+				fprintf(stderr, _("URL is too long (max 255 chars). Quitting.\n"));
+			        return -1;
+			}
+			
+			sms.user_data[curpos].type = GN_SMS_DATA_WAPPush;
+			
+			gn_wap_push_init(&wp);
+
+			memset(message_buffer, 0, sizeof(message_buffer));
+			fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
+			chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
+			
+			wp.url = optarg;
+			wp.text = message_buffer;
+			
+			if (gn_wap_push_encode(&wp) != GN_ERR_NONE) {
+			    fprintf(stderr, _("WAP Push encoding failed!\n"));
+			    return -1;
+			}
+
+			memcpy(sms.user_data[curpos].u.text, wp.data, wp.data_len);
+			
+			sms.user_data[curpos].length = wp.data_len;
+			
+			free(wp.data);
+
+			sms.user_data[++curpos].type = GN_SMS_DATA_None;
+			
+			curpos = -1;
+			break;
+		}
 		default:
 			sendsms_usage(stderr, -1);
 		}
