@@ -68,6 +68,7 @@ GNOKII_API char *gn_error_print(gn_error e)
 	case GN_ERR_NONEWCBRECEIVED:       return _("Attempt to read CB when no new CB received.");
 	case GN_ERR_SIMPROBLEM:            return _("SIM card missing or damaged.");
 	case GN_ERR_CODEREQUIRED:          return _("PIN or PUK code required.");
+	case GN_ERR_NOTAVAILABLE:          return _("The requested information is not available.");
 	default:                           return _("Unknown error.");
 	}
 }
