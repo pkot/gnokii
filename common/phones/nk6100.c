@@ -1738,25 +1738,28 @@ static gn_error IncomingNetworkInfo(int messagetype, unsigned char *message, int
 	switch (message[3]) {
 	/* Network info */
 	case 0x71:
-		if (data->network_info && message[7] >= 9) {
-			data->network_info->cell_id[0] = message[10];
-			data->network_info->cell_id[1] = message[11];
-			data->network_info->LAC[0] = message[12];
-			data->network_info->LAC[1] = message[13];
-			data->network_info->network_code[0] = '0' + (message[14] & 0x0f);
-			data->network_info->network_code[1] = '0' + (message[14] >> 4);
-			data->network_info->network_code[2] = '0' + (message[15] & 0x0f);
-			data->network_info->network_code[3] = ' ';
-			data->network_info->network_code[4] = '0' + (message[16] & 0x0f);
-			data->network_info->network_code[5] = '0' + (message[16] >> 4);
-			data->network_info->network_code[6] = 0;
-		} else {
+		dprintf("Message: Network Info Received\n");
+		if (message[7] >= 9) {
+			if (data->network_info) {
+				data->network_info->cell_id[0] = message[10];
+				data->network_info->cell_id[1] = message[11];
+				data->network_info->LAC[0] = message[12];
+				data->network_info->LAC[1] = message[13];
+				data->network_info->network_code[0] = '0' + (message[14] & 0x0f);
+				data->network_info->network_code[1] = '0' + (message[14] >> 4);
+				data->network_info->network_code[2] = '0' + (message[15] & 0x0f);
+				data->network_info->network_code[3] = ' ';
+				data->network_info->network_code[4] = '0' + (message[16] & 0x0f);
+				data->network_info->network_code[5] = '0' + (message[16] >> 4);
+				data->network_info->network_code[6] = 0;
+			}
+		} else if (message[7] >= 2) {
 			/* This can happen if handset has not (yet) registered with network (e.g. waiting for PIN code) */
 			/* FIXME: print error messages instead of numeric codes, see Docs/protocol/nk6110.txt */
-			if (message[7] >= 2) {
-				dprintf("netstatus 0x%02x netsel 0x%02x\n", message[8], message[9]);
-			}
-			return GN_ERR_UNKNOWN;
+			dprintf("netstatus 0x%02x netsel 0x%02x\n", message[8], message[9]);
+			return GN_ERR_NOTAVAILABLE;
+		} else {
+			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
 	default:
