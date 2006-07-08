@@ -11,6 +11,8 @@
                                                     (Daniele Forsi) 
     o added -w option to --sendsms to for push messages sending
       support (service indication - wap push)	       (Igor Popik)
+    o make --senddtmf, --answercall, --hangup, --getdisplaystatus,
+      --getprofile print the error message          (Daniele Forsi)
  * dku2 module updates
     o fix module headers                                (Pawel Kot)
  * libgnokii updates

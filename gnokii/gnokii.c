@@ -1809,6 +1809,7 @@ static int dialvoice(char *number)
 static int answercall(char *callid)
 {
     	gn_call_info callinfo;
+	gn_error error;
 
 	memset(&callinfo, 0, sizeof(callinfo));
 	callinfo.call_id = atoi(callid);
@@ -1816,13 +1817,20 @@ static int answercall(char *callid)
 	gn_data_clear(data);
 	data->call_info = &callinfo;
 
-	return gn_sm_functions(GN_OP_AnswerCall, data, state);
+	error = gn_sm_functions(GN_OP_AnswerCall, data, state);
+	
+	if (error != GN_ERR_NONE) {
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
+	}
+	
+	return error;
 }
 
 /* Hangup the call */
 static int hangup(char *callid)
 {
     	gn_call_info callinfo;
+	gn_error error;
 
 	memset(&callinfo, 0, sizeof(callinfo));
 	callinfo.call_id = atoi(callid);
@@ -1830,7 +1838,13 @@ static int hangup(char *callid)
 	gn_data_clear(data);
 	data->call_info = &callinfo;
 
-	return gn_sm_functions(GN_OP_CancelCall, data, state);
+	error = gn_sm_functions(GN_OP_CancelCall, data, state);
+
+	if (error != GN_ERR_NONE) {
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
+	}
+	
+	return error;
 }
 
 
@@ -3205,6 +3219,7 @@ static int getprofile(int argc, char *argv[])
 			error = gn_sm_functions(GN_OP_GetProfile, data, state);
 			if (error != GN_ERR_NONE) {
 				fprintf(stderr, _("Cannot get profile %d\n"), i);
+				fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 				return error;
 			}
 		}
@@ -4143,8 +4158,16 @@ static int getdisplaystatus(void)
 	data->display_status = &status;
 
 	error = gn_sm_functions(GN_OP_GetDisplayStatus, data, state);
-	if (error == GN_ERR_NONE) printdisplaystatus(status);
 
+	switch (error) {
+	case GN_ERR_NONE:
+		printdisplaystatus(status);
+		break;
+	default:
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
+		break;
+	}
+	
 	return error;
 }
 
@@ -4189,10 +4212,18 @@ static int identify(void)
 
 static int senddtmf(char *string)
 {
+	gn_error error;
+	
 	gn_data_clear(data);
 	data->dtmf_string = string;
 
-	return gn_sm_functions(GN_OP_SendDTMF, data, state);
+	error = gn_sm_functions(GN_OP_SendDTMF, data, state);
+	
+	if (error != GN_ERR_NONE) {
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
+	}
+	
+	return error;
 }
 
 /* Resets the phone */
