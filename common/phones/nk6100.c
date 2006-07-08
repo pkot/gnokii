@@ -2196,6 +2196,8 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 		switch (message[4]) {
 		case 0x6f: /* Insert SIM card */
 			return GN_ERR_NOTREADY;
+		case 0x7d:
+			return GN_ERR_INVALIDLOCATION;
 		case 0x8d: /* waiting for PIN */
 			return GN_ERR_CODEREQUIRED;
 		default:

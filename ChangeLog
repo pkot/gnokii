@@ -30,6 +30,8 @@
       info is sent unsolicited after hanging up a call (at least on
       Nokia 3330) and use GN_ERR_NOTAVAILABLE instead of
       GN_ERR_UNKNOWN when it's the case             (Daniele Forsi)
+    o handle 'invalid profile location' errors in IncomingProfile()
+                                                    (Daniele Forsi)
     
 0.6.13
 ======
