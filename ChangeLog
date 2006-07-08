@@ -32,6 +32,9 @@
       GN_ERR_UNKNOWN when it's the case             (Daniele Forsi)
     o handle 'invalid profile location' errors in IncomingProfile()
                                                     (Daniele Forsi)
+ * documentation updates
+    o copy missing error codes from common/phones/nk6100.c to
+      Docs/protocol/nk6110.txt                      (Daniele Forsi)
     
 0.6.13
 ======
