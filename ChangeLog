@@ -32,6 +32,9 @@
       GN_ERR_UNKNOWN when it's the case             (Daniele Forsi)
     o handle 'invalid profile location' errors in IncomingProfile()
                                                     (Daniele Forsi)
+    o use old call API with Nokia 3210 NSE-8 (tested with firmwares
+      04.43, 05.26 and 06.00); probably this should be done for
+      NSE-9 too, but I haven't got one to test      (Daniele Forsi)
  * documentation updates
     o copy missing error codes from common/phones/nk6100.c to
       Docs/protocol/nk6110.txt                      (Daniele Forsi)
