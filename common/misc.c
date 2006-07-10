@@ -507,7 +507,7 @@ failed:
 	free(lock_file);
 	return NULL;
 #else
-	return NULL;
+	return 1;
 #endif /* WIN32 */
 }
 
