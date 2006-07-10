@@ -13,6 +13,9 @@
       support (service indication - wap push)	       (Igor Popik)
     o make --senddtmf, --answercall, --hangup, --getdisplaystatus,
       --getprofile print the error message          (Daniele Forsi)
+    o in --savesms print "storing sms" message after checking for
+      all possible errors and for cosmetics change capitalization,
+      add ellipsis and a space ("Storing SMS... ")  (Daniele Forsi)
  * dku2 module updates
     o fix module headers                                (Pawel Kot)
  * libgnokii updates
