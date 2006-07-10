@@ -3567,11 +3567,20 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 	case 0x05:
 		break;
 
-	/* change security code error */
-	case 0x06:
-		if (message[4] != 0x88) return GN_ERR_UNHANDLEDFRAME;
-		dprintf("Message: Security code wrong.\n");
-		return GN_ERR_INVALIDSECURITYCODE;
+	/* security code error */
+	case 0x06: /* --getsecuritycodestatus */
+	case 0x09: /* --changesecuritycode */
+	case 0x0c: /* --entersecuritycode */
+		switch (message[4]) {
+			case 0x6f: /* Insert SIM card */
+				return GN_ERR_NOTREADY;
+			case 0x88:
+			case 0x8d:
+				dprintf("Message: Security code wrong.\n");
+				return GN_ERR_INVALIDSECURITYCODE;
+			default:
+				return GN_ERR_UNHANDLEDFRAME;
+		}
 		
 	/* security code status */
 	case 0x08:
@@ -3593,12 +3602,6 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 		dprintf("Message: Security code accepted.\n");
 		break;
 	
-	/* security code wrong */
-	case 0x0c:
-		if (message[4] != 0x88) return GN_ERR_UNHANDLEDFRAME;
-		dprintf("Message: Security code wrong.\n");
-		return GN_ERR_INVALIDSECURITYCODE;
-
 	default:
 		return GN_ERR_UNHANDLEDFRAME;
 	}

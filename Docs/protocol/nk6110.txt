@@ -501,7 +501,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                             calltype:
                               0x00: all calls (data, voice, fax)
                               0x0b: voice calls
-                              0x0d: fax calla
+                              0x0d: fax calls
                               0x19: data calls
     s Deactivate calldiverts{ 0x0001, 0x04, 0x00, divtype, calltype, 0x00 }
                             where divtype, calltype: see above
@@ -529,14 +529,20 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                         4: PUK (8 chars)
                                         5: PUK2 (8 chars)
     r Change code ok        { 0x0005 }
-    r Change code err       { 0x0006, reason }
-                            where reason: 0x88: current code wrong
+    r Get code status err   { 0x0006, reason }
+                            where reason: 0x6f: SIM card not ready
+                                          0x88: current code wrong (or not needed?)
+                                          0x8d: current code wrong
     s Status request        { 0x0007, 0x01 }
     r pin recvd             { 0x0008, accepted }
                             where accepted: 0x0c (or 0x06): OK
                                             code: waiting for (0x08/0x0004) code
+    r Change code err       { 0x0009, reason }
+                            where reason: see above
     s entering code         { 0x000a, code, "code", 0x00 }
                             where code: see 0x08/0x0004
+    r Enter code err        { 0x000c, reason }
+                            where reason: see above
 0x09: SIM login
     r login                 { 0x0080 }
     r logout                { 0x0081 }
