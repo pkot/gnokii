@@ -46,6 +46,8 @@
  * documentation updates
     o copy missing error codes from common/phones/nk6100.c to
       Docs/protocol/nk6110.txt                      (Daniele Forsi)
+    o update --getsmsc and --setsmsc description in gnokii man page
+                                                    (Daniele Forsi)
  * portability updates
     o don't fail on win32 with use_locking=yes          (Pawel Kot)
 
