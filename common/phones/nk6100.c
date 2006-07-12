@@ -3007,7 +3007,14 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 	
 	/* Set bin ringtone result */
 	case 0xa0:
-		if (message[3] != 0x02) return GN_ERR_UNHANDLEDFRAME;
+		switch (message[4]) {
+		case 0x00:
+			break;
+		case 0x0a:
+			return GN_ERR_INVALIDLOCATION;
+		default:
+			return GN_ERR_UNHANDLEDFRAME;
+		}
 		break;
 
 	case 0xc8:

@@ -41,6 +41,8 @@
     o handle 'insert SIM card' error and an additional 'wrong code'
       error for --getsecuritycodestatus, --changesecuritycode and
       --entersecuritycode                           (Daniele Forsi)
+    o handle 'invalid location' error for --deleteringtone
+                                                    (Daniele Forsi)
  * documentation updates
     o copy missing error codes from common/phones/nk6100.c to
       Docs/protocol/nk6110.txt                      (Daniele Forsi)
