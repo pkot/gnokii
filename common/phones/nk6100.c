@@ -3367,6 +3367,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 			}
 			switch (pos[5]) {
 			case 0x00: ca[i].prev_state = GN_CALL_Idle; break;
+			case 0x01: ca[i].prev_state = GN_CALL_Idle; break;
 			case 0x02: ca[i].prev_state = GN_CALL_Dialing; break;
 			case 0x03: ca[i].prev_state = GN_CALL_Ringing; break;
 			case 0x04: ca[i].prev_state = GN_CALL_Incoming; break;
