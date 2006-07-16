@@ -218,7 +218,7 @@ struct {
 	 * Set NULL in the second field for all software versions.
 	 */
 	{ "NSE-3",	"-4.06",	NK6100_CAP_NBS_UPLOAD }, /* 6110 */
-	{ "NHM-5",      NULL,           NK6100_CAP_PB_UNICODE | NK6100_CAP_NO_PSTATUS }, /* 3310 */
+	{ "NHM-5",      NULL,           NK6100_CAP_PB_UNICODE | NK6100_CAP_NO_PSTATUS | NK6100_CAP_OLD_CALL_API }, /* 3310 */
 	{ "NHM-6",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3330 */
 	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3410 */
 	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE | NK6100_CAP_CAL_UNICODE }, /* 8250 */

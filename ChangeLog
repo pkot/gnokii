@@ -46,6 +46,8 @@
     o handle 'prev_state' with code 0x01 as GN_CALL_Idle (seen on
       Nokia 3330) else IncomingCallInfo() would fail with
       GN_ERR_UNHANDLEDFRAME                         (Daniele Forsi)
+    o use old call API with Nokia 3310 (tested with firmware 5.79)
+                                                    (Daniele Forsi)
  * documentation updates
     o copy missing error codes from common/phones/nk6100.c to
       Docs/protocol/nk6110.txt                      (Daniele Forsi)
