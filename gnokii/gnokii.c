@@ -3508,6 +3508,7 @@ static int getphonebook(int argc, char *argv[])
 			} else {
 				/* Only print an error if we got a valid end index */
 				fprintf(stderr, _("Error reading from the location %d in memory %s\n"), count, memory_type_string);
+				fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 			}
 			break;
 		case GN_ERR_TIMEOUT:
