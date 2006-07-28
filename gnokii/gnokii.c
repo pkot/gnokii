@@ -5096,6 +5096,7 @@ static int getfiledetailsbyid(int nargc, char *nargv[])
 		    	gn_file_list fil2;
 			gn_error error2;
 
+			dprintf("getting %s\n", fil.files[i]->id);
 			memset(&fi2, 0, sizeof(fi2));
 			memset(&fil2, 0, sizeof(fil2));
 
@@ -5300,7 +5301,11 @@ static int getallfiles(char *path)
 	if ((error = gn_sm_functions(GN_OP_GetFileList, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get info for %s: %s\n"), path, gn_error_print(error));
 	else {
-		*(strrchr(path,'/')+1) = 0;
+		char *pos = strrchr(path, '/');
+
+		if (pos)
+			*(pos+1) = 0;
+
 		for (i = 0; i < fi.file_count; i++) {
 			data->file = fi.files[i];
 			strncpy(filename2, fi.files[i]->name, 512);
@@ -5308,7 +5313,7 @@ static int getallfiles(char *path)
 			if ((error = gn_sm_functions(GN_OP_GetFile, data, state)) != GN_ERR_NONE)
 				fprintf(stderr, _("Failed to get file %s: %s\n"), data->file->name, gn_error_print(error));
 			else {
-				fprintf(stdout, _("Got file %s.\n"),filename2);
+				fprintf(stdout, _("Got file %s.\n"), filename2);
 				f = fopen(filename2, "w");
 				if (!f) {
 					fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);

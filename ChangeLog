@@ -19,6 +19,7 @@
     o in --getphonebook in case GN_ERR_INVALIDLOCATION print
       the actual error message in addition to the generic "Error
       reading from the location %d in memory %s\n"  (Daniele Forsi)
+    o fix segfault on filesystem reading                (Pawel Kot)
  * dku2 module updates
     o fix module headers                                (Pawel Kot)
  * libgnokii updates
