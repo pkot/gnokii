@@ -94,6 +94,8 @@ GNOKII_API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 	if (aux) ldif_entry_write(f, "sn", aux + 1, 1);
 	if (aux) *aux = ' ';
 	ldif_entry_write(f, "cn", entry->name, 1);
+	if (entry->caller_group)
+		ldif_entry_write(f, "businessGroup", entry->caller_group, 1);
 
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {

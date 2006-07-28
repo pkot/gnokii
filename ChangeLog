@@ -29,6 +29,8 @@
       of binary tag tokens and some contstant values   (Igor Popik)
     o use GN_OP_CancelCall in gn_call_cancel()      (Daniele Forsi)
     o add new error code GN_ERR_NOTAVAILABLE        (Daniele Forsi)
+    o save caller group as businessGroup in ldif phonebook export
+      if present                                        (Pawel Kot)
  * nk6100 driver updates
     o make --getdatetime return GN_ERR_NOTAVAILABLE when date/time
       is not set                                    (Daniele Forsi)
