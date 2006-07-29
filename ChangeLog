@@ -61,6 +61,9 @@
                                                     (Daniele Forsi)
  * portability updates
     o don't fail on win32 with use_locking=yes          (Pawel Kot)
+ * utils updates
+    o add 'waitcall' program which can be used in a script to get
+      phone number of incoming call                 (Daniele Forsi)
 
 0.6.13
 ======
