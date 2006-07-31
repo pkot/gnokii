@@ -151,8 +151,8 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 	size_t nconv;
 	char *pin;
 	char *pout;
-	int inlen;
-	int outlen;
+	size_t inlen;
+	size_t outlen;
 	iconv_t cd;
 
 	pin = (char *)src;
@@ -180,19 +180,21 @@ static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 	size_t nconv;
 	char *pin;
 	char *pout;
-	int inlen;
-	int outlen;
+	size_t inlen;
+	size_t outlen;
 	iconv_t cd;
 
 	pin = (char *)&src;
 	pout = (char *)dst;
 	inlen = 4;
 	outlen = 4;
-	
+
 	cd = iconv_open(gn_char_get_encoding(), "WCHAR_T");
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
+	if (nconv == (size_t)-1)
+		perror("iconv");
 	iconv_close(cd);
-	
+
 	return nconv == -1 ? -1 : pout-dst;
 #else
     #ifdef HAVE_WCRTOMB
@@ -513,7 +515,7 @@ void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
 			i_len += length;
 			break;
 		}
-		sprintf(dest + (o_len << 2), "%04lx", wc);
+		sprintf(dest + (o_len << 2), "%-4lc", wc);
 	}
 	return;
 }
@@ -526,7 +528,8 @@ unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, 
 
 	MBSTATE_DEC_CLEAR(mbs);
 	for (i = 0; i < len / 2; i++) {
-		length = char_uni_alphabet_decode((src[i * 2] << 8) | src[(i * 2) + 1], dest, &mbs);
+		wchar_t wc = src[i * 2] << 8 | src[(i * 2) + 1];
+		length = char_uni_alphabet_decode(wc, dest, &mbs);
 		dest += length;
 		pos += length;
 	}
