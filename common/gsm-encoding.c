@@ -610,7 +610,7 @@ void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len)
    destination number) for SMS sending function. */
 int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type)
 {
-	unsigned char *in_num = number;  /* Pointer to the input number */
+	char *in_num = number;  /* Pointer to the input number */
 	unsigned char *out_num = output; /* Pointer to the output */
 	int count = 0; /* This variable is used to notify us about count of already
 			  packed numbers. */
