@@ -163,7 +163,7 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 	cd = iconv_open("WCHAR_T", gn_char_get_encoding());
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	iconv_close(cd);
-	
+
 	return (char*)dst == pout ? -1 : pin-src;
 #else
 #  ifdef HAVE_WCRTOMB
@@ -702,7 +702,7 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
 
 	pin = (char *)instring;
 	pout = outstring;
-	
+
 	cd = iconv_open(gn_char_get_encoding(), "UTF-8");
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	iconv_close(cd);
