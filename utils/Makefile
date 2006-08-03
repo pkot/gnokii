@@ -17,7 +17,7 @@ mgnokiidev: $(OBJS)
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $@
 
 waitcall: waitcall.o
-	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) waitcall.o $(LDLIBS) -lgnokii -o $@
+	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) waitcall.o $(LDLIBS) $(TOPDIR)/common/libgnokii.la -o $@
 
 clean:
 	$(LIBTOOL) --mode=clean $(RM) mgnokiidev $(OBJS) waitcall waitcall.o
