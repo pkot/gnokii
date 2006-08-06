@@ -9,7 +9,9 @@
 TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
-OBJS =	gnokii.o
+OBJS =	gnokii.o gnokii-calendar.o gnokii-dial.o gnokii-file.o gnokii-logo.o gnokii-monitor.o \
+	gnokii-other.o gnokii-phonebook.o gnokii-profile.o gnokii-ringtone.o gnokii-security.o \
+	gnokii-settings.o gnokii-sms.o gnokii-todo.o gnokii-utils.o gnokii-wap.o
 
 ifdef OWN_GETOPT
 	OBJS += $(TOPDIR)/getopt/libgetopt.a
