@@ -39,14 +39,14 @@
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
-#include "gnokii.h"
+
+#include "gnokii-internal.h"
 #include "nokia-decoding.h"
 #include "phones/generic.h"
 #include "phones/nk6510.h"
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
 #include "phones/nokia.h"
-#include "gnokii-internal.h"
 
 #define SEND_MESSAGE_BLOCK(type, length) \
 do { \

@@ -86,7 +86,7 @@
 
 #include "compat.h"
 #include "misc.h"
-#include "gnokii.h"
+#include "gnokii-internal.h"
 #include "data/at-emulator.h"
 #include "data/datapump.h"
 #include "device.h"

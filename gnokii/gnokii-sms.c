@@ -49,8 +49,8 @@
 #include <time.h>
 #include <signal.h>
 
-#include "gnokii.h"
 #include "gnokii-app.h"
+#include "gnokii.h"
 
 /* Outputs summary of all SMS gnokii commands */
 void sms_usage(FILE *f)

@@ -38,6 +38,11 @@
 #include "config.h"
 #include "compat.h"
 #include "misc.h"
+
+#if !defined(GNOKII_DEPRECATED)
+#  define GNOKII_DEPRECATED /* do not warn about deprecated functions here */
+#endif
+
 #include "gnokii.h"
 
 /* utils */

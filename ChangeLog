@@ -73,6 +73,8 @@
  * build system updates
     o use -Wno-pointer-sign to reduce number of warnings during
       compilation                         (Helge Deller, Pawel Kot)
+    o don't warn about deprecated interfaces inside gnokii
+                                          (Helge Deller, Pawel Kot)
 
 0.6.13
 ======

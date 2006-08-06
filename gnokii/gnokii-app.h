@@ -34,7 +34,7 @@
 #ifndef __gnokii_app_h_
 #define __gnokii_app_h_
 
-#include "gnokii.h"
+#include "gnokii-internal.h"
 
 #define MAX_INPUT_LINE_LEN 512
 

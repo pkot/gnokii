@@ -47,8 +47,8 @@
 #include <getopt.h>
 #include <signal.h>
 
-#include "gnokii.h"
 #include "gnokii-app.h"
+#include "gnokii.h"
 
 static gn_ringtone_list ringtone_list;
 static int ringtone_list_initialised = 0;

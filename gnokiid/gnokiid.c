@@ -43,7 +43,7 @@
 #include <string.h>
 
 #include "misc.h"
-#include "gnokii.h"
+#include "gnokii-internal.h"
 
 /* Global variables */
 bool DebugMode;		/* When true, run in debug mode */

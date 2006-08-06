@@ -47,8 +47,8 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 
-#include "gnokii.h"
 #include "gnokii-app.h"
+#include "gnokii.h"
 
 void logo_usage(FILE *f)
 {

@@ -46,8 +46,8 @@
 #define _GNU_SOURCE
 #include <getopt.h>
 
-#include "gnokii.h"
 #include "gnokii-app.h"
+#include "gnokii.h"
 
 void file_usage(FILE *f)
 {

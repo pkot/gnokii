@@ -46,8 +46,8 @@
 #include <unistd.h>
 #include <signal.h>
 
-#include "gnokii.h"
 #include "gnokii-app.h"
+#include "gnokii.h"
 
 gn_error readtext(gn_sms_user_data *udata, int input_len)
 {

@@ -47,8 +47,8 @@
 #include <getopt.h>
 #include <signal.h>
 
-#include "gnokii.h"
 #include "gnokii-app.h"
+#include "gnokii.h"
 
 static gn_cb_message cb_queue[16];
 static int cb_ridx = 0;

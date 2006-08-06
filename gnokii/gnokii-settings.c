@@ -47,8 +47,8 @@
 #include <getopt.h>
 #include <time.h>
 
-#include "gnokii.h"
 #include "gnokii-app.h"
+#include "gnokii.h"
 
 void settings_usage(FILE *f)
 {
