@@ -70,6 +70,9 @@
     o add 'waitcall' program which can be used in a script to get
       phone number of incoming call, then fix CVS Id and a linking
       issue                                         (Daniele Forsi)
+ * build system updates
+    o use -Wno-pointer-sign to reduce number of warnings during
+      compilation                         (Helge Deller, Pawel Kot)
 
 0.6.13
 ======
