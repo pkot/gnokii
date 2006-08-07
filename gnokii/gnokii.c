@@ -288,14 +288,8 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc)
 		if (gals[i].gal_opt == opt) {
 
 			/* Argument count checking. */
-			if (gals[i].gal_flags == GAL_XOR) {
-				if (gals[i].gal_min == argc || gals[i].gal_max == argc)
-					return 0;
-			} else {
-				if (gals[i].gal_min <= argc && gals[i].gal_max >= argc)
-					return 0;
-			}
-
+			if (gals[i].gal_min <= argc)
+				return 0;
 			return 1;
 		}
 	}
