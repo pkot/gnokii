@@ -202,13 +202,20 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 		case GN_PHONEBOOK_ENTRY_RingtoneAdv:   /* Newer ringtones */
 			switch(blockstart[15]) {
 			case 0x01:
-				memcpy(data->bitmap->ringtone_id, blockstart+6, 6);
 				dprintf("   Gallery ringtone id: %02x %02x %02x %02x %02x %02x\n", blockstart[6], blockstart[7], blockstart[8], blockstart[9], blockstart[10], blockstart[11]);
-				data->bitmap->ringtone = -1;
+				if (data->bitmap) {
+					memcpy(data->bitmap->ringtone_id, blockstart+6, 6);
+					data->bitmap->ringtone = -1;
+				} else {
+					dprintf("WARNING: no bitmap allocated for the phonebook entry\n");
+				}
 				break;
 			case 0x07:
-				data->bitmap->ringtone = blockstart[11];
 				dprintf("   Standard ringtone: %d\n", blockstart[11]);
+				if (data->bitmap)
+					data->bitmap->ringtone = blockstart[11];
+				else
+					dprintf("WARNING: no bitmap allocated for the phonebook entry\n");
 				break;
 			default:
 				dprintf("   Unknown ringtone entry!\n");

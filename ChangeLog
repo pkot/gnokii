@@ -37,6 +37,8 @@
     o fix encoding issues on 64bit architectures    (Daniel Gollub)
     o add libgnokii functions to load config from the alternate
       file                                              (Pawel Kot)
+    o fix segfault on getting phonebook with entries with custom
+      ringtone                                          (Pawel Kot)
  * nk6100 driver updates
     o make --getdatetime return GN_ERR_NOTAVAILABLE when date/time
       is not set                                    (Daniele Forsi)
