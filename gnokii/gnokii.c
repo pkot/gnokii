@@ -103,7 +103,6 @@ struct gnokii_arg_len {
 /* This is used for checking correct argument count. If it is used then if
    the user specifies some argument, their count should be equivalent to the
    count the programmer expects. */
-
 #define GAL_XOR 0x01
 
 typedef enum {
@@ -111,7 +110,7 @@ typedef enum {
 	OPT_VERSION,
 	OPT_MONITOR,
 	OPT_ENTERSECURITYCODE,
-	OPT_GETSECURITYCODESTATUS,
+	OPT_GETSECURITYCODESTATUS,	/* 260 */
 	OPT_CHANGESECURITYCODE,
 	OPT_SETDATETIME,
 	OPT_GETDATETIME,
@@ -121,7 +120,7 @@ typedef enum {
 	OPT_ANSWERCALL,
 	OPT_HANGUP,
 	OPT_GETTODO,
-	OPT_WRITETODO,
+	OPT_WRITETODO,			/* 270 */
 	OPT_DELETEALLTODOS,
 	OPT_GETCALENDARNOTE,
 	OPT_WRITECALENDARNOTE,
@@ -131,7 +130,7 @@ typedef enum {
 	OPT_WRITEPHONEBOOK,
 	OPT_DELETEPHONEBOOK,
 	OPT_GETSPEEDDIAL,
-	OPT_SETSPEEDDIAL,
+	OPT_SETSPEEDDIAL,		/* 280 */
 	OPT_GETSMS,
 	OPT_DELETESMS,
 	OPT_SENDSMS,
@@ -141,7 +140,7 @@ typedef enum {
 	OPT_GETSMSC,
 	OPT_SETSMSC,
 	OPT_GETWELCOMENOTE,
-	OPT_SETWELCOMENOTE,
+	OPT_SETWELCOMENOTE,		/* 290 */
 	OPT_PMON,
 	OPT_NETMONITOR,
 	OPT_IDENTIFY,
@@ -151,7 +150,7 @@ typedef enum {
 	OPT_GETLOGO,
 	OPT_VIEWLOGO,
 	OPT_GETRINGTONE,
-	OPT_SETRINGTONE,
+	OPT_SETRINGTONE,		/* 300 */
 	OPT_PLAYRINGTONE,
 	OPT_RINGTONECONVERT,
 	OPT_GETPROFILE,
@@ -161,7 +160,7 @@ typedef enum {
 	OPT_DISPLAYOUTPUT,
 	OPT_KEYPRESS,
 	OPT_ENTERCHAR,
-	OPT_DIVERT,
+	OPT_DIVERT,			/* 310 */
 	OPT_SMSREADER,
 	OPT_FOOGLE,
 	OPT_GETSECURITYCODE,
@@ -171,7 +170,7 @@ typedef enum {
 	OPT_WRITEWAPSETTING,
 	OPT_ACTIVATEWAPSETTING,
 	OPT_DELETEWAPBOOKMARK,
-	OPT_DELETESMSFOLDER,
+	OPT_DELETESMSFOLDER,		/* 320 */
 	OPT_CREATESMSFOLDER,
 	OPT_LISTNETWORKS,
 	OPT_GETNETWORKINFO,
@@ -181,7 +180,7 @@ typedef enum {
 	OPT_SHOWSMSFOLDERSTATUS,
 	OPT_GETFILELIST,
 	OPT_GETFILEDETAILSBYID,
-	OPT_GETFILEID,
+	OPT_GETFILEID,			/* 330 */
 	OPT_GETFILE,
 	OPT_GETFILEBYID,
 	OPT_GETALLFILES,
@@ -277,26 +276,42 @@ static void businit(void)
 
 /* This function checks that the argument count for a given options is withing
    an allowed range. */
-static int checkargs(int opt, struct gnokii_arg_len gals[], int argc)
+static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_arg)
 {
 	int i;
 
+	switch (has_arg) {
+	case required_argument:
+		has_arg = 1;
+		break;
+	default:
+		has_arg = 0;
+	}
 	/* Walk through the whole array with options requiring arguments. */
-	for (i = 0; !(gals[i].gal_min == 0 && gals[i].gal_max == 0); i++) {
+	for (i = 0; gals[i].gal_opt != 0; i++) {
 
 		/* Current option. */
 		if (gals[i].gal_opt == opt) {
 
 			/* Argument count checking. */
-			if (gals[i].gal_min <= argc)
-				return 0;
+			if (gals[i].gal_flags == GAL_XOR) {
+				if (gals[i].gal_min == argc - optind + has_arg ||
+				    gals[i].gal_max == argc - optind + has_arg)
+					return 0;
+			} else {
+				if (gals[i].gal_min <= argc - optind + has_arg &&
+				    gals[i].gal_max >= argc - optind + has_arg)
+					return 0;
+			}
 			return 1;
 		}
 	}
 
 	/* We do not have options without arguments in the array, so check them. */
-	if (argc == 0) return 0;
-	else return 1;
+	if (argc-optind+has_arg == 0)
+		return 0;
+	else
+		return 1;
 }
 
 /* This is a "convenience" function to allow quick test of new API stuff which
@@ -350,7 +365,8 @@ static int install_log_handler(void)
 
 static int parse_options(int argc, char *argv[])
 {
-	int c, i, rc = -1;
+	int c, rc = -1;
+	int opt_index;
 
 	/* Every option should be in this array. */
 	static struct option long_options[] = {
@@ -597,8 +613,8 @@ static int parse_options(int argc, char *argv[])
 	/* Every command which requires arguments should have an appropriate entry
 	   in this array. */
 	static struct gnokii_arg_len gals[] = {
-		{ OPT_CONFIGFILE,        0, 100, 0 },
-		{ OPT_CONFIGMODEL,       0, 100, 0 },
+		{ OPT_CONFIGFILE,        1, 100, 0 },
+		{ OPT_CONFIGMODEL,       1, 100, 0 },
 #ifdef SECURITY
 		{ OPT_ENTERSECURITYCODE, 1, 1, 0 },
 		{ OPT_CHANGESECURITYCODE,1, 1, 0 },
@@ -665,7 +681,7 @@ static int parse_options(int argc, char *argv[])
 	 * -c equals to --config
 	 * -p equals to --phone
 	 */
-	c = getopt_long(argc, argv, "c:p:", long_options, NULL);
+	c = getopt_long(argc, argv, "c:p:", long_options, &opt_index);
 
 	switch (c) {
 	/* No argument given - we should display usage. */
@@ -682,6 +698,13 @@ static int parse_options(int argc, char *argv[])
 	case OPT_VERSION:
 		version();
 		exit(0);
+	/* That's a bit ugly... */
+	case 'c':
+		c = OPT_CONFIGFILE;
+		break;
+	case 'p':
+		c = OPT_CONFIGMODEL;
+		break;
 	}
 
 	/* We have to build an array of the arguments which will be passed to the
@@ -689,17 +712,15 @@ static int parse_options(int argc, char *argv[])
 	   passed as arguments.  A syntax like gnokii --cmd1 args --cmd2 args will
 	   not work as expected; instead args --cmd2 args is passed as a
 	   parameter. */
-	if (checkargs(c, gals, argc)) {
+	if (checkargs(c, gals, argc, long_options[opt_index].has_arg)) {
 		usage(stderr, -1);
 	}
 
 	/* Other options that do not need initialization */
 	switch (c) {
-	case 'c':
 	case OPT_CONFIGFILE:
 		configfile = optarg;
 		return parse_options(argc, argv);
-	case 'p':
 	case OPT_CONFIGMODEL:
 		configmodel = optarg;
 		return parse_options(argc, argv);
