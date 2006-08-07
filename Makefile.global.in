@@ -45,7 +45,7 @@ XGETTEXT       = @XGETTEXT@
 MSGFMT         = @MSGFMT@
 
 CC             = @CC@
-CFLAGS         = -Wno-pointer-sign @CFLAGS@
+CFLAGS         = @CFLAGS@
 CPPFLAGS       = @CPPFLAGS@
 LIBS           = @LIBS@
 LDFLAGS        = @LDFLAGS@
