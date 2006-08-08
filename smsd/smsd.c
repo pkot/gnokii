@@ -125,35 +125,35 @@ gint LoadDB (void)
   DB_Bye = dlsym(handle, "DB_Bye");
   if ((error = dlerror ()) != NULL)
   {
-    g_print (error);
+    g_print ("%s\n", error);
     return (2);
   }
 
   DB_ConnectInbox = dlsym(handle, "DB_ConnectInbox");
   if ((error = dlerror ()) != NULL)
   {
-    g_print (error);
+    g_print ("%s\n", error);
     return (2);
   }
 
   DB_ConnectOutbox = dlsym(handle, "DB_ConnectOutbox");
   if ((error = dlerror ()) != NULL)
   {
-    g_print (error);
+    g_print ("%s\n", error);
     return (2);
   }
   
   DB_InsertSMS = dlsym(handle, "DB_InsertSMS");
   if ((error = dlerror ()) != NULL)
   {
-    g_print (error);
+    g_print ("%s\n", error);
     return (2);
   }
   
   DB_Look = dlsym(handle, "DB_Look");
   if ((error = dlerror ()) != NULL)
   {
-    g_print (error);
+    g_print ("%s\n", error);
     return (2);
   }
   
