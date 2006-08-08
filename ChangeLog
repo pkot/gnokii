@@ -40,6 +40,7 @@
     o fix segfault on getting phonebook with entries with custom
       ringtone                                          (Pawel Kot)
     o output correctly sms date in debug mode           (Pawel Kot)
+    o fix model setting for --identify in AT driver     (Pawel Kot)
  * nk6100 driver updates
     o make --getdatetime return GN_ERR_NOTAVAILABLE when date/time
       is not set                                    (Daniele Forsi)
