@@ -90,7 +90,6 @@ gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 {
   GString *buf, *phnStr;
   gchar *text;
-  gint l;
 
 
   if (phone[0] == '\0')
