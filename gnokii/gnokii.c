@@ -366,7 +366,7 @@ static int install_log_handler(void)
 static int parse_options(int argc, char *argv[])
 {
 	int c, rc = -1;
-	int opt_index;
+	int opt_index = -1;
 
 	/* Every option should be in this array. */
 	static struct option long_options[] = {
@@ -701,9 +701,11 @@ static int parse_options(int argc, char *argv[])
 	/* That's a bit ugly... */
 	case 'c':
 		c = OPT_CONFIGFILE;
+		opt_index = 0;
 		break;
 	case 'p':
 		c = OPT_CONFIGMODEL;
+		opt_index = 1;
 		break;
 	}
 
