@@ -721,9 +721,13 @@ static int parse_options(int argc, char *argv[])
 	/* Other options that do not need initialization */
 	switch (c) {
 	case OPT_CONFIGFILE:
+		if (configfile)
+			usage(stderr, -1);
 		configfile = optarg;
 		return parse_options(argc, argv);
 	case OPT_CONFIGMODEL:
+		if (configmodel)
+			usage(stderr, -1);
 		configmodel = optarg;
 		return parse_options(argc, argv);
 	case OPT_VIEWLOGO:
