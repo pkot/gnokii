@@ -404,13 +404,16 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 
 	memset(cfg, '\0', sizeof(gn_config));
 
+	/* You need to specify at least model and port in the phone section */
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "model")))
-		strcpy(cfg->model, def->model);
+		/* strcpy(cfg->model, def->model); */
+		return false;
 	else
 		snprintf(cfg->model, sizeof(cfg->model), "%s", val);
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "port")))
-		strcpy(cfg->port_device, def->port_device);
+		/* strcpy(cfg->port_device, def->port_device); */
+		return false;
 	else
 		snprintf(cfg->port_device, sizeof(cfg->port_device), "%s", val);
 
@@ -533,7 +536,7 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 }
 
 #define MAX_PATH_LEN 200
-GNOKII_API int gn_cfg_read_default()
+GNOKII_API gn_error gn_cfg_read_default()
 {
 	char *homedir;
 	char rcfile[MAX_PATH_LEN];
@@ -564,16 +567,16 @@ GNOKII_API int gn_cfg_read_default()
 		if (gn_cfg_file_read(globalrc)) {
 			/* That failed too so exit */
 			fprintf(stderr, _("Couldn't open %s or %s.\n"), rcfile, globalrc);
-			return -1;
+			return GN_ERR_NOCONFIG;
 		}
 	}
-	return 0;
+	return GN_ERR_NONE;
 }
 
 /* DEPRECATED */
-GNOKII_API int gn_cfg_read(char **bindir)
+GNOKII_API gn_error gn_cfg_read(char **bindir)
 {
-	int retval;
+	gn_error retval;
 
 	retval = gn_cfg_read_default();
 
@@ -586,13 +589,13 @@ GNOKII_API int gn_cfg_read(char **bindir)
 	return retval;
 }
 
-static int cfg_file_or_memory_read(const char *file, const char **lines)
+static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 {
 	char *val;
 
 	if (file == NULL && lines == NULL) {
 		dprintf("Couldn't open a config file or memory.\n");
-		return -1;
+		return GN_ERR_NOCONFIG;
 	}
 
 	/* I know that it doesn't belong here but currently there is now generic
@@ -611,8 +614,11 @@ static int cfg_file_or_memory_read(const char *file, const char **lines)
 
 	if (gn_cfg_info == NULL) {
 		/* this is bad, but the previous was much worse - bozo */
-		dprintf("Couldn't open %s config file,\n", file);
-		return -1;
+		if (file)
+			dprintf("Couldn't open %s config file.\n", file);
+		else
+			dprintf("Couldn't read config\n");
+		return GN_ERR_NOCONFIG;
 	}
 	strcpy(gn_config_default.model, "");
 	strcpy(gn_config_default.port_device, "");
@@ -631,7 +637,7 @@ static int cfg_file_or_memory_read(const char *file, const char **lines)
 
 	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default)) {
 		fprintf(stderr, _("No [global] section in %s config file.\n"), file);
-		return -2;
+		return GN_ERR_NOPHONE;
 	}
 
 	/* hack to support [sms] / smsc_timeout parameter */
@@ -642,27 +648,28 @@ static int cfg_file_or_memory_read(const char *file, const char **lines)
 			gn_config_global.smsc_timeout = 10 * atoi(val);
 	}
 
-	if (!cfg_get_log_target(&gn_log_debug_mask, "debug")) return -2;
-	if (!cfg_get_log_target(&gn_log_rlpdebug_mask, "rlpdebug")) return -2;
-	if (!cfg_get_log_target(&gn_log_xdebug_mask, "xdebug")) return -2;
+	if (!cfg_get_log_target(&gn_log_debug_mask, "debug") ||
+	    !cfg_get_log_target(&gn_log_rlpdebug_mask, "rlpdebug") ||
+	    !cfg_get_log_target(&gn_log_xdebug_mask, "xdebug"))
+		return GN_ERR_NOLOG;
 
 	gn_log_debug("LOG: debug mask is 0x%x\n", gn_log_debug_mask);
 	gn_log_rlpdebug("LOG: rlpdebug mask is 0x%x\n", gn_log_rlpdebug_mask);
 	gn_log_xdebug("LOG: xdebug mask is 0x%x\n", gn_log_xdebug_mask);
-	return 0;
+	return GN_ERR_NONE;
 }
 
-GNOKII_API int gn_cfg_file_read(const char *file)
+GNOKII_API gn_error gn_cfg_file_read(const char *file)
 {
 	return cfg_file_or_memory_read(file, NULL);
 }
 
-GNOKII_API int gn_cfg_memory_read(const char **lines)
+GNOKII_API gn_error gn_cfg_memory_read(const char **lines)
 {
 	return cfg_file_or_memory_read(NULL, lines);
 }
 
-GNOKII_API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state)
+GNOKII_API gn_error gn_cfg_phone_load(const char *iname, struct gn_statemachine *state)
 {
 	char section[256];
 
@@ -671,17 +678,17 @@ GNOKII_API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *stat
 	} else {
 		snprintf(section, sizeof(section), "phone_%s", iname);
 		if (!cfg_psection_load(&state->config, section, &gn_config_global))
-			return false;
+			return GN_ERR_NOPHONE;
 	}
 
 	if (state->config.model[0] == '\0') {
 		fprintf(stderr, _("Config error - no model specified.\n"));
-		return false;
+		return GN_ERR_NOMODEL;
 	}
 	if (state->config.port_device[0] == '\0') {
 		fprintf(stderr, _("Config error - no port specified.\n"));
-		return false;
+		return GN_ERR_NOPORT;
 	}
 
-	return true;
+	return GN_ERR_NONE;
 }

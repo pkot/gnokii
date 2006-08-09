@@ -77,12 +77,11 @@ GNOKII_API gn_error gn_lib_phoneprofile_load_from_file(const char *configfile, c
 	memset(*state, 0, sizeof(**state));
 
 	/* Load the phone configuration */
-	if (!gn_cfg_phone_load(configname, *state)) {
+	if ((error = gn_cfg_phone_load(configname, *state)) != GN_ERR_NONE) {
 		free(*state);
 		*state = NULL;
-		return GN_ERR_UNKNOWNMODEL;
+		return error;
 	}
-
 	return LASTERROR((*state), GN_ERR_NONE);
 }
 

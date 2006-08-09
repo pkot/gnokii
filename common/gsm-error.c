@@ -69,6 +69,11 @@ GNOKII_API char *gn_error_print(gn_error e)
 	case GN_ERR_SIMPROBLEM:            return _("SIM card missing or damaged.");
 	case GN_ERR_CODEREQUIRED:          return _("PIN or PUK code required.");
 	case GN_ERR_NOTAVAILABLE:          return _("The requested information is not available.");
+	case GN_ERR_NOCONFIG:              return _("Config file cannot be read.");
+	case GN_ERR_NOPHONE:               return _("Either global or given phone section cannot be found.");
+	case GN_ERR_NOLOG:                 return _("Incorrect logging section configuration.");
+	case GN_ERR_NOMODEL:               return _("No phone model specified in the config file.");
+	case GN_ERR_NOPORT:                return _("No port specified in the config file.");
 	default:                           return _("Unknown error.");
 	}
 }

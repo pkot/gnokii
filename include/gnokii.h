@@ -244,17 +244,17 @@ GNOKII_API gn_error gn_gsm_initialise(struct gn_statemachine *sm) GNOKII_DEPRECA
 /* Config handling */
 /* Get the key value from the given config, given section and the key name */
 GNOKII_API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, const char *key) GNOKII_DEPRECATED;
-GNOKII_API int gn_cfg_read(char **bindir) GNOKII_DEPRECATED;
+GNOKII_API gn_error gn_cfg_read(char **bindir) GNOKII_DEPRECATED;
 /* Read the config from the file filename */
-GNOKII_API int gn_cfg_file_read(const char *filename) GNOKII_DEPRECATED;
+GNOKII_API gn_error gn_cfg_file_read(const char *filename) GNOKII_DEPRECATED;
 /* Read the config from the file already put into the memory */
-GNOKII_API int gn_cfg_memory_read(const char **lines) GNOKII_DEPRECATED;
+GNOKII_API gn_error gn_cfg_memory_read(const char **lines) GNOKII_DEPRECATED;
 /* Read the config from the standard $HOME/.gnokiirc or /etc/gnokiirc locations */
-GNOKII_API int gn_cfg_read_default() GNOKII_DEPRECATED;
+GNOKII_API gn_error gn_cfg_read_default() GNOKII_DEPRECATED;
 /* free any ressources which were used by libgnokii */
 GNOKII_API void gn_cfg_free_default() GNOKII_DEPRECATED;
 /* Use phone_iname section for the communication. Default is the global section */
-GNOKII_API int gn_cfg_phone_load(const char *iname, struct gn_statemachine *state) GNOKII_DEPRECATED;
+GNOKII_API gn_error gn_cfg_phone_load(const char *iname, struct gn_statemachine *state) GNOKII_DEPRECATED;
 
 /* In/Out routines, file formats */
 GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location);

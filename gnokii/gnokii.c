@@ -262,15 +262,20 @@ static void busterminate(void)
 
 static void businit(void)
 {
-	if (GN_ERR_NONE != gn_lib_phoneprofile_load_from_file(configfile, configmodel, &state))
+	gn_error err;
+	if ((err = gn_lib_phoneprofile_load_from_file(configfile, configmodel, &state)) != GN_ERR_NONE) {
+		fprintf(stderr, "%s\n", gn_error_print(err));
 		exit(2);
+	}
 
 	/* register cleanup function */
 	atexit(busterminate);
 	/* signal(SIGINT, bussignal); */
 
-	if (GN_ERR_NONE != gn_lib_phone_open(state))
+	if ((err = gn_lib_phone_open(state)) != GN_ERR_NONE) {
+		fprintf(stderr, "%s\n", gn_error_print(err));
 		exit(2);
+	}
 	data = &state->sm_data;
 }
 

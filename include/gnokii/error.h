@@ -79,7 +79,14 @@ typedef enum {
 	GN_ERR_NONEWCBRECEIVED,		/* Attempt to read CB when no new CB received */
 	GN_ERR_SIMPROBLEM,		/* SIM card missing or damaged */
 	GN_ERR_CODEREQUIRED,		/* PIN or PUK code required */
-	GN_ERR_NOTAVAILABLE		/* The requested information is not available */
+	GN_ERR_NOTAVAILABLE,		/* The requested information is not available */
+
+	/* Config */
+	GN_ERR_NOCONFIG,		/* Config file cannot be found */
+	GN_ERR_NOPHONE,			/* Either global or given phone section cannot be found */
+	GN_ERR_NOLOG,			/* Incorrect logging section configuration */
+	GN_ERR_NOMODEL,			/* No phone model specified */
+	GN_ERR_NOPORT			/* No port specified */
 } gn_error;
 
 GNOKII_API char *gn_error_print(gn_error e);

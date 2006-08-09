@@ -22,6 +22,8 @@
     o fix segfault on filesystem reading                (Pawel Kot)
     o add --config and --phone options                  (Pawel Kot)
     o split gnokii functionality across the files       (Pawel Kot)
+    o print error messages when no config file or no phone section
+      is found                                          (Pawel Kot)
  * dku2 module updates
     o fix module headers                                (Pawel Kot)
  * libgnokii updates
@@ -41,6 +43,10 @@
       ringtone                                          (Pawel Kot)
     o output correctly sms date in debug mode           (Pawel Kot)
     o fix model setting for --identify in AT driver     (Pawel Kot)
+    o return appropriate gn_error codes on particular errors
+                                                        (Pawel Kot)
+    o return an error when no model or no port is found in the
+      given section (in particular no section)          (Pawel Kot)
  * nk6100 driver updates
     o make --getdatetime return GN_ERR_NOTAVAILABLE when date/time
       is not set                                    (Daniele Forsi)
