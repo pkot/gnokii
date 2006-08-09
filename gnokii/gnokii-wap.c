@@ -51,8 +51,7 @@
 
 void wap_usage(FILE *f)
 {
-	fprintf(f, _(
-		     "WAP options:\n"
+	fprintf(f, _("WAP options:\n"
 		     "          --getwapbookmark number\n"
 		     "          --writewapbookmark name URL\n"
 		     "          --deletewapbookmark number\n"
@@ -92,8 +91,7 @@ int getwapbookmark(char *number, gn_data *data, struct gn_statemachine *state)
 
 void writewapbookmark_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(""
-		));
+	fprintf(f, _("usage: --writebookmark name URL\n"));
 	exit(exitval);
 }
 
@@ -152,10 +150,9 @@ int deletewapbookmark(char *number, gn_data *data, struct gn_statemachine *state
 	return error;
 }
 
-void getwapbookmark_usage(FILE *f, int exitval)
+void getwapsetting_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(""
-		));
+	fprintf(f, _(" usage: --getwapsetting number [-r|--raw]"));
 	exit(exitval);
 }
 
@@ -171,7 +168,7 @@ int getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine 
 		if (!strcmp(argv[optind], "-r") || !strcmp(argv[optind], "--raw")) 
 			raw = true;
 		else 
-			getwapbookmark_usage(stderr, -1);
+			getwapsetting_usage(stderr, -1);
 	}
 
 	gn_data_clear(data);

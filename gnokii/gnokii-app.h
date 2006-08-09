@@ -145,7 +145,7 @@ extern int getwapbookmark(char *number, gn_data *data, struct gn_statemachine *s
 extern void writewapbookmark_usage(FILE *f, int exitval);
 extern int writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern int deletewapbookmark(char *number, gn_data *data, struct gn_statemachine *state);
-extern void getwapbookmark_usage(FILE *f, int exitval);
+extern void getwapsetting_usage(FILE *f, int exitval);
 extern int getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern int writewapsetting(gn_data *data, struct gn_statemachine *state);
 extern int activatewapsetting(char *number, gn_data *data, struct gn_statemachine *state);
