@@ -265,6 +265,10 @@ static void businit(void)
 	gn_error err;
 	if ((err = gn_lib_phoneprofile_load_from_file(configfile, configmodel, &state)) != GN_ERR_NONE) {
 		fprintf(stderr, "%s\n", gn_error_print(err));
+		if (configfile)
+			fprintf(stderr, _("File: %s\n"), configfile);
+		if (configmodel)
+			fprintf(stderr, _("Phone section: [phone_%s]\n"), configmodel);
 		exit(2);
 	}
 
