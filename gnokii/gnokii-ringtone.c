@@ -171,11 +171,6 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		{ NULL,     0,           NULL, 0}
 	};
 
-	optarg = NULL;
-	optind = 0;
-	argv++;
-	argc--;
-
 	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
 		switch (i) {
 		case 'r':
@@ -257,11 +252,6 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		{ "name",   required_argument, NULL, 'n'},
 		{ NULL,     0,                 NULL, 0}
 	};
-
-	optarg = NULL;
-	optind = 0;
-	argv++;
-	argc--;
 
 	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
 		switch (i) {
@@ -347,11 +337,6 @@ int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		{ "volume", required_argument, NULL, 'v'},
 		{ NULL,     0,                 NULL, 0}
 	};
-
-	optarg = NULL;
-	optind = 0;
-	argv++;
-	argc--;
 
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {
