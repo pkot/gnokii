@@ -152,8 +152,7 @@ int sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 void getringtone_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(""
-		));
+	fprintf(f, _(" usage: --getringtone rtttlfile [location] [-r|--raw]\n"));
 	exit(exitval);
 }
 
@@ -232,8 +231,7 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 
 void setringtone_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(""
-		));
+	fprintf(f, _(" usage: --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"));
 	exit(exitval);
 }
 
@@ -316,8 +314,7 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 
 void playringtone_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(""
-		));
+	fprintf(f, _(" usage: --playringtone rtttlfile [--volume vol]\n"));
 	exit(exitval);
 }
 
@@ -402,8 +399,7 @@ int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 void ringtoneconvert_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(""
-		));
+	fprintf(f, _(" usage: --ringtoneconvert source destination\n"));
 	exit(exitval);
 }
 
@@ -463,7 +459,7 @@ int getringtonelist(gn_data *data, struct gn_statemachine *state)
 
 void deleteringtone_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(""));
+	fprintf(f, _(" usage: --deleteringtone start [end]\n"));
 	exit(exitval);
 }
 
