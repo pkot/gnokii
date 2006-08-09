@@ -162,13 +162,21 @@ int getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine 
 	gn_wap_setting	wapsetting;
 	gn_error	error;
 	bool		raw = false;
+	int i;
+	struct option options[] = {
+		{ "raw",    no_argument, NULL, 'r'},
+		{ NULL,     0,           NULL, 0}
+	};
 
 	wapsetting.location = atoi(optarg);
-	if (argc > optind) {
-		if (!strcmp(argv[optind], "-r") || !strcmp(argv[optind], "--raw")) 
+	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
+		switch (i) {
+		case 'r':
 			raw = true;
-		else 
+			break;
+		default:
 			getwapsetting_usage(stderr, -1);
+		}
 	}
 
 	gn_data_clear(data);
