@@ -59,7 +59,7 @@ void sms_usage(FILE *f)
 		     "          --sendsms destination [--smsc message_center_number |\n"
 		     "                 --smscno message_center_index] [-r|--remote] [-8|8bit]\n"
 		     "                 [-C|--class n] [-v|--validity n] [-l|--long n]\n"
-		     "                 [-i|--imelody] [-a|--animation file;file;file;file\n"
+		     "                 [-i|--imelody] [-a|--animation file;file;file;file]\n"
 		     "                 [-o|--concat this;total;serial] [-w|--wappush url]\n"
 		     "          --savesms [--sender from] [--smsc message_center_number |\n"
 		     "                 --smscno message_center_index] [-f|--folder folder_id]\n"
