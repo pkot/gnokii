@@ -51,34 +51,38 @@ smsd: $(OBJS) $(TOPDIR)/common/libgnokii.la $(DB_LIBS)
 
 
 ### DB Modules
+utils.lo: utils.h utils.c
+	$(LIBTOOL) --mode=compile $(CC) -o utils.lo $(CFLAGS) $(CPPFLAGS) \
+	-I../include -c utils.c
+
 
 # PostgreSQL support
-pq.lo: smsd.h utils.h pq.c utils.c
+pq.lo: smsd.h utils.h pq.c
 	$(LIBTOOL) --mode=compile $(CC) -o pq.lo $(CFLAGS) $(CPPFLAGS) \
 	-I../include -I$(shell pg_config --includedir) -c pq.c
 
-libpq.la: pq.lo
-	$(LIBTOOL) --mode=link $(CC) -o libpq.la pq.lo \
+libpq.la: pq.lo utils.lo
+	$(LIBTOOL) --mode=link $(CC) -o libpq.la pq.lo utils.lo \
 	$(shell $(GLIBLDLIBS)) -L$(shell pg_config --libdir) -lpq \
 	-export-dynamic -avoid-version -rpath ${pkglibdir}
 
 # MySQL support
-mysql.lo: smsd.h utils.h mysql.c utils.c
+mysql.lo: smsd.h utils.h mysql.c
 	$(LIBTOOL) --mode=compile $(CC) -o mysql.lo $(CFLAGS) $(CPPFLAGS) \
 	-I../include $(shell mysql_config --cflags) -c mysql.c
 
-libmysql.la: mysql.lo
-	$(LIBTOOL) --mode=link $(CC) -o libmysql.la mysql.lo \
+libmysql.la: mysql.lo utils.lo
+	$(LIBTOOL) --mode=link $(CC) -o libmysql.la mysql.lo utils.lo \
 	$(shell $(GLIBLDLIBS)) $(shell mysql_config --libs) \
 	-export-dynamic -avoid-version -rpath ${pkglibdir}
 
 # File support
-file.lo: smsd.h utils.h file.c utils.c
+file.lo: smsd.h utils.h file.c
 	$(LIBTOOL) --mode=compile $(CC) -o file.lo $(CFLAGS) $(CPPFLAGS) \
 	-I../include -c file.c
 
-libfile.la: file.lo
-	$(LIBTOOL) --mode=link $(CC) -o libfile.la file.lo \
+libfile.la: file.lo utils.lo
+	$(LIBTOOL) --mode=link $(CC) -o libfile.la file.lo utils.lo \
 	$(shell $(GLIBLDLIBS)) \
 	-export-dynamic -avoid-version -rpath ${pkglibdir}
 

@@ -29,6 +29,8 @@
   
 */
 
+#include "utils.h"
+
 /* Escapes ' and \ with \. */
 /* Returned value needs to be free with g_free(). */
 gchar *strEscape (const gchar *const s)
