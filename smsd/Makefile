@@ -35,12 +35,13 @@ LDLIBS += -rdynamic $(TOPDIR)/common/libgnokii.la -ldl
 
 OBJS = 	smsd.lo \
 	lowlevel.lo
-DB_OBJS = pq.lo mysql.lo file.lo
+DB_OBJS = file.lo
+#pq.lo mysql.lo file.lo
 
 # A list of database modules to build.
 # FIXME: detect which ones to build in configure
-DB_LIBS = libfile.la libpq.la libmysql.la
-#DB_LIBS := libfile.la
+#DB_LIBS = libfile.la libpq.la libmysql.la
+DB_LIBS := libfile.la
 
 all: smsd
 
@@ -80,6 +81,10 @@ libfile.la: file.lo
 	$(LIBTOOL) --mode=link $(CC) -o libfile.la file.lo \
 	$(shell $(GLIBLDLIBS)) \
 	-export-dynamic -avoid-version -rpath ${pkglibdir}
+
+libfile.so: file.c
+	$(LIBTOOL) --mode=link $(CC) -shared -o libfile.so $(CFLAGS) file.c -rdynamic \
+	$(shell $(GLIBLDLIBS))
 
 ### End of DB Modules
 
