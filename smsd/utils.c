@@ -22,42 +22,31 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
+  Copyright (C) 1999 Pavel Janik ml., Hugh Blemings
   Copyright (C) 1999-2005 Jan Derfinak
 
+  Utils functions for SMSD plugins
+  
 */
 
-#ifndef SMSD_H
-#define SMSD_H
+/* Escapes ' and \ with \. */
+/* Returned value needs to be free with g_free(). */
+gchar *strEscape (const gchar *const s)
+{
+  GString *str = g_string_new (s);
+  register gint i = 0;
+  gchar *ret;
+  
+  while (str->str[i] != '\0')
+  {
+    if (str->str[i] == '\\' || str->str[i] == '\'')
+      g_string_insert_c (str, i++, '\\');
+    i++;
+  }
+  
+  ret = str->str;
+  g_string_free (str, FALSE);
+  
+  return (ret);
+}
 
-#include <glib.h>
-#include "gnokii.h"
-
-typedef enum {
-  SMSD_READ_REPORTS = 1
-} SMSDSettings;
-
-typedef struct {
-  gchar *bindir;
-  gchar *dbMod;
-  gchar *libDir;
-  gchar *logFile;
-  gchar *phone;
-  gint   refreshInt;
-  gint   maxSMS;
-  gint   smsSets:4;
-  gn_memory_type memoryType;
-} SmsdConfig;
-
-typedef struct {
-  gchar *user;
-  gchar *password;
-  gchar *db;
-  gchar *host;
-  gchar *schema;
-} DBConfig;
-
-extern SmsdConfig smsdConfig;
-extern gint WriteSMS (gn_sms *);
-
-#endif

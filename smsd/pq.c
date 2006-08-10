@@ -37,12 +37,13 @@
 #include "smsd.h"
 #include "gnokii.h"
 #include "compat.h"
+#include "utils.h"
 
 static PGconn *connIn = NULL;
 static PGconn *connOut = NULL;
 static gchar *schema = NULL;		/* database schema */
 
-void DB_Bye (void)
+GNOKII_API void DB_Bye (void)
 {
   if (connIn)
     PQfinish (connIn);
@@ -52,7 +53,7 @@ void DB_Bye (void)
 }
 
 
-gint DB_ConnectInbox (DBConfig connect)
+GNOKII_API gint DB_ConnectInbox (DBConfig connect)
 {
   connIn = PQsetdbLogin (connect.host[0] != '\0' ? connect.host : NULL,
                          NULL,
@@ -77,7 +78,7 @@ gint DB_ConnectInbox (DBConfig connect)
 }
 
 
-gint DB_ConnectOutbox (DBConfig connect)
+GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
 {
   connOut = PQsetdbLogin (connect.host[0] != '\0' ? connect.host : NULL,
                           NULL,
@@ -102,7 +103,7 @@ gint DB_ConnectOutbox (DBConfig connect)
 }
 
 
-gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
+GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 {
   GString *buf, *phnStr;
   gchar *text;
@@ -146,7 +147,7 @@ gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 }
 
 
-void DB_Look (const gchar * const phone)
+GNOKII_API void DB_Look (const gchar * const phone)
 {
   GString *buf, *phnStr;
   PGresult *res1, *res2;

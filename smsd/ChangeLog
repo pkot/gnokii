@@ -1,3 +1,8 @@
+* Thu Aug 10 2006 Pawel Kot
+- fix problems with exporting symbols from shared libraries/plugins with
+  newer gcc versions
+
+
 * Wed May 10 2006 Jan Derfinak
 - added setlocale() call
 

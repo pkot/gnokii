@@ -84,6 +84,9 @@
  * build system updates
     o don't warn about deprecated interfaces inside gnokii
                                           (Helge Deller, Pawel Kot)
+ * smsd updates
+    o fix problems with exporting symbols from shared
+      libraries/plugins with newer gcc versions         (Pawel Kot)
 
 0.6.13
 ======

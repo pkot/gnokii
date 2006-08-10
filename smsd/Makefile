@@ -39,8 +39,8 @@ DB_OBJS = pq.lo mysql.lo file.lo
 
 # A list of database modules to build.
 # FIXME: detect which ones to build in configure
-#DB_LIBS = libfile.la libpq.la libmysql.la
-DB_LIBS := libfile.la
+DB_LIBS = libfile.la libpq.la libmysql.la
+#DB_LIBS := libfile.la
 
 all: smsd
 
@@ -52,7 +52,7 @@ smsd: $(OBJS) $(TOPDIR)/common/libgnokii.la $(DB_LIBS)
 ### DB Modules
 
 # PostgreSQL support
-pq.lo: smsd.h pq.c
+pq.lo: smsd.h utils.h pq.c utils.c
 	$(LIBTOOL) --mode=compile $(CC) -o pq.lo $(CFLAGS) $(CPPFLAGS) \
 	-I../include -I$(shell pg_config --includedir) -c pq.c
 
@@ -62,7 +62,7 @@ libpq.la: pq.lo
 	-export-dynamic -avoid-version -rpath ${pkglibdir}
 
 # MySQL support
-mysql.lo: smsd.h mysql.c
+mysql.lo: smsd.h utils.h mysql.c utils.c
 	$(LIBTOOL) --mode=compile $(CC) -o mysql.lo $(CFLAGS) $(CPPFLAGS) \
 	-I../include $(shell mysql_config --cflags) -c mysql.c
 
@@ -72,7 +72,7 @@ libmysql.la: mysql.lo
 	-export-dynamic -avoid-version -rpath ${pkglibdir}
 
 # File support
-file.lo: smsd.h file.c
+file.lo: smsd.h utils.h file.c utils.c
 	$(LIBTOOL) --mode=compile $(CC) -o file.lo $(CFLAGS) $(CPPFLAGS) \
 	-I../include -c file.c
 
@@ -88,7 +88,7 @@ $(TOPDIR)/common/libgnokii.la:
 
 clean:
 	$(LIBTOOL) --mode=clean $(RM) smsd $(DB_LIBS) $(OBJS) $(DB_OBJS)
-	$(RM) *~ depend core*
+	$(RM) -r *~ depend core* .libs
 
 install: all
 	$(INSTALL) -d $(DESTDIR)$(sbindir)

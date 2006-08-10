@@ -37,18 +37,19 @@
 #include "smsd.h"
 #include "gnokii.h"
 #include "compat.h"
+#include "utils.h"
 
 static MYSQL mysqlIn;
 static MYSQL mysqlOut;
 
-void DB_Bye (void)
+GNOKII_API void DB_Bye (void)
 {
   mysql_close (&mysqlIn);
   mysql_close (&mysqlOut);
 }
 
 
-gint DB_ConnectInbox (DBConfig connect)
+GNOKII_API gint DB_ConnectInbox (DBConfig connect)
 {
   mysql_init (&mysqlIn);
   if (!mysql_real_connect (&mysqlIn,
@@ -67,7 +68,7 @@ gint DB_ConnectInbox (DBConfig connect)
 }
 
 
-gint DB_ConnectOutbox (DBConfig connect)
+GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
 {
   mysql_init (&mysqlOut);
   if (!mysql_real_connect (&mysqlOut,
@@ -86,7 +87,7 @@ gint DB_ConnectOutbox (DBConfig connect)
 }
 
 
-gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
+GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 {
   GString *buf, *phnStr;
   gchar *text;
@@ -131,7 +132,7 @@ gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
 }
 
 
-void DB_Look (const gchar * const phone)
+GNOKII_API void DB_Look (const gchar * const phone)
 {
   GString *buf, *phnStr;
   MYSQL_RES *res1;

@@ -81,27 +81,6 @@ static pthread_t db_monitor_th;
 pthread_mutex_t db_monitorMutex;
 static volatile bool db_monitor;
 
-/* Escapes ' and \ with \. */
-/* Returned value needs to be free with g_free(). */
-gchar *strEscape (const gchar *const s)
-{
-  GString *str = g_string_new (s);
-  register gint i = 0;
-  gchar *ret;
-  
-  while (str->str[i] != '\0')
-  {
-    if (str->str[i] == '\\' || str->str[i] == '\'')
-      g_string_insert_c (str, i++, '\\');
-    i++;
-  }
-  
-  ret = str->str;
-  g_string_free (str, FALSE);
-  
-  return (ret);
-}
-
 
 gint LoadDB (void)
 {

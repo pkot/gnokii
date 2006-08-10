@@ -22,42 +22,18 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
+  Copyright (C) 1999 Pavel Janik ml., Hugh Blemings
   Copyright (C) 1999-2005 Jan Derfinak
 
+  Utils functions for SMSD plugins.
+  
 */
 
-#ifndef SMSD_H
-#define SMSD_H
+#ifndef __smsd_utils_h_
+#define __smsd_utils_h_
 
 #include <glib.h>
-#include "gnokii.h"
 
-typedef enum {
-  SMSD_READ_REPORTS = 1
-} SMSDSettings;
+extern gchar *strEscape (const gchar *const s);
 
-typedef struct {
-  gchar *bindir;
-  gchar *dbMod;
-  gchar *libDir;
-  gchar *logFile;
-  gchar *phone;
-  gint   refreshInt;
-  gint   maxSMS;
-  gint   smsSets:4;
-  gn_memory_type memoryType;
-} SmsdConfig;
-
-typedef struct {
-  gchar *user;
-  gchar *password;
-  gchar *db;
-  gchar *host;
-  gchar *schema;
-} DBConfig;
-
-extern SmsdConfig smsdConfig;
-extern gint WriteSMS (gn_sms *);
-
-#endif
+#endif /* __smsd_utils_h_ */
