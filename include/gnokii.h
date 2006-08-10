@@ -57,7 +57,7 @@ typedef unsigned char uint8_t;
 #ifndef GNOKII_API
 #  if defined(WIN32) && defined(GNOKIIDLL_IMPORTS)
 #    define GNOKII_API __declspec(dllimport)
-#  elif (__GNUC__ - 0 > 3)
+#  elif (__GNUC__ - 0 > 3 || __GNUC__ == 3 && __GNUC_MINOR__ > 3)
 #    define GNOKII_API __attribute__ ((visibility("default")))
 #  else
 #    define GNOKII_API

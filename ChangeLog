@@ -84,6 +84,8 @@
  * build system updates
     o don't warn about deprecated interfaces inside gnokii
                                           (Helge Deller, Pawel Kot)
+    o -fvisibility=hidden flag is supported since gcc 3.4
+                                                     (Brian Wallis)
  * smsd updates
     o fix problems with exporting symbols from shared
       libraries/plugins with newer gcc versions         (Pawel Kot)
