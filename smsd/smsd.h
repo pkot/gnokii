@@ -58,6 +58,6 @@ typedef struct {
 } DBConfig;
 
 extern SmsdConfig smsdConfig;
-extern gint WriteSMS (gn_sms *);
+GNOKII_API gint WriteSMS (gn_sms *);
 
 #endif

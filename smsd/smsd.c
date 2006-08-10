@@ -365,7 +365,7 @@ static void *SendSMS (void *a)
 }
 
 
-gint WriteSMS (gn_sms *sms)
+GNOKII_API gint WriteSMS (gn_sms *sms)
 {
   gn_error error;
   PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
