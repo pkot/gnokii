@@ -78,7 +78,7 @@ void sms_usage(FILE *f)
 /* Displays usage of --sendsms command */
 void sendsms_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(" usage: --sendsms destination               receipient number (msisdn)\n"
+	fprintf(f, _(" usage: --sendsms destination              recipient number (msisdn)\n"
 			"        --smsc message_center_number       number (msisdn) of the message\n"
 			"                                           center\n"
 			"        --smscno message_center_index      index of the message center stored\n"
