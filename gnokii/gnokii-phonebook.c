@@ -72,7 +72,7 @@ void getphonebook_usage(FILE *f, int exitval)
 			"       -r\n"
 			"       --raw                             output in raw form (comma separated)\n"
 			"       -v\n"
-			"       --vard                            output in vcard format\n"
+			"       --vcard                           output in vcard format\n"
 			"       -l\n"
 			"       --ldif                            output in ldif format\n"
 			"\n"
