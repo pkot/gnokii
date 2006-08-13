@@ -392,7 +392,7 @@ int getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 
 void putfile_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(" usage: --getfilebyid localfilename remotefilename\n"));
+	fprintf(f, _(" usage: --putfile local_filename remote_filename\n"));
 	exit(exitval);
 }
 

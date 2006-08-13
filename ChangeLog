@@ -77,7 +77,8 @@
     o discourage gnokiid for real modems                (Pawel Kot)
     o fix usage string for --writephonebook as both --memory-type
       and --memory-location need a parameter and an alternate form
-      of --memory-location is --location            (Daniele Forsi)
+      of --memory-location is --location; fix usage strings in some
+      of the new split gnokii files                 (Daniele Forsi)
  * portability updates
     o don't fail on win32 with use_locking=yes          (Pawel Kot)
  * utils updates
