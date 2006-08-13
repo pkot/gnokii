@@ -55,7 +55,8 @@ void phonebook_usage(FILE *f)
 		     "          --getphonebook memory_type start_number [end_number|end]\n"
 		     "                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
 		     "          --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
-		     "                 [-m|--memory-type|--memory] [-n|--memory-location|--memory]\n"
+		     "                 [-m|--memory-type|--memory memory_type]\n"
+		     "                 [-n|--memory-location|--location number]\n"
 		     "                 [[-v|--vcard]|[-l|--ldif]]\n"
 		     "          --deletephonebook memory_type start_number [end_number|end]\n"));
 }
@@ -280,7 +281,8 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 void writephonebook_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage:  --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
-		     "                 [-m|--memory-type|--memory] [-n|--memory-location|--memory]\n"
+		     "                 [-m|--memory-type|--memory memory_type]\n"
+		     "                 [-n|--memory-location|--location number]\n"
 		     "                 [[-v|--vcard]|[-l|--ldif]]\n"
 		     "\n"
 		));

@@ -75,6 +75,9 @@
     o update --getsmsc and --setsmsc description in gnokii man page
                                                     (Daniele Forsi)
     o discourage gnokiid for real modems                (Pawel Kot)
+    o fix usage string for --writephonebook as both --memory-type
+      and --memory-location need a parameter and an alternate form
+      of --memory-location is --location            (Daniele Forsi)
  * portability updates
     o don't fail on win32 with use_locking=yes          (Pawel Kot)
  * utils updates
