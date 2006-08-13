@@ -61,7 +61,7 @@ void todo_usage(FILE *f)
 
 void gettodo_usage(FILE *f, int exitval)
 {
-	fprintf(f, _("usage: --todo start_number [end_number | end] [-v|--vCal]\n"
+	fprintf(f, _("usage: --gettodo start_number [end_number | end] [-v|--vCal]\n"
 			 "       start_number - entry number in the phone todo (numeric)\n"
 			 "       end_number   - until this entry in the phone todo (numeric, optional)\n"
 			 "       end          - the string \"end\" indicates all entries from start to end\n"
