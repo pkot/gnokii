@@ -78,7 +78,8 @@
     o fix usage string for --writephonebook as both --memory-type
       and --memory-location need a parameter and an alternate form
       of --memory-location is --location; fix usage strings in some
-      of the new split gnokii files                 (Daniele Forsi)
+      of the new split gnokii files; update usage string in gnokiid
+                                                    (Daniele Forsi)
  * portability updates
     o don't fail on win32 with use_locking=yes          (Pawel Kot)
  * utils updates

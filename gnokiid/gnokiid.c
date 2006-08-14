@@ -70,7 +70,7 @@ static void version()
 static void usage()
 {
 
-	fprintf(stderr, _("   usage: gnokiid {--help|--version}\n"
+	fprintf(stderr, _("   usage: gnokiid [--help|--version|--debug]\n"
 "          --help            display usage information\n"
 "          --version         displays version and copyright information\n"
 "          --debug           uses stdin/stdout for virtual modem comms\n"));
