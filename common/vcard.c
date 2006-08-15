@@ -66,7 +66,7 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 		fprintf(f, "Others\n");
 		break;
 	default:
-		fprintf(f, "Unkown\n");
+		fprintf(f, "Unknown\n");
 		break;	
 	}
 
