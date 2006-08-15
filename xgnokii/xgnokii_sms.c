@@ -1460,7 +1460,7 @@ static void NewSMS(void)
 
 	RefreshSMSStatus();
 
-	gtk_widget_show(sendSMS.SMSSendWindow);
+	gtk_window_present(GTK_WINDOW(sendSMS.SMSSendWindow));
 }
 
 
@@ -1494,7 +1494,7 @@ static void ForwardSMS(void)
 
 	RefreshSMSStatus();
 
-	gtk_widget_show(sendSMS.SMSSendWindow);
+	gtk_window_present(GTK_WINDOW(sendSMS.SMSSendWindow));
 }
 
 
@@ -1553,7 +1553,7 @@ static void ReplySMS(void)
 	CheckAddressMain();
 	RefreshSMSStatus();
 
-	gtk_widget_show(sendSMS.SMSSendWindow);
+	gtk_window_present(GTK_WINDOW(sendSMS.SMSSendWindow));
 }
 
 static void ActivateSMS(void)
@@ -1633,7 +1633,7 @@ static void NewBC(void)
 
 	RefreshSMSStatus();
 
-	gtk_widget_show(sendSMS.SMSSendWindow);
+	gtk_window_present(GTK_WINDOW(sendSMS.SMSSendWindow));
 }
 
 
