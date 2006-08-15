@@ -99,6 +99,13 @@
       no more needed and was causing an infinite loop with a crash
                                                     (Daniele Forsi)
     o enable Netmonitor menu for 3210|3310|3330     (Daniele Forsi)
+    o use gtk_window_present() instead of gtk_widget_show() when
+      user clicks the menus so windows are always shown; gtk docs
+      say: "This may mean raising the window in the stacking order,
+      deiconifying it, moving it to the current desktop, and/or
+      giving it the keyboard focus, possibly dependent on the
+      user's platform, window manager, and preferences."
+                                                    (Daniele Forsi)
 
 0.6.13
 ======

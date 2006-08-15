@@ -77,7 +77,7 @@ inline void GUI_ShowData(void)
 	}
 	UpdateStatus();
 
-	gtk_widget_show(GUI_DataWindow);
+	gtk_window_present(GTK_WINDOW(GUI_DataWindow));
 }
 
 

@@ -199,7 +199,7 @@ static inline void CloseDTMF(GtkWidget * w, gpointer data)
 
 inline void GUI_ShowDTMF()
 {
-	gtk_widget_show(GUI_DTMFWindow);
+	gtk_window_present(GTK_WINDOW(GUI_DTMFWindow));
 }
 
 

@@ -499,7 +499,7 @@ static void ExportSpeedDial(void)
 inline void GUI_ShowSpeedDial(void)
 {
 	ReadSpeedDial();
-	gtk_widget_show(GUI_SpeedDialWindow);
+	gtk_window_present(GTK_WINDOW(GUI_SpeedDialWindow));
 }
 
 

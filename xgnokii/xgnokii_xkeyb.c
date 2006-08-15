@@ -187,7 +187,7 @@ void GUI_ShowXkeyb(void)
 			gtk_widget_show(errorDialog.dialog);
 		}
 	}
-	gtk_widget_show(GUI_XkeybWindow);
+	gtk_window_present(GTK_WINDOW(GUI_XkeybWindow));
 }
 
 

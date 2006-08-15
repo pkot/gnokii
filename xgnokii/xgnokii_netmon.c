@@ -245,7 +245,7 @@ inline void GUI_ShowNetmon()
 	e->event = Event_NetMonitor;
 	e->data = (gpointer) displayData.curDisp;;
 	GUI_InsertEvent(e);
-	gtk_widget_show(GUI_NetmonWindow);
+	gtk_window_present(GTK_WINDOW(GUI_NetmonWindow));
 }
 
 static GtkItemFactoryEntry menu_items[] = {

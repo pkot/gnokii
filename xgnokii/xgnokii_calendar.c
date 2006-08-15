@@ -140,7 +140,7 @@ static inline void CloseCalendar(GtkWidget * w, gpointer data)
 inline void GUI_ShowCalendar()
 {
 	if (phoneMonitor.supported & PM_CALENDAR)
-		gtk_widget_show(GUI_CalendarWindow);
+		gtk_window_present(GTK_WINDOW(GUI_CalendarWindow));
 }
 
 

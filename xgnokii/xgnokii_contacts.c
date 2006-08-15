@@ -2776,7 +2776,7 @@ inline void GUI_ShowContacts(void)
 	gtk_clist_set_column_visibility(GTK_CLIST(clist), 3,
 					phoneMonitor.supported & PM_CALLERGROUP);
 	GUI_RefreshContacts();
-	gtk_widget_show(GUI_ContactsWindow);
+	gtk_window_present(GTK_WINDOW(GUI_ContactsWindow));
 	/*
 	if (!contactsMemoryInitialized)
 		ReadContacts ();

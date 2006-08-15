@@ -1005,5 +1005,6 @@ void GUI_ShowXring(void)
 	gi.pressed = 0;
 
 	gtk_widget_show_all(gi.w);
+	gtk_window_present(GTK_WINDOW(gi.w));
 	gtk_widget_grab_focus(gi.f);
 }

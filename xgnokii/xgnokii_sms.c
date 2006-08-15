@@ -510,7 +510,7 @@ inline void GUI_ShowSMS(void)
 	for (j = i + 1; j < lastfoldercount; j++)
 		gtk_widget_hide(treeFolderItem[j - 1]);
 	lastfoldercount = foldercount;
-	gtk_widget_show(GUI_SMSWindow);
+	gtk_window_present(GTK_WINDOW(GUI_SMSWindow));
 	GUI_RefreshMessageWindow();
 }
 

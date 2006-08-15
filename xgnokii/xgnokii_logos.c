@@ -1824,7 +1824,7 @@ void GUI_ShowLogosWindow(void)
 	/* Call to reset Startup logo size */
 	LogoTypeEvent(GUI_LogosWindow);
 	g_print("width: %i, height: %i\n", bitmap.width, bitmap.height);
-	gtk_widget_show(GUI_LogosWindow);
+	gtk_window_present(GTK_WINDOW(GUI_LogosWindow));
 
 	if (!previewAvailable && showPreviewErrorDialog) {
 		gchar *buf = g_strdup(_("Load preview pixmap error, feature disabled."));
