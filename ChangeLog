@@ -98,6 +98,7 @@
     o remove ExposeDisplay() from xgnokii/xgnokii_netmon.c as it's
       no more needed and was causing an infinite loop with a crash
                                                     (Daniele Forsi)
+    o enable Netmonitor menu for 3210|3310|3330     (Daniele Forsi)
 
 0.6.13
 ======
