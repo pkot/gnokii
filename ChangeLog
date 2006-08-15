@@ -94,6 +94,10 @@
  * smsd updates
     o fix problems with exporting symbols from shared
       libraries/plugins with newer gcc versions         (Pawel Kot)
+ * xgnokii updates
+    o remove ExposeDisplay() from xgnokii/xgnokii_netmon.c as it's
+      no more needed and was causing an infinite loop with a crash
+                                                    (Daniele Forsi)
 
 0.6.13
 ======

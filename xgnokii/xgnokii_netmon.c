@@ -43,7 +43,7 @@
 #include "xpm/Display.xpm"
 
 static GtkWidget *GUI_NetmonWindow;
-static DisplayData displayData = { NULL, 0 };
+static DisplayData displayData = { NULL, NULL, 0 };
 static GtkWidget *tableLabels[4][7];
 static GtkWidget *tableProgress[7];
 
@@ -276,28 +276,6 @@ static void InitMainMenu(void)
 #define DISPLAY_X	12
 #define DISPLAY_Y	15
 
-static inline gint ExposeDisplay(GtkWidget * widget, GdkEventExpose * event)
-{
-	GdkRectangle rec;
-	GtkRequisition r;
-
-	gtk_widget_size_request(displayData.number, &r);
-	rec.x = DISPLAY_X;
-	rec.y = DISPLAY_Y;
-	rec.width = r.width;
-	rec.height = r.height;
-	gtk_widget_draw(displayData.number, &rec);
-
-	gtk_widget_size_request(displayData.label, &r);
-	rec.x += 3;
-	rec.y += 12;
-	rec.width = r.width;
-	rec.height = r.height;
-	gtk_widget_draw(displayData.label, &rec);
-
-	return FALSE;
-}
-
 
 void GUI_CreateNetmonWindow()
 {
@@ -362,9 +340,6 @@ void GUI_CreateNetmonWindow()
 
 	pixmap = NewPixmap(Display_xpm, GUI_NetmonWindow->window,
 			   &GUI_NetmonWindow->style->bg[GTK_STATE_NORMAL]);
-
-	gtk_signal_connect_after(GTK_OBJECT(pixmap), "expose_event",
-				 (GtkSignalFunc) ExposeDisplay, NULL);
 
 	gtk_fixed_put(GTK_FIXED(display), pixmap, 0, 0);
 	gtk_widget_show(pixmap);
