@@ -18,7 +18,7 @@ XGETTEXT_OPTIONS = --keyword=_ --keyword=N_
 # or entity, or to disclaim their copyright.  The empty string stands for
 # the public domain; in this case the translators are expected to disclaim
 # their copyright.
-COPYRIGHT_HOLDER = 1999-2003 Hugh Blemings, Pavel Janik, Pawel Kot
+COPYRIGHT_HOLDER = 1999-2006 Hugh Blemings, Pavel Janik, Pawel Kot
 
 # This is the list of locale categories, beyond LC_MESSAGES, for which the
 # message catalogs shall be used.  It is usually empty.
