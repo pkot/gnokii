@@ -40,6 +40,7 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 {
 	int i;
 	char name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
+	const char *category = "";
 
 	fprintf(f, "BEGIN:VCARD\n");
 	fprintf(f, "VERSION:3.0\n");
@@ -48,27 +49,27 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 	fprintf(f, "TEL;VOICE:%s\n", entry->number);
 	fprintf(f, "X_GSM_STORE_AT:%s\n", location);
 	fprintf(f, "X_GSM_CALLERGROUP:%d\n", entry->caller_group);
-	fprintf(f, "CATEGORIES:");
 	switch (entry->caller_group) {
 	case GN_PHONEBOOK_GROUP_Family:
-		fprintf(f, "Family\n");
+		category = _("Family");
 		break;
 	case GN_PHONEBOOK_GROUP_Vips:
-		fprintf(f, "VIPs\n");	
+		category = _("VIPs");
 		break;
-	case GN_PHONEBOOK_GROUP_Friends:	
-		fprintf(f, "Friends\n");
+	case GN_PHONEBOOK_GROUP_Friends:
+		category = _("Friends");
 		break;
 	case GN_PHONEBOOK_GROUP_Work:
-		fprintf(f, "Work\n");
+		category = _("Work");
 		break;
 	case GN_PHONEBOOK_GROUP_Others:
-		fprintf(f, "Others\n");
+		category = _("Others");
 		break;
 	default:
-		fprintf(f, "Unknown\n");
-		break;	
+		category = _("Unknown");
+		break;
 	}
+	fprintf(f, "CATEGORIES:%s\n", category);
 
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {
@@ -154,7 +155,7 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	while (1) {
 		int line_len;
 		if (!fgets(buf, 1024, f)) {
-			ERROR("Vcard began but not ended?");
+			ERROR(_("Vcard began but not ended?"));
 			return -1;
 		}
 		/* There's either "\n" or "\r\n' sequence at the

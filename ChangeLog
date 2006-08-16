@@ -49,6 +49,8 @@
       given section (in particular no section)          (Pawel Kot)
     o fix typo when converting phonebook entry to vCard; in default
       CATEGORY s/Unkown/Unknown                           (Whoopie)
+    o make categories in phonebook vCards translatable
+                                                    (Daniele Forsi)
  * nk6100 driver updates
     o make --getdatetime return GN_ERR_NOTAVAILABLE when date/time
       is not set                                    (Daniele Forsi)
