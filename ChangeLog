@@ -108,6 +108,11 @@
       giving it the keyboard focus, possibly dependent on the
       user's platform, window manager, and preferences."
                                                     (Daniele Forsi)
+    o in Logos window provide an empty network code when it could
+      not be read from the phone else later code would reference
+      unitialized memory (it is possible to read startup logo and
+      operator logo from a Nokia 3330 even when SIM card is missing
+      or PIN code is required)                      (Daniele Forsi)
 
 0.6.13
 ======
