@@ -115,6 +115,10 @@
       unitialized memory (it is possible to read startup logo and
       operator logo from a Nokia 3330 even when SIM card is missing
       or PIN code is required)                      (Daniele Forsi)
+ * translation updates
+    o change gnokii/gnokii-phonebook.c and gnokii/gnokii-calendar.c
+      to remove some strings that differ only for a trailing \n to
+      ease future translations                      (Daniele Forsi)
 
 0.6.13
 ======

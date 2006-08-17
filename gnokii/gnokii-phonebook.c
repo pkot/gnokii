@@ -175,27 +175,28 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				fprintf(stdout, _("Group: "));
 				switch (entry.caller_group) {
 				case GN_PHONEBOOK_GROUP_Family:
-					fprintf(stdout, _("Family\n"));
+					fprintf(stdout, _("Family"));
 					break;
 				case GN_PHONEBOOK_GROUP_Vips:
-					fprintf(stdout, _("VIPs\n"));
-					break;	
+					fprintf(stdout, _("VIPs"));
+					break;
 				case GN_PHONEBOOK_GROUP_Friends:
-					fprintf(stdout, _("Friends\n"));	
+					fprintf(stdout, _("Friends"));
 					break;
 				case GN_PHONEBOOK_GROUP_Work:
-					fprintf(stdout, _("Work\n"));
+					fprintf(stdout, _("Work"));
 					break;
 				case GN_PHONEBOOK_GROUP_Others:
-					fprintf(stdout, _("Others\n"));
+					fprintf(stdout, _("Others"));
 					break;
 				case GN_PHONEBOOK_GROUP_None:
-					fprintf(stdout, _("None\n"));
+					fprintf(stdout, _("None"));
 					break;
 				default:
-					fprintf(stdout, _("Unknown\n"));	
+					fprintf(stdout, _("Unknown"));
 					break;
-				}	
+				}
+				fprintf(stdout, "\n");
 
 				dprintf("subentries count: %d\n", entry.subentries_count);
 				for (i = 0; i < entry.subentries_count; i++) {

@@ -117,24 +117,25 @@ int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachin
 
 				switch (calnote.type) {
 				case GN_CALNOTE_REMINDER:
-					fprintf(stdout, _("Reminder\n"));
+					fprintf(stdout, _("Reminder"));
 					break;
 				case GN_CALNOTE_CALL:
-					fprintf(stdout, _("Call\n"));
+					fprintf(stdout, _("Call"));
 					break;
 				case GN_CALNOTE_MEETING:
-					fprintf(stdout, _("Meeting\n"));
+					fprintf(stdout, _("Meeting"));
 					break;
 				case GN_CALNOTE_BIRTHDAY:
-					fprintf(stdout, _("Birthday\n"));
+					fprintf(stdout, _("Birthday"));
 					break;
 				case GN_CALNOTE_MEMO:
-					fprintf(stdout, _("Memo\n"));
+					fprintf(stdout, _("Memo"));
 					break;
 				default:
-					fprintf(stdout, _("Unknown\n"));
+					fprintf(stdout, _("Unknown"));
 					break;
 				}
+				fprintf(stdout, "\n");
 
 				fprintf(stdout, _("   Start date: %d-%02d-%02d\n"), calnote.time.year,
 					calnote.time.month,
