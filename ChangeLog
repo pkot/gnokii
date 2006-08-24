@@ -119,6 +119,8 @@
     o change gnokii/gnokii-phonebook.c and gnokii/gnokii-calendar.c
       to remove some strings that differ only for a trailing \n to
       ease future translations                      (Daniele Forsi)
+    o update Italian translation and change charset back to that of
+      version 0.6.12                                (Daniele Forsi)
 
 0.6.13
 ======
