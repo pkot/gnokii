@@ -51,6 +51,7 @@
       CATEGORY s/Unkown/Unknown                           (Whoopie)
     o make categories in phonebook vCards translatable
                                                     (Daniele Forsi)
+    o add Nokia 6280 support                     (Kostas Peletidis)
  * nk6100 driver updates
     o make --getdatetime return GN_ERR_NOTAVAILABLE when date/time
       is not set                                    (Daniele Forsi)
