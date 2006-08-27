@@ -187,6 +187,8 @@ typedef struct {
 /* Some phones (at the moment 7110/6510 series) supports extended phonebook
    with additional data.  Here we have structures for them */
 typedef enum {
+	GN_PHONEBOOK_NUMBER_None    = 0x00,
+	GN_PHONEBOOK_NUMBER_Common  = 0x01,
 	GN_PHONEBOOK_NUMBER_Home    = 0x02,
 	GN_PHONEBOOK_NUMBER_Mobile  = 0x03,
 	GN_PHONEBOOK_NUMBER_Fax     = 0x04,

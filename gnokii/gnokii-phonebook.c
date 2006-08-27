@@ -224,8 +224,10 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 						case GN_PHONEBOOK_NUMBER_Work:
 							fprintf(stdout, _("Business number: "));
 							break;
+						case GN_PHONEBOOK_NUMBER_None:
+						case GN_PHONEBOOK_NUMBER_Common:
 						case GN_PHONEBOOK_NUMBER_General:
-							fprintf(stdout, _("Preferred number: "));
+							fprintf(stdout, _("General number: "));
 							break;
 						default:
 							fprintf(stdout, _("Unknown (%d): "), entry.subentries[i].number_type);
