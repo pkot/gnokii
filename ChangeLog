@@ -99,6 +99,7 @@
                                           (Helge Deller, Pawel Kot)
     o -fvisibility=hidden flag is supported since gcc 3.4
                                                      (Brian Wallis)
+    o don't prepare distribution specific things        (Pawel Kot)
  * smsd updates
     o fix problems with exporting symbols from shared
       libraries/plugins with newer gcc versions         (Pawel Kot)
