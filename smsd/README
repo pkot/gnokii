@@ -7,6 +7,8 @@ phone to outbox and inbox tables.
 NOTE: The database format from version 1.3 to 1.4 changed! You must add
 columns not_before and not_after to outbox.
 
+NOTE: You must NOT ./configure --disable-shared in gnokii directory to let
+smsd compile correctly.
 
 INTRODUCTION
 
