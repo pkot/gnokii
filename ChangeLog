@@ -102,6 +102,8 @@
  * smsd updates
     o fix problems with exporting symbols from shared
       libraries/plugins with newer gcc versions         (Pawel Kot)
+    o autoreconnect in case of the phone being disconnected somehow
+                                                     (Jan Derfinak)
  * xgnokii updates
     o remove ExposeDisplay() from xgnokii/xgnokii_netmon.c as it's
       no more needed and was causing an infinite loop with a crash

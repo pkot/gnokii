@@ -112,8 +112,10 @@ static gn_error InitModelInf (void)
 
 static void busterminate (void)
 {
-  gn_lib_phone_close(sm);
-  gn_lib_phoneprofile_free(&sm);
+  if (sm) {
+    gn_lib_phone_close(sm);
+    gn_lib_phoneprofile_free(&sm);
+  }
   gn_lib_library_free();
 }
 
@@ -121,9 +123,10 @@ static gn_error fbusinit (const char * const iname)
 {
   gn_error error;
 
-  if (GN_ERR_NONE != gn_lib_phoneprofile_load(iname,&sm))
+  if (GN_ERR_NONE != gn_lib_phoneprofile_load(iname, &sm))
   {
     g_print (_("Cannot load phone %s!\nDo you have proper section in gnokiirc?\n"), iname);
+    g_print (_("%s\n"), gn_error_print(error));
     exit (-1);
   }
 
@@ -136,6 +139,7 @@ static gn_error fbusinit (const char * const iname)
   if (error != GN_ERR_NONE)
   {
     g_print (_("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
+    g_print (_("%s\n"), gn_error_print(error));
     return (error);
   }
 
@@ -322,9 +326,8 @@ gint (*DoAction[])(gpointer) = {
 };
 
 
-void *Connect (void *phone)
+static void RealConnect (void *phone)
 {
-  static gint status = 1;
   gn_data *data;
   gn_sms_status SMSStatus = {0, 0, 0, 0};
   gn_sms_folder SMSFolder;
@@ -358,7 +361,7 @@ void *Connect (void *phone)
     {
       data->sms_folder = &SMSFolder;
       SMSFolder.folder_id = smsdConfig.memoryType;
-      if (status && (error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, sm)) == GN_ERR_NONE)
+      if ((error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.number != SMSFolder.number)
         {
@@ -370,14 +373,8 @@ void *Connect (void *phone)
       }
       else
       {
-        if (status)
-        {
-          g_print (_("GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\nEntering dumb mode."), __LINE__, __FILE__, error);
-          status = 0;
-        }
-        phoneMonitor.working = TRUE;
-        RefreshSMS (smsdConfig.maxSMS);
-        phoneMonitor.working = FALSE;
+        g_print (_("GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\nRestarting connection."), __LINE__, __FILE__, error);
+        break;
       }
     }
     else
@@ -387,7 +384,7 @@ void *Connect (void *phone)
 
       data->sms_status = &SMSStatus;
       data->memory_status = &dummy;
-      if (status && (error = gn_sm_functions (GN_OP_GetSMSStatus, data, sm)) == GN_ERR_NONE)
+      if ((error = gn_sm_functions (GN_OP_GetSMSStatus, data, sm)) == GN_ERR_NONE)
       {
         if (phoneMonitor.sms.unRead != SMSStatus.unread ||
             phoneMonitor.sms.number != SMSStatus.number)
@@ -400,14 +397,8 @@ void *Connect (void *phone)
       }
       else
       {
-        if (status)
-        {
-          g_print (_("GN_OP_GetSMSStatus at line %d in file %s returns error %d\nEntering dumb mode."), __LINE__, __FILE__, error);
-          status = 0;
-        }
-        phoneMonitor.working = TRUE;
-        RefreshSMS (smsdConfig.maxSMS);
-        phoneMonitor.working = FALSE;
+        g_print (_("GN_OP_GetSMSStatus at line %d in file %s returns error %d\nRestarting connection."), __LINE__, __FILE__, error);
+        break;
       }
     }
 
@@ -426,3 +417,14 @@ void *Connect (void *phone)
   
   free (data);
 }
+
+
+void *Connect (void *phone)
+{
+  while (1)
+  {
+    RealConnect (phone);
+    busterminate ();
+    sleep (1);
+  }
+} 
