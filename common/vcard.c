@@ -46,7 +46,7 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 	fprintf(f, "VERSION:3.0\n");
 	add_slashes(name, entry->name, sizeof(name), strlen(entry->name));
 	fprintf(f, "FN:%s\n", name);
-	fprintf(f, "TEL;VOICE:%s\n", entry->number);
+	fprintf(f, "TEL;TYPE=PREF,VOICE:%s\n", entry->number);
 	fprintf(f, "X_GSM_STORE_AT:%s\n", location);
 	fprintf(f, "X_GSM_CALLERGROUP:%d\n", entry->caller_group);
 	switch (entry->caller_group) {
@@ -76,11 +76,11 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 		switch (entry->subentries[i].entry_type) {
 		case GN_PHONEBOOK_ENTRY_Email:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			fprintf(f, "EMAIL;INTERNET:%s\n", name);
+			fprintf(f, "EMAIL;TYPE=INTERNET:%s\n", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Postal:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			fprintf(f, "ADR;HOME:%s\n", name);
+			fprintf(f, "ADR;TYPE=HOME:%s\n", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Note:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
@@ -89,24 +89,24 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 		case GN_PHONEBOOK_ENTRY_Number:
 			switch (entry->subentries[i].number_type) {
 			case GN_PHONEBOOK_NUMBER_Home:
-				fprintf(f, "TEL;HOME:%s\n", entry->subentries[i].data.number);
+				fprintf(f, "TEL;TYPE=HOME:%s\n", entry->subentries[i].data.number);
 				break;
 			case GN_PHONEBOOK_NUMBER_Mobile:
-				fprintf(f, "TEL;CELL:%s\n", entry->subentries[i].data.number);
+				fprintf(f, "TEL;TYPE=CELL:%s\n", entry->subentries[i].data.number);
 				break;
 			case GN_PHONEBOOK_NUMBER_Fax:
-				fprintf(f, "TEL;FAX:%s\n", entry->subentries[i].data.number);
+				fprintf(f, "TEL;TYPE=FAX:%s\n", entry->subentries[i].data.number);
 				break;
 			case GN_PHONEBOOK_NUMBER_Work:
-				fprintf(f, "TEL;WORK:%s\n", entry->subentries[i].data.number);
+				fprintf(f, "TEL;TYPE=WORK:%s\n", entry->subentries[i].data.number);
 				break;
 			case GN_PHONEBOOK_NUMBER_None:
 			case GN_PHONEBOOK_NUMBER_Common:
 			case GN_PHONEBOOK_NUMBER_General:
-				fprintf(f, "TEL;PREF:%s\n", entry->subentries[i].data.number);
+				fprintf(f, "TEL;TYPE=VOICE:%s\n", entry->subentries[i].data.number);
 				break;
 			default:
-				fprintf(f, "TEL;X_UNKNOWN_%d: %s\n", entry->subentries[i].number_type, entry->subentries[i].data.number);
+				fprintf(f, "TEL;TYPE=X_UNKNOWN_%d: %s\n", entry->subentries[i].number_type, entry->subentries[i].data.number);
 				break;
 			}
 			break;
@@ -175,11 +175,12 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 			continue; 
 
 		STORE("FN:", entry->name);
-		STORE("TEL;VOICE:", entry->number);
+		STORE("TEL;TYPE=PREF,VOICE:", entry->number);
+		STORE("TEL;TYPE=PREF:", entry->number);
 
 		STORESUB("URL:", GN_PHONEBOOK_ENTRY_URL);
-		STORESUB("EMAIL;INTERNET:", GN_PHONEBOOK_ENTRY_Email);
-		STORESUB("ADR;HOME:", GN_PHONEBOOK_ENTRY_Postal);
+		STORESUB("EMAIL;TYPE=INTERNET:", GN_PHONEBOOK_ENTRY_Email);
+		STORESUB("ADR;TYPE=HOME:", GN_PHONEBOOK_ENTRY_Postal);
 		STORESUB("NOTE:", GN_PHONEBOOK_ENTRY_Note);
 
 		STORE3("X_GSM_STORE_AT:", memloc);
@@ -192,11 +193,12 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 		}
 		STOREINT("X_GSM_CALLERGROUP:", entry->caller_group);
 
-		STORENUM("TEL;HOME:", GN_PHONEBOOK_NUMBER_Home);
-		STORENUM("TEL;CELL:", GN_PHONEBOOK_NUMBER_Mobile);
-		STORENUM("TEL;FAX:", GN_PHONEBOOK_NUMBER_Fax);
-		STORENUM("TEL;WORK:", GN_PHONEBOOK_NUMBER_Work);
-		STORENUM("TEL;PREF:", GN_PHONEBOOK_NUMBER_General);
+		STORENUM("TEL;TYPE=HOME:", GN_PHONEBOOK_NUMBER_Home);
+		STORENUM("TEL;TYPE=CELL:", GN_PHONEBOOK_NUMBER_Mobile);
+		STORENUM("TEL;TYPE=FAX:", GN_PHONEBOOK_NUMBER_Fax);
+		STORENUM("TEL;TYPE=WORK:", GN_PHONEBOOK_NUMBER_Work);
+		STORENUM("TEL;TYPE=PREF:", GN_PHONEBOOK_NUMBER_General);
+		STORENUM("TEL;TYPE=VOICE:", GN_PHONEBOOK_NUMBER_Common);
 
 		if (BEGINS("END:VCARD"))
 			break;
