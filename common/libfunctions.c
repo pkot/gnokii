@@ -336,11 +336,11 @@ GNOKII_API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state
 	gn_error error;
 	gn_data *data = &state->sm_data;
 
-	state->u.pb_entry.memory_type = memory_type;
-	state->u.pb_entry.location = index;
 	data->phonebook_entry = &state->u.pb_entry;
 	memset(data->phonebook_entry, 0, sizeof(*data->phonebook_entry));
 	data->phonebook_entry->empty = 1;
+	data->phonebook_entry->memory_type = memory_type;
+	data->phonebook_entry->location = index;
 	error = gn_sm_functions(GN_OP_WritePhonebook, data, state);
 	return LASTERROR(state, error);
 }
