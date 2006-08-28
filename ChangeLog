@@ -6,6 +6,7 @@
     o be more compliant with VCARD 3.0                  (Pawel Kot)
     o use TYPE=PREF for the main entry number for the phonebook
       entry                                             (Pawel Kot)
+    o add Nokia 6136 support                            (Pawel Kot)
 
 0.6.14
 ======
