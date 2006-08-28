@@ -100,6 +100,8 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 			case GN_PHONEBOOK_NUMBER_Work:
 				fprintf(f, "TEL;WORK:%s\n", entry->subentries[i].data.number);
 				break;
+			case GN_PHONEBOOK_NUMBER_None:
+			case GN_PHONEBOOK_NUMBER_Common:
 			case GN_PHONEBOOK_NUMBER_General:
 				fprintf(f, "TEL;PREF:%s\n", entry->subentries[i].data.number);
 				break;
