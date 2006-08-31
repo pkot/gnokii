@@ -7,6 +7,8 @@
     o use TYPE=PREF for the main entry number for the phonebook
       entry                                             (Pawel Kot)
     o add Nokia 6136 support                            (Pawel Kot)
+    o add Italian operator "Blu SpA" (222 98) to the list of nets
+      in common/gsm-networks.c                      (Daniele Forsi)
 
 0.6.14
 ======

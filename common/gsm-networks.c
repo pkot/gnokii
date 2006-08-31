@@ -267,6 +267,7 @@ static gn_network networks[] = {
 	{"222 01", "Telecom Italia Mobile"},
 	{"222 10", "vodafone"},
 	{"222 88", "Wind Telecomunicazioni SpA"},
+	{"222 98", "Blu SpA"}, /* defunct year 2002 */
 	{"222 99", "H3G"},
 	{"226 01", "CONNEX GSM"},
 	{"226 03", "Cosmorom S.A."},
