@@ -9,6 +9,8 @@
     o add Nokia 6136 support                            (Pawel Kot)
     o add Italian operator "Blu SpA" (222 98) to the list of nets
       in common/gsm-networks.c                      (Daniele Forsi)
+    o delete lockfile in gn_lib_phone_open() if gn_gsm_initialise()
+      fails (eg. bad config or no write access)     (Daniele Forsi)
 
 0.6.14
 ======
