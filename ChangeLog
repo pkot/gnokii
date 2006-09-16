@@ -11,6 +11,11 @@
       in common/gsm-networks.c                      (Daniele Forsi)
     o delete lockfile in gn_lib_phone_open() if gn_gsm_initialise()
       fails (eg. bad config or no write access)     (Daniele Forsi)
+    o search for default config files if an empty filename is given
+      to gn_lib_phoneprofile_load_from_file()       (Daniele Forsi)
+ * gnokii updates
+    o search for default config files if an empty filename is given
+      to --config                                   (Daniele Forsi)
 
 0.6.14
 ======

@@ -62,7 +62,7 @@ GNOKII_API gn_error gn_lib_phoneprofile_load_from_file(const char *configfile, c
 	*state = NULL;
 
 	if (!gn_cfg_info) {
-		if (configfile)
+		if (configfile && *configfile)
 			error = gn_cfg_file_read(configfile);
 		else
 			error = gn_cfg_read_default();
