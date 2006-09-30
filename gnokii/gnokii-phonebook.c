@@ -485,7 +485,7 @@ int deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachin
 	char *memory_type_string;
 	int i, first_location, last_location;
 
-	if (argc < optind + 3)
+	if (argc < 3)
 		deletephonebook_usage(stderr, -1);
 
 	/* Handle command line args that set memory type and location. */

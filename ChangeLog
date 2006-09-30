@@ -17,6 +17,8 @@
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
     o fix --setdatetime segfault                        (Pawel Kot)
+    o fix --deletephonebook incorrect argument number counting
+                                                        (Pawel Kot)
 
 0.6.14
 ======
