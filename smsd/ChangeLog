@@ -1,3 +1,6 @@
+* Sun Oct  1 2006 Jan Derfinak
+- exit after unsuccessful insert into DB (Massimo Citterio)
+
 * Thu Aug 10 2006 Pawel Kot
 - fix problems with exporting symbols from shared libraries/plugins with
   newer gcc versions

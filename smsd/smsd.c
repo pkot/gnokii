@@ -365,6 +365,25 @@ static void *SendSMS (void *a)
 }
 
 
+static void MainExit (gint sig)
+{
+  PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
+
+  e->event = Event_Exit;
+  e->data = NULL;
+  InsertEvent (e);
+  
+  pthread_mutex_lock (&db_monitorMutex);
+  db_monitor = FALSE;
+  pthread_mutex_unlock (&db_monitorMutex);
+  
+  pthread_join (monitor_th, NULL);
+  pthread_join (db_monitor_th, NULL);
+  (*DB_Bye) ();
+  exit (sig);
+}
+
+
 GNOKII_API gint WriteSMS (gn_sms *sms)
 {
   gn_error error;
@@ -414,17 +433,22 @@ static void ReadSMS (gpointer d, gpointer userData)
     else */
     {  
       gn_log_xdebug ("%d. %s   ", data->number, data->remote.number);
-      gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
-                data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
-                data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
-                data->user_data[0].u.text);
+      gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", );
       error = (*DB_InsertSMS) (data, smsdConfig.phone);
     }
     
     if (smsdConfig.logFile)
     {
       if (error)
-        LogFile (_("Inserting sms from %s unsuccessful.\n"), data->remote.number);
+      {
+        LogFile (_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting."),
+                 data->remote.number, data->smsc_time.year,
+                 data->smsc_time.month, data->smsc_time.day,
+                 data->smsc_time.hour, data->smsc_time.minute,
+                 data->smsc_time.second, data->smsc_time.timezone,
+                 data->user_data[0].u.text);
+        MainExit (1);
+      }
       else
         LogFile (_("Inserting sms from %s successful.\n"), data->remote.number);
     }
@@ -453,25 +477,6 @@ static void GetSMS (void)
     g_slist_foreach (phoneMonitor.sms.messages, ReadSMS, (gpointer) NULL);
     pthread_mutex_unlock (&smsMutex);
   }
-}
-
-
-static void MainExit (gint sig)
-{
-  PhoneEvent *e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-
-  e->event = Event_Exit;
-  e->data = NULL;
-  InsertEvent (e);
-  
-  pthread_mutex_lock (&db_monitorMutex);
-  db_monitor = FALSE;
-  pthread_mutex_unlock (&db_monitorMutex);
-  
-  pthread_join (monitor_th, NULL);
-  pthread_join (db_monitor_th, NULL);
-  (*DB_Bye) ();
-  exit (0);
 }
 
 
