@@ -433,7 +433,10 @@ static void ReadSMS (gpointer d, gpointer userData)
     else */
     {  
       gn_log_xdebug ("%d. %s   ", data->number, data->remote.number);
-      gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", );
+      gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
+                     data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
+                     data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
+                     data->user_data[0].u.text);
       error = (*DB_InsertSMS) (data, smsdConfig.phone);
     }
     
