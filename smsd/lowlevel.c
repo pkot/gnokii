@@ -124,7 +124,8 @@ static gn_error fbusinit (const char * const iname)
 {
   gn_error error;
 
-  if (GN_ERR_NONE != gn_lib_phoneprofile_load(iname, &sm))
+  error = gn_lib_phoneprofile_load(iname, &sm);
+  if (error != GN_ERR_NONE)
   {
     g_print (_("Cannot load phone %s!\nDo you have proper section in gnokiirc?\n"), iname);
     g_print (_("%s\n"), gn_error_print(error));
