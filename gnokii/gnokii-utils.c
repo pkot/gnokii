@@ -42,7 +42,6 @@
 #include "compat.h"
 
 #include <stdio.h>
-#include <termios.h>
 #include <signal.h>
 
 #include "gnokii-app.h"

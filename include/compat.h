@@ -103,6 +103,10 @@
 #  include <unistd.h>
 #endif
 
+#ifdef HAVE_TERMIOS_H
+#  include <termios.h>
+#endif
+
 /*
  * The following ifdef block is the standard way of creating macros which make
  * exporting from a DLL simpler. All files within this DLL are compiled with 
