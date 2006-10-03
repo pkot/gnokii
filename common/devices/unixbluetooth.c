@@ -37,7 +37,6 @@
 #if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH)
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>

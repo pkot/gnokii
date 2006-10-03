@@ -42,7 +42,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <time.h>
-#include <unistd.h>
 #include <ctype.h>
 
 #ifndef WIN32
@@ -52,6 +51,7 @@
 #include "config.h"
 #include "misc.h"
 #include "gnokii.h"
+#include "compat.h"
 #include "data/at-emulator.h"
 #include "data/datapump.h"
 

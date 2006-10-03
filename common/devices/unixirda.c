@@ -32,11 +32,11 @@
 #include "config.h"
 #include "misc.h"
 #include "gnokii.h"
+#include "compat.h"
 
 #ifdef HAVE_IRDA
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>

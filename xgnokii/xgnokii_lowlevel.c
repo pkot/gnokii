@@ -30,7 +30,9 @@
 
 */
 
-#include <unistd.h>
+#ifndef WIN32
+#  include <unistd.h>
+#endif
 #include <pthread.h>
 #include <string.h>
 #include <glib.h>

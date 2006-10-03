@@ -43,7 +43,6 @@
 
 #include <stdio.h>
 #include <termios.h>
-#include <unistd.h>
 #include <signal.h>
 
 #include "gnokii-app.h"

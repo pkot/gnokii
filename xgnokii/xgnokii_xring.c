@@ -52,7 +52,9 @@
  * HISTORY 
  */
 
-#include <unistd.h>
+#ifndef WIN32
+#  include <unistd.h>
+#endif
 #include <stdio.h>
 #include <assert.h>
 #include <errno.h>

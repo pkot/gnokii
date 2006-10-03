@@ -99,6 +99,10 @@
 #  include <limits.h>
 #endif
 
+#ifdef HAVE_UNISTD_H
+#  include <unistd.h>
+#endif
+
 /*
  * The following ifdef block is the standard way of creating macros which make
  * exporting from a DLL simpler. All files within this DLL are compiled with 

@@ -78,7 +78,6 @@
 #ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #endif
-#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/wait.h>
 #include <sys/uio.h>

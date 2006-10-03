@@ -45,11 +45,11 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
-#include <unistd.h>
 
 
 #include "misc.h"
 #include "gnokii.h"
+#include "compat.h"
 #include "device.h"
 #include "data/at-emulator.h"
 #include "data/datapump.h"

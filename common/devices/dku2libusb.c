@@ -65,7 +65,6 @@ int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state)
 #else
 
 #include <stdlib.h>
-#include <unistd.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>

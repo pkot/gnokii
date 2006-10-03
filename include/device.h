@@ -36,10 +36,6 @@
 #include "misc.h"
 #include "gnokii.h"
 
-#ifdef HAVE_UNISTD_H
-#  include <unistd.h>
-#endif
-
 GNOKII_API int device_getfd(struct gn_statemachine *state);
 
 int device_open(const char *file, int with_odd_parity, int with_async,

@@ -42,7 +42,6 @@
 #include "compat.h"
 
 #include <stdio.h>
-#include <unistd.h>
 #define _GNU_SOURCE
 #include <getopt.h>
 

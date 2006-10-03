@@ -43,7 +43,6 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
-#include <unistd.h>
 #define _GNU_SOURCE
 #include <getopt.h>
 

@@ -27,12 +27,13 @@
 
 */
 
-#include <unistd.h>
+#include "config.h"
 #include <pthread.h>
 #include <string.h>
 #include <glib.h>
 #include "misc.h"
 #include "gnokii.h"
+#include "compat.h"
 #include "smsd.h"
 #include "lowlevel.h"
 

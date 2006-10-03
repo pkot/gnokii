@@ -30,7 +30,9 @@
   Copyright (C) 2003      Uli Hopp
 
 */
-#include <unistd.h>
+#ifndef WIN32
+#  include <unistd.h>
+#endif
 #include <locale.h>
 #include <fcntl.h>
 #include <pthread.h>
