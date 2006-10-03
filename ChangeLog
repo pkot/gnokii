@@ -13,6 +13,8 @@
       fails (eg. bad config or no write access)     (Daniele Forsi)
     o search for default config files if an empty filename is given
       to gn_lib_phoneprofile_load_from_file()       (Daniele Forsi)
+    o add #include <limits.h> needed for MAX_INT on various
+      platforms           (Magnus Henoch, Petr Hruska, Kuba Tyszko)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
