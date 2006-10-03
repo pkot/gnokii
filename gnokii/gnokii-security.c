@@ -54,13 +54,15 @@ void security_usage(FILE *f)
 		     "Security options:\n"
 		     "          --identify\n"
 		     "          --getlocksinfo\n"
+		));
 #ifdef SECURITY
+	fprintf(f, _(
 		     "          --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 		     "          --getsecuritycodestatus\n"
 		     "          --getsecuritycode\n"
 		     "          --changesecuritycode PIN|PIN2|PUK|PUK2\n"
-#endif
 		));
+#endif
 }
 
 int identify(struct gn_statemachine *state)
