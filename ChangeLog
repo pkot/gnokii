@@ -23,6 +23,9 @@
                                                         (Pawel Kot)
     o print phonebook entry number in case when there's no
       subentry                                        (Petr Hruska)
+ * at driver updates
+    o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
+                                                      (Petr Hruska)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
