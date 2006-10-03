@@ -27,6 +27,7 @@
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
       compat.h                                        (Jari Turkia)
+    o MSVC needs #include <stdio.h> in snprintf.c     (Jari Turkia)
 
 0.6.14
 ======

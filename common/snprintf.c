@@ -64,6 +64,7 @@
 #define	snprintf __dummy_snprintf
 
 #if defined(WIN32) && !defined(CYGWIN)
+#  include <stdio.h>
 #  include <stddef.h>
 #endif
 
