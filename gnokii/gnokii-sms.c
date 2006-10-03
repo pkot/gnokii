@@ -41,6 +41,11 @@
 #include "misc.h"
 #include "compat.h"
 
+#if defined(WIN32) && !defined(CYGWIN)
+#  include <process.h>
+#  define getpid _getpid
+#endif
+
 #include <stdio.h>
 #include <sys/stat.h>
 #define _GNU_SOURCE

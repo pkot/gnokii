@@ -32,6 +32,8 @@
     o MSVC needs #include <stdio.h> in snprintf.c     (Jari Turkia)
     o MSVC compatibility fixes: string cannot be splitted with
       #ifdef                                          (Jari Turkia)
+    o add missing includes for MSVC after splitting gnokii into
+      serveral files                                  (Jari Turkia)
 
 0.6.14
 ======
