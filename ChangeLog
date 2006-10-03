@@ -21,6 +21,8 @@
     o fix --setdatetime segfault                        (Pawel Kot)
     o fix --deletephonebook incorrect argument number counting
                                                         (Pawel Kot)
+ * build system updates
+    o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
 
 0.6.14
 ======

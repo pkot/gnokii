@@ -17,6 +17,21 @@ AC_PREFIX_DEFAULT("/usr/local")
 dnl ======================== Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP
+
+dnl -----------------------------
+dnl Checks for FreeBSD Build
+dnl -----------------------------
+AC_MSG_CHECKING(if building on FreeBSD)
+
+if test `uname -s` = "FreeBSD" ; then
+	AC_MSG_RESULT(yes)
+	CPPFLAGS="$CFLAGS -I/usr/local/include"
+	LDFLAGS="$LDFLAGS -L/usr/local/lib"
+else
+	AC_MSG_RESULT(no)
+fi
+
+
 AC_PROG_LEX
 AC_PATH_PROG(RM, rm, no)
 AC_PATH_PROG(FIND, find, no)
