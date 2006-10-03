@@ -21,6 +21,8 @@
     o fix --setdatetime segfault                        (Pawel Kot)
     o fix --deletephonebook incorrect argument number counting
                                                         (Pawel Kot)
+    o print phonebook entry number in case when there's no
+      subentry                                        (Petr Hruska)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
 

@@ -198,6 +198,11 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				}
 				fprintf(stdout, "\n");
 
+				/* FIXME: AT driver doesn't set subentries */
+				if (!entry.subentries_count && entry.number) {
+					fprintf(stdout, _("Number: %s\n"), entry.number);
+				}
+
 				dprintf("subentries count: %d\n", entry.subentries_count);
 				for (i = 0; i < entry.subentries_count; i++) {
 					switch (entry.subentries[i].entry_type) {
