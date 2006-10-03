@@ -71,6 +71,7 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_error AT_Identify(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state);
@@ -102,6 +103,8 @@ static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_AnswerCall(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_CancelCall(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetDateTime(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -145,6 +148,8 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_AT_Ring,               NULL,                     ReplyRing },
 	{ GN_OP_SetCallNotification,   AT_SetCallNotification,   Reply },
 	{ GN_OP_GetNetworkInfo,        AT_GetNetworkInfo,        ReplyGetNetworkInfo },
+	{ GN_OP_SetDateTime,           AT_SetDateTime,           Reply },
+	{ GN_OP_GetDateTime,           AT_GetDateTime,           ReplyGetDateTime },
 };
 
 char *strip_quotes(char *s)
@@ -1148,6 +1153,29 @@ static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
 }
 
+static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state)
+{
+	char req[29];
+
+	gn_timestamp *dt = data->datetime;
+
+	sprintf(req, "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d\"\r",
+		dt->year % 100, dt->month, dt->day,
+		dt->hour, dt->minute, dt->second);
+
+	if (sm_message_send(28, GN_OP_SetDateTime, req, state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_SetDateTime, data, state);
+}
+
+static gn_error AT_GetDateTime(gn_data *data, struct gn_statemachine *state)
+{
+	if (sm_message_send(9, GN_OP_GetDateTime, "AT+CCLK?\r", state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_GetDateTime, data, state);
+}
+
+
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -1786,6 +1814,31 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		}
 		gnokii_strfreev(strings);
 	}
+
+	return GN_ERR_NONE;
+}
+
+static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_line_buffer buf;
+	gn_error error;
+
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return error;
+
+	buf.line1 = buffer + 1;
+	buf.length= length;
+
+	splitlines(&buf);
+
+	gn_timestamp *dt = data->datetime;
+	if (sscanf(buf.line2, "+CCLK: \"%d/%d/%d,%d:%d:%d\"",
+		   &dt->year, &dt->month, &dt->day,
+		   &dt->hour, &dt->minute, &dt->second) != 6)
+		return GN_ERR_FAILED;
+
+	if (dt->year < 100)
+		dt->year += 2000;
 
 	return GN_ERR_NONE;
 }

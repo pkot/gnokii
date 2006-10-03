@@ -27,6 +27,7 @@
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
     o implement --setdatetime                         (Petr Hruska)
+    o implement --getdatetime                         (Petr Hruska)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
