@@ -34,11 +34,12 @@
       compat.h                                        (Jari Turkia)
     o termios.h is not on all platforms; try to include only from
       compat.h                                        (Jari Turkia)
-    o MSVC needs #include <stdio.h> in snprintf.c     (Jari Turkia)
-    o MSVC compatibility fixes: string cannot be splitted with
+    o MSVS needs #include <stdio.h> in snprintf.c     (Jari Turkia)
+    o MSVS compatibility fixes: string cannot be splitted with
       #ifdef                                          (Jari Turkia)
-    o add missing includes for MSVC after splitting gnokii into
+    o add missing includes for MSVS after splitting gnokii into
       serveral files                                  (Jari Turkia)
+    o update MSVS project files                       (Jari Turkia)
 
 0.6.14
 ======
