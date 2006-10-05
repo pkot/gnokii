@@ -141,7 +141,7 @@ GNOKII_API void gn_sms_default_deliver(gn_sms *sms)
 static char *sms_timestamp_print(u8 *number)
 {
 #ifdef DEBUG
-#define LOCAL_DATETIME_MAX_LENGTH 23
+#define LOCAL_DATETIME_MAX_LENGTH 26
 	static char buffer[LOCAL_DATETIME_MAX_LENGTH];
 	char buf[5];
 	int i;
