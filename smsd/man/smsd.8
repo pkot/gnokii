@@ -45,8 +45,8 @@ When the phone receives an SMS, \fBSMSD\fR moves it into 'inbox' table and
 removes the SMS from the phone.
 
 .PP
-Table 'outbox' is for outgoing SMSes. \fBSMSD\fR periodicaly looks into this table
-and searches for lines with attribute 'processed' set to FALSE. If it find
+Table 'outbox' is for outgoing SMSes. \fBSMSD\fR periodically looks into this table
+and searches for lines with attribute 'processed' set to FALSE. If it finds
 such SMS, it will send SMS to 'number':
 
 .RS
@@ -73,7 +73,7 @@ must not fill this column. See -t option below.
 
 .TP
 .B processed
-new SMS must have this attribut set to FALSE. \fBSMSD\fR will send this SMS and will update 'processed' to TRUE.
+new SMS must have this attribute set to FALSE. \fBSMSD\fR will send this SMS and will update 'processed' to TRUE.
 
 .TP
 .B error
@@ -85,23 +85,23 @@ request for delivery report per message. Possible values are 0 for no delivery r
 
 .TP
 .B not_before
-sms will not be send before this time (default 00:00:00).
+sms will not be sent before this time (default 00:00:00).
 
 .TP
 .B not_after
-sms will not be send after this time (default 23:59:59).
+sms will not be sent after this time (default 23:59:59).
 .RE
 .PP
-\fBSMSD\fR is multi threaded program. If you list processes you will see more then
+\fBSMSD\fR is multi threaded program. If you list processes you will see more than
 one instance of smsd.
 
 .SS
 THE FILE MODULE
 .PP
 This module doesn't need an SQL server to work. For incoming messages it
-work in a way that it calls a program giving phone number, date as parameter
-and the message text on stdin. In the smsd directory there is as example file
-action. It shows sms data to stdout. If you want something usefull you must
+works in a way that it calls a program giving phone number, date as parameter
+and the message text on stdin. In the smsd directory there is an example file
+action. It shows sms data to stdout. If you want something useful you must
 write your own action.
 .BR
 For outgoing messages you can set spool directory where smsd looks
@@ -129,8 +129,8 @@ Outgoing sms must be in format:
 
 .PP
 The name of file is unimportant but smsd ignores all files with prefix
-"ERR.". If smsd succesfuly sends sms, it removes file from spool directory.
-If smsd cannot sends sms prepend file with "ERR." prefix and ignores it.
+"ERR.". If smsd succesfully sends sms, it removes file from spool directory.
+If smsd cannot send sms prepends file with "ERR." prefix and ignores it.
 If you use \fI-m file\fR, \fI-u\fR (\fI--user\fR) and \fI-c\fR (\fI--host\fR) will have other meaning.
 \fI-u\fR is for action (action must be executable)
 \fI-c\fR is for spool directory where smsd looks for smses. Smsd must have read
@@ -173,13 +173,13 @@ Specify which module to use for connection to DB server. Currently supported are
 .TP
 .BR -l,\ --libdir\ path_to_db_module
 Specify path to DB modules. If you specify pq module, smsd searches in libdir for file libpq.so (for mysql - libmysql.so).
-Do not interchange this plugins with default SQL libraries from database distribution!
+Do not interchange these plugins with default SQL libraries from database distribution!
 
 .TP
 .BR -f,\ --logfile\ file
 If used, smsd will monitor sms traffic to file "file". File is
 reopened and closed for every message so you can simply rename or
-delete it if you want rotate logs. If you use '-' as filename smsd
+delete it if you want to rotate logs. If you use '-' as filename smsd
 will use standard output.
 
 .TP
@@ -247,9 +247,9 @@ smsc_timeout = 10
 In this setup if you run smsd without -t option it will use config
 from global section. If you run smsd with -t 1 it will use config
 from phone_1 and likewise with -t 2 uses phone_2. In case of use -t
-option smsd fill phone number for incoming sms's and in outbox it
+option smsd fills phone number for incoming sms's and in outbox it
 looks only for sms's with the specified phone number in column
-'phone'. This behaviour give you possibility to run one instance
+'phone'. This behaviour gives you possibility to run one instance
 of smsd for every phone you have at the same time.
 .RE
 
