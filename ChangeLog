@@ -44,6 +44,7 @@
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)
+    o use correct size for the user data         (Waterser Forrest)
 
 0.6.14
 ======
