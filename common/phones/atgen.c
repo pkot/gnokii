@@ -552,7 +552,6 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_data data;
-	gn_sms_status sms_status;
 	char req[32];
 	gn_error ret = GN_ERR_NONE;
 
@@ -560,17 +559,10 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 		if (mt >= NR_MEMORIES)
 			return GN_ERR_INVALIDMEMORYTYPE;
 		gn_data_clear(&data);
-		data.sms_status = &sms_status;
-		ret = AT_GetSMSStatus(&data, state);
-		if (ret != GN_ERR_NONE)
-			return ret;
-
-		sprintf(req, "AT+CPMS=\"%s\",\"%s\",\"%s\"\r", memorynames[mt], memorynames[mt],
-			memorynames[data.sms_status->new_message_store]);
+		sprintf(req, "AT+CPMS=\"%s\"\r", memorynames[mt]);
 		ret = sm_message_send(23, GN_OP_Init, req, state);
-		if (ret != GN_ERR_NONE)
-			return GN_ERR_NOTREADY;
-		ret = sm_block_no_retry(GN_OP_Init, &data, state);
+		if (ret == GN_ERR_NONE)
+			ret = sm_block_no_retry(GN_OP_Init, &data, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->smsmemorytype = mt;
 	}
@@ -1458,8 +1450,6 @@ static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int le
 {
 	at_line_buffer buf;
 	gn_error error;
-	char store[3] = "XX";
-	int i;
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
 
@@ -1467,21 +1457,12 @@ static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int le
 	buf.length = length;
 	splitlines(&buf);
 
-	if (sscanf(buf.line2, "+CPMS: \"%*c%*c\",%d,%*d,\"%*c%*c\",%*d,%*d,\"%c%c\",%*d,%*d",
-		   &data->sms_status->number, &store[0], &store[1]) != 3)
+	if (sscanf(buf.line2, "+CPMS: \"%*c%*c\",%d,%*d", &data->sms_status->number) != 1)
 		return GN_ERR_FAILED;
 
 	data->sms_status->unread = 0;
 	data->sms_status->changed = 0;
 	data->sms_status->folders_count = 0;
-
-	data->sms_status->new_message_store = GN_MT_ME;
-	for (i = 0; i < NR_MEMORIES; i++) {
-		if (strcmp(store, memorynames[i]) == 0) {
-			data->sms_status->new_message_store = i;
-			break;
-		}
-	}
 
 	return GN_ERR_NONE;
 }
