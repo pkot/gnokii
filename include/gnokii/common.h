@@ -197,19 +197,37 @@ typedef enum {
 } gn_phonebook_number_type;
 
 typedef enum {
-	GN_PHONEBOOK_ENTRY_Name       = 0x07,
-	GN_PHONEBOOK_ENTRY_Email      = 0x08,
-	GN_PHONEBOOK_ENTRY_Postal     = 0x09,
-	GN_PHONEBOOK_ENTRY_Note       = 0x0a,
-	GN_PHONEBOOK_ENTRY_Number     = 0x0b,
-	GN_PHONEBOOK_ENTRY_Ringtone   = 0x0c,
-	GN_PHONEBOOK_ENTRY_Date       = 0x13,   /* Date is used for DC,RC,etc (last calls) */
-	GN_PHONEBOOK_ENTRY_Pointer    = 0x1a,   /* Pointer to the other memory */
-	GN_PHONEBOOK_ENTRY_Logo       = 0x1b,
-	GN_PHONEBOOK_ENTRY_LogoSwitch = 0x1c,
-	GN_PHONEBOOK_ENTRY_Group      = 0x1e,
-	GN_PHONEBOOK_ENTRY_URL        = 0x2c,
-	GN_PHONEBOOK_ENTRY_RingtoneAdv= 0x37,
+	GN_PHONEBOOK_ENTRY_Name            = 0x07,
+	GN_PHONEBOOK_ENTRY_Email           = 0x08,
+	GN_PHONEBOOK_ENTRY_Postal          = 0x09,
+	GN_PHONEBOOK_ENTRY_Note            = 0x0a,
+	GN_PHONEBOOK_ENTRY_Number          = 0x0b,
+	GN_PHONEBOOK_ENTRY_Ringtone        = 0x0c,
+	GN_PHONEBOOK_ENTRY_Date            = 0x13,   /* Date is used for DC,RC,etc (last calls) */
+	GN_PHONEBOOK_ENTRY_Pointer         = 0x1a,   /* Pointer to the other memory */
+	GN_PHONEBOOK_ENTRY_Logo            = 0x1b,
+	GN_PHONEBOOK_ENTRY_LogoSwitch      = 0x1c,
+	GN_PHONEBOOK_ENTRY_Group           = 0x1e,
+	GN_PHONEBOOK_ENTRY_URL             = 0x2c,
+	GN_PHONEBOOK_ENTRY_Location        = 0x2f, /* ??? */
+	GN_PHONEBOOK_ENTRY_Image           = 0x33,
+	GN_PHONEBOOK_ENTRY_RingtoneAdv     = 0x37,
+	GN_PHONEBOOK_ENTRY_UserID          = 0x38,
+	GN_PHONEBOOK_ENTRY_PTTAddress      = 0x3f, /* string */
+	GN_PHONEBOOK_ENTRY_FirstName       = 0x46,
+	GN_PHONEBOOK_ENTRY_LastName        = 0x47,
+	GN_PHONEBOOK_ENTRY_PostalAddress   = 0x4a,
+	GN_PHONEBOOK_ENTRY_ExtendedAddress = 0x4b,
+	GN_PHONEBOOK_ENTRY_Street          = 0x4c,
+	GN_PHONEBOOK_ENTRY_City            = 0x4d,
+	GN_PHONEBOOK_ENTRY_StateProvince   = 0x4e,
+	GN_PHONEBOOK_ENTRY_ZipCode         = 0x4f,
+	GN_PHONEBOOK_ENTRY_Country         = 0x50,
+	GN_PHONEBOOK_ENTRY_FormalName      = 0x52,
+	GN_PHONEBOOK_ENTRY_JobTitle        = 0x54,
+	GN_PHONEBOOK_ENTRY_Company         = 0x55,
+	GN_PHONEBOOK_ENTRY_Nickname        = 0x56,
+	GN_PHONEBOOK_ENTRY_Birthday        = 0x57,
 } gn_phonebook_entry_type;
 
 typedef enum {
