@@ -728,6 +728,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 		memcpy(data->raw_sms->time, message + 13, 7);
 		break;
 	case 0x02: /* submit, templates */
+		data->raw_sms->dcs = message[6];
 		if (data->raw_sms->memory_type == 5) {
 			dprintf("Type: TextTemplate\n");
 			data->raw_sms->type = GN_SMS_MT_TextTemplate;
