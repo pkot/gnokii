@@ -545,8 +545,8 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
  *   <mem2> - memory to which writing and sending operations are made
  *   <mem3> - memory to which received SMs are preferred to be stored
  *
- * To avoid confusing the user by changing <mem3> we set it to the current
- * setting.
+ * According to ETSI TS 127 005 V6.0.1 (2005-01) section 3.2.2, second and
+ * third parameter are optional, so we set only <mem1> to be more compatible.
  */
 gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 {
@@ -560,7 +560,7 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 			return GN_ERR_INVALIDMEMORYTYPE;
 		gn_data_clear(&data);
 		sprintf(req, "AT+CPMS=\"%s\"\r", memorynames[mt]);
-		ret = sm_message_send(23, GN_OP_Init, req, state);
+		ret = sm_message_send(13, GN_OP_Init, req, state);
 		if (ret == GN_ERR_NONE)
 			ret = sm_block_no_retry(GN_OP_Init, &data, state);
 		if (ret == GN_ERR_NONE)
