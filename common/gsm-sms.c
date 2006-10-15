@@ -1333,6 +1333,9 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 	gn_sms_user_data ud[GN_SMS_PART_MAX_NUMBER];
 	gn_error error = GN_ERR_NONE;
 
+	/* count -- number of SMS to be sent
+	 * total -- total number of octets to be sent
+	 */
 	sms = *data->sms;
 
 	/* If there's no concat header we need to add one */
@@ -1376,9 +1379,11 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 		switch (data->sms->dcs.u.general.alphabet) {
 		case GN_SMS_DCS_DefaultAlphabet:
 			start += copied;
-			copied = (ud[0].length - start) % ((MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7);
-			if (copied == 0)
-				copied = ((MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7);
+			if (ud[0].length - start >= (MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7) {
+				copied = (MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7;
+			} else {
+				copied = (ud[0].length - start) % ((MAX_SMS_PART - (data->sms->udh.length+1)) * 8 / 7);
+			}
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
 			data->sms->user_data[0].type = ud[0].type;
 			data->sms->user_data[0].length = copied;
@@ -1393,9 +1398,9 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 				copied = copied / 2;
 				if (copied < (MAX_SMS_PART - (data->sms->udh.length+1)) / 2)
 					copied = (MAX_SMS_PART - (data->sms->udh.length+1)) / 2;
-
 			}
-			dprintf("%d\n", copied);
+			if (copied % 2)
+				copied--;
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
 			data->sms->user_data[0].type = ud[0].type;
 			data->sms->user_data[0].length = copied;

@@ -17,6 +17,10 @@
       platforms           (Magnus Henoch, Petr Hruska, Kuba Tyszko)
     o fix overflow when printing SMS date               (Pawel Kot)
     o add new phonebook entry types                     (Pawel Kot)
+    o for concatenated messages send the smallest part at the end
+                                                        (Pawel Kot)
+    o for concatenated unicode messages try not to split character
+      across multiple parts                             (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
