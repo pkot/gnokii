@@ -1493,7 +1493,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	at_line_buffer buf;
 	gn_error ret = GN_ERR_NONE;
 	unsigned int sms_len, l, offset = 0;
-	char *tmp;
+	unsigned char *tmp;
 	gn_error error;
  	at_driver_instance *drvinst = AT_DRVINST(state);
 
@@ -1551,7 +1551,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	data->raw_sms->pid                 = tmp[offset + 1];
 	data->raw_sms->dcs                 = tmp[offset + 2];
 	memcpy(data->raw_sms->smsc_time, tmp + offset + 3, 7);
-	data->raw_sms->length              = tmp[offset + 10] & 0x00ff;
+	data->raw_sms->length              = tmp[offset + 10];
 	if (sms_len - offset - 11 > 1000) {
 		dprintf("Phone gave as poisonous (too short?) reply %s, either phone went crazy or communication went out of sync\n", buf.line3);
 		ret = GN_ERR_INTERNALERROR;

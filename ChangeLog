@@ -37,6 +37,8 @@
     o fix problem for the devices that accept CPMS only with two
       memory types -- current implementation made them not work
       with gnokii                        (Daniele Forsi, Pawel Kot)
+    o read PDU data a unsigned chars in ReplyGetSMS() else values
+      would be sign extended when >127              (Daniele Forsi)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
