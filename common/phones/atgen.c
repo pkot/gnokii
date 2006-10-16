@@ -1532,9 +1532,10 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	}
 
 	data->raw_sms->type                = (tmp[offset] & 0x03) << 1;
-	data->raw_sms->udh_indicator       = tmp[offset];
-	data->raw_sms->more_messages       = tmp[offset];
-	data->raw_sms->report_status       = tmp[offset];
+	data->raw_sms->more_messages       = (tmp[offset] >> 2) & 1;
+	data->raw_sms->reply_via_same_smsc = (tmp[offset] >> 3) & 1;
+	data->raw_sms->udh_indicator       = (tmp[offset] >> 4) & 1;
+	data->raw_sms->report              = (tmp[offset] >> 5) & 1;
 	l = (tmp[offset + 1] % 2) ? tmp[offset + 1] + 1 : tmp[offset + 1] ;
 	l = l / 2 + 2;
 	if (l + offset + 11 > sms_len || l > GN_SMS_NUMBER_MAX_LENGTH) {
@@ -1544,9 +1545,8 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	}
 	memcpy(data->raw_sms->remote_number, tmp + offset + 1, l);
 	offset += l;
-	data->raw_sms->reply_via_same_smsc = 0;
 	data->raw_sms->reject_duplicates   = 0;
-	data->raw_sms->report              = 0;
+	data->raw_sms->report_status       = 0;
 	data->raw_sms->reference           = 0;
 	data->raw_sms->pid                 = tmp[offset + 1];
 	data->raw_sms->dcs                 = tmp[offset + 2];
