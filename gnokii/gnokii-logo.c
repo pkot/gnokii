@@ -94,7 +94,7 @@ int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *stat
 	switch (type = set_bitmap_type(optarg)) {
 	case GN_BMP_OperatorLogo:   fprintf(stderr, _("Sending operator logo.\n")); break;
 	case GN_BMP_CallerLogo:     fprintf(stderr, _("Sending caller line identification logo.\n")); break;
-	case GN_BMP_PictureMessage: fprintf(stderr,_("Sending Multipart Message: Picture Message.\n")); break;
+	case GN_BMP_PictureMessage: fprintf(stderr, _("Sending Multipart Message: Picture Message.\n")); break;
 	case GN_BMP_EMSPicture:     fprintf(stderr, _("Sending EMS-compliant Picture Message.\n")); break;
 	case GN_BMP_EMSAnimation:   fprintf(stderr, _("Sending EMS-compliant Animation.\n")); break;
 	default: 	            fprintf(stderr, _("You should specify what kind of logo to send!\n")); return -1;
@@ -116,7 +116,7 @@ int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *stat
 	}
 
 	/* If we are sending op logo we can rewrite network code. */
-	if ((sms.user_data[0].u.bitmap.type == GN_BMP_OperatorLogo) && (argc > optind + 1)) {
+	if ((sms.user_data[0].u.bitmap.type == GN_BMP_OperatorLogo) && (argc > optind + 2)) {
 		/*
 		 * The fourth argument, if present, is the Network code of the operator.
 		 * Network code is in this format: "xxx yy".
@@ -333,26 +333,26 @@ int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		if (argc > optind) strncpy(bitmap.text, argv[optind], sizeof(bitmap.text) - 1);
 		break;
 	case GN_BMP_OperatorLogo:
-		error = (argc < optind + 1) ? gn_bmp_null(&bitmap, phone) : ReadBitmapFileDialog(argv[optind], &bitmap, phone);
+		error = (argc > optind) ? gn_bmp_null(&bitmap, phone) : ReadBitmapFileDialog(argv[optind], &bitmap, phone);
 		if (error != GN_ERR_NONE)
 			return error;
 			
 		memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
-		if (argc < optind + 2)
-			if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE)
-				strncpy(bitmap.netcode, networkinfo.network_code, sizeof(bitmap.netcode) - 1);
-
+		/* FIXME: ugly as hell */
 		if (!strncmp(state->driver.phone.models, "6510", 4))
 			gn_bmp_resize(&bitmap, GN_BMP_NewOperatorLogo, phone);
 		else
 			gn_bmp_resize(&bitmap, GN_BMP_OperatorLogo, phone);
 
-		if (argc == optind + 2) {
+		if (argc > optind + 1) {
 			strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
 			if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
 				fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 				return GN_ERR_UNKNOWN;
 			}
+		} else {
+			if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE)
+				strncpy(bitmap.netcode, networkinfo.network_code, sizeof(bitmap.netcode) - 1);
 		}
 		break;
 	case GN_BMP_StartupLogo:

@@ -29,6 +29,8 @@
                                                         (Pawel Kot)
     o print phonebook entry number in case when there's no
       subentry                                        (Petr Hruska)
+    o fix logo options segfaults                        (Pawel Kot)
+    o exit gnokii after --viewlogo or --listnetworks    (Pawel Kot)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
