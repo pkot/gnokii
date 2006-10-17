@@ -53,15 +53,15 @@ void logo_usage(FILE *f)
 {
 	fprintf(f, _("Logo options:\n"
 		     "          --sendlogo {caller|op|picture} destination logofile\n"
-		     "                 [network code]\n"
-		     "          --setlogo op [logofile] [network code]\n"
+		     "                 [network_code]\n"
+		     "          --setlogo op [logofile [network_code]]\n"
 		     "          --setlogo startup [logofile]\n"
-		     "          --setlogo caller [logofile] [caller group number] [group name]\n"
+		     "          --setlogo caller [logofile [caller_group_number [group_name]]]\n"
 		     "          --setlogo {dealer|text} [text]\n"
-		     "          --getlogo op [logofile] [network code]\n"
-		     "          --getlogo startup [logofile] [network code]\n"
-		     "          --getlogo caller [caller group number] [logofile]\n"
-		     "                 [network code]\n"
+		     "          --getlogo op [logofile [network_code]]\n"
+		     "          --getlogo startup [logofile [network_code]]\n"
+		     "          --getlogo caller [caller_group_number [logofile\n"
+		     "                 [network code]]]\n"
 		     "          --getlogo {dealer|text}\n"
 		     "          --viewlogo logofile\n"
 		     ));
@@ -333,7 +333,7 @@ int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		if (argc > optind) strncpy(bitmap.text, argv[optind], sizeof(bitmap.text) - 1);
 		break;
 	case GN_BMP_OperatorLogo:
-		error = (argc > optind) ? gn_bmp_null(&bitmap, phone) : ReadBitmapFileDialog(argv[optind], &bitmap, phone);
+		error = (argc > optind) ? ReadBitmapFileDialog(argv[optind], &bitmap, phone) : gn_bmp_null(&bitmap, phone);
 		if (error != GN_ERR_NONE)
 			return error;
 			
