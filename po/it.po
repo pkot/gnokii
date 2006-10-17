@@ -7,7 +7,7 @@ msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
 "POT-Creation-Date: 2006-10-17 21:18+0200\n"
-"PO-Revision-Date: 2006-08-14 16:42+0200\n"
+"PO-Revision-Date: 2006-10-17 21:42+0200\n"
 "Last-Translator: Daniele Forsi <daniele@forsi.it>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
 "MIME-Version: 1.0\n"
@@ -2106,9 +2106,9 @@ msgid "Business number: "
 msgstr "Numero dell'ufficio: "
 
 #: gnokii/gnokii-phonebook.c:234
-#, fuzzy, c-format
+#, c-format
 msgid "General number: "
-msgstr "Numero Centro Messaggi"
+msgstr "Numero generale: "
 
 #: gnokii/gnokii-phonebook.c:237 gnokii/gnokii-phonebook.c:248
 #, c-format
@@ -2534,18 +2534,18 @@ msgid ""
 "          --identify\n"
 "          --getlocksinfo\n"
 msgstr ""
+"Opzioni sicurezza:\n"
+"          --identify\n"
+"          --getlocksinfo\n"
 
 #: gnokii/gnokii-security.c:60
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "          --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 "          --getsecuritycodestatus\n"
 "          --getsecuritycode\n"
 "          --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 msgstr ""
-"Opzioni sicurezza:\n"
-"          --identify\n"
-"          --getlocksinfo\n"
 "          --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 "          --getsecuritycodestatus\n"
 "          --getsecuritycode\n"
@@ -4043,27 +4043,27 @@ msgstr ""
 "Verificare che sia presente la sezione adatta in gnokiirc.\n"
 
 #: smsd/lowlevel.c:131 smsd/lowlevel.c:144
-#, fuzzy, c-format
+#, c-format
 msgid "%s\n"
-msgstr "  %s\n"
+msgstr "%s\n"
 
 #: smsd/lowlevel.c:378
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\n"
 "Restarting connection."
 msgstr ""
 "GN_OP_GetSMSFolderStatus alla linea %d nel file %s ritorna l'errore %d.\n"
-"Attivata la modalità stupida."
+"Riavvio della connessione."
 
 #: smsd/lowlevel.c:402
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "GN_OP_GetSMSStatus at line %d in file %s returns error %d\n"
 "Restarting connection."
 msgstr ""
 "GN_OP_GetSMSStatus alla linea %d nel file %s ritorna l'errore %d.\n"
-"Attivata la modalità stupida."
+"Riavvio della connessione."
 
 #: smsd/lowlevel.c:413 xgnokii/xgnokii_lowlevel.c:1302
 #, c-format
@@ -4175,6 +4175,11 @@ msgid ""
 "\n"
 "Exiting."
 msgstr ""
+"L'inserimento del messaggio da %s non è riuscito.\n"
+"Data: %02d-%02d-%02d %02d:%02d:%02d+%02d\n"
+"Testo: %s\n"
+"\n"
+"Uscita."
 
 #: smsd/smsd.c:456
 #, c-format
