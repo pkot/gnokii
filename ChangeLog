@@ -60,6 +60,9 @@
                                                  (Waterser Forrest)
  * translation updates
     o update Italian translation                    (Daniele Forsi)
+ * gnokiid updates
+    o set locale according to the environment variable LC_ALL just
+      like the other programs                       (Daniele Forsi)
 
 0.6.14
 ======
