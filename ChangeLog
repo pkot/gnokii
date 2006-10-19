@@ -21,6 +21,8 @@
                                                         (Pawel Kot)
     o for concatenated unicode messages try not to split character
       across multiple parts                             (Pawel Kot)
+    o change gn_vm_initialise() because gn_cfg_phone_load() now
+      returns GN_ERR_NONE on success, instead of -1 (Daniele Forsi)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
@@ -63,6 +65,8 @@
  * gnokiid updates
     o set locale according to the environment variable LC_ALL just
       like the other programs                       (Daniele Forsi)
+    o gn_cfg_phone_load() now returns GN_ERR_NONE on success,
+      instead of -1                                 (Daniele Forsi)
 
 0.6.14
 ======

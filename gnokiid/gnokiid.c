@@ -105,7 +105,7 @@ int main(int argc, char *argv[])
 	if (!BinDir) BinDir = gn_lib_cfg_get("gnokiid", "bindir");
 	if (!BinDir) BinDir = "/usr/local/sbin";
 
-	if (!gn_cfg_phone_load("", &temp_state)) exit(-1);
+	if (gn_cfg_phone_load("", &temp_state) != GN_ERR_NONE) exit(-1);
 
 	/* Handle command line arguments. */
 	if (argc >= 2 && strcmp(argv[1], "--help") == 0) {

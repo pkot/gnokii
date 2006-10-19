@@ -139,7 +139,7 @@ bool gn_vm_initialise(const char *iname, const char *bindir, bool debug_mode, bo
 
 	if (GSMInit) {
 		dprintf("Initialising GSM\n");
-		if (!gn_cfg_phone_load(iname, sm)) return false;
+		if (gn_cfg_phone_load(iname, sm) != GN_ERR_NONE) return false;
 		if ((VM_GSMInitialise(sm) != GN_ERR_NONE)) {
 			fprintf (stderr, _("gn_vm_initialise - VM_GSMInitialise failed!\n"));
 			return (false);
