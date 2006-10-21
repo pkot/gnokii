@@ -239,7 +239,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 						bitmap.netcode, gn_network_name_get(bitmap.netcode));
 				if (argc == optind + 2) {
 					strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
-					if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
+					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
 					}
@@ -251,7 +251,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				fprintf(stdout, _("Startup logo got successfully\n"));
 				if (argc == optind + 2) {
 					strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
-					if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
+					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
 					}
@@ -266,7 +266,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 					bitmap.text, get_ringtone_name(bitmap.ringtone, data, state), bitmap.ringtone);
 				if (argc == optind + 3) {
 					strncpy(bitmap.netcode, argv[optind + 2], sizeof(bitmap.netcode) - 1);
-					if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
+					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
 					}
@@ -346,7 +346,7 @@ int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 
 		if (argc > optind + 1) {
 			strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
-			if (!strcmp(gn_network_name_get(bitmap.netcode), "unknown")) {
+			if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 				fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 				return GN_ERR_UNKNOWN;
 			}
