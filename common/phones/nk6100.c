@@ -1710,8 +1710,14 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 
 	/* sms status failed */
 	case 0x38:
-		dprintf("Message: SMS Status error, probably not authorized by PIN\n");
-		return GN_ERR_INTERNALERROR;
+		switch (message[4]) {
+		case 0x06: /* Insert SIM card */
+			return GN_ERR_NOTREADY;
+		case 0x0c: /* waiting for PIN */
+			return GN_ERR_CODEREQUIRED;
+		default:
+			return GN_ERR_UNHANDLEDFRAME;
+		}
 
 	/* unknown */
 	default:

@@ -692,7 +692,9 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                            0x0c: waiting for PIN
     s SMS status request    { 0x0036, 0x64 }
     r SMS status            { 0x0037,?,?,?,?,?,?,msgnumber,unread }
-    r SMS status error      { 0x0038 }
+    r SMS status error      { 0x0038, errcode }
+                            where errcode: 0x06: SIM card not ready
+                                           0x0c: waiting for PIN
 0x3f: WAP 
     s Enable WAP frames     { 0x0000}
     r Enable WAP frames     { 0x0002, 0x01}
