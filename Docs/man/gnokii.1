@@ -171,20 +171,30 @@ keeps reading incoming SMS and saves them into the mailbox.
 
 .SS LOGOS
 .TP 
-.BR "\-\-sendlogo {\fIcaller\fP|\fIop\fP} \fIdestination\fP \fIlogofile\fP [\fInetwork_code\fP]"
+.BR "\-\-sendlogo {caller|op|picture} \fIdestination\fP \fIlogofile\fP [\fInetwork_code\fP]"
 send the \fIlogofile\fR to \fIdestination\fR as operator or CLI logo.
 .TP 
-.BR "\-\-setlogo \fIlogofile\fP [\fInetwork_code\fP]"
+.BR "\-\-setlogo op [\fIlogofile\fP [\fInetwork_code\fP]]"
+.TP
+.BR "\-\-setlogo startup [\fIlogofile\fP]
 .TP 
-.BR "\-\-setlogo \fIlogofile\fP [\fIcaller_group_number\fP] [\fIgroup_name\fP]"
-.TP 
-.BR "\-\-setlogo \fItext\fP [\fIstartup_text\fP]"
-.TP 
-.BR "\-\-setlogo \fIdealer\fP [\fIdealer_startup_text\fP]"
-set caller, startup or operator logo.
-.TP 
-.BR "\-\-getlogo \fIlogofile\fP {\fIcaller\fP|\fIop\fP|\fIstartup\fP} [\fIcaller_group_number\fP]"
-get caller, startup or operator logo.
+.BR "\-\-setlogo caller [\fIlogofile\fP [\fIcaller_group_number\fP [\fIgroup_name\fP]]]"
+set or clear operator, startup or caller logo.
+.TP
+.BR "\-\-setlogo {dealer|text} [\fItext\fP]"
+set or clear welcome note.
+.TP
+.BR "\-\-getlogo op [\fIlogofile\fP [\fInetwork_code\fP]]"
+.TP
+.BR "\-\-getlogo startup [\fIlogofile\fP [\fInetwork_code\fP]]"
+.TP
+.BR "\-\-getlogo caller [\fIcaller_group_number\fP [\fIlogofile\fP [\fInetwork code\fP]]]"
+get operator, startup or caller logo.
+.TP
+.BR "\-\-getlogo {dealer|text}"
+get welcome note.
+.TP
+.BR "\-\-viewlogo \fIlogofile\fP"
 
 .SS RINGTONES
 .TP 
