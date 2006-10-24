@@ -23,6 +23,8 @@
       across multiple parts                             (Pawel Kot)
     o change gn_vm_initialise() because gn_cfg_phone_load() returns
       GN_ERR_NONE on success, instead of true       (Daniele Forsi)
+    o use sizeof(wchar_t) instead of hardcoded 4 for the size of
+      exactly one output wchar_t              (Alex Villacís Lasso)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
