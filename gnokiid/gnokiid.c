@@ -42,6 +42,12 @@
 #include <sys/time.h>
 #include <string.h>
 
+#include "config.h"
+
+#ifdef ENABLE_NLS
+#  include <locale.h>
+#endif
+
 #include "misc.h"
 #include "gnokii-internal.h"
 
