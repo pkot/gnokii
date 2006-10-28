@@ -25,6 +25,9 @@
       GN_ERR_NONE on success, instead of true       (Daniele Forsi)
     o use sizeof(wchar_t) instead of hardcoded 4 for the size of
       exactly one output wchar_t              (Alex Villacís Lasso)
+    o let gn_get_connectiontype() and
+      gn_lib_get_supported_connection() know which connection types
+      have been actually compiled in libgnokii      (Daniele Forsi)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

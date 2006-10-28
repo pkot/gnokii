@@ -452,13 +452,19 @@ static struct { gn_connection_type ct; const char *str; } connectiontypes[] = {
 	{ GN_CT_Serial,     "serial" },
 	{ GN_CT_DAU9P,      "dau9p" },
 	{ GN_CT_DLR3P,      "dlr3p" },
-	{ GN_CT_Infrared,   "infrared" },
 	{ GN_CT_M2BUS,      "m2bus" },
+#ifdef HAVE_IRDA
+	{ GN_CT_Infrared,   "infrared" },
 	{ GN_CT_Irda,       "irda" },
+#endif
+#ifdef HAVE_BLUETOOTH
 	{ GN_CT_Bluetooth,  "bluetooth" },
+#endif
 	{ GN_CT_DLR3P,      "dku5" },
 	{ GN_CT_DKU2,       "dku2" },
+#ifdef HAVE_LIBUSB
 	{ GN_CT_DKU2LIBUSB, "dku2libusb" },
+#endif
 #ifndef WIN32
 	{ GN_CT_TCP,        "tcp" },
 #endif
