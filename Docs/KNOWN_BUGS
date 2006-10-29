@@ -16,6 +16,8 @@ leads to the damage. It seems that this behaviour affects Nokia Series 40
 v1. See http://www.mobile-review.com/forum2/showthread.php?t=10266 for more
 complete list. these phones are currently disabled in gnokii when using FBUS
 over IrDA communication.
+It seems to happen only when using xgnokii. If you don't intend to do it you
+may try do remove/disable the blacklisting code in nk6510.c driver.
 
 3. Nokia 6310(i) doesn't work well over the DRL3P cable. After few
 successfull connections it stops working. When you power the phone off and
