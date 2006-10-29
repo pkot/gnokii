@@ -4,6 +4,13 @@
 
 * Notes *
 
+The recommended way to use DKU2 cable is to use included in gnokii userspace
+libusb driver. Ensure that you have libusb on your system (if you compile
+gnokii you would need development libusb packages) and use
+connection=dku2libusb setting in your gnokiirc file.
+
+If for some reason you want to use Linux kernel driver read on.
+
 The DKU2 cable, supplied for example with the nokia 7600/6230, is a
 straight-through lead which connects the phone to a USB port.  By default,
 the usb device exposes two endpoints which provide AT-like modem emulation. 
@@ -56,4 +63,4 @@ the OBEX endpoint which leads OBEX communication not to work.
 No warranty, you are on your own. If you have questions or remarks,
 please let me know on my email address mentioned below.
 
-Author: Chris Kemp (ck231@cam.ac.uk)
+Author: Chris Kemp (chris at madpanda dot org)
