@@ -121,7 +121,8 @@ Thank you to, in no particular order...
 *  Jan Kratochvil for various patches.
 
 *  BORBELY Zoltan for patches for 6100 series for the new structure, many
-   usefull hints and discussions and real help in approaching 0.4.0 release
+   useful hints and discussions and real help in approaching 0.4.0 release and
+   instant help for gnokii development and of course for gnapplet.
 
 *  Przemek ¦widerski for sample hscsd chat script.
 
@@ -154,8 +155,8 @@ Thank you to, in no particular order...
 
 *  Siegfried Schloissnig for Mac OSX bluetooth code.
 
-*  Olivier Kaloudoff for his fixes and valuable efforts, without him
-   the Mac OSX bluetooth support wouldn't have been integrated.
+*  Olivier Kaloudoff for his fixes and valuable efforts and French translation
+   Without him Mac OSX bluetooth support wouldn't have been integrated.
 
 *  Torsten Kunkelfor usage reports and catching our bugs.
 
@@ -163,27 +164,38 @@ Thank you to, in no particular order...
    list of country and operator codes and names.
 
 *  Ron Yorston for a bunch of the paches and intresting discussions on
-   gnokii-ml
+   gnokii-ml.
 
-*  Reiner Steib for useful patches, bug reports and other hints
+*  Reiner Steib for useful patches, bug reports and other hints.
 
-*  Daniel Koæ for Polish translation
+*  Daniel Koæ for Polish translation.
 
-*  Phil Ashby for Windows IrDA support
+*  Phil Ashby for Windows IrDA support.
 
-*  Helge Deller for forcing Pawel to do the right things
+*  Helge Deller for forcing Pawel to do the right things.
 
-*  Hugo Hass for work on AT driver
+*  Hugo Hass for work on AT driver.
 
-*  Martin Goldhahn for work on vCalendar support and other pieces of code
+*  Martin Goldhahn for work on vCalendar support and other pieces of code.
 
 *  Bastien Nocera for changes to the cfgreader, variuos other patches and
-   work on integrating libgnokii with gnome-phone-manager
+   work on integrating libgnokii with gnome-phone-manager.
 
 *  Alex Kanavin for OBEX USB DKU2 support and patient help for Pawel while
-   porting it to gnokii
+   porting it to gnokii.
 
-*  Everyone chatting with us on IRC #gnokii at freenode.net
+*  Daniele Forsi for active gnokii development.
+
+*  Petr Hruska for hist contribution to AT driver.
+
+*  Jari Turkia for trying to keep win32 port alive (with success!).
+
+*  Daniel Gollub for various patches, fixes and hints and integrating gnokii
+   with opensync (http://opensync.org/).
+
+*  Matthias Jahn for keeping Debian and Ubuntu gnokii repository up to date.
+
+*  Everyone chatting with us on IRC #gnokii at freenode.net.
 
 *  Lucy for making pizza and putting up with Hugh disappearing to
    work on this.  Rachael for new parent induced insomnia...
