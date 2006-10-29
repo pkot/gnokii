@@ -6,34 +6,33 @@ gnokii part		maintainer
 =============================================================================
 gnokii			Pawel Kot
 gnokiid			BORBELY Zoltan
-xgnokii			Jan Derfinak, Markus Plail
+xgnokii			Jan Derfinak
 smsd			Jan Derfinak
-libgnokii		Pawel Kot
-statemachine		Chris Kemp, BORBELY Zoltan
-libsms			Pawel Kot, Pavel Machek
-bitmaps			Pavel Machek, Pawel Kot
-ringtones		Pavel Machek, Chris Kemp
-2110 driver		Pavel Machek
-3110 driver		Pawel Kot
-6110 driver		BORBELY Zoltan
-6210 driver		Pawel Kot, Markus Plail, BORBELY Zoltan
-6510 driver		Markus Plail, Pawel Kot
-AT driver		Manfred Jonsson, Pavel Machek, Pawel Kot, Ladislav Michl
+libgnokii		Pawel Kot, Daniele Forsi
+statemachine		BORBELY Zoltan, Pawel Kot
+libsms			Pawel Kot
+bitmaps		Pawel Kot
+ringtones		Pawel Kot
+2110 driver		no longer maintained
+3110 driver		no longer maintained
+6110 driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot
+6210 driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot
+6510 driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot
+AT driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot
 gnapplet driver		BORBELY Zoltan
-link layer		Chris Kemp, BORBELY Zoltan, Ladislav Michl
-device layer		Manfred Jonsson, Chris Kemp, BORBELY Zoltan
-documentation		Pawel Kot
+link layer		BORBELY Zoltan, Pawel Kot
+device layer		BORBELY Zoltan, Pawel Kot
+documentation		Pawel Kot, Daniele Forsi
 autoconf		Pawel Kot, BORBELY Zoltan
-win32 port		Marcus Godehardt, Ladislav Michl
+win32 port		Jari Turkia
+dku2 kernel driver	Chris Kemp
 
 maintainer		e-mail address
 =============================================================================
 BORBELY Zoltan		bozo (at) andrews (dot) hu
-Chris Kemp		ck231 (at) cam (dot) ac (dot) uk
+Chris Kemp		chris (at) madpanda (dot) uk
 Jan Derfinak		ja (at) mail (dot) upjs (dot) sk
-Manfred Jonsson		manfred.jonsson (at) gmx (dot) de
-Markus Plail		plail (at) web (dot) de
-Pavel Machek		pavel (at) suse (dot) cz
-Pawel Kot		pkot (at) linuxnews (dot) pl
-Ladislav Michl		ladis (at) linux-mips (dot) org
-Marcus Godehardt	godehardt (at) teleaction (dot)com
+Pawel Kot		gnokii (at) gmail (dot) com
+Jari Turkia		jmjt (at) lut (dot) fi
+Daniele Forsi		daniele (at) forsi (dot) it
+gnokii-ml		gnokii-users (at) nongnu (dot) org
