@@ -1057,45 +1057,48 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 		}
 	case NK7110_SUBSMS_READ_OK: /* GetSMS OK, 0x08 */
 		dprintf("Trying to get message # %i from the folder # %i\n", (message[6] << 8) | message[7], message[5]);
-		if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+		if (!data->raw_sms)
+			return GN_ERR_INTERNALERROR;
 
 		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
-		T = data->raw_sms->type         = message[8];
-		data->raw_sms->number           = (message[6] << 8) | message[7];
-		data->raw_sms->memory_type       = message[5];
-		data->raw_sms->status           = message[4];
+		T = data->raw_sms->type    = message[8];
+		data->raw_sms->number      = (message[6] << 8) | message[7];
+		data->raw_sms->memory_type = message[5];
+		data->raw_sms->status      = message[4];
 
-		data->raw_sms->more_messages     = 0;
+		data->raw_sms->more_messages       = 0;
 		data->raw_sms->reply_via_same_smsc = message[21];
-		data->raw_sms->reject_duplicates = 0;
-		data->raw_sms->report           = 0;
+		data->raw_sms->reject_duplicates   = 0;
+		data->raw_sms->report              = 0;
 
-		data->raw_sms->reference        = 0;
-		data->raw_sms->pid              = 0;
-		data->raw_sms->report_status     = 0;
+		data->raw_sms->reference     = 0;
+		data->raw_sms->pid           = 0;
+		data->raw_sms->report_status = 0;
 
 		if (T != GN_SMS_MT_Submit) {
-			memcpy(data->raw_sms->smsc_time,      message + get_data(T, 37, 38, 36, 34), 7);
-			memcpy(data->raw_sms->message_center, message + 9,  12);
-			memcpy(data->raw_sms->remote_number,  message + get_data(T, 25, 26, 24, 22), 12);
+			memcpy(data->raw_sms->smsc_time, message + get_data(T, 37, 38, 36, 34), 7);
+			memcpy(data->raw_sms->message_center, message + 9, 12);
+			memcpy(data->raw_sms->remote_number, message + get_data(T, 25, 26, 24, 22), 12);
 		}
-		if (T == GN_SMS_MT_DeliveryReport) memcpy(data->raw_sms->time, message + 43, 7);
+		if (T == GN_SMS_MT_DeliveryReport) 
+			memcpy(data->raw_sms->time, message + 43, 7);
 
-		data->raw_sms->dcs              = message[23];
+		data->raw_sms->dcs = message[23];
 		/* This is ugly hack. But the picture message format in 6210
 		 * is the real pain in the ass. */
 		if (T == GN_SMS_MT_Picture && (message[47] == 0x48) && (message[48] == 0x1c))
 			/* 47 (User Data offset) + 256 (72 * 28 / 8 + 4) = 303 */
 			offset = 303;
-		data->raw_sms->length           = message[get_data(T, 24, 25, 0, offset)];
-		if (T == GN_SMS_MT_Picture) data->raw_sms->length += 256;
-		data->raw_sms->udh_indicator     = message[get_data(T, 21, 23, 0, 21)];
-		memcpy(data->raw_sms->user_data,      message + get_data(T, 44, 45, 0, 47), data->raw_sms->length);
+		data->raw_sms->length = message[get_data(T, 24, 25, 0, offset)];
+		if (T == GN_SMS_MT_Picture)
+			data->raw_sms->length += 256;
+		data->raw_sms->udh_indicator = message[get_data(T, 21, 23, 0, 21)];
+		memcpy(data->raw_sms->user_data, message + get_data(T, 44, 45, 0, 47), data->raw_sms->length);
 
 		data->raw_sms->user_data_length = length - get_data(T, 44, 45, 0, 47);
 
 		data->raw_sms->validity_indicator = 0;
-		memcpy(data->raw_sms->validity,      message, 0);
+		memcpy(data->raw_sms->validity, message, 0);
 		break;
 	case NK7110_SUBSMS_READ_FAIL: /* GetSMS FAIL, 0x09 */
 		dprintf("SMS reading failed:\n");
