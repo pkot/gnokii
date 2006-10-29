@@ -11,7 +11,7 @@ should work well with any sort of cable.
 - Nokia protocol is not followed. We use hacks instead of collision
   detection protocol nokia suggests.
 
-- Many. Look at code, needs cleanup, etc. Contact pavel@ucw.cz
+- Many. Look at code, needs cleanup, etc. Contact pavel at ucw dot cz
   if you want to help.
 
 - When periodically fetching messages, it gets to state where protocol
