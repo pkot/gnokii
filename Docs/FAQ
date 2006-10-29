@@ -310,3 +310,12 @@ A. Place the new section in your config file (or update existing section in
 
    [logging]
    debug = on
+
+-------------------------------------------------------------------------------
+Q. Gnokii does not work with my Fedora system with planetccrma patches.
+   Could you please fix it?
+
+A. There is nothing wrong with gnokii. Please contact people from
+   planetccrma responsible for the kernel patches and ask them to fix the
+   problem.
+
