@@ -85,6 +85,7 @@ The current code is able to:
     o missing attributes
     o no group handling
     o missing SIM memory handling
+ * gnapplet seems to not work on SymbianOS v3 devices (eg. Nokia 5500)
 
 * TODO *
 
