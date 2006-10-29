@@ -321,7 +321,6 @@ static gn_network networks[] = {
 	{"250 01", "Mobile Telesystems"},
 	{"250 01", "SANTEL"},
 	{"250 01", "Tambov RUS"},
-	{"250 02", "Megafon"},
 	{"250 02", "MegaFon"},
 	{"250 02", "MegaFon Moscow"},
 	{"250 03", "NCC"},
