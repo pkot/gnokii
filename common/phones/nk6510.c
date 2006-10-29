@@ -762,7 +762,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			memcpy(data->raw_sms->user_data, message + 13, data->raw_sms->length);
 			return;
 		case 0x02:
-			dprintf("|Type: Picture\n");
+			dprintf("Type: Picture\n");
 			data->raw_sms->type = GN_SMS_MT_Picture;
 			block = message + 20;
 			memcpy(data->raw_sms->smsc_time, message + 10, 7);
@@ -793,36 +793,23 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			switch (block[2]) {
 			case 0x01:
 				memcpy(data->raw_sms->remote_number,  block + 4, block[3]);
-				/*
-				dprintf("   Setting remote number: length: %i first: %02x\n", block[3], block[4]);
-				*/
 				break;
 			case 0x02:
 				memcpy(data->raw_sms->message_center,  block + 4, block[3]);
-				/*
-				dprintf("   Setting MC number: length: %i first: %02x\n", block[3], block[4]);
-				*/
 				break;
 			default:
-				/*
-				dprintf("Error while parsing numbers!\n");
-				*/
 				break;
 			}
 			break;
 		case 0x80: /* User Data */
 			if ((data->raw_sms->type != GN_SMS_MT_Picture) && (data->raw_sms->type != GN_SMS_MT_PictureTemplate)) { 
 				/* Ignore the found user_data block for pictures */
-				dprintf("block[2]: %02x\n", block[2]);
-				dprintf("block[3]: %02x\n", block[3]);
 				data->raw_sms->length = block[3];
+				data->raw_sms->user_data_length = block[2];
 				memcpy(data->raw_sms->user_data, block + 4, block[2]);
 			}
 			break;
 		case 0x08: /* Time blocks (mainly at the end of submit sent messages */
-			/*
-			dprintf("   Setting time...\n");
-			*/
 			memcpy(data->raw_sms->smsc_time, block + 3, block[2]);
 			break;
 		case 0x84: /* Time blocks (not BCD encoded) */
@@ -838,9 +825,6 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			dprintf("Unknown block of type: %02x!\n", block[0]);
 			break;
 		}
-		/*
-		dprintf("\n");
-		*/
 		block = block + block[1];
 	}
 	return;

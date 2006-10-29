@@ -1532,10 +1532,10 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	}
 
 	data->raw_sms->type                = (tmp[offset] & 0x03) << 1;
-	data->raw_sms->more_messages       = (tmp[offset] >> 2) & 1;
-	data->raw_sms->reply_via_same_smsc = (tmp[offset] >> 3) & 1;
-	data->raw_sms->udh_indicator       = (tmp[offset] >> 4) & 1;
-	data->raw_sms->report              = (tmp[offset] >> 5) & 1;
+	data->raw_sms->more_messages       = tmp[offset];
+	data->raw_sms->reply_via_same_smsc = tmp[offset];
+	data->raw_sms->udh_indicator       = tmp[offset];
+	data->raw_sms->report              = tmp[offset];
 	l = (tmp[offset + 1] % 2) ? tmp[offset + 1] + 1 : tmp[offset + 1] ;
 	l = l / 2 + 2;
 	if (l + offset + 11 > sms_len || l > GN_SMS_NUMBER_MAX_LENGTH) {
@@ -1552,6 +1552,9 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	data->raw_sms->dcs                 = tmp[offset + 2];
 	memcpy(data->raw_sms->smsc_time, tmp + offset + 3, 7);
 	data->raw_sms->length              = tmp[offset + 10];
+	data->raw_sms->user_data_length = data->raw_sms->length;
+	if (data->raw_sms->udh_indicator & 0x40)
+		data->raw_sms->user_data_length -= tmp[offset+11] + 1;
 	if (sms_len - offset - 11 > 1000) {
 		dprintf("Phone gave as poisonous (too short?) reply %s, either phone went crazy or communication went out of sync\n", buf.line3);
 		ret = GN_ERR_INTERNALERROR;

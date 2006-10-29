@@ -684,12 +684,11 @@ static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
 		break;
 	/* Plain text message */
 	default:
-		size = rawsms->length - sms->udh.length;
 		sms_data_decode(rawsms->user_data + sms->udh.length,        /* Skip the UDH */
 				(unsigned char *)&sms->user_data[0].u.text, /* With a plain text message we have only 1 part */
-				rawsms->length,                            /* Length of the decoded text */
-				size,                                      /* Length of the encoded text (in full octets) without UDH */
-				sms->udh.length,                          /* To skip the certain number of bits when unpacking 7bit message */
+				rawsms->length,                             /* Length of the decoded text */
+				rawsms->user_data_length,                   /* Length of the encoded text (in full octets) without UDH */
+				sms->udh.length,                            /* To skip the certain number of bits when unpacking 7bit message */
 				sms->dcs);
 		break;
 	}
