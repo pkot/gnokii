@@ -1,6 +1,6 @@
 GNOKII - A Linux/Unix toolset and driver for the mobile phones
          Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
-         Copyright (C) 2001-2005 Pawe³ Kot
+         Copyright (C) 2001-2006 Pawe³ Kot
 
 This program is free software; you can redistribute it and/or modify it under
 the terms of the GNU General Public License as published by the Free Software
@@ -18,13 +18,13 @@ Place - Suite 330, Boston, MA 02111-1307, USA.
 
 You can contact authors by mail at
 
-hugh@blemings.org                     Pavel.Janik@suse.cz
+hugh at blemings dot org              Pavel at Janik dot cz
 Hugh Blemings                         Mgr. Pavel Janík, SuSE CR, s.r.o.
 PO Box 234                            Pod Pekárnami 338/12
 Belconnen ACT 2616                    190 00 Praha 9
 Australia                             Czech Republic
 
-pkot@bezsensu.pl
+pkot at bezsensu at pl
 Pawe³ Kot
 ul. Dembego 6/45
 02-796 Warsaw
