@@ -80,6 +80,14 @@
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
+ * documentation updates
+    o add spam filters for email addresses              (Pawel Kot)
+    o add libusb information to DKU2 docs               (Pawel Kot)
+    o update MAINTAINTERS, COPYRIGHT, CREDITS files     (Pawel Kot)
+    o add note about gnapplet not working with SymbianV3 OS
+                                                        (Pawel Kot)
+    o update information about irda issue -- seems to be the case
+      only with xgnokii                                 (Pawel Kot)
 
 0.6.14
 ======
