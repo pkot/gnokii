@@ -92,6 +92,7 @@
     o update information about irda issue -- seems to be the case
       only with xgnokii                                 (Pawel Kot)
     o FAQ update                                        (Pawel Kot)
+    o update gnokii and xgnokii manual pages        (Daniele Forsi)
  * xgnokii updates
     o in xgnokii_contacts.c use GN_PHONEBOOK_GROUP_None, not
       literal 5                                     (Daniele Forsi)
