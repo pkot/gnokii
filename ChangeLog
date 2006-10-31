@@ -78,6 +78,8 @@
  * nk6100 driver updates
     o add more specific error codes to GN_OP_GetSMSStatus
       (observed on Nokia 3210|3310|3330)            (Daniele Forsi)
+    o set and compare caller_group with GN_PHONEBOOK_GROUP_None,
+      not literal 5                                 (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)

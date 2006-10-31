@@ -772,7 +772,7 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	*pos++ = numlen;
 	pnok_string_encode(pos, numlen, pe->number);
 	pos += numlen;
-	*pos++ = (pe->caller_group == 5) ? 0xff : pe->caller_group;
+	*pos++ = (pe->caller_group == GN_PHONEBOOK_GROUP_None) ? 0xff : pe->caller_group;
 	if (sm_message_send(pos-req, 0x03, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x03, data, state);
 }
@@ -790,7 +790,7 @@ static gn_error DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 
 	entry.location = data->phonebook_entry->location;
 	entry.memory_type = data->phonebook_entry->memory_type;
-	entry.caller_group = 5;
+	entry.caller_group = GN_PHONEBOOK_GROUP_None;
 
 	return WritePhonebook(&d, state);
 }
