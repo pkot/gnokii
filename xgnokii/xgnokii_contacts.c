@@ -2331,7 +2331,7 @@ static void SaveContacts(void)
 				if (pbEntry->status == E_Deleted) {
 					pbEntry->entry.name[0] = '\0';
 					pbEntry->entry.number[0] = '\0';
-					pbEntry->entry.caller_group = 5;
+					pbEntry->entry.caller_group = GN_PHONEBOOK_GROUP_None;
 				}
 
 				pbEntry->entry.location = i + 1;
@@ -2368,7 +2368,7 @@ static void SaveContacts(void)
 				if (pbEntry->status == E_Deleted) {
 					pbEntry->entry.name[0] = '\0';
 					pbEntry->entry.number[0] = '\0';
-					pbEntry->entry.caller_group = 5;
+					pbEntry->entry.caller_group = GN_PHONEBOOK_GROUP_None;
 				}
 
 				pbEntry->entry.location = i - memoryStatus.MaxME + 1;
@@ -3044,7 +3044,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 		pbEntry->entry.name[0] = '\0';
 		pbEntry->entry.number[0] = '\0';
 		pbEntry->entry.memory_type = GN_MT_ME;
-		pbEntry->entry.caller_group = 5;
+		pbEntry->entry.caller_group = GN_PHONEBOOK_GROUP_None;
 		pbEntry->status = E_Deleted;	/* I must set status to E_Deleted, since I   */
 		/* I want clear empty entries when saving to */
 		/* to phone                                  */
@@ -3066,7 +3066,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 		pbEntry->entry.name[0] = '\0';
 		pbEntry->entry.number[0] = '\0';
 		pbEntry->entry.memory_type = GN_MT_SM;
-		pbEntry->entry.caller_group = 5;
+		pbEntry->entry.caller_group = GN_PHONEBOOK_GROUP_None;
 		pbEntry->status = E_Deleted;
 		pbEntry->entry.subentries_count = 0;
 
