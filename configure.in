@@ -31,6 +31,7 @@ else
 	AC_MSG_RESULT(no)
 fi
 
+AC_GNU_SOURCE
 
 AC_PROG_LEX
 AC_PATH_PROG(RM, rm, no)

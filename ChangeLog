@@ -76,6 +76,7 @@
     o avoid redefining _GNU_SOURCE                      (Pawel Kot)
     o add --disable-libusb and --disable-ical options
                                                 (Michele Noberasco)
+    o add AC_GNU_SOURCE to supress autoconf warnings    (Pawel Kot)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)
