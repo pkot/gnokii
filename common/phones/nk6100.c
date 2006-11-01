@@ -1018,10 +1018,12 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 		switch (message[4]) {
 		case 0x6f: /* Insert SIM card */
 			return GN_ERR_NOTREADY;
+		case 0x74:
+			return GN_ERR_INVALIDLOCATION;
+		case 0x7d:
+			return GN_ERR_INVALIDMEMORYTYPE;
 		case 0x8d: /* waiting for PIN */
 			return GN_ERR_CODEREQUIRED;
-		case 0x7d:
-			return GN_ERR_INVALIDLOCATION;
 		default:
 			return GN_ERR_UNHANDLEDFRAME;
 		}

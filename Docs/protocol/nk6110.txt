@@ -202,8 +202,10 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r Set speed dial OK     { 0x001a }
     r Set speed dial error  { 0x001b, errtype }
                             where errtype: 0x6f: SIM card not ready
-                                           0x7d: invalid location
+                                           0x74: invalid location
+                                           0x7d: invalid memory type
                                            0x8d: waiting for PIN
+      Note: if mem.type == ME on Nokia 3210 errtype is 0x7d but on Nokia 3330 it is 0x74
 0x04: Phone Status
     s Phone status          { 0x0001 }
     r Phone status          { 0x0002, mode, signal str, ???, pwr, batt.level }

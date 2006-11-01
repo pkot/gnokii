@@ -84,6 +84,10 @@
       not literal 5                                 (Daniele Forsi)
     o check if SMSC index is in range 1..255 in GetSMSCenter() and
       SetSMSCenter()                                (Daniele Forsi)
+    o handle GN_ERR_INVALIDLOCATION and GN_ERR_INVALIDMEMORYTYPE
+      errors for SetSpeedDial() in IncomingPhonebook() because
+      Nokia 3210 differentiates between the two (Nokia 3330 returns
+      always the same error code)                   (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
