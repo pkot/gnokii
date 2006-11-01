@@ -1647,6 +1647,9 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 		data->raw_sms->dcs		= getdata(22, 21, 23);
 		data->raw_sms->length		= getdata(23, 22, 24);
 		data->raw_sms->udh_indicator	= message[20];
+		data->raw_sms->user_data_length = data->raw_sms->length;
+		if (data->raw_sms->udh_indicator & 0x40)
+			data->raw_sms->user_data_length -= message[getdata(24, 23, 25)] + 1;
 		memcpy(data->raw_sms->user_data, &getdata(43, 22, 44), data->raw_sms->length);
 
 		if (data->raw_sms->type == GN_SMS_MT_DeliveryReport) {
