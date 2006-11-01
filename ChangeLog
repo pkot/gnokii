@@ -103,7 +103,6 @@
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
- * documentation updates
     o add spam filters for email addresses              (Pawel Kot)
     o add libusb information to DKU2 docs               (Pawel Kot)
     o update MAINTAINTERS, COPYRIGHT, CREDITS files     (Pawel Kot)
