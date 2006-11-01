@@ -50,9 +50,10 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 	gn_phonebook_subentry* subentry = NULL;
 
 
+	dprintf("Parts: %d\n", blocks);
 	for (i = 0; i < blocks; i++) {
 
-		dprintf("Blockstart: 0x%02x\n", blockstart[0]);  /* FIXME ? */
+		dprintf("[%d] Blockstart: 0x%02x\n", i, blockstart[0]);  /* FIXME ? */
 
 		if (blockstart[0] != GN_PHONEBOOK_ENTRY_Logo &&
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_Ringtone &&
@@ -115,6 +116,33 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 				dprintf("   Name: %s\n", data->phonebook_entry->name);
 			}
 			break;
+		case GN_PHONEBOOK_ENTRY_Location:
+			dprintf("Location: %d\n", blockstart[7]);
+			break;
+		case GN_PHONEBOOK_ENTRY_Image:
+			dprintf("Image\n");
+			dprintf("   Image id: %02x %02x %02x %02x %02x %02x\n",
+				blockstart[6], blockstart[7], blockstart[8], blockstart[9], blockstart[10], blockstart[11]);
+			memcpy(subentry->data.fileid, blockstart+6, 6);
+			break;
+		case GN_PHONEBOOK_ENTRY_PostalAddress:
+			dprintf("Postal Address %d parts\n", blockstart[7]);
+			blocks += blockstart[7];
+			break;
+		case GN_PHONEBOOK_ENTRY_FirstName:
+		case GN_PHONEBOOK_ENTRY_LastName:
+		case GN_PHONEBOOK_ENTRY_PTTAddress:
+		case GN_PHONEBOOK_ENTRY_Street:
+		case GN_PHONEBOOK_ENTRY_City:
+		case GN_PHONEBOOK_ENTRY_StateProvince:
+		case GN_PHONEBOOK_ENTRY_ZipCode:
+		case GN_PHONEBOOK_ENTRY_Country:
+		case GN_PHONEBOOK_ENTRY_ExtendedAddress:
+		case GN_PHONEBOOK_ENTRY_UserID:
+		case GN_PHONEBOOK_ENTRY_FormalName:
+		case GN_PHONEBOOK_ENTRY_JobTitle:
+		case GN_PHONEBOOK_ENTRY_Company:
+		case GN_PHONEBOOK_ENTRY_Nickname:
 		case GN_PHONEBOOK_ENTRY_Email:
 		case GN_PHONEBOOK_ENTRY_URL:
 		case GN_PHONEBOOK_ENTRY_Postal:
@@ -141,7 +169,8 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->number_type = blockstart[5];
 			subentry->id          = blockstart[4];
 			char_unicode_decode(subentry->data.number, (blockstart + 10), blockstart[9]);
-			if (!subblock_count) strcpy(data->phonebook_entry->number, subentry->data.number);
+			if (!subblock_count)
+				strcpy(data->phonebook_entry->number, subentry->data.number);
 			dprintf("   Type: %d (%02x)\n", subentry->number_type, subentry->number_type);
 			dprintf("   Number: %s\n", subentry->data.number);
 			subblock_count++;
@@ -159,6 +188,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			}
 			break;
 		case GN_PHONEBOOK_ENTRY_Date:
+		case GN_PHONEBOOK_ENTRY_Birthday:
 			if (!subentry) {
 				dprintf("ERROR!!!");
 				break;
@@ -245,7 +275,8 @@ gn_error calnote_get_alarm(int alarmdiff, gn_timestamp *time, gn_timestamp *alar
 {
 	struct tm tm_time;
 
-	if (!time || !alarm) return GN_ERR_INTERNALERROR;
+	if (!time || !alarm)
+		return GN_ERR_INTERNALERROR;
 
 	memset(&tm_time, 0, sizeof(tm_time));
 	tm_time.tm_year = time->year - 1900;
@@ -273,7 +304,8 @@ static gn_error calnote_get_times(unsigned char *block, gn_calnote *c)
 	time_t alarmdiff;
 	gn_error e = GN_ERR_NONE;
 
-	if (!c) return GN_ERR_INTERNALERROR;
+	if (!c)
+		return GN_ERR_INTERNALERROR;
 
 	c->time.hour = block[0];
 	c->time.minute = block[1];
@@ -296,7 +328,8 @@ gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 	int alarm;
 	gn_error e = GN_ERR_NONE;
 
-	if (!data->calnote) return GN_ERR_INTERNALERROR;
+	if (!data->calnote)
+		return GN_ERR_INTERNALERROR;
 
 	block = message + 12;
 
@@ -310,13 +343,15 @@ gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 	case GN_CALNOTE_MEETING:
 		e = calnote_get_times(block, data->calnote);
 		data->calnote->recurrence = 256 * block[4] + block[5];
-		if (e != GN_ERR_NONE) return e;
+		if (e != GN_ERR_NONE)
+			return e;
 		char_unicode_decode(data->calnote->text, (block + 8), block[6] << 1);
 		break;
 	case GN_CALNOTE_CALL:
 		e = calnote_get_times(block, data->calnote);
 		data->calnote->recurrence = 256 * block[4] + block[5];
-		if (e != GN_ERR_NONE) return e;
+		if (e != GN_ERR_NONE)
+			return e;
 		char_unicode_decode(data->calnote->text, (block + 8), block[6] << 1);
 		char_unicode_decode(data->calnote->phone_number, (block + 8 + block[6] * 2), block[7] << 1);
 		break;
@@ -343,7 +378,8 @@ gn_error calnote_decode(unsigned char *message, int length, gn_data *data)
 		}
 
 		e = calnote_get_alarm(alarm, &(data->calnote->time), &(data->calnote->alarm.timestamp));
-		if (e != GN_ERR_NONE) return e;
+		if (e != GN_ERR_NONE)
+			return e;
 
 		data->calnote->time.hour = 0;
 		data->calnote->time.minute = 0;

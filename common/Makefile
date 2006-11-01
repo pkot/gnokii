@@ -19,7 +19,7 @@ include $(TOPDIR)/Makefile.global
 
 # REMEMBER: if you change the numbers below, please change them in gnokii.h as well.
 GNOKII_MAJOR = 3
-GNOKII_MINOR = 0
+GNOKII_MINOR = 1
 GNOKII_RELEASE = 1
 ifdef WIN32_CROSS
 LIBTOOL_UNDEF = -no-undefined

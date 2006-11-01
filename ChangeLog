@@ -31,6 +31,8 @@
     o fix decoding SMS with some locale set (Chinese)   (Pawel Kot)
     o avoid using va argument twice for in logging handlers
                                                        (Scott Tsai)
+    o add support for reading extended phonebook attributes
+                                                        (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
