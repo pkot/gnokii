@@ -169,6 +169,25 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		{ NULL,     0,           NULL, 0}
 	};
 
+	memset(&ringtone, 0, sizeof(ringtone));
+	rawdata.data = buff;
+	rawdata.length = sizeof(buff);
+	gn_data_clear(data);
+	data->ringtone = &ringtone;
+	data->raw_data = &rawdata;
+
+	if (argc < optind) {
+		getringtone_usage(stderr, -1);
+		return -1;
+	}
+
+	if (argc > optind) {
+		ringtone.location = atoi(argv[optind]);
+	} else {
+		init_ringtone_list(data, state);
+		ringtone.location = ringtone_list.userdef_location;
+	}
+
 	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
 		switch (i) {
 		case 'r':
@@ -178,25 +197,6 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			getringtone_usage(stderr, -1); /* FIXME */
 			return -1;
 		}
-	}
-
-	memset(&ringtone, 0, sizeof(ringtone));
-	rawdata.data = buff;
-	rawdata.length = sizeof(buff);
-	gn_data_clear(data);
-	data->ringtone = &ringtone;
-	data->raw_data = &rawdata;
-
-	if (argc <= optind) {
-		getringtone_usage(stderr, -1);
-		return -1;
-	}
-
-	if (argc > optind + 1) {
-		ringtone.location = atoi(argv[optind + 1]);
-	} else {
-		init_ringtone_list(data, state);
-		ringtone.location = ringtone_list.userdef_location;
 	}
 
 	if (raw)
