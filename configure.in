@@ -265,54 +265,67 @@ AC_ARG_WITH(libical,
 )
 
 USE_LIBICAL="no"
-OLD_LIBS="$LIBS"
-OLD_CFLAGS="$CFLAGS"
-LIBS="$LIBS $ICAL_LIBS -lpthread -lical"
-CFLAGS="$CFLAGS $ICAL_CFLAGS"
-AC_MSG_CHECKING(whether libical is installed)
-AC_TRY_LINK([
-   #include <ical.h>
-   ],[
-   int priority;
-   icalcomponent *pIcal=NULL;
-   struct icaltimetype atime = icaltime_from_string("20031231T223000");
+AC_ARG_ENABLE(libical,
+       	      AC_HELP_STRING([--enable-libical],
+               	             [enable libical support (default is autodetected)]
+                            ),,
+       	      [enable_libical=yes])
 
-   pIcal = icalcomponent_vanew(
-      ICAL_VCALENDAR_COMPONENT,
-      icalproperty_new_version("2.0"),
-      icalproperty_new_prodid("//Gnokii.org//NONSGML v.0.5.8"),
-      0
-   );
-   atime.is_daylight = 1;
-   priority = icalproperty_get_priority(icalcomponent_get_first_property(pIcal, ICAL_PRIORITY_PROPERTY));
-   ],
-   [
-      AC_MSG_RESULT(yes)
-      USE_LIBICAL="yes"
-      AC_DEFINE([HAVE_LIBICAL],[1],[Use libical])
-   ],
-   [
-      AC_MSG_RESULT(no)
-      LIBS="$OLD_LIBS"
-      CFLAGS="$OLD_CFLAGS"
-   ]
-)
+if test "$enable_libical" == "yes"; then
+	OLD_CFLAGS="$CFLAGS"
+	LIBS="$LIBS $ICAL_LIBS -lpthread -lical"
+	CFLAGS="$CFLAGS $ICAL_CFLAGS"
+	AC_MSG_CHECKING(whether libical is installed)
+	AC_TRY_LINK([
+	   #include <ical.h>
+	   ],[
+	   int priority;
+	   icalcomponent *pIcal=NULL;
+	   struct icaltimetype atime = icaltime_from_string("20031231T223000");
+
+	   pIcal = icalcomponent_vanew(
+	      ICAL_VCALENDAR_COMPONENT,
+	      icalproperty_new_version("2.0"),
+	      icalproperty_new_prodid("//Gnokii.org//NONSGML v.0.5.8"),
+	      0
+	   );
+	   atime.is_daylight = 1;
+	   priority = icalproperty_get_priority(icalcomponent_get_first_property(pIcal, ICAL_PRIORITY_PROPERTY));
+	   ],
+	   [
+	      AC_MSG_RESULT(yes)
+	      USE_LIBICAL="yes"
+	      AC_DEFINE([HAVE_LIBICAL],[1],[Use libical])
+	   ],
+	   [
+	      AC_MSG_RESULT(no)
+	      LIBS="$OLD_LIBS"
+	      CFLAGS="$OLD_CFLAGS"
+	   ]
+	)
+fi
 
 dnl ======================== Check for libusb
 USE_LIBUSB="no"
-AC_MSG_CHECKING(whether libusb is installed)
-AC_TRY_COMPILE([#include <usb.h>],
-	[struct usb_dev_handle *dev;],
-	[
-		AC_MSG_RESULT(yes)
-		AC_DEFINE([HAVE_LIBUSB],[1],[Use libusb])
-		USE_LIBUSB="yes"
-		LIBS="$LIBS -lusb"
-	],
-	[
-		AC_MSG_RESULT(no)
-	]
-)
+AC_ARG_ENABLE(libusb,
+              AC_HELP_STRING([--enable-libusb],
+                             [enable libusb support (default is autodetected)]
+                            ),,
+              [enable_libusb=yes])
+if test "$enable_libusb" == "yes"; then
+	AC_TRY_COMPILE([#include <usb.h>],
+		[struct usb_dev_handle *dev;],
+		[
+			AC_MSG_RESULT(yes)
+			AC_DEFINE([HAVE_LIBUSB],[1],[Use libusb])
+			USE_LIBUSB="yes"
+			LIBS="$LIBS -lusb"
+		],
+		[
+			AC_MSG_RESULT(no)
+		]
+	)
+fi
 
 dnl ======================== Checks for gethostbyname support
 AC_CHECK_FUNC(gethostbyname, ,

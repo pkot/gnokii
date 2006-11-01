@@ -74,6 +74,8 @@
                                                         (Pawel Kot)
     o define INT_MAX where it's not defined             (Pawel Kot)
     o avoid redefining _GNU_SOURCE                      (Pawel Kot)
+    o add --disable-libusb and --disable-ical options
+                                                (Michele Noberasco)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)
