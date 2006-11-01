@@ -2374,7 +2374,7 @@ static gn_error SetDateTime(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x60, 0x01, 0x01, 0x07,
 			       0x00, 0x00,	/* year - H/L */
 			       0x00, 0x00,	/* month, day */
-			       0x00, 0x00,	/* yours, minutes */
+			       0x00, 0x00,	/* hours, minutes */
 			       0x00};		/* Unknown, but not seconds - try 59 and wait 1 sec. */
 
 	req[7] = data->datetime->year >> 8;
@@ -2399,7 +2399,7 @@ static gn_error GetAlarm(gn_data *data, struct gn_statemachine *state)
 static gn_error SetAlarm(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x6b, 0x01, 0x20, 0x03,
-			       0x02,		/* should be alarm on/off, but it doesn't works */
+			       0x02,		/* should be alarm on/off, but it doesn't work */
 			       0x00, 0x00,	/* hours, minutes */
 			       0x00};		/* Unknown, but not seconds - try 59 and wait 1 sec. */
 
