@@ -41,6 +41,8 @@
     o exit gnokii after --viewlogo or --listnetworks    (Pawel Kot)
     o compare network name with translated "unknown" string in logo
       operations too                                (Daniele Forsi)
+    o make --getspeeddial and --setspeeddial print to stdout on
+      success, not stderr                           (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
