@@ -199,6 +199,11 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		}
 	}
 
+	if (argc > optind + 1) {
+		getringtone_usage(stderr, -1);
+		return -1;
+	}
+
 	if (raw)
 		error = gn_sm_functions(GN_OP_GetRawRingtone, data, state);
 	else
