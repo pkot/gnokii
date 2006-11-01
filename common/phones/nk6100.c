@@ -1231,8 +1231,12 @@ static int get_memory_type(gn_memory_type memory_type)
 static gn_error GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x33, 0x64, 0x00};
+	int id;
 
-	req[5] = data->message_center->id;
+	id = data->message_center->id;
+	if ((id < 1) || (id > 255)) return GN_ERR_INVALIDLOCATION;
+
+	req[5] = id;
 
 	if (sm_message_send(6, 0x02, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x02, data, state);
@@ -1243,6 +1247,8 @@ static gn_error SetSMSCenter(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[64] = {FBUS_FRAME_HEADER, 0x30, 0x64};
 	gn_sms_message_center *smsc;
 	unsigned char *pos;
+
+	if ((smsc->id < 1) || (smsc->id > 255)) return GN_ERR_INVALIDLOCATION;
 
 	smsc = data->message_center;
 	pos = req+5;
