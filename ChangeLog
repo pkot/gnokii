@@ -68,6 +68,8 @@
     o add missing includes for MSVS after splitting gnokii into
       serveral files                                  (Jari Turkia)
     o update MSVS project files                       (Jari Turkia)
+    o updated config/* files along with new Ubuntu version
+                                                        (Pawel Kot)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)
