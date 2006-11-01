@@ -48,7 +48,9 @@
 
 #include <stdio.h>
 #include <sys/stat.h>
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+#  define _GNU_SOURCE 1
+#endif
 #include <getopt.h>
 #include <time.h>
 #include <signal.h>

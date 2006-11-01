@@ -29,7 +29,6 @@
       gn_lib_get_supported_connection() know which connection types
       have been actually compiled in libgnokii      (Daniele Forsi)
     o fix decoding SMS with some locale set (Chinese)   (Pawel Kot)
-    o define INT_MAX where it's not defined             (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
@@ -71,6 +70,8 @@
     o update MSVS project files                       (Jari Turkia)
     o updated config/* files along with new Ubuntu version
                                                         (Pawel Kot)
+    o define INT_MAX where it's not defined             (Pawel Kot)
+    o avoid redefining _GNU_SOURCE                      (Pawel Kot)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)

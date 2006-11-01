@@ -42,7 +42,9 @@
 #include "compat.h"
 
 #include <stdio.h>
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+#  define _GNU_SOURCE 1
+#endif
 #include <getopt.h>
 
 #include "gnokii-app.h"
