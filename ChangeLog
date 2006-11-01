@@ -29,6 +29,8 @@
       gn_lib_get_supported_connection() know which connection types
       have been actually compiled in libgnokii      (Daniele Forsi)
     o fix decoding SMS with some locale set (Chinese)   (Pawel Kot)
+    o avoid using va argument twice for in logging handlers
+                                                       (Scott Tsai)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
