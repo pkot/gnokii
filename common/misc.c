@@ -394,13 +394,13 @@ GNOKII_API void gn_elog_write(const char *fmt, ...)
 
 	if (gn_elog_handler) {
 		va_copy(ap1, ap);
-		gn_elog_handler(fmt, ap);
+		gn_elog_handler(fmt, ap1);
 		va_end(ap1);
 	} else {
 #ifndef	DEBUG
 		if (!(gn_log_debug_mask & GN_LOG_T_STDERR)) {
 			va_copy(ap1, ap);
-			log_printf(GN_LOG_T_STDERR, fmt, ap);
+			log_printf(GN_LOG_T_STDERR, fmt, ap1);
 			va_end(ap1);
 		}
 #endif
