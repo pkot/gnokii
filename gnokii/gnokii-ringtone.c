@@ -161,6 +161,7 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	gn_raw_data rawdata;
 	gn_error error;
 	unsigned char buff[512];
+	char *filename = optarg;
 	int i;
 
 	bool raw = false;
@@ -214,17 +215,22 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	}
 	fprintf(stderr, _("Getting ringtone %d (\"%s\") succeeded!\n"), ringtone.location, ringtone.name);
 
+	if (!filename) {
+		fprintf(stderr, _("Internal gnokii error: null filename\n"));
+		return GN_ERR_FAILED;
+	}
+
 	if (raw) {
 		FILE *f;
 
-		if ((f = fopen(argv[optind], "wb")) == NULL) {
+		if ((f = fopen(filename, "wb")) == NULL) {
 			fprintf(stderr, _("Failed to save ringtone.\n"));
 			return -1;
 		}
 		fwrite(rawdata.data, 1, rawdata.length, f);
 		fclose(f);
 	} else {
-		if ((error = gn_file_ringtone_save(argv[optind], &ringtone)) != GN_ERR_NONE) {
+		if ((error = gn_file_ringtone_save(filename, &ringtone)) != GN_ERR_NONE) {
 			fprintf(stderr, _("Failed to save ringtone: %s\n"), gn_error_print(error));
 			return error;
 		}
