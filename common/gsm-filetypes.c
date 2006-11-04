@@ -1655,8 +1655,9 @@ GNOKII_API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *ent
 		entry->location, entry->caller_group);
 	for (i = 0; i < entry->subentries_count; i++) {
 		switch (entry->subentries[i].entry_type) {
+		case GN_PHONEBOOK_ENTRY_Birthday:
 		case GN_PHONEBOOK_ENTRY_Date:
-			fprintf(f, ";%d;0;0;%04u%02u%02u%02u%02u%02u", GN_PHONEBOOK_ENTRY_Date,
+			fprintf(f, ";%d;0;0;%04u%02u%02u%02u%02u%02u", entry->subentries[i].entry_type,
 				entry->subentries[i].data.date.year, entry->subentries[i].data.date.month, entry->subentries[i].data.date.day,
 				entry->subentries[i].data.date.hour, entry->subentries[i].data.date.minute, entry->subentries[i].data.date.second);
 			break;

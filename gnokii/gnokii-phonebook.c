@@ -206,52 +206,19 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 				dprintf("subentries count: %d\n", entry.subentries_count);
 				for (i = 0; i < entry.subentries_count; i++) {
+					fprintf(stdout, "%s: ", gn_subentrytype2string(entry.subentries[i].entry_type, entry.subentries[i].number_type));
 					switch (entry.subentries[i].entry_type) {
-					case GN_PHONEBOOK_ENTRY_Email:
-						fprintf(stdout, _("Email address: "));
-						break;
-					case GN_PHONEBOOK_ENTRY_Postal:
-						fprintf(stdout, _("Address: "));
-						break;
-					case GN_PHONEBOOK_ENTRY_Note:
-						fprintf(stdout, _("Notes: "));
-						break;
-					case GN_PHONEBOOK_ENTRY_Number:
-						switch (entry.subentries[i].number_type) {
-						case GN_PHONEBOOK_NUMBER_Home:
-							fprintf(stdout, _("Home number: "));
-							break;
-						case GN_PHONEBOOK_NUMBER_Mobile:
-							fprintf(stdout, _("Cellular number: "));
-							break;
-						case GN_PHONEBOOK_NUMBER_Fax:
-							fprintf(stdout, _("Fax number: "));
-							break;
-						case GN_PHONEBOOK_NUMBER_Work:
-							fprintf(stdout, _("Business number: "));
-							break;
-						case GN_PHONEBOOK_NUMBER_None:
-						case GN_PHONEBOOK_NUMBER_Common:
-						case GN_PHONEBOOK_NUMBER_General:
-							fprintf(stdout, _("General number: "));
-							break;
-						default:
-							fprintf(stdout, _("Unknown (%d): "), entry.subentries[i].number_type);
-							break;
-						}
-						break;
-					case GN_PHONEBOOK_ENTRY_URL:
-						fprintf(stdout, _("WWW address: "));
-						break;
+					case GN_PHONEBOOK_ENTRY_Birthday:
 					case GN_PHONEBOOK_ENTRY_Date:
-						fprintf(stdout, _("Date: %04u.%02u.%02u %02u:%02u:%02u\n"), entry.subentries[i].data.date.year, entry.subentries[i].data.date.month, entry.subentries[i].data.date.day, entry.subentries[i].data.date.hour, entry.subentries[i].data.date.minute, entry.subentries[i].data.date.second);
+						fprintf(stdout, _("%04u.%02u.%02u %02u:%02u:%02u"), entry.subentries[i].data.date.year, entry.subentries[i].data.date.month, entry.subentries[i].data.date.day, entry.subentries[i].data.date.hour, entry.subentries[i].data.date.minute, entry.subentries[i].data.date.second);
+						break;
+					case GN_PHONEBOOK_ENTRY_Image:
 						break;
 					default:
-						fprintf(stdout, _("Unknown (%d): "), entry.subentries[i].entry_type);
+						fprintf(stdout, "%s", entry.subentries[i].data.number);
 						break;
 					}
-					if (entry.subentries[i].entry_type != GN_PHONEBOOK_ENTRY_Date)
-						fprintf(stdout, "%s\n", entry.subentries[i].data.number);
+					fprintf(stdout, "\n");
 				}
 				if ((entry.memory_type == GN_MT_MC ||
 				     entry.memory_type == GN_MT_DC ||
