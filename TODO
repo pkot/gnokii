@@ -1,7 +1,5 @@
  * gnokii changes:
-    o separating into smaller parts
     o readline support
-    o improve command line args parsing
 
  * libgnokii changes
     o make modules dynamically loadable (phone drivers, connection drivers)
@@ -21,8 +19,3 @@
     o external apps
 
  * Full Smart Messaging Specification 3.0, EMS, etc.
-
- * Next version (internal) changes:
-    o change  "int caller_group" to "gn_phonebook_group_type caller_group"
-
-   
