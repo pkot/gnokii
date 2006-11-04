@@ -1250,9 +1250,10 @@ static gn_error SetSMSCenter(gn_data *data, struct gn_statemachine *state)
 	gn_sms_message_center *smsc;
 	unsigned char *pos;
 
-	if ((smsc->id < 1) || (smsc->id > 255)) return GN_ERR_INVALIDLOCATION;
-
 	smsc = data->message_center;
+	if ((smsc->id < 1) || (smsc->id > 255))
+		return GN_ERR_INVALIDLOCATION;
+
 	pos = req+5;
 	*pos++ = smsc->id;
 	pos++;
