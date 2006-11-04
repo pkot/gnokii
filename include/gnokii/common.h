@@ -264,7 +264,7 @@ typedef struct {
 							     nullterminator. */
 	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1];  /* Number */
 	gn_memory_type memory_type;                       /* Type of memory */
-	int caller_group;          /* Caller group - gn_phonebook_group_type */
+	gn_phonebook_group_type caller_group;             /* Caller group - gn_phonebook_group_type */
 	int location;                                     /* Location */
 	gn_timestamp date;                                /* The record date and time
 							     of the number. */

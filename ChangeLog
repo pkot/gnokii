@@ -33,6 +33,8 @@
                                                        (Scott Tsai)
     o add support for reading extended phonebook attributes
                                                         (Pawel Kot)
+    o change type of caller_group from int to
+      gn_phonebook_group_type                           (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
