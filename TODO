@@ -7,6 +7,7 @@
        + encoding/decoding functions require output length
        + move information hardcoded in the drivers into gn_phone_model
          structure
+    o change structures to be dynamically allocatable
 
  * driver changes
     o obex support
