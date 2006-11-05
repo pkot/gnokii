@@ -53,6 +53,7 @@
     o fix --sendsms usage string: -r is the short form of --report
                                                     (Daniele Forsi)
     o add support for reading extended phonebook        (Pawel Kot)
+    o fix --ringtoneconvert segfault                (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)

@@ -744,6 +744,8 @@ static int parse_options(int argc, char *argv[])
 	case OPT_LISTNETWORKS:
 		list_gsm_networks();
 		return GN_ERR_NONE;
+	case OPT_RINGTONECONVERT:
+		return ringtoneconvert(argc, argv);
 	}
 
 	/* Initialise the code for the GSM interface. */
@@ -927,9 +929,6 @@ static int parse_options(int argc, char *argv[])
 		break;
 	case OPT_PLAYRINGTONE:
 		rc = playringtone(argc, argv, data, state);
-		break;
-	case OPT_RINGTONECONVERT:
-		rc = ringtoneconvert(argc, argv, data, state);
 		break;
 	case OPT_GETRINGTONELIST:
 		rc = getringtonelist(data, state);

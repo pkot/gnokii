@@ -170,7 +170,7 @@ extern int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemac
 extern void playringtone_usage(FILE *f, int exitval);
 extern int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void ringtoneconvert_usage(FILE *f, int exitval);
-extern int ringtoneconvert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern int ringtoneconvert(int argc, char *argv[]);
 extern int getringtonelist(gn_data *data, struct gn_statemachine *state);
 extern void deleteringtone_usage(FILE *f, int exitval);
 extern gn_error deleteringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);

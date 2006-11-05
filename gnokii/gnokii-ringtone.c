@@ -415,14 +415,10 @@ void ringtoneconvert_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int ringtoneconvert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+int ringtoneconvert(int argc, char *argv[])
 {
 	gn_ringtone ringtone;
 	gn_error error;
-
-	memset(&ringtone, 0, sizeof(ringtone));
-	gn_data_clear(data);
-	data->ringtone = &ringtone;
 
 	if (argc != optind + 1) {
 		ringtoneconvert_usage(stderr, -1);
