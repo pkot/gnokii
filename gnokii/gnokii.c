@@ -749,7 +749,7 @@ static int parse_options(int argc, char *argv[])
 	}
 
 	/* Initialise the code for the GSM interface. */
-	if (c != OPT_VIEWLOGO && c != OPT_FOOGLE && c != OPT_LISTNETWORKS && c != OPT_RINGTONECONVERT)
+	if (c != OPT_FOOGLE)
 		businit();
 
 	switch (c) {
