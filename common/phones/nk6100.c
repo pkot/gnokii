@@ -1533,6 +1533,7 @@ static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 	if (data->raw_sms->memory_type != GN_MT_SM) return GN_ERR_INVALIDMEMORYTYPE;
+	if ((data->raw_sms->number < 0) || (data->raw_sms->number > 255)) return GN_ERR_INVALIDLOCATION;
 
 	req[5] = data->raw_sms->number;
 	if (sm_message_send(8, 0x02, req, state)) return GN_ERR_NOTREADY;
@@ -1549,6 +1550,7 @@ static gn_error SaveSMSMessage(gn_data *data, struct gn_statemachine *state)
 	int len;
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+	if ((data->raw_sms->number < 0) || (data->raw_sms->number > 255)) return GN_ERR_INVALIDLOCATION;
 
 	if (44 + data->raw_sms->user_data_length > sizeof(req))
 		return GN_ERR_WRONGDATAFORMAT;
@@ -1586,6 +1588,7 @@ static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->sms) return GN_ERR_INTERNALERROR;
 	if (data->sms->memory_type != GN_MT_SM) return GN_ERR_INVALIDMEMORYTYPE;
+	if ((data->raw_sms->number < 0) || (data->raw_sms->number > 255)) return GN_ERR_INVALIDLOCATION;
 
 	req[5] = data->sms->number;
 	if (sm_message_send(6, 0x14, req, state)) return GN_ERR_NOTREADY;

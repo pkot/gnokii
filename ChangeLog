@@ -105,6 +105,8 @@
       Nokia 3210 differentiates between the two (Nokia 3330 returns
       always the same error code)                   (Daniele Forsi)
     o make get_ringtone_list() more general         (Daniele Forsi)
+    o check if message number is in range 0..255 in GetSMSMessage()
+      SaveSMSMessage() and DeleteSMSMessage()       (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
