@@ -135,7 +135,7 @@ GNOKII_API void gn_sms_default_deliver(gn_sms *sms)
  * sms_timestamp_print - formats date and time in the human readable manner
  * @number: binary coded date and time
  *
- * The function converts binary date time into a easily readable form.
+ * The function converts binary date time into an easily readable form.
  * It is Y2K compliant.
  */
 static char *sms_timestamp_print(u8 *number)
@@ -409,7 +409,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
  * @udhlen: udh length 
  * @dcs: data coding scheme
  *
- * This function decodes either 7bit or 8bit os Unicode text to the
+ * This function decodes either 7bit or 8bit or Unicode text to the
  * readable text format according to the locale set.
  */
 static gn_error sms_data_decode(unsigned char *message, unsigned char *output, unsigned int length,
@@ -437,11 +437,11 @@ static gn_error sms_data_decode(unsigned char *message, unsigned char *output, u
 }
 
 /**
- * sms_udh_decode - interprete the User Data Header contents
+ * sms_udh_decode - interprets the User Data Header contents
  * @message: received UDH
  * @sms: SMS structure to fill in
  *
- * At this stage we already need to know thet SMS has UDH.
+ * At this stage we already need to know that SMS has UDH.
  * This function decodes UDH as described in:
  *   - GSM 03.40 version 6.1.0 Release 1997, section 9.2.3.24
  *   - Smart Messaging Specification, Revision 1.0.0, September 15, 1997
@@ -487,7 +487,7 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 			udh->udh[nr].u.special_sms_message_indication.store = (message[pos + 2] & 0x80) >> 7;
 			udh->udh[nr].u.special_sms_message_indication.message_count = message[pos + 3];
 			break;
-		case 0x05: /* Application port addression scheme, 16 bit address */
+		case 0x05: /* Application port addressing scheme, 16 bit address */
 			switch (((0x00ff & message[pos + 2]) << 8) | (0x00ff & message[pos + 3])) {
 			case 0x1581:
 				dprintf("Ringtone\n");
@@ -531,7 +531,7 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 				break;
 			}
 			break;
-		case 0x04: /* Application port addression scheme, 8 bit address */
+		case 0x04: /* Application port addressing scheme, 8 bit address */
 		case 0x06: /* SMSC Control Parameters */
 		case 0x07: /* UDH Source Indicator */
 		default:
@@ -552,13 +552,13 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 }
 
 /**
- * sms_header_decode - Doecodes PDU SMS header
+ * sms_header_decode - Decodes PDU SMS header
  * @rawsms:
  * @sms:
  * @udh:
  *
  * This function parses received SMS header information and stores
- * them in hihger level SMS struct. It also checks for the UDH and when
+ * them in higher level SMS struct. It also checks for the UDH and when
  * it's found calls the function to extract the UDH.
  */
 static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *udh)
@@ -712,12 +712,12 @@ GNOKII_API gn_error gn_sms_parse(gn_data *data)
 }
 
 /**
- * gn_sms_request - High-level function for the expicit SMS reading from the phone
+ * gn_sms_request - High-level function for the explicit SMS reading from the phone
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
  * This is the function for explicit requesting the SMS from the
- * phone driver. Not that raw_sms field in the gn_data structure must
+ * phone driver. Note that raw_sms field in the gn_data structure must
  * be initialized
  */
 GNOKII_API gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
@@ -731,7 +731,7 @@ GNOKII_API gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
- * This function is the frotnend for reading SMS. Note that SMS field
+ * This function is the frontend for reading SMS. Note that SMS field
  * in the gn_data structure must be initialized.
  */
 GNOKII_API gn_error gn_sms_get(gn_data *data, struct gn_statemachine *state)
@@ -751,7 +751,7 @@ GNOKII_API gn_error gn_sms_get(gn_data *data, struct gn_statemachine *state)
 }
 
 /**
- * gn_sms_delete - High-level function for delting SMS
+ * gn_sms_delete - High-level function for deleting SMS
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
@@ -889,7 +889,7 @@ static gn_error sms_verify_status(gn_data *data)
 				(data->message_list[i][data->sms_folder->folder_id]->status == GN_SMS_FLD_NotReadHandled)) {
 			for (j = 0; j < data->sms_folder->number; j++) {
 				if (data->message_list[i][data->sms_folder->folder_id]->location == data->sms_folder->locations[j]) {
-					/* We have a found a formerly unread message which has been read in the meantime */
+					/* We have found a formerly unread message which has been read in the meantime */
 					dprintf("Found a formerly unread message which has been read in the meantime: loc: %i\n",
 							data->message_list[i][data->sms_folder->folder_id]->location);
 					data->message_list[i][data->sms_folder->folder_id]->status = GN_SMS_FLD_Changed;
@@ -1050,7 +1050,7 @@ static gn_error sms_concat_header_encode(gn_sms_raw *rawsms, int curr, int total
  * @clen: coded data length
  *
  * This function does the phone frame encoding basing on the given SMS
- * structure. This function is capable to create only one frame at a time.
+ * structure. This function is capable of creating only one frame at a time.
  */
 static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 {
@@ -1242,7 +1242,14 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 	}
 	/* Encoding the header */
 	rawsms->report = sms->delivery_report;
-	rawsms->remote_number[0] = char_semi_octet_pack(sms->remote.number, rawsms->remote_number + 1, sms->remote.type);
+	if (sms->remote.type == GN_GSM_NUMBER_Alphanumeric) {
+		unsigned int dummy;
+		/* convert packed length in semi octets */
+		rawsms->remote_number[0] = 2 * char_7bit_pack(0, sms->remote.number, rawsms->remote_number + 2, &dummy);
+		rawsms->remote_number[1] = sms->remote.type;
+	} else {
+		rawsms->remote_number[0] = char_semi_octet_pack(sms->remote.number, rawsms->remote_number + 1, sms->remote.type);
+	}
 	rawsms->validity_indicator = GN_SMS_VP_RelativeFormat;
 	rawsms->validity[0] = 0xa9;
 
