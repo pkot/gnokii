@@ -3897,6 +3897,7 @@ static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
 	gn_ringtone_list *rl;
 	gn_ringtone ringtone;
 	gn_data d;
+	gn_error error;
 
 #define ADDRINGTONE(id, str) \
 	rl->ringtone[rl->count].location = (id); \
@@ -3907,13 +3908,28 @@ static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
 	rl->count++;
 
 	if (!(rl = data->ringtone_list)) return GN_ERR_INTERNALERROR;
-	rl->count = 0;
-	rl->userdef_location = 0;
+	rl->userdef_location = 17;
 	rl->userdef_count = 0;
 
+	for (rl->count = 0; rl->count < GN_RINGTONE_MAX_COUNT; rl->count++) {
+		memset(&ringtone, 0, sizeof(ringtone));
+		gn_data_clear(&d);
+		d.ringtone = &ringtone;
+		ringtone.location = rl->userdef_location + rl->userdef_count;
+		error = GetRingtone(&d, state);
+		if (error == GN_ERR_NONE) {
+			strncpy(rl->ringtone[rl->count].name, ringtone.name, sizeof(ringtone.name) - 1);
+		} else if (error == GN_ERR_WRONGDATAFORMAT) {
+			strncpy(rl->ringtone[rl->count].name, _("Unknown"), sizeof(ringtone.name) - 1);
+		} else break;
+		rl->ringtone[rl->count].location = ringtone.location;
+		rl->ringtone[rl->count].user_defined = 1;
+		rl->ringtone[rl->count].readable = 1;
+		rl->ringtone[rl->count].writable = 1;
+		rl->userdef_count++;
+	}
+
 	if (!memcmp(state->config.model, "61", 2)) {
-		rl->userdef_location = 17;
-		rl->userdef_count = 1;
 		ADDRINGTONE(18, "Ring ring");
 		ADDRINGTONE(19, "Low");
 		ADDRINGTONE(20, "Fly");
@@ -3951,22 +3967,7 @@ static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
 		ADDRINGTONE(70, "Orient");
 		ADDRINGTONE(71, "Charleston");
 		ADDRINGTONE(73, "Jumping");
-
-		memset(&ringtone, 0, sizeof(ringtone));
-		gn_data_clear(&d);
-		d.ringtone = &ringtone;
-		ringtone.location = 17;
-		if (GetRingtone(&d, state) == GN_ERR_NONE) {
-			rl->ringtone[rl->count].location = ringtone.location;
-			strcpy(rl->ringtone[rl->count].name, ringtone.name);
-			rl->ringtone[rl->count].user_defined = 1;
-			rl->ringtone[rl->count].readable = 1;
-			rl->ringtone[rl->count].writable = 1;
-			rl->count++;
-		}
 	} else if (!memcmp(state->config.model, "51", 2)) {
-		rl->userdef_location = 17;
-		rl->userdef_count = 1;
 		ADDRINGTONE(18, "Ring ring");
 		ADDRINGTONE(19, "Low");
 		ADDRINGTONE(20, "Fly");
@@ -4006,20 +4007,13 @@ static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
 		ADDRINGTONE(74, "Jumping");
 		ADDRINGTONE(75, "Lamb");
 		ADDRINGTONE(80, "Tango");
+	}
 
-		memset(&ringtone, 0, sizeof(ringtone));
-		gn_data_clear(&d);
-		d.ringtone = &ringtone;
-		ringtone.location = 17;
-		if (GetRingtone(&d, state) == GN_ERR_NONE) {
-			rl->ringtone[rl->count].location = ringtone.location;
-			strcpy(rl->ringtone[rl->count].name, ringtone.name);
-			rl->ringtone[rl->count].user_defined = 1;
-			rl->ringtone[rl->count].readable = 1;
-			rl->ringtone[rl->count].writable = 1;
-			rl->count++;
-		}
-	} else return GN_ERR_NOTIMPLEMENTED;
+	if (!rl->count) {
+		rl->userdef_location = 0;
+		rl->userdef_count = 0;
+		return GN_ERR_NOTIMPLEMENTED;
+	}
 
 #undef ADDRINGTONE
 
