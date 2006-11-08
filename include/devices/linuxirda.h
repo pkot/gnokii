@@ -32,7 +32,7 @@
  *
  * GNOKII modifications:
  * Fixes for Solaris compile (Artur Kubiak and Michael Wiedmann)
- * FIXME: does it have *ANY* chance to work under other OS then Linux?
+ * FIXME: does it have *ANY* chance to work under other OS than Linux?
  */
 
 #ifndef __gnokii_linuxirda_h

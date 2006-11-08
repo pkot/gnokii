@@ -82,10 +82,10 @@ typedef enum {
 #define NK6510_SUBSMS_SMS_SEND_FAIL	0x01	/* SMS send failed */
 #define NK6510_SUBSMS_SMS_RCVD		0x10	/* SMS received */
 #define NK6510_SUBSMS_SMSC_RCV		0x15	/* SMS center info received */
-#define NK6510_SUBSMS_CELLBRD_OK	0x21	/* Set cell broadcast success*/
+#define NK6510_SUBSMS_CELLBRD_OK	0x21	/* Set cell broadcast success */
 #define NK6510_SUBSMS_CELLBRD_FAIL	0x22	/* Set cell broadcast failure */
 #define NK6510_SUBSMS_READ_CELLBRD	0x23	/* Read cell broadcast */
-#define NK6510_SUBSMS_SMSC_OK		0x31	/* Set SMS center success*/
+#define NK6510_SUBSMS_SMSC_OK		0x31	/* Set SMS center success */
 #define NK6510_SUBSMS_SMSC_FAIL		0x32	/* Set SMS center failure */
 
 /* Clock handling message subtypes (send) */
@@ -110,17 +110,17 @@ typedef enum {
 #define NK6510_SUBCAL_DEL_NOTE		0x0b	/* Delete note */
 #define NK6510_SUBCAL_GET_NOTE		0x19	/* Get note */
 #define NK6510_SUBCAL_GET_FREEPOS	0x31	/* Get first free position */
-#define NK6510_SUBCAL_GET_INFO		0x3a	/* Calendar sumary */
+#define NK6510_SUBCAL_GET_INFO		0x3a	/* Calendar summary */
 /* Calendar handling message subtypes (recv) */
 #define NK6510_SUBCAL_ADD_MEETING_RESP	0x02	/* Add meeting note response */
 #define NK6510_SUBCAL_ADD_CALL_RESP	0x04	/* Add call note response */
 #define NK6510_SUBCAL_ADD_BIRTHDAY_RESP	0x06	/* Add birthday note response */
 #define NK6510_SUBCAL_ADD_REMINDER_RESP	0x08	/* Add reminder note response */
-#define NK6510_SUBCAL_DEL_NOTE_RESP	0x0c	/* Dletete note response */
+#define NK6510_SUBCAL_DEL_NOTE_RESP	0x0c	/* Delete note response */
 #define NK6510_SUBCAL_NOTE_RCVD		0x1a	/* Received note */
 #define NK6510_SUBCAL_FREEPOS_RCVD	0x32	/* Received first free position */
 #define NK6510_SUBCAL_INFO_RCVD		0x3b	/* Received calendar summary */
-#define NK6510_SUBCAL_NOTE2_RCVD	0x7e	/* Received note (with more detailes) */
+#define NK6510_SUBCAL_NOTE2_RCVD	0x7e	/* Received note (with more details) */
 #define NK6510_SUBCAL_ADD_NOTE_RESP	0x66	/* Add calendar note response */
 
 /* Calendar note types */

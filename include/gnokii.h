@@ -95,7 +95,7 @@ struct gn_statemachine;
 /* Get the current runtime version (LIBGNOKII_VERSION) of libgnokii - see LIBGNOKII_MAKE_VERSION() */
 GNOKII_API unsigned int gn_lib_version();
 
-/* free any ressources which were used by libgnokii */
+/* free any resources which were used by libgnokii */
 GNOKII_API void gn_lib_library_free( void );
 
 /* return last error code from functions below */
@@ -107,7 +107,7 @@ GNOKII_API gn_error gn_lib_lasterror( struct gn_statemachine *state );
 GNOKII_API gn_error gn_lib_phoneprofile_load_from_file( const char *configfile, const char *configname, struct gn_statemachine **state );
 GNOKII_API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statemachine **state );
 
-/* Free any structures and ressources which were loaded in this state machine. */
+/* Free any structures and resources which were loaded in this state machine. */
 GNOKII_API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state );
 
 /* opens connection to the phone. Necessary locking will be made */
@@ -251,7 +251,7 @@ GNOKII_API gn_error gn_cfg_file_read(const char *filename) GNOKII_DEPRECATED;
 GNOKII_API gn_error gn_cfg_memory_read(const char **lines) GNOKII_DEPRECATED;
 /* Read the config from the standard $HOME/.gnokiirc or /etc/gnokiirc locations */
 GNOKII_API gn_error gn_cfg_read_default() GNOKII_DEPRECATED;
-/* free any ressources which were used by libgnokii */
+/* free any resources which were used by libgnokii */
 GNOKII_API void gn_cfg_free_default() GNOKII_DEPRECATED;
 /* Use phone_iname section for the communication. Default is the global section */
 GNOKII_API gn_error gn_cfg_phone_load(const char *iname, struct gn_statemachine *state) GNOKII_DEPRECATED;

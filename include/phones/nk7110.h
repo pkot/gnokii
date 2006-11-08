@@ -79,7 +79,7 @@ typedef enum {
 #define NK7110_SUBSMS_DELETE_OK		0x0b	/* SMS deleted */
 #define NK7110_SUBSMS_DELETE_FAIL	0x0c	/* SMS delete failed */
 #define NK7110_SUBSMS_SMS_RCVD		0x10	/* SMS received */
-#define NK7110_SUBSMS_CELLBRD_OK	0x21	/* Set cell broadcast success*/
+#define NK7110_SUBSMS_CELLBRD_OK	0x21	/* Set cell broadcast success */
 #define NK7110_SUBSMS_CELLBRD_FAIL	0x22	/* Set cell broadcast failure */
 #define NK7110_SUBSMS_READ_CELLBRD	0x23	/* Read cell broadcast */
 #define NK7110_SUBSMS_SMSC_OK		0x31	/* Set SMS center success*/
@@ -113,18 +113,18 @@ typedef enum {
 #define NK7110_SUBCAL_DEL_NOTE		0x0b	/* Delete note */
 #define NK7110_SUBCAL_GET_NOTE		0x19	/* Get note */
 #define NK7110_SUBCAL_GET_FREEPOS	0x31	/* Get first free position */
-#define NK7110_SUBCAL_GET_INFO		0x3a	/* Calendar sumary */
+#define NK7110_SUBCAL_GET_INFO		0x3a	/* Calendar summary */
 /* Calendar handling message subtypes (recv) */
 #define NK7110_SUBCAL_ADD_MEETING_RESP	0x02	/* Add meeting note response */
 #define NK7110_SUBCAL_ADD_CALL_RESP	0x04	/* Add call note response */
 #define NK7110_SUBCAL_ADD_BIRTHDAY_RESP	0x06	/* Add birthday note response */
 #define NK7110_SUBCAL_ADD_REMINDER_RESP	0x08	/* Add reminder note response */
-#define NK7110_SUBCAL_DEL_NOTE_RESP	0x0c	/* Dletete note response */
+#define NK7110_SUBCAL_DEL_NOTE_RESP	0x0c	/* Delete note response */
 #define NK7110_SUBCAL_NOTE_RCVD		0x1a	/* Received note */
 #define NK7110_SUBCAL_FREEPOS_RCVD	0x32	/* Received first free position */
 #define NK7110_SUBCAL_INFO_RCVD		0x3b	/* Received calendar summary*/
 /* Calendar note types */
-#define NK7110_NOTE_MEETING		0x01	/* Metting */
+#define NK7110_NOTE_MEETING		0x01	/* Meeting */
 #define NK7110_NOTE_CALL		0x02	/* Call */
 #define NK7110_NOTE_BIRTHDAY		0x04	/* Birthday */
 #define NK7110_NOTE_REMINDER		0x08	/* Reminder */

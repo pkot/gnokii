@@ -39,7 +39,7 @@
 #include <gnokii/error.h>
 #include <gnokii/common.h>
 
-/* Bitmap types. These do *not* corespond to headers[] in gsm-sms.c. */
+/* Bitmap types. These do *not* correspond to headers[] in gsm-sms.c. */
 
 typedef enum {
 	GN_BMP_None = 0,

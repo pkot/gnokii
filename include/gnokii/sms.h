@@ -282,7 +282,7 @@ typedef enum {
 	GN_SMS_CT_CancelStatusReport = 0x01, /* Cancel Status Report Request
 						relating to previously submitted
 						short message; sets SRR to 0 */
-	GN_SMS_CT_DeleteSM           = 0x02, /* Delete previousle submitted
+	GN_SMS_CT_DeleteSM           = 0x02, /* Delete previously submitted
 						Short Message; sets SRR to 0 */
 	GN_SMS_CT_EnableStatusReport = 0x03  /* Enable Status Report Request
 						relating to previously submitted
@@ -366,7 +366,7 @@ typedef struct {
 typedef struct {
 	/* General fields */
 	gn_sms_message_type type;           /* Type of the message. */
-	int delivery_report;               /* Do we request the delivery report? Only for setting. */
+	int delivery_report;                /* Do we request the delivery report? Only for setting. */
 	gn_sms_message_status status;       /* Status of the message read/unread/sent/unsent. */
 	unsigned int validity;              /* Message validity in minutes. Only for setting. */
 	gn_memory_type memory_type  ;       /* Memory type where the message is/should be stored. */
@@ -374,7 +374,7 @@ typedef struct {
 
 	/* Number related fields */
 	gn_gsm_number smsc;                 /* SMSC Number. */
-	gn_gsm_number remote;               /* Remote (sender/receipient) number. */
+	gn_gsm_number remote;               /* Remote (sender/recipient) number. */
 
 	/* Data format fields */
 	gn_sms_dcs dcs;
@@ -407,7 +407,7 @@ typedef struct {
 	unsigned int dcs;		/* Data Coding Scheme (9.2.3.10) */
 	unsigned int length;		/* User Data Length (9.2.3.16), Command Data Length (9.2.3.20) */
 	int udh_indicator;
-	unsigned char user_data[GN_SMS_LONG_MAX_LENGTH];	/* User Data (9.2.3.24), Command Data (9.2.3.21), extened to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
+	unsigned char user_data[GN_SMS_LONG_MAX_LENGTH];      /* User Data (9.2.3.24), Command Data (9.2.3.21), extended to Nokia Multipart Messages from Smart Messaging Specification 3.0.0 */
 	int user_data_length;		/* Length of just previous field */
 
 	gn_sms_vp_format validity_indicator;
@@ -421,7 +421,7 @@ typedef struct {
 
 /*** FOLDERS ***/
 
-/*** Datatype for SMS folders ins 6210/7110 ***/
+/*** Datatype for SMS folders in 6210/7110 ***/
 /* Max name length is 15 characters and trailing \0 */
 #define GN_SMS_FOLDER_NAME_MAX_LENGTH	16
 typedef struct {
