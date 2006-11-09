@@ -128,7 +128,7 @@ int enterchar(gn_data *data, struct gn_statemachine *state)
 	gn_data_clear(data);
 	console_raw();
 
-	while (read(0, &ch, 1) > 0) {
+	while ((error = GN_ERR_NONE) && (read(0, &ch, 1) > 0)) {
 		switch (ch) {
 		case '\r':
 			break;
