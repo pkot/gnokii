@@ -57,6 +57,7 @@
     o avoid looping up to INT_MAX when '--getsms 1 end' fails (e.g.
       PIN code required, invalid memory type)       (Daniele Forsi)
     o --enterchar exits after first failure             (Pawel Kot)
+    o add network code to --monitor output            (Jari Turkia)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
