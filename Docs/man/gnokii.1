@@ -79,8 +79,9 @@ resets the phone.
 
 .SS TODO
 .TP 
-.BR "\-\-gettodo \fIstart\fP [\fIend\fP] [\-v]"
-get the notes with numbers from \fIstart\fR to \fIend\fR from calendar.
+.BR "\-\-gettodo \fIstart_number\fP [\fIend_number\fP|\fIend\fP] [\-v|\-\-vCal]"
+get the notes with numbers from \fIstart_number\fR to \fIend_number\fR from calendar. \fIend\fR is a keyword that denotes 'everything till the end'.
+
 .PP 
 \-v \- output in vCalendar 1.0 format
 .TP 
@@ -94,16 +95,18 @@ delete all notes from the ToDo list.
 
 .SS CALENDAR
 .TP 
-.BR "\-\-getcalendarnote \fIstart\fP [\fIend\fP] [\-v]"
-get the note with numbers from \fIstart\fR to \fIend\fR from calendar. \fIend\fR can be either a number or a keyword end that denotes 'everything till the end'.
+.BR "\-\-getcalendarnote \fIstart_number\fP [\fIend_number\fP|\fIend\fP] [\-v|\-\-vCal]"
+get the note with numbers from \fIstart_number\fR to \fIend_number\fR from calendar. \fIend\fR is a keyword that denotes 'everything till the end'.
 .PP 
 \-v \- output in vCalendar 1.0 format
 .TP 
 .BR "\-\-writecalendarnote \fIvcalfile\fR \fInumber\fR"
 write the note number \fInumber\fR from a vCal file \fIvcalfile\fR to a phone calendar. Just one note a time can be saved.
+.PP
+number \- location of the note in the vCalendar file
 .TP 
-.BR "\-\-deletecalendarnote \fIstart\fP [\fIend\fP]"
-delete the note with numbers from \fIstart\fR to \fIend\fR from calendar. \fIend\fR can be either a number or a keyword end that denotes 'everything till the end'.
+.BR "\-\-deletecalendarnote \fIstart_number\fP [\fIend_number\fP|\fIend\fP]"
+delete the notes with numbers from \fIstart_number\fR to \fIend_number\fR from calendar. \fIend\fR is a keyword that denotes 'everything till the end'.
 
 .SS SMS
 .TP 
@@ -214,7 +217,7 @@ set the \fIrtttlfile\fR as ringtone (on 6110).
 
 .SS PHONEBOOK
 .TP 
-.BR "\-\-getphonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP] [\fI\-r|\-\-raw\fP]"
+.BR "\-\-getphonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP] [\fI[\-r|\-\-raw]|[\-v|\-\-vcard]|[\-l|\-\-ldif]\fP]"
 reads specified memory location from phone.
 If \fIend_number\fR is not specified only one location \- \fIstart\fR is read.
 If instead of \fIend_number\fR the text \fIend\fR is specified then gnokii
@@ -247,6 +250,8 @@ Missed calls
 .IP
 .B LD
 Last dialed numbers 
+.PP
+You can use \fI\-v\fR or \fI\-\-vcard\fR switch to get output in vCal format or \fI\-l\fR or \fI\-\-ldif\fR switch to get output in ldif format.
 .PP
 You can use also \fI\-r\fR or \fI\-\-raw\fR switch to get the raw output.
 You can use it then with \fI\-\-writephonebook\fR. Normally you got verbose output.
@@ -371,12 +376,10 @@ number is the general number
 .PP
 For the subentry types that don't care about number type (as text files)
 this should be set to 0. 
-
-.BR "\-\-deletephonebook  \fImemory_type\fP \fIstart_number\fP [\fIend_number\fP]"
-\" [\fIend_number|end\fP]"
+.TP
+.BR "\-\-deletephonebook \fImemory_type\fP \fIstart_number\fP [\fIend_number|end\fP]"
 delete entries with \fIstart_number\fR to \fIend_number\fR from the phone
-book in \fImemory_type\fR. \fIend_number\fR can be either a number or a keyword
-end that denotes 'everything till the end'.
+book in \fImemory_type\fR. \fIend\fR is a keyword that denotes 'everything till the end'.
 
 .SS WAP
 .TP 
