@@ -64,10 +64,10 @@ void getcalendarnote_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --getcalendarnote start_number [end_number | end] [-v|--vCal]\n"
 			"                        start_number - entry number in the phone calendar (numeric)\n"
-			"                        end_number   - until this entry in the phone calendar (numeric, optional)\n"
+			"                        end_number   - read to this entry in the phone calendar (numeric, optional)\n"
 			"                        end          - the string \"end\" indicates all entries from start to end\n"
 			"                        -v           - output in iCalendar format\n"
-			"  NOTE: if no end is given, only the start entry is written\n"
+			"  NOTE: if no end is given, only the start entry is read\n"
 	));
 	exit(exitval);
 }
@@ -86,8 +86,12 @@ int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachin
 		{ NULL,      0,                 NULL, 0}
 	};
 
-	first_location = atoi(optarg);
+	first_location = gnokii_atoi(optarg);
+	if (errno || first_location < 0)
+		getcalendarnote_usage(stderr, -1);
 	last_location = parse_end_value_option(argc, argv, optind, first_location);
+	if (errno || last_location < 0)
+		getcalendarnote_usage(stderr, -1);
 
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {
@@ -228,6 +232,16 @@ int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachin
 	return error;
 }
 
+void writecalendarnote_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: --writecalendarnote vcalendarfile number\n"
+			"                        vcalendarfile - file containing calendar notes in vCal format\n"
+			"                        number        - calendar note number withing the file\n"
+			"  NOTE: it stores the note at the first empty location.\n"
+	));
+	exit(exitval);
+}
+
 /* Writing calendar notes. */
 int writecalendarnote(char *argv[], gn_data *data, struct gn_statemachine *state)
 {
@@ -246,7 +260,9 @@ int writecalendarnote(char *argv[], gn_data *data, struct gn_statemachine *state
 		return GN_ERR_FAILED;
 	}
 
-	location = atoi(argv[optind]);
+	location = gnokii_atoi(argv[optind]);
+	if (errno || location < 0)
+		writecalendarnote_usage(stderr, -1);
 
 	error = gn_ical2calnote(f, &calnote, location);
 
@@ -277,6 +293,17 @@ int writecalendarnote(char *argv[], gn_data *data, struct gn_statemachine *state
 	return error;
 }
 
+void deletecalendarnote_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: --deletecalendarnote start_number [end_number | end] [-v|--vCal]\n"
+			"                        start_number - first number in the phone calendar (numeric)\n"
+			"                        end_number   - until this entry in the phone calendar (numeric, optional)\n"
+			"                        end          - the string \"end\" indicates all entries from start to end\n"
+			"  NOTE: if no end is given, only the start entry is deleted\n"
+	));
+	exit(exitval);
+}
+
 /* Calendar note deleting. */
 int deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
@@ -290,11 +317,14 @@ int deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemac
 	data->calnote = &calnote;
 	data->calnote_list = &clist;
 
-	first_location = atoi(optarg);
+	first_location = gnokii_atoi(optarg);
+	if (errno || first_location < 0)
+		deletecalendarnote_usage(stderr, -1);
 	last_location = parse_end_value_option(argc, argv, optind, first_location);
+	if (errno || last_location < 0)
+		deletecalendarnote_usage(stderr, -1);
 
 	for (i = first_location; i <= last_location; i++) {
-
 		calnote.location = i;
 
 		error = gn_sm_functions(GN_OP_DeleteCalendarNote, data, state);

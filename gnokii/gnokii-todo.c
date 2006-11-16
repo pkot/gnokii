@@ -86,8 +86,12 @@ int gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		{ NULL,      0,                 NULL, 0}
 	};
 
-	first_location = atoi(optarg);
+	first_location = gnokii_atoi(optarg);
+	if (errno || first_location < 0)
+		gettodo_usage(stderr, -1);
 	last_location = parse_end_value_option(argc, argv, optind, first_location);
+	if (errno || last_location < 0)
+		gettodo_usage(stderr, -1);
 
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {
@@ -141,6 +145,16 @@ int gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	return error;
 }
 
+void writetodo_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: --writetodo vcalfile number\n"
+			 "       vcalfile - file name in vCal format\n"
+			 "       number   - vCal entry from the file to be saved\n"
+			 "  NOTE: entry is written to the first empty location\n"
+	));
+	exit(exitval);
+}
+
 /* ToDo notes writing */
 int writetodo(char *argv[], gn_data *data, struct gn_statemachine *state)
 {
@@ -158,7 +172,9 @@ int writetodo(char *argv[], gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_FAILED;
 	}
 
-	location = atoi(argv[optind]);
+	location = gnokii_atoi(argv[optind]);
+	if (errno || location < 0)
+		writetodo_usage(stderr, -1);
 
 	error = gn_ical2todo(f, &todo, location);
 	fclose(f);

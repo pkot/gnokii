@@ -54,6 +54,7 @@
 #include <getopt.h>
 #include <time.h>
 #include <signal.h>
+#include <errno.h>
 
 #include "gnokii-app.h"
 #include "gnokii.h"
@@ -165,8 +166,8 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 
 		case '2': /* SMSC number index in phone memory */
 			data->message_center = calloc(1, sizeof(gn_sms_message_center));
-			data->message_center->id = atoi(optarg);
-			if (data->message_center->id < 1 || data->message_center->id > 5) {
+			data->message_center->id = gnokii_atoi(optarg);
+			if (errno || data->message_center->id < 1 || data->message_center->id > 5) {
 				free(data->message_center);
 				sendsms_usage(stderr, -1);
 			}
@@ -178,7 +179,9 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			break;
 
 		case 'l': /* we send long message */
-			input_len = atoi(optarg);
+			input_len = gnokii_atoi(optarg);
+			if (errno || input_len < 0)
+				sendsms_usage(stderr, -1);
 			if (input_len > 255 * GN_SMS_MAX_LENGTH) {
 				fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), input_len, 255 * GN_SMS_MAX_LENGTH);
 				return -1;
@@ -221,16 +224,27 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 
 		case 'C': /* class Message */
 			switch (*optarg) {
-			case '0': sms.dcs.u.general.m_class = 1; break;
-			case '1': sms.dcs.u.general.m_class = 2; break;
-			case '2': sms.dcs.u.general.m_class = 3; break;
-			case '3': sms.dcs.u.general.m_class = 4; break;
-			default: sendsms_usage(stderr, -1);
+			case '0':
+				sms.dcs.u.general.m_class = 1;
+				break;
+			case '1':
+				sms.dcs.u.general.m_class = 2;
+				break;
+			case '2':
+				sms.dcs.u.general.m_class = 3;
+				break;
+			case '3':
+				sms.dcs.u.general.m_class = 4;
+				break;
+			default:
+				sendsms_usage(stderr, -1);
 			}
 			break;
 
 		case 'v':
-			sms.validity = atoi(optarg);
+			sms.validity = gnokii_atoi(optarg);
+			if (errno || sms.validity < 0)
+				sendsms_usage(stderr, -1);
 			break;
 
 		case '8':
@@ -429,10 +443,10 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			break;
 		case '1': /* SMSC number index in phone memory */
 			data->message_center = calloc(1, sizeof(gn_sms_message_center));
-			data->message_center->id = atoi(optarg);
-			if (data->message_center->id < 1 || data->message_center->id > 5) {
+			data->message_center->id = gnokii_atoi(optarg);
+			if (errno || data->message_center->id < 1 || data->message_center->id > 5) {
 				free(data->message_center);
-				sendsms_usage(stderr, -1);
+				savesms_usage(stderr, -1);
 			}
 			if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
 				strcpy(sms.smsc.number, data->message_center->smsc.number);
@@ -448,7 +462,9 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			snprintf(sms.remote.number, GN_BCD_STRING_MAX_LENGTH, "%s", optarg);
 			break;
 		case '3': /* location to write to */
-			sms.number = atoi(optarg);
+			sms.number = gnokii_atoi(optarg);
+			if (errno || sms.number < 0)
+				savesms_usage(stderr, -1);
 			break;
 		case 's': /* mark the message as sent */
 		case 'r': /* mark the message as read */
@@ -590,6 +606,8 @@ void getsms_usage(FILE *f, int exitval)
 			"                                    location start and ending with end;\n"
 			"                                    if end option is omitted, just one entry\n"
 			"                                    is read;\n"
+			"                                    start must be a number, end may be a number\n"
+			"                                    or 'end' string;\n"
 			"                                    if 'end' is used entries are being read\n"
 			"                                    until empty location\n"
 			"        -F file                     save sms to the file overwriting it if\n"
@@ -627,8 +645,12 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 		return -1;
 	}
 
-	start_message = atoi(argv[optind]);
+	start_message = gnokii_atoi(argv[optind]);
+	if (errno || start_message < 0)
+		getsms_usage(stderr, -1);
 	end_message = parse_end_value_option(argc, argv, optind + 1, start_message);
+	if (errno || end_message < 0)
+		getsms_usage(stderr, -1);
 
 	memset(&filename, 0, sizeof(filename));
 	/* parse all options (beginning with '-') */
@@ -899,8 +921,12 @@ int deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *sta
 		return -1;
 	}
 
-	start_message = atoi(argv[optind]);
+	start_message = gnokii_atoi(argv[optind]);
+	if (errno || start_message < 0)
+		deletesms_usage(stderr, -1);
 	end_message = parse_end_value_option(argc, argv, optind + 1, start_message);
+	if (errno || end_message < 0)
+		deletesms_usage(stderr, -1);
 
 	/* Now delete the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
@@ -966,8 +992,12 @@ int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	}
 
 	if (argc > optind) {
-		start = atoi(argv[optind]);
-		stop = (argc > optind+1) ? atoi(argv[optind+1]) : start;
+		start = gnokii_atoi(argv[optind]);
+		if (errno || start < 0)
+			getsmsc_usage(stderr, -1);
+		stop = (argc > optind+1) ? gnokii_atoi(argv[optind+1]) : start;
+		if (errno || stop < 0)
+			getsmsc_usage(stderr, -1);
 
 		if (start > stop) {
 			fprintf(stderr, _("Starting SMS center number is greater than stop\n"));
@@ -1176,8 +1206,8 @@ int deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *state)
 
 	gn_data_clear(data);
 
-	folder.folder_id = atoi(number);
-	if (folder.folder_id > 0 && folder.folder_id <= GN_SMS_FOLDER_MAX_NUMBER)
+	folder.folder_id = gnokii_atoi(number);
+	if (!errno && folder.folder_id > 0 && folder.folder_id <= GN_SMS_FOLDER_MAX_NUMBER)
 		data->sms_folder = &folder;
 	else
 		fprintf(stderr, _("Error: Number must be between 1 and %i!\n"), GN_SMS_FOLDER_MAX_NUMBER);

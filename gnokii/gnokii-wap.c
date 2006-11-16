@@ -62,13 +62,21 @@ void wap_usage(FILE *f)
 		     ));
 }
 
+void getwapbookmark_usage(FILE *f, int exitval)
+{
+	fprintf(f, _(" usage: --getwapbookmark number\n"));
+	exit(exitval);
+}
+
 /* Getting WAP bookmarks. */
 int getwapbookmark(char *number, gn_data *data, struct gn_statemachine *state)
 {
 	gn_wap_bookmark	wapbookmark;
 	gn_error	error;
 
-	wapbookmark.location = atoi(number);
+	wapbookmark.location = gnokii_atoi(number);
+	if (errno || wapbookmark.location < 0)
+		getwapbookmark_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->wap_bookmark = &wapbookmark;
@@ -102,7 +110,6 @@ int writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	gn_wap_bookmark	wapbookmark;
 	gn_error	error;
 
-
 	gn_data_clear(data);
 	data->wap_bookmark = &wapbookmark;
 
@@ -126,13 +133,21 @@ int writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	return error;
 }
 
+void deletewapbookmark_usage(FILE *f, int exitval)
+{
+	fprintf(f, _(" usage: --deletewapbookmark number\n"));
+	exit(exitval);
+}
+
 /* Deleting WAP bookmarks. */
 int deletewapbookmark(char *number, gn_data *data, struct gn_statemachine *state)
 {
 	gn_wap_bookmark	wapbookmark;
 	gn_error	error;
 
-	wapbookmark.location = atoi(number);
+	wapbookmark.location = gnokii_atoi(number);
+	if (errno || wapbookmark.location < 0)
+		deletewapbookmark_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->wap_bookmark = &wapbookmark;
@@ -169,7 +184,10 @@ int getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine 
 		{ NULL,     0,           NULL, 0}
 	};
 
-	wapsetting.location = atoi(optarg);
+	wapsetting.location = gnokii_atoi(optarg);
+	if (errno || wapsetting.location < 0)
+		getwapsetting_usage(stderr, -1);
+
 	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
 		switch (i) {
 		case 'r':
@@ -387,13 +405,21 @@ int writewapsetting(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+void activatewapsetting_usage(FILE *f, int exitval)
+{
+	fprintf(f, _(" usage: --activatewapsetting number\n"));
+	exit(exitval);
+}
+
 /* Deleting WAP bookmarks. */
 int activatewapsetting(char *number, gn_data *data, struct gn_statemachine *state)
 {
 	gn_wap_setting	wapsetting;
 	gn_error	error;
 
-	wapsetting.location = atoi(number);
+	wapsetting.location = gnokii_atoi(number);
+	if (errno || wapsetting.location < 0)
+		activatewapsetting_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->wap_setting = &wapsetting;

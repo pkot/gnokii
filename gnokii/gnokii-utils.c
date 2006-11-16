@@ -96,6 +96,23 @@ gn_error loadbitmap(gn_bmp *bitmap, char *s, int type, struct gn_statemachine *s
 	return GN_ERR_NONE;
 }
 
+/* 
+ * Does almost the same as atoi().
+ * Returns error in case when the string is not numerical or when strtol returns an error.
+ * Modifies errno variable.
+ */
+int gnokii_atoi(char *string)
+{
+	char *aux = NULL;
+	int num;
+
+	errno = 0;
+	num = strtol(string, &aux, 10);
+	if (*aux)
+		errno = ERANGE;
+	return num;
+}
+
 /* Calculates end value from the command line of the form:
  * gnokii --something [...] start [end]
  * where end can be either number or 'end' string.
@@ -109,7 +126,7 @@ int parse_end_value_option(int argc, char *argv[], int pos, int start_value)
 		if (!strcasecmp(argv[pos], "end"))
 			retval = INT_MAX;
 		else
-			retval = atoi(argv[pos]);
+			retval = gnokii_atoi(argv[pos]);
 	}
 	if (retval < start_value) {
 		fprintf(stderr, _("Warning: end value (%d) is less than start value (%d). Setting it to the start value (%d)\n"),

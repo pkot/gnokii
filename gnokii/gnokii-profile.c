@@ -186,8 +186,12 @@ int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *st
 		max_profiles = 3;
 
 	if (argc > optind) {
-		start = atoi(argv[optind]);
-		stop = (argc > optind + 1) ? atoi(argv[optind + 1]) : start;
+		start = gnokii_atoi(argv[optind]);
+		if (errno || start < 0)
+			getprofile_usage(stderr, -1);
+		stop = (argc > optind + 1) ? gnokii_atoi(argv[optind + 1]) : start;
+		if (errno || stop < 0)
+			getprofile_usage(stderr, -1);
 
 		if (start > stop) {
 			fprintf(stderr, _("Starting profile number is greater than stop\n"));
@@ -316,6 +320,12 @@ int getactiveprofile(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+void setactiveprofile_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: --setactiveprofile profile_number\n"));
+	exit(exitval);
+}
+
 /* Select the specified profile */
 int setactiveprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
@@ -324,7 +334,9 @@ int setactiveprofile(int argc, char *argv[], gn_data *data, struct gn_statemachi
 
 	gn_data_clear(data);
 	data->profile = &p;
-	p.number = atoi(optarg);
+	p.number = gnokii_atoi(optarg);
+	if (errno || p.number < 0)
+		setactiveprofile_usage(stderr, -1);
 
 	error = gn_sm_functions(GN_OP_SetActiveProfile, data, state);
 	if (error != GN_ERR_NONE)

@@ -185,7 +185,9 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	}
 
 	if (argc > optind) {
-		ringtone.location = atoi(argv[optind]);
+		ringtone.location = gnokii_atoi(argv[optind]);
+		if (errno || ringtone.location < 0)
+			getringtone_usage(stderr, -1);
 	} else {
 		init_ringtone_list(data, state);
 		ringtone.location = ringtone_list.userdef_location;
@@ -284,12 +286,13 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	data->ringtone = &ringtone;
 	data->raw_data = &rawdata;
 
-	if (argc <= optind) {
+	if (argc <= optind)
 		setringtone_usage(stderr, -1);
-		return -1;
-	}
 
-	location = (argc > optind + 1) ? atoi(argv[optind + 1]) : -1;
+	errno = 0;
+	location = (argc > optind + 1) ? gnokii_atoi(argv[optind + 1]) : -1;
+	if (errno)
+		setringtone_usage(stderr, -1);
 
 	if (raw) {
 		FILE *f;
@@ -350,7 +353,9 @@ int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {
 		case 'v':
-			volume = atoi(optarg);
+			volume = gnokii_atoi(optarg);
+			if (errno || volume < 0)
+				playringtone_usage(stderr, -1);
 			break;
 		default:
 			playringtone_usage(stderr, -1); /* FIXME */
@@ -481,8 +486,12 @@ gn_error deleteringtone(int argc, char *argv[], gn_data *data, struct gn_statema
 	gn_data_clear(data);
 	data->ringtone = &ringtone;
 
-	start = atoi(optarg);
+	start = gnokii_atoi(optarg);
+	if (errno || start < 0)
+		deleteringtone_usage(stderr, -1);
 	end = parse_end_value_option(argc, argv, optind, start);
+	if (errno || end < 0)
+		deleteringtone_usage(stderr, -1);
 
 	for (i = start; i <= end; i++) {
 		ringtone.location = i;

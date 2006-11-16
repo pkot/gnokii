@@ -53,7 +53,7 @@
 void dial_usage(FILE *f)
 {
 	fprintf(f, _("Dialling and call options:\n"
-		     "          --getspeeddial number\n"
+		     "          --getspeeddial location\n"
 		     "          --setspeeddial number memory_type location\n"
 		     "          --dialvoice number\n"
 		     "          --senddtmf string\n"
@@ -64,7 +64,16 @@ void dial_usage(FILE *f)
 		     "                 {--call|-c} {all|voice|fax|data}\n"
 		     "                 [{--timeout|-m} time_in_seconds]\n"
 		     "                 [{--number|-n} number]\n"
+		     "All number, location and callid options need to be numeric.\n"
 		     ));
+}
+
+void getspeeddial_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: --getspeeddial location\n"
+			"                        location - speeddial location in the phone calendar\n"
+	));
+	exit(exitval);
 }
 
 /* Getting speed dials. */
@@ -73,7 +82,9 @@ int getspeeddial(char *number, gn_data *data, struct gn_statemachine *state)
 	gn_speed_dial	speeddial;
 	gn_error	error;
 
-	speeddial.number = atoi(number);
+	speeddial.number = gnokii_atoi(number);
+	if (errno || speeddial.number < 0)
+		getspeeddial_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->speed_dial = &speeddial;
@@ -90,6 +101,16 @@ int getspeeddial(char *number, gn_data *data, struct gn_statemachine *state)
 	}
 
 	return error;
+}
+
+void setspeeddial_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: --setspeeddial number memory_type location\n"
+			"                        number      - phone number to be stored\n"
+			"                        memory_type - memory type for the speed dial\n"
+			"                        location    - location in the speed dial memory\n"
+	));
+	exit(exitval);
 }
 
 /* Setting speed dials. */
@@ -114,8 +135,12 @@ int setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state)
 		return -1;
 	}
 
-	entry.number = atoi(optarg);
-	entry.location = atoi(argv[optind+1]);
+	entry.number = gnokii_atoi(optarg);
+	if (errno || entry.number < 0)
+		setspeeddial_usage(stderr, -1);
+	entry.location = gnokii_atoi(argv[optind+1]);
+	if (errno || entry.location < 0)
+		setspeeddial_usage(stderr, -1);
 
 	error = gn_sm_functions(GN_OP_SetSpeedDial, data, state);
 
@@ -170,6 +195,14 @@ int senddtmf(char *string, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+void answercall_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: --answercall callid\n"
+			"                        callid - call identifier\n"
+	));
+	exit(exitval);
+}
+
 /* Answering incoming call */
 int answercall(char *callid, gn_data *data, struct gn_statemachine *state)
 {
@@ -177,7 +210,9 @@ int answercall(char *callid, gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 
 	memset(&callinfo, 0, sizeof(callinfo));
-	callinfo.call_id = atoi(callid);
+	callinfo.call_id = gnokii_atoi(callid);
+	if (errno || callinfo.call_id < 0)
+		answercall_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->call_info = &callinfo;
@@ -191,6 +226,14 @@ int answercall(char *callid, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+void hangup_usage(FILE *f, int exitval)
+{
+	fprintf(f, _("usage: --hangup callid\n"
+			"                        callid - call identifier\n"
+	));
+	exit(exitval);
+}
+
 /* Hangup the call */
 int hangup(char *callid, gn_data *data, struct gn_statemachine *state)
 {
@@ -198,7 +241,9 @@ int hangup(char *callid, gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 
 	memset(&callinfo, 0, sizeof(callinfo));
-	callinfo.call_id = atoi(callid);
+	callinfo.call_id = gnokii_atoi(callid);
+	if (errno || callinfo.call_id < 0)
+		hangup_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->call_info = &callinfo;
@@ -274,7 +319,6 @@ int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				cd.operation = GN_CDV_Query;
 			} else {
 				divert_usage(stderr, -1);
-				return -1;
 			}
 			break;
 		case 't':
@@ -290,7 +334,6 @@ int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				cd.type = GN_CDV_NotAvailable;
 			} else {
 				divert_usage(stderr, -1);
-				return -1;
 			}
 			break;
 		case 'c':
@@ -304,11 +347,12 @@ int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				cd.ctype = GN_CDV_DataCalls;
 			} else {
 				divert_usage(stderr, -1);
-				return -1;
 			}
 			break;
 		case 'm':
-			cd.timeout = atoi(optarg);
+			cd.timeout = gnokii_atoi(optarg);
+			if (errno || cd.timeout < 0)
+				divert_usage(stderr, -1);
 			break;
 		case 'n':
 			strncpy(cd.number.number, optarg, sizeof(cd.number.number) - 1);
@@ -319,7 +363,6 @@ int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 			break;
 		default:
 			divert_usage(stderr, -1);
-			return -1;
 		}
 	}
 	data->call_divert = &cd;
@@ -328,20 +371,42 @@ int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 	if (error == GN_ERR_NONE) {
 		fprintf(stdout, _("Divert type: "));
 		switch (cd.type) {
-		case GN_CDV_AllTypes: fprintf(stdout, _("all\n")); break;
-		case GN_CDV_Busy: fprintf(stdout, _("busy\n")); break;
-		case GN_CDV_NoAnswer: fprintf(stdout, _("noans\n")); break;
-		case GN_CDV_OutOfReach: fprintf(stdout, _("outofreach\n")); break;
-		case GN_CDV_NotAvailable: fprintf(stdout, _("notavail\n")); break;
-		default: fprintf(stdout, _("unknown(0x%02x)\n"), cd.type);
+		case GN_CDV_AllTypes:
+			fprintf(stdout, _("all\n"));
+			break;
+		case GN_CDV_Busy:
+			fprintf(stdout, _("busy\n"));
+			break;
+		case GN_CDV_NoAnswer:
+			fprintf(stdout, _("noans\n"));
+			break;
+		case GN_CDV_OutOfReach:
+			fprintf(stdout, _("outofreach\n"));
+			break;
+		case GN_CDV_NotAvailable:
+			fprintf(stdout, _("notavail\n"));
+			break;
+		default:
+			fprintf(stdout, _("unknown(0x%02x)\n"), cd.type);
+			break;
 		}
 		fprintf(stdout, _("Call type: "));
 		switch (cd.ctype) {
-		case GN_CDV_AllCalls: fprintf(stdout, _("all\n")); break;
-		case GN_CDV_VoiceCalls: fprintf(stdout, _("voice\n")); break;
-		case GN_CDV_FaxCalls: fprintf(stdout, _("fax\n")); break;
-		case GN_CDV_DataCalls: fprintf(stdout, _("data\n")); break;
-		default: fprintf(stdout, _("unknown(0x%02x)\n"), cd.ctype);
+		case GN_CDV_AllCalls:
+			fprintf(stdout, _("all\n"));
+			break;
+		case GN_CDV_VoiceCalls:
+			fprintf(stdout, _("voice\n"));
+			break;
+		case GN_CDV_FaxCalls:
+			fprintf(stdout, _("fax\n"));
+			break;
+		case GN_CDV_DataCalls:
+			fprintf(stdout, _("data\n"));
+			break;
+		default:
+			fprintf(stdout, _("unknown(0x%02x)\n"), cd.ctype);
+			break;
 		}
 		if (cd.number.number[0]) {
 			fprintf(stdout, _("Number: %s\n"), cd.number.number);

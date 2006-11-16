@@ -34,6 +34,7 @@
 #ifndef __gnokii_app_h_
 #define __gnokii_app_h_
 
+#include <errno.h>
 #include "gnokii-internal.h"
 
 #define MAX_INPUT_LINE_LEN 512
@@ -213,5 +214,6 @@ extern int presskeysequence(gn_data *data, struct gn_statemachine *state);
 extern int enterchar(gn_data *data, struct gn_statemachine *state);
 extern void list_gsm_networks(void);
 extern int getnetworkinfo(gn_data *data, struct gn_statemachine *state);
+extern int gnokii_atoi(char *string);
 
 #endif /* __gnokii_app_h_ */
