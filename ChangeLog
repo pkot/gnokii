@@ -35,6 +35,8 @@
                                                         (Pawel Kot)
     o change type of caller_group from int to
       gn_phonebook_group_type                           (Pawel Kot)
+    o add support for concatenated messages with 16-bit reference
+      number                                          (Petr Hruska)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
