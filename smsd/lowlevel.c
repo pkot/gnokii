@@ -95,7 +95,7 @@ static gn_error InitModelInf (void)
     
   g_free (phoneMonitor.phone.model);
   phoneMonitor.phone.version = g_strdup (model);
-  phoneMonitor.phone.model = gn_phone_model_get (model)->model;
+  phoneMonitor.phone.model = (gchar *)(gn_phone_model_get (model)->model);
   if (phoneMonitor.phone.model == NULL)
     phoneMonitor.phone.model = g_strdup (_("unknown"));
 
@@ -373,11 +373,6 @@ static void RealConnect (void *phone)
         }
         phoneMonitor.sms.unRead = 0;
       }
-      else
-      {
-        g_print (_("GN_OP_GetSMSFolderStatus at line %d in file %s returns error %d\nRestarting connection."), __LINE__, __FILE__, error);
-        break;
-      }
     }
     else
     {
@@ -397,11 +392,17 @@ static void RealConnect (void *phone)
         }
         phoneMonitor.sms.unRead = SMSStatus.unread;
       }
-      else
+    }
+    if (error != GN_ERR_NONE)
+    {
+      if (error == GN_ERR_TIMEOUT)
       {
-        g_print (_("GN_OP_GetSMSStatus at line %d in file %s returns error %d\nRestarting connection."), __LINE__, __FILE__, error);
+        g_print (_("Timeout in file %s, line %d, restarting connection.\n"),
+                 __FILE__, __LINE__);
         break;
       }
+      else
+        g_print ("%s:%d %s\n", __FILE__, __LINE__, gn_error_print(error));
     }
 
     while ((event = RemoveEvent ()) != NULL)
@@ -416,7 +417,7 @@ static void RealConnect (void *phone)
     
     sleep (smsdConfig.refreshInt);
   }
-  
+
   free (data);
 }
 
