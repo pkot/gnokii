@@ -465,6 +465,13 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 			udh->udh[nr].u.concatenated_short_message.maximum_number   = message[pos + 3];
 			udh->udh[nr].u.concatenated_short_message.current_number   = message[pos + 4];
 			break;
+		case 0x08: /* Concatenated short messages, 16-bit reference number */
+			dprintf("Concatenated messages, 16-bit reference number\n");
+			udh->udh[nr].type = GN_SMS_UDH_ConcatenatedMessages;
+			udh->udh[nr].u.concatenated_short_message.reference_number = 256 * message[pos + 2] + message[pos + 3];
+			udh->udh[nr].u.concatenated_short_message.maximum_number   = message[pos + 4];
+			udh->udh[nr].u.concatenated_short_message.current_number   = message[pos + 5];
+			break;
 		case 0x01: /* Special SMS Message Indication */
 			switch (message[pos + 2] & 0x03) {
 			case 0x00:
@@ -534,13 +541,6 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 		case 0x04: /* Application port addressing scheme, 8 bit address */
 		case 0x06: /* SMSC Control Parameters */
 		case 0x07: /* UDH Source Indicator */
-		case 0x08: /* Concatenated short messages, 16-bit reference number */
-			dprintf("Concatenated messages, 16-bit reference number\n");
-			udh->udh[nr].type = GN_SMS_UDH_ConcatenatedMessages;
-			udh->udh[nr].u.concatenated_short_message.reference_number = 256 * message[pos + 2] + message[pos + 3];
-			udh->udh[nr].u.concatenated_short_message.maximum_number   = message[pos + 4];
-			udh->udh[nr].u.concatenated_short_message.current_number   = message[pos + 5];
-			break;
 		default:
 			udh->udh[nr].type = GN_SMS_UDH_Unknown;
 			dprintf("Not supported UDH\n");
