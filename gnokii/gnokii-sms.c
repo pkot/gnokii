@@ -716,10 +716,23 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				break;
 			case GN_SMS_MT_DeliveryReport:
 				fprintf(stdout, _("%d. Delivery Report "), message.number);
-				if (message.status)
+				switch (message.status) {
+				case GN_SMS_Read:
 					fprintf(stdout, _("(read)\n"));
-				else
-					fprintf(stdout, _("(not read)\n"));
+					break;
+				case GN_SMS_Unread:
+					fprintf(stdout, _("(unread)\n"));
+					break;
+				case GN_SMS_Sent:
+					fprintf(stdout, _("(sent)\n"));
+					break;
+				case GN_SMS_Unsent:
+					fprintf(stdout, _("(unsent)\n"));
+					break;
+				default:
+					fprintf(stdout, _("(read)\n"));
+					break;
+				}
 				fprintf(stdout, _("Sending date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.smsc_time.day, message.smsc_time.month, message.smsc_time.year, \
 					message.smsc_time.hour, message.smsc_time.minute, message.smsc_time.second);
