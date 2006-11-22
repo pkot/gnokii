@@ -712,7 +712,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 					fprintf(stdout, _("(read)\n"));
 					break;
 				}
-				fprintf(stdout, _("Text: %s\n\n"), message.user_data[0].u.text);
+				fprintf(stdout, _("Text:\n%s\n"), message.user_data[0].u.text);
 				break;
 			case GN_SMS_MT_DeliveryReport:
 				fprintf(stdout, _("%d. Delivery Report "), message.number);
@@ -754,7 +754,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				}
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
-				fprintf(stdout, _("Text: %s\n\n"), message.user_data[0].u.text);
+				fprintf(stdout, _("Text:\n%s\n"), message.user_data[0].u.text);
 				break;
 			case GN_SMS_MT_Picture:
 				fprintf(stdout, _("Picture Message\n"));
@@ -771,7 +771,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
 				fprintf(stdout, _("Bitmap:\n"));
 				gn_bmp_print(&message.user_data[0].u.bitmap, stdout);
-				fprintf(stdout, _("Text: %s\n\n"), message.user_data[1].u.text);
+				fprintf(stdout, _("Text:\n%s\n"), message.user_data[1].u.text);
 				break;
 			default:
 				fprintf(stdout, _("%d. Inbox Message "), message.number);
