@@ -1806,6 +1806,7 @@ static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int len
 {
 	at_line_buffer buf;
 	gn_error error;
+	gn_timestamp *dt;
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
 		return error;
@@ -1815,7 +1816,7 @@ static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int len
 
 	splitlines(&buf);
 
-	gn_timestamp *dt = data->datetime;
+	dt = data->datetime;
 	if (sscanf(buf.line2, "+CCLK: \"%d/%d/%d,%d:%d:%d\"",
 		   &dt->year, &dt->month, &dt->day,
 		   &dt->hour, &dt->minute, &dt->second) != 6)
