@@ -283,4 +283,13 @@ time_t timegm(struct tm *tm);
 #  define MBSTATE_DEC_CLEAR(x) wctomb(NULL, 0)
 #endif
 
+/* MS Visual C does not have va_copy */
+#ifndef va_copy
+#  ifdef __va_copy
+#    define va_copy(dest, src)    __va_copy((dest), (src))
+#  else
+#    define va_copy(dest, src)    memcpy(&(dest), &(src), sizeof(va_list))
+#  endif
+#endif
+
 #endif
