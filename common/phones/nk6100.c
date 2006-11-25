@@ -1663,9 +1663,9 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 		}
 		if (data->raw_sms->type != GN_SMS_MT_Submit) {
 			memcpy(data->raw_sms->smsc_time, &getdata(36, 35, 0), 7);
-			memcpy(data->raw_sms->message_center, message + 8, 12);
-			memcpy(data->raw_sms->remote_number, &getdata(24, 23, 0), 12);
 		}
+		memcpy(data->raw_sms->message_center, message + 8, 12);
+		memcpy(data->raw_sms->remote_number, &getdata(24, 23, 25), 12);
 #undef getdata
 		break;
 

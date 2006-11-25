@@ -122,6 +122,8 @@
     o make get_ringtone_list() more general         (Daniele Forsi)
     o check if message number is in range 0..255 in GetSMSMessage()
       SaveSMSMessage() and DeleteSMSMessage()       (Daniele Forsi)
+    o in IncomingSMS() copy message center number and remote number
+      for type GN_SMS_MT_Submit too                 (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
