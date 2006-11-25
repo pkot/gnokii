@@ -98,6 +98,8 @@
     o add AC_GNU_SOURCE to supress autoconf warnings    (Pawel Kot)
     o update win32 build files                        (Jari Turkia)
     o provide a replacement for va_copy() macro       (Jari Turkia)
+    o add --disable-irda and --disable-bluetooth options
+                                                        (Pawel Kot)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)

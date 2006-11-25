@@ -314,6 +314,7 @@ AC_ARG_ENABLE(libusb,
                             ),,
               [enable_libusb=yes])
 if test "$enable_libusb" == "yes"; then
+	AC_MSG_CHECKING(whether libusb is installed)
 	AC_TRY_COMPILE([#include <usb.h>],
 		[struct usb_dev_handle *dev;],
 		[
@@ -334,12 +335,19 @@ AC_CHECK_FUNC(gethostbyname, ,
 
 dnl ======================== Checks for Linux IrDA support
 USE_IRDA="no"
-AC_CHECK_HEADER(linux/irda.h,
-	[AC_DEFINE(HAVE_IRDA)
-	 USE_IRDA="yes"],,
-	[#include <sys/socket.h>
-	 #include <sys/ioctl.h>
-	 #include <linux/types.h>])
+AC_ARG_ENABLE(irda,
+              AC_HELP_STRING([--enable-irda],
+                             [enable irda support (default is autodetected)]
+                            ),,
+              [enable_irda=yes])
+if test "$enable_irda" == "yes"; then
+	AC_CHECK_HEADER(linux/irda.h,
+		[AC_DEFINE(HAVE_IRDA)
+		 USE_IRDA="yes"],,
+		[#include <sys/socket.h>
+		 #include <sys/ioctl.h>
+		 #include <linux/types.h>])
+fi
 
 dnl ======================== Checks for Linux Bluetooth support
 bluetooth="no"
@@ -354,32 +362,35 @@ AC_ARG_WITH(bluetooth,
 	]
 )
 
-AC_MSG_CHECKING([for the bluetooth support])
-echo
-AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_sockaddr_rc,
-	[AC_TRY_COMPILE([#include <sys/socket.h>
-			#include <bluetooth/bluetooth.h>
-			#include <bluetooth/rfcomm.h>],
-		[struct sockaddr_rc rc;],
-		ac_cv_have_sockaddr_rc=yes,
-		ac_cv_have_sockaddr_rc=no)])
 USE_BLUETOOTH="no"
-if test $ac_cv_have_sockaddr_rc = yes; then
-	AC_DEFINE(HAVE_BLUETOOTH)
-	AC_DEFINE(HAVE_BLUETOOTH_BLUEZ,[],[Compile on Linux])
-	USE_BLUETOOTH="yes"
-	LIBS="$LIBS -lbluetooth"
+AC_ARG_ENABLE(bluetooth,
+              AC_HELP_STRING([--enable-bluetooth],
+                             [enable bluetooth support (default is autodetected)]
+                            ),,
+              [enable_bluetooth=yes])
+if test "$enable_bluetooth" == "yes"; then
+	AC_MSG_CHECKING([for the bluetooth support])
+	AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_sockaddr_rc,
+		[AC_TRY_COMPILE([#include <sys/socket.h>
+				#include <bluetooth/bluetooth.h>
+				#include <bluetooth/rfcomm.h>],
+			[struct sockaddr_rc rc;],
+			ac_cv_have_sockaddr_rc=yes,
+			ac_cv_have_sockaddr_rc=no)])
+	if test $ac_cv_have_sockaddr_rc = yes; then
+		AC_DEFINE(HAVE_BLUETOOTH)
+		AC_DEFINE(HAVE_BLUETOOTH_BLUEZ,[],[Compile on Linux])
+		USE_BLUETOOTH="yes"
+		LIBS="$LIBS -lbluetooth"
+	fi
 fi
-
-
 dnl ======================== Checks for MacOSX Bluetooth support
-
-AC_MSG_CHECKING([for the MacOS X bluetooth support])
-echo
-AC_CHECK_HEADERS(CoreFoundation/CoreFoundation.h)
-AC_CHECK_HEADERS(IOBluetooth/Bluetooth.h)
-AC_CHECK_HEADERS(IOBluetooth/IOBluetoothUserLib.h)
-AC_TRY_COMPILE([#include <CoreFoundation/CoreFoundation.h>
+if test "$enable_bluetooth" == "yes"; then
+	AC_MSG_CHECKING([for the MacOS X bluetooth support])
+	AC_CHECK_HEADERS(CoreFoundation/CoreFoundation.h)
+	AC_CHECK_HEADERS(IOBluetooth/Bluetooth.h)
+	AC_CHECK_HEADERS(IOBluetooth/IOBluetoothUserLib.h)
+	AC_TRY_COMPILE([#include <CoreFoundation/CoreFoundation.h>
 			#include <IOBluetooth/Bluetooth.h>
 			#include <IOBluetooth/IOBluetoothUserLib.h>],
 
@@ -390,37 +401,36 @@ AC_TRY_COMPILE([#include <CoreFoundation/CoreFoundation.h>
 		ac_cv_have_iobluetooth=yes,
 		ac_cv_have_iobluetooth=no)
 
-if test $ac_cv_have_iobluetooth = yes; then
-	AC_DEFINE(HAVE_BLUETOOTH)
-	AC_DEFINE(HAVE_BLUETOOTH_MACOSX,[],[Compile on Darwin / Mac OSX])
-	USE_BLUETOOTH="yes"
-	LIBS="$LIBS $PTHREAD_LIBS -framework CoreFoundation -framework IOBluetooth -framework Foundation"
+	if test $ac_cv_have_iobluetooth = yes; then
+		AC_DEFINE(HAVE_BLUETOOTH)
+		AC_DEFINE(HAVE_BLUETOOTH_MACOSX,[],[Compile on Darwin / Mac OSX])
+		USE_BLUETOOTH="yes"
+		LIBS="$LIBS $PTHREAD_LIBS -framework CoreFoundation -framework IOBluetooth -framework Foundation"
+	fi
 fi
-
 
 dnl ======================== Checks for FreeBSD/netgraph Bluetooth support
+if test "$enable_bluetooth" == "yes"; then
+	AC_MSG_CHECKING([for the FreeBSD/netgraph bluetooth support])
+	AC_CACHE_CHECK(for the struct sockaddr_rfcomm in <netgraph/.../ng_btsocket.h>, ac_cv_have_sockaddr_rfcomm,
+		[AC_TRY_COMPILE([#include <sys/types.h>
+				#include <sys/socket.h>
+				#include <bitstring.h>
+				#include <netgraph/bluetooth/include/ng_hci.h>
+				#include <netgraph/bluetooth/include/ng_l2cap.h>
+				#include <netgraph/bluetooth/include/ng_btsocket.h>],
+			[struct sockaddr_rfcomm rc;],
+			ac_cv_have_sockaddr_rfcomm=yes,
+			ac_cv_have_sockaddr_rfcomm=no)])
 
-AC_MSG_CHECKING([for the FreeBSD/netgraph bluetooth support])
-echo
-AC_CACHE_CHECK(for the struct sockaddr_rfcomm in <netgraph/.../ng_btsocket.h>, ac_cv_have_sockaddr_rfcomm,
-	[AC_TRY_COMPILE([#include <sys/types.h>
-			#include <sys/socket.h>
-			#include <bitstring.h>
-			#include <netgraph/bluetooth/include/ng_hci.h>
-			#include <netgraph/bluetooth/include/ng_l2cap.h>
-			#include <netgraph/bluetooth/include/ng_btsocket.h>],
-		[struct sockaddr_rfcomm rc;],
-		ac_cv_have_sockaddr_rfcomm=yes,
-		ac_cv_have_sockaddr_rfcomm=no)])
-
-if test $ac_cv_have_sockaddr_rfcomm = yes; then
-	AC_DEFINE(HAVE_BLUETOOTH)
-	AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH,[],[Compile on FreeBSD])
-	USE_BLUETOOTH="yes"
-	AC_CHECK_LIB(bluetooth, bt_aton,
-		    [LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the \`bt_aton' function.])])
+	if test $ac_cv_have_sockaddr_rfcomm = yes; then
+		AC_DEFINE(HAVE_BLUETOOTH)
+		AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH,[],[Compile on FreeBSD])
+		USE_BLUETOOTH="yes"
+		AC_CHECK_LIB(bluetooth, bt_aton,
+			    [LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the \`bt_aton' function.])])
+	fi
 fi
-
 
 dnl ======================== Checks for X base support
 
