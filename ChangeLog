@@ -65,7 +65,8 @@
     o treat read/unread status of delivery reports like other SMs
                                                     (Daniele Forsi)
     o make --getsms print "Text:" then go to newline for all types
-      of SMs                                        (Daniele Forsi)
+      of SMs; make it also print more details for GN_SMS_MT_Submit
+      like already done for GN_SMS_MT_SubmitSent    (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)

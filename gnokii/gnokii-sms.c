@@ -693,27 +693,6 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 		switch (error) {
 		case GN_ERR_NONE:
 			switch (message.type) {
-			case GN_SMS_MT_Submit:
-				fprintf(stdout, _("%d. MO Message "), message.number);
-				switch (message.status) {
-				case GN_SMS_Read:
-					fprintf(stdout, _("(read)\n"));
-					break;
-				case GN_SMS_Unread:
-					fprintf(stdout, _("(unread)\n"));
-					break;
-				case GN_SMS_Sent:
-					fprintf(stdout, _("(sent)\n"));
-					break;
-				case GN_SMS_Unsent:
-					fprintf(stdout, _("(unsent)\n"));
-					break;
-				default:
-					fprintf(stdout, _("(read)\n"));
-					break;
-				}
-				fprintf(stdout, _("Text:\n%s\n"), message.user_data[0].u.text);
-				break;
 			case GN_SMS_MT_DeliveryReport:
 				fprintf(stdout, _("%d. Delivery Report "), message.number);
 				switch (message.status) {
@@ -774,7 +753,15 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				fprintf(stdout, _("Text:\n%s\n"), message.user_data[1].u.text);
 				break;
 			default:
-				fprintf(stdout, _("%d. Inbox Message "), message.number);
+				switch (message.type) {
+				case GN_SMS_MT_Submit:
+				case GN_SMS_MT_SubmitSent:
+					fprintf(stdout, _("%d. MO Message "), message.number);
+					break;
+				default:
+					fprintf(stdout, _("%d. Inbox Message "), message.number);
+					break;
+				}
 				switch (message.status) {
 				case GN_SMS_Read:
 					fprintf(stdout, _("(read)\n"));
@@ -802,7 +789,15 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 						fprintf(stdout,_("%02d00"), message.smsc_time.timezone);
 				}
 				fprintf(stdout, "\n");
-				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
+				switch (message.type) {
+				case GN_SMS_MT_Submit:
+				case GN_SMS_MT_SubmitSent:
+					fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
+					break;
+				default:
+					fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
+					break;
+				}
 				/* No UDH */
 				if (!message.udh.number) message.udh.udh[0].type = GN_SMS_UDH_None;
 				switch (message.udh.udh[0].type) {
