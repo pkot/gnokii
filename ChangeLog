@@ -37,6 +37,7 @@
       gn_phonebook_group_type                           (Pawel Kot)
     o add support for concatenated messages with 16-bit reference
       number                                          (Petr Hruska)
+    o add support for Nokia 6233                        (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
