@@ -100,6 +100,7 @@
     o provide a replacement for va_copy() macro       (Jari Turkia)
     o add --disable-irda and --disable-bluetooth options
                                                         (Pawel Kot)
+    o replace gettextize with autopoint                 (Pawel Kot)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)
