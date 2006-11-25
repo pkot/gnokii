@@ -1557,7 +1557,7 @@ static gn_error SaveSMSMessage(gn_data *data, struct gn_statemachine *state)
 
 	if (data->raw_sms->type == GN_SMS_MT_Deliver) {	/* Inbox */
 		dprintf("INBOX!\n");
-		req[4] 		= 0x03;			/* SMS State - GSM_Unread */
+		req[4] 		= 0x03;			/* SMS State - GN_SMS_Unread */
 		req[7] 		= 0x00;			/* SMS Type */
 	}
 
