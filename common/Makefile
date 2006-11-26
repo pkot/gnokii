@@ -18,9 +18,15 @@ TOPDIR=..
 include $(TOPDIR)/Makefile.global
 
 # REMEMBER: if you change the numbers below, please change them in gnokii.h as well.
-GNOKII_MAJOR = 3
+# Change it in the following manner
+#  - if you change the code and don't change API, increase GNOKII_RELEASE
+#  - if you change API in backward compatible manner (adding things),
+#    increase GNOKII_MAJOR, GNOKII_MINOR, set GNOKII_RELEASE to 0
+#  - if you change API in backward incompatible manner (removing things,
+#    changing things), increase GNOKII_MAJOR, set GNOKII_RELEASE to 0
+GNOKII_MAJOR = 4
 GNOKII_MINOR = 1
-GNOKII_RELEASE = 1
+GNOKII_RELEASE = 0
 ifdef WIN32_CROSS
 LIBTOOL_UNDEF = -no-undefined
 LIBTOOL_VER = -version-info $(GNOKII_MAJOR):$(GNOKII_RELEASE):$(GNOKII_MINOR) -avoid-version
