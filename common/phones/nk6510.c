@@ -4151,6 +4151,7 @@ static gn_error NK6510_PressOrReleaseKey(gn_data *data, struct gn_statemachine *
 	SEND_MESSAGE_BLOCK(NK6510_MSG_KEYPRESS, 10);
 }
 
+#ifdef  SECURITY
 /*****************/
 /*** SECURITY  ***/
 /*****************/
@@ -4249,6 +4250,7 @@ static gn_error NK6510_EnterSecurityCode(gn_data *data, struct gn_statemachine *
 
 	SEND_MESSAGE_BLOCK(NK6510_MSG_SECURITY, 6 + len);
 }
+#endif
 
 /*****************/
 /*** SUBSCRIBE ***/

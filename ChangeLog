@@ -107,6 +107,8 @@
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)
+    o fix warning about unused functions when compiled without
+      --enable-security                             (Daniele Forsi)
  * translation updates
     o update Italian translation                    (Daniele Forsi)
  * gnokiid updates
