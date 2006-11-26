@@ -38,6 +38,8 @@
     o add support for concatenated messages with 16-bit reference
       number                                          (Petr Hruska)
     o add support for Nokia 6233                        (Pawel Kot)
+    o close the file before returning error in the two deprecated
+      gn_vcal_file_*_read() functions               (Daniele Forsi)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

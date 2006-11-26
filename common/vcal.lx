@@ -289,6 +289,7 @@ int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number)
 
 	if (yylex(type, text, meeting_location, desc, time, endtime, alarm, todo_priority, number)) {
 		fprintf(stderr, _("Error parsing vCalendar file!\n"));
+		fclose(file);
 		return -1;
 	}
 	gn_calnote_fill(cnote, type, text, meeting_location, desc, time, endtime, alarm);
@@ -349,6 +350,7 @@ int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number)
 
 	if (yylex(type, text, meeting_location, desc, time, endtime, alarm, todo_priority, number)) {
 		fprintf(stderr, _("Error parsing vCalendar file!\n"));
+		fclose(file);
 		return -1;
 	}
 	gn_todo_fill(ctodo, text, todo_priority);
