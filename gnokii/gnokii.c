@@ -396,6 +396,9 @@ static int parse_options(int argc, char *argv[])
 
 #ifdef SECURITY
 
+		/* Get Security Code */
+		{ "getsecuritycode",    no_argument,   	   NULL, OPT_GETSECURITYCODE },
+
 		/* Enter Security Code mode */
 		{ "entersecuritycode",  required_argument, NULL, OPT_ENTERSECURITYCODE },
 
@@ -568,9 +571,6 @@ static int parse_options(int argc, char *argv[])
 
 		/* For development purposes: insert you function calls here */
 		{ "foogle",             no_argument,       NULL, OPT_FOOGLE },
-
-		/* Get Security Code */
-		{ "getsecuritycode",    no_argument,   	   NULL, OPT_GETSECURITYCODE },
 
 		/* Get WAP bookmark */
 		{ "getwapbookmark",     required_argument, NULL, OPT_GETWAPBOOKMARK },
@@ -944,10 +944,10 @@ static int parse_options(int argc, char *argv[])
 	case OPT_GETLOCKSINFO:
 		rc = getlocksinfo(data, state);
 		break;
+#ifdef SECURITY
 	case OPT_GETSECURITYCODE:
 		rc = getsecuritycode(data, state);
 		break;
-#ifdef SECURITY
 	case OPT_ENTERSECURITYCODE:
 		rc = entersecuritycode(optarg, data, state);
 		break;
