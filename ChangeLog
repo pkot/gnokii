@@ -82,6 +82,8 @@
       with gnokii                        (Daniele Forsi, Pawel Kot)
     o read PDU data as unsigned chars in ReplyGetSMS() else values
       would be sign extended when >127              (Daniele Forsi)
+    o exclude unused code when compiled without --enable-security
+                                                    (Daniele Forsi)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
