@@ -75,6 +75,8 @@
     o make --writewapsetting --setprofile and --setsmsc return
       GN_ERR_WRONGDATAFORMAT when appropriate       (Daniele Forsi)
     o use readtext() in savesms() too               (Daniele Forsi)
+    o skip trailing \n before checking string length in readtext()
+                                                    (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
