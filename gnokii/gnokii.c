@@ -200,7 +200,7 @@ static void short_version(void)
 	fprintf(stderr, _("GNOKII Version %s\n"), VERSION);
 }
 
-/* This function shows the copyright and some informations usefull for
+/* This function shows the copyright and some informations useful for
    debugging. */
 static void version(void)
 {
@@ -283,7 +283,7 @@ static void businit(void)
 	data = &state->sm_data;
 }
 
-/* This function checks that the argument count for a given options is withing
+/* This function checks that the argument count for a given options is within
    an allowed range. */
 static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_arg)
 {
@@ -379,7 +379,7 @@ static int parse_options(int argc, char *argv[])
 
 	/* Every option should be in this array. */
 	static struct option long_options[] = {
-		/* FIXME: these comments are nice, but they would be more usefull as docs for the user */
+		/* FIXME: these comments are nice, but they would be more useful as docs for the user */
 		/* Display usage. */
 		{ "help",               no_argument,       NULL, OPT_HELP },
 
@@ -548,10 +548,10 @@ static int parse_options(int argc, char *argv[])
 		/* Set profile */
 		{ "setprofile",         no_argument,       NULL, OPT_SETPROFILE },
 
-		/* Gets the active profile */
+		/* Get the active profile */
 		{ "getactiveprofile",   no_argument,       NULL, OPT_GETACTIVEPROFILE },
 
-		/* Sets the active profile */
+		/* Set the active profile */
 		{ "setactiveprofile",   required_argument, NULL, OPT_SETACTIVEPROFILE },
 
 		/* Show texts from phone's display */
@@ -821,7 +821,7 @@ static int parse_options(int argc, char *argv[])
 		rc = deletecalendarnote(argc, argv, data, state);
 		break;
 
-	/* TODO options */
+	/* ToDo options */
 	case OPT_GETTODO:
 		rc = gettodo(argc, argv, data, state);
 		break;

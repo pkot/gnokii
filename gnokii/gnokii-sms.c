@@ -425,7 +425,7 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	/* nokia 7110 will choke if no number is present when we
 	 * try to store a SMS on the phone. maybe others do too
 	 * TODO should this be handled here? report an error instead
-	 * of setting an default? */
+	 * of setting a default? */
 	strcpy(sms.remote.number, "0");
 	sms.remote.type = GN_GSM_NUMBER_International;
 	sms.number = 0;
