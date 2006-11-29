@@ -1156,7 +1156,7 @@ int setsmsc(gn_data *data, struct gn_statemachine *state)
 			break;
 		default:
 			fprintf(stderr, _("Input line format isn't valid\n"));
-			return -1;
+			return GN_ERR_WRONGDATAFORMAT;
 		}
 
 		error = gn_sm_functions(GN_OP_SetSMSCenter, data, state);
@@ -1166,7 +1166,7 @@ int setsmsc(gn_data *data, struct gn_statemachine *state)
 		}
 	}
 
-	return 0;
+	return GN_ERR_NONE;
 }
 
 /* Displays usage of --createsmsfolder command */

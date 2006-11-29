@@ -283,7 +283,7 @@ int setprofile(gn_data *data, struct gn_statemachine *state)
 			    &p.caller_groups, &p.automatic_answer, &ch);
 		if (n != 13) {
 			fprintf(stderr, _("Input line format isn't valid\n"));
-			return GN_ERR_UNKNOWN;
+			return GN_ERR_WRONGDATAFORMAT;
 		}
 
 		error = gn_sm_functions(GN_OP_SetProfile, data, state);
