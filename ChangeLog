@@ -72,6 +72,8 @@
       like already done for GN_SMS_MT_SubmitSent    (Daniele Forsi)
     o completely disable --getsecuritycode when compiled without
       --enable-security                             (Daniele Forsi)
+    o make --writewapsetting return GN_ERR_WRONGDATAFORMAT instead
+      of GN_ERR_UNKNOWN when appropriate            (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)

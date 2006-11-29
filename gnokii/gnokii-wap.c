@@ -395,7 +395,7 @@ int writewapsetting(gn_data *data, struct gn_statemachine *state)
 		if (n != 23) {
 			fprintf(stderr, _("Input line format isn't valid\n"));
 			dprintf("n: %i\n", n);
-			return GN_ERR_UNKNOWN;
+			return GN_ERR_WRONGDATAFORMAT;
 		}
 
 		error = gn_sm_functions(GN_OP_WriteWAPSetting, data, state);
