@@ -380,10 +380,7 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 {
 	gn_sms sms;
 	gn_error error = GN_ERR_INTERNALERROR;
-	/* The maximum length of an uncompressed concatenated short message is
-	   255 * 153 = 39015 default alphabet characters */
-	char message_buffer[255 * GN_SMS_MAX_LENGTH];
-	int input_len, chars_read, i;
+	int input_len, i;
 	char tmp[3];
 #if 0
 	int confirm = -1;
@@ -558,20 +555,10 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
 
-	fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
-
-	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
-
-	if (chars_read == 0) {
-		fprintf(stderr, _("Couldn't read from stdin!\n"));
-		return -1;
-	} else if (chars_read > input_len || chars_read > sizeof(sms.user_data[0].u.text) - 1) {
-		fprintf(stderr, _("Input too long!\n"));
-		return -1;
-	}
-
-	if (chars_read > 0 && message_buffer[chars_read - 1] == '\n') message_buffer[--chars_read] = 0x00;
-	if (chars_read < 1) {
+	error = readtext(&sms.user_data[0], input_len);
+	if (error != GN_ERR_NONE)
+		return error;
+	if (sms.user_data[0].length < 1) {
 		fprintf(stderr, _("Empty message. Quitting.\n"));
 		return -1;
 	}
@@ -579,8 +566,6 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		sms.memory_type = gn_str2memory_type(memory_type);
 
 	sms.user_data[0].type = GN_SMS_DATA_Text;
-	strncpy(sms.user_data[0].u.text, message_buffer, chars_read);
-	sms.user_data[0].u.text[chars_read] = 0;
 	sms.user_data[1].type = GN_SMS_DATA_None;
 	if (!gn_char_def_alphabet(sms.user_data[0].u.text))
 		sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2;
