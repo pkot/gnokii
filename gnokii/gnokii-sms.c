@@ -637,7 +637,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 	if (errno || end_message < 0)
 		getsms_usage(stderr, -1);
 
-	memset(&filename, 0, sizeof(filename));
+	*filename = '\0';
 	/* parse all options (beginning with '-') */
 	while ((i = getopt(argc, argv, "f:F:d")) != -1) {
 		switch (i) {
@@ -649,11 +649,12 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 			mode = 0;
 		case 'f':
 			if (optarg) {
-				fprintf(stderr, _("Saving into %s\n"), optarg);
-				memset(&filename, 0, sizeof(filename));
-				strncpy(filename, optarg, sizeof(filename) - 1);
-				if (strlen(optarg) > sizeof(filename) - 1)
+				strncpy(filename, optarg, sizeof(filename));
+				if (filename[sizeof(filename) - 1]) {
+					filename[sizeof(filename) - 1] = '\0';
 					fprintf(stderr, _("Filename too long - will be truncated to 63 characters.\n"));
+				}
+				fprintf(stderr, _("Saving into %s\n"), filename);
 			} else
 				getsms_usage(stderr, -1);
 			break;

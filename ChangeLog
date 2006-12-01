@@ -77,6 +77,7 @@
     o use readtext() in savesms() too               (Daniele Forsi)
     o skip trailing \n before checking string length in readtext()
                                                     (Daniele Forsi)
+    o use strncpy() safely in getsms()              (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
