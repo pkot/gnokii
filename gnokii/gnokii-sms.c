@@ -622,6 +622,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 	gn_phone *phone = &state->driver.phone;
 	char ans[5];
 	struct stat buf;
+	char *message_text;
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = optarg;
@@ -679,6 +680,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 		error = gn_sms_get(data, state);
 		switch (error) {
 		case GN_ERR_NONE:
+			message_text = NULL;
 			switch (message.type) {
 			case GN_SMS_MT_DeliveryReport:
 				fprintf(stdout, _("%d. Delivery Report "), message.number);
@@ -720,7 +722,8 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				}
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
-				fprintf(stdout, _("Text:\n%s\n"), message.user_data[0].u.text);
+				fprintf(stdout, _("Text:\n"));
+				message_text = message.user_data[0].u.text;
 				break;
 			case GN_SMS_MT_Picture:
 				fprintf(stdout, _("Picture Message\n"));
@@ -737,7 +740,8 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
 				fprintf(stdout, _("Bitmap:\n"));
 				gn_bmp_print(&message.user_data[0].u.bitmap, stdout);
-				fprintf(stdout, _("Text:\n%s\n"), message.user_data[1].u.text);
+				fprintf(stdout, _("Text:\n"));
+				message_text = message.user_data[1].u.text;
 				break;
 			default:
 				switch (message.type) {
@@ -849,13 +853,16 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				}
 				if (done)
 					break;
-				fprintf(stdout, "%s\n", message.user_data[0].u.text);
+				message_text = message.user_data[0].u.text;
+				break;
+			}
+			if (message_text) {
+				fprintf(stdout, "%s\n", message_text);
 				if ((mode != -1) && *filename) {
 					char buf[1024];
 					sprintf(buf, "%s%d", filename, count);
-					mode = gn_file_text_save(buf, message.user_data[0].u.text, mode);
+					mode = gn_file_text_save(buf, message_text, mode);
 				}
-				break;
 			}
 			if (del) {
 				data->sms = &message;
