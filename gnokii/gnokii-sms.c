@@ -726,7 +726,24 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				message_text = message.user_data[0].u.text;
 				break;
 			case GN_SMS_MT_Picture:
-				fprintf(stdout, _("Picture Message\n"));
+				fprintf(stdout, _("%d. Picture Message "), message.number);
+				switch (message.status) {
+				case GN_SMS_Read:
+					fprintf(stdout, _("(read)\n"));
+					break;
+				case GN_SMS_Unread:
+					fprintf(stdout, _("(unread)\n"));
+					break;
+				case GN_SMS_Sent:
+					fprintf(stdout, _("(sent)\n"));
+					break;
+				case GN_SMS_Unsent:
+					fprintf(stdout, _("(unsent)\n"));
+					break;
+				default:
+					fprintf(stdout, _("(read)\n"));
+					break;
+				}
 				fprintf(stdout, _("Date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.smsc_time.day, message.smsc_time.month, message.smsc_time.year, \
 					message.smsc_time.hour, message.smsc_time.minute, message.smsc_time.second);
