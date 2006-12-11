@@ -118,6 +118,7 @@
     o add --disable-irda and --disable-bluetooth options
                                                         (Pawel Kot)
     o replace gettextize with autopoint                 (Pawel Kot)
+    o add waitcall file to utils/.cvsignore         (Daniele Forsi)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)
