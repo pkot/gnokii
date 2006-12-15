@@ -1505,16 +1505,26 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	gn_error error;
  	at_driver_instance *drvinst = AT_DRVINST(state);
 
-	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return error;
 	
 	buf.line1 = buffer + 1;
 	buf.length = length;
 
 	splitlines(&buf);
 
-	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+	if (!data->raw_sms)
+		return GN_ERR_INTERNALERROR;
 
 	tmp = strrchr(buf.line2, ',');
+	/* The following sequence is correct for emtpy location:
+	 * w: AT+CMGR=9
+	 * r: AT+CMGR=9
+	 *  :
+	 *  : OK
+	 */
+	if (!tmp)
+		return GN_ERR_EMPTYLOCATION;
 	sms_len = atoi(tmp+1);
 	if (sms_len == 0)
 		return GN_ERR_EMPTYLOCATION;

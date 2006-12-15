@@ -94,6 +94,8 @@
       would be sign extended when >127              (Daniele Forsi)
     o exclude unused code when compiled without --enable-security
                                                     (Daniele Forsi)
+    o fix segfault on reading empty SMS locations with certain
+      GSM modems                                      (Yves PERREY)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
