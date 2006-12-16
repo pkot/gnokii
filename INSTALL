@@ -7,15 +7,13 @@ Gnokii installation instructions
 Quickstart
 ==========
 
-    $ gettextize -c -f --intl --no-changelog	# only for CVS copies
+    $ autopoint -f				# only for CVS copies
     $ libtoolize -c -f				# only for CVS copies
-    $ aclocal					# only for CVS copies
+    $ aclocal -I m4				# only for CVS copies
     $ autoheader				# only for CVS copies
     $ autoconf					# only for CVS copies
     $ ./configure [<options>]
-    [ If you use latest Red Hat with new (0.11) gettext version ]
-    [ run autogen.sh with configure options instead of the      ]
-    [ above commands. It will do all required things.           ]
+    [ instead of above commands you can simply run ./autogen.sh [<options>]]
     $ make
     # groupadd gnokii
     # make [install|install-suid|install-strip|install-ss]
@@ -32,20 +30,24 @@ Additional libraries and header files needed for the various gnokii parts:
 xgnokii:		libX11, libXpm, glib-2.0, gtk+-2.0
 bitmap support:		libXpm for xpm files support, gnokii can deal without
 			this (xgnokii cannot)
-irda support:		Linux kernel includes
-bluetooth support:	bluez (Linux Bluetooth stack)
+irda support:		Linux kernel includes (there is also IrDA support
+			for Mac OS X and win32)
+bluetooth support:	bluez (Linux Bluetooth stack) (there is also IrDA
+			support for Mac OS X and FreeBSD)
 libical support:	libical-0.24, you may want to use gnokii internal iCal
 			implementation but it is limited, no longer developed
 			and deprecated. This is only for converting calendar
 			and todo entries into iCal files and reading such
 			files.
+libusb support:		libusb (for DKU2 cables support)
 
 Sources:
 http://www.xfree86.org/					libX11, libXpm
 http://www.gtk.org/					glib, gtk
 http://www.kernel.org/					Linux kernel includes
-http://bluez.sf.net/					bluez (Linux Bluetooth stack)
+http://www.bluez.org/					bluez (Linux Bluetooth stack)
 http://sourceforge.net/projects/freeassociation/	libical
+http://libusb.sf.net/					libusb
 
 For xgnokii you may want download gnokii-artwork package from
 http://www.gnokii.org/download/gnokii, the package containing mobile
@@ -60,9 +62,9 @@ Preparations
 
 If you retrieved this copy from CVS, then first call
 
-    $ gettextize
-    $ libtoolize
-    $ aclocal
+    $ autopoint -f
+    $ libtoolize -c -f
+    $ aclocal -I m4
     $ autoheader
     $ autoconf
 
