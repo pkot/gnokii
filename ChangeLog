@@ -169,6 +169,7 @@
       literal 5                                     (Daniele Forsi)
  * smsd updates
     o reconnect only after timeout                      (Pawel Kot)
+    o avoid freeing statically allocated memory         (Pawel Kot)
 
 0.6.14
 ======
