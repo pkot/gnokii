@@ -124,6 +124,8 @@ int getfiledetailsbyid(int argc, char *argv[], gn_data *data, struct gn_statemac
 	/* default parameter is root == 0x01 */
 	if (argc == optind) {
 		fi.id = calloc(3, sizeof(char));
+		if (!fi.id)
+			return GN_ERR_INTERNALERROR;
 		fi.id[0] = 2;
 		fi.id[1] = 0x00;
 		fi.id[2] = 0x01;
@@ -172,6 +174,7 @@ int getfiledetailsbyid(int argc, char *argv[], gn_data *data, struct gn_statemac
 			}
 		}
 	}
+	free(fi.id);
 	return error;
 }
 
