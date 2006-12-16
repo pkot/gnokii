@@ -82,6 +82,7 @@
       Delivery Reports and Picture Messages too     (Daniele Forsi)
     o print message number and status for Picture Messages too
                                                     (Daniele Forsi)
+    o make --getsms arguments work on FreeBSD           (Pawel Kot)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)

@@ -71,8 +71,9 @@ void sms_usage(FILE *f)
 		     "          --savesms [--sender from] [--smsc message_center_number |\n"
 		     "                 --smscno message_center_index] [-f|--folder folder_id]\n"
 		     "                 [-l|--location number] [-s|--sent|-r|--read] [-d|--deliver]\n"
-		     "                 [-t|--datetime YYMMDDHHMMSS] \n"
-		     "          --getsms memory_type start [end] [-f file] [-F file] [-d]\n"
+		     "                 [-t|--datetime YYMMDDHHMMSS]\n"
+		     "          --getsms memory_type start [end] [-f|--file file]\n"
+		     "                 [-F|--force-file file] [-d|--delete]\n"
 		     "          --deletesms memory_type start [end]\n"
 		     "          --getsmsc [start_number [end_number]] [-r|--raw]\n"
 		     "          --setsmsc\n"
@@ -595,12 +596,15 @@ void getsms_usage(FILE *f, int exitval)
 			"                                    or 'end' string;\n"
 			"                                    if 'end' is used entries are being read\n"
 			"                                    until empty location\n"
-			"        -F file                     save sms to the file overwriting it if\n"
+			"        --force-file filename\n"
+			"        -F filename                 save sms to the file overwriting it if\n"
 			"                                    the file already exists;\n"
 			"                                    if multiple SMS are being read, message\n"
 			"                                    identifier is appended to the file name\n"
-			"        -f file                     as above but user is prompted before\n"
+			"        --file filename\n"
+			"        -f filename                 as above but user is prompted before\n"
 			"                                    overwriting the file\n"
+			"        --delete\n"
 			"        -d                          delete message after reading\n"
 			"\n"
 		));
@@ -624,6 +628,14 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 	struct stat buf;
 	char *message_text;
 
+	struct option options[] = {
+		{ "delete",     no_argument,       NULL, 'd' },
+		{ "file",       required_argument, NULL, 'f' },
+		{ "force-file", required_argument, NULL, 'F' },
+		{ NULL,         0,                 NULL, 0 }
+	};
+
+
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = optarg;
 	if (gn_str2memory_type(memory_type_string) == GN_MT_XX) {
@@ -640,10 +652,11 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 
 	*filename = '\0';
 	/* parse all options (beginning with '-') */
-	while ((i = getopt(argc, argv, "f:F:d")) != -1) {
+	while ((i = getopt_long(argc, argv, "f:F:d", options, NULL)) != -1) {
 		switch (i) {
 		case 'd':
 			del = 1;
+			dprintf("del\n");
 			break;
 		/* force mode -- don't ask to overwrite */
 		case 'F':
@@ -664,6 +677,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 			getsms_usage(stderr, -1);
 		}
 	}
+
 	folder.folder_id = 0;
 	data->sms_folder = &folder;
 	data->sms_folder_list = &folderlist;
