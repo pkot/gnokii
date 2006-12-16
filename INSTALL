@@ -32,7 +32,7 @@ bitmap support:		libXpm for xpm files support, gnokii can deal without
 			this (xgnokii cannot)
 irda support:		Linux kernel includes (there is also IrDA support
 			for Mac OS X and win32)
-bluetooth support:	bluez (Linux Bluetooth stack) (there is also IrDA
+bluetooth support:	bluez (Linux Bluetooth stack) (there is also bluetooth
 			support for Mac OS X and FreeBSD)
 libical support:	libical-0.24, you may want to use gnokii internal iCal
 			implementation but it is limited, no longer developed
