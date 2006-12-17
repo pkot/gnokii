@@ -56,7 +56,6 @@
 #endif
 
 #ifndef WIN32
-#  include <unistd.h>		/* for usleep */
 #  include <signal.h>
 #else
 #  include <windows.h>
@@ -818,7 +817,7 @@ inline void GUI_HideAbout(void)
 }
 
 
-void MainExit(void)
+static void _MainExit(void)
 {
 	PhoneEvent *e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 
@@ -827,6 +826,17 @@ void MainExit(void)
 	GUI_InsertEvent(e);
 	pthread_join(monitor_th, NULL);
 	gtk_main_quit();
+}
+
+void MainExit(gchar *ermsg)
+{
+	if (ermsg) {
+		gtk_label_set_text(GTK_LABEL(infoDialog.text), ermsg);
+		gtk_widget_show_now(infoDialog.dialog);
+		GUI_Refresh();
+		sleep(10);
+	}
+	_MainExit();
 }
 
 
@@ -885,7 +895,7 @@ static gint ButtonPressEvent(GtkWidget * widget, GdkEventButton * event)
 			if (GUI_ContactsIsChanged())
 				GUI_QuitSaveContacts();
 			else
-				MainExit();
+				MainExit(NULL);
 		} else if ((event->x >= 180 && event->x <= 195 &&
 			    event->y >= 30 && event->y <= 50) ||
 			   (event->x >= 185 && event->x <= 215 &&
@@ -2227,7 +2237,7 @@ static void TopLevelWindow(void)
 
 	gtk_widget_shape_combine_mask(GUI_MainWindow, mask, 0, 0);
 
-	gtk_signal_connect(GTK_OBJECT(GUI_MainWindow), "destroy", GTK_SIGNAL_FUNC(MainExit), NULL);
+	gtk_signal_connect(GTK_OBJECT(GUI_MainWindow), "destroy", GTK_SIGNAL_FUNC(_MainExit), NULL);
 
 	Menu = CreateMenu();
 	OptionsDialog = CreateOptionsDialog();
@@ -2348,6 +2358,10 @@ static void ReadConfig(void)
 		xgnokiiConfig.bindir = gn_lib_cfg_get("gnokiid", "bindir");
 	if (!xgnokiiConfig.bindir)
 		xgnokiiConfig.bindir = g_strdup("/usr/local/sbin");
+	if (gn_lib_cfg_get("xgnokii", "allow_breakage"))
+		xgnokiiConfig.allowBreakage = atoi(gn_lib_cfg_get("xgnokii", "allow_breakage"));
+	else
+		xgnokiiConfig.allowBreakage = 0;
 
 	max_phonebook_number_length = max_phonebook_sim_number_length =
 	    GN_PHONEBOOK_NUMBER_MAX_LENGTH;

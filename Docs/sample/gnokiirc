@@ -153,6 +153,11 @@ serial_baudrate = 19200
 # forever.
 smsc_timeout = 10
 
+# Set this to 1 if you want to break your phone with xgnokii. Works only
+# with few Nokia models and FBUS communication
+[xgnokii]
+allow_breakage = 0
+
 # Set bindir to point to the location of the various gnokiid binaries.
 # In particular ensure that mgnokiidev is in this location, with
 # permissions 4750, owned by root, group gnokii.  Ensure you

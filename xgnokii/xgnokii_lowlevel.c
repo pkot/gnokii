@@ -1216,7 +1216,18 @@ void *GUI_Connect(void *a)
 	phoneMonitor.working = _("Connecting...");
 	if (fbusinit() != GN_ERR_NONE) {
 		gn_log_xdebug("Initialization failed...\n");
-		MainExit();
+		MainExit(NULL);
+	}
+
+	if (!xgnokiiConfig.allowBreakage &&				/* User did not allow to break the phone */
+		(phoneMonitor.supported & PM_XGNOKIIBREAKAGE) &&	/* Phone is known to be on the black list */
+		strncmp(xgnokiiConfig.model, "AT", 2)) {		/* We're not using it in AT mode */
+		gn_log_xdebug("Detected phone known to be broken using xgnokii\n");
+		MainExit(_("It has been reported that your phone is known to be broken by xgnokii.\n"
+			   "Exiting application to avoid breakage. If you want to take a risk and\n"
+			   "run xgnokii anyway, set:\n\n"
+			   "\tallow_breakage = 1\n\n"
+			   "in xgnokii section in your config file.\n"));
 	}
 
 	gn_log_xdebug("Phone connected. Starting monitoring...\n");

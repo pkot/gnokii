@@ -42,6 +42,8 @@
       gn_vcal_file_*_read() functions               (Daniele Forsi)
     o be more verbose in debug mode in dku2libusb initialization
                                                         (Pawel Kot)
+    o add PM_XGNOKIIBREAKAGE and PM_FULLPBK capabilities
+                                                        (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
@@ -170,6 +172,8 @@
  * xgnokii updates
     o in xgnokii_contacts.c use GN_PHONEBOOK_GROUP_None, not
       literal 5                                     (Daniele Forsi)
+    o add support for blacklisting models known to be broken by
+      xgnokii usage                                     (Pawel Kot)
  * smsd updates
     o reconnect only after timeout                      (Pawel Kot)
     o avoid freeing statically allocated memory         (Pawel Kot)

@@ -67,6 +67,7 @@ typedef struct {
 	gchar *help_locale;	/* Locale for HTML help */
 	gn_sms_message_center smsSetting[MAX_SMS_CENTER];
 	UserInf user;
+	gint allowBreakage;
 	gchar *callerGroups[6];
 	gint smsSets:4;
 	bool alarmSupported:1;
@@ -84,6 +85,6 @@ extern gint max_phonebook_sim_number_length;
 extern void GUI_InitCallerGroupsInf(void);
 extern void GUI_InitSMSSettings(void);
 extern void GUI_ShowAbout(void);
-extern void MainExit();
+extern void MainExit(gchar *);
 
 #endif				/* XGNOKII_H */
