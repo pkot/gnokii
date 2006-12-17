@@ -1227,7 +1227,8 @@ void *GUI_Connect(void *a)
 			   "Exiting application to avoid breakage. If you want to take a risk and\n"
 			   "run xgnokii anyway, set:\n\n"
 			   "\tallow_breakage = 1\n\n"
-			   "in xgnokii section in your config file.\n"));
+			   "in xgnokii section in your config file.\n"
+			   "See http://thread.gmane.org/gmane.linux.drivers.gnokii/3195 for details.\n"));
 	}
 
 	gn_log_xdebug("Phone connected. Starting monitoring...\n");
