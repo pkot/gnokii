@@ -131,6 +131,7 @@
                                                  (Waterser Forrest)
     o fix warning about unused functions when compiled without
       --enable-security                             (Daniele Forsi)
+    o remove irda blacklisting code                     (Pawel Kot)
  * translation updates
     o update Italian translation                    (Daniele Forsi)
  * gnokiid updates
