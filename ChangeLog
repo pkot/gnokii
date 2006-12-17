@@ -181,6 +181,7 @@
     o avoid freeing statically allocated memory         (Pawel Kot)
  * nokia dku2 kernel module
     o add Linux 2.6.18 compatibility     (Pawel Kot, Mark Kirkwood)
+    o add Nokia 6155 support                            (Pawel Kot)
 
 0.6.14
 ======
