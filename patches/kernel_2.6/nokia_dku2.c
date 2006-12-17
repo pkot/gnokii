@@ -39,7 +39,12 @@
 	static int debug;
 #endif
 
-#include "usb-serial.h"
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18))
+#  include "usb-serial.h"
+#else
+#  include <linux/usb/serial.h>
+#endif
+
 #include "nokia_dku2.h"
 
 /*
@@ -54,12 +59,16 @@ static int nokia_probe(struct usb_serial *serial, const struct usb_device_id *id
 
 static struct usb_device_id id_table [] = {
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7600_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6650_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6255_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6651_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6170_PRODUCT_ID) },
-/*	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6670_PRODUCT_ID) },*/
-/*	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6680_PRODUCT_ID) },*/
-	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6265_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7270_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA7710_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA3230_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230i_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6265_PRODUCT_ID) },
 	{ }			/* Terminating entry */
 };
 
@@ -159,6 +168,11 @@ module_exit(nokia_exit);
 MODULE_AUTHOR(DRIVER_AUTHOR);
 MODULE_DESCRIPTION(DRIVER_DESC);
 MODULE_LICENSE("GPL");
+MODULE_VERSION(DRIVER_VERSION);
 
+#if (LINUX_VERSION_CODE < KERNEL_VERSION(2,6,18))
 MODULE_PARM(debug, "i");
+#else
+module_param(debug, int, S_IRUGO | S_IWUSR);
+#endif
 MODULE_PARM_DESC(debug, "Debug enabled or not");

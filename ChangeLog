@@ -179,6 +179,8 @@
  * smsd updates
     o reconnect only after timeout                      (Pawel Kot)
     o avoid freeing statically allocated memory         (Pawel Kot)
+ * nokia dku2 kernel module
+    o add Linux 2.6.18 compatibility     (Pawel Kot, Mark Kirkwood)
 
 0.6.14
 ======
