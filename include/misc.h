@@ -111,6 +111,9 @@
  */
 #define ceiling_to_octet(x) ((x) + 7) / 8
 
+#define PM_OLD_DEFAULT		PM_SPEEDDIAL | PM_SMS | PM_DTMF | PM_KEYBOARD | PM_CALENDAR
+#define PM_DEFAULT		PM_OLD_DEFAULT | PM_CALLERGROUP | PM_EXTPBK | PM_FOLDERS
+
 #define PM_CALLERGROUP		0x0001
 #define PM_NETMONITOR		0x0002
 #define PM_KEYBOARD		0x0004
@@ -122,6 +125,10 @@
 #define PM_EXTPBK		0x0100
 #define PM_AUTHENTICATION	0x0200
 #define PM_FOLDERS		0x0400
+#define PM_FULLPBK		0x0800
+/* This one indicated reported cases of breaking the phone by xgnokii
+ * in FBUS orver IrDA mode */
+#define PM_XGNOKIIBREAKAGE	0x8000
 
 char **gnokii_strsplit(const char *string, const char *delimiter, int tokens);
 void gnokii_strfreev(char **str_array);
