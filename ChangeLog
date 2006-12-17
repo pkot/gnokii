@@ -40,6 +40,8 @@
     o add support for Nokia 6233                        (Pawel Kot)
     o close the file before returning error in the two deprecated
       gn_vcal_file_*_read() functions               (Daniele Forsi)
+    o be more verbose in debug mode in dku2libusb initialization
+                                                        (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

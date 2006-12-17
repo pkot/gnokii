@@ -179,6 +179,7 @@ next_desc:
 		dprintf("No active setting\n");
 		return -ENODEV;
 	}
+	dprintf("Found FBUS interface\n");
 	return 0;
 }
 
@@ -273,6 +274,8 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 			}
 		}
 	}
+	if (current->next)
+		free(current->next);
 	while (current && current->prev) {
 		current = current->prev;
 		if (current->next)
@@ -303,7 +306,6 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 		usb_close(usb_handle);
 		retval = 1;
 	}
-	return retval;
 
 cleanup_list:
 	while (current) {
