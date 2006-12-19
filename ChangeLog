@@ -180,6 +180,8 @@
       literal 5                                     (Daniele Forsi)
     o add support for blacklisting models known to be broken by
       xgnokii usage                                     (Pawel Kot)
+    o clear the text box after deleting a note and update the list
+      after adding a note in the Calendar window    (Daniele Forsi)
  * smsd updates
     o reconnect only after timeout                      (Pawel Kot)
     o avoid freeing statically allocated memory         (Pawel Kot)
