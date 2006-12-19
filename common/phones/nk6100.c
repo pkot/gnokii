@@ -2568,13 +2568,21 @@ static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 		memset(pos, 0x00, 7);
 		pos += 7;
 	}
-	
+
 	/* FIXME: use some constant not 255 magic number */
-	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_CAL_UNICODE)
-		namelen = char_unicode_encode(pos + 1, note->text, 255);
-	else
-		namelen = pnok_string_encode(pos + 1, 255, note->text);
-	*pos++ = namelen;
+	if (!strcmp(DRVINSTANCE(state)->model, "NHM-5") 	/* Nokia 3310 */
+	 || !strcmp(DRVINSTANCE(state)->model, "NHM-6")) {	/* Nokia 3330 */
+		/* in this case we have: length, encoding indicator, text */
+		namelen = pnok_string_encode(pos + 2, 255, note->text);
+		*pos++ = namelen + 1;	/* length of text + encoding indicator */
+		*pos++ = 0x03;		/* encoding type */
+	} else {
+		if (DRVINSTANCE(state)->capabilities & NK6100_CAP_CAL_UNICODE)
+			namelen = char_unicode_encode(pos + 1, note->text, 255);
+		else
+			namelen = pnok_string_encode(pos + 1, 255, note->text);
+		*pos++ = namelen;
+	}
 	pos += namelen;
 
 	if (note->type == GN_CALNOTE_CALL) {
@@ -2669,6 +2677,11 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 			note->alarm.timestamp.second = *pos++;
 			note->alarm.enabled = (note->alarm.timestamp.year != 0);
 			n = *pos++;
+			if (!strcmp(DRVINSTANCE(state)->model, "NHM-5") 	/* Nokia 3310 */
+			 || !strcmp(DRVINSTANCE(state)->model, "NHM-6")) {	/* Nokia 3330 */
+				pos++; /* skip encoding byte FIXME: decode accordingly */
+				n--;   /* text length */
+			}
 			if ((DRVINSTANCE(state)->capabilities & NK6100_CAP_CAL_UNICODE))
 				char_unicode_decode(note->text, pos, n);
 			else

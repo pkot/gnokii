@@ -644,6 +644,13 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                           0x8d: waiting for PIN
     s Calendar notes set    { 0x0066... }
     r Calendar note recvd   { 0x0067, 0x01, ?, length, type, yrH,yrL,mon,day,hr,tz,alrm yrH,yrL,mon,day,hr,tz,textlen,"text"}
+[Nokia 3310|3330 info:
+ The year given for start date is incorrect -- subtract 84 to get the real value -- the year for the alarm is correct.
+ The text field starts with character which is a value for the type of encoding for the rest of the text field:
+  0x01 for ASCII-only text
+  0x02 if text contains the Yen sign
+  0x03 if text contains the Euro sign (or both Euro and Yen)
+]
 [Nokia 3410 info:
  The year given by the phone is incorrect -- subtract 90 to get the real value
  The text field starts with character 0x01. This is apparently a value for

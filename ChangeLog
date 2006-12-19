@@ -155,6 +155,8 @@
       SaveSMSMessage() and DeleteSMSMessage()       (Daniele Forsi)
     o in IncomingSMS() copy message center number and remote number
       for type GN_SMS_MT_Submit too                 (Daniele Forsi)
+    o set encoding for calendar notes text on Nokia 3310 and 3330;
+      see Docs/protocol/nk6110.txt for details      (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
