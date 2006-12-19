@@ -159,8 +159,8 @@
       for type GN_SMS_MT_Submit too                 (Daniele Forsi)
     o set encoding for calendar notes text on Nokia 3310 and 3330;
       see Docs/protocol/nk6110.txt for details      (Daniele Forsi)
-    o use old key API with both variants of 3310 (tested only with
-      firmware V 05.79)                             (Daniele Forsi)
+    o use old key API with both variants of 3310 (tested only NHM-5
+      with firmware V 05.79)                        (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
