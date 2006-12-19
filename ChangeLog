@@ -87,6 +87,8 @@
     o print message number and status for Picture Messages too
                                                     (Daniele Forsi)
     o make --getsms arguments work on FreeBSD           (Pawel Kot)
+    o it's not an error if we read at least a Calendar or ToDo note
+      and the rest is empty when reading up to end  (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
