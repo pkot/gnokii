@@ -284,7 +284,7 @@ static inline gn_calnote_type str2calnote_type(const char *str)
 		return GN_CALNOTE_MEETING;
 	} else if (!strncasecmp("ANNIVERSARY", str, 11)) {
 		return GN_CALNOTE_BIRTHDAY;
-	} else if (!strncasecmp("MISCELLANOUS", str, 12)) {
+	} else if (!strncasecmp("MISCELLANEOUS", str, 13)) {
 		return GN_CALNOTE_MEMO;
 	}
 	return GN_CALNOTE_REMINDER;
@@ -315,7 +315,7 @@ GNOKII_API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 	if (id < 1)
 		id = 1;
 
-	/* interate through the component */
+	/* iterate through the component */
 	iterate_cal(comp, 0, &id, &compresult, ICAL_VEVENT_COMPONENT);
 
 	if (!compresult) {
@@ -503,7 +503,7 @@ GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
 	if (id < 1)
 		id = 1;
 
-	/* interate through the component */
+	/* iterate through the component */
 	iterate_cal(comp, 0, &id, &compresult, ICAL_VTODO_COMPONENT);
 
 	if (!compresult) {
@@ -544,7 +544,7 @@ static int iterate_cal(icalcomponent *parent, int depth, int *count, icalcompone
 	if (!parent)
 		return 0;
 
-	/* we need to use interators because we're calling iterate_cal recursively */
+	/* we need to use iterators because we're calling iterate_cal recursively */
 	compiter = icalcomponent_begin_component(parent, ICAL_ANY_COMPONENT);
 	comp = icalcompiter_deref(&compiter);
 	for (; comp && *count; comp = icalcompiter_next(&compiter)) {
