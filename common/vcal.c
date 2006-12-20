@@ -42,6 +42,8 @@ static const char gnokii_version[] = VERSION;
 
 
 #ifdef HAVE_LIBICAL
+/* needs gnokii-internal.h for string_base64() and utf8_encode() */
+#  include "gnokii-internal.h"
 #  include "ical.h"
 /* mother's little helpers */
 static int iterate_cal(icalcomponent *parent, int depth, int *count, icalcomponent **result, icalcomponent_kind kind);

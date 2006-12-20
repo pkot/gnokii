@@ -44,6 +44,8 @@
                                                         (Pawel Kot)
     o add PM_XGNOKIIBREAKAGE and PM_FULLPBK capabilities
                                                         (Pawel Kot)
+    o include "gnokii-internal.h" when common/vcal.c is compiled
+      with libical                                  (Daniele Forsi)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
