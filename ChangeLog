@@ -166,6 +166,8 @@
     o set the same flags for both variants of 3210 because *#0000#
       actually reports "NSE-8/9" (seen on NSE-8 with firmwares V
       05.10, 05.26 and 06.00)                       (Daniele Forsi)
+    o when reading calendar notes replace year 2090 with alarm year
+      (partial fix)                                 (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)

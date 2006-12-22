@@ -2698,6 +2698,15 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 				note->phone_number[0] = 0;
 			}
 
+			/* from Nokia 3310 and 3330 we always read year == 2090 */
+			if (note->time.year == 2090) {
+				note->time.year = note->alarm.timestamp.year;
+				/* FIXME: decrease note->time.year if the new start date is later than alarm date
+				   (this happens if you set an alarm for the next year);
+				   this would need a gn_timestamp_cmp() but would break again if you set an alarm
+				   two years in the future */
+			}
+
 			memset(&note->end_time, 0, sizeof(note->end_time));
 			note->mlocation[0] = 0;
 		}
