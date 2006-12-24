@@ -168,6 +168,8 @@
       05.10, 05.26 and 06.00)                       (Daniele Forsi)
     o when reading calendar notes replace year 2090 with alarm year
       (partial fix)                                 (Daniele Forsi)
+    o make it possible to use --getphonebook to read DC, MC and RC
+      when there is no name, only the number        (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)

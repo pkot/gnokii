@@ -884,7 +884,7 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			pe->date.minute = *pos++;
 			pe->date.second = *pos++;
 			pe->subentries_count = 0;
-			pe->empty = (pe->name[0] == '\0');
+			pe->empty = (pe->name[0] == '\0') && (pe->number[0] == '\0');
 		}
 		break;
 	case 0x03:
