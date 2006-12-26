@@ -46,6 +46,8 @@
                                                         (Pawel Kot)
     o include "gnokii-internal.h" when common/vcal.c is compiled
       with libical                                  (Daniele Forsi)
+    o there is no need to bind a bluetooth socket (gnokii does not
+      accept connections)                               (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

@@ -110,15 +110,6 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 		return -1;
 	}
 
-	memset(&laddr, 0, sizeof(laddr));
-	laddr.rc_family = AF_BLUETOOTH;
-	bacpy(&laddr.rc_bdaddr, BDADDR_ANY);
-	if (bind(fd, (struct sockaddr *)&laddr, sizeof(laddr)) < 0) {
-		perror(_("Can't bind socket"));
-		close(fd);
-		return -1;
-	}
-
 	memset(&raddr, 0, sizeof(raddr));
 	raddr.rc_family = AF_BLUETOOTH;
 	bacpy(&raddr.rc_bdaddr, &bdaddr);
