@@ -107,6 +107,16 @@ int main(int argc, char *argv[])
 
 	short_version();
 
+	aux = gn_lib_cfg_get("global", "model");
+	if (strncmp(aux, "5110", 4) &&
+	    strncmp(aux, "5130", 4) &&
+	    strncmp(aux, "6110", 4) &&
+	    strncmp(aux, "6130", 4) &&
+	    strncmp(aux, "6150", 4)) {
+		fprintf(stderr, _("gnokiid purpose is to work only with the phones that do not have AT Hayes\ncommands interpreter.\n"));
+		exit(1);
+	}
+
 	BinDir = gn_lib_cfg_get("global", "bindir");
 	if (!BinDir) BinDir = gn_lib_cfg_get("gnokiid", "bindir");
 	if (!BinDir) BinDir = "/usr/local/sbin";
