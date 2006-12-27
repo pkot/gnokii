@@ -1489,11 +1489,11 @@ GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char 
 	BUG(offset >= length);
 
 	entry->memory_type = gn_str2memory_type(memory_type_char);
-	/* We can store addressbook entries only in ME or SM */
+	/* We can store addressbook entries only in ME or SM (or ON on some models) */
 	if (entry->memory_type != GN_MT_ME &&
-	    entry->memory_type != GN_MT_SM) {
-		fprintf(stderr, _("Format problem on line [%s]\n"), backline);
-		return GN_ERR_WRONGDATAFORMAT;
+	    entry->memory_type != GN_MT_SM &&
+	    entry->memory_type != GN_MT_ON) {
+		return GN_ERR_INVALIDMEMORYTYPE;
 	}
 
 	BUG(offset >= length);

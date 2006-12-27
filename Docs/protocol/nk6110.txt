@@ -163,6 +163,8 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                                      0x08: Missed calls
                                      0x09: Received calls
                                      0x0b: voice mailbox (location not important)
+      [Note: Nokia 3210, 3310 and 3330 can write both name and number to "Own numbers", but
+       3310 reads back only the number, not the name.]
     r mem location recvd    { 0x0002, 0x00,namelen,"name",numlen,"number",groupID, 0x01?, yearLO, yearHI, month, day, hour, minute, sec. }
                             Note: in 3310 all entries have null name ("feature" or bug ?)
     r mem loc error recvd   { 0x0003, errtype }
