@@ -51,6 +51,7 @@
     o make gn_file_phonebook_raw_parse() accept "ON" memory too and
       return GN_ERR_INVALIDMEMORYTYPE if memory type is not ME, SM
       or ON, instead of GN_ERR_WRONGDATAFORMAT      (Daniele Forsi)
+    o add Nokia N70 ids                                 (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

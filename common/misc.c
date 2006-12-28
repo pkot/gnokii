@@ -198,7 +198,7 @@ static gn_phone_model models[] = {
 	{"6011",  "RTE-2RH",	PM_OLD_DEFAULT },
 	{"6015i", "RH-55",	PM_DEFAULT | PM_NETMONITOR },
 	{"6020",  "RM-30",	PM_DEFAULT | PM_NETMONITOR },
-	{"6021",  "RM-94",	PM_DEFAULT | PM_NETMONITOR },
+	{"6021",  "RM-94",	PM_DEFAULT | PM_NETMONITOR | PM_XGNOKIIBREAKAGE},
 	{"6050",  "NME-1",	PM_OLD_DEFAULT },
 	{"6080",  "NME-2",	PM_OLD_DEFAULT },
 	{"6081",  "NME-2A",	PM_OLD_DEFAULT },
@@ -300,6 +300,7 @@ static gn_phone_model models[] = {
 	{"9210c", "RAE-3",	PM_OLD_DEFAULT },
 	{"9210i", "RAE-5N",	PM_OLD_DEFAULT },
 	{"9290",  "RAE-3N",	PM_OLD_DEFAULT },
+	{"N70",   "RM-84",      PM_DEFAULT },
 	{"RPM-1", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"Card Phone 1.0", "RPE-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"Card Phone 2.0", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
@@ -308,7 +309,7 @@ static gn_phone_model models[] = {
 	{"D211",  "DTE-1",	PM_OLD_DEFAULT },
 	{"N-Gage", "NEM-4",	PM_OLD_DEFAULT },
 	{"RinGo", "NHX-7",	PM_OLD_DEFAULT },
-	{"sx1",  "SX1",		PM_DEFAULT | PM_NETMONITOR },
+	{"sx1",  "SX1",		PM_DEFAULT },
 	{NULL,    NULL, 0 } /* keep last one as NULL */
 };
 
