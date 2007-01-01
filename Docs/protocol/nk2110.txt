@@ -3,7 +3,7 @@ $Id$
 Assembled by
 	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)
         Pavel Machek <pavel@ucw.cz>
-	... and other members of gnokii mailing list
+	... and other members of gnokii mailing list <gnokii-users@nongnu.org>
             and authors of some WWW pages
 	    (http://republika.pl/junk/mbus).
 
@@ -13,7 +13,7 @@ We do not take any responsibility or liability for damages, etc.
 
 NOTE: this information isn't (and can't be) complete.  If you know anything
 about features not listed here or you noticed a bug in this list, please
-notify us via e-mail.  Thank you.
+notify us via e-mail at our mailing list <gnokii-users@nongnu.org>. Thank you.
 
 Document describing frames used in GSM Nokia 2110 and derivatives:
 Correct format is MBUS version 1 (see nokia.txt for protocol details):

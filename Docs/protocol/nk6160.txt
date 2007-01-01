@@ -2,7 +2,7 @@ $Id$
 
 Assembled by
                      <arnu@venia.net>
-	... and other members of gnokii mailing list
+	... and other members of gnokii mailing list <gnokii-users@nongnu.org>
             and authors of some WWW pages.
 
 The data provided is for information purposes only. 
@@ -11,7 +11,7 @@ We do not take any responsibility or liability for damages, etc.
 
 NOTE: this information isn't (and can't be) complete.  If you know anything
 about features not listed here or you noticed a bug in this list, please
-notify us via e-mail.  Thank you.
+notify us via e-mail at our mailing list <gnokii-users@nongnu.org>. Thank you.
 
 Document describing frames used in
 TDMA NOKIA 5120 / 5160 / 6120 / 6160

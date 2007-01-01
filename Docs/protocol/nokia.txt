@@ -15,7 +15,7 @@ Assembled by
 	Mike Bradley <mike@trumpington.st>
 	Odinokov Serge <serge@takas.lt>
 	Pavel Janik <Pavel@Janik.cz>
-	Pawe³ Kot <pkot@linuxnews.pl>
+	Pawel Kot <gnokii@gmail.com>
 	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)
         Jens Bennfors <jens.bennfors@ing.hj.se>
         Michael Hund <michael@drhund.de>
@@ -25,12 +25,12 @@ Assembled by
         Pavel Machek <pavel@ucw.cz>
         Diego Betancor <dbetancor@duocom.net>
         Marcel Holtmann <marcel@holtmann.org>
-	... and other members of gnokii mailing list
+	... and other members of gnokii mailing list <gnokii-users@nongnu.org>
             and authors of some WWW pages.
 
 NOTE: this information isn't (and can't be) complete.  If you know anything
 about features not listed here or you noticed a bug in this list, please
-notify us via e-mail.  Thank you.
+notify us via e-mail at our mailing list <gnokii-users@nongnu.org>. Thank you.
 
  Frame format for MBUS version 1:
 

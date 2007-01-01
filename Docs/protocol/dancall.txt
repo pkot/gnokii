@@ -13,7 +13,7 @@ Thanx to
 
 NOTE: this information isn't (and can't be) complete.  If you know anything
 about features not listed here or you noticed a bug in this list, please
-notify us via e-mail.  Thank you.
+notify us via e-mail at our mailing list <gnokii-users@nongnu.org>. Thank you.
 
  Frame format for CBUS:
 

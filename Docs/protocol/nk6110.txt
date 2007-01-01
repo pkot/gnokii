@@ -7,10 +7,10 @@ Assembled by
 	Mike Bradley <mike@trumpington.st>
 	Odinokov Serge <serge@takas.lt>
 	Pavel Janik <Pavel@Janik.cz>
-	Pawel Kot <pkot@linuxnews.pl>
+	Pawel Kot <gnokii@gmail.com>
 	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)
 	Harri Yli-Torkko <hyt@surfeu.fi>
-	... and other members of gnokii mailing list
+	... and other members of gnokii mailing list <gnokii-users@nongnu.org>
             and authors of some WWW pages.
 
 The data provided is for information purposes only. 
@@ -19,7 +19,7 @@ We do not take any responsibility or liability for damages, etc.
 
 NOTE: this information isn't (and can't be) complete.  If you know anything
 about features not listed here or you noticed a bug in this list, please
-notify us via e-mail.  Thank you.
+notify us via e-mail at our mailing list <gnokii-users@nongnu.org>. Thank you.
 
 Document describing frames used in
 GSM/PCN Nokia 6110 and derivatives (Nokia 6130, 6150, 6190, 5110, 5130, 5150,
