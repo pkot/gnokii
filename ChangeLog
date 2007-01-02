@@ -52,6 +52,8 @@
       return GN_ERR_INVALIDMEMORYTYPE if memory type is not ME, SM
       or ON, instead of GN_ERR_WRONGDATAFORMAT      (Daniele Forsi)
     o add Nokia N70 ids                                 (Pawel Kot)
+    o add support for Bluetooth on win32/MSVS 2005      (Pawel Kot,
+                                                       Jari Turkia)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

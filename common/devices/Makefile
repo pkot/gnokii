@@ -24,7 +24,8 @@ OBJS =	tekram.lo \
 
 ifdef WIN32
 	OBJS += winserial.lo \
-		winirda.lo
+		winirda.lo \
+		winbluetooth.lo
 else
 	OBJS += unixserial.lo \
 		unixbluetooth.lo \
