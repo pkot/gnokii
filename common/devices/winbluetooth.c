@@ -69,11 +69,11 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 		fprintf(stderr, _("Failed to initialize socket subsystem: need WINSOCK2. Please upgrade.\n"));
 		return -1;
 	}
-	/* Create a socket */
+	/* Create a bluetooth socket */
 	if ((fd = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) < 0) {
 		perror("socket");
-		dprintf("Failed to open a bluetooth socket\n");
-		return fd;
+		dprintf("Failed to create a bluetooth socket\n");
+		return -1;
 	}
 	/* Prepare socket structure for the bluetooth socket */
 	memset(&sa, 0, sizeof(sa));
@@ -85,7 +85,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	}
 	sa.btAddr = addr;
 	sa.port = channel & 0xff;
-	/* Connect to the socket */
+	/* Connect to the bluetooth socket */
 	if (connect(fd, (SOCKADDR *)&sa, sizeof(sa))) {
 		perror("socket");
 		dprintf("Failed to connect to bluetooth socket\n");

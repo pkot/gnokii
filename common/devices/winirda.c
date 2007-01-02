@@ -105,33 +105,46 @@ int irda_open(struct gn_statemachine *state)
 	SOCKADDR_IRDA peer;
 	SOCKET fd = INVALID_SOCKET;
 	DWORD daddr = INVALID_DADDR;
-	int x;
+	int x = 1;
 
+	/* Initialize */
 	if (WSAStartup(MAKEWORD(2,0), &wsaData) == 0) {
-		fd = socket(AF_IRDA, SOCK_STREAM, 0); /* Create socket */
-		daddr = irda_discover_device(state, fd); /* discover the devices */
-		if (daddr != INVALID_DADDR)  {
-			peer.irdaAddressFamily = AF_IRDA;
-			*(DWORD*)peer.irdaDeviceID = daddr;
-
-			if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
-				strcpy(peer.irdaServiceName, "IrDA:IrCOMM");
-				x = 1;
-				if ( setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, &x, sizeof(x)) == SOCKET_ERROR ) {
-					closesocket(fd);
-					return -1;
-				}
-			} else
-				strcpy(peer.irdaServiceName, "Nokia:PhoNet");
-
-			if (connect(fd, (struct sockaddr *)&peer, sizeof(peer))) {	/* Connect to service "Nokia:PhoNet" */
-				perror("connect");
-				closesocket(fd);
-				fd = INVALID_SOCKET;
-			}
+		dprintf("WSAStartup() failed.\n");
+		fprintf(stderr, _("Failed to initialize socket subsystem: need WINSOCK2. Please upgrade.\n"));
+		return -1;
+	}
+	/* Create an irda socket */
+	if ((fd = socket(AF_IRDA, SOCK_STREAM, 0)) < 0) {
+		perror("socket");
+		dprintf("Failed to create an irda socket.\n");
+		return -1;
+	}
+	/* Discover devices */
+	daddr = irda_discover_device(state, fd); /* discover the devices */
+	if (daddr == INVALID_DADDR) {
+		dprintf("Failed to discover any irda device.\n");
+		closesocket(fd);
+		return -1;
+	}
+	/* Prepare socket structure for irda socket */
+	peer.irdaAddressFamily = AF_IRDA;
+	*(DWORD*)peer.irdaDeviceID = daddr;
+	if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
+		strcpy(peer.irdaServiceName, "IrDA:IrCOMM");
+		if (setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, &x, sizeof(x)) == SOCKET_ERROR) {
+			perror("setsockopt");
+			dprintf("Failed to set irda socket options.\n");
+			closesocket(fd);
+			return -1;
 		}
-	} else {
-		fprintf(stderr, _("Not WINSOCK2 :( - Get an upgrade dude!"));
+	} else
+		strcpy(peer.irdaServiceName, "Nokia:PhoNet");
+	/* Connect to the irda socket */
+	if (connect(fd, (struct sockaddr *)&peer, sizeof(peer))) {	/* Connect to service "Nokia:PhoNet" */
+		perror("connect");
+		dprintf("Failed to connect to irda socket\n");
+		closesocket(fd);
+		return -1;
 	}
 	return (int)fd;
 }
