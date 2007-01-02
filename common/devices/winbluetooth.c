@@ -28,12 +28,13 @@
 
 #ifdef HAVE_BLUETOOTH
 
-#include <mmsystem.h>
 #include <Winsock2.h>
+#include <mmsystem.h>
 #include <Ws2bth.h>
 #include <BluetoothAPIs.h>
 
 #include "compat.h"
+#include "gnokii.h"
 #include "misc.h"
 
 /* QTTY by Davide Libenzi ( Terminal interface to Symbian QConsole )
@@ -83,7 +84,6 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 		closesocket(fd);
 		return -1;
 	}
-	sa.btAddr = addr;
 	sa.port = channel & 0xff;
 	/* Connect to the bluetooth socket */
 	if (connect(fd, (SOCKADDR *)&sa, sizeof(sa))) {
