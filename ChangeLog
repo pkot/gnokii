@@ -199,6 +199,9 @@
     o update TODO, CALENDAR, PHONEBOOK and SMS sections of gnokii
       man page with new usage                       (Daniele Forsi)
     o fix some usage strings                        (Daniele Forsi)
+    o all protocol related questions should be asked on the gnokii
+      mailing list                                      (Pawel Kot)
+    o update WIN32 readme                             (Jari Turkia)
  * xgnokii updates
     o in xgnokii_contacts.c use GN_PHONEBOOK_GROUP_None, not
       literal 5                                     (Daniele Forsi)

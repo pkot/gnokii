@@ -1,4 +1,3 @@
-
 README-WIN32
 ============
 
@@ -6,55 +5,117 @@ The graphical X version, the AT-emulator and virtual device are not ported to
 Win32. This might change in the future but as far as I know no work is in
 progress. Of course the effort of porting only makes sense if there is a need.
 Do you have the need for extended Win32 functionality don't ask me but let us
-all know on the Gnokii mailing list.
+all know on the gnokii mailing list.
 
-Compile using Microsoft Visual C++
-====================================================
+Recent Windows-related information is updated on the gnokii wiki. The main
+Windows page is: http://wiki.gnokii.org/index.php/Windows
 
-Below a description how to compile Gnokii with the Microsoft Visual C++ 6.0.
 
-1) Put the Gnokii source in <path>\gnokii\gnokii src.
-2) Copy <path>\win32\MSVC6\config.h into <path>\include\
-3) Open <path>\win32\MSVC6\gnokii.dsw and compile :)
+Compile using Microsoft Visual Studio 2005
+==========================================
+
+Below a description how to compile gnokii with the Microsoft Visual Studio 2005 C/C++.
+
+Both the commercial MSVS 2005 or MS Visual C++ 2005 Express Edition do work.
+
+1) Extract gnokii source into <path>
+2) (optional) Build settings are in <path>\win32\MSVS2005\config.h you may edit that.
+3) Open <path>\win32\MSVS2005\gnokii.sln and compile :)
+
+The solution will contain three projects: gnokii.dll, gnokii.exe and setup.
+The setup build will fail on Visual C++ Express edition as the setup tools are
+available only in the commercial Visual Studio.
 
 You may want to change the compiler run-time library settings to singe
 threaded / debug single threaded to have much smaller binaries.
 
+
+Compile using Microsoft Visual C++ 4.2 and 6.0
+==============================================
+
+Current versions do not compile.
+
+Maintainers chose not to support these compilers. Microsoft don't support
+those either. There are free of charge alternatives available from Microsoft.
+
+
 Compile with Cygwin (B20)
 =========================
 
-This is in fact the easiest option. Because Cygwin implements a GNU (Unix style) 
-environment on your PC you can almost compile Gnokii 'as is' out of the box. 
+Current versions do not compile.
 
-There are just a few steps extra needed to tweak the Makefile. Read the comments 
-in the Makefile. Actually you might want to keep the '-s' in the LDFLAGS since 
-this strips debug information and keeps your executable lean.
+This is on a TODO list and will be supported on later versions.
+
 
 Cross compiling with MinGW
 ==========================
 
-You can easily cross compile gnokii with MinGW, just follow these instructions:
-1) run autoheader
-2) edit win32/mingw-cross/mingw-cross.sh according to your MinGW setup
-3) run make DESTDIR=/tmp/foo to install
+Current versions do not compile.
+
+This is on a TODO list and will be supported on later versions.
+
+
+Configuring gnokii / gnokiirc
+=============================
+
+Current versions attempt to read the gnokiirc from:
+
+   1. User's home directory: %HOMEDRIVE%\%HOMEPATH%\_gnokiirc
+   2. Windows installation directory: %SYSTEMROOT%\gnokiirc
+
+If user gnokii configuration can not be found, system global is used.
+
+Three values are required in the config file for gnokii to work: port, model
+and connection. See the comments in the config file for further information.
+
+In Windows the port is always a Com-port, a hard wired or virtual.
+See the README-files for correct phone model number. See the README-files for
+correct connection cable type.
+
+Example:
+port = com5:
+model = 6510
+connection = dlr3p
+
+gnokii wiki has example configurations for various handsets at
+http://wiki.gnokii.org/index.php/Config
+
 
 IrDA support for Windows
 ========================
 
-Gnokii does support IrDA connection on Windows system. Due to license issues
-we cannot distribute all needed files to build Windows support out of the
-box. Here are the steps you need to take to build IrDA support for Windows.
-1) Get a copy of af_irda.h header file. It is distributed with the Windows
-IrDA DDK. The contents of the file you can find at:
-http://www.cswl.com/whiteppr/white/arhead.html
-2) Copy it to some system path
-3) Enable IrDA support in config.h file (see above) by replacing a line:
-#undef HAVE_IRDA
-with
+gnokii does support IrDA connection on Windows system. The support is built
+in as default.
+
+You will need Nokia IrDA driver for this to work, it is in Nokia PC Suite software
+package. The driver will create a virtual Com-port when phone is near the PC.
+
+If you want to disable the IrDA do the following:
+1) Disable IrDA support in config.h file (see above) by replacing a line:
 #define HAVE_IRDA 1
-4) Build gnokii as described above
+with
+#undef HAVE_IRDA
+2) Build gnokii as described above
+
+
+Bluetooth support for Windows
+=============================
+
+gnokii does support Bluetooth connection on Windows system. The support is built
+in as default.
+
+If you want to disable the Bluetooth do the following:
+1) Disable Bluetooth support in config.h file (see above) by replacing a line:
+#define HAVE_BLUETOOTH 1
+with
+#undef HAVE_BLUETOOTH
+2) Build gnokii as described above
+
 
 Disclaimer
 ==========
 
-No warranty, you are on your own. We are looking for maintainer of Win32 port.
+No warranty, you are on your own. If you have questions or remarks,
+please let me know on my email address mentioned below.
+
+Maintainer: Jari Turkia <jmjt at lut dot fi>
