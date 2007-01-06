@@ -55,6 +55,8 @@
     o add support for Bluetooth on win32/MSVS 2005      (Pawel Kot,
                                                        Jari Turkia)
     o fix encoding to UCS2                              (Pawel Kot)
+    o fix user data length calculating on concatenated SMS
+                                        (Pawel Kot, Alain Degreffe)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

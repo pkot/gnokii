@@ -1144,26 +1144,28 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 			unsigned int length, udh_length, offset = rawsms->user_data_length;
 
 			length = strlen(sms->user_data[i].u.text);
+			if (sms->udh.length)
+				udh_length = sms->udh.length + 1;
+			else
+				udh_length = 0;
 			switch (al) {
 			case GN_SMS_DCS_DefaultAlphabet:
-				if (sms->udh.length) udh_length = sms->udh.length+1;
-				else udh_length = 0;
 				size = char_7bit_pack((7 - (udh_length % 7)) % 7,
 						      sms->user_data[i].u.text,
 						      rawsms->user_data + offset,
 						      &length);
-				rawsms->length = length;
+				rawsms->length = length + (udh_length * 8 + 6) / 7;
 				rawsms->user_data_length = size + offset;
 				break;
 			case GN_SMS_DCS_8bit:
 				rawsms->dcs |= 0xf4;
 				memcpy(rawsms->user_data + offset, sms->user_data[i].u.text, sms->user_data[i].u.text[0]);
-				rawsms->user_data_length = rawsms->length = length + offset;
+				rawsms->user_data_length = rawsms->length = length + udh_length;
 				break;
 			case GN_SMS_DCS_UCS2:
 				rawsms->dcs |= 0x08;
 				length = char_unicode_encode(rawsms->user_data + offset, sms->user_data[i].u.text, length);
-				rawsms->user_data_length = rawsms->length = length + offset;
+				rawsms->user_data_length = rawsms->length = length + udh_length;
 				break;
 			default:
 				return GN_ERR_WRONGDATAFORMAT;
@@ -1346,7 +1348,8 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 
 	/* If there's no concat header we need to add one */
 	for (i = 0; i < data->sms->number; i++)
-		if (data->sms->udh.udh[i].type == GN_SMS_UDH_ConcatenatedMessages) isConcat = i;
+		if (data->sms->udh.udh[i].type == GN_SMS_UDH_ConcatenatedMessages)
+			isConcat = i;
 
 	if (isConcat == -1)
 		isConcat = gn_sms_udh_add(data->sms, GN_SMS_UDH_ConcatenatedMessages);
@@ -1398,15 +1401,18 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 		case GN_SMS_DCS_UCS2:
 			start += copied;
 			copied = (ud[0].length - start) % ((MAX_SMS_PART - (data->sms->udh.length+1)));
-			if (copied == 0)
+			/* This is maximum size of what we can send */
+			if (copied == 0) {
 				copied = (MAX_SMS_PART - (data->sms->udh.length+1));
+			}
 			if (copied > (MAX_SMS_PART - (data->sms->udh.length+1)) / 2) {
 				copied = copied / 2;
 				if (copied < (MAX_SMS_PART - (data->sms->udh.length+1)) / 2)
 					copied = (MAX_SMS_PART - (data->sms->udh.length+1)) / 2;
 			}
-			if (copied % 2)
+			if (i < count - 1 && copied % 2) {
 				copied--;
+			}
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
 			data->sms->user_data[0].type = ud[0].type;
 			data->sms->user_data[0].length = copied;
