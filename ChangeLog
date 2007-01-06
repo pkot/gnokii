@@ -54,6 +54,7 @@
     o add Nokia N70 ids                                 (Pawel Kot)
     o add support for Bluetooth on win32/MSVS 2005      (Pawel Kot,
                                                        Jari Turkia)
+    o fix encoding to UCS2                              (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
