@@ -29,6 +29,7 @@
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2003-2004 Igor Popik
   Copyright (C) 2004      Hugo Hass, Ron Yorston
+  Copyright (C) 2007      Jeremy Laine
 
   This file provides functions specific to generic AT command compatible
   phones. See README for more details on supported mobile phones.
@@ -109,6 +110,7 @@ static gn_error AT_CancelCall(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetDateTime(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -156,6 +158,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetNetworkInfo,        AT_GetNetworkInfo,        ReplyGetNetworkInfo },
 	{ GN_OP_SetDateTime,           AT_SetDateTime,           Reply },
 	{ GN_OP_GetDateTime,           AT_GetDateTime,           ReplyGetDateTime },
+	{ GN_OP_SendDTMF,              AT_SendDTMF,              Reply },
 };
 
 char *strip_quotes(char *s)
@@ -1175,6 +1178,42 @@ static gn_error AT_GetDateTime(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetDateTime, data, state);
 }
 
+
+/*
+ * This command allows to send DTMF tones and arbitrary tones.
+ * DTMF is a single ASCII character in the set 0-9, *, #, A-D
+ * FIXME: tone and duration parameters are not yet supported
+ */
+static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+	unsigned char req[32];
+	int len, i, dtmf_len;
+
+	if (!data || !data->dtmf_string)
+		return GN_ERR_INTERNALERROR;
+
+	dtmf_len = strlen(data->dtmf_string);
+
+	/* First let's check out if the command is supported by the phone */
+	len = snprintf(req, sizeof(req), "AT+VTS?\r");
+	if (sm_message_send(len, GN_OP_SendDTMF, req, state))
+		return GN_ERR_NOTREADY;
+	if (sm_block_no_retry(GN_OP_SendDTMF, data, state) != GN_ERR_NONE)	
+		return GN_ERR_NOTSUPPORTED;
+
+	/* Send it char by char */
+	for (i = 0; i < dtmf_len; i++) {
+		len = snprintf(req, sizeof(req), "AT+VTS=%c\r", data->dtmf_string[i]);
+		if (sm_message_send(len, GN_OP_SendDTMF, req, state))
+			return GN_ERR_NOTREADY;
+		error = sm_block_no_retry(GN_OP_SendDTMF, data, state);
+		if (error)
+			break;
+	}
+
+	return error;
+}
 
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {

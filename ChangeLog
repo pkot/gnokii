@@ -116,6 +116,7 @@
                                                     (Daniele Forsi)
     o fix segfault on reading empty SMS locations with certain
       GSM modems                                      (Yves PERREY)
+    o add DTMF support                               (Jeremy Laine)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
