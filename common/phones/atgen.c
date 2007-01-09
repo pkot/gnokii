@@ -1198,7 +1198,7 @@ static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_WRONGDATAFORMAT;
 
 	/* First let's check out if the command is supported by the phone */
-	len = snprintf(req, sizeof(req), "AT+VTS?\r");
+	len = snprintf(req, sizeof(req), "AT+VTS=?\r");
 	if (sm_message_send(len, GN_OP_SendDTMF, req, state))
 		return GN_ERR_NOTREADY;
 	if (sm_block_no_retry(GN_OP_SendDTMF, data, state) != GN_ERR_NONE)	
