@@ -69,7 +69,7 @@ typedef struct {
 	void (*on_cell_broadcast)(gn_cb_message *msg);
 	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
 	void (*rlp_rx_callback)(gn_rlp_f96_frame *frame);
-	gn_error (*on_sms)(gn_sms *message);
+	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state);
 
 	unsigned char magic_bytes[4];
 	bool sms_notification_in_progress;

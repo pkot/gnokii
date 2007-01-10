@@ -1292,7 +1292,7 @@ int showsmsfolderstatus(gn_data *data, struct gn_statemachine *state)
 }
 
 /* SMS handler for --smsreader mode */
-static gn_error smsslave(gn_sms *message)
+static gn_error smsslave(gn_sms *message, struct gn_statemachine *state)
 {
 	FILE *output;
 	char *s = message->user_data[0].u.text;

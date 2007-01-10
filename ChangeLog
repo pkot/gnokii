@@ -57,6 +57,8 @@
     o fix encoding to UCS2                              (Pawel Kot)
     o fix user data length calculating on concatenated SMS
                                         (Pawel Kot, Alain Degreffe)
+    o on_sms callback should have a pointer to the statemachine
+                                                     (Jeremy Laine)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

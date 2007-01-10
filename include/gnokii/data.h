@@ -82,7 +82,7 @@ typedef struct {
 	gn_calnote_alarm *alarm;
 	gn_raw_data *raw_data;
 	gn_call_divert *call_divert;
-	gn_error (*on_sms)(gn_sms *message);
+	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state);
 	int *display_status;
 	void (*on_cell_broadcast)(gn_cb_message *message);
 	gn_netmonitor *netmonitor;
