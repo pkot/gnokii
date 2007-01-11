@@ -1350,7 +1350,7 @@ static bool CheckIncomingSMS(struct gn_statemachine *state, int pos)
 		return false;
 	}
 
-	DRVINSTANCE(state)->on_sms(&sms);
+	DRVINSTANCE(state)->on_sms(&sms, state);
 
 	dprintf("deleting sms#%hd\n", sms.number);
 	gn_data_clear(&data);
