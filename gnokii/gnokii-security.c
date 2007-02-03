@@ -125,11 +125,21 @@ static int get_password(const char *prompt, char *pass, int length)
 	fprintf(stdout, "%s", prompt);
 	fgets(pass, length, stdin);
 #else
-	/* FIXME: manual says: Do not use it */
-	strncpy(pass, getpass(prompt), length - 1);
+	/* FIXME: manual says: Do not use getpass */
+	char *s = NULL;
+	int err, s_len, fd = fileno(stdin);
+
+	if (isatty(fd)) {
+		strncpy(pass, getpass(prompt), length - 1);
+	} else {
+		err = getline(&s, &s_len, stdin);
+		if (err > 0 && s) {
+			strncpy(pass, s, length - 1);
+			free(s);
+		}
+	}
 	pass[length - 1] = 0;
 #endif
-
 	return 0;
 }
 
