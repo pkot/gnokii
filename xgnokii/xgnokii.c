@@ -1334,7 +1334,7 @@ static void OkEditSMSSetDialog(GtkWidget * w, gpointer data)
 		gtk_entry_get_text(GTK_ENTRY(configDialogData.sms.number)),
 		GN_BCD_STRING_MAX_LENGTH);
 	configDialogData.sms.smsSetting[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].
-	    smsc.number[GN_BCD_STRING_MAX_LENGTH]
+	    smsc.number[GN_BCD_STRING_MAX_LENGTH - 1]
 	    = '\0';
 
 	configDialogData.sms.smsSetting[GPOINTER_TO_INT(GTK_CLIST(SMSClist)->selection->data)].
