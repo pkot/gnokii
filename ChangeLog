@@ -148,6 +148,9 @@
                                                         (Pawel Kot)
     o replace gettextize with autopoint                 (Pawel Kot)
     o add waitcall file to utils/.cvsignore         (Daniele Forsi)
+    o waitcall, todologo and ppm2nokia moved to gnokii-extras
+      repository                                    (Daniele Forsi,
+                                                         Pawel Kot)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)
