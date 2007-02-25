@@ -267,6 +267,7 @@ static gn_error P3110_Initialise(struct gn_statemachine *state)
 	goto retval;
 errcond:
 	FREE(DRVINSTANCE(state));
+	pgen_terminate(&data, state);
 retval:
 	return error;
 }

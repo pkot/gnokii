@@ -497,8 +497,13 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 		/* Now test the link and get the model */
 		gn_data_clear(&data);
 		data.model = model;
-		if (state->driver.functions(GN_OP_GetModel, &data, state) == GN_ERR_NONE)
+		err = state->driver.functions(GN_OP_GetModel, &data, state);
+		if (err != GN_ERR_NONE) {
+			/* ignore return value from GN_OP_Terminate, will use previous error code instead */
+			state->driver.functions(GN_OP_Terminate, &data, state);
+		} else {
 			connected = true;
+		}
 
 		/* Change the defaults for Nokia 8310 */
 		if (!strncmp(data.model, "NHM-7", 5)) {
@@ -575,6 +580,7 @@ static gn_error NK6510_Identify(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x00, 0x41};
 	unsigned char req2[] = {FBUS_FRAME_HEADER, 0x07, 0x01, 0x00};
+	gn_error err;
 
 	dprintf("Identifying...\n");
 	pnok_manufacturer_get(data->manufacturer);
@@ -582,7 +588,8 @@ static gn_error NK6510_Identify(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(6, 0x1b, req2, state)) return GN_ERR_NOTREADY;
 	sm_wait_for(0x1b, data, state);
 	sm_block(0x1b, data, state); /* waits for all requests - returns req2 error */
-	sm_error_get(0x1b, state);
+	err = sm_error_get(0x1b, state);
+	if (err != GN_ERR_NONE) return err;
 
 	/* Check that we are back at state Initialised */
 	if (gn_sm_loop(0, state) != GN_SM_Initialised) return GN_ERR_UNKNOWN;

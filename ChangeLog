@@ -123,6 +123,8 @@
     o fix segfault on reading empty SMS locations with certain
       GSM modems                                      (Yves PERREY)
     o add DTMF support                               (Jeremy Laine)
+    o fix memory leak when link initialisation succeeds but driver
+      initialisation fails  (e.g. timeout)          (Daniele Forsi)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
@@ -157,6 +159,8 @@
     o fix warning about unused functions when compiled without
       --enable-security                             (Daniele Forsi)
     o remove irda blacklisting code                     (Pawel Kot)
+    o fix memory leak when link initialisation succeeds but driver
+      initialisation fails (e.g. timeout)           (Daniele Forsi)
  * translation updates
     o update Italian translation                    (Daniele Forsi)
  * gnokiid updates
@@ -193,6 +197,8 @@
       (partial fix)                                 (Daniele Forsi)
     o make it possible to use --getphonebook to read DC, MC and RC
       when there is no name, only the number        (Daniele Forsi)
+    o fix memory leak when link initialisation succeeds but driver
+      initialisation fails (e.g. timeout)           (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
@@ -225,6 +231,12 @@
  * nokia dku2 kernel module
     o add Linux 2.6.18 compatibility     (Pawel Kot, Mark Kirkwood)
     o add Nokia 6155 support                            (Pawel Kot)
+ * nk3110 driver updates
+    o fix memory leak when link initialisation succeeds but driver
+      initialisation fails  (e.g. timeout)          (Daniele Forsi)
+ * nk7110 driver updates
+    o fix memory leak when link initialisation succeeds but driver
+      initialisation fails  (e.g. timeout)          (Daniele Forsi)
 
 0.6.14
 ======

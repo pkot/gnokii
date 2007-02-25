@@ -538,13 +538,12 @@ static gn_error Initialise(struct gn_statemachine *state)
 		err = m2bus_initialise(state);
 		break;
 	default:
-		FREE(DRVINSTANCE(state));
-		return GN_ERR_NOTSUPPORTED;
+		err = GN_ERR_NOTSUPPORTED;
 	}
 
 	if (err != GN_ERR_NONE) {
 		dprintf("Error in link initialisation\n");
-		FREE(DRVINSTANCE(state));
+		gn_sm_functions(GN_OP_Terminate, NULL, state);
 		return GN_ERR_NOTSUPPORTED;
 	}
 
@@ -554,7 +553,7 @@ static gn_error Initialise(struct gn_statemachine *state)
 	   authorize or set keytable */
 
 	if ((err = IdentifyPhone(state)) != GN_ERR_NONE) {
-		FREE(DRVINSTANCE(state));
+		gn_sm_functions(GN_OP_Terminate, NULL, state);
 		return err;
 	}
 
@@ -564,7 +563,7 @@ static gn_error Initialise(struct gn_statemachine *state)
 	if (DRVINSTANCE(state)->pm->flags & PM_AUTHENTICATION) {
 		/* Now test the link and authenticate ourself */
 		if ((err = Authentication(state, DRVINSTANCE(state)->imei)) != GN_ERR_NONE) {
-			FREE(DRVINSTANCE(state));
+			gn_sm_functions(GN_OP_Terminate, NULL, state);
 			return err;
 		}
 	}
@@ -574,7 +573,7 @@ static gn_error Initialise(struct gn_statemachine *state)
 			/* FIXME: build a default table */
 		} else {
 			if (BuildKeytable(state) != GN_ERR_NONE) {
-				FREE(DRVINSTANCE(state));
+				gn_sm_functions(GN_OP_Terminate, NULL, state);
 				return GN_ERR_NOTSUPPORTED;
 			}
 		}
