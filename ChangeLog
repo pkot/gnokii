@@ -237,6 +237,8 @@
  * nk7110 driver updates
     o fix memory leak when link initialisation succeeds but driver
       initialisation fails  (e.g. timeout)          (Daniele Forsi)
+    o fix gcc warning: enumeration value not handled in switch
+                                                    (Daniele Forsi)
 
 0.6.14
 ======
