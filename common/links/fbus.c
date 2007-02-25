@@ -100,7 +100,7 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
 
 	/* Communication with the phone looks strange here. I am unable to
 	 * read the whole answer from the port with DKU-5 cable and
-	 * Nokia 6020. The following code seems to work reliable.
+	 * Nokia 6020. The following code seems to work reliably.
 	 */
 	device_write(cmd, len, state);
 	/* Experimental timeout */
@@ -138,7 +138,7 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
 	usleep(1000000);
 	device_changespeed(19200, state);
 	dprintf("Switching to FBUS mode\n");
-	/* Here we can be either switch to FBUS or not. Assume 0.5 second
+	/* Here we can be either switched to FBUS or not. Assume 0.5 second
 	 * timeout for the answer.
 	 */
 	res = send_command("AT\r\n", 4, state);
@@ -327,7 +327,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 	case FBUS_RX_GetMessage:
 
 		if (i->buffer_count >= FBUS_FRAME_MAX_LENGTH) {
-			dprintf("FBUS: Message buffer overun - resetting\n");
+			dprintf("FBUS: Message buffer overrun - resetting\n");
 			i->state = FBUS_RX_Sync;
 			break;
 		}
@@ -454,7 +454,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 	case FBUS_RX_EchoMessage:
 
 		if (i->buffer_count >= FBUS_FRAME_MAX_LENGTH) {
-			dprintf("FBUS: Message buffer overun - resetting\n");
+			dprintf("FBUS: Message buffer overrun - resetting\n");
 			i->state = FBUS_RX_Sync;
 			break;
 		}
@@ -629,7 +629,7 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 
 
 /* Initialise variables and start the link */
-/* state is only passed around to allow for muliple state machines (one day...) */
+/* state is only passed around to allow for multiple state machines (one day...) */
 
 gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 {
