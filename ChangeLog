@@ -161,6 +161,9 @@
     o remove irda blacklisting code                     (Pawel Kot)
     o fix memory leak when link initialisation succeeds but driver
       initialisation fails (e.g. timeout)           (Daniele Forsi)
+    o fix error spotted with valgrind after driver init failure:
+      "Conditional jump or move depends on uninitialised value(s)"
+                                                    (Daniele Forsi)
  * translation updates
     o update Italian translation                    (Daniele Forsi)
  * gnokiid updates
