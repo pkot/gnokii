@@ -59,6 +59,7 @@
                                         (Pawel Kot, Alain Degreffe)
     o on_sms callback should have a pointer to the statemachine
                                                      (Jeremy Laine)
+    o fix winsock2 check                              (Jari Turkia)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)
