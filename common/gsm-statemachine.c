@@ -168,7 +168,8 @@ gn_error sm_error_get(unsigned char messagetype, struct gn_statemachine *state)
 	int c, d;
 	gn_error error = GN_ERR_NOTREADY;
 
-	if (state->current_state == GN_SM_ResponseReceived) {
+	switch (state->current_state) {
+	case GN_SM_ResponseReceived:
 		for (c = 0; c < state->received_number; c++)
 			if (state->waiting_for[c] == messagetype) {
 				error = state->response_error[c];
@@ -185,6 +186,13 @@ gn_error sm_error_get(unsigned char messagetype, struct gn_statemachine *state)
 			state->waiting_for_number = 0;
 			state->current_state = GN_SM_Initialised;
 		}
+		break;
+	/* Here we are fine! */
+	case GN_SM_Initialised:
+		error = GN_ERR_NONE;
+		break;
+	default:
+		break;
 	}
 
 	return error;
