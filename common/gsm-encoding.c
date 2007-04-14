@@ -399,19 +399,20 @@ void char_ascii_decode(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-unsigned int char_ascii_encode(unsigned char* dest, const unsigned char* src, unsigned int len)
+size_t char_ascii_encode(char *dest, size_t dest_len, const char *src, size_t len)
 {
-	int i, j;
+	size_t i, j, extra = 0;
 
-	for (i = 0, j = 0; j < len; i++, j++) {
+	for (i = 0, j = 0; i < dest_len && j < len; i++, j++) {
 		if (char_def_alphabet_ext(src[j])) {
 			dest[i++] = GN_CHAR_ESCAPE;
 			dest[i] = char_def_alphabet_ext_encode(src[j]);
+			extra++;
 		} else {
 			dest[i] = char_def_alphabet_encode(src[j]);
 		}
 	}
-	return i;
+	return len + extra;
 }
 
 /* null terminates the string */
@@ -429,28 +430,23 @@ void char_hex_decode(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-void char_hex_encode(unsigned char* dest, const unsigned char* src, int len)
+size_t char_hex_encode(char *dest, size_t dest_len, const char *src, size_t len)
 {
-	int i;
+	int i, n = dest_len / 2 >= len ? len : dest_len / 2;
 
-	for (i = 0; i < (len / 2); i++) {
+	for (i = 0; i < n; i++)
 		sprintf(dest + i * 2, "%x", char_def_alphabet_encode(src[i]));
-	}
-	return;
+	return len * 2;
 }
 
-int char_uni_alphabet_encode(unsigned char const *value, wchar_t *dest, MBSTATE *mbs)
+size_t char_uni_alphabet_encode(const char *value, size_t n, wchar_t *dest, MBSTATE *mbs)
 {
 	int length;
 
-	switch (length = char_mbtowc(dest, value, MB_CUR_MAX, mbs)) {
-	case -1:
-		dprintf("Error calling mctowb!\n");
-		*dest = '?';
-		length = 1;
-	default:
-		return length;
-	}
+	if (n > MB_CUR_MAX)
+		n = MB_CUR_MAX;
+	length = char_mbtowc(dest, value, n, mbs);
+	return length;
 }
 
 int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs)
@@ -499,28 +495,22 @@ void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
 /*
  * This function should convert "ABC" to "004100420043"
  */
-void char_ucs2_encode(unsigned char* dest, const unsigned char* src, int len)
+size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len)
 {
 	wchar_t wc;
-	int i_len = 0, o_len, length;
+	int i, o_len, length;
 	MBSTATE mbs;
 
 	MBSTATE_ENC_CLEAR(mbs);
-	for (o_len = 0; i_len < len ; o_len++) {
-		switch (length = char_uni_alphabet_encode(src + i_len, &wc, &mbs)) {
-		case -1:
-			i_len++;
-			break;
-		case 0:
-			/* return at the end of the string */
-			return;
-		default:
-			i_len += length;
-			break;
-		}
-		sprintf(dest + (o_len << 2), "%04lx", wc);
+	for (i = 0, o_len = 0; i < len && o_len < dest_len / 4; o_len++) {
+		length = char_uni_alphabet_encode(src + i, len - i, &wc, &mbs);
+		if (!length)
+			return i * 4;
+		i += length;
+		/* XXX: We should probably check wchar_t size. */
+		sprintf(dest + (o_len << 2), "%04x", wc);
 	}
-	return;
+	return len * 4;
 }
 
 /* null terminates the string */
@@ -548,7 +538,8 @@ unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, 
 
 	MBSTATE_ENC_CLEAR(mbs);
 	while (offset < len) {
-		switch (length = char_uni_alphabet_encode(src + offset, &wc, &mbs)) {
+		length = char_uni_alphabet_encode(src + offset, len - offset, &wc, &mbs);
+		switch (length) {
 		case -1:
 			dest[pos++] =  wc >> 8 & 0xFF;
 			dest[pos++] =  wc & 0xFF;

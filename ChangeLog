@@ -62,6 +62,8 @@
     o fix winsock2 check                              (Jari Turkia)
     o it's not an error when statemachine is in the Initialised
       state                                             (Pawel Kot)
+    o fix segfault on contacts handling in AT driver for long names
+                                               (Baurzhan Ismagulov)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

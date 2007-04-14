@@ -54,9 +54,10 @@ static gn_error se_at_memory_type_set(gn_memory_type mt, struct gn_statemachine 
 		int len;
 		char memtype[10];
 
-		len = at_encode(drvinst->charset, memtype, memorynames[mt], strlen(memorynames[mt]));
+		len = at_encode(drvinst->charset, memtype, sizeof(memtype),
+				memorynames[mt], strlen(memorynames[mt]));
 		sprintf(req, "AT+CPBS=\"%s\"\r", memtype);
-		ret = sm_message_send(11 + len, GN_OP_Init, req, state);
+		ret = sm_message_send(11 + len - 1, GN_OP_Init, req, state);
 		if (ret)
 			return GN_ERR_NOTREADY;
 		gn_data_clear(&data);
@@ -149,32 +150,32 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
-	int len, ofs;
-	char req[256], *tmp;
+	size_t len;
+	char pnumber[128], name[256], req[256];
 	gn_error ret;
 	
 	ret = se_at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
-	if (data->phonebook_entry->empty) {
+	if (data->phonebook_entry->empty)
 		return state->driver.functions(GN_OP_DeletePhonebook, data, state);
-	} else {
-		char pnumber[128];
 
-		ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
-		if (ret)
-			return ret;
-		at_encode(drvinst->charset, pnumber, data->phonebook_entry->number, strlen(data->phonebook_entry->number));
-		ofs = sprintf(req, "AT+CPBW=%d,\"%s\",%s,\"",
-			      data->phonebook_entry->location+drvinst->memoryoffset,
-			      pnumber,
-			      data->phonebook_entry->number[0] == '+' ? "145" : "129");
-		len = strlen(data->phonebook_entry->name);
-		tmp = req + ofs;
-		len = at_encode(drvinst->charset, tmp, data->phonebook_entry->name, len);
-		tmp[len++] = '"'; tmp[len++] = '\r';
-		len += ofs;
-	} 
+	ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
+	if (ret)
+		return ret;
+
+	at_encode(drvinst->charset, pnumber, sizeof(pnumber),
+		data->phonebook_entry->number,
+		strlen(data->phonebook_entry->number));
+	at_encode(drvinst->charset, name, sizeof(name),
+		data->phonebook_entry->name,
+		strlen(data->phonebook_entry->name));
+
+	len = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%s,\"%s\"\r",
+		       data->phonebook_entry->location+drvinst->memoryoffset,
+		       pnumber,
+		       data->phonebook_entry->number[0] == '+' ? "145" : "129",
+		       name);
 	if (sm_message_send(len, GN_OP_WritePhonebook, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_WritePhonebook, data, state);

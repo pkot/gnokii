@@ -103,7 +103,7 @@ char *findcrlf(unsigned char *str, int test, int maxlength);
 char *strip_quotes(char *s);
 
 void at_decode(int charset, char *dst, char *src, int len);
-int at_encode(int charset, char *dst, char *src, int len);
+size_t at_encode(at_charset charset, char *dst, size_t dst_len, const char *src, size_t len);
 
 extern char *memorynames[];
 
