@@ -55,7 +55,7 @@ void calendar_usage(FILE *f)
 	fprintf(f, _(
 		     "Calendar options:\n"
 		     "          --getcalendarnote start_number [end_number|end] [-v|--vCal]\n"
-		     "          --writecalendarnote vcalendarfile number\n"
+		     "          --writecalendarnote vcalendarfile start_number [end_number|end]\n"
 		     "          --deletecalendarnote start [end_number|end]\n"
 		     ));
 }
@@ -241,25 +241,23 @@ int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachin
 
 void writecalendarnote_usage(FILE *f, int exitval)
 {
-	fprintf(f, _("usage: --writecalendarnote vcalendarfile number\n"
+	fprintf(f, _("usage: --writecalendarnote vcalendarfile start_number [end_number|end]\n"
 			"                        vcalendarfile - file containing calendar notes in vCal format\n"
-			"                        number        - calendar note number within the file\n"
+			"                        start_number  - first calendar note from vcalendarfile to read\n"
+			"                        end_number    - last calendar note from vcalendarfile to read\n"
+			"                        end           - read all notes from vcalendarfile from start_number\n"
 			"  NOTE: it stores the note at the first empty location.\n"
 	));
 	exit(exitval);
 }
 
 /* Writing calendar notes. */
-int writecalendarnote(char *argv[], gn_data *data, struct gn_statemachine *state)
+int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_calnote calnote;
-	gn_error error;
-	int location;
+	gn_error error = GN_ERR_NONE;
+	int first_location, last_location, i;
 	FILE *f;
-
-	memset(&calnote, 0, sizeof(calnote));
-	gn_data_clear(data);
-	data->calnote = &calnote;
 
 	f = fopen(optarg, "r");
 	if (f == NULL) {
@@ -267,36 +265,57 @@ int writecalendarnote(char *argv[], gn_data *data, struct gn_statemachine *state
 		return GN_ERR_FAILED;
 	}
 
-	location = gnokii_atoi(argv[optind]);
-	if (errno || location < 0)
+	first_location = gnokii_atoi(argv[3]);
+	if (errno || first_location < 0) {
+		fclose(f);
 		writecalendarnote_usage(stderr, -1);
-
-	error = gn_ical2calnote(f, &calnote, location);
-
-	fclose(f);
-#ifndef WIN32
-	if (error == GN_ERR_NOTIMPLEMENTED) {
-		switch (gn_vcal_file_event_read(optarg, &calnote, location)) {
-		case 0:
-			error = GN_ERR_NONE;
-			break;
-		default:
-			error = GN_ERR_FAILED;
-			break;
-		}
 	}
-#endif
-	if (error != GN_ERR_NONE) {
-		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
-		return error;
+	last_location = parse_end_value_option(argc, argv, 4, first_location);
+	if (errno || last_location < 0) {
+		fclose(f);
+		writecalendarnote_usage(stderr, -1);
 	}
 	
-	error = gn_sm_functions(GN_OP_WriteCalendarNote, data, state);
+	for (i = first_location; i < last_location; i++) {
 
-	if (error == GN_ERR_NONE)
-		fprintf(stderr, _("Successfully written!\n"));
-	else
-		fprintf(stderr, _("Failed to write calendar note: %s\n"), gn_error_print(error));
+		memset(&calnote, 0, sizeof(calnote));
+		gn_data_clear(data);
+		data->calnote = &calnote;
+
+		/* TODO: gn_ical2note expects the pointer to begin file to
+		 * iterate. Fix it to not rewind the file each time
+		 * TODO: parameter to gn_ical2note to not print vcard for
+		 * each contact
+		 */
+		rewind(f);
+		error = gn_ical2calnote(f, &calnote, i);
+
+#ifndef WIN32
+		if (error == GN_ERR_NOTIMPLEMENTED) {
+			switch (gn_vcal_file_event_read(optarg, &calnote, i)) {
+			case 0:
+				error = GN_ERR_NONE;
+				break;
+			default:
+				error = GN_ERR_FAILED;
+				break;
+			}
+		}
+#endif
+		if (error != GN_ERR_NONE) {
+			fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
+			return error;
+		}
+	
+		error = gn_sm_functions(GN_OP_WriteCalendarNote, data, state);
+
+		if (error == GN_ERR_NONE)
+			fprintf(stderr, _("Successfully written!\n"));
+		else
+			fprintf(stderr, _("Failed to write calendar note: %s\n"), gn_error_print(error));
+	}
+	fclose(f);
+
 	return error;
 }
 

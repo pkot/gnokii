@@ -113,6 +113,8 @@
       not 1). Working on Nokia 3210 and 3330; 3310 can only read
       number, not name; not working on 8310.        (Daniele Forsi)
     o allow to enter PIN code not from the terminal         (rob_w)
+    o allow to write more than 1 calendar note at a time
+                                             (Carles Pina i Estany)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)

@@ -636,7 +636,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_GETTODO,           1, 3, 0 },
 		{ OPT_WRITETODO,         2, 2, 0 },
 		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
-		{ OPT_WRITECALENDARNOTE, 2, 2, 0 },
+		{ OPT_WRITECALENDARNOTE, 3, 3, 0 },
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
 		{ OPT_GETPHONEBOOK,      2, 4, 0 },
 		{ OPT_WRITEPHONEBOOK,    0, 10, 0 },
@@ -815,7 +815,7 @@ static int parse_options(int argc, char *argv[])
 		rc = getcalendarnote(argc, argv, data, state);
 		break;
 	case OPT_WRITECALENDARNOTE:
-		rc = writecalendarnote(argv, data, state);
+		rc = writecalendarnote(argc, argv, data, state);
 		break;
 	case OPT_DELCALENDARNOTE:
 		rc = deletecalendarnote(argc, argv, data, state);

@@ -98,7 +98,7 @@ extern void calendar_usage(FILE *f);
 
 extern void getcalendarnote_usage(FILE *f, int exitval);
 extern int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int writecalendarnote(char *argv[], gn_data *data, struct gn_statemachine *state);
+extern int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern int deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* TODO functions */
