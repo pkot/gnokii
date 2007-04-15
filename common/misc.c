@@ -533,7 +533,7 @@ GNOKII_API bool gn_device_unlock(char *lock_file)
 	int err;
 
 	if (!lock_file) {
-		fprintf(stderr, _("Cannot unlock device\n"));
+		fprintf(stderr, _("Cannot unlock device.\n"));
 		return false;
 	}
 	err = unlink(lock_file);
