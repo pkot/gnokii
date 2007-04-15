@@ -656,6 +656,8 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	gn_log_debug("LOG: debug mask is 0x%x\n", gn_log_debug_mask);
 	gn_log_rlpdebug("LOG: rlpdebug mask is 0x%x\n", gn_log_rlpdebug_mask);
 	gn_log_xdebug("LOG: xdebug mask is 0x%x\n", gn_log_xdebug_mask);
+	if (file)
+		dprintf("Config read from file %s.\n", file);
 	return GN_ERR_NONE;
 }
 
