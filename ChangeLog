@@ -228,6 +228,7 @@
     o all protocol related questions should be asked on the gnokii
       mailing list                                      (Pawel Kot)
     o update WIN32 readme                             (Jari Turkia)
+    o update sample config file                         (Pawel Kot)
  * xgnokii updates
     o in xgnokii_contacts.c use GN_PHONEBOOK_GROUP_None, not
       literal 5                                     (Daniele Forsi)

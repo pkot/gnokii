@@ -39,7 +39,7 @@ port = /dev/ttyS0
 
 # Set model to the model number of your phone. For the
 # Symbian phones use:
-# model = series60
+# model = symbian
 # For other non-Nokia phones and when you want to use AT
 # mode use:
 # model = AT
