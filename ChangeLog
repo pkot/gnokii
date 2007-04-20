@@ -64,6 +64,7 @@
       state                                             (Pawel Kot)
     o fix segfault on contacts handling in AT driver for long names
                                                (Baurzhan Ismagulov)
+    o improve INT_MAX detection                         (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

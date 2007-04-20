@@ -97,8 +97,6 @@
 
 #ifdef HAVE_LIMITS_H
 #  include <limits.h>
-#else
-#  define INT_MAX 2147483647
 #endif
 
 #ifdef HAVE_UNISTD_H
@@ -107,6 +105,10 @@
 
 #ifdef HAVE_TERMIOS_H
 #  include <termios.h>
+#endif
+
+#if !defined(INT_MAX)
+#  define INT_MAX 2147483647
 #endif
 
 /*
