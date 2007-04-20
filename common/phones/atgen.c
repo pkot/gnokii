@@ -49,6 +49,7 @@
 #include "phones/atnok.h"
 #include "phones/atsie.h"
 #include "phones/atsoer.h"
+#include "phones/atsam.h"
 #include "links/atbus.h"
 
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state);
@@ -1987,6 +1988,8 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 		at_siemens_init(model, setupdata->model, state);
 	else if (!strncasecmp(manufacturer, "sony ericsson", 14))
 		at_sonyericsson_init(model, setupdata->model, state);
+	else if (!strncasecmp(manufacturer, "samsung", 7))
+		at_samsung_init(model, setupdata->model, state);
 	
 	StoreDefaultCharset(state);
 

@@ -30,6 +30,7 @@ OBJS =	generic.lo \
 	atnok.lo \
 	atsie.lo \
 	atsoer.lo \
+	atsam.lo \
 	gnapplet.lo \
 	fake.lo
 

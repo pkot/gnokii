@@ -133,6 +133,7 @@
     o add DTMF support                               (Jeremy Laine)
     o fix memory leak when link initialisation succeeds but driver
       initialisation fails  (e.g. timeout)          (Daniele Forsi)
+    o initial Samsung support                        (Ingmar Steen)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
