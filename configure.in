@@ -74,7 +74,7 @@ else
 	exit 1
 fi
 
-dnl Let us have $prefix variable aviable here
+dnl Let us have $prefix variable available here
 test x"$prefix" = xNONE && prefix="$ac_default_prefix"
 
 debug="yes"
@@ -443,14 +443,6 @@ if test "$no_x" = yes -o "$with_x" = "no"; then
    GTK_LIBS=""
 else
    AC_PATH_X
-   if test "x$x_includes" != "x"; then
-      XINCL="-I$x_includes"
-   else
-      XINCL=""
-   fi
-   CPPFLAGS="$CPPFLAGS $XINCL"
-   AC_CHECK_HEADERS(X11/xpm.h)
-
    if test "x$x_libraries" = "xNONE"; then
       x_support="no"
       XPM_CFLAGS=""
@@ -460,11 +452,20 @@ else
       AC_MSG_WARN(Cannot find library libX11.)
       AC_MSG_WARN(Disabling xgnokii.)
    else
-      AC_CHECK_LIB(Xpm, XpmWriteFileFromXpmImage,
-            [ XPM_CFLAGS="$XINCL" XPM_LIBS="-L$x_libraries -lXpm -lX11"
-              AC_DEFINE(XPM) ],
-            AC_MSG_WARN(Cannot found library libXpm - disabling XPM support.),
-            [ -L$x_libraries -lX11 ]
+      if test "x$x_includes" != "x"; then
+         XINCL="-I$x_includes"
+      else
+         XINCL=""
+      fi
+      CPPFLAGS="$CPPFLAGS $XINCL"
+      AC_CHECK_HEADERS(X11/xpm.h,
+          [ AC_CHECK_LIB(Xpm, XpmWriteFileFromXpmImage,
+                [ XPM_CFLAGS="$XINCL" XPM_LIBS="-L$x_libraries -lXpm -lX11"
+                  AC_DEFINE(XPM) ],
+                AC_MSG_WARN(Cannot found library libXpm - disabling XPM support.),
+                [ -L$x_libraries -lX11 ]
+            )
+          ]
       )
 
       if test "x$PTHREAD_LIBS" = xerror; then
