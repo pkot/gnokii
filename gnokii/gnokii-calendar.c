@@ -276,7 +276,7 @@ int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemach
 		writecalendarnote_usage(stderr, -1);
 	}
 	
-	for (i = first_location; i < last_location; i++) {
+	for (i = first_location; i <= last_location; i++) {
 
 		memset(&calnote, 0, sizeof(calnote));
 		gn_data_clear(data);
