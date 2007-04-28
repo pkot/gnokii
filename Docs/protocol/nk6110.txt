@@ -640,7 +640,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r Write cal.note report { 0x0065, return }
                             where return: 0x01: ok
                                           0x6f: SIM card not ready
-                                          0x73: failure
+                                          0x73: memory full
                                           0x7d: failure
                                           0x81: calendar functions busy. Exit Calendar menu and try again
                                           0x8d: waiting for PIN

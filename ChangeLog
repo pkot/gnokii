@@ -218,6 +218,8 @@
       when there is no name, only the number        (Daniele Forsi)
     o fix memory leak when link initialisation succeeds but driver
       initialisation fails (e.g. timeout)           (Daniele Forsi)
+    o return GN_ERR_MEMORYFULL when calendar memory is full
+                                                    (Daniele Forsi)
  * documentation updates
     o update logos section of man page with current usage
                                                     (Daniele Forsi)
@@ -238,6 +240,8 @@
       mailing list                                      (Pawel Kot)
     o update WIN32 readme                             (Jari Turkia)
     o update sample config file                         (Pawel Kot)
+    o update Docs/protocol/nk6110.txt new explanation for error
+      code 0x73: memory full                        (Daniele Forsi)
  * xgnokii updates
     o in xgnokii_contacts.c use GN_PHONEBOOK_GROUP_None, not
       literal 5                                     (Daniele Forsi)
