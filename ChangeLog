@@ -119,6 +119,8 @@
     o fix valgrind error in --savesms when -f option is not given:
       "Conditional jump or move depends on uninitialised value(s)"
                                                     (Daniele Forsi)
+    o print picture message templates like normal picture messages
+                                                    (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
