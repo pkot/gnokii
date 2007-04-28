@@ -55,7 +55,7 @@ void todo_usage(FILE *f)
 	fprintf(f, _(
 		     "ToDo options:\n"
 		     "          --gettodo start_number [end_number|end] [-v|--vCal]\n"
-		     "          --writetodo vcalendarfile number\n"
+		     "          --writetodo vcalendarfile start_number [end_number|end]\n"
 		     "          --deletealltodos\n"
 		     ));
 }
@@ -154,61 +154,84 @@ int gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 
 void writetodo_usage(FILE *f, int exitval)
 {
-	fprintf(f, _("usage: --writetodo vcalfile number\n"
-			 "       vcalfile - file name in vCal format\n"
-			 "       number   - vCal entry from the file to be saved\n"
-			 "  NOTE: entry is written to the first empty location\n"
+	fprintf(f, _("usage: --writetodo vcalendarfile start_number [end_number|end]\n"
+			"                vcalendarfile - file containing todo notes in vCal format\n"
+			"                start_number  - first note to read from file\n"
+			"                end_number    - last note to read from file\n"
+			"                end           - read all notes from file from start_number\n"
+			"  NOTE: it stores the note at the first empty location.\n"
 	));
 	exit(exitval);
 }
 
 /* ToDo notes writing */
-int writetodo(char *argv[], gn_data *data, struct gn_statemachine *state)
+int writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_todo todo;
-	gn_error error;
-	int location;
+	gn_error error = GN_ERR_NONE;
+	int first_location, last_location, i;
 	FILE *f;
 
-	gn_data_clear(data);
-	data->todo = &todo;
-
 	f = fopen(optarg, "r");
-	if (!f) {
+	if (f == NULL) {
 		fprintf(stderr, _("Can't open file %s for reading!\n"), optarg);
 		return GN_ERR_FAILED;
 	}
 
-	location = gnokii_atoi(argv[optind]);
-	if (errno || location < 0)
+	first_location = gnokii_atoi(argv[optind]);
+	if (errno || first_location < 0) {
+		fclose(f);
 		writetodo_usage(stderr, -1);
+	}
+	last_location = parse_end_value_option(argc, argv, optind + 1, first_location);
+	if (errno || last_location < 0) {
+		fclose(f);
+		writetodo_usage(stderr, -1);
+	}
 
-	error = gn_ical2todo(f, &todo, location);
-	fclose(f);
+	for (i = first_location; i <= last_location; i++) {
+
+		memset(&todo, 0, sizeof(todo));
+		gn_data_clear(data);
+		data->todo = &todo;
+
+		/* TODO: gn_ical2todo expects the pointer to begin file to
+		 * iterate. Fix it to not rewind the file each time
+		 * TODO: parameter to gn_ical2todo to not print vcard for
+		 * each contact
+		 */
+		rewind(f);
+
+		error = gn_ical2todo(f, &todo, i);
+
 #ifndef WIN32
-	if (error == GN_ERR_NOTIMPLEMENTED) {
-		switch (gn_vcal_file_todo_read(optarg, &todo, location)) {
-		case 0:
-			error = GN_ERR_NONE;
-			break;
-		default:
-			error = GN_ERR_FAILED;
-			break;
+		if (error == GN_ERR_NOTIMPLEMENTED) {
+			switch (gn_vcal_file_todo_read(optarg, &todo, i)) {
+			case 0:
+				error = GN_ERR_NONE;
+				break;
+			default:
+				error = GN_ERR_FAILED;
+				break;
+			}
 		}
-	}
 #endif
-	if (error != GN_ERR_NONE) {
-		fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
-		return error;
+		if (error != GN_ERR_NONE) {
+			fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
+			fclose(f);
+			return error;
+		}
+
+		error = gn_sm_functions(GN_OP_WriteToDo, data, state);
+	
+		if (error == GN_ERR_NONE) {
+			fprintf(stderr, _("Successfully written!\n"));
+			fprintf(stderr, _("Priority %d. %s\n"), data->todo->priority, data->todo->text);
+		} else
+			fprintf(stderr, _("Failed to write ToDo note: %s\n"), gn_error_print(error));
 	}
+	fclose(f);
 
-	error = gn_sm_functions(GN_OP_WriteToDo, data, state);
-
-	if (error == GN_ERR_NONE) {
-		fprintf(stderr, _("Successfully written!\n"));
-		fprintf(stderr, _("Priority %d. %s\n"), data->todo->priority, data->todo->text);
-	} else
-		fprintf(stderr, _("Failed to write ToDo note: %s\n"), gn_error_print(error));
 	return error;
 }
 

@@ -117,6 +117,8 @@
     o allow to write more than 1 calendar note at a time
                                              (Carles Pina i Estany,
                                                      Daniele Forsi)
+    o allow to write more than 1 todo note at a time
+                                                    (Daniele Forsi)
     o fix valgrind error in --savesms when -f option is not given:
       "Conditional jump or move depends on uninitialised value(s)"
                                                     (Daniele Forsi)

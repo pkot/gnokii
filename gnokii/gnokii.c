@@ -634,7 +634,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_ANSWERCALL,        1, 1, 0 },
 		{ OPT_HANGUP,            1, 1, 0 },
 		{ OPT_GETTODO,           1, 3, 0 },
-		{ OPT_WRITETODO,         2, 2, 0 },
+		{ OPT_WRITETODO,         2, 3, 0 },
 		{ OPT_GETCALENDARNOTE,   1, 3, 0 },
 		{ OPT_WRITECALENDARNOTE, 2, 3, 0 },
 		{ OPT_DELCALENDARNOTE,   1, 2, 0 },
@@ -826,7 +826,7 @@ static int parse_options(int argc, char *argv[])
 		rc = gettodo(argc, argv, data, state);
 		break;
 	case OPT_WRITETODO:
-		rc = writetodo(argv, data, state);
+		rc = writetodo(argc, argv, data, state);
 		break;
 	case OPT_DELETEALLTODOS:
 		rc = deletealltodos(data, state);

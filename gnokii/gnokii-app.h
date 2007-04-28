@@ -101,12 +101,12 @@ extern int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_stat
 extern int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern int deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
-/* TODO functions */
+/* ToDo functions */
 extern void todo_usage(FILE *f);
 
 extern void gettodo_usage(FILE *f, int exitval);
 extern int gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int writetodo(char *argv[], gn_data *data, struct gn_statemachine *state);
+extern int writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern int deletealltodos(gn_data *data, struct gn_statemachine *state);
 
 /* Dialling and call handling functions */
