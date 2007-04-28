@@ -401,7 +401,7 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		{ NULL,       0,                 NULL, 0 }
 	};
 
-	char memory_type[20];
+	char memory_type[20] = "";
 	struct tm		*now;
 	time_t			nowh;
 

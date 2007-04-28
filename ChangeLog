@@ -116,6 +116,9 @@
     o allow to enter PIN code not from the terminal         (rob_w)
     o allow to write more than 1 calendar note at a time
                                              (Carles Pina i Estany)
+    o fix valgrind error in --savesms when -f option is not given:
+      "Conditional jump or move depends on uninitialised value(s)"
+                                                    (Daniele Forsi)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
