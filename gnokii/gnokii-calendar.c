@@ -304,6 +304,7 @@ int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemach
 #endif
 		if (error != GN_ERR_NONE) {
 			fprintf(stderr, _("Failed to load vCalendar file: %s\n"), gn_error_print(error));
+			fclose(f);
 			return error;
 		}
 	
