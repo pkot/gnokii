@@ -265,12 +265,12 @@ int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemach
 		return GN_ERR_FAILED;
 	}
 
-	first_location = gnokii_atoi(argv[3]);
+	first_location = gnokii_atoi(argv[optind]);
 	if (errno || first_location < 0) {
 		fclose(f);
 		writecalendarnote_usage(stderr, -1);
 	}
-	last_location = parse_end_value_option(argc, argv, 4, first_location);
+	last_location = parse_end_value_option(argc, argv, optind + 1, first_location);
 	if (errno || last_location < 0) {
 		fclose(f);
 		writecalendarnote_usage(stderr, -1);
