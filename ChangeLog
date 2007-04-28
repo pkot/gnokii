@@ -115,7 +115,8 @@
       number, not name; not working on 8310.        (Daniele Forsi)
     o allow to enter PIN code not from the terminal         (rob_w)
     o allow to write more than 1 calendar note at a time
-                                             (Carles Pina i Estany)
+                                             (Carles Pina i Estany,
+                                                     Daniele Forsi)
     o fix valgrind error in --savesms when -f option is not given:
       "Conditional jump or move depends on uninitialised value(s)"
                                                     (Daniele Forsi)
