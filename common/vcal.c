@@ -320,6 +320,7 @@ GNOKII_API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 
 	if (!compresult) {
 		fprintf(stderr, _("No component found.\n"));
+		retval = GN_ERR_EMPTYLOCATION;
 	} else {
 		const char *str;
 		icalcomponent *alarm = {0};
@@ -508,6 +509,7 @@ GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
 
 	if (!compresult) {
 		fprintf(stderr, _("No component found.\n"));
+		return GN_ERR_EMPTYLOCATION;
 	} else {
 		const char *priostr = NULL;
 		icalproperty *priority = icalcomponent_get_first_property(compresult, ICAL_PRIORITY_PROPERTY);
