@@ -284,8 +284,6 @@ int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemach
 
 		/* TODO: gn_ical2note expects the pointer to begin file to
 		 * iterate. Fix it to not rewind the file each time
-		 * TODO: parameter to gn_ical2note to not print vcard for
-		 * each contact
 		 */
 		rewind(f);
 		error = gn_ical2calnote(f, &calnote, i);
