@@ -176,6 +176,8 @@
                                                          Pawel Kot)
     o disable XPM support if X11/xpm.h is not found or is not
       usable, even if libXpm is found and usable    (Daniele Forsi)
+    o fail with configure when there's no (f)lex installed nor
+      common/gnvcal.c is present                        (Pawel Kot)
  * nk6510 driver updates
     o for sms submit dcs field is on other location
                                                  (Waterser Forrest)

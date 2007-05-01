@@ -34,6 +34,14 @@ fi
 AC_GNU_SOURCE
 
 AC_PROG_LEX
+# If there's no flex/lex utility and there's no generated common/gnvcal.c file, we won't be able to compile
+if test "x$LEX" = "x:" && test ! -f common/gnvcal.c; then
+	echo "You need one of the following:"
+	echo " - installed lex/flex"
+	echo " - generated common/gnvcal.c file (included in release tarballs, not included in CVS)"
+	exit 1
+fi
+
 AC_PATH_PROG(RM, rm, no)
 AC_PATH_PROG(FIND, find, no)
 AC_CHECK_PROGS(MAKE, gmake make)
