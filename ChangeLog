@@ -188,7 +188,8 @@
  * translation updates
     o update Italian translation                    (Daniele Forsi)
     o do not translate strings in common/vcal.c and translate those
-      in common/devices/winbluetooth.c           (Daniele Nylander)
+      in common/devices/winbluetooth.c            (Daniel Nylander)
+    o update Swedish translation                  (Daniel Nylander)
  * gnokiid updates
     o set locale according to the environment variable LC_ALL just
       like the other programs                       (Daniele Forsi)
