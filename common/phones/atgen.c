@@ -1458,7 +1458,8 @@ static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length
 	at_line_buffer buf;
 	gn_error error;
 
-	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return error;
 
 	buf.line1 = buffer + 1;
 	buf.length = length;
@@ -1912,7 +1913,11 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	int i;
 
 	dprintf("Initializing AT capable mobile phone ...\n");
-	
+
+	/* initialize variables */
+	memset(model, 0, GN_MODEL_MAX_LENGTH);
+	memset(manufacturer, 0, GN_MANUFACTURER_MAX_LENGTH);
+
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_at, sizeof(gn_driver));
 
@@ -2015,29 +2020,33 @@ static gn_error Terminate(gn_data *data, struct gn_statemachine *state)
 void splitlines(at_line_buffer *buf)
 {
 	char *pos;
+	int length = buf->length;
 
-	pos = findcrlf(buf->line1, 0, buf->length);
+	pos = findcrlf(buf->line1, 0, length);
 	if (pos) {
 		*pos = 0;
 		buf->line2 = skipcrlf(++pos);
+		length -= (buf->line2 - buf->line1);
 	} else {
 		buf->line2 = buf->line1;
 	}
-	pos = findcrlf(buf->line2, 1, buf->length);
+	pos = findcrlf(buf->line2, 1, length);
 	if (pos) {
 		*pos = 0;
 		buf->line3 = skipcrlf(++pos);
+		length -= (buf->line3 - buf->line2);
 	} else {
 		buf->line3 = buf->line2;
 	}
-	pos = findcrlf(buf->line3, 1, buf->length);
+	pos = findcrlf(buf->line3, 1, length);
 	if (pos) {
 		*pos = 0;
 		buf->line4 = skipcrlf(++pos);
+		length -= (buf->line4 - buf->line3);
 	} else {
 		buf->line4 = buf->line3;
 	}
-	pos = findcrlf(buf->line4, 1, buf->length);
+	pos = findcrlf(buf->line4, 1, length);
 	if (pos) {
 		*pos = 0;
 	}
@@ -2067,7 +2076,7 @@ char *findcrlf(unsigned char *str, int test, int max)
 {
 	if (str == NULL)
 		return str;
-	while ((*str != '\n') && (*str != '\r') && ((*str != '\0') || test) && (max > 0)) {
+	while ((max > 0) && (*str != '\n') && (*str != '\r') && ((*str != '\0') || test)) {
 		str++;
 		max--;
 	}

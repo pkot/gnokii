@@ -146,6 +146,8 @@
     o fix memory leak when link initialisation succeeds but driver
       initialisation fails  (e.g. timeout)          (Daniele Forsi)
     o initial Samsung support                        (Ingmar Steen)
+    o initialize variables on driver initialization     (Pawel Kot)
+    o fix findcrlf() usage -- valgrind findings         (Pawel Kot)
  * build system updates
     o add default (/usr/local) paths for FreeBSD      (Petr Hruska)
     o unistd.h is not on all platforms; try to include only from
