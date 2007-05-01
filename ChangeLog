@@ -67,6 +67,8 @@
     o improve INT_MAX detection                         (Pawel Kot)
     o make gn_ical2calnote() and gn_ical2todo() print the parsed
       notes only when debug = on                    (Daniele Forsi)
+    o don't invoke additional fcntls when with_async is set to 0,
+      which is always                                   (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

@@ -294,21 +294,23 @@ int serial_opendevice(const char *file, int with_odd_parity,
 #endif
 
 	/* Make filedescriptor asynchronous. */
-
-	/* We need to supply FNONBLOCK (or O_NONBLOCK) again as it would get reset
-	 * by F_SETFL as a side-effect!
-	 */
+	if (with_async) {
+		/* We need to supply FNONBLOCK (or O_NONBLOCK) again as it would get reset
+		 * by F_SETFL as a side-effect!
+		 */
 #ifdef FNONBLOCK
-	retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | FNONBLOCK);
+		retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | FNONBLOCK);
 #else
 #  ifdef FASYNC
-	retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | O_NONBLOCK);
+		retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | O_NONBLOCK);
 #  else
-	retcode = fcntl(fd, F_SETFL, O_NONBLOCK);
-	if (retcode != -1)
-		retcode = ioctl(fd, FIOASYNC, &with_async);
+		retcode = fcntl(fd, F_SETFL, O_NONBLOCK);
+		if (retcode != -1)
+			retcode = ioctl(fd, FIOASYNC, &with_async);
 #  endif
 #endif
+	}
+
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
 		serial_close(fd, state);
