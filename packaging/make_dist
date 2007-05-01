@@ -30,22 +30,10 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
 #   done
    make -C common gnvcal.c
    mv common/gnvcal.c common/gnvcal2.c
-   # RedHat thing
-   # cp packaging/RedHat/gnokii.spec .
-   # and Debian one
-   # cp -r packaging/Debian debian
-   # and for Slack as well
-   # cp packaging/Slackware/SlackBuild packaging/Slackware/SlackBuild-save
-   # cp packaging/Slackware/SlackBuild-xgnokii packaging/Slackware/SlackBuild-xgnokii-save
-   # and there's Gentoo
-   # cp packaging/Gentoo/gnokii.ebuild packaging/Gentoo/gnokii-${VERSION}.ebuild
    # get recent version of gnapplet.sis
    wget -q -O utils/gnapplet.sis http://users.szivarvanynet.hu/bozo/gnokii/gnapplet.sis
    make distclean
    mv common/gnvcal2.c common/gnvcal.c
-   # and again for Slack
-   # mv packaging/Slackware/SlackBuild-save packaging/Slackware/SlackBuild
-   # mv packaging/Slackware/SlackBuild-xgnokii-save packaging/Slackware/SlackBuild-xgnokii
    # prepare configure for dku-2 module
    # for 2.4 kernel
    cd patches/kernel_2.4
