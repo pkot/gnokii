@@ -192,12 +192,7 @@ int serial_close(int fd, struct gn_statemachine *state)
 		dprintf("Gnokii serial_close: disconnect_script\n");
 
 	if (fd >= 0) {
-#if 1 /* HACK */
 		serial_termios.c_cflag |= HUPCL;	/* production == 1 */
-#else
-		serial_termios.c_cflag &= ~HUPCL;	/* debugging  == 0 */
-#endif
-
 		tcsetattr(fd, TCSANOW, &serial_termios);
 	}
 
