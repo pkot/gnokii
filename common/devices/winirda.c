@@ -131,7 +131,7 @@ int irda_open(struct gn_statemachine *state)
 	*(DWORD*)peer.irdaDeviceID = daddr;
 	if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
 		strcpy(peer.irdaServiceName, "IrDA:IrCOMM");
-		if (setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, &x, sizeof(x)) == SOCKET_ERROR) {
+		if (setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, (char *)&x, sizeof(x)) == SOCKET_ERROR) {
 			perror("setsockopt");
 			dprintf("Failed to set irda socket options.\n");
 			closesocket(fd);

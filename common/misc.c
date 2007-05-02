@@ -522,7 +522,7 @@ failed:
 	free(lock_file);
 	return NULL;
 #else
-	return 1;
+	return (char *)1;
 #endif /* WIN32 */
 }
 
