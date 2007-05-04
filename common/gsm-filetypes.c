@@ -36,6 +36,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#define _GNU_SOURCE
 #include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
@@ -1434,6 +1435,15 @@ static int get_next_token(char *src, int delim)
 #define GET_NEXT_TOKEN()	o = get_next_token(line + offset, ';')
 #define STORE_TOKEN(a)		strip_slashes(a, line + offset, sizeof(a) - 1, o - 1)
 
+inline int local_atoi(char *str, int len)
+{
+	int retval;
+	char *aux = strndup(str, len);
+	retval = atoi(aux);
+	free(aux);
+	return retval;
+}
+
 GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char *line)
 {
 	char backline[MAX_INPUT_LINE_LEN];
@@ -1608,7 +1618,20 @@ GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char 
 		}
 
 		GET_NEXT_TOKEN();
-		STORE_TOKEN(entry->subentries[entry->subentries_count].data.number);
+		switch (entry->subentries[entry->subentries_count].entry_type) {
+			case GN_PHONEBOOK_ENTRY_Date:
+			case GN_PHONEBOOK_ENTRY_Birthday:
+				entry->subentries[entry->subentries_count].data.date.year   = local_atoi(line + offset, 4);
+				entry->subentries[entry->subentries_count].data.date.month  = local_atoi(line + offset + 4, 2);
+				entry->subentries[entry->subentries_count].data.date.day    = local_atoi(line + offset + 6, 2);
+				entry->subentries[entry->subentries_count].data.date.hour   = local_atoi(line + offset + 8, 2);
+				entry->subentries[entry->subentries_count].data.date.minute = local_atoi(line + offset + 10, 2);
+				entry->subentries[entry->subentries_count].data.date.second = local_atoi(line + offset + 12, 2);
+				break;
+			default:
+				STORE_TOKEN(entry->subentries[entry->subentries_count].data.number);
+				break;
+			}
 		switch (o) {
 		case 0:
 			fprintf(stderr, _("Formatting error: unknown error while reading subentry contents\n"));
@@ -1616,14 +1639,6 @@ GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char 
 			goto endloop;
 		case 1:
 			fprintf(stderr, _("Formatting error: empty subentry contents\n"));
-			/* 0x13 Date Type; it is only for Dialed Numbers, etc.
-			   we don't store to this memories so it's an error to use it. */
-			if (entry->subentries[entry->subentries_count].entry_type == GN_PHONEBOOK_ENTRY_Date) {
-				fprintf(stderr, _("Cannot write to read-only memory (Dialed Numbers)\n"));
-				error = GN_ERR_WRONGDATAFORMAT;
-				/* With this error do not write a fake subentry (see below) */
-				goto endfunc;
-			}
 			break;
 		default:
 			break;
@@ -1640,7 +1655,6 @@ endloop:
 		strcpy(entry->subentries[entry->subentries_count].data.number, entry->number);
 		entry->subentries_count = 1;
 	}
-endfunc:
 	return error;
 }
 
@@ -1653,11 +1667,46 @@ GNOKII_API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *ent
 	fprintf(f, "%s;%s;%s;%d;%d", escaped_name,
 		entry->number, memory_type_string,
 		entry->location, entry->caller_group);
+	if (entry->person.has_person) {
+		if (entry->person.honorific_prefixes[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_FormalName,
+				entry->person.honorific_prefixes);
+		if (entry->person.given_name[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_FirstName,
+				entry->person.given_name);
+		if (entry->person.family_name[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_LastName,
+				entry->person.family_name);
+	}
+	if (entry->address.has_address) {
+		if (entry->address.post_office_box[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_Postal,
+				entry->address.post_office_box);
+		if (entry->address.extended_address[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_ExtendedAddress,
+				entry->address.extended_address);
+		if (entry->address.street[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_Street,
+				entry->address.street);
+		if (entry->address.city[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_City,
+				entry->address.city);
+		if (entry->address.state_province[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_StateProvince,
+				entry->address.state_province);
+		if (entry->address.zipcode[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_ZipCode,
+				entry->address.zipcode);
+		if (entry->address.country[0])
+			fprintf(f, ";%d;0;0;%s", GN_PHONEBOOK_ENTRY_Country,
+				entry->address.country);
+	}
+
 	for (i = 0; i < entry->subentries_count; i++) {
 		switch (entry->subentries[i].entry_type) {
 		case GN_PHONEBOOK_ENTRY_Birthday:
 		case GN_PHONEBOOK_ENTRY_Date:
-			fprintf(f, ";%d;0;0;%04u%02u%02u%02u%02u%02u", entry->subentries[i].entry_type,
+			fprintf(f, ";%d;0;%d;%04u%02u%02u%02u%02u%02u", entry->subentries[i].entry_type, entry->subentries[i].id,
 				entry->subentries[i].data.date.year, entry->subentries[i].data.date.month, entry->subentries[i].data.date.day,
 				entry->subentries[i].data.date.hour, entry->subentries[i].data.date.minute, entry->subentries[i].data.date.second);
 			break;
@@ -1680,4 +1729,3 @@ GNOKII_API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *ent
 	fprintf(f, "\n");
 	return GN_ERR_NONE;
 }
-

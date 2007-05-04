@@ -36,7 +36,7 @@
 #include "gnokii.h"
 #include "gnokii-internal.h"
 
-GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *location)
+GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location)
 {
 	int i;
 	char name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
@@ -70,6 +70,24 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 		break;
 	}
 	fprintf(f, "CATEGORIES:%s\n", category);
+
+	if (entry->person.has_person)
+		fprintf(f, "N:%s;%s;%s;%s;%s\n",
+			entry->person.family_name[0]        ? entry->person.family_name        : "",
+			entry->person.given_name[0]         ? entry->person.given_name         : "",
+			entry->person.additional_names[0]   ? entry->person.additional_names   : "",
+			entry->person.honorific_prefixes[0] ? entry->person.honorific_prefixes : "",
+			entry->person.honorific_suffixes[0] ? entry->person.honorific_suffixes : "");
+
+	if (entry->address.has_address)
+		fprintf(f, "ADR;TYPE=HOME,PREF:%s;%s;%s;%s;%s;%s;%s\n",
+			entry->address.post_office_box[0]  ? entry->address.post_office_box  : "",
+			entry->address.extended_address[0] ? entry->address.extended_address : "",
+			entry->address.street[0]           ? entry->address.street           : "",
+			entry->address.city[0]             ? entry->address.city             : "",
+			entry->address.state_province[0]   ? entry->address.state_province   : "",
+			entry->address.zipcode[0]          ? entry->address.zipcode          : "",
+			entry->address.country[0]          ? entry->address.country          : "");
 
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {
@@ -113,6 +131,30 @@ GNOKII_API int gn_phonebook2vcard(FILE * f, gn_phonebook_entry *entry, char *loc
 		case GN_PHONEBOOK_ENTRY_URL:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
 			fprintf(f, "URL:%s\n", name);
+			break;
+		case GN_PHONEBOOK_ENTRY_JobTitle:
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			fprintf(f, "TITLE:%s\n", name);
+			break;
+		case GN_PHONEBOOK_ENTRY_Company:
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			fprintf(f, "ORG:%s\n", name);
+			break;
+		case GN_PHONEBOOK_ENTRY_Nickname:
+			fprintf(f, "NICKNAME:%s\n", entry->subentries[i].data.number);
+			break;
+		case GN_PHONEBOOK_ENTRY_Birthday:
+			fprintf(f, "BDAY:%s\n", entry->subentries[i].data.number);
+			break;
+		case GN_PHONEBOOK_ENTRY_Ringtone:
+		case GN_PHONEBOOK_ENTRY_Pointer:
+		case GN_PHONEBOOK_ENTRY_Logo:
+		case GN_PHONEBOOK_ENTRY_LogoSwitch:
+		case GN_PHONEBOOK_ENTRY_Group:
+		case GN_PHONEBOOK_ENTRY_Location:
+		case GN_PHONEBOOK_ENTRY_Image:
+		case GN_PHONEBOOK_ENTRY_RingtoneAdv:
+			/* Ignore */
 			break;
 		default:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));

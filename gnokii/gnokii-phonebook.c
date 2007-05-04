@@ -111,14 +111,18 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = optarg;
-	entry.memory_type = gn_str2memory_type(memory_type_string);
-	if (entry.memory_type == GN_MT_XX) {
+	memstat.memory_type = gn_str2memory_type(memory_type_string);
+	if (memstat.memory_type == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
 		return -1;
 	}
 
-	start_entry = atoi(argv[optind]);
+	start_entry = gnokii_atoi(argv[optind]);
+	if (errno || start_entry < 0)
+		getphonebook_usage(stderr, -1);
 	end_entry = parse_end_value_option(argc, argv, optind + 1, start_entry);
+	if (errno || end_entry < 0)
+		getphonebook_usage(stderr, -1);
 
 	i = getopt_long(argc, argv, "rvl", options, NULL);
 	switch (i) {
@@ -140,7 +144,6 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 	if (end_entry == INT_MAX) {
 		data->memory_status = &memstat;
-		memstat.memory_type = entry.memory_type;
 		if ((error = gn_sm_functions(GN_OP_GetMemoryStatus, data, state)) == GN_ERR_NONE) {
 			num_entries = memstat.used;
 		}
@@ -149,6 +152,8 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	/* Now retrieve the requested entries. */
 	count = start_entry;
 	while (num_entries > 0 && count <= end_entry) {
+		memset(&entry, 0, sizeof(gn_phonebook_entry));
+		entry.memory_type = memstat.memory_type;
 		entry.location = count;
 
 		data->phonebook_entry = &entry;
@@ -173,6 +178,17 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				break;
 			default:
 				fprintf(stdout, _("%d. Name: %s\n"), entry.location, entry.name);
+				/* Print out personal information */
+				if (entry.person.has_person) {
+					if (entry.person.honorific_prefixes[0])
+						fprintf(stdout, "%s ", entry.person.honorific_prefixes);
+					if (entry.person.given_name[0])
+						fprintf(stdout, "%s ", entry.person.given_name);
+					if (entry.person.family_name[0])
+						fprintf(stdout, "%s", entry.person.family_name);
+					fprintf(stdout, "\n");
+				}
+
 				fprintf(stdout, _("Group: "));
 				switch (entry.caller_group) {
 				case GN_PHONEBOOK_GROUP_Family:
@@ -204,6 +220,24 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 					fprintf(stdout, _("Number: %s\n"), entry.number);
 				}
 
+				/* Print out address information */
+				if (entry.address.has_address) {
+					fprintf(stdout, _("Address information:\n"));
+					if (entry.address.post_office_box[0])
+						fprintf(stdout, "  Post office address: %s\n", entry.address.post_office_box);
+					if (entry.address.extended_address[0])
+						fprintf(stdout, "  Extended address: %s\n", entry.address.extended_address);
+					if (entry.address.street[0])
+						fprintf(stdout, "  Street: %s\n", entry.address.street);
+					if (entry.address.city[0])
+						fprintf(stdout, "  City: %s\n", entry.address.city);
+					if (entry.address.state_province[0])
+						fprintf(stdout, "  State or province: %s\n", entry.address.state_province);
+					if (entry.address.zipcode[0])
+						fprintf(stdout, "  Zipcode: %s\n", entry.address.zipcode);
+					if (entry.address.country[0])
+						fprintf(stdout, "  Country: %s\n", entry.address.country);
+				}
 				dprintf("subentries count: %d\n", entry.subentries_count);
 				for (i = 0; i < entry.subentries_count; i++) {
 					fprintf(stdout, "%s: ", gn_subentrytype2string(entry.subentries[i].entry_type, entry.subentries[i].number_type));
@@ -317,7 +351,9 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 			default_mt = gn_str2memory_type(optarg);
 			break;
 		case 'n':
-			default_location = atoi(optarg);
+			default_location = gnokii_atoi(optarg);
+			if (errno || default_location < 0)
+				writephonebook_usage(stderr, -1);
 			break;
 		default:
 			writephonebook_usage(stderr, -1);
@@ -469,8 +505,12 @@ int deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachin
 		return -1;
 	}
 
-	first_location = atoi(argv[optind]);
+	first_location = gnokii_atoi(argv[optind]);
+	if (errno || first_location < 0)
+		deletephonebook_usage(stderr, -1);
 	last_location = parse_end_value_option(argc, argv, optind + 1, first_location);
+	if (errno || last_location < 0)
+		deletephonebook_usage(stderr, -1);
 
 	for (i = first_location; i <= last_location; i++) {
 		entry.location = i;

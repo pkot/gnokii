@@ -132,6 +132,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			  int blocks, int memtype, int speeddial_pos)
 {
 	int subblock_count = 0, i;
+	gn_phonebook_entry *entry = data->phonebook_entry;
 	gn_phonebook_subentry* subentry = NULL;
 
 
@@ -139,6 +140,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 	for (i = 0; i < blocks; i++) {
 
 		dprintf("[%d] Blockstart: 0x%02x\n", i, blockstart[0]);  /* FIXME ? */
+		dprintf("seq: %d\n", blockstart[4]);
 
 		if (blockstart[0] != GN_PHONEBOOK_ENTRY_Logo &&
 		    blockstart[0] != GN_PHONEBOOK_ENTRY_Ringtone &&
@@ -214,23 +216,76 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			dprintf("Postal Address %d parts\n", blockstart[7]);
 			blocks += blockstart[7];
 			break;
+		/* person related entries */
 		case GN_PHONEBOOK_ENTRY_FirstName:
+			entry->person.has_person = 1;
+			char_unicode_decode(entry->person.given_name, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: First name\n");
+			dprintf("   Text: %s\n", entry->person.given_name);
+			break;
 		case GN_PHONEBOOK_ENTRY_LastName:
-		case GN_PHONEBOOK_ENTRY_PTTAddress:
-		case GN_PHONEBOOK_ENTRY_Street:
-		case GN_PHONEBOOK_ENTRY_City:
-		case GN_PHONEBOOK_ENTRY_StateProvince:
-		case GN_PHONEBOOK_ENTRY_ZipCode:
-		case GN_PHONEBOOK_ENTRY_Country:
-		case GN_PHONEBOOK_ENTRY_ExtendedAddress:
-		case GN_PHONEBOOK_ENTRY_UserID:
+			entry->person.has_person = 1;
+			char_unicode_decode(entry->person.family_name, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: Last name\n");
+			dprintf("   Text: %s\n", entry->person.family_name);
+			break;
 		case GN_PHONEBOOK_ENTRY_FormalName:
+			entry->person.has_person = 1;
+			char_unicode_decode(entry->person.honorific_prefixes, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: Formal name\n");
+			dprintf("   Text: %s\n", entry->person.honorific_prefixes);
+			break;
+		/* address related entries */
+		case GN_PHONEBOOK_ENTRY_Postal:
+			entry->address.has_address = 1;
+			char_unicode_decode(entry->address.post_office_box, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: Postal address\n");
+			dprintf("   Text: %s\n", entry->address.post_office_box);
+			break;
+		case GN_PHONEBOOK_ENTRY_ExtendedAddress:
+			entry->address.has_address = 1;
+			char_unicode_decode(entry->address.extended_address, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: Extended address\n");
+			dprintf("   Text: %s\n", entry->address.extended_address);
+			break;
+		case GN_PHONEBOOK_ENTRY_Street:
+			entry->address.has_address = 1;
+			char_unicode_decode(entry->address.street, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: Street\n");
+			dprintf("   Text: %s\n", entry->address.street);
+			break;
+		case GN_PHONEBOOK_ENTRY_City:
+			entry->address.has_address = 1;
+			char_unicode_decode(entry->address.city, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: City\n");
+			dprintf("   Text: %s\n", entry->address.city);
+			break;
+		case GN_PHONEBOOK_ENTRY_StateProvince:
+			entry->address.has_address = 1;
+			char_unicode_decode(entry->address.state_province, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: State or province\n");
+			dprintf("   Text: %s\n", entry->address.state_province);
+			break;
+		case GN_PHONEBOOK_ENTRY_ZipCode:
+			entry->address.has_address = 1;
+			char_unicode_decode(entry->address.zipcode, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: Zipcode\n");
+			dprintf("   Text: %s\n", entry->address.zipcode);
+			break;
+		case GN_PHONEBOOK_ENTRY_Country:
+			entry->address.has_address = 1;
+			char_unicode_decode(entry->address.country, (blockstart + 6), blockstart[5]);
+			dprintf("   Type: Country\n");
+			dprintf("   Text: %s\n", entry->address.country);
+			break;
+		/* other entries */
+		case GN_PHONEBOOK_ENTRY_PTTAddress:
+		case GN_PHONEBOOK_ENTRY_UserID:
 		case GN_PHONEBOOK_ENTRY_JobTitle:
 		case GN_PHONEBOOK_ENTRY_Company:
 		case GN_PHONEBOOK_ENTRY_Nickname:
 		case GN_PHONEBOOK_ENTRY_Email:
 		case GN_PHONEBOOK_ENTRY_URL:
-		case GN_PHONEBOOK_ENTRY_Postal:
 		case GN_PHONEBOOK_ENTRY_Note:
 			if (!subentry) {
 				dprintf("ERROR!!!");
@@ -286,7 +341,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->data.date.day    = blockstart[9];
 			subentry->data.date.hour   = blockstart[10];
 			subentry->data.date.minute = blockstart[11];
-			subentry->data.date.second = blockstart[12];
+			subentry->data.date.second = 0;
 			dprintf("   Date: %04u.%02u.%02u\n", subentry->data.date.year,
 				subentry->data.date.month, subentry->data.date.day);
 			dprintf("   Time: %02u:%02u:%02u\n", subentry->data.date.hour,
