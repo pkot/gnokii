@@ -540,7 +540,7 @@ msgstr "nie"
 #: xgnokii/xgnokii_speed.c:425
 #, c-format
 msgid "Can't open file %s for writing!\n"
-msgstr "Nie można otworzyć pliku %s do zapisu!"
+msgstr "Nie można otworzyć pliku %s do zapisu!\n"
 
 #: common/gsm-filetypes.c:1551
 #, c-format
@@ -2175,7 +2175,7 @@ msgstr "Puste miejsce w pamięci. Pomijane.\n"
 #: gnokii/gnokii-phonebook.c:274
 #, c-format
 msgid "Error reading from the location %d in memory %s\n"
-msgstr "Nieudany odczyt pozycji %s z pamięci %s\n"
+msgstr "Nieudany odczyt pozycji %d z pamięci %s\n"
 
 #: gnokii/gnokii-phonebook.c:293
 #, c-format
@@ -3874,8 +3874,10 @@ msgid ""
 "sms sending is disabled!\n"
 "!"
 msgstr ""
-"Plik %s nie jest katalogiem lub nie masz uprawnień do odczytu i zapisu w tym katalogu."
+"Plik %s nie jest katalogiem\n"
+"lub nie masz uprawnień do odczytu i zapisu w tym katalogu.\n"
 "Wysyłanie sms jest wyłączone!\n"
+"!"
 
 #: smsd/file.c:167
 #, c-format
@@ -3944,7 +3946,7 @@ msgstr "%d: nieudane zapisanie wyniku operacji bazodanowej.\n"
 #: smsd/mysql.c:218 smsd/pq.c:228
 #, c-format
 msgid "%d: UPDATE command failed.\n"
-msgstr "%d: nieudana operacja bazodanowa UPDATE"
+msgstr "%d: nieudana operacja bazodanowa UPDATE\n"
 
 #: smsd/pq.c:138
 #, c-format
@@ -4008,7 +4010,7 @@ msgstr "Nieudane załadowanie modułu bazy danych %s z katalogu %s!\n"
 #: smsd/smsd.c:411
 #, c-format
 msgid "Sending to %s unsuccessful. Error %d\n"
-msgstr "Niedane wysłanie SMS do %s. Błąd %s.\n"
+msgstr "Niedane wysłanie SMS do %s. Błąd %d.\n"
 
 #: smsd/smsd.c:413
 #, c-format
@@ -4025,10 +4027,10 @@ msgid ""
 "Exiting."
 msgstr ""
 "Nieudane wstawienie SMS z %s\n"
-"Data: %02d-%02d-%02d %02d:%02d:%02d+02d\n"
+"Data: %02d-%02d-%02d %02d:%02d:%02d+%02d\n"
 "Tekst: %s\n"
 "\n"
-"Koniec pracy.\n"
+"Koniec pracy."
 
 #: smsd/smsd.c:456
 #, c-format
@@ -4423,12 +4425,12 @@ msgstr "Przeglądarka:"
 #: xgnokii/xgnokii_calendar.c:193
 #, c-format
 msgid "%04d/%02d/%02d"
-msgstr "%04d/%02d/%02d\n"
+msgstr "%04d/%02d/%02d"
 
 #: xgnokii/xgnokii_calendar.c:196 xgnokii/xgnokii_calendar.c:202
 #, c-format
 msgid "%04d/%02d/%02d %02d:%02d"
-msgstr "%04d/%02d/%0x2d %02d:%02d"
+msgstr "%04d/%02d/%02d %02d:%02d"
 
 #: xgnokii/xgnokii_calendar.c:210
 #, c-format
