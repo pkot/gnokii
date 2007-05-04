@@ -69,6 +69,8 @@
       notes only when debug = on                    (Daniele Forsi)
     o don't invoke additional fcntls when with_async is set to 0,
       which is always                                   (Pawel Kot)
+    o add extented phonebook address into public API    (Pawel Kot)
+    o add file types into public API                    (Pawel Kot)
  * gnokii updates
     o search for default config files if an empty filename is given
       to --config                                   (Daniele Forsi)

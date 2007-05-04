@@ -203,8 +203,8 @@ typedef enum {
 	GN_PHONEBOOK_ENTRY_Note            = 0x0a,
 	GN_PHONEBOOK_ENTRY_Number          = 0x0b,
 	GN_PHONEBOOK_ENTRY_Ringtone        = 0x0c,
-	GN_PHONEBOOK_ENTRY_Date            = 0x13,   /* Date is used for DC,RC,etc (last calls) */
-	GN_PHONEBOOK_ENTRY_Pointer         = 0x1a,   /* Pointer to the other memory */
+	GN_PHONEBOOK_ENTRY_Date            = 0x13, /* Date is used for DC,RC,etc (last calls) */
+	GN_PHONEBOOK_ENTRY_Pointer         = 0x1a, /* Pointer to the other memory */
 	GN_PHONEBOOK_ENTRY_Logo            = 0x1b,
 	GN_PHONEBOOK_ENTRY_LogoSwitch      = 0x1c,
 	GN_PHONEBOOK_ENTRY_Group           = 0x1e,
@@ -239,6 +239,30 @@ typedef enum {
 	GN_PHONEBOOK_GROUP_None,
 } gn_phonebook_group_type;
 
+#define GN_PHONEBOOK_PERSON_MAX_LENGTH 64
+
+typedef struct {
+	int has_person;
+	char family_name[GN_PHONEBOOK_PERSON_MAX_LENGTH + 1];		/* GN_PHONEBOOK_ENTRY_LastName */
+	char given_name[GN_PHONEBOOK_PERSON_MAX_LENGTH + 1];            /* GN_PHONEBOOK_ENTRY_FirstName */
+	char additional_names[GN_PHONEBOOK_PERSON_MAX_LENGTH + 1];
+	char honorific_prefixes[GN_PHONEBOOK_PERSON_MAX_LENGTH + 1];    /* GN_PHONEBOOK_ENTRY_FormalName */
+	char honorific_suffixes[GN_PHONEBOOK_PERSON_MAX_LENGTH + 1];
+} gn_phonebook_person;
+
+#define GN_PHONEBOOK_ADDRESS_MAX_LENGTH 64
+
+typedef struct {
+	int has_address;
+	char post_office_box[GN_PHONEBOOK_ADDRESS_MAX_LENGTH + 1];	/* GN_PHONEBOOK_ENTRY_PostalAddress */
+	char extended_address[GN_PHONEBOOK_ADDRESS_MAX_LENGTH + 1];	/* GN_PHONEBOOK_ENTRY_ExtendedAddress */
+	char street[GN_PHONEBOOK_ADDRESS_MAX_LENGTH + 1];		/* GN_PHONEBOOK_ENTRY_Street */
+	char city[GN_PHONEBOOK_ADDRESS_MAX_LENGTH + 1];			/* GN_PHONEBOOK_ENTRY_City */
+	char state_province[GN_PHONEBOOK_ADDRESS_MAX_LENGTH + 1];	/* GN_PHONEBOOK_ENTRY_StateProvince */
+	char zipcode[GN_PHONEBOOK_ADDRESS_MAX_LENGTH + 1];		/* GN_PHONEBOOK_ENTRY_ZipCode */
+	char country[GN_PHONEBOOK_ADDRESS_MAX_LENGTH + 1];		/* GN_PHONEBOOK_ENTRY_Country */
+} gn_phonebook_address;
+
 typedef struct {
 	gn_phonebook_entry_type entry_type;
 	gn_phonebook_number_type number_type;
@@ -259,7 +283,7 @@ typedef struct {
 /* Define datatype for phonebook entry, used for getting/writing phonebook
    entries. */
 typedef struct {
-	int empty;                                       /* Is this entry empty? */
+	int empty;                                        /* Is this entry empty? */
 	char name[GN_PHONEBOOK_NAME_MAX_LENGTH + 1];      /* Plus 1 for
 							     nullterminator. */
 	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1];  /* Number */
@@ -268,6 +292,8 @@ typedef struct {
 	int location;                                     /* Location */
 	gn_timestamp date;                                /* The record date and time
 							     of the number. */
+	gn_phonebook_person person;                       /* Personal information */
+	gn_phonebook_address address;                     /* Address information */
 	gn_phonebook_subentry subentries[GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER];
 	/* For phones with
 	 * additional phonebook
@@ -731,7 +757,29 @@ typedef enum {
 	GN_LOG_T_STDERR = 1
 } gn_log_target;
 
+
+typedef enum {
+	GN_FT_None = 0,
+	GN_FT_NOL,
+	GN_FT_NGG,
+	GN_FT_NSL,
+	GN_FT_NLM,
+	GN_FT_BMP,
+	GN_FT_OTA,
+	GN_FT_XPMF,
+	GN_FT_RTTTL,
+	GN_FT_OTT,
+	GN_FT_MIDI,
+	GN_FT_NOKRAW_TONE,
+	GN_FT_GIF,
+	GN_FT_JPG,
+	GN_FT_MID,
+	GN_FT_NRT,
+	GN_FT_PNG,
+} gn_filetypes;
+
 typedef struct {
+	gn_filetypes filetype;   /* file type */
 	unsigned char *id;	/* file id */
 	char name[512];		/* file name */
 	int year;		/* datetime of creation/modification */
@@ -743,6 +791,7 @@ typedef struct {
 	int file_length;	/* size of the file */
 	int togo;		/* amount of bytes to be sent yet */
 	int just_sent;		/* ??? */
+	int folderId;           /* folder id of the file */
 	unsigned char *file;	/* file contents */
 } gn_file;
 
