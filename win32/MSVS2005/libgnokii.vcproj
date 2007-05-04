@@ -326,7 +326,7 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\..\common\links\atsam.c"
+				RelativePath="..\..\common\phones\atsam.c"
 				>
 				<FileConfiguration
 					Name="Release|Win32"
