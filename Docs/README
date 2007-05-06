@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
-                         (C) 2001 - 2006 Paweł Kot
-                 Last update 28 August 2006  Version 0.6.14
+                         (C) 2001 - 2007 Paweł Kot
+                  Last update xx May 2007  Version 0.6.15
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.14 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.15 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -136,7 +136,7 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.6.14-i386.rpm
+rpm -i gnokii-0.6.15-i386.rpm
 
 If you are using a Debian based system, you may use basic
 
@@ -144,7 +144,7 @@ apt-get install gnokii xgnokii
 
 if you want to base on the official Debian package, or
 
-dpkg -i gnokii_0.6.14_i386.deb xgnokii_0.6.14_i386.deb
+dpkg -i gnokii_0.6.15_i386.deb xgnokii_0.6.15_i386.deb
 
 On Slackware you can use installpkg or pkgtool.
 
@@ -393,6 +393,12 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+200705xx Version 0.6.15
+Tons of updates. Most important changes include: support for reading
+extented phonebook entries, fixes for some nasty segfaults, fixes for
+decoding SMSes for some encodings, better support for Samsung mobiles in AT
+driver.
+
 20060829 Version 0.6.14
 Add WAP push support. Add --config and --phone options for gnokii CLI (to
 choose config file and phone section). New waitcall utility. Other minor
