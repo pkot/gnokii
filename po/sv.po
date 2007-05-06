@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnokii cvs\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-05-06 16:21+0200\n"
+"POT-Creation-Date: 2007-05-06 18:43+0200\n"
 "PO-Revision-Date: 2007-04-30 15:30+0100\n"
 "Last-Translator: Daniel Nylander <po@danielnylander.se>\n"
 "Language-Team: Swedish <tp-sv@listor.tp-sv.se>\n"
@@ -1954,8 +1954,8 @@ msgid "Entering monitor mode...\n"
 msgstr "Går in i monitoreringsläget...\n"
 
 #: gnokii/gnokii-monitor.c:223
-#, c-format
-msgid "Argument to --monitor once needs to be positive number\n"
+#, fuzzy, c-format
+msgid "Argument to --monitor delay needs to be positive number\n"
 msgstr "Argument till --monitor once behöver vara ett positivt tal\n"
 
 #: gnokii/gnokii-monitor.c:231

@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnokii\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-05-06 16:21+0200\n"
+"POT-Creation-Date: 2007-05-06 18:43+0200\n"
 "PO-Revision-Date: 2002-04-24 09:41+0100\n"
 "Last-Translator: Bo¹tjan Müller <neonatus@neonatus.net>\n"
 "Language-Team: Slovenian <translation-team-sl@lists.sourceforge.net>\n"
@@ -1935,7 +1935,7 @@ msgstr "Vstopam v nadzorni naèin...\n"
 
 #: gnokii/gnokii-monitor.c:223
 #, c-format
-msgid "Argument to --monitor once needs to be positive number\n"
+msgid "Argument to --monitor delay needs to be positive number\n"
 msgstr ""
 
 #: gnokii/gnokii-monitor.c:231
