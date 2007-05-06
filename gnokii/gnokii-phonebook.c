@@ -145,7 +145,7 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	if (end_entry == INT_MAX) {
 		data->memory_status = &memstat;
 		if ((error = gn_sm_functions(GN_OP_GetMemoryStatus, data, state)) == GN_ERR_NONE) {
-			num_entries = memstat.used;
+			num_entries = memstat.used - start_entry + 1;
 		}
 	}
 

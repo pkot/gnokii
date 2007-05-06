@@ -132,6 +132,7 @@
                                                     (Daniele Forsi)
     o print picture message templates like normal picture messages
                                                     (Daniele Forsi)
+    o fix --getphonebook XX n end where n > 1           (Pawel Kot)
  * at driver updates
     o initialize caller groups with GN_PHONEBOOK_GROUP_None, not 0
                                                       (Petr Hruska)
