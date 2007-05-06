@@ -131,7 +131,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 		dcb.fRtsControl = RTS_CONTROL_ENABLE;
 	}
 	if (!SetCommState(hPhone, &dcb)) {
-		fprintf(stderr, "Gnokii serial_opendevice: cannot set handshake\n");
+		fprintf(stderr, _("Gnokii serial_opendevice: cannot set handshake\n"));
 		serial_close(0, state);
 		return -1;
 	}
@@ -221,7 +221,7 @@ size_t serial_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *s
 				     dwLength, &dwLength, &osRead);
 		if (!fReadStat) {
 			if (GetLastError() == ERROR_IO_PENDING) {
-				fprintf(stderr, "\n\rIO Pending");
+				fprintf(stderr, _("\n\rIO Pending"));
 				/* We have to wait for read to complete.
 				 * This function will timeout according to the
 				 * CommTimeOuts.ReadTotalTimeoutConstant variable
@@ -299,9 +299,9 @@ size_t serial_write(int fd, __ptr_t buf, size_t n, struct gn_statemachine *state
 			dwBytesSent += dwBytesWritten;
 #if 0
 			if (dwBytesSent != dwBytesToWrite)
-				fprintf(stderr, "\nProbable Write Timeout: Total of %ld bytes sent (%ld)", dwBytesSent, dwBytesToWrite);
+				fprintf(stderr, _("\nProbable Write Timeout: Total of %ld bytes sent (%ld)"), dwBytesSent, dwBytesToWrite);
 			else
-				fprintf(stderr, "\n%ld bytes written", dwBytesSent);
+				fprintf(stderr, _("\n%ld bytes written"), dwBytesSent);
 #endif
 		} else {
 			/* some other error occurred */

@@ -638,7 +638,7 @@ gn_error file_xpm_load(char *filename, gn_bmp *bitmap)
 	bitmap->size = ((bitmap->width + 7) / 8) * bitmap->height;
 
 	if (bitmap->size > GN_BMP_MAX_SIZE) {
-		fprintf(stdout, "Bitmap too large\n");
+		fprintf(stderr, _("Bitmap too large\n"));
 		return GN_ERR_INVALIDSIZE;
 	}
 
@@ -1070,7 +1070,7 @@ int gn_file_text_save(char *filename, char *text, int mode)
 	if ((mode == 1) && (stat(filename, &buf) == 0)) {
 		fprintf(stdout, _("File %s exists.\n"), filename);
 		while (confirm < 0) {
-			fprintf(stderr, _("Overwrite? (yes/no) "));
+			fprintf(stdout, _("Overwrite? (yes/no) "));
 			gn_line_get(stdin, ans, 4);
 			if (!strcmp(ans, _("yes"))) confirm = 1;
 			else if (!strcmp(ans, _("no"))) confirm = 0;

@@ -224,19 +224,19 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				if (entry.address.has_address) {
 					fprintf(stdout, _("Address information:\n"));
 					if (entry.address.post_office_box[0])
-						fprintf(stdout, "  Post office address: %s\n", entry.address.post_office_box);
+						fprintf(stdout, _("  Post office address: %s\n"), entry.address.post_office_box);
 					if (entry.address.extended_address[0])
-						fprintf(stdout, "  Extended address: %s\n", entry.address.extended_address);
+						fprintf(stdout, _("  Extended address: %s\n"), entry.address.extended_address);
 					if (entry.address.street[0])
-						fprintf(stdout, "  Street: %s\n", entry.address.street);
+						fprintf(stdout, _("  Street: %s\n"), entry.address.street);
 					if (entry.address.city[0])
-						fprintf(stdout, "  City: %s\n", entry.address.city);
+						fprintf(stdout, _("  City: %s\n"), entry.address.city);
 					if (entry.address.state_province[0])
-						fprintf(stdout, "  State or province: %s\n", entry.address.state_province);
+						fprintf(stdout, _("  State or province: %s\n"), entry.address.state_province);
 					if (entry.address.zipcode[0])
-						fprintf(stdout, "  Zipcode: %s\n", entry.address.zipcode);
+						fprintf(stdout, _("  Zipcode: %s\n"), entry.address.zipcode);
 					if (entry.address.country[0])
-						fprintf(stdout, "  Country: %s\n", entry.address.country);
+						fprintf(stdout, _("  Country: %s\n"), entry.address.country);
 				}
 				dprintf("subentries count: %d\n", entry.subentries_count);
 				for (i = 0; i < entry.subentries_count; i++) {
