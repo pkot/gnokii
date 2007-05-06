@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnokii 0.6.8\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-05-03 19:27+0200\n"
+"POT-Creation-Date: 2007-05-06 16:21+0200\n"
 "PO-Revision-Date: 2006-02-03 09:20+0100\n"
 "Last-Translator: Olivier Kaloudoff <kalou@kalou.net>\n"
 "Language-Team: French <kalou@kalou.net>\n"
@@ -357,7 +357,7 @@ msgstr "Repertoire SMS 19"
 msgid "SMS Folder 20"
 msgstr "Repertoire SMS 20"
 
-#: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:173
+#: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:167
 #: common/nokia-decoding.c:127 common/phones/nk6100.c:3949 common/vcard.c:69
 #: gnokii/gnokii-calendar.c:140 gnokii/gnokii-phonebook.c:213
 #: gnokii/gnokii-profile.c:72 gnokii/gnokii-profile.c:84
@@ -524,6 +524,11 @@ msgstr "Erreur Inconnue."
 msgid "Sorry, gnokii was not compiled with XPM support.\n"
 msgstr "Desole, gnokii a ete compile sans le support XPM.\n"
 
+#: common/gsm-filetypes.c:641
+#, c-format
+msgid "Bitmap too large\n"
+msgstr ""
+
 #: common/gsm-filetypes.c:1071 gnokii/gnokii-sms.c:855
 #, c-format
 msgid "File %s exists.\n"
@@ -649,12 +654,12 @@ msgstr "reponse:"
 msgid "Please read Docs/Bugs and send a bug report!\n"
 msgstr "Merci de lire Docs/Bugs et d'envoyer un rapport de bug!\n"
 
-#: common/libfunctions.c:136 gnokiid/gnokiid.c:151
+#: common/libfunctions.c:130 gnokiid/gnokiid.c:151
 #, c-format
 msgid "Lock file error. Exiting.\n"
 msgstr "Erreur avec le fichier verrou. Sortie.\n"
 
-#: common/libfunctions.c:144
+#: common/libfunctions.c:138
 #, c-format
 msgid ""
 "Telephone interface init failed: %s\n"
@@ -2165,6 +2170,41 @@ msgstr "Note"
 #, fuzzy, c-format
 msgid "Address information:\n"
 msgstr "Information telephone"
+
+#: gnokii/gnokii-phonebook.c:227
+#, fuzzy, c-format
+msgid "  Post office address: %s\n"
+msgstr "Adresse mail:"
+
+#: gnokii/gnokii-phonebook.c:229
+#, c-format
+msgid "  Extended address: %s\n"
+msgstr ""
+
+#: gnokii/gnokii-phonebook.c:231
+#, fuzzy, c-format
+msgid "  Street: %s\n"
+msgstr "   Texte: %s\n"
+
+#: gnokii/gnokii-phonebook.c:233
+#, fuzzy, c-format
+msgid "  City: %s\n"
+msgstr "   Texte: %s\n"
+
+#: gnokii/gnokii-phonebook.c:235
+#, fuzzy, c-format
+msgid "  State or province: %s\n"
+msgstr "Enregistrer dans tÃ©lÃ©phone"
+
+#: gnokii/gnokii-phonebook.c:237
+#, fuzzy, c-format
+msgid "  Zipcode: %s\n"
+msgstr "   Telephone: %s\n"
+
+#: gnokii/gnokii-phonebook.c:239
+#, fuzzy, c-format
+msgid "  Country: %s\n"
+msgstr "Remise a zero du compteur"
 
 #: gnokii/gnokii-phonebook.c:247
 #, fuzzy, c-format

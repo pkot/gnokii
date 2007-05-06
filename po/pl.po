@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-05-03 19:27+0200\n"
+"POT-Creation-Date: 2007-05-06 16:21+0200\n"
 "PO-Revision-Date: 2007-05-05 23:05+0200\n"
 "Last-Translator: Paweł Kot <gnokii@gmail.com>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -166,7 +166,8 @@ msgstr "device_script(\"%s\"): nieudane wywołanie fork(): %s!\n"
 #: common/devices/unixserial.c:136
 #, c-format
 msgid "device_script(\"%s\"): file descriptor preparation failure: %s\n"
-msgstr "device_script(\"%s\"): nieudana próba przygotowania deskryptora pliku: %s\n"
+msgstr ""
+"device_script(\"%s\"): nieudana próba przygotowania deskryptora pliku: %s\n"
 
 #: common/devices/unixserial.c:142
 #, c-format
@@ -202,7 +203,9 @@ msgstr ""
 #: common/devices/winbluetooth.c:70 common/devices/winirda.c:113
 #, c-format
 msgid "Failed to initialize socket subsystem: need WINSOCK2. Please upgrade.\n"
-msgstr "Nieudana próba inicjalizacji podsystemu obsługi gniazd (wymagana biblioteka WINSOCK2).\n"
+msgstr ""
+"Nieudana próba inicjalizacji podsystemu obsługi gniazd (wymagana biblioteka "
+"WINSOCK2).\n"
 
 #: common/gsm-common.c:86
 msgid "Internal memory"
@@ -348,7 +351,7 @@ msgstr "19 folder SMS"
 msgid "SMS Folder 20"
 msgstr "20 folder SMS"
 
-#: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:173
+#: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:167
 #: common/nokia-decoding.c:127 common/phones/nk6100.c:3949 common/vcard.c:69
 #: gnokii/gnokii-calendar.c:140 gnokii/gnokii-phonebook.c:213
 #: gnokii/gnokii-profile.c:72 gnokii/gnokii-profile.c:84
@@ -512,6 +515,11 @@ msgstr "Nieznany błąd."
 msgid "Sorry, gnokii was not compiled with XPM support.\n"
 msgstr "gnokii jest skompilowane bez obsługi XPM.\n"
 
+#: common/gsm-filetypes.c:641
+#, c-format
+msgid "Bitmap too large\n"
+msgstr ""
+
 #: common/gsm-filetypes.c:1071 gnokii/gnokii-sms.c:855
 #, c-format
 msgid "File %s exists.\n"
@@ -545,7 +553,8 @@ msgstr "Nie można otworzyć pliku %s do zapisu!\n"
 #: common/gsm-filetypes.c:1551
 #, c-format
 msgid "Formatting error: unknown error while reading subentry type\n"
-msgstr "Nieprawidłowy format danych: nieznany błąd przy odczytywaniu typu pola.\n"
+msgstr ""
+"Nieprawidłowy format danych: nieznany błąd przy odczytywaniu typu pola.\n"
 
 #: common/gsm-filetypes.c:1555
 #, c-format
@@ -560,7 +569,8 @@ msgstr "Nieprawidłowy format danych: pole nie ma określonego typu.\n"
 #: common/gsm-filetypes.c:1574
 #, c-format
 msgid "Formatting error: unknown error while reading subentry number type\n"
-msgstr "Nierawidłowy format danych: nieznany błąd przy odczytywaniu typu numeru.\n"
+msgstr ""
+"Nierawidłowy format danych: nieznany błąd przy odczytywaniu typu numeru.\n"
 
 #: common/gsm-filetypes.c:1578
 #, c-format
@@ -575,7 +585,9 @@ msgstr "Nieprawidłowy format danych: pole nie ma określonego typu.\n"
 #: common/gsm-filetypes.c:1602
 #, c-format
 msgid "Formatting error: unknown error while reading subentry id\n"
-msgstr "Nieprawidłowy format danych: nieznany błąd przy odczycie identyfikatora pola.\n"
+msgstr ""
+"Nieprawidłowy format danych: nieznany błąd przy odczycie identyfikatora "
+"pola.\n"
 
 #: common/gsm-filetypes.c:1606
 #, c-format
@@ -623,7 +635,9 @@ msgstr "Oczekuje"
 msgid ""
 "UNHANDLED FRAME RECEIVED\n"
 "request: "
-msgstr "OTRZYMANO NIEOBSŁUGIWANY KOMUNIKAT\nżądanie: "
+msgstr ""
+"OTRZYMANO NIEOBSŁUGIWANY KOMUNIKAT\n"
+"żądanie: "
 
 #: common/gsm-statemachine.c:388
 msgid "reply: "
@@ -633,17 +647,19 @@ msgstr "odpowiedź: "
 msgid "Please read Docs/Bugs and send a bug report!\n"
 msgstr "Przeczytaj Docs/Bugs i wyślij raport z błedem!\n"
 
-#: common/libfunctions.c:136 gnokiid/gnokiid.c:151
+#: common/libfunctions.c:130 gnokiid/gnokiid.c:151
 #, c-format
 msgid "Lock file error. Exiting.\n"
 msgstr "Błąd obsługi pliku blokady. Koniec.\n"
 
-#: common/libfunctions.c:144
+#: common/libfunctions.c:138
 #, c-format
 msgid ""
 "Telephone interface init failed: %s\n"
 "Quitting.\n"
-msgstr "Nieudana inicjalizacja interfejsu telefonu: %s\nKoniec pracy.\n"
+msgstr ""
+"Nieudana inicjalizacja interfejsu telefonu: %s\n"
+"Koniec pracy.\n"
 
 #: common/links/atbus.c:74
 msgid "gnokii I/O error"
@@ -2157,6 +2173,41 @@ msgstr "brak"
 msgid "Address information:\n"
 msgstr "Informacje adresowe:\n"
 
+#: gnokii/gnokii-phonebook.c:227
+#, fuzzy, c-format
+msgid "  Post office address: %s\n"
+msgstr "Adres pocztowy"
+
+#: gnokii/gnokii-phonebook.c:229
+#, fuzzy, c-format
+msgid "  Extended address: %s\n"
+msgstr "Adres rozszerzony"
+
+#: gnokii/gnokii-phonebook.c:231
+#, fuzzy, c-format
+msgid "  Street: %s\n"
+msgstr "   Tekst: %s\n"
+
+#: gnokii/gnokii-phonebook.c:233
+#, fuzzy, c-format
+msgid "  City: %s\n"
+msgstr "   Tekst: %s\n"
+
+#: gnokii/gnokii-phonebook.c:235
+#, fuzzy, c-format
+msgid "  State or province: %s\n"
+msgstr "Stan lub prowincja"
+
+#: gnokii/gnokii-phonebook.c:237
+#, fuzzy, c-format
+msgid "  Zipcode: %s\n"
+msgstr "   Telefon: %s\n"
+
+#: gnokii/gnokii-phonebook.c:239
+#, fuzzy, c-format
+msgid "  Country: %s\n"
+msgstr "Kraj"
+
 #: gnokii/gnokii-phonebook.c:247
 #, c-format
 msgid "%04u.%02u.%02u %02u:%02u:%02u"
@@ -2229,8 +2280,8 @@ msgstr "Wpis usunięty z książki adresowej: typ pamięci: %s, pozycja: %d\n"
 #, c-format
 msgid "Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"
 msgstr ""
-"Nieudana próba usunięcia wpisu z książki adresowej (%s): typ pamięci: %s, pozycja: "
-"%d\n"
+"Nieudana próba usunięcia wpisu z książki adresowej (%s): typ pamięci: %s, "
+"pozycja: %d\n"
 
 #: gnokii/gnokii-profile.c:55
 #, c-format
@@ -3110,7 +3161,8 @@ msgid ""
 "See the gnokii manual page for the supported memory types with the phone\n"
 "you use.\n"
 msgstr ""
-"Obsługiwane typy pamięci dla twojego telefonu znajdziesz w podręczniku gnokii.\n"
+"Obsługiwane typy pamięci dla twojego telefonu znajdziesz w podręczniku "
+"gnokii.\n"
 
 #: gnokii/gnokii-sms.c:935
 #, c-format
@@ -3847,7 +3899,8 @@ msgid ""
 "gnokiid purpose is to work only with the phones that do not have AT Hayes\n"
 "commands interpreter.\n"
 msgstr ""
-"gnokiid jest przeznaczone jedynie dla telefonów nieposiadających interpretera poleceń Hayes AT.\n"
+"gnokiid jest przeznaczone jedynie dla telefonów nieposiadających "
+"interpretera poleceń Hayes AT.\n"
 
 #: smsd/file.c:61 smsd/file.c:92
 #, c-format
@@ -3860,11 +3913,14 @@ msgid ""
 "File %s is not regular file or\n"
 "you have not executable permission to this file!\n"
 msgstr ""
-"Plik %s nie jest zwykłem plikiem lub nie masz uprawnień do jego wykonywania!\n"
+"Plik %s nie jest zwykłem plikiem lub nie masz uprawnień do jego "
+"wykonywania!\n"
 
 #: smsd/file.c:87
 msgid "You have not set spool directory, sms sending is disabled!\n"
-msgstr "Katalog wysyłkowy nie jest skonfigurowany, więc wysyłanie sms jest wyłączone!\n"
+msgstr ""
+"Katalog wysyłkowy nie jest skonfigurowany, więc wysyłanie sms jest "
+"wyłączone!\n"
 
 #: smsd/file.c:101
 #, c-format
@@ -3916,7 +3972,8 @@ msgstr "%s\n"
 #: smsd/lowlevel.c:405
 #, c-format
 msgid "Timeout in file %s, line %d, restarting connection.\n"
-msgstr "Przekroczony czas oczekiwania w pliku %s, w linii %d, restart połączenia.\n"
+msgstr ""
+"Przekroczony czas oczekiwania w pliku %s, w linii %d, restart połączenia.\n"
 
 #: smsd/lowlevel.c:419 xgnokii/xgnokii_lowlevel.c:1314
 #, c-format
@@ -3982,13 +4039,15 @@ msgstr ""
 "            -u, --user nazwa_użytkownika LUB akcja jeżeli użyto -m file\n"
 "            -p, --password hasło\n"
 "            -d, --db nazwa_bazy\n"
-"            -c, --host serwer_bazy LUB katalog_wysylkowy jeżeli użyto -m file\n"
+"            -c, --host serwer_bazy LUB katalog_wysylkowy jeżeli użyto -m "
+"file\n"
 "            -s, --schema schemat_bazy\n"
 "            -m, --module moduł (pq, mysql, file)\n"
 "            -l, --libdir ścieżka_do_katalogu_z_modułami\n"
 "            -f, --logfile plik_z_logami\n"
 "            -t, --phone numer_telefonu\n"
-"            -i, --interval częstotliwość_sprawdzania_przychodzących_sms_w_sekundach\n"
+"            -i, --interval "
+"częstotliwość_sprawdzania_przychodzących_sms_w_sekundach\n"
 "            -S, --maxsms liczba_smsów (tylko w trybie dumb)\n"
 "            -v, --version\n"
 "            -h, --help\n"
@@ -5307,8 +5366,10 @@ msgid ""
 "Misconfiguration detected: phone handles neither folders nor sim.\n"
 "Contact gnokii developers to fix the issue.\n"
 msgstr ""
-"Wykryto błąd konfiguracji: telefon nie obsługuje ani folderów ani pamięci SMS.\n"
-"Skontaktuj się z deweloperami gnokii (gnokii-users@nongnu.org), aby rozwiązać problem.\n"
+"Wykryto błąd konfiguracji: telefon nie obsługuje ani folderów ani pamięci "
+"SMS.\n"
+"Skontaktuj się z deweloperami gnokii (gnokii-users@nongnu.org), aby "
+"rozwiązać problem.\n"
 
 #: xgnokii/xgnokii_lowlevel.c:480
 #, c-format
@@ -5839,7 +5900,8 @@ msgstr "Nieudana próba odczytu klawisza szybkiego wybierania %d!\n"
 #: xgnokii/xgnokii_speed.c:276
 #, c-format
 msgid "Error writing speed dial for key %d!\n"
-msgstr "Nieudana próba przypisania numeru do klawisza szybkiego wybierania %d!\n"
+msgstr ""
+"Nieudana próba przypisania numeru do klawisza szybkiego wybierania %d!\n"
 
 #: xgnokii/xgnokii_speed.c:359 xgnokii/xgnokii_speed.c:384
 msgid "Error reading file!"
@@ -5961,4 +6023,3 @@ msgstr "Nazwa dzwonka"
 #: xgnokii/xgnokii_xring.c:927
 msgid "Set tempo"
 msgstr "Ustaw tempo"
-

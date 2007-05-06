@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnokii\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-05-03 19:27+0200\n"
+"POT-Creation-Date: 2007-05-06 16:21+0200\n"
 "PO-Revision-Date: 2004-11-20 20:39+0800\n"
 "Last-Translator: Funda Wang <fundawang@linux.net.cn>\n"
 "Language-Team: zh_CN <i18n-translation@lists.linux.net.cn>\n"
@@ -352,7 +352,7 @@ msgstr ""
 msgid "SMS Folder 20"
 msgstr ""
 
-#: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:173
+#: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:167
 #: common/nokia-decoding.c:127 common/phones/nk6100.c:3949 common/vcard.c:69
 #: gnokii/gnokii-calendar.c:140 gnokii/gnokii-phonebook.c:213
 #: gnokii/gnokii-profile.c:72 gnokii/gnokii-profile.c:84
@@ -520,6 +520,11 @@ msgstr "未知"
 msgid "Sorry, gnokii was not compiled with XPM support.\n"
 msgstr ""
 
+#: common/gsm-filetypes.c:641
+#, c-format
+msgid "Bitmap too large\n"
+msgstr ""
+
 #: common/gsm-filetypes.c:1071 gnokii/gnokii-sms.c:855
 #, c-format
 msgid "File %s exists.\n"
@@ -644,12 +649,12 @@ msgstr ""
 msgid "Please read Docs/Bugs and send a bug report!\n"
 msgstr ""
 
-#: common/libfunctions.c:136 gnokiid/gnokiid.c:151
+#: common/libfunctions.c:130 gnokiid/gnokiid.c:151
 #, c-format
 msgid "Lock file error. Exiting.\n"
 msgstr ""
 
-#: common/libfunctions.c:144
+#: common/libfunctions.c:138
 #, c-format
 msgid ""
 "Telephone interface init failed: %s\n"
@@ -2141,6 +2146,41 @@ msgstr "备忘："
 #, fuzzy, c-format
 msgid "Address information:\n"
 msgstr "电话信息"
+
+#: gnokii/gnokii-phonebook.c:227
+#, fuzzy, c-format
+msgid "  Post office address: %s\n"
+msgstr "电子邮件地址："
+
+#: gnokii/gnokii-phonebook.c:229
+#, c-format
+msgid "  Extended address: %s\n"
+msgstr ""
+
+#: gnokii/gnokii-phonebook.c:231
+#, fuzzy, c-format
+msgid "  Street: %s\n"
+msgstr "删除"
+
+#: gnokii/gnokii-phonebook.c:233
+#, fuzzy, c-format
+msgid "  City: %s\n"
+msgstr "URL：%s\n"
+
+#: gnokii/gnokii-phonebook.c:235
+#, fuzzy, c-format
+msgid "  State or province: %s\n"
+msgstr "保存到电话"
+
+#: gnokii/gnokii-phonebook.c:237
+#, fuzzy, c-format
+msgid "  Zipcode: %s\n"
+msgstr "名称：%s\n"
+
+#: gnokii/gnokii-phonebook.c:239
+#, fuzzy, c-format
+msgid "  Country: %s\n"
+msgstr "位置忙。"
 
 #: gnokii/gnokii-phonebook.c:247
 #, c-format

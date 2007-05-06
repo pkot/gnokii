@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-05-01 23:51+0200\n"
+"POT-Creation-Date: 2007-05-06 16:21+0200\n"
 "PO-Revision-Date: 2007-05-01 23:52+0200\n"
 "Last-Translator: Daniele Forsi <daniele@forsi.it>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
@@ -364,7 +364,7 @@ msgstr "Cartella messaggi n° 20"
 
 #: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:167
 #: common/nokia-decoding.c:127 common/phones/nk6100.c:3949 common/vcard.c:69
-#: gnokii/gnokii-calendar.c:140 gnokii/gnokii-phonebook.c:197
+#: gnokii/gnokii-calendar.c:140 gnokii/gnokii-phonebook.c:213
 #: gnokii/gnokii-profile.c:72 gnokii/gnokii-profile.c:84
 #: gnokii/gnokii-profile.c:95 gnokii/gnokii-profile.c:107
 #: gnokii/gnokii-profile.c:116 gnokii/gnokii-profile.c:125
@@ -524,34 +524,39 @@ msgstr "Nel file di configurazione non è specificata alcuna porta."
 msgid "Unknown error."
 msgstr "Errore sconosciuto."
 
-#: common/gsm-filetypes.c:597
+#: common/gsm-filetypes.c:598
 #, c-format
 msgid "Sorry, gnokii was not compiled with XPM support.\n"
 msgstr "gnokii non è stato compilato con il supporto per il formato XPM.\n"
 
-#: common/gsm-filetypes.c:1070 gnokii/gnokii-sms.c:855
+#: common/gsm-filetypes.c:641
+#, c-format
+msgid "Bitmap too large\n"
+msgstr ""
+
+#: common/gsm-filetypes.c:1071 gnokii/gnokii-sms.c:855
 #, c-format
 msgid "File %s exists.\n"
 msgstr "Il file %s esiste.\n"
 
-#: common/gsm-filetypes.c:1072 gnokii/gnokii-phonebook.c:405
+#: common/gsm-filetypes.c:1073 gnokii/gnokii-phonebook.c:441
 #: gnokii/gnokii-sms.c:529 gnokii/gnokii-sms.c:856
 #, c-format
 msgid "Overwrite? (yes/no) "
 msgstr "Sovrascrivere? (si/no) "
 
-#: common/gsm-filetypes.c:1074 common/phones/nk6510.c:1306
-#: gnokii/gnokii-phonebook.c:407 gnokii/gnokii-sms.c:531
+#: common/gsm-filetypes.c:1075 common/phones/nk6510.c:1306
+#: gnokii/gnokii-phonebook.c:443 gnokii/gnokii-sms.c:531
 #: gnokii/gnokii-sms.c:858
 msgid "yes"
 msgstr "si"
 
-#: common/gsm-filetypes.c:1075 gnokii/gnokii-phonebook.c:408
+#: common/gsm-filetypes.c:1076 gnokii/gnokii-phonebook.c:444
 #: gnokii/gnokii-sms.c:532
 msgid "no"
 msgstr "no"
 
-#: common/gsm-filetypes.c:1084 gnokii/gnokii-file.c:289
+#: common/gsm-filetypes.c:1085 gnokii/gnokii-file.c:289
 #: gnokii/gnokii-file.c:338 gnokii/gnokii-file.c:384 gnokii/gnokii-logo.c:188
 #: xgnokii/xgnokii_contacts.c:2887 xgnokii/xgnokii_dtmf.c:135
 #: xgnokii/xgnokii_speed.c:425
@@ -559,67 +564,62 @@ msgstr "no"
 msgid "Can't open file %s for writing!\n"
 msgstr "Impossibile aprire il file %s in scrittura\n"
 
-#: common/gsm-filetypes.c:1541
+#: common/gsm-filetypes.c:1551
 #, c-format
 msgid "Formatting error: unknown error while reading subentry type\n"
 msgstr "Formato errato: errore sconosciuto leggendo il tipo della sottovoce\n"
 
-#: common/gsm-filetypes.c:1545
+#: common/gsm-filetypes.c:1555
 #, c-format
 msgid "Formatting error: empty entry type\n"
 msgstr "Formato errato: manca il tipo della voce\n"
 
-#: common/gsm-filetypes.c:1555
+#: common/gsm-filetypes.c:1565
 #, c-format
 msgid "Formatting error: subentry has only entry type field\n"
 msgstr "Formato errato: la sottovoce ha solo il campo per il tipo della voce\n"
 
-#: common/gsm-filetypes.c:1564
+#: common/gsm-filetypes.c:1574
 #, c-format
 msgid "Formatting error: unknown error while reading subentry number type\n"
 msgstr ""
 "Formato errato: errore sconosciuto leggendo il numero del tipo della "
 "sottovoce\n"
 
-#: common/gsm-filetypes.c:1568
+#: common/gsm-filetypes.c:1578
 #, c-format
 msgid "Formatting error: empty number type\n"
 msgstr "Formato errato: il numero del tipo è vuoto\n"
 
-#: common/gsm-filetypes.c:1583 common/gsm-filetypes.c:1606
+#: common/gsm-filetypes.c:1593 common/gsm-filetypes.c:1616
 #, c-format
 msgid "Formatting error: subentry has only entry and number type fields\n"
 msgstr ""
 "Formato errato: la sottovoce ha solo i campi per il tipo e il numero della "
 "voce\n"
 
-#: common/gsm-filetypes.c:1592
+#: common/gsm-filetypes.c:1602
 #, c-format
 msgid "Formatting error: unknown error while reading subentry id\n"
 msgstr ""
 "Formato errato: errore sconosciuto leggendo l'identificativo della "
 "sottovoce\n"
 
-#: common/gsm-filetypes.c:1596
+#: common/gsm-filetypes.c:1606
 #, c-format
 msgid "Formatting error: empty id\n"
 msgstr "Formato errato: l'identificativo è vuoto\n"
 
-#: common/gsm-filetypes.c:1614
+#: common/gsm-filetypes.c:1637
 #, c-format
 msgid "Formatting error: unknown error while reading subentry contents\n"
 msgstr ""
 "Formato errato: errore sconosciuto leggendo il contenuto della sottovoce\n"
 
-#: common/gsm-filetypes.c:1618
+#: common/gsm-filetypes.c:1641
 #, c-format
 msgid "Formatting error: empty subentry contents\n"
 msgstr "Formato errato: il contenuto della sottovoce è vuoto\n"
-
-#: common/gsm-filetypes.c:1622
-#, c-format
-msgid "Cannot write to read-only memory (Dialed Numbers)\n"
-msgstr "Impossibile scrivere sulla memoria di sola lettura (numeri chiamati)\n"
 
 #: common/gsm-networks.c:795 common/gsm-networks.c:829
 #: gnokii/gnokii-logo.c:244 gnokii/gnokii-logo.c:256 gnokii/gnokii-logo.c:271
@@ -666,7 +666,7 @@ msgstr ""
 "Leggere Docs/Bugs (documento in Inglese) e inviare una segnalazione "
 "dell'errore.\n"
 
-#: common/libfunctions.c:130 gnokiid/gnokiid.c:152
+#: common/libfunctions.c:130 gnokiid/gnokiid.c:151
 #, c-format
 msgid "Lock file error. Exiting.\n"
 msgstr "Errore nel file di blocco. Uscita.\n"
@@ -926,29 +926,29 @@ msgstr "Soprannome"
 msgid "Birthday date"
 msgstr "Compleanno"
 
-#: common/nokia-decoding.c:348 common/phones/nk6100.c:964 common/vcard.c:54
-#: gnokii/gnokii-phonebook.c:179 xgnokii/xgnokii.c:232 xgnokii/xgnokii.c:1041
+#: common/nokia-decoding.c:403 common/phones/nk6100.c:964 common/vcard.c:54
+#: gnokii/gnokii-phonebook.c:195 xgnokii/xgnokii.c:232 xgnokii/xgnokii.c:1041
 #, c-format
 msgid "Family"
 msgstr "Famiglia"
 
-#: common/nokia-decoding.c:349 common/phones/nk6100.c:965
+#: common/nokia-decoding.c:404 common/phones/nk6100.c:965
 #: xgnokii/xgnokii.c:233 xgnokii/xgnokii.c:1053
 msgid "VIP"
 msgstr "VIP"
 
-#: common/nokia-decoding.c:350 common/phones/nk6100.c:966 common/vcard.c:60
-#: gnokii/gnokii-phonebook.c:185 xgnokii/xgnokii.c:234 xgnokii/xgnokii.c:1065
+#: common/nokia-decoding.c:405 common/phones/nk6100.c:966 common/vcard.c:60
+#: gnokii/gnokii-phonebook.c:201 xgnokii/xgnokii.c:234 xgnokii/xgnokii.c:1065
 #, c-format
 msgid "Friends"
 msgstr "Amici"
 
-#: common/nokia-decoding.c:351 common/phones/nk6100.c:967
+#: common/nokia-decoding.c:406 common/phones/nk6100.c:967
 #: xgnokii/xgnokii.c:235 xgnokii/xgnokii.c:1077
 msgid "Colleagues"
 msgstr "Colleghi"
 
-#: common/nokia-decoding.c:352 common/phones/nk6100.c:968
+#: common/nokia-decoding.c:407 common/phones/nk6100.c:968
 #: xgnokii/xgnokii.c:236 xgnokii/xgnokii.c:1089
 msgid "Other"
 msgstr "Altro"
@@ -1083,12 +1083,12 @@ msgstr "Impossibile aprire il file %s in lettura\n"
 msgid "Error parsing vCalendar file!\n"
 msgstr "Errore nel formato del file vCalendar\n"
 
-#: common/vcard.c:57 gnokii/gnokii-phonebook.c:182
+#: common/vcard.c:57 gnokii/gnokii-phonebook.c:198
 #, c-format
 msgid "VIPs"
 msgstr "VIP"
 
-#: common/vcard.c:63 gnokii/gnokii-phonebook.c:188
+#: common/vcard.c:63 gnokii/gnokii-phonebook.c:204
 #: xgnokii/xgnokii_contacts.c:937 xgnokii/xgnokii_contacts.c:1021
 #: xgnokii/xgnokii_contacts.c:1164 xgnokii/xgnokii_contacts.c:1206
 #: xgnokii/xgnokii_contacts.c:1418
@@ -1096,12 +1096,12 @@ msgstr "VIP"
 msgid "Work"
 msgstr "Lavoro"
 
-#: common/vcard.c:66 gnokii/gnokii-phonebook.c:191
+#: common/vcard.c:66 gnokii/gnokii-phonebook.c:207
 #, c-format
 msgid "Others"
 msgstr "Altri"
 
-#: common/vcard.c:160
+#: common/vcard.c:202
 msgid "Vcard began but not ended?"
 msgstr "Vcard iniziato ma non terminato?"
 
@@ -1390,8 +1390,8 @@ msgstr "Chiamata veloce n° %d: %d:%d\n"
 #: gnokii/gnokii-logo.c:288 gnokii/gnokii-logo.c:458
 #: gnokii/gnokii-monitor.c:428 gnokii/gnokii-monitor.c:431
 #: gnokii/gnokii-monitor.c:454 gnokii/gnokii-other.c:182
-#: gnokii/gnokii-phonebook.c:241 gnokii/gnokii-phonebook.c:248
-#: gnokii/gnokii-phonebook.c:419 gnokii/gnokii-profile.c:176
+#: gnokii/gnokii-phonebook.c:275 gnokii/gnokii-phonebook.c:282
+#: gnokii/gnokii-phonebook.c:455 gnokii/gnokii-profile.c:176
 #: gnokii/gnokii-profile.c:225 gnokii/gnokii-security.c:187
 #: gnokii/gnokii-security.c:229 gnokii/gnokii-security.c:280
 #: gnokii/gnokii-settings.c:122 gnokii/gnokii-settings.c:146
@@ -1423,7 +1423,7 @@ msgstr ""
 "chiamate rapide\n"
 
 #: gnokii/gnokii-dial.c:134 gnokii/gnokii-phonebook.c:116
-#: gnokii/gnokii-phonebook.c:468 gnokii/gnokii-sms.c:479
+#: gnokii/gnokii-phonebook.c:504 gnokii/gnokii-sms.c:479
 #: gnokii/gnokii-sms.c:961
 #, c-format
 msgid "Unknown memory type %s (use ME, SM, ...)!\n"
@@ -1554,7 +1554,7 @@ msgstr "fax\n"
 msgid "data\n"
 msgstr "dati\n"
 
-#: gnokii/gnokii-dial.c:412 gnokii/gnokii-phonebook.c:204
+#: gnokii/gnokii-dial.c:412 gnokii/gnokii-phonebook.c:220
 #, c-format
 msgid "Number: %s\n"
 msgstr "Numero: %s\n"
@@ -2280,42 +2280,82 @@ msgstr ""
 "       --ldif                            stampa in formato ldif\n"
 "\n"
 
-#: gnokii/gnokii-phonebook.c:175
+#: gnokii/gnokii-phonebook.c:180
 #, c-format
 msgid "%d. Name: %s\n"
 msgstr "%d. Nome: %s\n"
 
-#: gnokii/gnokii-phonebook.c:176
+#: gnokii/gnokii-phonebook.c:192
 #, c-format
 msgid "Group: "
 msgstr "Gruppo: "
 
-#: gnokii/gnokii-phonebook.c:194
+#: gnokii/gnokii-phonebook.c:210
 #, c-format
 msgid "None"
 msgstr "Nessuno"
 
-#: gnokii/gnokii-phonebook.c:213
+#: gnokii/gnokii-phonebook.c:225
+#, fuzzy, c-format
+msgid "Address information:\n"
+msgstr "Informazioni sul telefono"
+
+#: gnokii/gnokii-phonebook.c:227
+#, fuzzy, c-format
+msgid "  Post office address: %s\n"
+msgstr "Indirizzo postale"
+
+#: gnokii/gnokii-phonebook.c:229
+#, fuzzy, c-format
+msgid "  Extended address: %s\n"
+msgstr "Indirizzo esteso"
+
+#: gnokii/gnokii-phonebook.c:231
+#, fuzzy, c-format
+msgid "  Street: %s\n"
+msgstr "   Testo: %s\n"
+
+#: gnokii/gnokii-phonebook.c:233
+#, fuzzy, c-format
+msgid "  City: %s\n"
+msgstr "   Testo: %s\n"
+
+#: gnokii/gnokii-phonebook.c:235
+#, fuzzy, c-format
+msgid "  State or province: %s\n"
+msgstr "Stato o provincia"
+
+#: gnokii/gnokii-phonebook.c:237
+#, fuzzy, c-format
+msgid "  Zipcode: %s\n"
+msgstr "   Telefono: %s\n"
+
+#: gnokii/gnokii-phonebook.c:239
+#, fuzzy, c-format
+msgid "  Country: %s\n"
+msgstr "Nazione"
+
+#: gnokii/gnokii-phonebook.c:247
 #, c-format
 msgid "%04u.%02u.%02u %02u:%02u:%02u"
 msgstr "%3$u/%2$02u/%1$04u %4$u.%5$02u.%6$02u"
 
-#: gnokii/gnokii-phonebook.c:227
+#: gnokii/gnokii-phonebook.c:261
 #, c-format
 msgid "Date: %04u.%02u.%02u %02u:%02u:%02u\n"
 msgstr "Data: %3$u/%2$02u/%1$04u %4$u.%5$02u.%6$02u\n"
 
-#: gnokii/gnokii-phonebook.c:232
+#: gnokii/gnokii-phonebook.c:266
 #, c-format
 msgid "Empty memory location. Skipping.\n"
 msgstr "Posizione di memoria vuota. Ignorata.\n"
 
-#: gnokii/gnokii-phonebook.c:240
+#: gnokii/gnokii-phonebook.c:274
 #, c-format
 msgid "Error reading from the location %d in memory %s\n"
 msgstr "Errore leggendo dalla posizione %d della memoria %s\n"
 
-#: gnokii/gnokii-phonebook.c:259
+#: gnokii/gnokii-phonebook.c:293
 #, c-format
 msgid ""
 " usage:  --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
@@ -2329,12 +2369,12 @@ msgstr ""
 "                 [-n|--memory-location|--location numero]\n"
 "                 [[-v|--vcard]|[-l|--ldif]]\n"
 
-#: gnokii/gnokii-phonebook.c:402
+#: gnokii/gnokii-phonebook.c:438
 #, c-format
 msgid "Location busy. "
 msgstr "Posizione occupata. "
 
-#: gnokii/gnokii-phonebook.c:410
+#: gnokii/gnokii-phonebook.c:446
 #, c-format
 msgid ""
 "\n"
@@ -2343,20 +2383,20 @@ msgstr ""
 "\n"
 "Risposta errata [%s]. Si presume «no».\n"
 
-#: gnokii/gnokii-phonebook.c:431
+#: gnokii/gnokii-phonebook.c:467
 #, c-format
 msgid "Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"
 msgstr ""
 "Scrittura riuscita: tipo memoria: %s, posizione: %d, nome: %s, numero: %s\n"
 
-#: gnokii/gnokii-phonebook.c:438
+#: gnokii/gnokii-phonebook.c:474
 #, c-format
 msgid "Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"
 msgstr ""
 "Scrittura fallita (%s): tipo memoria: %s, posizione: %d, nome: %s, numero: %"
 "s\n"
 
-#: gnokii/gnokii-phonebook.c:447
+#: gnokii/gnokii-phonebook.c:483
 #, c-format
 msgid ""
 " usage: --deletephonebook memory_type start_number [end_number|end]\n"
@@ -2365,12 +2405,12 @@ msgstr ""
 " Uso: --deletephonebook tipo_memoria numero_iniziale [numero_finale|end]\n"
 "\n"
 
-#: gnokii/gnokii-phonebook.c:482
+#: gnokii/gnokii-phonebook.c:522
 #, c-format
 msgid "Phonebook entry removed: memory type: %s, loc: %d\n"
 msgstr "Eliminazione dalla rubrica riuscita: tipo memoria: %s, posizione: %d\n"
 
-#: gnokii/gnokii-phonebook.c:489
+#: gnokii/gnokii-phonebook.c:529
 #, c-format
 msgid "Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"
 msgstr ""
@@ -4966,7 +5006,7 @@ msgstr "Eliminare la nota/le note selezionate?"
 #: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1471
 #: xgnokii/xgnokii_netmon.c:265 xgnokii/xgnokii_sms.c:1262
 #: xgnokii/xgnokii_sms.c:1667 xgnokii/xgnokii_speed.c:525
-#: xgnokii/xgnokii_xkeyb.c:278 xgnokii/xgnokii_xring.c:823
+#: xgnokii/xgnokii_xkeyb.c:242 xgnokii/xgnokii_xring.c:823
 msgid "/_File"
 msgstr "/_File"
 
@@ -5015,7 +5055,7 @@ msgstr "/File/Sep3"
 #: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1480
 #: xgnokii/xgnokii_netmon.c:266 xgnokii/xgnokii_sms.c:1269
 #: xgnokii/xgnokii_sms.c:1672 xgnokii/xgnokii_speed.c:532
-#: xgnokii/xgnokii_xkeyb.c:279 xgnokii/xgnokii_xring.c:833
+#: xgnokii/xgnokii_xkeyb.c:243 xgnokii/xgnokii_xring.c:833
 msgid "/File/_Close"
 msgstr "/File/_Chiudi"
 
@@ -5057,21 +5097,21 @@ msgstr "/Modifica/Selezion_a tutti"
 #: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3471
 #: xgnokii/xgnokii_dtmf.c:225 xgnokii/xgnokii_netmon.c:270
 #: xgnokii/xgnokii_sms.c:1270 xgnokii/xgnokii_sms.c:1681
-#: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:280
+#: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:244
 msgid "/_Help"
 msgstr "/_Aiuto"
 
 #: xgnokii/xgnokii_calendar.c:1518 xgnokii/xgnokii_contacts.c:3472
 #: xgnokii/xgnokii_dtmf.c:226 xgnokii/xgnokii_netmon.c:271
 #: xgnokii/xgnokii_sms.c:1271 xgnokii/xgnokii_sms.c:1682
-#: xgnokii/xgnokii_speed.c:536 xgnokii/xgnokii_xkeyb.c:281
+#: xgnokii/xgnokii_speed.c:536 xgnokii/xgnokii_xkeyb.c:245
 msgid "/Help/_Help"
 msgstr "/Aiuto/_Aiuto"
 
 #: xgnokii/xgnokii_calendar.c:1519 xgnokii/xgnokii_contacts.c:3473
 #: xgnokii/xgnokii_dtmf.c:227 xgnokii/xgnokii_netmon.c:272
 #: xgnokii/xgnokii_sms.c:1272 xgnokii/xgnokii_sms.c:1683
-#: xgnokii/xgnokii_speed.c:537 xgnokii/xgnokii_xkeyb.c:282
+#: xgnokii/xgnokii_speed.c:537 xgnokii/xgnokii_xkeyb.c:246
 msgid "/Help/_About"
 msgstr "/Aiuto/_Informazioni su"
 
@@ -6228,11 +6268,11 @@ msgstr "Errore di lettura del file!"
 msgid "Key"
 msgstr "Tasto"
 
-#: xgnokii/xgnokii_xkeyb.c:222
+#: xgnokii/xgnokii_xkeyb.c:186
 msgid "Cannot load background pixmap!"
 msgstr "Impossibile caricare l'immagine di sfondo"
 
-#: xgnokii/xgnokii_xkeyb.c:297
+#: xgnokii/xgnokii_xkeyb.c:261
 msgid "XGnokii Keyboard"
 msgstr "Tastiera di XGnokii"
 
@@ -6341,3 +6381,7 @@ msgstr "Nome suoneria"
 #: xgnokii/xgnokii_xring.c:927
 msgid "Set tempo"
 msgstr "Imposta il tempo"
+
+#~ msgid "Cannot write to read-only memory (Dialed Numbers)\n"
+#~ msgstr ""
+#~ "Impossibile scrivere sulla memoria di sola lettura (numeri chiamati)\n"
