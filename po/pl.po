@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-05-06 16:21+0200\n"
+"POT-Creation-Date: 2007-05-06 18:43+0200\n"
 "PO-Revision-Date: 2007-05-05 23:05+0200\n"
 "Last-Translator: Paweł Kot <gnokii@gmail.com>\n"
 "Language-Team: Polish <pl@li.org>\n"
@@ -518,7 +518,7 @@ msgstr "gnokii jest skompilowane bez obsługi XPM.\n"
 #: common/gsm-filetypes.c:641
 #, c-format
 msgid "Bitmap too large\n"
-msgstr ""
+msgstr "Zbyt duża bitmapa\n"
 
 #: common/gsm-filetypes.c:1071 gnokii/gnokii-sms.c:855
 #, c-format
@@ -602,7 +602,7 @@ msgstr "Nieprawidłowy format danych: nieznany błąd przy odczycie pola.\n"
 #: common/gsm-filetypes.c:1641
 #, c-format
 msgid "Formatting error: empty subentry contents\n"
-msgstr ""
+msgstr "Nieprawidłowy format danych: puste pole wpisu\n"
 
 #: common/gsm-networks.c:795 common/gsm-networks.c:829
 #: gnokii/gnokii-logo.c:244 gnokii/gnokii-logo.c:256 gnokii/gnokii-logo.c:271
@@ -1260,6 +1260,13 @@ msgid ""
 "from start_number\n"
 "  NOTE: it stores the note at the first empty location.\n"
 msgstr ""
+"sposób użycia: --writealendarnote plik_vcalendar początek [koniec|end]\n"
+"                 plik_vcalendar - plik z notatkami w formacie vCal\n"
+"                 początek       - pierwsza notatka z pliku do odczytania\n"
+"                 koniec         - ostatnia notatka z pliku do odczytania\n"
+"                 end            - odczytaj wszystkie notatki od początek do "
+"końca\n"
+"  UWAGA: notatki są zapisywanie w wolnych pozycjach w pamięci.\n"
 
 #: gnokii/gnokii-calendar.c:308 gnokii/gnokii-todo.c:221
 #, c-format
@@ -1278,7 +1285,7 @@ msgid "Failed to write calendar note: %s\n"
 msgstr "Nieudana próba zapisu notatki: %s\n"
 
 #: gnokii/gnokii-calendar.c:328
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "usage: --deletecalendarnote start_number [end_number | end]\n"
 "                        start_number - first number in the phone calendar "
@@ -1289,15 +1296,14 @@ msgid ""
 "entries from start to end\n"
 "  NOTE: if no end is given, only the start entry is deleted\n"
 msgstr ""
-"sposób użycia: gnokii --getcalendarnote start_number [end_number | end] [-"
-"v]\n"
-"       start_number - numer pozycji w kalendarzu telefonu (liczba)\n"
-"       end_number   - do tej pozycji w kalendarzu telefonu (liczba, "
-"opcjonalnie)\n"
-"       end          - napis \"end\" oznacza wszystkie pozycje od początku do "
-"końca\n"
-"       -v           - wyjście w formacie iCalendar\n"
-"  UWAGA: jeśli nie podana jest ostatnia pozycja, odczytywana jest tylko "
+"sposób użycia: gnokii --deletecalendarnote początek [koniec | end]\n"
+"       początek     - numer pierwszej pozycji w kalendarzu telefonu do "
+"usunięcia (liczba)\n"
+"       koniec       - numer ostatniej pozycji w kalendarzu telefonu do "
+"usunięcia (liczba, opcjonalnie)\n"
+"       end          - napis \"end\" oznacza usunięcie wszystkich pozycje od "
+"początek do końca\n"
+"  UWAGA: jeśli nie podana jest ostatnia pozycja, usuwana jest tylko "
 "pierwsza\n"
 
 #: gnokii/gnokii-calendar.c:362
@@ -1327,6 +1333,18 @@ msgid ""
 "                 [{--number|-n} number]\n"
 "All number, location and callid options need to be numeric.\n"
 msgstr ""
+"Opcje obsługi połączeń:\n"
+"          --getspeeddial pozycja\n"
+"          --setspeeddial numer typ_pamięci pozycja\n"
+"          --dialvoice numer\n"
+"          --senddtmf napis\n"
+"          --answercall id_rozmowy\n"
+"          --hangup id_rozmowy\n"
+"          --divert {--op|-o} {register|enable|query|disable|erasure}\n"
+"                 {--type|-t} {all|busy|noans|outofreach|notavail}\n"
+"                 {--call|-c} {all|voice|fax|data}\n"
+"                 [{--timeout|-m} czas_w_sekundach]\n"
+"                 [{--number|-n} numer]\n"
 
 #: gnokii/gnokii-dial.c:73
 #, c-format
@@ -1334,6 +1352,8 @@ msgid ""
 "usage: --getspeeddial location\n"
 "                        location - location in the speed dial memory\n"
 msgstr ""
+"sposób użycia: --getspeeddial pozycja\n"
+"                 pozycja - pozycja w pamięci szybkiego wybierania\n"
 
 #: gnokii/gnokii-dial.c:96
 #, c-format
@@ -1370,6 +1390,10 @@ msgid ""
 "                        memory_type - memory type for the speed dial\n"
 "                        location    - location in the speed dial memory\n"
 msgstr ""
+"sposób użycia: --setspeeddial numer typ_pamięci pozycja\n"
+"                 numer       - numer telefonu do zapisania\n"
+"                 typ_pamięci - typ pamięci dla szybkiego wybierania\n"
+"                 pozycja     - pozycja w pamięci szybkiego wybierania\n"
 
 #: gnokii/gnokii-dial.c:134 gnokii/gnokii-phonebook.c:116
 #: gnokii/gnokii-phonebook.c:504 gnokii/gnokii-sms.c:479
@@ -1394,6 +1418,8 @@ msgid ""
 "usage: --answercall callid\n"
 "                        callid - call identifier\n"
 msgstr ""
+"sposób użycia: --answercall id_rozmowy\n"
+"                 id_rozmowy - identyfikator rozmowy\n"
 
 #: gnokii/gnokii-dial.c:231
 #, c-format
@@ -1401,6 +1427,8 @@ msgid ""
 "usage: --hangup callid\n"
 "                        callid - call identifier\n"
 msgstr ""
+"sposób użycia: --hangup id_rozmowy\n"
+"                 id_rozmowy -- identyfikator rozmowy\n"
 
 #: gnokii/gnokii-dial.c:262
 #, c-format
@@ -1424,11 +1452,30 @@ msgid ""
 "        --number msisdn      number for redirection\n"
 "\n"
 msgstr ""
+" sposób użycia: --divert\n"
+"        -o operacja\n"
+"        --op operacja         operacja do wykonania, musi być jednym z:\n"
+"                              register, enable, query, disable, erasure;\n"
+"                              to jest wymagana opcja\n"
+"        -t typ\n"
+"        --type typ            typ operacji, musi być jednym z: all, busy, \n"
+"                              noans, outofreach, notavail; to jest\n"
+"                              wymagana opcja\n"
+"        -c typ_połączenia\n"
+"        --call typ_połączenia typ połączenia dla operacji, musi być jednym "
+"z:\n"
+"                              all, voice, fax, data; to jest wymagana opcja\n"
+"        -m sekundy\n"
+"        --timeout sekundy     ustawienie czasu oczekiwania; wartość "
+"argumentu w sekundach\n"
+"        -n numer\n"
+"        --number numer        numer do przekierowania\n"
+"\n"
 
 #: gnokii/gnokii-dial.c:372
 #, c-format
 msgid "Divert type: "
-msgstr "Typ przekazywania:"
+msgstr "Typ przekazywania: "
 
 #: gnokii/gnokii-dial.c:375 gnokii/gnokii-dial.c:396
 #, c-format
@@ -1496,7 +1543,7 @@ msgid "Divert isn't active.\n"
 msgstr "Przekazywanie nieaktywne.\n"
 
 #: gnokii/gnokii-file.c:55
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "File options:\n"
 "          --getfilelist remote_path\n"
@@ -1509,13 +1556,16 @@ msgid ""
 "          --deletefile remote_filename\n"
 "          --deletefilebyid id\n"
 msgstr ""
-"Opcje plików:\n"
-"          gnokii --getfilelist remote_path\n"
-"          gnokii --getfileid remote_filename\n"
-"          gnokii --getfile remote_filename [local_filename]\n"
-"          gnokii --getallfiles remote_path\n"
-"          gnokii --putfile local_filename remote_filename\n"
-"          gnokii --deletefile remote_filename\n"
+"Opcje obsługi plików:\n"
+"          --getfilelist zdalna_ścieżka\n"
+"          --getfiledetailsid [id]\n"
+"          --getfileid zdalny_plik\n"
+"          --getfile zdalny_plik [lokalny_plik]\n"
+"          --getfilebyid id [lokalny_plik]\n"
+"          --getallfiles zdalna_ścieżka\n"
+"          --putfile lokalny_plik zdalny_plik\n"
+"          --deletefile zdalny_plik\n"
+"          --deletefilebyid id\n"
 
 #: gnokii/gnokii-file.c:100 gnokii/gnokii-file.c:194 gnokii/gnokii-file.c:367
 #, c-format
@@ -1565,7 +1615,7 @@ msgstr "Usunięto: %s\n"
 #: gnokii/gnokii-file.c:243
 #, c-format
 msgid " usage: --getfile remote_filename [localfilename]\n"
-msgstr ""
+msgstr " sposób użycia: --getfile zdalny_plik [lokalny_plik]\n"
 
 #: gnokii/gnokii-file.c:265 gnokii/gnokii-file.c:379
 #, c-format
@@ -1580,7 +1630,7 @@ msgstr "Pobrano plik %s.  Zapisano do [%s]: "
 #: gnokii/gnokii-file.c:301
 #, c-format
 msgid " usage: --getfilebyid id [localfilename]\n"
-msgstr ""
+msgstr " sposób użycia: --getfilebyid id [lokalny_plik]\n"
 
 #: gnokii/gnokii-file.c:325
 #, c-format
@@ -1595,7 +1645,7 @@ msgstr "Pobrano plik %s.\n"
 #: gnokii/gnokii-file.c:399
 #, c-format
 msgid " usage: --putfile local_filename remote_filename\n"
-msgstr ""
+msgstr " sposób użycia: --putfile lokalny_plik zdalny_plik\n"
 
 #: gnokii/gnokii-file.c:433
 #, c-format
@@ -1619,6 +1669,20 @@ msgid ""
 "          --getlogo {dealer|text}\n"
 "          --viewlogo logofile\n"
 msgstr ""
+"Opcje logo:\n"
+"          --sendlogo {caller|op|picture} numer plik_logo\n"
+"                 [kod_sieci]\n"
+"          --setlogo op [plik_logo [kod_sieci]]\n"
+"          --setlogo startup [plik_logo]\n"
+"          --setlogo caller [plik_logo [numer_grupy_dzwoniących "
+"[group_name]]]\n"
+"          --setlogo {dealer|text} [tekst]\n"
+"          --getlogo op [plik_logo [kod_sieci]]\n"
+"          --getlogo startup [plik_logo [kod_sieci]]\n"
+"          --getlogo caller [numer_grupy_dzwoniących [plik_logo\n"
+"                 [kod_sieci]]]\n"
+"          --getlogo {dealer|text}\n"
+"          --viewlogo plik_logo\n"
 
 #: gnokii/gnokii-logo.c:97
 #, c-format
@@ -1726,7 +1790,7 @@ msgstr "Komunikat powitalny "
 #: gnokii/gnokii-logo.c:240
 #, c-format
 msgid "Operator logo for %s (%s) network got successfully\n"
-msgstr "Logo operatora sieci %s (%s) pobrane prawidłowo!\n"
+msgstr "Logo operatora sieci %s (%s) pobrane prawidłowo\n"
 
 #: gnokii/gnokii-logo.c:245 gnokii/gnokii-logo.c:257 gnokii/gnokii-logo.c:272
 #: gnokii/gnokii-logo.c:352
@@ -1825,6 +1889,11 @@ msgid ""
 "          --displayoutput\n"
 "          --netmonitor {reset|off|field|devel|next|nr}\n"
 msgstr ""
+"Opcje monitorowania:\n"
+"          --monitor [opóźnienie|once]\n"
+"          --getdisplaystatus\n"
+"          --displayoutput\n"
+"          --netmonitor {reset|off|field|devel|next|nr}\n"
 
 #: gnokii/gnokii-monitor.c:72
 #, c-format
@@ -1894,7 +1963,7 @@ msgstr "Uruchamiam tryb monitorowania...\n"
 
 #: gnokii/gnokii-monitor.c:223
 #, c-format
-msgid "Argument to --monitor once needs to be positive number\n"
+msgid "Argument to --monitor delay needs to be positive number\n"
 msgstr "Argumentem --monitor once musi być dodatnia liczba całkowita\n"
 
 #: gnokii/gnokii-monitor.c:231
@@ -2057,7 +2126,7 @@ msgid "Leaving display monitor mode...\n"
 msgstr "Wyjście z trybu monitorowania wyświetlacza...\n"
 
 #: gnokii/gnokii-other.c:55
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Misc options:\n"
 "          --keysequence\n"
@@ -2104,7 +2173,7 @@ msgstr "Sieć         : %s (%s)\n"
 #: gnokii/gnokii-other.c:193
 #, c-format
 msgid "Network code : %s\n"
-msgstr "Kod sieci : %s\n"
+msgstr "Kod sieci    : %s\n"
 
 #: gnokii/gnokii-other.c:194
 #, c-format
@@ -2128,6 +2197,14 @@ msgid ""
 "                 [[-v|--vcard]|[-l|--ldif]]\n"
 "          --deletephonebook memory_type start_number [end_number|end]\n"
 msgstr ""
+"Opcje książki adresowej:\n"
+"          --getphonebook typ_pamięci początek [koniec|end]\n"
+"                 [[-r|--raw]|[-v|--vcard]|[-l|--ldif]]\n"
+"          --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
+"                 [-m|--memory-type|--memory typ_pamięci]\n"
+"                 [-n|--memory-location|--location numer]\n"
+"                 [[-v|--vcard]|[-l|--ldif]]\n"
+"          --deletephonebook typ_pamięci początek [koniec|end]\n"
 
 #: gnokii/gnokii-phonebook.c:68
 #, c-format
@@ -2152,6 +2229,18 @@ msgid ""
 "       --ldif                            output in ldif format\n"
 "\n"
 msgstr ""
+" sposób użycia: --getphonebook typ_pamięci początek [koniec | end] odczytuje\n"
+"                wpisy z pamięci typ_pamięci (SM, ME, IN, OU, ...) rozpoczynając\n"
+"                od pozycji początek i kończąc na pozycji koniec; jeśli jest\n"
+"                użyte słowo end, odczytywane są wszystkie pozycje; jeśli ten\n"
+"                argument nie jest podany, odczytywana jest tylko jedna pozycja.\n"
+"       -r\n"
+"       --raw       wyjście w formacie csv\n"
+"       -v\n"
+"       --vcard     wyjście w formacie vcard\n"
+"       -l\n"
+"       --ldif      wyjście w formacje ldif\n"
+"\n"
 
 #: gnokii/gnokii-phonebook.c:180
 #, c-format
@@ -2174,39 +2263,39 @@ msgid "Address information:\n"
 msgstr "Informacje adresowe:\n"
 
 #: gnokii/gnokii-phonebook.c:227
-#, fuzzy, c-format
+#, c-format
 msgid "  Post office address: %s\n"
-msgstr "Adres pocztowy"
+msgstr "  Adres pocztowy: %s\n"
 
 #: gnokii/gnokii-phonebook.c:229
-#, fuzzy, c-format
+#, c-format
 msgid "  Extended address: %s\n"
-msgstr "Adres rozszerzony"
+msgstr "  Adres rozszerzony : %s\n"
 
 #: gnokii/gnokii-phonebook.c:231
-#, fuzzy, c-format
+#, c-format
 msgid "  Street: %s\n"
-msgstr "   Tekst: %s\n"
+msgstr "   Ulica: %s\n"
 
 #: gnokii/gnokii-phonebook.c:233
-#, fuzzy, c-format
+#, c-format
 msgid "  City: %s\n"
-msgstr "   Tekst: %s\n"
+msgstr "   Miasto: %s\n"
 
 #: gnokii/gnokii-phonebook.c:235
-#, fuzzy, c-format
+#, c-format
 msgid "  State or province: %s\n"
-msgstr "Stan lub prowincja"
+msgstr "  Stan lub prowincja: %s\n"
 
 #: gnokii/gnokii-phonebook.c:237
-#, fuzzy, c-format
+#, c-format
 msgid "  Zipcode: %s\n"
-msgstr "   Telefon: %s\n"
+msgstr "   Kod pocztowy: %s\n"
 
 #: gnokii/gnokii-phonebook.c:239
-#, fuzzy, c-format
+#, c-format
 msgid "  Country: %s\n"
-msgstr "Kraj"
+msgstr "  Kraj: %s\n"
 
 #: gnokii/gnokii-phonebook.c:247
 #, c-format
@@ -2237,6 +2326,11 @@ msgid ""
 "                 [[-v|--vcard]|[-l|--ldif]]\n"
 "\n"
 msgstr ""
+" sposób użycia: --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
+"                 [-m|--memory-type|--memory typ_pamięci]\n"
+"                 [-n|--memory-location|--location numer]\n"
+"                 [[-v|--vcard]|[-l|--ldif]]\n"
+"\n"
 
 #: gnokii/gnokii-phonebook.c:438
 #, c-format
@@ -2270,6 +2364,8 @@ msgid ""
 " usage: --deletephonebook memory_type start_number [end_number|end]\n"
 "\n"
 msgstr ""
+" sposób użycia: --deletephonebook typ_pamięci początek [koniec|end]\n"
+"\n"
 
 #: gnokii/gnokii-phonebook.c:522
 #, c-format
@@ -2292,10 +2388,15 @@ msgid ""
 "          --getactiveprofile\n"
 "          --setactiveprofile profile_number\n"
 msgstr ""
+"Opcje obsługi profili:\n"
+"          --getprofile [początek [koniec]] [-r|--raw]\n"
+"          --setprofile\n"
+"          --getactiveprofile\n"
+"          --setactiveprofile numer_profilu\n"
 
 #: gnokii/gnokii-profile.c:66
 msgid "Ringing"
-msgstr "Ciągłu"
+msgstr "Ciągły"
 
 #: gnokii/gnokii-profile.c:67 gnokii/gnokii-profile.c:106
 msgid "Ascending"
@@ -2359,7 +2460,7 @@ msgstr "włączone"
 #: gnokii/gnokii-profile.c:131
 #, c-format
 msgid "usage: --getprofile [start_number [end_number]] [-r|--raw]\n"
-msgstr ""
+msgstr "sposób użycia: --getprofile [początek [koniec]] [-r|--raw]\n"
 
 #: gnokii/gnokii-profile.c:197
 #, c-format
@@ -2464,7 +2565,7 @@ msgstr "Aktywny profil: %d (%s)\n"
 #: gnokii/gnokii-profile.c:325
 #, c-format
 msgid "usage: --setactiveprofile profile_number\n"
-msgstr ""
+msgstr "sposób użycia: --getactiveprofile numer_profilu\n"
 
 #: gnokii/gnokii-profile.c:343
 #, c-format
@@ -2483,6 +2584,14 @@ msgid ""
 "          --getringtonelist\n"
 "          --deleteringtone start [end]\n"
 msgstr ""
+"Opcje obsługi dzwonków:\n"
+"          --sendringtone plik_rtttl numer\n"
+"          --getringtone plik_rtttl [pozycja] [-r|--raw]\n"
+"          --setringtone plik_rtttl [pozycja] [-r|--raw] [--name nazwa]\n"
+"          --playringtone plik_rtttl [--volume głośność]\n"
+"          --ringtoneconvert plik_źródłowy plik_docelowy\n"
+"          --getringtonelist\n"
+"          --deleteringtone początek [koniec]\n"
 
 #: gnokii/gnokii-ringtone.c:117 gnokii/gnokii-ringtone.c:301
 #: gnokii/gnokii-ringtone.c:314
@@ -2493,7 +2602,7 @@ msgstr "Nieudana próba załadowania dzwonka.\n"
 #: gnokii/gnokii-ringtone.c:156
 #, c-format
 msgid " usage: --getringtone rtttlfile [location] [-r|--raw]\n"
-msgstr ""
+msgstr " sposób użycia: --getringtone plik_rtttl [pozycja] [-r|--raw]\n"
 
 #: gnokii/gnokii-ringtone.c:217
 #, c-format
@@ -2508,32 +2617,32 @@ msgstr "Pobranie dzwonka %d  (\"%s\") udało się!\n"
 #: gnokii/gnokii-ringtone.c:223
 #, c-format
 msgid "Internal gnokii error: null filename\n"
-msgstr ""
+msgstr "Wewnętrzny błąd gnokii: pusta nazwa pliku\n"
 
 #: gnokii/gnokii-ringtone.c:231
 #, c-format
 msgid "Failed to save ringtone.\n"
-msgstr "NIe udało się zapisać dzwonka.\n"
+msgstr "Nie udało się zapisać dzwonka.\n"
 
 #: gnokii/gnokii-ringtone.c:238 gnokii/gnokii-ringtone.c:438
 #, c-format
 msgid "Failed to save ringtone: %s\n"
-msgstr "NIe udało się zapisać dzwonka: %s\n"
+msgstr "Nie udało się zapisać dzwonka: %s\n"
 
 #: gnokii/gnokii-ringtone.c:248
 #, c-format
 msgid " usage: --setringtone rtttlfile [location] [-r|--raw] [--name name]\n"
-msgstr ""
+msgstr " sposób użycia: --setringtone plik_rtttl [pozycja] [-r|--raw] [--name nazwa]\n"
 
 #: gnokii/gnokii-ringtone.c:325
 #, c-format
 msgid "Send failed: %s\n"
-msgstr "Wysyłanie nieudane:%s\n"
+msgstr "Wysyłanie nieudane: %s\n"
 
 #: gnokii/gnokii-ringtone.c:332
 #, c-format
 msgid " usage: --playringtone rtttlfile [--volume vol]\n"
-msgstr ""
+msgstr " sposób użycia: --playringtone plik_rtttl [--volume głośność]\n"
 
 #: gnokii/gnokii-ringtone.c:378 gnokii/gnokii-ringtone.c:434
 #, c-format
@@ -2548,12 +2657,12 @@ msgstr "Odegrano!\n"
 #: gnokii/gnokii-ringtone.c:412
 #, c-format
 msgid "Play failed: %s\n"
-msgstr "Niudane odegranie:%s\n"
+msgstr "Nieudane odegranie:%s\n"
 
 #: gnokii/gnokii-ringtone.c:419
 #, c-format
 msgid " usage: --ringtoneconvert source destination\n"
-msgstr ""
+msgstr " sposób użycia: --ringtoneconvert plik_źródłowy plik_docelowy\n"
 
 #: gnokii/gnokii-ringtone.c:442
 #, c-format
@@ -2568,7 +2677,7 @@ msgstr "Nieudana próba pobrania listy dzwonków.\n"
 #: gnokii/gnokii-ringtone.c:458
 #, c-format
 msgid "First user defined ringtone location: %3d\n"
-msgstr ""
+msgstr "Pierwsza pozycja dla dzwonków użytkownika: %3d\n"
 
 #: gnokii/gnokii-ringtone.c:459
 #, c-format
@@ -2576,11 +2685,13 @@ msgid ""
 "Number of user defined ringtones: %d\n"
 "\n"
 msgstr ""
+"Liczba dzwonków użytkownika: %d\n"
+"\n"
 
 #: gnokii/gnokii-ringtone.c:460
 #, c-format
 msgid "loc   rwu   name\n"
-msgstr ""
+msgstr "poz   rwu   nazwa\n"
 
 #: gnokii/gnokii-ringtone.c:461
 #, c-format
@@ -2590,12 +2701,12 @@ msgstr "===============================\n"
 #: gnokii/gnokii-ringtone.c:463
 #, c-format
 msgid "%3d   %d%d%d   %-20s\n"
-msgstr ""
+msgstr "%3d   %d%d%d   %-20s\n"
 
 #: gnokii/gnokii-ringtone.c:475
 #, c-format
 msgid " usage: --deleteringtone start [end]\n"
-msgstr ""
+msgstr " sposób użycia: --deleteringtone początek [koniec]\n"
 
 #: gnokii/gnokii-ringtone.c:499
 #, c-format
@@ -2614,19 +2725,22 @@ msgid ""
 "          --identify\n"
 "          --getlocksinfo\n"
 msgstr ""
+"Opcje bezpieczeństwa:\n"
+"          --identify\n"
+"          --getlocksinfo\n"
 
 #: gnokii/gnokii-security.c:62
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "          --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 "          --getsecuritycodestatus\n"
 "          --getsecuritycode\n"
 "          --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 msgstr ""
-"          gnokii --entersecuritycode PIN|PIN2|PUK|PUK2\n"
-"          gnokii --getsecuritycodestatus\n"
-"          gnokii --getsecuritycode\n"
-"          gnokii --changesecuritycode PIN|PIN2|PUK|PUK2\n"
+"          --entersecuritycode PIN|PIN2|PUK|PUK2\n"
+"          --getsecuritycodestatus\n"
+"          --getsecuritycode\n"
+"          --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 
 #: gnokii/gnokii-security.c:72
 #, c-format
@@ -2671,7 +2785,7 @@ msgstr "Kod zabezpieczający to: %s\n"
 #: gnokii/gnokii-security.c:148
 #, c-format
 msgid " usage: --entersecuritycode PIN|PIN2|PUK|PUK2\n"
-msgstr ""
+msgstr " sposób użycia: --entersecuritycode PIN|PIN2|PUK|PUK2\n"
 
 #: gnokii/gnokii-security.c:175 gnokii/gnokii-security.c:263
 msgid "Enter your code: "
@@ -2728,7 +2842,7 @@ msgstr "nieznana\n"
 #: gnokii/gnokii-security.c:236
 #, c-format
 msgid " usage: --changesecuritycode PIN|PIN2|PUK|PUK2\n"
-msgstr ""
+msgstr " sposób użycia: --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 
 #: gnokii/gnokii-security.c:264
 msgid "Enter new code: "
@@ -2758,6 +2872,12 @@ msgid ""
 "          --setalarm [HH MM]\n"
 "          --getalarm\n"
 msgstr ""
+"Ustawienia telefonu:\n"
+"          --reset [soft|hard]\n"
+"          --setdatetime [YYYY [MM [DD [HH [MM]]]]]\n"
+"          --getdatetime\n"
+"          --setalarm [HH MM]\n"
+"          --getalarm\n"
 
 #: gnokii/gnokii-settings.c:142
 #, c-format
@@ -2808,6 +2928,26 @@ msgid ""
 "          --showsmsfolderstatus\n"
 "          --smsreader\n"
 msgstr ""
+"Opcje SMS:\n"
+"          --sendsms numer [--smsc numer_centrum_sms |\n"
+"                 --smscno id_centrum_sms] [-r|--report] [-8|--8bit]\n"
+"                 [-C|--class n] [-v|--validity n] [-l|--long n]\n"
+"                 [-i|--imelody] [-a|--animation plik;plik;plik;plik]\n"
+"                 [-o|--concat x;y;z] [-w|--wappush url]\n"
+"          --savesms [--sender od] [--smsc numer_centrum_sms |\n"
+"                 --smscno id_centrum_sms] [-f|--folder id_folderu]\n"
+"                 [-l|--location numer] [-s|--sent|-r|--read] [-d|--"
+"deliver]\n"
+"                 [-t|--datetime YYMMDDHHMMSS]\n"
+"          --getsms typ_pamięci początek [koniec] [-f|--file plik]\n"
+"                 [-F|--force-file plik] [-d|--delete]\n"
+"          --deletesms typ_pamięci początek [koniec]\n"
+"          --getsmsc [początek [koniec]] [-r|--raw]\n"
+"          --setsmsc\n"
+"          --createsmsfolder nazwa\n"
+"          --deletesmsfolder id_folderu\n"
+"          --showsmsfolderstatus\n"
+"          --smsreader\n"
 
 #: gnokii/gnokii-sms.c:89
 #, c-format
@@ -2846,6 +2986,37 @@ msgid ""
 "Message text is read from standard input.\n"
 "\n"
 msgstr ""
+"sposób użycia:\n"
+"    --sendsms numer                        numer odbiorcy\n"
+"      --smsc numer_centrum_sms             numer centrum sms\n"
+"      --smscno id_centrum_sms              pozycja zapisanego centrum sms w\n"
+"                                           telefonie\n"
+"      -l n\n"
+"      --long n                             wyślij wiadomość dłuższą niż\n"
+"                                           standardowe 160 znaków\n"
+"      -r\n"
+"      --report                             pokaż raport doręczenia\n"
+"      -v n\n"
+"      --validity n                         ustaw termin ważności wiadomości\n"
+"      -C n\n"
+"      --class n                            ustaw klasę wiadomości; możliwe\n"
+"                                           wartości to 0, 1, 2 lub 3\n"
+"      -8\n"
+"      -8bit                                użyj 8-bitowego kodowania\n"
+"      -i\n"
+"      --imelody                            wyślij wiadomość imelody, tekst\n"
+"                                           jest odczytywany ze standardowego\n"
+"                                           wejścia\n"
+"      -a plik;plik;plik;plik\n"
+"      --animation plik;plik;plik;plik      wyślij wiadomość z animacją\n"
+"      -o x;y;z\n"
+"      --concat x;y;z                       wyślij wieloczęściową wiadomość:\n"
+"                                           część x z łącznej liczby y o\n"
+"                                           identyfikatorze z\n"
+"      -w url\n"
+"      --wappush url                        wyślij wappush pod wskazany url\n"
+"Tekst wiadomości jest odczytywany ze standardowego wejścia.\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:187 gnokii/gnokii-utils.c:72
 #, c-format
@@ -2865,7 +3036,7 @@ msgstr "Pusta wiadomość. Koniec.\n"
 #: gnokii/gnokii-sms.c:275
 #, c-format
 msgid "URL is too long (max 255 chars). Quitting.\n"
-msgstr ""
+msgstr "URL jest zbyt długi (maksymalna długość to 255 znaków). Koniec pracy.\n"
 
 #: gnokii/gnokii-sms.c:284 gnokii/gnokii-utils.c:60
 #, c-format
@@ -2875,7 +3046,7 @@ msgstr "Wprowadź treść SMS-a. Zakończ przez <cr><control-D>:"
 #: gnokii/gnokii-sms.c:291
 #, c-format
 msgid "WAP Push encoding failed!\n"
-msgstr ""
+msgstr "Nieudana próba zakodowania WAP Push!\n"
 
 #: gnokii/gnokii-sms.c:318
 #, c-format
@@ -2913,6 +3084,25 @@ msgid ""
 "Message text is read from standard input.\n"
 "\n"
 msgstr ""
+" sposób użycia:\n"
+"     --savesms\n"
+"       --smsc numer_centrum_sms numer centrum sms\n"
+"       --smscno id_centrum_sms  identyfikator centrum sms z pamięci telefonu\n"
+"       --sender numer           numer nadawcy\n"
+"       -l n\n"
+"       --location n             pozycja w pamięci do zapisania wiadomości\n"
+"       -r\n"
+"       --read                   oznacza wiadomość jako przeczytaną\n"
+"       -s\n"
+"       --sent                   oznacza wiadomość jako wysłaną\n"
+"       -f ID\n"
+"       --folder ID              zapisuje wiadomość w folderze ID (IN, OU, ...)\n"
+"       -d\n"
+"       --deliver                oznacz wiadomość jako wiadomość do wysłania\n"
+"       -t YYMMDDHHMISS\n"
+"       --datetime YYMMDDHHMISS  ustaw czas i datę wiadomości\n"
+"Tekst wiadomości jest odczytywany ze standardowego wejścia.\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:489 gnokii/gnokii-sms.c:494
 #, c-format
@@ -2971,6 +3161,28 @@ msgid ""
 "        -d                          delete message after reading\n"
 "\n"
 msgstr ""
+" sposób użycia:\n"
+"   --getsms typ_pamięci początek [koniec] odczytuje wiadomości z typ_pamięci\n"
+"                                          (SM, ME, IN, OU, ...) od pozycji\n"
+"                                          początek do pozycji koniec; jeśli\n"
+"                                          koniec nie jest podany, odczytywana\n"
+"                                          jest tylko jedna pozycja;\n"
+"                                          początek musi być liczbą, koniec może\n"
+"                                          być liczbą lub napisem 'end'; 'end'\n"
+"                                          oznacza odczytanie wszystkich\n"
+"                                          wiadomości do końca\n"
+"     --force-file plik\n"
+"     -F plik                              zapisz SMS do pliku nadpisując go,\n"
+"                                          jeżeli istnieje;\n"
+"                                          jeśli odczytywanych jest wiele SMSów\n"
+"                                          do nazwy pliku dodawany jest\n"
+"                                          identyfikator wiadomości\n"
+"     --file plik\n"
+"     -f plik                              jak powyżej, ale użytkownik jest pytany\n"
+"                                          przed nadpisaniem pliku\n"
+"     --delete\n"
+"     -d                                   usuń wiadomość po odczytaniu\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:642
 #, c-format
@@ -3179,6 +3391,16 @@ msgid ""
 "                                       until empty location\n"
 "\n"
 msgstr ""
+" sposób użycia:\n"
+"   --deletesms typ_pamięci początek [koniec] usuwa wiadomości z typ_pamięci\n"
+"                                             (SM, ME, IN, OU, ...) od pozycji\n"
+"                                             początek do pozycji koniec; jeśli\n"
+"                                             koniec nie jest podany, usuwana\n"
+"                                             jest tylko jedna pozycja;\n"
+"                                             początek musi być liczbą, koniec może\n"
+"                                             być liczbą lub napisem 'end'; 'end'\n"
+"                                             oznacza usunięcie wszystkich\n"
+"                                             wiadomości do końca\n"
 
 #: gnokii/gnokii-sms.c:981
 #, c-format
@@ -3209,6 +3431,18 @@ msgid ""
 "                                     default is human readable form\n"
 "\n"
 msgstr ""
+" sposób użycia:\n"
+"   --getsmsc [poczatek [koniec]]  odczytuje szczegóły centrum wiadomości\n"
+"                                  rozpoczynając od pozycji początek i kończąc\n"
+"                                  na pozycji koniec;\n"
+"                                  brak argumentu koniec oznacza odczytanie\n"
+"                                  wszystkich pozycji do końca;\n"
+"                                  brak argumentu początek oznacza odczytanie\n"
+"                                  od pierwszej pozycji;\n"
+"-r\n"
+"--raw                             wyjście w formacie csv; domyślnym formatem\n"
+"                                  jest sformatowane wyjście\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:1044
 #, c-format
@@ -3318,6 +3552,9 @@ msgid ""
 "SMSC details are read from standard input.\n"
 "\n"
 msgstr ""
+" sposób użycia: --setsmsc\n"
+"Szczegóły centrum SMS są odczytywane ze standardowego wejścia.\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:1208
 #, c-format
@@ -3325,6 +3562,8 @@ msgid ""
 " usage: --createsmsfolder name     creates SMS folder with given name\n"
 "\n"
 msgstr ""
+" sposób użycia: --createsmsfolder nazwa tworzy folder SMS o podanej nazwie\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:1229
 #, c-format
@@ -3337,6 +3576,9 @@ msgid ""
 " usage: --deletesmsfolder folderid    removes SMS folder with given id\n"
 "\n"
 msgstr ""
+" sposób użycia: --deletesmsfolder id_folderu usuwa folder SMS o podanym\n"
+"                                             identyfikatorze\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:1254
 #, c-format
@@ -3354,6 +3596,9 @@ msgid ""
 " usage: --showsmsfolderstatus     shows summary of SMS folders\n"
 "\n"
 msgstr ""
+" sposób użycia: --showsmsfolderstatus  pokazuje podsumowanie informacji o\n"
+"                                       folderach SMS\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:1284
 #, c-format
@@ -3407,6 +3652,9 @@ msgid ""
 "                       in mbox format\n"
 "\n"
 msgstr ""
+" sposób użycia: --smsreader  okresowo sprawdza nowe SMS-y w telefonie i\n"
+"                             zapisuje je w formacie mbox\n"
+"\n"
 
 #: gnokii/gnokii-sms.c:1380
 #, c-format
@@ -3426,9 +3674,13 @@ msgid ""
 "          --writetodo vcalendarfile start_number [end_number|end]\n"
 "          --deletealltodos\n"
 msgstr ""
+"Opcje zadań:\n"
+"          --gettodo początek [koniec|end] [-v|--vCal]\n"
+"          --writetodo plik_vcal początek [koniec|end]\n"
+"          --deletealltodos\n"
 
 #: gnokii/gnokii-todo.c:65
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "usage: --gettodo start_number [end_number | end] [-v|--vCal]\n"
 "       start_number - entry number in the phone todo (numeric)\n"
@@ -3439,16 +3691,16 @@ msgid ""
 "       -v           - output in iCalendar format\n"
 "  NOTE: if no end is given, only the start entry is written\n"
 msgstr ""
-"sposób użycia: gnokii --getcalendarnote start_number [end_number | end] [-"
-"v]\n"
-"       start_number - numer pozycji w kalendarzu telefonu (liczba)\n"
-"       end_number   - do tej pozycji w kalendarzu telefonu (liczba, "
-"opcjonalnie)\n"
-"       end          - napis \"end\" oznacza wszystkie pozycje od początku do "
-"końca\n"
-"       -v           - wyjście w formacie iCalendar\n"
-"  UWAGA: jeśli nie podana jest ostatnia pozycja, odczytywana jest tylko "
-"pierwsza\n"
+"sposób użycia:\n"
+"  --gettodo początek [koniec | end] [-v|--vCal]  odczytuje zadane pozycje\n"
+"                                                 z listy zadań w telefonie\n"
+"       początek  - numer pierszej pozycji do odczytania na liście zadań w\n"
+"                   telefonie (liczba)\n"
+"       koniec    - numer ostatniej pozycji do odczytania na liście zadań w\n"
+"                   telefonie (liczba, opcjonalnie)\n"
+"       end       - napis \"end\" oznacza wszystkie pozycje od początku do końca\n"
+"       -v        - wyjście w formacie iCalendar\n"
+"  UWAGA: jeśli nie podana jest ostatnia pozycja, odczytywana jest tylko pierwsza\n"
 
 #: gnokii/gnokii-todo.c:120
 #, c-format
@@ -3490,6 +3742,13 @@ msgid ""
 "                end           - read all notes from file from start_number\n"
 "  NOTE: it stores the note at the first empty location.\n"
 msgstr ""
+"sposób użycia:\n"
+"  --writetodo plik_vcal początek [koniec|end]\n"
+"      plik_vcal   - plik zawierający zadania w formacie vCal\n"
+"      początek    - pierwsze zadanie do odczytania z pliku\n"
+"      koniec      - ostatnie zadanie do odczytania z pliku\n"
+"      end         - czytaj wszystkie zadania począwszy od początek\n"
+"  UWAGA: zadania zapisywane są w wolnych pozycjach pamięci telefonu.\n"       
 
 #: gnokii/gnokii-todo.c:231
 #, c-format
@@ -3546,11 +3805,18 @@ msgid ""
 "          --writewapsetting\n"
 "          --activatewapsetting number\n"
 msgstr ""
+"Opcje WAP:\n"
+"          --getwapbookmark numer\n"
+"          --writewapbookmark nazwa URL\n"
+"          --deletewapbookmark numer\n"
+"          --getwapsetting numer [-r|raw]\n"
+"          --writewapsetting\n"
+"          --activatewapsetting numer\n"
 
 #: gnokii/gnokii-wap.c:67
 #, c-format
 msgid " usage: --getwapbookmark number\n"
-msgstr ""
+msgstr " sposób użycia: --getwapbookmark numer\n"
 
 #: gnokii/gnokii-wap.c:88 gnokii/gnokii-wap.c:218
 #, c-format
@@ -3570,7 +3836,7 @@ msgstr "URL: %s\n"
 #: gnokii/gnokii-wap.c:103
 #, c-format
 msgid "usage: --writebookmark name URL\n"
-msgstr ""
+msgstr "sposób użycia: --writephonebook nazwa URL\n"
 
 #: gnokii/gnokii-wap.c:126
 #, c-format
@@ -3580,7 +3846,7 @@ msgstr "Zakładka WAP nr %d zapisana pomyślnie!\n"
 #: gnokii/gnokii-wap.c:138
 #, c-format
 msgid " usage: --deletewapbookmark number\n"
-msgstr ""
+msgstr " sposób użycia: --deletewapbookmark numer\n"
 
 #: gnokii/gnokii-wap.c:159
 #, c-format
@@ -3590,7 +3856,7 @@ msgstr "Zakładka WAP nr %d usunięta!\n"
 #: gnokii/gnokii-wap.c:171
 #, c-format
 msgid " usage: --getwapsetting number [-r|--raw]\n"
-msgstr ""
+msgstr " sposób użycia: --getwapsetting numer [-r|--raw]\n"
 
 #: gnokii/gnokii-wap.c:220
 #, c-format
@@ -3770,7 +4036,7 @@ msgstr "Nie można zapisać ustawień WAP: %s\n"
 #: gnokii/gnokii-wap.c:410
 #, c-format
 msgid " usage: --activatewapsetting number\n"
-msgstr ""
+msgstr " sposób użycua: --activatewapsetting numer\n"
 
 #: gnokii/gnokii-wap.c:431
 #, c-format
@@ -3824,6 +4090,18 @@ msgid ""
 "          --help\n"
 "          --version\n"
 msgstr ""
+"Sposób użycia:\n"
+"\tgnokii [OPCJE KONFIGURACYJNE] OPCJE\n"
+"\n"
+"OPCJE KONFIGURACYJNE\n"
+"\t\t--config plik\n"
+"\t\t--phone sekcja_telefonu\n"
+"\n"
+"OPCJE\n"
+"Można użyć tylko jedną opcję w wywołaniu.\n"
+"Opcje ogólne:\n"
+"          --help\n"
+"          --version\n"
 
 #: gnokii/gnokii.c:269
 #, c-format
