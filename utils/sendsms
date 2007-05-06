@@ -10,6 +10,8 @@
 #                              gnokii (Pawel Kot)
 #                              Remove notice on mygnokii as this is no longer
 #                              mainained (Pawel Kot)
+#         may  6, 2007         Give a choice between SIM and phone memory for
+#                              the phonebook (Pawel Kot)
 ###############################################################################
 # G N O K I I
 #
@@ -40,10 +42,10 @@
 # var settings.
 
 PROGNAME=${0##*/}
-VERSION="1.02"
-GNOKII=gnokii
+VERSION="1.03"
+GNOKII=${GNOKII:-gnokii}
 PID=$$
-SMSDIR=~/tmp/sms
+SMSDIR=${SMSDIR:-$HOME/tmp/sms}
 TMP=~/tmp/SMStmp.$PID
 BACKTITLE="SENDSMS V$VERSION"
 AUTHOR="Gabriele Zappi - Rimini <gzappi@inwind.it>"
@@ -67,8 +69,8 @@ Examples:\n\
   $PROGNAME --version       # Display version, author and quits.\n\
 \n\
 NOTE:\n\
-If you require to pickup number from phone's memory (really from SIM card),\n\
-for the first time, it anyway reads phonebook from your cellular phone. \n\
+If you require to pickup number from phone's memory (or from SIM card),\n\
+for the first time, it anyway reads phonebook from your mobile phone. \n\
 (It may take a while... please, be patient ;-) \n\
 \n\
 Available options:\n\
@@ -76,7 +78,11 @@ Available options:\n\
                          For debugging purpose.\n\
   --simul[ate], -S       Simulation mode. Doesn't really send SMS by phone. \n\
                          Only simulates. For debugging purpose.\n\
-  --forcememread, -F     Forces $PROGNAME to read phonebook from SIM card,\n\
+  --forceSMread, -s      Forces $PROGNAME to read phonebook from SIM card,\n\
+                         and to parse the generated file in order to update\n\
+                         the numbers' list (useful only if required to pickup\n\
+                         number from the phone's memory). see NOTE.\n\
+  --forceMEread, -m      Forces $PROGNAME to read phonebook from phone memory,\n\
                          and to parse the generated file in order to update\n\
                          the numbers' list (useful only if required to pickup\n\
                          number from the phone's memory). see NOTE.\n\
@@ -130,8 +136,11 @@ parse_stdin() {
 					SW_DEBUG=yes
 					SW_SIMUL=yes
 					;;
-			--forcememread|-F)
-					SW_FORCEMREAD=yes
+			--forceSMread|-s)
+					SW_FORCESMREAD=yes
+					;;
+			--forceMEread|-m)
+					SW_FORCEMEREAD=yes
 					;;
 			--skipgnokiicheck|-K)
 					SW_SKIPGNOKITST=yes
@@ -159,49 +168,88 @@ sure_to_quit() {
  fi
 }
 
-SMS_phoneread() {
-dialog --backtitle "$BACKTITLE" --infobox "Reading phonebook by phone's SIM\n         Please wait" 4 40 
-$GNOKII --getphonebook SM 1 end --raw > $SMSDIR/.SMlist.temp
+SMS_phonereadSM() {
+dialog --backtitle "$BACKTITLE" --infobox "Reading phonebook from SIM\n         Please wait" 4 40 
+$GNOKII --getphonebook SM 1 end --raw > $SMSDIR/.SMlist.temp 2>/dev/null
+}
+
+SMS_phonereadME() {
+dialog --backtitle "$BACKTITLE" --infobox "Reading phonebook from phone memory\n         Please wait" 4 40 
+$GNOKII --getphonebook ME 1 end --raw > $SMSDIR/.MElist.temp 2>/dev/null
 }
 
 SMS_choicefrommem() {
 	# read from phonebook.
-	if [ "$SW_FORCEMREAD" = "yes" ] ; then
+	if [ "$SW_FORCESMREAD" = "yes" ] ; then
 		readsim=1
 	elif [ -s $SMSDIR/.SMlist.sim ]; then
 		dialog --backtitle "INSERT NUMBER(s).." \
-					 --yesno "A SIM phonebook file is already present. \
-                    Do you want to read phone memory anyway?" 8 60
+					 --yesno "SIM phonebook file is already present. \
+                    Do you want to read SIM card anyway?" 8 60
 		if [ $? -eq 0 ] ; then
 			readsim=1
 		else
 			readsim=0
 		fi
 	else
-		readsim=1
+		readsim=0
+	fi
+	if [ "$SW_FORCEMEREAD" = "yes" ] ; then
+		readme=1
+	elif [ -s $SMSDIR/.MElist.mem ]; then
+		dialog --backtitle "INSERT NUMBER(s).." \
+					 --yesno "Phonebook file is already present. \
+                    Do you want to read phone memory anyway?" 8 60
+		if [ $? -eq 0 ] ; then
+			readme=1
+		else
+			readme=0
+		fi
+	else
+		readme=0
 	fi
 
-	ERROR=0
+	SMERROR=0
 	if [ $readsim -eq 1 ] ; then
-		SMS_phoneread
+		SMS_phonereadSM
 		if [ $? -ne 0 ] ; then
 			dialog --backtitle "INSERT NUMBER(s).." \
-						 --msgbox "ERROR during reading memory from your phone... \
-                       Insert manually destination number." 8 60
-			ERROR=1
+						 --msgbox "ERROR during reading memory the SIM card... \
+	                      Insert manually destination number." 8 60
+			SMERROR=1
 		else
 			mv -f $SMSDIR/.SMlist.temp $SMSDIR/.SMlist.sim
 		fi
 	fi
 
+	MEERROR=0
+	if [ $readme -eq 1 ]; then
+		SMS_phonereadME
+		if [ $? -ne 0 ] ; then
+			dialog --backtitle "INSERT NUMBER(s).." \
+						 --msgbox "ERROR during reading memory from your phone... \
+	                      Insert manually destination number." 8 60
+			MEERROR=1
+		else
+			mv -f $SMSDIR/.MElist.temp $SMSDIR/.MElist.mem
+		fi
+	fi
+
+	if [ $SMERROR -eq 1 && $MEERROR -eq 1 ]; then
+		ERROR=1
+	else
+		ERROR=0
+		cat $SMSDIR/.SMlist.sim > $SMSDIR/.PBKlist
+		cat $SMSDIR/.MElist.mem >> $SMSDIR/.PBKlist
+	fi
 	if [ $ERROR -eq 0 ]; then
 		# Parsing sim file...
 		if [ ! -s $SMSDIR/.SMlist.chklst -o ! -s $SMSDIR/.SMlist.choice \
-					-o $readsim -eq 1 ] ; then
+					-o $readsim -eq 1 -o $readme -eq 1 ] ; then
 			> $SMSDIR/.SMlist.menu
 			> $SMSDIR/.SMlist.chklst
 			> $SMSDIR/.SMlist.choice
-			totrows=`cat $SMSDIR/.SMlist.sim | wc -l`
+			totrows=`cat $SMSDIR/.PBKlist | wc -l`
 			rownow=0
 			(while read riga
 			do
@@ -216,22 +264,22 @@ SMS_choicefrommem() {
 					echo "$pos;$num" >> $SMSDIR/.SMlist.choice
 				fi
 				echo $perc
-			done < $SMSDIR/.SMlist.sim) | dialog \
-													--gauge "Parsing phonebook file..." 12 70 0
+			done < $SMSDIR/.PBKlist) | dialog \
+				--gauge "Parsing phonebook file..." 12 70 0
 		fi
 
 		chkok=0
 		option=0
 		while [ $chkok -eq 0 ]
 		do
-			eval dialog --backtitle \"SENDSM CKECKLIST\" \
+			eval dialog --backtitle \"SENDSMS CKECKLIST\" \
 									--checklist \"Check your MEMORY number\(s\).\
                               \\nPress ESC key \for options..... \" \
 									16 60 9 \
 									`cat $SMSDIR/.SMlist.chklst` 2> $TMP/rspTEMP02
 			option=$?
 			if [ $option -eq 255 ] ; then
-				dialog --backtitle "SENDSM CKECKLIST" --menu \
+				dialog --backtitle "SENDSMS CKECKLIST" --menu \
 						"Options sub-menus for Phonebook choise list:" \
 						10 50 4 \
 						"1" "Sort by Memory Pos" \
@@ -382,8 +430,8 @@ do
 	while [ "$NUMBERS" = "" -o "$okcycle" -eq 0 ]
 	do
 		dialog --backtitle "INSERT NUMBER(s).." \
-					 --yesno "would you like to pick up number(s) \
-                    from your phone memory" 8 60
+					 --yesno "Would you like to pick up number(s)\
+                    from your phone memory?" 8 60
 														
 
 		if [ $? -eq 0 ] ; then # Yes, gimme num from phonebook.

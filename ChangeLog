@@ -283,6 +283,8 @@
       initialisation fails  (e.g. timeout)          (Daniele Forsi)
     o fix gcc warning: enumeration value not handled in switch
                                                     (Daniele Forsi)
+ * utils updates
+    o sendsms can now read phonebook from phone memory  (Pawel Kot)
 
 0.6.14
 ======
