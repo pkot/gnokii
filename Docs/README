@@ -43,9 +43,10 @@ provide some support for the project.  Regrettably, these negotiations
 stalled over the issue of binary versus open source releases and the project
 has proceeded without official or unofficial assistance.
 
-We have a web site at http://www.gnokii.org/ which amongst other things
-gives information on how to join the gnokii mailing list, retrieving
-bleeding edge releases through CVS and more!
+We have a web site at http://www.gnokii.org/ and wiki at
+http://wiki.gnokii.org/ which amongst other things give information on how
+to join the gnokii mailing list, retrieving bleeding edge releases through
+CVS and more!
 
 
 - 2.0 About the applications -
@@ -296,19 +297,23 @@ You'll find the detailed protocol description in Docs/protocol/ directory.
 
 - 12.0 References -
 
-The web site for this project is at;
+The web site for this project is at:
 
 	<http://www.gnokii.org/>
 
-Project page on savannah is at
+Wiki site for the project is at:
+
+	<http://wiki.gnokii.org/>
+
+Project page on savannah is at:
 
 	<http://savannah.nongnu.org/projects/gnokii/>
 
-The mailing list devoted to the gnokii project is
+The mailing list devoted to the gnokii project is:
 
 	<gnokii-users@nongnu.org>
 
-You can subscribe at
+You can subscribe at:
 
 	<http://mail.nongnu.org/mailman/listinfo/gnokii-users>
 
