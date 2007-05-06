@@ -171,7 +171,7 @@ do { \
 		yield(); \
 		POLLIT; \
 	} \
-	if (!(limit > GetTime())) eprintf("???? TIMEOUT!"); \
+	if (!(limit > GetTime())) dprintf("???? TIMEOUT!"); \
 } while(0)
 
 /* Checksum calculation */
@@ -245,12 +245,12 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	{
 		int i;
 		u8  b;
-		fprintf( stderr, "PC   : " );
+		dprintf( "PC   : " );
 		for( i = 0; i < current; i++ ) {
 			b = pkt[i];
-			fprintf( stderr, "[%02X %c]", b, b > 0x20 ? b : '.' );
+			dprintf( "[%02X %c]", b, b > 0x20 ? b : '.' );
 		}
-		fprintf( stderr, "\n" );
+		dprintf( "\n" );
 	}
 #endif /* DEBUG */
 	/* Send it out... */
@@ -266,7 +266,7 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 		return  GN_ERR_INTERNALERROR);
 	dprintf("echook");
 	if (memcmp(pkt, pkt2, current)) {
-		eprintf("Bad echo?!");
+		dprintf("Bad echo?!");
 		msleep(1000);
 		return  GN_ERR_TIMEOUT);
 	}
@@ -307,7 +307,7 @@ SendCommand( u8 *buffer, u8 command, u8 length )
 		time = 50;		/* 5 seems to be enough */
 		dprintf("[resend]");
 	}
-	eprintf("Command not okay after 10 retries!\n");
+	dprintf("Command not okay after 10 retries!\n");
 	return GN_ERR_BUSY;
 }
 
@@ -336,14 +336,14 @@ SMS(GSM_SMSMessage *message, int command)
 	msleep_poll(300);	/* We have to keep acknowledning phone's data */
 	waitfor(PacketOK, 1000);
 	if (!PacketOK) {
-		eprintf("SMS: No reply came within second!\n");
+		dprintf("SMS: No reply came within second!\n");
 	}
 	if (PacketData[3] != LM_SMS_EVENT) {
-		eprintf("Something is very wrong with SMS\n");
+		dprintf("Something is very wrong with SMS\n");
 		return GN_ERR_BUSY; /* FIXME */
 	}
 	if ((SMSData[2]) && (SMSData[2] != message->Number)) {
-		eprintf("Wanted message @%d, got message at @%d!\n", message->Number, SMSData[2]);
+		dprintf("Wanted message @%d, got message at @%d!\n", message->Number, SMSData[2]);
 		return GN_ERR_BUSY;
 	}
 	SMSpos = 0;
@@ -379,7 +379,7 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 	ddprintf("\n");
 
 	if (len>160)
-		eprintf("Magic not allowed\n");
+		dprintf("Magic not allowed\n");
 	memset(m->UserData[0].u.Text, 0, 161);
 	strncpy(m->UserData[0].u.Text, (void *) &SMSData[15], len);
 
@@ -424,7 +424,7 @@ GetSMSMessage(GSM_Data *data)
 	data->RawData->Data = calloc(data->RawData->Length, 1);
 	memcpy(data->RawData->Data, (void *)SMSData+1, 180);
 	if (ParseSMS(data, 0))
-		eprintf("Error in parsesms?\n");
+		dprintf("Error in parsesms?\n");
 
 	msleep_poll(1000);		/* If phone lost our ack, it might retransmit data */
 	return  GN_ERR_NONE);
@@ -600,7 +600,7 @@ static int
 CheckIncomingSMS(int at)
 {
 	GSM_SMSMessage m;
-	eprintf("Check message at %d\n", at);
+	dprintf("Check message at %d\n", at);
 	memset(&m, 0, sizeof(m));
 	m.Number = at;
 	m.MemoryType = GMT_ME;
@@ -624,7 +624,7 @@ HandlePacket(void)
 	int lsize[5] = {10, 10, 10, 3, 12};
 	char *t;
 
-	eprintf("[%x]", PacketData[3]);
+	dprintf("[%x]", PacketData[3]);
 	switch(PacketData[3]) {
 	case 0x12: {			/* Text from display */
 		drawmsg.Command = GSM_Draw_ClearScreen;
@@ -684,11 +684,11 @@ HandlePacket(void)
 		{
 			switch (SMSData[0]) {
 			case LM_SMS_RECEIVED_PP_DATA:
-				eprintf("Data came!\n");
+				dprintf("Data came!\n");
 				SMSpos = 0;
 				return 1;
 			case LM_SMS_ALIVE_TEST:
-				eprintf("Am I alive?\n");
+				dprintf("Am I alive?\n");
 				SMSpos = 0;
 				return 1;
 			case LM_SMS_NEW_MESSAGE_INDICATION:
@@ -696,7 +696,7 @@ HandlePacket(void)
 				int i, at;
 				SMSpos = 0;
 				at = SMSData[2];
-				eprintf("New message indicated @%d\n", at);
+				dprintf("New message indicated @%d\n", at);
 				for (i=0; i<sizeof(SMSData); i++)
 					SMSData[i] = 0;
 				SMSReady = at;
@@ -750,7 +750,7 @@ SigHandler(int status)
 					ddprintf( "\n" );
 					/* ensure that we received valid packet */
 					if(pkt[Length - 1] != GetChecksum(pkt, Length-1)) {
-						eprintf( "***bad checksum***");
+						dprintf( "***bad checksum***");
 					} else {
 						if((pkt[2] == 0x7F) || (pkt[2] == 0x7E)) /* acknowledge by phone */ {
 							if (pkt[2] == 0x7F) {
@@ -792,7 +792,7 @@ SigHandler(int status)
 						}
 					}
 				} else
-					eprintf("Got my own echo? That should not be possible!\n");
+					dprintf("Got my own echo? That should not be possible!\n");
 				/* Look for new packet */
 				Index  = 0;
 				Length = 5;
@@ -803,7 +803,7 @@ SigHandler(int status)
 		int at = SMSReady;
 		SMSReady = 0;
 		if (!CheckIncomingSMS(at))
-			eprintf("Could not find promissed message?\n");
+			dprintf("Could not find promissed message?\n");
 	}
 }
 
@@ -816,7 +816,7 @@ bool OpenSerial(void)
 
 	result = device_open(PortDevice, true, false, false, GCT_Serial);
 	if (!result) {
-		fprintf(stderr, "Failed to open %s ...\n", PortDevice);
+		dprintf( "Failed to open %s ...\n", PortDevice);
 		return (false);
 	}
 
@@ -882,7 +882,7 @@ static void PressKey(char c, int i)
 	X(RCL, 20)
 	X(MUTE, 28)
 #endif
-	default: fprintf(stderr, "Unknown key %d\n", c);
+	default: dprintf("Unknown key %d\n", c);
 	}
 #undef X
 }
@@ -895,7 +895,7 @@ PressString(char *s, int upcase)
 	static int lastupcase = 1;
 
 	if (lastchar == *s) {
-		fprintf(stderr, "***collision");
+		dprintf("***collision");
 		PressKey(ALPHA, 0);
 		PressKey(ALPHA, 0);
 		lastupcase = 1;
@@ -905,7 +905,7 @@ PressString(char *s, int upcase)
 		lastchar = *s;
 		PressKey(*s, 0);
 		if (upcase != lastupcase) {
-			fprintf(stderr, "***size change");
+			dprintf("***size change");
 			msleep_poll(1500);
 			PressKey(*s, 1);
 			lastupcase = upcase;
@@ -1012,7 +1012,7 @@ HandleString(char *s)
 		HandleKey(*s);
 		s++;
 	}
-	fprintf(stderr,"***end of input");
+	dprintf("***end of input");
 	PressKey(lastkey, 1);
 	return GN_ERR_NONE;
 }
@@ -1031,22 +1031,22 @@ EnableDisplayOutput(GSM_Statemachine *sm)
 	u8  pkt[] = {3, 3, 0, 0, 1};
 
 	msleep_poll(500);
-	fprintf(stderr, "\nShould display output\n");
+	dprintf("\nShould display output\n");
 	if (!OutputFn) {
 		pkt[0] = 0;
 		pkt[1] = 0;
 	}
 	PacketOK = false;
 	SendCommand(pkt, 0x19, 5);
-	fprintf(stderr, "\nGrabbing display");
+	dprintf("\nGrabbing display");
 	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xcd) ||
 	    (PacketData[2] != 1) ||
 	    (PacketData[4] != 1 /* LN_UC_REQUEST_OK */))
-		fprintf(stderr, "Something is very wrong with GrabDisplay\n");
-	fprintf(stderr, "Display grabbed okay (waiting)\n");
+		dprintf("Something is very wrong with GrabDisplay\n");
+	dprintf("Display grabbed okay (waiting)\n");
 	msleep_poll(500);
-	fprintf(stderr, "Okay\n");
+	dprintf("Okay\n");
 	return GN_ERR_NONE;
 }
 
@@ -1059,11 +1059,11 @@ static gn_error SMS_Reserve(GSM_Statemachine *sm)
 	PacketOK = 0;
 	waitfor(PacketOK, 100);
 	if (!PacketOK)
-		eprintf("No reply trying to reserve SMS-es\n");
+		dprintf("No reply trying to reserve SMS-es\n");
 	if (PacketData[3] != LM_SMS_EVENT)
-		eprintf("Bad reply trying to reserve SMS-es\n");
+		dprintf("Bad reply trying to reserve SMS-es\n");
 	if (SMSData[0] != LM_SMS_PP_RESERVE_COMPLETE)
-		eprintf("Not okay trying to reserve SMS-es (%d)\n", SMSData[0]);
+		dprintf("Not okay trying to reserve SMS-es (%d)\n", SMSData[0]);
 	SMSpos = 0;
 	return GN_ERR_NONE;
 }
@@ -1084,7 +1084,7 @@ static gn_error SMS_UnReserve(GSM_Statemachine *sm)
 static void
 RegisterMe(void)
 {
-	fprintf(stderr, "Initializing... ");
+	dprintf("Initializing... ");
 	/* Do initialisation stuff */
 	LastChar = GetTime();
 	if (OpenSerial() != true) {
@@ -1094,11 +1094,11 @@ RegisterMe(void)
 
 	msleep(100);
 	while(!N2110_LinkOK) {
-		fprintf(stderr, "registration... ");
+		dprintf("registration... ");
 		Register();
 		msleep_poll(100);
 	}
-	fprintf(stderr, "okay\n");
+	dprintf("okay\n");
 }
 
 /* Initialise variables and state machine. */
@@ -1153,7 +1153,7 @@ GetPhonebookLocation(GSM_PhonebookEntry *entry)
 	waitfor(PacketOK, 0);
 	if ((PacketData[3] != 0xc9) ||
 	    (PacketData[4] != 0x1a)) {
-		fprintf(stderr, "Something is very wrong with GetPhonebookLocation\n");
+		dprintf("Something is very wrong with GetPhonebookLocation\n");
 		return GN_ERR_BUSY;
 	}
 	ddprintf("type= %x\n", PacketData[5]);
@@ -1195,7 +1195,7 @@ WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	printf("okay?\n");
 	if ((PacketData[3] != 0xc9) ||
 	    (PacketData[4] != 0x1b)) {
-		fprintf(stderr, "Something is very wrong with WritePhonebookLocation\n");
+		dprintf("Something is very wrong with WritePhonebookLocation\n");
 		return GN_ERR_BUSY;
 	}
 	printf("type= %x\n", PacketData[5]);
@@ -1291,7 +1291,7 @@ gn_error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sta
 			device_select(&tm);
 
 			if (lastpoll + 10000000 < GetTime()) {
-				fprintf(stderr, "Trying to capture leftover messages\n");
+				dprintf("Trying to capture leftover messages\n");
 				CheckIncomingSMS(1);
 				CheckIncomingSMS(2);
 				CheckIncomingSMS(3);
