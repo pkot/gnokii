@@ -24,6 +24,7 @@ include $(TOPDIR)/Makefile.global
 #    increase GNOKII_MAJOR, GNOKII_MINOR, set GNOKII_RELEASE to 0
 #  - if you change API in backward incompatible manner (removing things,
 #    changing things), increase GNOKII_MAJOR, set GNOKII_RELEASE to 0
+# Change is just once per release!
 GNOKII_MAJOR = 4
 GNOKII_MINOR = 1
 GNOKII_RELEASE = 0
