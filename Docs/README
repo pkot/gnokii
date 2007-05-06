@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
                          (C) 2001 - 2007 Paweł Kot
-                  Last update xx May 2007  Version 0.6.15
+                  Last update  7 May 2007  Version 0.6.15
 
 - Contents -
 
@@ -393,7 +393,7 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
-200705xx Version 0.6.15
+20070507 Version 0.6.15
 Tons of updates. Most important changes include: support for reading
 extented phonebook entries, fixes for some nasty segfaults, fixes for
 decoding SMSes for some encodings, better support for Samsung mobiles in AT
