@@ -178,3 +178,16 @@ time_t timegm(struct tm *tm)
 }
 
 #endif
+
+#ifndef HAVE_STRNDUP
+char *strndup(const char *src, size_t n)
+{
+	char *dst = malloc(n + 1);
+
+	if (!dst)
+		return NULL;
+
+	dst[n] = '\0';
+	return (char *)memcpy(dst, src, n);
+}
+#endif

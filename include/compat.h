@@ -60,6 +60,7 @@
 #endif
 
 #ifdef HAVE_STRING_H
+#  define _GNU_SOURCE
 #  include <string.h>
 #endif
 
@@ -133,6 +134,11 @@
 #else
 #    define GNOKII_API
 #endif /* WIN32 */
+
+/* I assume that HAVE_STRNDUP always implies HAVE_STRING_H */
+#ifndef HAVE_STRNDUP
+extern char *strndup(const char *src, size_t n);
+#endif
 
 #ifndef	HAVE_TIMEOPS
 
@@ -293,5 +299,6 @@ time_t timegm(struct tm *tm);
 #    define va_copy(dest, src)    memcpy(&(dest), &(src), sizeof(va_list))
 #  endif
 #endif
+
 
 #endif

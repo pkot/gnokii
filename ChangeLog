@@ -2,6 +2,9 @@
 =========================
  * gnokii updates
     o fix Solaris compilation (fcntl and friends)       (Pawel Kot)
+ * libgnokii updates
+    o provide own implementation of strndup() for non-GNU systems
+                                                        (Pawel Kot)
 
 0.6.15
 ======
