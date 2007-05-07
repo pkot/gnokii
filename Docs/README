@@ -261,7 +261,7 @@ Once you have the sources, you will need to run the following commands
 
 	autopoint -f
 	libtoolize -c -f
-	# under FreeBSD you may want to privide additional parameter to
+	# under FreeBSD you may want to provide additional parameter to
 	# aclocal: -I /usr/local/share/aclocal
 	aclocal -I m4
 	autoheader
