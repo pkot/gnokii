@@ -1,6 +1,6 @@
 0.6.15 (not released yet)
 =========================
- * libgnokii changes
+ * libgnokii changes (libgnokii.so.3.1.0)
     o handle new type of phonebook number for ldif and vcard
       output                                            (Pawel Kot)
     o be more compliant with VCARD 3.0                  (Pawel Kot)
