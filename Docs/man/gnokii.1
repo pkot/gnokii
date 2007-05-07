@@ -1,4 +1,4 @@
-.TH "gnokii" "1" "December 16, 2006" "Dag Wieers, Pawel Kot, Daniele Forsi" "gnokii"
+.TH "gnokii" "1" "May 7, 2007" "Dag Wieers, Pawel Kot, Daniele Forsi" "gnokii"
 .SH "NAME"
 gnokii \- modem/fax driver for the mobile phones
 .SH "SYNOPSIS"
@@ -80,13 +80,16 @@ resets the phone.
 .SS TODO
 .TP 
 .BR "\-\-gettodo \fIstart_number\fP [\fIend_number\fP|\fIend\fP] [\-v|\-\-vCal]"
-get the notes with numbers from \fIstart_number\fR to \fIend_number\fR from calendar. \fIend\fR is a keyword that denotes 'everything till the end'.
+get the notes with numbers from \fIstart_number\fR to \fIend_number\fR from ToDo list.
+\fIend\fR is a keyword that denotes 'everything till the end'.
 
 .PP 
 \-v \- output in vCalendar 1.0 format
 .TP 
-.BR "\-\-writetodo \fIvCalendarfile\fR \fInumber\fR"
-write the notes to ToDo list.
+.BR "\-\-writetodo \fIvCalendarfile\fR \fIstart_number\fP [\fIend_number\fP|\fIend\fP]"
+write the notes with numbers from \fIstart_number\fR to \fIend_number\fR from vCal file \fIvcalfile\fR to ToDo list.
+More than one note a time can be saved.
+\fIend\fR is a keyword that denotes 'everything till the end'.
 .PP 
 number \- location of the note in the vCalendar file
 .TP 
@@ -96,12 +99,15 @@ delete all notes from the ToDo list.
 .SS CALENDAR
 .TP 
 .BR "\-\-getcalendarnote \fIstart_number\fP [\fIend_number\fP|\fIend\fP] [\-v|\-\-vCal]"
-get the note with numbers from \fIstart_number\fR to \fIend_number\fR from calendar. \fIend\fR is a keyword that denotes 'everything till the end'.
+get the notes with numbers from \fIstart_number\fR to \fIend_number\fR from calendar.
+\fIend\fR is a keyword that denotes 'everything till the end'.
 .PP 
 \-v \- output in vCalendar 1.0 format
 .TP 
-.BR "\-\-writecalendarnote \fIvcalfile\fR \fInumber\fR"
-write the note number \fInumber\fR from a vCal file \fIvcalfile\fR to a phone calendar. Just one note a time can be saved.
+.BR "\-\-writecalendarnote \fIvcalfile\fR \fIstart_number\fP [\fIend_number\fP|\fIend\fd]"
+write the notes with numbers from \fIstart_number\fR to \fIend_number\fR from vCal file \fIvcalfile\fR to a phone calendar.
+More than one note a time can be saved.
+\fIend\fR is a keyword that denotes 'everything till the end'.
 .PP
 number \- location of the note in the vCalendar file
 .TP 
