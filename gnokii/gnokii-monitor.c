@@ -47,6 +47,9 @@
 #endif
 #include <getopt.h>
 #include <signal.h>
+#ifndef WIN32
+#  include <fcntl.h>
+#endif
 
 #include "gnokii-app.h"
 #include "gnokii.h"
