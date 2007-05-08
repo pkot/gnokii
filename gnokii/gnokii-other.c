@@ -47,6 +47,10 @@
 #endif
 #include <getopt.h>
 
+#ifdef WIN32
+#  include <io.h>
+#endif
+
 #include "gnokii-app.h"
 #include "gnokii.h"
 

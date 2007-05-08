@@ -2,6 +2,7 @@
 =========================
  * gnokii updates
     o fix Solaris compilation (fcntl and friends)       (Pawel Kot)
+    o avoid warnings on WIN32                           (Pawel Kot)
  * libgnokii updates
     o provide own implementation of strndup() for non-GNU systems
                                                         (Pawel Kot)
