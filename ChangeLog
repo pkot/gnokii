@@ -1,3 +1,11 @@
+0.6.17 (not yet released)
+======
+ * gnokii updates
+    o do not open the log file when communication with phone is not
+      needed; this fixes a memory leak found with valgrind
+                                                    (Daniele Forsi)
+
+
 0.6.16
 ======
  * gnokii updates

@@ -246,6 +246,45 @@ static int usage(FILE *f, int retval)
 	exit(retval);
 }
 
+static void gnokii_error_logger(const char *fmt, va_list ap)
+{
+	if (logfile) {
+		vfprintf(logfile, fmt, ap);
+		fflush(logfile);
+	}
+}
+
+static int install_log_handler(void)
+{
+	char logname[256];
+	char *home;
+#ifdef WIN32
+	char *file = "gnokii-errors";
+#else
+	char *file = ".gnokii-errors";
+#endif
+
+	if ((home = getenv("HOME")) == NULL) {
+#ifdef WIN32
+		home = ".";
+#else
+		fprintf(stderr, _("ERROR: Can't find HOME environment variable!\n"));
+		return -1;
+#endif
+	}
+
+	snprintf(logname, sizeof(logname), "%s/%s", home, file);
+
+	if ((logfile = fopen(logname, "a")) == NULL) {
+		fprintf(stderr, _("Cannot open logfile %s\n"), logname);
+		return -1;
+	}
+
+	gn_elog_handler = gnokii_error_logger;
+
+	return 0;
+}
+
 /* businit is the generic function which waits for the FBUS link. The limit
    is 10 seconds. After 10 seconds we quit. */
 
@@ -275,6 +314,10 @@ static void businit(void)
 	/* register cleanup function */
 	atexit(busterminate);
 	/* signal(SIGINT, bussignal); */
+
+	if (install_log_handler()) {
+		fprintf(stderr, _("WARNING: cannot open logfile, logs will be directed to stderr\n"));
+	}
 
 	if ((err = gn_lib_phone_open(state)) != GN_ERR_NONE) {
 		fprintf(stderr, "%s\n", gn_error_print(err));
@@ -332,45 +375,6 @@ static int foogle(int argc, char *argv[], gn_data *data, struct gn_statemachine 
 	return 0;
 }
 #endif
-
-static void gnokii_error_logger(const char *fmt, va_list ap)
-{
-	if (logfile) {
-		vfprintf(logfile, fmt, ap);
-		fflush(logfile);
-	}
-}
-
-static int install_log_handler(void)
-{
-	char logname[256];
-	char *home;
-#ifdef WIN32
-	char *file = "gnokii-errors";
-#else
-	char *file = ".gnokii-errors";
-#endif
-
-	if ((home = getenv("HOME")) == NULL) {
-#ifdef WIN32
-		home = ".";
-#else
-		fprintf(stderr, _("ERROR: Can't find HOME environment variable!\n"));
-		return -1;
-#endif
-	}
-
-	snprintf(logname, sizeof(logname), "%s/%s", home, file);
-
-	if ((logfile = fopen(logname, "a")) == NULL) {
-		fprintf(stderr, _("Cannot open logfile %s\n"), logname);
-		return -1;
-	}
-
-	gn_elog_handler = gnokii_error_logger;
-
-	return 0;
-}
 
 static int parse_options(int argc, char *argv[])
 {
@@ -1025,10 +1029,6 @@ int main(int argc, char *argv[])
 	textdomain("gnokii");
 	setlocale(LC_ALL, "");
 #endif
-
-	if (install_log_handler()) {
-		fprintf(stderr, _("WARNING: cannot open logfile, logs will be directed to stderr\n"));
-	}
 
 	opterr = 0;
 
