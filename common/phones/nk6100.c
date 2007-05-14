@@ -874,14 +874,24 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			pnok_string_decode(pe->number, sizeof(pe->number), pos, n);
 			pos += n;
 			pe->caller_group = *pos++;
-			pos++;
-			pe->date.year = (pos[0] << 8) + pos[1];
-			pos += 2;
-			pe->date.month = *pos++;
-			pe->date.day = *pos++;
-			pe->date.hour = *pos++;
-			pe->date.minute = *pos++;
-			pe->date.second = *pos++;
+			if (*pos++) {
+				/* date is set */
+				pe->date.year = (pos[0] << 8) + pos[1];
+				pos += 2;
+				pe->date.month = *pos++;
+				pe->date.day = *pos++;
+				pe->date.hour = *pos++;
+				pe->date.minute = *pos++;
+				pe->date.second = *pos++;
+			} else {
+				/* date is not set */
+				pe->date.year = 0;
+				pe->date.month = 0;
+				pe->date.day = 0;
+				pe->date.hour = 0;
+				pe->date.minute = 0;
+				pe->date.second = 0;
+			}
 			pe->subentries_count = 0;
 			pe->empty = (pe->name[0] == '\0') && (pe->number[0] == '\0');
 		}

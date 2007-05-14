@@ -4,6 +4,12 @@
     o do not open the log file when communication with phone is not
       needed; this fixes a memory leak found with valgrind
                                                     (Daniele Forsi)
+ * nk6100 driver updates
+    o when reading phonebook check if date/time is set in the entry
+                                                    (Daniele Forsi)
+ * documentation updates
+    o update Docs/protocol/nk6110.txt with date/time flag in
+      phonebook entries                             (Daniele Forsi)
 
 
 0.6.16
