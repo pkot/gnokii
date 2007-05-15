@@ -6,6 +6,10 @@
                                                     (Daniele Forsi)
  * nk6100 driver updates
     o when reading phonebook check if date/time is set in the entry
+      to fix valgrind error "Invalid read of size 1"
+                                                    (Daniele Forsi)
+    o handle errors in case 0x1b of IncomingProfile(); this fixes
+      another valgrind error "Invalid read of size 1"
                                                     (Daniele Forsi)
  * documentation updates
     o update Docs/protocol/nk6110.txt with date/time flag in
