@@ -198,7 +198,7 @@ static gn_error phonebook_read(gn_data *data, struct gn_statemachine *state)
 	dprintf("Reading phonebook location (%d)\n", data->phonebook_entry->location);
 
 	req[6] = data->phonebook_entry->location;
-	SEND_MESSAGE_BLOCK(7, 0x40);
+	SEND_MESSAGE_BLOCK(0x40, 7);
 }
 
 static gn_error phonebook_write(gn_data *data, struct gn_statemachine *state)
@@ -238,7 +238,7 @@ static gn_error phonebook_write(gn_data *data, struct gn_statemachine *state)
 	strcpy(pos, pe->name);
 	pos += namelen + 1;
 
-	SEND_MESSAGE_BLOCK(pos - req, 0x40);
+	SEND_MESSAGE_BLOCK(0x40, pos - req);
 }
 
 static gn_error phonebook_incoming(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
@@ -293,7 +293,7 @@ static gn_error phone_info(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {0x00, 0x01, 0x00, 0x03, 0x00};
 
 	dprintf("Getting phone info...\n");
-	SEND_MESSAGE_BLOCK(5, 0xd1);
+	SEND_MESSAGE_BLOCK(0xd1, 5);
 }
 
 static gn_error identify(gn_data *data, struct gn_statemachine *state)
@@ -333,7 +333,7 @@ static gn_error get_bitmap_startup_slice(gn_data *data, struct gn_statemachine *
 
 	drvinst->logoslice = s;
 	req[5] = (unsigned char)s + 1;
-	SEND_MESSAGE_BLOCK(6, 0x40);
+	SEND_MESSAGE_BLOCK(0x40, 6);
 }
 
 static gn_error bitmap_get(gn_data *data, struct gn_statemachine *state)
