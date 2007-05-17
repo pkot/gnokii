@@ -4,6 +4,8 @@
     o do not open the log file when communication with phone is not
       needed; this fixes a memory leak found with valgrind
                                                     (Daniele Forsi)
+    o fix valgrind error "Conditional jump or move depends on
+      uninitialised value(s)" in --getwapsetting    (Daniele Forsi)
  * nk6100 driver updates
     o when reading phonebook check if date/time is set in the entry
       to fix valgrind error "Invalid read of size 1"

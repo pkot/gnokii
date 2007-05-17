@@ -184,6 +184,7 @@ int getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine 
 		{ NULL,     0,           NULL, 0}
 	};
 
+	memset(&wapsetting, 0, sizeof(wapsetting));
 	wapsetting.location = gnokii_atoi(optarg);
 	if (errno || wapsetting.location < 0)
 		getwapsetting_usage(stderr, -1);
