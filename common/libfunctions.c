@@ -58,7 +58,7 @@ GNOKII_API unsigned int gn_lib_version()
 
 GNOKII_API gn_error gn_lib_phoneprofile_load_from_file(const char *configfile, const char *configname, struct gn_statemachine **state)
 {
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 	*state = NULL;
 
 	if (!gn_cfg_info) {
@@ -66,20 +66,22 @@ GNOKII_API gn_error gn_lib_phoneprofile_load_from_file(const char *configfile, c
 			error = gn_cfg_file_read(configfile);
 		else
 			error = gn_cfg_read_default();
-		if (GN_ERR_NONE != error)
-			return error;
 	}
+	if (GN_ERR_NONE == error) {
+		/* allocate and initialize data structures */
+		*state = malloc(sizeof(**state));
+		if (*state) {
+			memset(*state, 0, sizeof(**state));
 
-	/* allocate and initialize data structures */
-	*state = malloc(sizeof(**state));
-	if (!*state)
-		return GN_ERR_MEMORYFULL;
-	memset(*state, 0, sizeof(**state));
-
-	/* Load the phone configuration */
-	if ((error = gn_cfg_phone_load(configname, *state)) != GN_ERR_NONE) {
-		free(*state);
-		*state = NULL;
+			/* Load the phone configuration */
+			error = gn_cfg_phone_load(configname, *state);
+		} else {
+			error = GN_ERR_MEMORYFULL;
+		}
+	}
+	if (GN_ERR_NONE != error) {
+		gn_lib_phoneprofile_free(state);
+		gn_lib_library_free();
 		return error;
 	}
 	return LASTERROR((*state), GN_ERR_NONE);

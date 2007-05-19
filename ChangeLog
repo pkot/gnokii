@@ -19,7 +19,10 @@
  * nk6160 driver updates
     o fix usage of SEND_MESSAGE_BLOCK macro (another valgrind
       finding)                                      (Daniele Forsi)
-
+ * libgnokii updates
+    o fix memory leaks when config file has been open and memory
+      allocated but [global] section or section given with --phone
+      are not found (another valgrind finding)      (Daniele Forsi)
 
 0.6.16
 ======
