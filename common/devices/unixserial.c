@@ -160,7 +160,9 @@ int device_script(int fd, const char *section, struct gn_statemachine *state)
 int serial_close(int fd, struct gn_statemachine *state);
 
 
-/* Open the serial port and store the settings. */
+/* Open the serial port and store the settings.
+ * Returns a file descriptor on success, or -1 if an error occurred.
+ */
 int serial_open(const char *file, int oflag)
 {
 	int fd;
@@ -183,7 +185,9 @@ int serial_open(const char *file, int oflag)
 	return fd;
 }
 
-/* Close the serial port and restore old settings. */
+/* Close the serial port and restore old settings.
+ * Returns zero on success, -1 if an error occurred or fd was invalid.
+ */
 int serial_close(int fd, struct gn_statemachine *state)
 {
 	/* handle config file disconnect_script:
@@ -194,9 +198,10 @@ int serial_close(int fd, struct gn_statemachine *state)
 	if (fd >= 0) {
 		serial_termios.c_cflag |= HUPCL;	/* production == 1 */
 		tcsetattr(fd, TCSANOW, &serial_termios);
+		return close(fd);
 	}
 
-	return close(fd);
+	return -1;
 }
 
 /* Open a device with standard options.

@@ -23,6 +23,9 @@
     o fix memory leaks when config file has been open and memory
       allocated but [global] section or section given with --phone
       are not found (another valgrind finding)      (Daniele Forsi)
+    o in serial_close() fix valgrind warning "invalid file
+      descriptor -1 in syscall close()" when serial_open() failed
+      (eg. wrong permissions on /dev/ttyS0)         (Daniele Forsi)
 
 0.6.16
 ======
