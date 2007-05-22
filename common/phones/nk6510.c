@@ -633,16 +633,16 @@ static void ResetLayout(unsigned char *message, gn_data *data)
 	data->raw_sms->reference = 0;
 	data->raw_sms->pid = 0;
 	data->raw_sms->report_status  = 0;
-	memcpy(data->raw_sms->smsc_time, message, 0);
-	memcpy(data->raw_sms->time, message, 0);
-	memcpy(data->raw_sms->remote_number, message, 0);
-	memcpy(data->raw_sms->message_center, message, 0);
+	memset(data->raw_sms->smsc_time, 0, sizeof(data->raw_sms->smsc_time));
+	memset(data->raw_sms->time, 0, sizeof(data->raw_sms->time));
+	memset(data->raw_sms->remote_number, 0, sizeof(data->raw_sms->remote_number));
+	memset(data->raw_sms->message_center, 0, sizeof(data->raw_sms->message_center));
 	data->raw_sms->udh_indicator  = 0;
 	data->raw_sms->dcs = 0;
 	data->raw_sms->length = 0;
-	memcpy(data->raw_sms->user_data, message, 0);
+	memset(data->raw_sms->user_data, 0, sizeof(data->raw_sms->user_data));
 	data->raw_sms->validity_indicator = 0;
-	memcpy(data->raw_sms->validity, message, 0);
+	memset(data->raw_sms->validity, 0, sizeof(data->raw_sms->validity));
 }
 
 static void ParseLayout(unsigned char *message, gn_data *data)

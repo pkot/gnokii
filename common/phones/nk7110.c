@@ -1103,7 +1103,7 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 		data->raw_sms->user_data_length = length - get_data(T, 44, 45, 0, 47);
 
 		data->raw_sms->validity_indicator = 0;
-		memcpy(data->raw_sms->validity, message, 0);
+		memset(data->raw_sms->validity, 0, sizeof(data->raw_sms->validity));
 		break;
 	case NK7110_SUBSMS_READ_FAIL: /* GetSMS FAIL, 0x09 */
 		dprintf("SMS reading failed:\n");

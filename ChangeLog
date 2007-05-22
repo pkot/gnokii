@@ -28,6 +28,8 @@
     o in serial_close() fix valgrind warning "invalid file
       descriptor -1 in syscall close()" when serial_open() failed
       (eg. wrong permissions on /dev/ttyS0)         (Daniele Forsi)
+ * build system updates
+    o fix compilation warnings                      (Daniele Forsi)
 
 0.6.16
 ======

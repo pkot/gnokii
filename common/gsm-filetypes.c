@@ -34,15 +34,14 @@
 
 */
 
+#include "config.h"
+#include "compat.h"
+
 #include <stdio.h>
 #include <stdlib.h>
-#define _GNU_SOURCE
-#include <string.h>
 #include <ctype.h>
 #include <sys/stat.h>
 
-#include "config.h"
-#include "compat.h"
 #include "gnokii-internal.h"
 #include "gnokii.h"
 #include "gsm-filetypes.h"
