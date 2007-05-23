@@ -568,7 +568,7 @@ static int parse_options(int argc, char *argv[])
 		{ "enterchar",          no_argument,       NULL, OPT_ENTERCHAR },
 
 		/* Divert calls */
-		{ "divert",		required_argument, NULL, OPT_DIVERT },
+		{ "divert",		no_argument,       NULL, OPT_DIVERT },
 
 		/* SMS reader */
 		{ "smsreader",          no_argument,       NULL, OPT_SMSREADER },
@@ -602,24 +602,34 @@ static int parse_options(int argc, char *argv[])
 
 		/* Get (sim)lock info */
 		{ "getlocksinfo",       no_argument,       NULL, OPT_GETLOCKSINFO },
+
                 /* Get file list */
 		{ "getfilelist",        required_argument, NULL, OPT_GETFILELIST },
+
                 /* Get file details by id */
 		{ "getfiledetailsbyid", optional_argument, NULL, OPT_GETFILEDETAILSBYID },
+
                 /* Get file id */
 		{ "getfileid",          required_argument, NULL, OPT_GETFILEID },
+
                 /* Get file */
 		{ "getfile",            required_argument, NULL, OPT_GETFILE },
+
                 /* Get file by id */
 		{ "getfilebyid",        required_argument, NULL, OPT_GETFILEBYID },
+
 		/* Get all files */
 		{ "getallfiles",        required_argument, NULL, OPT_GETALLFILES },
+
                 /* Put a file */
 		{ "putfile",            required_argument, NULL, OPT_PUTFILE },
+
 		/* Delete a file */
 		{ "deletefile",         required_argument, NULL, OPT_DELETEFILE },
+
 		/* Delete a file by id */
 		{ "deletefilebyid",     required_argument, NULL, OPT_DELETEFILEBYID },
+
 		{ 0, 0, 0, 0 },
 	};
 
