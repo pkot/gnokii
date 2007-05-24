@@ -191,6 +191,16 @@ int monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	/*
 	char Number[20];
 	*/
+	errno = 0;
+	if (argc > optind) {
+		d = !strcasecmp(argv[optind], "once") ? -1 : gnokii_atoi(argv[optind]);
+		if (errno) {
+			fprintf(stderr, _("Argument to --monitor delay needs to be positive number\n"));
+			return -1;
+		}
+	} else
+		d = 1;
+
 	gn_data_clear(data);
 
 	/* We do not want to monitor serial line forever - press Ctrl+C to stop the
@@ -218,16 +228,6 @@ int monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	cb_ridx = 0;
 	cb_widx = 0;
 	gn_sm_functions(GN_OP_SetCellBroadcast, data, state);
-
-	errno = 0;
-	if (argc > optind) {
-		d = !strcasecmp(argv[optind], "once") ? -1 : gnokii_atoi(argv[optind]);
-		if (errno) {
-			fprintf(stderr, _("Argument to --monitor delay needs to be positive number\n"));
-			return -1;
-		}
-	} else
-		d = 1;
 
 	while (!bshutdown) {
 		if (gn_sm_functions(GN_OP_GetRFLevel, data, state) == GN_ERR_NONE)
@@ -461,9 +461,17 @@ int getdisplaystatus(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+/* Displays usage of --netmonitor command */
+void netmonitor_usage(FILE *f, int exitval)
+{
+	fprintf(f, _(" usage: --netmonitor {reset|off|field|devel|next|nr}\n"
+		));
+	exit(exitval);
+}
+
 int netmonitor(char *m, gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char mode = atoi(m);
+	unsigned char mode;
 	gn_netmonitor nm;
 	gn_error error;
 
@@ -477,6 +485,11 @@ int netmonitor(char *m, gn_data *data, struct gn_statemachine *state)
 		mode = 0xf3;
 	else if (!strcmp(m, "next"))
 		mode = 0x00;
+	else {
+		mode = gnokii_atoi(m);
+		if (errno || mode < 1 || mode >= 0xf0)
+			netmonitor_usage(stderr, -1);
+	}
 
 	nm.field = mode;
 	memset(&nm.screen, 0, 50);

@@ -307,6 +307,10 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			sendsms_usage(stderr, -1);
 		}
 	}
+	if (argc > optind) {
+		/* There too many arguments that don't start with '-' */
+		sendsms_usage(stderr, -1);
+	}
 
 	if (!sms.smsc.number[0]) {
 		data->message_center = calloc(1, sizeof(gn_sms_message_center));
@@ -515,6 +519,10 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			savesms_usage(stderr, -1);
 		}
 	}
+	if (argc > optind) {
+		/* There too many arguments that don't start with '-' */
+		savesms_usage(stderr, -1);
+	}
 #if 0
 	if (interactive) {
 		gn_sms aux;
@@ -676,6 +684,10 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 		default:
 			getsms_usage(stderr, -1);
 		}
+	}
+	if (argc - optind > 3) {
+		/* There too many arguments that don't start with '-' */
+		getsms_usage(stderr, -1);
 	}
 
 	folder.folder_id = 0;

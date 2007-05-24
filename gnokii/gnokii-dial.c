@@ -267,7 +267,7 @@ void divert_usage(FILE *f, int exitval)
 			"        -t type\n"
 			"        --type type          type of the operation, needs to be one of\n"
 			"                             the following: all, busy, noans, outofreach,\n"
-			"                             notavail; this it required option\n"
+			"                             notavail; this is required option\n"
 			"        -c calltype\n"
 			"        --call calltype      type of call for the operation, needs to be\n"
 			"                             one of the following: all, voice, fax, data;\n"
@@ -365,6 +365,11 @@ int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 			divert_usage(stderr, -1);
 		}
 	}
+	if (argc > optind) {
+		/* There too many arguments that don't start with '-' */
+		divert_usage(stderr, -1);
+	}
+
 	data->call_divert = &cd;
 	error = gn_sm_functions(GN_OP_CallDivert, data, state);
 

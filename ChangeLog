@@ -9,6 +9,8 @@
     o fix valgrind error "Conditional jump or move depends on
       uninitialised value(s)" in --getprofile       (Daniele Forsi)
     o fix --divert options parsing                      (Pawel Kot)
+    o return an error if unexpected optional arguments are given to
+      some commands and do stricter error checking  (Daniele Forsi)
  * nk6100 driver updates
     o when reading phonebook check if date/time is set in the entry
       to fix valgrind error "Invalid read of size 1"

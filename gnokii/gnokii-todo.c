@@ -99,8 +99,7 @@ int gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			vcal = true;
 			break;
 		default:
-			gettodo_usage(stderr, -1); /* Would be better to have an calendar_usage() here. */
-			return -1;
+			gettodo_usage(stderr, -1);
 		}
 	}
 
