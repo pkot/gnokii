@@ -11,6 +11,8 @@
     o fix --divert options parsing                      (Pawel Kot)
     o return an error if unexpected optional arguments are given to
       some commands and do stricter error checking  (Daniele Forsi)
+    o make --getphonebook output a telephone number in --ldif
+      format even when there are no subentries      (Daniele Forsi)
  * nk6100 driver updates
     o when reading phonebook check if date/time is set in the entry
       to fix valgrind error "Invalid read of size 1"
