@@ -138,7 +138,7 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		getphonebook_usage(stderr, -1);
 	}
 	if (argc - optind > 2) {
-		/* There too many arguments that don't start with '-' */
+		/* There are too many arguments that don't start with '-' */
 		getphonebook_usage(stderr, -1);
 	}
 
@@ -363,7 +363,7 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 		}
 	}
 	if (argc > optind) {
-		/* There too many arguments that don't start with '-' */
+		/* There are too many arguments that don't start with '-' */
 		writephonebook_usage(stderr, -1);
 	}
 

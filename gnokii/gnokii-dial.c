@@ -366,7 +366,7 @@ int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 		}
 	}
 	if (argc > optind) {
-		/* There too many arguments that don't start with '-' */
+		/* There are too many arguments that don't start with '-' */
 		divert_usage(stderr, -1);
 	}
 
