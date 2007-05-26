@@ -369,9 +369,10 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_ar
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
 #ifndef WIN32
-static int foogle(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
-{	
+static int foogle(int argc, char *argv[])
+{
 	/* Fill in what you would like to test here... */
+	/* remember to call businit(); if you need to communicate with your phone */
 	return 0;
 }
 #endif
@@ -1017,7 +1018,7 @@ static int parse_options(int argc, char *argv[])
 		break;
 #ifndef WIN32
 	case OPT_FOOGLE:
-		rc = foogle(argc, argv, data, state);
+		rc = foogle(argc, argv);
 		break;
 #endif
 	default:
