@@ -14,6 +14,8 @@
     o make --getphonebook output a telephone number in --ldif
       format even when there are no subentries      (Daniele Forsi)
     o let foogle() access global data and state     (Daniele Forsi)
+    o fix command arguments handling for getting, setting and
+      playing ringtones                             (Daniele Forsi)
  * nk6100 driver updates
     o when reading phonebook check if date/time is set in the entry
       to fix valgrind error "Invalid read of size 1"
