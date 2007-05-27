@@ -97,7 +97,7 @@ static int str2ba(const char *str, bdaddr_t *ba)
 int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state)
 {
 	bdaddr_t bdaddr;
-	struct sockaddr_rc laddr, raddr;
+	struct sockaddr_rc raddr;
 	int fd;
 
 	if (str2ba((char *)addr, &bdaddr)) {
