@@ -179,34 +179,27 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	data->ringtone = &ringtone;
 	data->raw_data = &rawdata;
 
-	if (argc < optind) {
-		getringtone_usage(stderr, -1);
-		return -1;
-	}
-
-	if (argc > optind) {
-		ringtone.location = gnokii_atoi(argv[optind]);
-		if (errno || ringtone.location < 0)
-			getringtone_usage(stderr, -1);
-	} else {
-		init_ringtone_list(data, state);
-		ringtone.location = ringtone_list.userdef_location;
-	}
-
 	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
 		switch (i) {
 		case 'r':
 			raw = true;
 			break;
 		default:
-			getringtone_usage(stderr, -1); /* FIXME */
-			return -1;
+			getringtone_usage(stderr, -1);
 		}
 	}
-
-	if (argc > optind + 1) {
+	if (argc == optind) {
+		/* There are 0 arguments that don't start with '-' */
+		init_ringtone_list(data, state);
+		ringtone.location = ringtone_list.userdef_location;
+	} else if (argc - optind == 1) {
+		/* There is 1 argument that doesn't start with '-' */
+		ringtone.location = gnokii_atoi(argv[optind]);
+		if (errno || ringtone.location < 0)
+			getringtone_usage(stderr, -1);
+	} else {
+		/* There are too many arguments that don't start with '-' */
 		getringtone_usage(stderr, -1);
-		return -1;
 	}
 
 	if (raw)
@@ -255,6 +248,7 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	gn_raw_data rawdata;
 	gn_error error;
 	unsigned char buff[512];
+	char *filename = optarg;
 	int i, location;
 
 	bool raw = false;
@@ -265,7 +259,7 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		{ NULL,     0,                 NULL, 0}
 	};
 
-	while ((i = getopt_long(argc, argv, "r", options, NULL)) != -1) {
+	while ((i = getopt_long(argc, argv, "rn:", options, NULL)) != -1) {
 		switch (i) {
 		case 'r':
 			raw = true;
@@ -274,9 +268,12 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			snprintf(name, sizeof(name), "%s", optarg);
 			break;
 		default:
-			setringtone_usage(stderr, -1); /* FIXME */
-			return -1;
+			setringtone_usage(stderr, -1);
 		}
+	}
+	if (argc - optind > 2) {
+		/* There are too many arguments that don't start with '-' */
+		setringtone_usage(stderr, -1);
 	}
 
 	memset(&ringtone, 0, sizeof(ringtone));
@@ -286,18 +283,20 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	data->ringtone = &ringtone;
 	data->raw_data = &rawdata;
 
-	if (argc <= optind)
-		setringtone_usage(stderr, -1);
-
 	errno = 0;
 	location = (argc > optind + 1) ? gnokii_atoi(argv[optind + 1]) : -1;
 	if (errno)
 		setringtone_usage(stderr, -1);
 
+	if (!filename) {
+		fprintf(stderr, _("Internal gnokii error: null filename\n"));
+		return GN_ERR_FAILED;
+	}
+
 	if (raw) {
 		FILE *f;
 
-		if ((f = fopen(argv[optind], "rb")) == NULL) {
+		if ((f = fopen(filename, "rb")) == NULL) {
 			fprintf(stderr, _("Failed to load ringtone.\n"));
 			return -1;
 		}
@@ -310,7 +309,7 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			snprintf(ringtone.name, sizeof(ringtone.name), "GNOKII");
 		error = gn_sm_functions(GN_OP_SetRawRingtone, data, state);
 	} else {
-		if ((error = gn_file_ringtone_read(argv[optind], &ringtone))) {
+		if ((error = gn_file_ringtone_read(filename, &ringtone))) {
 			fprintf(stderr, _("Failed to load ringtone.\n"));
 			return error;
 		}
@@ -329,7 +328,7 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 
 void playringtone_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(" usage: --playringtone rtttlfile [--volume vol]\n"));
+	fprintf(f, _(" usage: --playringtone rtttlfile [-v|--volume vol]\n"));
 	exit(exitval);
 }
 
@@ -338,6 +337,7 @@ int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	gn_ringtone ringtone;
 	gn_tone tone;
 	gn_error error;
+	char *filename = optarg;
 	int i, ulen;
 	struct timeval dt;
 #if (defined HAVE_TIMEOPS) && (defined HAVE_GETTIMEOFDAY)
@@ -350,7 +350,7 @@ int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		{ NULL,     0,                 NULL, 0}
 	};
 
-	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
+	while ((i = getopt_long(argc, argv, "v:", options, NULL)) != -1) {
 		switch (i) {
 		case 'v':
 			volume = gnokii_atoi(optarg);
@@ -358,9 +358,12 @@ int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				playringtone_usage(stderr, -1);
 			break;
 		default:
-			playringtone_usage(stderr, -1); /* FIXME */
-			return -1;
+			playringtone_usage(stderr, -1);
 		}
+	}
+	if (argc > optind) {
+		/* There are too many arguments that don't start with '-' */
+		playringtone_usage(stderr, -1);
 	}
 
 	memset(&ringtone, 0, sizeof(ringtone));
@@ -369,12 +372,12 @@ int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	data->ringtone = &ringtone;
 	data->tone = &tone;
 
-	if (argc <= optind) {
-		playringtone_usage(stderr, -1);
-		return -1;
+	if (!filename) {
+		fprintf(stderr, _("Internal gnokii error: null filename\n"));
+		return GN_ERR_FAILED;
 	}
 
-	if ((error = gn_file_ringtone_read(argv[optind], &ringtone))) {
+	if ((error = gn_file_ringtone_read(filename, &ringtone))) {
 		fprintf(stderr, _("Failed to load ringtone: %s\n"), gn_error_print(error));
 		return error;
 	}
@@ -427,7 +430,6 @@ int ringtoneconvert(int argc, char *argv[])
 
 	if (argc != optind + 1) {
 		ringtoneconvert_usage(stderr, -1);
-		return -1;
 	}
 
 	if ((error = gn_file_ringtone_read(optarg, &ringtone)) != GN_ERR_NONE) {
