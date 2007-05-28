@@ -41,6 +41,8 @@
  * gnokiid updates
     o accept at most one command line argument and let users of
       unsupported models use --version              (Daniele Forsi)
+    o fix segfault when config file is broken or missing
+                                                    (Daniele Forsi)
 
 0.6.16
 ======
