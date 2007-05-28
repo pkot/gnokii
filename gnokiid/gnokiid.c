@@ -107,6 +107,31 @@ int main(int argc, char *argv[])
 
 	short_version();
 
+	/* Handle command line arguments. */
+	switch (argc) {
+	case 1:
+		/* Default */
+		DebugMode = false;
+		break;
+	case 2:
+		if (strcmp(argv[1], "--version") == 0) {
+			/* Display version, copyright and build information. */
+			version();
+			exit(0);
+		} else if (strcmp(argv[1], "--debug") == 0) {
+			/* Use stdin/stdout for I/O */
+			DebugMode = true;
+			break;
+		} else if (strcmp(argv[1], "--help") == 0) {
+			usage();
+			exit(0);
+		}
+		/* FALL TROUGH */
+	default:
+		usage();
+		exit(1);
+	}
+
 	aux = gn_lib_cfg_get("global", "model");
 	if (strncmp(aux, "5110", 4) &&
 	    strncmp(aux, "5130", 4) &&
@@ -122,24 +147,6 @@ int main(int argc, char *argv[])
 	if (!BinDir) BinDir = "/usr/local/sbin";
 
 	if (gn_cfg_phone_load("", &temp_state) != GN_ERR_NONE) exit(-1);
-
-	/* Handle command line arguments. */
-	if (argc >= 2 && strcmp(argv[1], "--help") == 0) {
-		usage();
-		exit(0);
-	}
-
-	/* Display version, copyright and build information. */
-	if (argc >= 2 && strcmp(argv[1], "--version") == 0) {
-		version();
-		exit(0);
-	}
-
-	if (argc >= 2 && strcmp(argv[1], "--debug") == 0) {
-		DebugMode = true;
-	} else {
-		DebugMode = false;
-	}
 
 	gn_elog_handler = NULL;
 

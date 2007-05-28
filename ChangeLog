@@ -38,6 +38,9 @@
       (eg. wrong permissions on /dev/ttyS0)         (Daniele Forsi)
  * build system updates
     o fix compilation warnings                      (Daniele Forsi)
+ * gnokiid updates
+    o accept at most one command line argument and let users of
+      unsupported models use --version              (Daniele Forsi)
 
 0.6.16
 ======
