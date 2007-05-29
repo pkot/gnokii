@@ -155,9 +155,7 @@ int main(int argc, char *argv[])
 
 	gn_elog_handler = NULL;
 
-	aux = gn_lib_cfg_get("global", "use_locking");
-	/* Defaults to 'no' */
-	if (aux && !strcmp(aux, "yes")) {
+	if (temp_state.config.use_locking) {
 		lockfile = gn_device_lock(temp_state.config.port_device);
 		if (lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting.\n"));

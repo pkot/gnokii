@@ -121,12 +121,11 @@ GNOKII_API gn_error gn_lib_lasterror( struct gn_statemachine *state )
 
 GNOKII_API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 {
-	const char *aux;
 	gn_error error;
 
+	state->lockfile = NULL;
 	/* should the device be locked with a lockfile ? */
-	aux = gn_lib_cfg_get("global", "use_locking");
-	if (aux && !strcmp(aux, "yes")) {
+	if (state->config.use_locking) {
 		state->lockfile = gn_device_lock(state->config.port_device);
 		if (state->lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting.\n"));

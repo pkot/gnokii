@@ -36,6 +36,11 @@
     o in serial_close() fix valgrind warning "invalid file
       descriptor -1 in syscall close()" when serial_open() failed
       (eg. wrong permissions on /dev/ttyS0)         (Daniele Forsi)
+    o introduce use_locking field to config structure and fill it
+      from the config file                        (okki, Pawel Kot)
+    o make strings in cfgreader better translatable     (Pawel Kot)
+    o use default values when incorrect option is given in the
+      config file (where safe and possible)             (Pawel Kot)
  * build system updates
     o fix compilation warnings                      (Daniele Forsi)
  * gnokiid updates

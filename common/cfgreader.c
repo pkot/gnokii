@@ -434,7 +434,8 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 			cfg->init_length = 0;
 		else if (sscanf(val, " %d %c", &cfg->init_length, &ch) != 1) {
 			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "initlength", val);
-			return false;
+			fprintf(stderr, _("Assuming: %d\n"), def->init_length);
+			cfg->init_length = def->init_length;
 		}
 	}
 
@@ -442,14 +443,16 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 		cfg->serial_baudrate = def->serial_baudrate;
 	else if (sscanf(val, " %d %c", &cfg->serial_baudrate, &ch) != 1) {
 		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "serial_baudrate", val);
-		return false;
+		fprintf(stderr, _("Assuming: %d\n"), def->serial_baudrate);
+		cfg->serial_baudrate = def->serial_baudrate;
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "serial_write_usleep")))
 		cfg->serial_write_usleep = def->serial_write_usleep;
 	else if (sscanf(val, " %d %c", &cfg->serial_write_usleep, &ch) != 1) {
 		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "serial_write_usleep", val);
-		return false;
+		fprintf(stderr, _("Assuming: %d\n"), def->serial_write_usleep);
+		cfg->serial_write_usleep = def->serial_write_usleep;
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "handshake")))
@@ -459,16 +462,18 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 	else if (!strcasecmp(val, "hardware") || !strcasecmp(val, "xonxoff"))
 		cfg->hardware_handshake = true;
 	else {
-		fprintf(stderr, _("Unrecognized [%s] option \"%s\", use \"%s\" or \"%s\" value\n"),
-				 section, "handshake", "software", "hardware");
-		return false;
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "handshake", val);
+		fprintf(stderr, _("Use either \"%s\" or \"%s\".\n"), "software", "hardware");
+		fprintf(stderr, _("Assuming: %s\n"), def->hardware_handshake ? "software" : "hardware");
+		cfg->hardware_handshake = def->hardware_handshake;
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "require_dcd")))
 		cfg->require_dcd = def->require_dcd;
 	else if (sscanf(val, " %d %c", &cfg->require_dcd, &ch) != 1) {
 		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "require_dcd", val);
-		return false;
+		fprintf(stderr, _("Assuming: %d\n"), def->require_dcd);
+		cfg->require_dcd = def->require_dcd;
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "smsc_timeout")))
@@ -477,7 +482,8 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 		cfg->smsc_timeout *= 10;
 	else {
 		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "smsc_timeout", val);
-		return false;
+		fprintf(stderr, _("Assuming: %d\n"), def->smsc_timeout);
+		cfg->smsc_timeout = def->smsc_timeout;
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "connect_script")))
@@ -494,14 +500,16 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 		cfg->rfcomm_cn = def->rfcomm_cn;
 	else if (sscanf(val, " %hhu %c", &cfg->rfcomm_cn, &ch) != 1) {
 		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "rfcomm_channel", val);
-		return false;
+		fprintf(stderr, _("Assuming: %d\n"), def->rfcomm_cn);
+		cfg->rfcomm_cn = def->rfcomm_cn;
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "sm_retry")))
 		cfg->sm_retry = def->sm_retry;
 	else if (sscanf(val, " %d %c", &cfg->sm_retry, &ch) != 1) {
 		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "sm_retry", val);
-		return false;
+		fprintf(stderr, _("Assuming: %d\n"), def->sm_retry);
+		cfg->sm_retry = def->sm_retry;
 	}
 
 	/* There is no global setting. You need to set irda_string
@@ -511,6 +519,19 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 	else {
 		snprintf(cfg->irda_string, sizeof(cfg->irda_string), "%s", val);
 		dprintf("Setting irda_string in section %s to %s\n", section, cfg->irda_string);
+	}
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "use_locking")))
+		cfg->use_locking = def->use_locking;
+	else if (!strcasecmp(val, "no"))
+		cfg->use_locking = 0;
+	else if (!strcasecmp(val, "yes"))
+		cfg->use_locking = 1;
+	else {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "use_locking", val);
+		fprintf(stderr, _("Use either \"%s\" or \"%s\".\n"), "yes", "no");
+		fprintf(stderr, _("Assuming: %s\n"), def->use_locking ? "yes" : "no");
+		cfg->use_locking = def->use_locking;
 	}
 
 	return true;
@@ -528,8 +549,10 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 	else if (!strcasecmp(val, "on"))
 		*t = GN_LOG_T_STDERR;
 	else {
-		fprintf(stderr, _("Unrecognized [logging] option \"%s\", use \"off\" or \"on\" value\n"), opt);
-		return false;
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), "logging", opt, val);
+		fprintf(stderr, _("Use either \"%s\" or \"%s\".\n"), "yes", "no");
+		fprintf(stderr, _("Assuming: %s\n"), "off");
+		*t = GN_LOG_T_NONE;
 	}
 
 	return true;
@@ -634,6 +657,7 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	strcpy(gn_config_default.disconnect_script, "");
 	gn_config_default.rfcomm_cn = 1;
 	gn_config_default.sm_retry = 0;
+	gn_config_default.use_locking = 0;
 
 	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default)) {
 		fprintf(stderr, _("No [global] section in %s config file.\n"), file);
