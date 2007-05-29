@@ -1044,6 +1044,11 @@ int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		}
 	}
 
+	if (argc > optind + 2) {
+		/* There are too many arguments that don't start with '-' */
+		getsmsc_usage(stderr, -1);
+	}
+
 	if (argc > optind) {
 		start = gnokii_atoi(argv[optind]);
 		if (errno || start < 0)
