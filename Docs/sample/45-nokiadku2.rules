@@ -1,0 +1,31 @@
+# udev rules file for nokia dku2 devices (udev >= 0.98)
+# Put it to /etc/udev/rules.d/ directory
+#
+
+SUBSYSTEM!="usb_device", GOTO="nokiadku2_rules_end"
+# Nokia 7600
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="0400", MODE="0660", GROUP="plugdev"
+# Nokia 6650
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="0401", MODE="0660", GROUP="plugdev"
+# Nokia 6255
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="0402", MODE="0660", GROUP="plugdev"
+# Nokia 6651
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="040E", MODE="0660", GROUP="plugdev"
+# Nokia 6230
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="040F", MODE="0660", GROUP="plugdev"
+# Nokia 6170
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="0416", MODE="0660", GROUP="plugdev"
+# Nokia 7270
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="0417", MODE="0660", GROUP="plugdev"
+# Nokia 7710
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="041C", MODE="0660", GROUP="plugdev"
+# Nokia 3230
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="0421", MODE="0660", GROUP="plugdev"
+# Nokia 6230i
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="0428", MODE="0660", GROUP="plugdev"
+# Nokia 6265
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="0437", MODE="0660", GROUP="plugdev"
+# Nokia 6155
+SYSFS{idVendor}=="0421", SYSFS{bDeviceClass}=="043c", MODE="0660", GROUP="plugdev"
+
+LABEL="nokiadku2_rules_end"
