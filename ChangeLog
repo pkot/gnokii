@@ -49,6 +49,8 @@
       unsupported models use --version              (Daniele Forsi)
     o fix segfault when config file is broken or missing
                                                     (Daniele Forsi)
+ * xgnokii updates
+    o fix memory leaks when building menus          (Daniele Forsi)
 
 0.6.16
 ======

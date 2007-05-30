@@ -820,19 +820,19 @@ void GUI_CreateXringWindow(void)
 		{NULL, NULL,		clear_ringtone,	  0, NULL}
 	};
 
-	menu_items[0].path = g_strdup(_("/_File"));
-	menu_items[1].path = g_strdup(_("/File/_Open"));
-	menu_items[2].path = g_strdup(_("/File/_Save"));
-	menu_items[3].path = g_strdup(_("/File/Save _as ..."));
-	menu_items[4].path = g_strdup(_("/File/S1"));
-	menu_items[5].path = g_strdup(_("/File/_Get ringtone"));
-	menu_items[6].path = g_strdup(_("/File/Se_t ringtone"));
-	menu_items[7].path = g_strdup(_("/File/Delete ringtone"));
-	menu_items[8].path = g_strdup(_("/File/_Play"));
-	menu_items[9].path = g_strdup(_("/File/S2"));
-	menu_items[10].path = g_strdup(_("/File/_Close"));
-	menu_items[11].path = g_strdup(_("/_Edit"));
-	menu_items[12].path = g_strdup(_("/Edit/_Clear"));
+	menu_items[0].path = _("/_File");
+	menu_items[1].path = _("/File/_Open");
+	menu_items[2].path = _("/File/_Save");
+	menu_items[3].path = _("/File/Save _as ...");
+	menu_items[4].path = _("/File/S1");
+	menu_items[5].path = _("/File/_Get ringtone");
+	menu_items[6].path = _("/File/Se_t ringtone");
+	menu_items[7].path = _("/File/Delete ringtone");
+	menu_items[8].path = _("/File/_Play");
+	menu_items[9].path = _("/File/S2");
+	menu_items[10].path = _("/File/_Close");
+	menu_items[11].path = _("/_Edit");
+	menu_items[12].path = _("/Edit/_Clear");
 
 	/* create toplevel window */
 

@@ -1259,17 +1259,17 @@ static GtkItemFactoryEntry send_menu_items[] = {
 
 static void InitSendMenu(void)
 {
-	send_menu_items[0].path = g_strdup(_("/_File"));
-	send_menu_items[1].path = g_strdup(_("/File/Sen_d"));
-	send_menu_items[2].path = g_strdup(_("/File/_Save"));
-	send_menu_items[3].path = g_strdup(_("/File/Sep1"));
-	send_menu_items[4].path = g_strdup(_("/File/Check _Names"));
-	send_menu_items[5].path = g_strdup(_("/File/C_ontacts"));
-	send_menu_items[6].path = g_strdup(_("/File/Sep2"));
-	send_menu_items[7].path = g_strdup(_("/File/_Close"));
-	send_menu_items[8].path = g_strdup(_("/_Help"));
-	send_menu_items[9].path = g_strdup(_("/Help/_Help"));
-	send_menu_items[10].path = g_strdup(_("/Help/_About"));
+	send_menu_items[0].path = _("/_File");
+	send_menu_items[1].path = _("/File/Sen_d");
+	send_menu_items[2].path = _("/File/_Save");
+	send_menu_items[3].path = _("/File/Sep1");
+	send_menu_items[4].path = _("/File/Check _Names");
+	send_menu_items[5].path = _("/File/C_ontacts");
+	send_menu_items[6].path = _("/File/Sep2");
+	send_menu_items[7].path = _("/File/_Close");
+	send_menu_items[8].path = _("/_Help");
+	send_menu_items[9].path = _("/Help/_Help");
+	send_menu_items[10].path = _("/Help/_About");
 }
 
 
@@ -1664,23 +1664,23 @@ static void InitMainMenu(void)
 {
 	register gint i = 0;
 
-	menu_items[i++].path = g_strdup(_("/_File"));
-	menu_items[i++].path = g_strdup(_("/File/_Save"));
-	menu_items[i++].path = g_strdup(_("/File/Save to mailbo_x"));
-	menu_items[i++].path = g_strdup(_("/File/Save to _file"));
-	menu_items[i++].path = g_strdup(_("/File/Sep1"));
-	menu_items[i++].path = g_strdup(_("/File/_Close"));
-	menu_items[i++].path = g_strdup(_("/_Messages"));
-	menu_items[i++].path = g_strdup(_("/_Messages/_Activate SMS reading"));
-	menu_items[i++].path = g_strdup(_("/_Messages/_New"));
-	menu_items[i++].path = g_strdup(_("/_Messages/_Forward"));
-	menu_items[i++].path = g_strdup(_("/_Messages/_Reply"));
-	menu_items[i++].path = g_strdup(_("/_Messages/_Delete"));
-	menu_items[i++].path = g_strdup(_("/Messages/Sep3"));
-	menu_items[i++].path = g_strdup(_("/_Messages/_Business card"));
-	menu_items[i++].path = g_strdup(_("/_Help"));
-	menu_items[i++].path = g_strdup(_("/Help/_Help"));
-	menu_items[i++].path = g_strdup(_("/Help/_About"));
+	menu_items[i++].path = _("/_File");
+	menu_items[i++].path = _("/File/_Save");
+	menu_items[i++].path = _("/File/Save to mailbo_x");
+	menu_items[i++].path = _("/File/Save to _file");
+	menu_items[i++].path = _("/File/Sep1");
+	menu_items[i++].path = _("/File/_Close");
+	menu_items[i++].path = _("/_Messages");
+	menu_items[i++].path = _("/_Messages/_Activate SMS reading");
+	menu_items[i++].path = _("/_Messages/_New");
+	menu_items[i++].path = _("/_Messages/_Forward");
+	menu_items[i++].path = _("/_Messages/_Reply");
+	menu_items[i++].path = _("/_Messages/_Delete");
+	menu_items[i++].path = _("/Messages/Sep3");
+	menu_items[i++].path = _("/_Messages/_Business card");
+	menu_items[i++].path = _("/_Help");
+	menu_items[i++].path = _("/Help/_Help");
+	menu_items[i++].path = _("/Help/_About");
 }
 
 

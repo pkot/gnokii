@@ -522,19 +522,19 @@ static GtkItemFactoryEntry menu_items[] = {
 
 static void InitMainMenu(void)
 {
-	menu_items[0].path = g_strdup(_("/_File"));
-	menu_items[1].path = g_strdup(_("/File/_Read from phone"));
-	menu_items[2].path = g_strdup(_("/File/_Save to phone"));
-	menu_items[3].path = g_strdup(_("/File/Sep1"));
-	menu_items[4].path = g_strdup(_("/File/_Import from file"));
-	menu_items[5].path = g_strdup(_("/File/_Export to file"));
-	menu_items[6].path = g_strdup(_("/File/Sep2"));
-	menu_items[7].path = g_strdup(_("/File/_Close"));
-	menu_items[8].path = g_strdup(_("/_Edit"));
-	menu_items[9].path = g_strdup(_("/Edit/_Edit"));
-	menu_items[10].path = g_strdup(_("/_Help"));
-	menu_items[11].path = g_strdup(_("/Help/_Help"));
-	menu_items[12].path = g_strdup(_("/Help/_About"));
+	menu_items[0].path = _("/_File");
+	menu_items[1].path = _("/File/_Read from phone");
+	menu_items[2].path = _("/File/_Save to phone");
+	menu_items[3].path = _("/File/Sep1");
+	menu_items[4].path = _("/File/_Import from file");
+	menu_items[5].path = _("/File/_Export to file");
+	menu_items[6].path = _("/File/Sep2");
+	menu_items[7].path = _("/File/_Close");
+	menu_items[8].path = _("/_Edit");
+	menu_items[9].path = _("/Edit/_Edit");
+	menu_items[10].path = _("/_Help");
+	menu_items[11].path = _("/Help/_Help");
+	menu_items[12].path = _("/Help/_About");
 }
 
 

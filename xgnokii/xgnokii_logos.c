@@ -1468,27 +1468,27 @@ static GtkItemFactoryEntry logosMenuItems[] = {
 
 void InitLogosMenu(void)
 {
-	logosMenuItems[0].path = g_strdup(_("/_File"));
-	logosMenuItems[1].path = g_strdup(_("/File/_Open"));
-	logosMenuItems[2].path = g_strdup(_("/File/_Save"));
-	logosMenuItems[3].path = g_strdup(_("/File/Save _as ..."));
-	logosMenuItems[4].path = g_strdup(_("/File/Sep1"));
-	logosMenuItems[5].path = g_strdup(_("/File/_Get operator"));
-	logosMenuItems[6].path = g_strdup(_("/File/Get _logo"));
-	logosMenuItems[7].path = g_strdup(_("/File/Se_t logo"));
-	logosMenuItems[8].path = g_strdup(_("/File/Sep2"));
-	logosMenuItems[9].path = g_strdup(_("/File/_Close"));
-	logosMenuItems[10].path = g_strdup(_("/_Edit"));
-	logosMenuItems[11].path = g_strdup(_("/Edit/_Clear"));
-	logosMenuItems[12].path = g_strdup(_("/Edit/_Invert"));
-	logosMenuItems[13].path = g_strdup(_("/Edit/Sep3"));
-	logosMenuItems[14].path = g_strdup(_("/Edit/_Up logo"));
-	logosMenuItems[15].path = g_strdup(_("/Edit/_Down logo"));
-	logosMenuItems[16].path = g_strdup(_("/Edit/_Left logo"));
-	logosMenuItems[17].path = g_strdup(_("/Edit/_Right logo"));
-	logosMenuItems[18].path = g_strdup(_("/Edit/Sep4"));
-	logosMenuItems[19].path = g_strdup(_("/Edit/Flip _horizontal"));
-	logosMenuItems[20].path = g_strdup(_("/Edit/Flip _vertical"));
+	logosMenuItems[0].path = _("/_File");
+	logosMenuItems[1].path = _("/File/_Open");
+	logosMenuItems[2].path = _("/File/_Save");
+	logosMenuItems[3].path = _("/File/Save _as ...");
+	logosMenuItems[4].path = _("/File/Sep1");
+	logosMenuItems[5].path = _("/File/_Get operator");
+	logosMenuItems[6].path = _("/File/Get _logo");
+	logosMenuItems[7].path = _("/File/Se_t logo");
+	logosMenuItems[8].path = _("/File/Sep2");
+	logosMenuItems[9].path = _("/File/_Close");
+	logosMenuItems[10].path = _("/_Edit");
+	logosMenuItems[11].path = _("/Edit/_Clear");
+	logosMenuItems[12].path = _("/Edit/_Invert");
+	logosMenuItems[13].path = _("/Edit/Sep3");
+	logosMenuItems[14].path = _("/Edit/_Up logo");
+	logosMenuItems[15].path = _("/Edit/_Down logo");
+	logosMenuItems[16].path = _("/Edit/_Left logo");
+	logosMenuItems[17].path = _("/Edit/_Right logo");
+	logosMenuItems[18].path = _("/Edit/Sep4");
+	logosMenuItems[19].path = _("/Edit/Flip _horizontal");
+	logosMenuItems[20].path = _("/Edit/Flip _vertical");
 }
 
 void GUI_CreateLogosWindow(void)
