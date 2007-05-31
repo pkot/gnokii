@@ -52,6 +52,8 @@
  * xgnokii updates
     o fix memory leaks when building menus          (Daniele Forsi)
     o print some messages only when xdebug = on     (Daniele Forsi)
+    o use the same error message when memory could not be allocated
+      in xgnokii_speed.c                            (Daniele Forsi)
 
 0.6.16
 ======

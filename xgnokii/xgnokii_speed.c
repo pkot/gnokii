@@ -195,13 +195,13 @@ static void ReadSpeedDial(void)
 
 	for (i = 2; i < 10; i++) {
 		if ((d = (D_SpeedDial *) g_malloc(sizeof(D_SpeedDial))) == NULL) {
-			g_print(_("Cannot allocate memory!\n"));
+			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 			return;
 		}
 		memset(d, 0, sizeof(D_SpeedDial));
 		d->entry.number = i;
 		if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {
-			g_print(_("Cannot allocate memory!\n"));
+			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 			g_free(d);
 			return;
 		}
@@ -261,7 +261,7 @@ static void SaveSpeedDial(void)
 				if (d->entry.location == 0)
 					continue;
 				if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {
-					g_print(_("Cannot allocate memory!\n"));
+					g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 					return;
 				}
 
@@ -345,7 +345,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 	i = 0;
 	while (fgets(buf, IO_BUF_LEN, f) && i++ < 9) {
 		if ((d = (D_SpeedDial *) g_malloc(sizeof(D_SpeedDial))) == NULL) {
-			g_print(_("Cannot allocate memory!\n"));
+			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 			gtk_clist_clear(GTK_CLIST(clist));
 			gtk_clist_sort(GTK_CLIST(clist));
 			gtk_clist_thaw(GTK_CLIST(clist));
@@ -631,8 +631,7 @@ void GUI_CreateSpeedDialWindow(void)
 
 	for (i = 0; i < 3; i++) {
 		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__,
-				__LINE__);
+			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
 			gtk_main_quit();
 		}
 		sColumn->clist = clist;
