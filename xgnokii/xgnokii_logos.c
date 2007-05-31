@@ -1247,12 +1247,12 @@ gint ToolTypeEvent(GtkWidget * widget)
 	return 0;
 }
 
-/* this is launched when logo type was change by buttons on toolbar */
+/* this is launched when logo type was changed by buttons on toolbar */
 gint LogoTypeEvent(GtkWidget * widget)
 {
 	int clear = 0;
-	g_print("LogoTypeEvent called!\n");
-	g_print("width: %i, height: %i\n", statemachine->driver.phone.startup_logo_width,
+	gn_log_xdebug("LogoTypeEvent called!\n");
+	gn_log_xdebug("width: %i, height: %i\n", statemachine->driver.phone.startup_logo_width,
 		statemachine->driver.phone.startup_logo_height);
 	/* is startupLogo? */
 	/* Resize and clear anyway - CK */
@@ -1825,7 +1825,7 @@ void GUI_ShowLogosWindow(void)
 
 	/* Call to reset Startup logo size */
 	LogoTypeEvent(GUI_LogosWindow);
-	g_print("width: %i, height: %i\n", bitmap.width, bitmap.height);
+	gn_log_xdebug("width: %i, height: %i\n", bitmap.width, bitmap.height);
 	gtk_window_present(GTK_WINDOW(GUI_LogosWindow));
 
 	if (!previewAvailable && showPreviewErrorDialog) {
