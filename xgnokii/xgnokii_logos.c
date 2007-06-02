@@ -1621,6 +1621,7 @@ void GUI_CreateLogosWindow(void)
 	gtk_entry_set_editable(GTK_ENTRY(GTK_COMBO(networkCombo)->entry), FALSE);
 	gtk_toolbar_append_widget(GTK_TOOLBAR(toolBar), networkCombo, "", "");
 	gtk_widget_show(networkCombo);
+	g_list_foreach(glistNetwork, (GFunc) g_free, NULL);
 	g_list_free(glistNetwork);
 
 	callerCombo = gtk_combo_new();
