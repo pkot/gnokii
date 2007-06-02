@@ -57,6 +57,8 @@
     o fix a memory leak in xgnokii/xgnokii_logos.c  (Daniele Forsi)
  * translation updates
     o update Italian translation                    (Daniele Forsi)
+ * utils updates
+    o fix typos in sendsms                          (Daniele Forsi)
 
 0.6.16
 ======

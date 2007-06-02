@@ -9,7 +9,7 @@
 #         jan 20, 2004         Use www.gnokii.org as a primary site to get
 #                              gnokii (Pawel Kot)
 #                              Remove notice on mygnokii as this is no longer
-#                              mainained (Pawel Kot)
+#                              maintained (Pawel Kot)
 #         may  6, 2007         Give a choice between SIM and phone memory for
 #                              the phonebook (Pawel Kot)
 ###############################################################################
@@ -280,7 +280,7 @@ SMS_choicefrommem() {
 			option=$?
 			if [ $option -eq 255 ] ; then
 				dialog --backtitle "SENDSMS CKECKLIST" --menu \
-						"Options sub-menus for Phonebook choise list:" \
+						"Options sub-menus for Phonebook choice list:" \
 						10 50 4 \
 						"1" "Sort by Memory Pos" \
 						"2" "Sort by Names" \
@@ -474,7 +474,7 @@ do
 	okcycle=0
 	while [ $okcycle -eq 0 ]
 	do
-		echo "Ok. If you confirm the operation, the the SMS" > $TMP/txtTEMP$$ 
+		echo "Ok. If you confirm the operation, then the SMS" > $TMP/txtTEMP$$ 
 		echo "is going to be sent to the selected number(s)." >> $TMP/txtTEMP$$ 
 		echo >> $TMP/txtTEMP$$ 
 		echo "Press [ESC] to quit the program. " >> $TMP/txtTEMP$$ 
