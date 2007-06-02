@@ -21,11 +21,21 @@ May bother with more debugging messages. For debugging purpose.
 .BR --simul[ate],\ -S
 Simulation mode. Doesn't really send SMS by phone. Only simulates. For debugging purpose.
 .TP
-.BR --forcememread,\ -F
+.BR  --forceSMread,\ -s
 Forces
 .B sendsms
-to read phonebook from SIM card, and to parse the generated file in order to update
-the numbers' list (useful only if required to pickup number from the phone's memory).
+to read phonebook from SIM card,
+and to parse the generated file in order to update
+the numbers' list (useful only if required to pickup
+number from the phone's memory). See NOTE.
+.TP
+.BR  --forceMEread,\ -m
+Forces
+.B sendsms
+to read phonebook from phone memory,
+and to parse the generated file in order to update
+the numbers' list (useful only if required to pickup
+number from the phone's memory). See NOTE.
 .TP
 .BR --skipgnokiicheck,\ -K
 Skip the test of the presence of binary 'gnokii'. (It must be somewhere in your \$PATH).
@@ -40,6 +50,11 @@ display this help and exit
 .TP
 .BR --version,\ -V
 output version information and exit"
+.TP
+NOTE:
+If you require to pickup number from phone's memory (or from SIM card),
+for the first time, it anyway reads phonebook from your mobile phone.
+(It may take a while... please, be patient ;-)
 
 .SH "BUGS"
 .PP 
