@@ -55,6 +55,8 @@
     o use the same error message when memory could not be allocated
       in xgnokii_speed.c                            (Daniele Forsi)
     o fix a memory leak in xgnokii/xgnokii_logos.c  (Daniele Forsi)
+ * translation updates
+    o update Italian translation                    (Daniele Forsi)
 
 0.6.16
 ======
