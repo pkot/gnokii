@@ -36,6 +36,12 @@ port = /dev/ttyS0
 # port = /dev/ttyACM0
 # the last one will work only with AT driver. The correct setting should be
 # given in the dmesg output.
+#
+# If you use connection type dku2libusb use it to denote which use endpoint
+# you'd wish to use. It is useful when you have more than one phone connected
+# to your computer using DKU2 cable. Numbering goes from 1 upwards.
+# Default is 1.
+# port = 1
 
 # Set model to the model number of your phone. For the
 # Symbian phones use:

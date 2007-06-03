@@ -164,7 +164,7 @@ next_desc:
 	for (i = 0; i < config.bNumInterfaces; i++) {
 		/* Loop through all of the alternate settings */
 		for (a = 0; a < config.interface[i].num_altsetting; a++) {
-			/* Check if this interface is DKU2 FBUS data interface*/
+			/* Check if this interface is DKU2 FBUS data interface */
 			/* and find endpoints */
 			if (config.interface[i].altsetting[a].bInterfaceNumber == iface->data_interface) {
 				find_eps(iface, config.interface[i].altsetting[a], &found_active, &found_idle);
@@ -249,7 +249,14 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 	struct fbus_usb_interface_transport *current = NULL;
 	struct fbus_usb_interface_transport *tmp = NULL;
 	struct usb_dev_handle *usb_handle;
-	
+	int n;
+
+	/* For connection type dku2libusb port denotes number of DKU2 device */
+	n = atoi(state->config.port_device);
+	/* Assume default is first interface */
+	if (n < 1)
+		n = 1;
+
 	usb_init();
 	usb_find_busses();
 	usb_find_devices();
@@ -275,13 +282,16 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 		}
 	}
 
-	/* Take first device on the list */
-	if (current->next)
-		free(current->next);
-	while (current && current->prev) {
+	/* rewind */
+	while (current && current->prev)
 		current = current->prev;
-		if (current->next)
-			free(current->next);
+
+	/* Take N-th device on the list */
+	while (--n && current) {
+		tmp = current; 
+		current = current->next;
+		/* free the previous element on the list -- won't be needed anymore */
+		free(tmp);
 	}
 
 	if (current) {

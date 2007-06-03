@@ -46,6 +46,10 @@
     o make strings in cfgreader better translatable     (Pawel Kot)
     o use default values when incorrect option is given in the
       config file (where safe and possible)             (Pawel Kot)
+    o for connection type dku2libusb treat port as the number of
+      DKU2 USB endpoint; this is useful when you have more than
+      one DKU2 phone connected to the computer; numbering goes
+      from 1 upwards                                    (Pawel Kot)
  * build system updates
     o fix compilation warnings                      (Daniele Forsi)
  * gnokiid updates
