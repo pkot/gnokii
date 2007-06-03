@@ -65,6 +65,7 @@
     o fix a memory leak in xgnokii/xgnokii_logos.c  (Daniele Forsi)
  * translation updates
     o update Italian translation                    (Daniele Forsi)
+    o update Polish translation                         (Pawel Kot)
  * utils updates
     o fix typos in sendsms                          (Daniele Forsi)
 
