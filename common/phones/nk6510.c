@@ -434,6 +434,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	bool connected = false;
 	unsigned int attempt = 0;
 
+	memset(model, 0, 10);
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_nokia_6510, sizeof(gn_driver));
 
