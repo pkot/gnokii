@@ -209,6 +209,11 @@ SMS_choicefrommem() {
 		readme=0
 	fi
 
+	# by default read from SIM memory
+	if [ $readsim -eq 0 ] && [ $readme -eq 0 ] && [ ! -s $SMSDIR/.PBKlist ]; then
+		readsim=1
+	fi
+
 	SMERROR=0
 	if [ $readsim -eq 1 ] ; then
 		SMS_phonereadSM
@@ -235,7 +240,7 @@ SMS_choicefrommem() {
 		fi
 	fi
 
-	if [ $SMERROR -eq 1 && $MEERROR -eq 1 ]; then
+	if [ $SMERROR -eq 1 ] && [ $MEERROR -eq 1 ]; then
 		ERROR=1
 	else
 		ERROR=0
