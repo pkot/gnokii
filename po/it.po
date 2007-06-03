@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-06-01 11:40+0200\n"
+"POT-Creation-Date: 2007-06-03 21:13+0200\n"
 "PO-Revision-Date: 2007-05-29 23:56+0200\n"
 "Last-Translator: Daniele Forsi <daniele@forsi.it>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
@@ -203,12 +203,12 @@ msgstr "uscita normale"
 msgid "abnormal exit"
 msgstr "uscita anomala"
 
-#: common/devices/unixserial.c:393
+#: common/devices/unixserial.c:395
 #, c-format
 msgid "Serial port speed %d not supported!\n"
 msgstr "La velocità %d per la porta seriale non è supportata\n"
 
-#: common/devices/unixserial.c:433
+#: common/devices/unixserial.c:435
 #, c-format
 msgid "ERROR: Modem DCD is down and global/require_dcd parameter is set!\n"
 msgstr ""
@@ -550,7 +550,7 @@ msgstr "Il file %s esiste.\n"
 msgid "Overwrite? (yes/no) "
 msgstr "Sovrascrivere? (si/no) "
 
-#: common/gsm-filetypes.c:1074 common/phones/nk6510.c:1306
+#: common/gsm-filetypes.c:1074 common/phones/nk6510.c:1307
 #: gnokii/gnokii-phonebook.c:449 gnokii/gnokii-sms.c:539
 #: gnokii/gnokii-sms.c:870
 msgid "yes"
@@ -1021,7 +1021,7 @@ msgstr "All'aperto"
 msgid "Pager"
 msgstr "Cercapersone"
 
-#: common/phones/nk6510.c:1301
+#: common/phones/nk6510.c:1302
 #, c-format
 msgid ""
 "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
@@ -1034,12 +1034,12 @@ msgstr ""
 "va storto.\n"
 "Continuare veramente?"
 
-#: common/phones/nk6510.c:1304
+#: common/phones/nk6510.c:1305
 #, c-format
 msgid "(yes/no) "
 msgstr "(si/no) "
 
-#: common/phones/nk6510.c:1613 common/phones/nk6510.c:1665
+#: common/phones/nk6510.c:1614 common/phones/nk6510.c:1666
 #, c-format
 msgid "Progress: %d%% completed\n"
 msgstr "Avanzamento: %d%% completato\n"
@@ -5017,7 +5017,7 @@ msgstr "Eliminare la nota/le note selezionate?"
 #: xgnokii/xgnokii_dtmf.c:220 xgnokii/xgnokii_logos.c:1471
 #: xgnokii/xgnokii_netmon.c:265 xgnokii/xgnokii_sms.c:1262
 #: xgnokii/xgnokii_sms.c:1667 xgnokii/xgnokii_speed.c:525
-#: xgnokii/xgnokii_xkeyb.c:278 xgnokii/xgnokii_xring.c:823
+#: xgnokii/xgnokii_xkeyb.c:242 xgnokii/xgnokii_xring.c:823
 msgid "/_File"
 msgstr "/_File"
 
@@ -5066,7 +5066,7 @@ msgstr "/File/Sep3"
 #: xgnokii/xgnokii_dtmf.c:224 xgnokii/xgnokii_logos.c:1480
 #: xgnokii/xgnokii_netmon.c:266 xgnokii/xgnokii_sms.c:1269
 #: xgnokii/xgnokii_sms.c:1672 xgnokii/xgnokii_speed.c:532
-#: xgnokii/xgnokii_xkeyb.c:279 xgnokii/xgnokii_xring.c:833
+#: xgnokii/xgnokii_xkeyb.c:243 xgnokii/xgnokii_xring.c:833
 msgid "/File/_Close"
 msgstr "/File/_Chiudi"
 
@@ -5108,21 +5108,21 @@ msgstr "/Modifica/Selezion_a tutti"
 #: xgnokii/xgnokii_calendar.c:1517 xgnokii/xgnokii_contacts.c:3471
 #: xgnokii/xgnokii_dtmf.c:225 xgnokii/xgnokii_netmon.c:270
 #: xgnokii/xgnokii_sms.c:1270 xgnokii/xgnokii_sms.c:1681
-#: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:280
+#: xgnokii/xgnokii_speed.c:535 xgnokii/xgnokii_xkeyb.c:244
 msgid "/_Help"
 msgstr "/_Aiuto"
 
 #: xgnokii/xgnokii_calendar.c:1518 xgnokii/xgnokii_contacts.c:3472
 #: xgnokii/xgnokii_dtmf.c:226 xgnokii/xgnokii_netmon.c:271
 #: xgnokii/xgnokii_sms.c:1271 xgnokii/xgnokii_sms.c:1682
-#: xgnokii/xgnokii_speed.c:536 xgnokii/xgnokii_xkeyb.c:281
+#: xgnokii/xgnokii_speed.c:536 xgnokii/xgnokii_xkeyb.c:245
 msgid "/Help/_Help"
 msgstr "/Aiuto/_Aiuto"
 
 #: xgnokii/xgnokii_calendar.c:1519 xgnokii/xgnokii_contacts.c:3473
 #: xgnokii/xgnokii_dtmf.c:227 xgnokii/xgnokii_netmon.c:272
 #: xgnokii/xgnokii_sms.c:1272 xgnokii/xgnokii_sms.c:1683
-#: xgnokii/xgnokii_speed.c:537 xgnokii/xgnokii_xkeyb.c:282
+#: xgnokii/xgnokii_speed.c:537 xgnokii/xgnokii_xkeyb.c:246
 msgid "/Help/_About"
 msgstr "/Aiuto/_Informazioni su"
 
@@ -6276,11 +6276,11 @@ msgstr "Errore di lettura del file!"
 msgid "Key"
 msgstr "Tasto"
 
-#: xgnokii/xgnokii_xkeyb.c:222
+#: xgnokii/xgnokii_xkeyb.c:186
 msgid "Cannot load background pixmap!"
 msgstr "Impossibile caricare l'immagine di sfondo"
 
-#: xgnokii/xgnokii_xkeyb.c:297
+#: xgnokii/xgnokii_xkeyb.c:261
 msgid "XGnokii Keyboard"
 msgstr "Tastiera di XGnokii"
 
