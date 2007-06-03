@@ -16,11 +16,13 @@ name if it meets gnokii, xgnokii or gnokiid binaries or gnokii as a whole.
 
 Send resulting report to gnokii-users@nongnu.org.
 
-If you want to debug yourself, you may want to add -g to CFLAGS in Makefile.global,
-and run autogen.sh (or configure) with --enable-debug to debug gnokii or libgnokii
-and --enable-xdebug to debug xgnokii or smsd. The CVS version has these options set
-and you might add --disable-shared to build statically linked versions that are
-easier to deal with.
+If you want to debug yourself, by default the CVS version adds -g to CFLAGS
+when generating Makefile.global and the defines needed to print debug
+messages when generating include/config.h then in your gnokiirc set debug=on
+to see messages about libgnokii or gnokii and xgnokii=on to see messages
+about xgnokii or smsd.
+At configure time you may add --disable-shared to build statically linked
+versions that are easier to deal with.
 make clean; make and then you can make install or run the programs from their
 directory if they are statically linked: 
  gnokii/gnokii
