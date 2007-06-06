@@ -63,6 +63,8 @@
     o use the same error message when memory could not be allocated
       in xgnokii_speed.c                            (Daniele Forsi)
     o fix a memory leak in xgnokii/xgnokii_logos.c  (Daniele Forsi)
+    o calling gtk_set_locale() is unneeded according to gtk docs
+      and leaks memory according to valgrind        (Daniele Forsi)
  * translation updates
     o update Italian translation                    (Daniele Forsi)
     o update Polish translation                         (Pawel Kot)

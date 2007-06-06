@@ -2410,8 +2410,6 @@ int main(int argc, char *argv[])
 	textdomain("gnokii");
 #endif
 
-	(void) gtk_set_locale();
-
 	gtk_init(&argc, &argv);
 
 	gn_elog_handler = NULL;
