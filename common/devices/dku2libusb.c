@@ -365,30 +365,30 @@ static int usbfbus_connect_request(struct gn_statemachine *state)
 
 	ret = usb_set_configuration(DEVINSTANCE(state)->interface->dev_control, DEVINSTANCE(state)->interface->configuration);
 	if (ret < 0) {
-		dprintf("Can't set configuration %d\n", ret);
+		dprintf("Can't set configuration: %d\n", ret);
 	}
 
 	ret = usb_claim_interface(DEVINSTANCE(state)->interface->dev_control, DEVINSTANCE(state)->interface->control_interface);
 	if (ret < 0) {
-		dprintf("Can't claim control interface %d\n", ret);
+		dprintf("Can't claim control interface: %d\n", ret);
 		goto err1;
 	}
 
 	ret = usb_set_altinterface(DEVINSTANCE(state)->interface->dev_control, DEVINSTANCE(state)->interface->control_setting);
 	if (ret < 0) {
-		dprintf("Can't set control setting %d\n", ret);
+		dprintf("Can't set control setting: %d\n", ret);
 		goto err2;
 	}
 
 	ret = usb_claim_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);
 	if (ret < 0) {
-		dprintf("Can't claim data interface %d\n", ret);
+		dprintf("Can't claim data interface: %d\n", ret);
 		goto err2;
 	}
 
 	ret = usb_set_altinterface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_active_setting);
 	if (ret < 0) {
-		dprintf("Can't set data active setting %d\n", ret);
+		dprintf("Can't set data active setting: %d\n", ret);
 		goto err3;
 	}
 	return 1;
