@@ -50,6 +50,8 @@
       DKU2 USB endpoint; this is useful when you have more than
       one DKU2 phone connected to the computer; numbering goes
       from 1 upwards                                    (Pawel Kot)
+    o in gn_file_phonebook_raw_parse() parse all the fields even if
+      an empty name is given                        (Daniele Forsi)
  * build system updates
     o fix compilation warnings                      (Daniele Forsi)
  * gnokiid updates

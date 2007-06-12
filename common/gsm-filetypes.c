@@ -1464,7 +1464,7 @@ GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char 
 		return GN_ERR_WRONGDATAFORMAT;
 	case 1:
 		/* empty name: this is a request to delete the entry */
-		return GN_ERR_NONE;
+		break;
 	default:
 		break;
 	}
