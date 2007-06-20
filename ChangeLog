@@ -31,6 +31,7 @@
       usage                                         (Daniele Forsi)
     o update Docs/Bugs with current instructions to get a debug
       build                                         (Daniele Forsi)
+    o fix typos in Docs/sample/gnokiirc             (Daniele Forsi)
  * nk6160 driver updates
     o fix usage of SEND_MESSAGE_BLOCK macro (another valgrind
       finding)                                      (Daniele Forsi)
