@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
                          (C) 2001 - 2007 Paweł Kot
-                 Last update XX June 2007  Version 0.6.17
+                 Last update 21 June 2007  Version 0.6.17
 
 - Contents -
 
@@ -400,10 +400,12 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
-200706XX Version 0.6.17
+20070621 Version 0.6.17
 Fix most of xgnokii memleaks. Fix gnokii options parsing. Fix most of
 uninitialized variables usage. Introduce support for more than one phone
-connected with DKU2 cable (see sample config file for details).
+connected with DKU2 cable (see sample config file for details). Fix segfault
+when config file is missing or broken. Use defaults from config values are
+incorrect or unsupported.
 
 20070511 Version 0.6.16
 Compilation fixes for Solaris and Windows.
