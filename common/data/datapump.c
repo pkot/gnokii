@@ -155,7 +155,7 @@ static int DP_CallBack(rlp_user_inds ind, u8 *buffer, int length)
 	return 0;
 }
 
-void dp_CallPassup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_statemachine *state)
+void dp_CallPassup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_statemachine *state, void *callback_data)
 {
 	dprintf("dp_CallPassup called with %d\n", CallStatus);
 
@@ -175,7 +175,7 @@ void dp_CallPassup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_
 		rlp_user_request_set(Disc_Req, true);
 		connected = false;
 		/* send the hangup event to the at emulator */
-		gn_atem_call_passup(CallStatus, CallInfo, state);
+		gn_atem_call_passup(CallStatus, CallInfo, state, NULL);
 		break;
 	default:
 		break;

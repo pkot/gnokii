@@ -397,7 +397,7 @@ void	gn_atem_at_parse(char *cmd_buffer)
 			CommandMode = false;
 			if (gn_sm_functions(GN_OP_MakeCall, &data, sm) != GN_ERR_NONE) {
 				CommandMode = true;
-				dp_CallPassup(GN_CALL_RemoteHangup, NULL, NULL);
+				dp_CallPassup(GN_CALL_RemoteHangup, NULL, NULL, NULL);
 			} else {
 				IncomingCallNo = data.call_info->call_id;
 				gn_sm_loop(10, sm);

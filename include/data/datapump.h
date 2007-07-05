@@ -37,6 +37,6 @@
 
 /* Prototypes */
 bool	dp_Initialise(int read_fd, int write_fd);
-void    dp_CallPassup(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
+void    dp_CallPassup(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state, void *callback_data);
 
 #endif	/* _gnokii_data_datapump_h */
