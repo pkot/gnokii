@@ -2,6 +2,9 @@
 =========================
  * documentation updates
     o add sample gnokiirc for windows                 (Jari Turkia)
+ * at driver updates
+    o mark SMS messages as read/unread/sent/unsent where possible
+                                                   (Bastien Nocera)
 
 0.6.17
 ======
