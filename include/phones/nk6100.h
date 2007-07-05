@@ -66,10 +66,11 @@ typedef struct {
 } nk6100_keytable;
 
 typedef struct {
-	void (*on_cell_broadcast)(gn_cb_message *msg);
-	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
+	/* callbacks */
+	void (*on_cell_broadcast)(gn_cb_message *msg, void *callback_data);
+	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state, void *callback_data);
 	void (*rlp_rx_callback)(gn_rlp_f96_frame *frame);
-	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state);
+	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
 
 	unsigned char magic_bytes[4];
 	bool sms_notification_in_progress;
@@ -84,6 +85,11 @@ typedef struct {
 	char sw_version[10];
 	char hw_version[10];
 	gn_phone_model *pm;
+
+	/* callback local data */
+	void *cb_callback_data;	/* to be passed as callback_data to on_cell_broadcast */
+	void *call_callback_data;	/* to be passed as callback_data to call_notification */
+	void *sms_callback_data;	/* to be passed as callback_data to on_sms */
 } nk6100_driver_instance;
 
 void pnok_get_nokia_auth(unsigned char *imei, unsigned char *magic_bytes, unsigned char *magic_response);

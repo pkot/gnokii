@@ -1133,6 +1133,7 @@ static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *st
 	}
 
 	drvinst->call_notification = data->call_notification;
+	drvinst->call_callback_data = data->callback_data;
 
 	return GN_ERR_NONE;
 }
@@ -1790,22 +1791,22 @@ static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn
 		else
 			return GN_ERR_UNHANDLEDFRAME;
 
-		drvinst->call_notification(GN_CALL_Incoming, &cinfo, state);
+		drvinst->call_notification(GN_CALL_Incoming, &cinfo, state, drvinst->call_callback_data);
 
 	} else if (!strncmp(buf.line1, "CONNECT", 7))
-		drvinst->call_notification(GN_CALL_Established, &cinfo, state);
+		drvinst->call_notification(GN_CALL_Established, &cinfo, state, drvinst->call_callback_data);
 
 	else if (!strncmp(buf.line1, "BUSY", 4))
-		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state);
+		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state, drvinst->call_callback_data);
 
 	else if (!strncmp(buf.line1, "NO ANSWER", 9))
-		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state);
+		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state, drvinst->call_callback_data);
 
 	else if (!strncmp(buf.line1, "NO CARRIER", 10))
-		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state);
+		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state, drvinst->call_callback_data);
 
 	else if (!strncmp(buf.line1, "NO DIALTONE", 11))
-		drvinst->call_notification(GN_CALL_LocalHangup, &cinfo, state);
+		drvinst->call_notification(GN_CALL_LocalHangup, &cinfo, state, drvinst->call_callback_data);
 
 	else
 		return GN_ERR_UNHANDLEDFRAME;
@@ -1981,6 +1982,11 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->charset = AT_CHAR_UNKNOWN;
 	drvinst->no_smsc = 0;
 	drvinst->call_notification = NULL;
+	drvinst->call_callback_data = NULL;
+	drvinst->on_cell_broadcast = NULL;
+	drvinst->cb_callback_data = NULL;
+	drvinst->on_sms = NULL;
+	drvinst->sms_callback_data = NULL;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {

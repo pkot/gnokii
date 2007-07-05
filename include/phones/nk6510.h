@@ -87,6 +87,7 @@ typedef enum {
 #define NK6510_SUBSMS_READ_CELLBRD	0x23	/* Read cell broadcast */
 #define NK6510_SUBSMS_SMSC_OK		0x31	/* Set SMS center success */
 #define NK6510_SUBSMS_SMSC_FAIL		0x32	/* Set SMS center failure */
+#define NK6510_SUBSMS_INCOMING		0x04	/* Incoming SMS notification */
 
 /* Clock handling message subtypes (send) */
 #define NK6510_SUBCLO_GET_DATE		0x0a	/* Get date & time */
@@ -197,5 +198,17 @@ typedef enum {
 #define	NK6510_RINGTONE_USERDEF_LOCATION	231
 
 #define NK6510_FILE_ID_LENGTH 6
+
+typedef struct {
+	/* callbacks */
+	void (*on_cell_broadcast)(gn_cb_message *msg, void *callback_data);
+	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state, void *callback_data);
+	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
+
+	/* callback local data */
+	void *cb_callback_data;	/* to be passed as callback_data to on_cell_broadcast */
+	void *call_callback_data;	/* to be passed as callback_data to call_notification */
+	void *sms_callback_data;	/* to be passed as callback_data to on_sms */
+} nk6510_driver_instance;
 
 #endif  /* _gnokii_phones_nk6510_h */

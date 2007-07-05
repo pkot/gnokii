@@ -80,7 +80,15 @@ typedef struct {
 	at_charset defaultcharset;
 	at_charset charset;
 
-	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
+	/* callbacks */
+	void (*on_cell_broadcast)(gn_cb_message *msg, void *callback_data);
+	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state, void *callback_data);
+	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
+
+	/* callback local data */
+	void *cb_callback_data;	/* to be passed as callback_data to on_cell_broadcast */
+	void *call_callback_data;	/* to be passed as callback_data to call_notification */
+	void *sms_callback_data;	/* to be passed as callback_data to on_sms */
 } at_driver_instance;
 
 #define AT_DRVINST(s) (*((at_driver_instance **)(&(s)->driver.driver_instance)))

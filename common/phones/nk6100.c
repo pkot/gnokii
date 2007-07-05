@@ -1295,6 +1295,7 @@ static gn_error SetCellBroadcast(gn_data *data, struct gn_statemachine *state)
 
 	req = data->on_cell_broadcast ? req_ena : req_dis;
 	DRVINSTANCE(state)->on_cell_broadcast = data->on_cell_broadcast;
+	DRVINSTANCE(state)->cb_callback_data = data->callback_data;
 
 	if (sm_message_send(10, 0x02, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x02, data, state);
@@ -1359,7 +1360,7 @@ static bool CheckIncomingSMS(struct gn_statemachine *state, int pos)
 		return false;
 	}
 
-	DRVINSTANCE(state)->on_sms(&sms, state);
+	DRVINSTANCE(state)->on_sms(&sms, state, DRVINSTANCE(state)->sms_callback_data);
 
 	dprintf("deleting sms#%hd\n", sms.number);
 	gn_data_clear(&data);
@@ -1386,10 +1387,12 @@ static gn_error SetOnSMS(gn_data *data, struct gn_statemachine *state)
 {
 	if (data->on_sms) {
 		DRVINSTANCE(state)->on_sms = data->on_sms;
+		DRVINSTANCE(state)->sms_callback_data = data->callback_data;
 		DRVINSTANCE(state)->sms_notification_lost = true;
 		FlushLostSMSNotifications(state);
 	} else {
 		DRVINSTANCE(state)->on_sms = NULL;
+		DRVINSTANCE(state)->sms_callback_data = NULL;
 	}
 
 	return GN_ERR_NONE;
@@ -1452,7 +1455,7 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 			cbmsg.channel = message[7];
 			n = char_7bit_unpack(0, length-10, sizeof(cbmsg.message)-1, message+10, cbmsg.message);
 			char_ascii_decode(cbmsg.message, cbmsg.message, n);
-			DRVINSTANCE(state)->on_cell_broadcast(&cbmsg);
+			DRVINSTANCE(state)->on_cell_broadcast(&cbmsg, DRVINSTANCE(state)->cb_callback_data);
 		}
 		return GN_ERR_UNSOLICITED;
 
@@ -3282,6 +3285,7 @@ static gn_error CancelCall1(gn_data *data, struct gn_statemachine *state)
 static gn_error SetCallNotification(gn_data *data, struct gn_statemachine *state)
 {
 	DRVINSTANCE(state)->call_notification = data->call_notification;
+	DRVINSTANCE(state)->call_callback_data = data->callback_data;
 
 	return GN_ERR_NONE;
 }
@@ -3354,7 +3358,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.call_id = message[4];
 		if (DRVINSTANCE(state)->call_notification)
-			DRVINSTANCE(state)->call_notification(GN_CALL_Established, &cinfo, state);
+			DRVINSTANCE(state)->call_notification(GN_CALL_Established, &cinfo, state, DRVINSTANCE(state)->call_callback_data);
 		if (!data->call_info) return GN_ERR_UNSOLICITED;
 		data->call_info->call_id = message[4];
 		break;
@@ -3369,7 +3373,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.call_id = message[4];
 		if (DRVINSTANCE(state)->call_notification)
-			DRVINSTANCE(state)->call_notification(GN_CALL_RemoteHangup, &cinfo, state);
+			DRVINSTANCE(state)->call_notification(GN_CALL_RemoteHangup, &cinfo, state, DRVINSTANCE(state)->call_callback_data);
 		return GN_ERR_UNSOLICITED;
 
 	/* incoming call alert */
@@ -3387,7 +3391,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		memcpy(cinfo.name, pos + 1, *pos);
 		pos += *pos + 1;
 		if (DRVINSTANCE(state)->call_notification)
-			DRVINSTANCE(state)->call_notification(GN_CALL_Incoming, &cinfo, state);
+			DRVINSTANCE(state)->call_notification(GN_CALL_Incoming, &cinfo, state, DRVINSTANCE(state)->call_callback_data);
 		return GN_ERR_UNSOLICITED;
 	
 	/* answered call */
@@ -3399,7 +3403,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.call_id = message[4];
 		if (DRVINSTANCE(state)->call_notification)
-			DRVINSTANCE(state)->call_notification(GN_CALL_LocalHangup, &cinfo, state);
+			DRVINSTANCE(state)->call_notification(GN_CALL_LocalHangup, &cinfo, state, DRVINSTANCE(state)->call_callback_data);
 		if (!data->call_info) return GN_ERR_UNSOLICITED;
 		data->call_info->call_id = message[4];
 		break;
@@ -3449,7 +3453,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.call_id = message[4];
 		if (DRVINSTANCE(state)->call_notification)
-			DRVINSTANCE(state)->call_notification(GN_CALL_Held, &cinfo, state);
+			DRVINSTANCE(state)->call_notification(GN_CALL_Held, &cinfo, state, DRVINSTANCE(state)->call_callback_data);
 		return GN_ERR_UNSOLICITED;
 
 	/* call resumed */
@@ -3457,7 +3461,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		memset(&cinfo, 0, sizeof(cinfo));
 		cinfo.call_id = message[4];
 		if (DRVINSTANCE(state)->call_notification)
-			DRVINSTANCE(state)->call_notification(GN_CALL_Resumed, &cinfo, state);
+			DRVINSTANCE(state)->call_notification(GN_CALL_Resumed, &cinfo, state, DRVINSTANCE(state)->call_callback_data);
 		return GN_ERR_UNSOLICITED;
 
 	/* call switch */

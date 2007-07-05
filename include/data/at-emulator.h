@@ -47,7 +47,7 @@ bool	gn_atem_command_plusc(char **buf);
 bool	gn_atem_command_plusg(char **buf);
 int	gn_atem_num_get(char **p);
 void	gn_atem_modem_result(int code);
-void    gn_atem_call_passup(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state);
+void    gn_atem_call_passup(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state, void *callback_data);
 void	gn_atem_cid_out(gn_call_info *callinfo);
 bool	gn_atem_command_diesis(char **buf);
 

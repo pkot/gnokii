@@ -1317,7 +1317,7 @@ int showsmsfolderstatus(gn_data *data, struct gn_statemachine *state)
 }
 
 /* SMS handler for --smsreader mode */
-static gn_error smsslave(gn_sms *message, struct gn_statemachine *state)
+static gn_error smsslave(gn_sms *message, struct gn_statemachine *state, void *callback_data)
 {
 	FILE *output;
 	char *s = message->user_data[0].u.text;
@@ -1390,6 +1390,7 @@ int smsreader(gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 
 	data->on_sms = smsslave;
+	data->callback_data = NULL;
 	error = gn_sm_functions(GN_OP_OnSMS, data, state);
 	if (!error) {
 		/* We do not want to see texts forever - press Ctrl+C to stop. */

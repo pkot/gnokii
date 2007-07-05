@@ -48,6 +48,9 @@
 #include "links/fbus-phonet.h"
 #include "phones/nokia.h"
 
+#define DRVINSTANCE(s) (*((nk6510_driver_instance **)(&(s)->driver.driver_instance)))
+#define FREE(p) do { free(p); (p) = NULL; } while (0)
+
 #define SEND_MESSAGE_BLOCK(type, length) \
 do { \
 	if (sm_message_send(length, type, req, state)) return GN_ERR_NOTREADY; \
@@ -193,8 +196,6 @@ static gn_memory_type get_gn_memory_type(int memory_type);
 
 /* Some globals */
 
-static bool new_sms  = false; /* Do we have a new SMS? */
-
 static gn_incoming_function_type nk6510_incoming_functions[] = {
 	{ NK6510_MSG_RESET,	NK6510_IncomingReset },
        	{ NK6510_MSG_FOLDER,	NK6510_IncomingFolder },
@@ -252,10 +253,13 @@ gn_driver driver_nokia_6510 = {
 
 static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
+	if (!DRVINSTANCE(state) && op != GN_OP_Init) return GN_ERR_INTERNALERROR;
+
 	switch (op) {
 	case GN_OP_Init:
 		return NK6510_Initialise(state);
 	case GN_OP_Terminate:
+		FREE(DRVINSTANCE(state));
 		return pgen_terminate(data, state);
 	case GN_OP_GetModel:
 		return NK6510_GetModel(data, state);
@@ -321,16 +325,11 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_ActivateWAPSetting(data, state);
 	case GN_OP_WriteWAPSetting:
 		return NK6510_WriteWAPSetting(data, state);
-		/*
-
 	case GN_OP_OnSMS:
-		if (data->on_sms) {
-			new_sms = true;
-			return GN_ERR_NONE;
-		}
-		break;
-	case GN_OP_PollSMS:
-		if (new_sms) return GN_ERR_NONE;
+		DRVINSTANCE(state)->on_sms = data->on_sms;
+		DRVINSTANCE(state)->sms_callback_data = data->callback_data;
+		return NK6510_Subscribe(data, state);
+	/* case GN_OP_PollSMS:
 		break;
 	case GONK6510_GetPicture:
 		return NK6510_GetPicture(data, state);
@@ -438,6 +437,9 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_nokia_6510, sizeof(gn_driver));
 
+	if (!(DRVINSTANCE(state) = calloc(1, sizeof(nk6510_driver_instance))))
+		return GN_ERR_INTERNALERROR;
+
 	dprintf("Connecting\n");
 	while (!connected) {
 		if (attempt > 2) break;
@@ -506,7 +508,11 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 			connected = true;
 		}
 	}
-	if (!connected) return err;
+
+	if (!connected) {
+		FREE(DRVINSTANCE(state));
+		return err;
+	}
 
 	/* Change the defaults for Nokia 8310 */
 	if (!strncmp(data.model, "NHM-7", 5)) {
@@ -1180,7 +1186,10 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 	dprintf("Deleting SMS...\n");
 
 	error = ValidateSMS(data, state);
-	if (error != GN_ERR_NONE) return error;
+	if (error != GN_ERR_NONE)
+		return error;
+	if (data->raw_sms->number < 1)
+		return GN_ERR_EMPTYLOCATION;
 
 	data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
 
@@ -1340,9 +1349,36 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *message, int 
 
 	dprintf("Frame of type 0x02 (SMS handling) received!\n");
 
-	if (!data) return GN_ERR_INTERNALERROR;
+	if (!data)
+		return GN_ERR_INTERNALERROR;
 
 	switch (message[3]) {
+	case NK6510_SUBSMS_INCOMING: { /* 0x04 */
+		int freerawsms = 0, freesms = 0;
+
+		dprintf("Incoming SMS notification\n");
+		if (!data->raw_sms) {
+			freerawsms = 1;
+			data->raw_sms = calloc(1, sizeof(gn_sms_raw));
+		}
+		if (!data->sms) {
+			freesms = 1;
+			data->sms = calloc(1, sizeof(gn_sms));
+		}
+		/* FIXME: memleak */
+		if (!data->raw_sms || !data->sms)
+			e = GN_ERR_INTERNALERROR;
+		ParseLayout(message + 8, data);
+		e = gn_sms_parse(data);
+		if ((e == GN_ERR_NONE) && DRVINSTANCE(state)->on_sms)
+			e = DRVINSTANCE(state)->on_sms(data->sms, state, DRVINSTANCE(state)->sms_callback_data);
+
+		if (freerawsms)
+			free(data->raw_sms);
+		if (freesms)
+			free(data->sms);
+		break;
+	}
 	case NK6510_SUBSMS_SMSC_RCV: /* 0x15 */
 		switch (message[4]) {
 		case 0x00:
@@ -1439,8 +1475,6 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *message, int 
 
 	case 0x11:
 		dprintf("SMS received\n");
-		/* We got here the whole SMS */
-		new_sms = true;
 		break;
 
 	case NK6510_SUBSMS_SMS_RCVD: /* 0x10 */
@@ -4276,7 +4310,6 @@ static gn_error NK6510_IncomingSubscribe(int messagetype, unsigned char *message
 	default:
 		dprintf("Unknown subtype of type 0x3c (%d)\n", message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
-		break;
 	}
 	return GN_ERR_NONE;
 }

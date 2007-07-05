@@ -5,6 +5,11 @@
  * at driver updates
     o mark SMS messages as read/unread/sent/unsent where possible
                                                    (Bastien Nocera)
+ * libgnokii updates
+    o add void *callback_data argument to callbacks
+                                        (Bastien Nocera, Pawel Kot)
+ * nk6510 driver updates
+    o add support for incoming sms callbacks            (Pawel Kot)
 
 0.6.17
 ======

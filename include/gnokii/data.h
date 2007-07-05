@@ -82,13 +82,13 @@ typedef struct {
 	gn_calnote_alarm *alarm;
 	gn_raw_data *raw_data;
 	gn_call_divert *call_divert;
-	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state);
+	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
 	int *display_status;
-	void (*on_cell_broadcast)(gn_cb_message *message);
+	void (*on_cell_broadcast)(gn_cb_message *message, void *callback_data);
 	gn_netmonitor *netmonitor;
 	gn_call_info *call_info;
 	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info,
-				  struct gn_statemachine *state);
+				  struct gn_statemachine *state, void *callback_data);
 	gn_rlp_f96_frame *rlp_frame;
 	int rlp_out_dtx;
 	void (*rlp_rx_callback)(gn_rlp_f96_frame *frame);
@@ -104,6 +104,7 @@ typedef struct {
 	gn_call_active *call_active;
 	gn_file_list *file_list;
 	gn_file *file;
+	void *callback_data; /* this is a pointer to some data that will be needed by any callback function */
 } gn_data;
 
 /* 
@@ -194,7 +195,7 @@ typedef enum {
 	GN_OP_GetToDo,
 	GN_OP_GetCalendarNote,
 	GN_OP_CallDivert,
-	GN_OP_OnSMS,
+	GN_OP_OnSMS, /* set data->on_sms and data->callback_data */
 	GN_OP_PollSMS,
 	GN_OP_SetAlarm,
 	GN_OP_SetDateTime,
@@ -208,12 +209,12 @@ typedef enum {
 	GN_OP_GetDisplayStatus,
 	GN_OP_PollDisplay,
 	GN_OP_SaveSMS,
-	GN_OP_SetCellBroadcast,
+	GN_OP_SetCellBroadcast, /* set data->on_cell_broadcast and data->callback_data */
 	GN_OP_NetMonitor,
 	GN_OP_MakeCall,
 	GN_OP_AnswerCall,
 	GN_OP_CancelCall,
-	GN_OP_SetCallNotification,
+	GN_OP_SetCallNotification, /* set data->call_notification and data->callback_data */
 	GN_OP_SendRLPFrame,
 	GN_OP_SetRLPRXCallback,
 	GN_OP_EnterSecurityCode,
