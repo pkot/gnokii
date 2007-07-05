@@ -218,7 +218,7 @@ static void  gn_atem_answer_phone(void)
 
 
 /* This gets called to indicate an incoming call */
-void gn_atem_call_passup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_statemachine *state)
+void gn_atem_call_passup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_statemachine *state, void *callback_data)
 {
 	dprintf("gn_atem_call_passup called with %d\n", CallStatus);
 
