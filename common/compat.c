@@ -191,3 +191,19 @@ char *strndup(const char *src, size_t n)
 	return (char *)memcpy(dst, src, n);
 }
 #endif
+
+#ifndef HAVE_GETLINE
+int getline(char **line, size_t *len, FILE *stream)
+{
+	size_t size = 0, last = 0;
+
+	do {
+		size += BUFSIZ;
+		*line = realloc(*line, size);
+		fgets(*line + last, size, stream);
+		*len = strlen(*line);
+		last = *len - 1;
+	} while (!feof(stream) && *line[last] != '\n');
+	return 0;
+}
+#endif

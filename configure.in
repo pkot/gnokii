@@ -619,7 +619,7 @@ AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h sys/file.h)
 AC_CHECK_HEADERS(string.h strings.h ctype.h stdlib.h stdarg.h stdint.h)
 AC_CHECK_HEADERS(stddef.h sys/socket.h sys/modem.h termios.h sys/filio.h)
-AC_CHECK_HEADERS(inttypes.h wchar.h direct.h)
+AC_CHECK_HEADERS(inttypes.h wchar.h direct.h sys/param.h)
 
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -656,7 +656,7 @@ AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_CHECK_FUNCS(mktime timegm gettimeofday select poll wcrtomb)
 AC_CHECK_FUNCS(strchr strdup strndup strstr strtol strtok strsep)
-AC_CHECK_FUNCS(asprintf vasprintf snprintf vsnprintf)
+AC_CHECK_FUNCS(asprintf vasprintf snprintf vsnprintf getline)
 AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf_c99,
 	[AC_TRY_RUN([
 #include <stdio.h>
