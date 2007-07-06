@@ -1408,7 +1408,7 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 	
 	splitlines(&buf);
 
-	if (!strncmp(buf.line1, "AT+CBC", 6)) { /* FIXME realy needed? */
+	if (!strncmp(buf.line1, "AT+CBC", 6) && !strncmp(buf.line2, "+CBC: ", 6)) {
 		if (data->battery_level) {
 			*(data->battery_unit) = GN_BU_Percentage;
 			pos = strchr(buf.line2, ',');
@@ -1421,8 +1421,11 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 		}
 		if (data->power_source) {
 			*(data->power_source) = 0;
-			if (*buf.line2 == '1') *(data->power_source) = GN_PS_ACDC;
-			if (*buf.line2 == '0') *(data->power_source) = GN_PS_BATTERY;
+			pos = buf.line2 + strlen("+CBC: ");
+			if (*pos == '1' ||  *pos == '2')
+				*(data->power_source) = GN_PS_ACDC;
+			else if (*pos == '0')
+				*(data->power_source) = GN_PS_BATTERY;
 		}
 	}
 	return GN_ERR_NONE;

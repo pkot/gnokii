@@ -5,6 +5,7 @@
  * at driver updates
     o mark SMS messages as read/unread/sent/unsent where possible
                                                    (Bastien Nocera)
+    o fix battery level reading                    (Bastien Nocera)
  * libgnokii updates
     o add void *callback_data argument to callbacks
                                         (Bastien Nocera, Pawel Kot)
