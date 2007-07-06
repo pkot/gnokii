@@ -10,6 +10,11 @@
                                         (Bastien Nocera, Pawel Kot)
  * nk6510 driver updates
     o add support for incoming sms callbacks            (Pawel Kot)
+ * build system updates
+    o detect getline() presence and provide its substitute
+                                           (Guido Falsi, Pawel Kot)
+ * nokia_dku2 module updates
+    o add N70 id and new endpoint addresses                 (Yarda)
 
 0.6.17
 ======

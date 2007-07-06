@@ -64,6 +64,7 @@ static struct usb_device_id id_table [] = {
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6230i_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6265_PRODUCT_ID) },
 	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIA6155_PRODUCT_ID) },
+	{ USB_DEVICE(NOKIA_VENDOR_ID, NOKIAN70_PRODUCT_ID) },
 	{ }			/* Terminating entry */
 };
 
@@ -90,7 +91,8 @@ static int nokia_startup(struct usb_serial *serial)
 
 	dbg("%s", __FUNCTION__);
 
-	if (serial->interface->altsetting[0].endpoint[0].bEndpointAddress == NOKIA_AT_PORT) {
+	if (serial->interface->altsetting[0].endpoint[0].bEndpointAddress == NOKIA_AT_PORT ||
+		serial->interface->altsetting[0].endpoint[0].bEndpointAddress == NOKIA_AT_PORT2) {
 		/* the AT port */
 		printk("Nokia AT Port:\n");
 	} else if (serial->interface->num_altsetting == 2 &&
