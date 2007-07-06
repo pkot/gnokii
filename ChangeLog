@@ -7,6 +7,7 @@
                                                    (Bastien Nocera)
     o fix battery level reading                    (Bastien Nocera)
     o add support for call notifications           (Bastien Nocera)
+    o add support for getActiveCalls               (Bastien Nocera)
  * libgnokii updates
     o add void *callback_data argument to callbacks
                                         (Bastien Nocera, Pawel Kot)

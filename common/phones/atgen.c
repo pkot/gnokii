@@ -76,6 +76,7 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
 static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyGetActiveCalls(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_error AT_Identify(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state);
@@ -112,6 +113,7 @@ static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *st
 static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetDateTime(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetActiveCalls(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -160,6 +162,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_SetDateTime,           AT_SetDateTime,           Reply },
 	{ GN_OP_GetDateTime,           AT_GetDateTime,           ReplyGetDateTime },
 	{ GN_OP_SendDTMF,              AT_SendDTMF,              Reply },
+	{ GN_OP_GetActiveCalls,        AT_GetActiveCalls,        ReplyGetActiveCalls },
 };
 
 char *strip_quotes(char *s)
@@ -1233,6 +1236,13 @@ static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+static gn_error AT_GetActiveCalls(gn_data *data, struct gn_statemachine *state)
+{
+	if (sm_message_send(8, GN_OP_GetActiveCalls, "AT+CPAS\r", state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_GetActiveCalls, data, state);
+}
+
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -2079,6 +2089,77 @@ static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int len
 	return GN_ERR_NONE;
 }
 
+static gn_error ReplyGetActiveCalls(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst;
+	gn_error error;
+	at_line_buffer buf;
+	int status;
+
+	if (!data->call_active)
+		return GN_ERR_INTERNALERROR;
+
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return error;
+
+	status = -1;
+
+	buf.line1 = buffer + 1;
+	buf.length = length;
+	splitlines(&buf);
+
+	memset(data->call_active, 0, GN_CALL_MAX_PARALLEL * sizeof(gn_call_active));
+
+	if (strncmp(buf.line1, "AT+CPAS: ", 6)) {
+		return GN_ERR_UNKNOWN;
+	}
+
+	data->call_active->call_id = 1;
+
+	switch (atoi(buf.line2 + strlen ("+CPAS: "))) {
+	case 0:
+		status = GN_CALL_Idle;
+		break;
+	/* Terminal doesn't know */
+	case 1:
+	case 2:
+		break;
+	case 3:
+		status = GN_CALL_Ringing;
+		break;
+	case 4:
+		status = GN_CALL_Established;
+		break;
+	/* Low-power state, terminal can't answer */
+	case 5:
+		break;
+	}
+
+	if (status < 0)
+		return GN_ERR_UNKNOWN;
+
+	drvinst = AT_DRVINST(state);
+
+	data->call_active->state = status;
+	data->call_active->prev_state = drvinst->prev_state;
+
+	/* States go:
+	 * Idle -> Ringing -> (faked Local hangup) -> Idle
+	 * Idle -> Ringing -> Established -> (faked Remote hangup) -> Idle */
+	if (drvinst->prev_state == GN_CALL_Ringing && status == GN_CALL_Idle)
+		data->call_active->state = GN_CALL_LocalHangup;
+	else if (drvinst->prev_state == GN_CALL_Established && status == GN_CALL_Idle)
+		data->call_active->state = GN_CALL_RemoteHangup;
+	else
+		data->call_active->state = status;
+
+	drvinst->prev_state = data->call_active->state;
+	snprintf(data->call_active->name, GN_PHONEBOOK_NAME_MAX_LENGTH, _("Unknown"));
+	data->call_active->number[0] = '\0';
+
+	return GN_ERR_NONE;
+}
+
 /* General reply function for phone responses. buffer[0] holds the compiled
  * success of the result (OK, ERROR, ... ). see links/atbus.h and links/atbus.c 
  * for reference */
@@ -2127,6 +2208,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->clip_supported = 0;
 	drvinst->last_call_type = GN_CALL_Voice;
 	drvinst->last_call_status = GN_CALL_Idle;
+	drvinst->prev_state = GN_CALL_Idle;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {
