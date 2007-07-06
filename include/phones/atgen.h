@@ -80,6 +80,11 @@ typedef struct {
 	at_charset defaultcharset;
 	at_charset charset;
 
+	/* For call notifications via AT+CLIP */
+	int clip_supported;
+	gn_call_type last_call_type;
+	gn_call_status last_call_status;
+
 	/* callbacks */
 	void (*on_cell_broadcast)(gn_cb_message *msg, void *callback_data);
 	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state, void *callback_data);

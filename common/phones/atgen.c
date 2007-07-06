@@ -1130,6 +1130,16 @@ static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *st
 			return GN_ERR_NOTREADY;
 		if ((err = sm_block_no_retry(GN_OP_SetCallNotification, data, state)) != GN_ERR_NONE)
 			return err;
+		if (sm_message_send(10, GN_OP_SetCallNotification, "AT+CLIP=1\r", state))
+			return GN_ERR_NOTREADY;
+		/* Ignore errors when we can't set Call Line Identity, just set that we
+		 * don't handle it */
+		if (sm_block_no_retry(GN_OP_SetCallNotification, data, state) == GN_ERR_NONE)
+			drvinst->clip_supported = 1;
+		if (sm_message_send(10, GN_OP_SetCallNotification, "AT+CLCC=1\r", state))
+			return GN_ERR_NOTREADY;
+		/* Ignore errors when we can't set List Current Calls notifications */
+		sm_block_no_retry(GN_OP_SetCallNotification, data, state);
 	}
 
 	drvinst->call_notification = data->call_notification;
@@ -1774,6 +1784,7 @@ static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn
 	at_line_buffer buf;
 	char *pos;
 	gn_call_info cinfo;
+	gn_call_status status;
 
 	if (!drvinst->call_notification) return GN_ERR_UNSOLICITED;
 
@@ -1784,35 +1795,158 @@ static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn
 	memset(&cinfo, 0, sizeof(cinfo));
 	cinfo.call_id = 1;
 
-	if (!strncmp(buf.line1, "RING", 4))
+	if (!strncmp(buf.line1, "RING", 4)) {
 		return GN_ERR_INTERNALERROR; /* AT+CRC=1 disables RING */
-
-	else if (!strncmp(buf.line1, "+CRING: ", 8)) {
+	} else if (!strncmp(buf.line1, "+CRING: ", 8)) {
 		pos = buf.line1 + 8;
 		if (!strncmp(pos, "VOICE", 5))
 			cinfo.type = GN_CALL_Voice;
 		else
 			return GN_ERR_UNHANDLEDFRAME;
+		status = GN_CALL_Incoming;
+	} else if (!strncmp(buf.line1, "CONNECT", 7)) {
+		status = GN_CALL_Established;
+	} else if (!strncmp(buf.line1, "BUSY", 4)) {
+		status = GN_CALL_RemoteHangup;
+	} else if (!strncmp(buf.line1, "NO ANSWER", 9)) {
+		status = GN_CALL_RemoteHangup;
+	} else if (!strncmp(buf.line1, "NO CARRIER", 10)) {
+		status = GN_CALL_RemoteHangup;
+	} else if (!strncmp(buf.line1, "NO DIALTONE", 11)) {
+		status = GN_CALL_LocalHangup;
+	} else if (!strncmp(buf.line1, "+CLIP: ", 7)) {
+		char **items;
+		int i;
 
-		drvinst->call_notification(GN_CALL_Incoming, &cinfo, state, drvinst->call_callback_data);
+		items = gnokii_strsplit(buf.line1 + 7, ",", 6);
+		for (i = 0; i < 6; i++) {
+			if (items[i] == NULL)
+				break;
+			switch (i) {
+			/* Number, if known */
+			case 0:
+				snprintf(cinfo.number, GN_PHONEBOOK_NUMBER_MAX_LENGTH, "%s", strip_quotes(items[i]));
+				break;
+			/* 1 == Number "type"
+			 * 2 == String type subaddress
+			 * 3 == Type of subaddress
+			 * All ignored
+			 */
+			case 1:
+			case 2:
+			case 3:
+				break;
+			/* Name, if known */
+			case 4:
+				snprintf(cinfo.name, GN_PHONEBOOK_NAME_MAX_LENGTH, "%s", strip_quotes(items[i]));
+				break;
+			/* Validity of the name/number provided */
+			case 5:
+				switch (atoi(items[i])) {
+				case 1:
+					snprintf(cinfo.name, GN_PHONEBOOK_NAME_MAX_LENGTH, _("Withheld"));
+					break;
+				case 2:
+					snprintf(cinfo.name, GN_PHONEBOOK_NAME_MAX_LENGTH, _("Unknown"));
+					break;
+				}
+			}
+		}
 
-	} else if (!strncmp(buf.line1, "CONNECT", 7))
-		drvinst->call_notification(GN_CALL_Established, &cinfo, state, drvinst->call_callback_data);
+		if (cinfo.name == NULL)
+			snprintf(cinfo.name, GN_PHONEBOOK_NAME_MAX_LENGTH, _("Unknown"));
+		cinfo.type = drvinst->last_call_type;
+		drvinst->call_notification(drvinst->last_call_status, &cinfo, state, drvinst->call_callback_data);
+		gnokii_strfreev(items);
+		return GN_ERR_UNSOLICITED;
+	} else if (!strncmp(buf.line1, "+CLCC: ", 7)) {
+		char **items;
+		int i;
 
-	else if (!strncmp(buf.line1, "BUSY", 4))
-		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state, drvinst->call_callback_data);
+		items = gnokii_strsplit(buf.line1 + 7, ",", 8);
+		status = -1;
 
-	else if (!strncmp(buf.line1, "NO ANSWER", 9))
-		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state, drvinst->call_callback_data);
+		for (i = 0; i < 8; i++) {
+			if (items[i] == NULL)
+				break;
+			switch (i) {
+			/* Call ID */
+			case 0:
+				cinfo.call_id = atoi(items[i]);
+				break;
+			/* Incoming, or finishing call */
+			case 1:
+				break;
+			case 2:
+				switch (atoi(items[i])) {
+				case 0:
+					status = GN_CALL_Established;
+					break;
+				case 1:
+					status = GN_CALL_Held;
+					break;
+				case 2:
+					status = GN_CALL_Dialing;
+					break;
+				case 3:
+					/* Alerting, remote end is ringing */
+					status = GN_CALL_Ringing;
+					break;
+				case 4:
+					status = GN_CALL_Incoming;
+					break;
+				case 5:
+					/* FIXME Call is "Waiting" */
+					status = GN_CALL_Held;
+					break;
+				case 6:
+					status = GN_CALL_LocalHangup;
+					break;
+				}
+				break;
+			case 3:
+				if (atoi(items[i]) == 0)
+					cinfo.type = GN_CALL_Voice;
+				else {
+					/* We don't handle non-voice calls */
+					gnokii_strfreev(items);
+					return GN_ERR_UNHANDLEDFRAME;
+				}
+				break;
+			/* Multiparty status */
+			case 4:
+				break;
+			case 5:
+				snprintf(cinfo.number, GN_PHONEBOOK_NUMBER_MAX_LENGTH, "%s", strip_quotes (items[i]));
+				break;
+			/* Phone display format */
+			case 6:
+				break;
+			case 7:
+				snprintf(cinfo.name, GN_PHONEBOOK_NAME_MAX_LENGTH, "%s", strip_quotes (items[i]));
+				break;
+			}
+		}
 
-	else if (!strncmp(buf.line1, "NO CARRIER", 10))
-		drvinst->call_notification(GN_CALL_RemoteHangup, &cinfo, state, drvinst->call_callback_data);
+		/* FIXME we don't handle calls > 1 anywhere else */
+		if (status < 0) {
+			gnokii_strfreev(items);
+			return GN_ERR_UNHANDLEDFRAME;
+		}
 
-	else if (!strncmp(buf.line1, "NO DIALTONE", 11))
-		drvinst->call_notification(GN_CALL_LocalHangup, &cinfo, state, drvinst->call_callback_data);
-
-	else
+		drvinst->call_notification(status, &cinfo, state, drvinst->call_callback_data);
+		gnokii_strfreev(items);
+		return GN_ERR_UNSOLICITED;
+	} else {
 		return GN_ERR_UNHANDLEDFRAME;
+	}
+
+	if (!drvinst->clip_supported || status != GN_CALL_Incoming) {
+		drvinst->call_notification(status, &cinfo, state, drvinst->call_callback_data);
+	} else {
+		drvinst->last_call_status = status;
+		drvinst->last_call_type = cinfo.type;
+	}
 
 	return GN_ERR_UNSOLICITED;
 }
@@ -1990,6 +2124,9 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->cb_callback_data = NULL;
 	drvinst->on_sms = NULL;
 	drvinst->sms_callback_data = NULL;
+	drvinst->clip_supported = 0;
+	drvinst->last_call_type = GN_CALL_Voice;
+	drvinst->last_call_status = GN_CALL_Idle;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {
