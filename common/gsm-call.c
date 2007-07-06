@@ -181,7 +181,7 @@ GNOKII_API gn_call *gn_call_get_active(int call_id)
 GNOKII_API gn_error gn_call_check_active(struct gn_statemachine *state)
 {
 	gn_data data;
-	gn_call_active active[2];
+	gn_call_active active[GN_CALL_MAX_PARALLEL];
 	gn_call *call;
 	gn_error err;
 	int i, j, got;
@@ -197,7 +197,7 @@ GNOKII_API gn_error gn_call_check_active(struct gn_statemachine *state)
 	for (j = 0; j < GN_CALL_MAX_PARALLEL; j++) {
 		if (calltable[j].state != state) continue;
 		got = 0;
-		for ( i = 0; i < 2; i++) {
+		for (i = 0; i < GN_CALL_MAX_PARALLEL; i++) {
 			if (calltable[j].call_id == active[i].call_id) {
 				got = 1;
 				break;
@@ -209,7 +209,7 @@ GNOKII_API gn_error gn_call_check_active(struct gn_statemachine *state)
 		}
 	}
 
-	for (i = 0; i < 2; i++) {
+	for (i = 0; i < GN_CALL_MAX_PARALLEL; i++) {
 		if (active[i].state == GN_CALL_Idle) continue;
 
 		if (!(call = search_call(active[i].call_id, state))) {
