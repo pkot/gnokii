@@ -1666,36 +1666,76 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 		offset += l;
 	}
 
+	data->raw_sms->reject_duplicates   = 0;
+	data->raw_sms->report_status       = 0;
+	data->raw_sms->reference           = 0;
+	data->raw_sms->reply_via_same_smsc = 0;
+	data->raw_sms->report              = 0;
+
 	data->raw_sms->type                = (tmp[offset] & 0x03) << 1;
-	data->raw_sms->more_messages       = tmp[offset];
-	data->raw_sms->reply_via_same_smsc = tmp[offset];
-	data->raw_sms->udh_indicator       = tmp[offset];
-	data->raw_sms->report              = tmp[offset];
-	l = (tmp[offset + 1] % 2) ? tmp[offset + 1] + 1 : tmp[offset + 1] ;
+	if (data->raw_sms->type == GN_SMS_MT_Deliver) { 
+		dprintf("SMS-DELIVER found\n");
+		data->raw_sms->more_messages       = tmp[offset] & 0x04;
+		// bits 3 and 4 of the first octet unused;
+		data->raw_sms->report_status       = tmp[offset] & 0x20;
+	} else if (data->raw_sms->type == GN_SMS_MT_Submit) {
+		dprintf("SMS-SUBMIT found\n");
+		data->raw_sms->reject_duplicates   = tmp[offset] & 0x04;
+		data->raw_sms->validity_indicator  = (tmp[offset] & 0x18) >> 3;
+	} else {
+		dprintf("Unknown PDU type %d\n", data->raw_sms->type);
+		return GN_ERR_INTERNALERROR;
+ 	}
+ 	data->raw_sms->more_messages       = tmp[offset];
+	data->raw_sms->udh_indicator       = tmp[offset] & 0x40;
+	offset++;
+
+	if (data->raw_sms->type == GN_SMS_MT_Submit) {
+		data->raw_sms->reference = tmp[offset++];
+	} else {
+		data->raw_sms->reference = 0;
+	}
+
+	l = (tmp[offset] % 2) ? tmp[offset] + 1 : tmp[offset];
 	l = l / 2 + 2;
-	if (l + offset + 11 > sms_len || l > GN_SMS_NUMBER_MAX_LENGTH) {
+	if (l + offset + 10 > sms_len || l > GN_SMS_NUMBER_MAX_LENGTH) {
 		dprintf("Invalid remote number length (%d)\n", l);
 		ret = GN_ERR_INTERNALERROR;
 		goto out;
 	}
-	memcpy(data->raw_sms->remote_number, tmp + offset + 1, l);
+	memcpy(data->raw_sms->remote_number, tmp + offset, l);
 	offset += l;
-	data->raw_sms->reject_duplicates   = 0;
-	data->raw_sms->report_status       = 0;
-	data->raw_sms->reference           = 0;
-	data->raw_sms->pid                 = tmp[offset + 1];
-	data->raw_sms->dcs                 = tmp[offset + 2];
-	memcpy(data->raw_sms->smsc_time, tmp + offset + 3, 7);
-	data->raw_sms->length              = tmp[offset + 10];
+	data->raw_sms->pid                 = tmp[offset++];
+	data->raw_sms->dcs                 = tmp[offset++];
+	if (data->raw_sms->type == GN_SMS_MT_Deliver) {
+		memcpy(data->raw_sms->smsc_time, tmp + offset, 7);
+		offset += 7;
+	}
+	if (data->raw_sms->type == GN_SMS_MT_Submit) {
+		if (data->raw_sms->validity_indicator == GN_SMS_VP_None) {
+			offset += 0;
+		} else if (data->raw_sms->validity_indicator == GN_SMS_VP_RelativeFormat) {
+			// FIXME save this info
+			offset += 1;
+		} else if (data->raw_sms->validity_indicator == GN_SMS_VP_EnhancedFormat ||
+			   data->raw_sms->validity_indicator == GN_SMS_VP_AbsoluteFormat) {
+			// FIXME save this info
+			offset += 7;
+		} else { 
+			dprintf("Internal Error on validity_indicator");
+			return GN_ERR_INTERNALERROR;
+		}
+	}
+	data->raw_sms->length              = tmp[offset++];
 	data->raw_sms->user_data_length = data->raw_sms->length;
 	if (data->raw_sms->udh_indicator & 0x40)
-		data->raw_sms->user_data_length -= tmp[offset+11] + 1;
-	if (sms_len - offset - 11 > 1000) {
+		data->raw_sms->user_data_length -= tmp[offset] + 1;
+	if (sms_len - offset > 1000) {
 		dprintf("Phone gave as poisonous (too short?) reply %s, either phone went crazy or communication went out of sync\n", buf.line3);
 		ret = GN_ERR_INTERNALERROR;
 		goto out;
 	}
-	memcpy(data->raw_sms->user_data, tmp + offset + 11, sms_len - offset - 11);
+	memcpy(data->raw_sms->user_data, tmp + offset, sms_len - offset);
 out:
 	free(tmp);
 	return ret;
