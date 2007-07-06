@@ -9,6 +9,7 @@
     o add void *callback_data argument to callbacks
                                         (Bastien Nocera, Pawel Kot)
     o use GN_CALL_MAX_PARALLEL instead of hardcode (Bastien Nocera)
+    o add more sanity checks for sms reading       (Bastien Nocera)
  * nk6510 driver updates
     o add support for incoming sms callbacks            (Pawel Kot)
  * build system updates
