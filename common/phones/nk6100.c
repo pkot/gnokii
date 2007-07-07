@@ -70,6 +70,8 @@ static gn_error SetOnSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state);
 static gn_error SaveSMSMessage(gn_data *data, struct gn_statemachine *state);
 static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSFolders(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error GetBitmap(gn_data *data, struct gn_statemachine *state);
 static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state);
 static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state);
@@ -282,6 +284,10 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return SaveSMSMessage(data, state);
 	case GN_OP_DeleteSMS:
 		return DeleteSMSMessage(data, state);
+	case GN_OP_GetSMSFolders:
+		return GetSMSFolders(data, state);
+	case GN_OP_GetSMSFolderStatus:
+		return GetSMSFolderStatus(data, state);
 	case GN_OP_GetDateTime:
 		return GetDateTime(data, state);
 	case GN_OP_SetDateTime:
@@ -1606,6 +1612,41 @@ static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 	req[5] = data->sms->number;
 	if (sm_message_send(6, 0x14, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x14, data, state);
+}
+
+static gn_error GetSMSFolders(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data || !data->sms_folder_list) return GN_ERR_INTERNALERROR;
+
+	memset(data->sms_folder_list, 0, sizeof(gn_sms_folder_list));
+
+	data->sms_folder_list->number = 1;
+	strcpy(data->sms_folder_list->folder[0].name, _("SMS Inbox"));
+	data->sms_folder_list->folder_id[0] = GN_MT_SM;
+	data->sms_folder_list->folder[0].folder_id = NK6100_MEMORY_SM;
+
+	return GN_ERR_NONE;
+}
+
+static gn_error GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+	gn_sms_status smsstatus = {0, 0, 0, 0}, *save_smsstatus;
+
+	if (!data || !data->sms_folder || data->sms_folder->folder_id != NK6100_MEMORY_SM) return GN_ERR_INTERNALERROR;
+
+	error = GetSMSFolders(data, state);
+	if (error != GN_ERR_NONE) return error;
+
+	save_smsstatus = data->sms_status;
+	data->sms_status = &smsstatus;
+	error = GetSMSStatus(data, state);
+	data->sms_status = save_smsstatus;
+	if (error != GN_ERR_NONE) return error;
+
+	data->sms_folder->number = smsstatus.number;
+
+	return GN_ERR_NONE;
 }
 
 static gn_error IncomingSMS(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)

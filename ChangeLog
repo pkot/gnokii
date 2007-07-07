@@ -21,6 +21,9 @@
                                            (Guido Falsi, Pawel Kot)
  * nokia_dku2 module updates
     o add N70 id and new endpoint addresses                 (Yarda)
+ * nk6100 driver updates
+    o add GN_OP_GetSMSFolders and GN_OP_GetSMSFolderStatus to
+      support gnokii --showsmsfolderstatus          (Daniele Forsi)
 
 0.6.17
 ======
