@@ -30,6 +30,9 @@
  * nk6100 driver updates
     o add GN_OP_GetSMSFolders and GN_OP_GetSMSFolderStatus to
       support gnokii --showsmsfolderstatus          (Daniele Forsi)
+ * gnokii updates
+    o update callback functions to match current libgnokii
+                                                        (Pawel Kot)
 
 0.6.17
 ======
