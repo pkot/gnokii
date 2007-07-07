@@ -1430,7 +1430,8 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 
 	if (!strncmp(buf.line1, "AT+CBC", 6) && !strncmp(buf.line2, "+CBC: ", 6)) {
 		if (data->battery_level) {
-			*(data->battery_unit) = GN_BU_Percentage;
+			if (data->battery_unit)
+				*(data->battery_unit) = GN_BU_Percentage;
 			pos = strchr(buf.line2, ',');
 			if (pos) {
 				pos++;
