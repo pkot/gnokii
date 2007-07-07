@@ -34,7 +34,8 @@
     o update callback functions to match current libgnokii
                                                         (Pawel Kot)
  * smsd updates
-    o add support for multipart SMS for MySQL backend        (ecze)
+    o add support for multipart SMS for MySQL backend
+                                                   (Alain Degreffe)
 
 0.6.17
 ======
