@@ -21,6 +21,8 @@
  * build system updates
     o detect getline() presence and provide its substitute
                                            (Guido Falsi, Pawel Kot)
+    o hide 'dereferencing type-punned pointer will break
+      strict-aliasing rules' warning                    (Pawel Kot)
  * nokia_dku2 module updates
     o add N70 id and new endpoint addresses                 (Yarda)
  * nk6100 driver updates

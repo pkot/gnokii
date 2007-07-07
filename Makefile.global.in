@@ -45,7 +45,7 @@ XGETTEXT       = @XGETTEXT@
 MSGFMT         = @MSGFMT@
 
 CC             = @CC@
-CFLAGS         = @CFLAGS@
+CFLAGS         = -fno-strict-aliasing @CFLAGS@
 CPPFLAGS       = @CPPFLAGS@
 LIBS           = @LIBS@
 LDFLAGS        = @LDFLAGS@
