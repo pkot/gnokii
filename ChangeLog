@@ -18,6 +18,7 @@
     o add more sanity checks for sms reading       (Bastien Nocera)
     o extend cell broadcast callback with gn_statemachine
       argument                                          (Pawel Kot)
+    o fix splitting long messages                  (Robert Gerlach)
  * nk6510 driver updates
     o add support for incoming sms callbacks            (Pawel Kot)
  * build system updates
