@@ -89,7 +89,7 @@ typedef struct {
 	gn_call_status prev_state;
 
 	/* callbacks */
-	void (*on_cell_broadcast)(gn_cb_message *msg, void *callback_data);
+	void (*on_cell_broadcast)(gn_cb_message *msg, struct gn_statemachine *state, void *callback_data);
 	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state, void *callback_data);
 	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
 

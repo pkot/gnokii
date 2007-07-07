@@ -16,6 +16,8 @@
                                         (Bastien Nocera, Pawel Kot)
     o use GN_CALL_MAX_PARALLEL instead of hardcode (Bastien Nocera)
     o add more sanity checks for sms reading       (Bastien Nocera)
+    o extend cell broadcast callback with gn_statemachine
+      argument                                          (Pawel Kot)
  * nk6510 driver updates
     o add support for incoming sms callbacks            (Pawel Kot)
  * build system updates
