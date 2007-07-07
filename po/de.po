@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnokii 0.4.3\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-06-03 21:13+0200\n"
+"POT-Creation-Date: 2007-07-07 18:47+0200\n"
 "PO-Revision-Date: 2002-07-25 19:30+0200\n"
 "Last-Translator: Markus Plail <plail@web.de>\n"
 "Language-Team: German\n"
@@ -272,7 +272,7 @@ msgstr "Telefonspeicher..."
 msgid "Currently selected memory"
 msgstr ""
 
-#: common/gsm-common.c:98
+#: common/gsm-common.c:98 common/phones/nk6100.c:1624
 msgid "SMS Inbox"
 msgstr ""
 
@@ -369,7 +369,7 @@ msgid "SMS Folder 20"
 msgstr ""
 
 #: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:168
-#: common/nokia-decoding.c:127 common/phones/nk6100.c:3971 common/vcard.c:69
+#: common/nokia-decoding.c:127 common/phones/nk6100.c:4016 common/vcard.c:69
 #: gnokii/gnokii-calendar.c:140 gnokii/gnokii-phonebook.c:213
 #: gnokii/gnokii-profile.c:72 gnokii/gnokii-profile.c:84
 #: gnokii/gnokii-profile.c:95 gnokii/gnokii-profile.c:107
@@ -557,7 +557,7 @@ msgstr "Datei %s existiert bereits.\n"
 msgid "Overwrite? (yes/no) "
 msgstr "Datei überschreiben?"
 
-#: common/gsm-filetypes.c:1074 common/phones/nk6510.c:1307
+#: common/gsm-filetypes.c:1074 common/phones/nk6510.c:1316
 #: gnokii/gnokii-phonebook.c:449 gnokii/gnokii-sms.c:539
 #: gnokii/gnokii-sms.c:870
 #, fuzzy
@@ -963,29 +963,29 @@ msgstr "Name"
 msgid "Birthday date"
 msgstr "Geburtstag\n"
 
-#: common/nokia-decoding.c:403 common/phones/nk6100.c:974 common/vcard.c:54
+#: common/nokia-decoding.c:403 common/phones/nk6100.c:980 common/vcard.c:54
 #: gnokii/gnokii-phonebook.c:195 xgnokii/xgnokii.c:232 xgnokii/xgnokii.c:1041
 #, fuzzy, c-format
 msgid "Family"
 msgstr "Familie"
 
-#: common/nokia-decoding.c:404 common/phones/nk6100.c:975
+#: common/nokia-decoding.c:404 common/phones/nk6100.c:981
 #: xgnokii/xgnokii.c:233 xgnokii/xgnokii.c:1053
 msgid "VIP"
 msgstr "VIP"
 
-#: common/nokia-decoding.c:405 common/phones/nk6100.c:976 common/vcard.c:60
+#: common/nokia-decoding.c:405 common/phones/nk6100.c:982 common/vcard.c:60
 #: gnokii/gnokii-phonebook.c:201 xgnokii/xgnokii.c:234 xgnokii/xgnokii.c:1065
 #, c-format
 msgid "Friends"
 msgstr "Freunde"
 
-#: common/nokia-decoding.c:406 common/phones/nk6100.c:977
+#: common/nokia-decoding.c:406 common/phones/nk6100.c:983
 #: xgnokii/xgnokii.c:235 xgnokii/xgnokii.c:1077
 msgid "Colleagues"
 msgstr "Kollegen"
 
-#: common/nokia-decoding.c:407 common/phones/nk6100.c:978
+#: common/nokia-decoding.c:407 common/phones/nk6100.c:984
 #: xgnokii/xgnokii.c:236 xgnokii/xgnokii.c:1089
 msgid "Other"
 msgstr "Andere"
@@ -999,32 +999,32 @@ msgstr "Schreibfehler!\n"
 msgid "Read ack error!\n"
 msgstr "Schreibfehler!\n"
 
-#: common/phones/nk6100.c:1497 xgnokii/xgnokii.c:532 xgnokii/xgnokii_sms.c:855
+#: common/phones/nk6100.c:1506 xgnokii/xgnokii.c:532 xgnokii/xgnokii_sms.c:855
 #, c-format
 msgid "Set %d"
 msgstr "Setze %d"
 
-#: common/phones/nk6100.c:1989
+#: common/phones/nk6100.c:2033
 #, fuzzy, c-format
 msgid "Personal"
 msgstr "Version:"
 
-#: common/phones/nk6100.c:1992 common/phones/nk6100.c:2019
+#: common/phones/nk6100.c:2036 common/phones/nk6100.c:2063
 #, c-format
 msgid "Car"
 msgstr "Auto"
 
-#: common/phones/nk6100.c:1995 common/phones/nk6100.c:2022
+#: common/phones/nk6100.c:2039 common/phones/nk6100.c:2066
 #, c-format
 msgid "Headset"
 msgstr "Headset"
 
-#: common/phones/nk6100.c:1998 common/phones/nk6100.c:2025
+#: common/phones/nk6100.c:2042 common/phones/nk6100.c:2069
 #, fuzzy, c-format
 msgid "Unknown (%d)"
 msgstr "Unbekannt: "
 
-#: common/phones/nk6100.c:2004 xgnokii/xgnokii_contacts.c:925
+#: common/phones/nk6100.c:2048 xgnokii/xgnokii_contacts.c:925
 #: xgnokii/xgnokii_contacts.c:1015 xgnokii/xgnokii_contacts.c:1162
 #: xgnokii/xgnokii_contacts.c:1204 xgnokii/xgnokii_contacts.c:1245
 #: xgnokii/xgnokii_contacts.c:1318 xgnokii/xgnokii_contacts.c:1410
@@ -1032,28 +1032,28 @@ msgstr "Unbekannt: "
 msgid "General"
 msgstr "seriell"
 
-#: common/phones/nk6100.c:2007
+#: common/phones/nk6100.c:2051
 #, fuzzy, c-format
 msgid "Silent"
 msgstr "Gesendet\n"
 
-#: common/phones/nk6100.c:2010 gnokii/gnokii-calendar.c:131
+#: common/phones/nk6100.c:2054 gnokii/gnokii-calendar.c:131
 #: xgnokii/xgnokii_calendar.c:174
 #, fuzzy, c-format
 msgid "Meeting"
 msgstr "Treffen\n"
 
-#: common/phones/nk6100.c:2013
+#: common/phones/nk6100.c:2057
 #, c-format
 msgid "Outdoor"
 msgstr "Draußen"
 
-#: common/phones/nk6100.c:2016
+#: common/phones/nk6100.c:2060
 #, fuzzy, c-format
 msgid "Pager"
 msgstr "Muster:"
 
-#: common/phones/nk6510.c:1302
+#: common/phones/nk6510.c:1311
 #, c-format
 msgid ""
 "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
@@ -1061,12 +1061,12 @@ msgid ""
 "Do you really want to continue? "
 msgstr ""
 
-#: common/phones/nk6510.c:1305
+#: common/phones/nk6510.c:1314
 #, fuzzy, c-format
 msgid "(yes/no) "
 msgstr "Datei überschreiben?"
 
-#: common/phones/nk6510.c:1614 common/phones/nk6510.c:1666
+#: common/phones/nk6510.c:1648 common/phones/nk6510.c:1700
 #, c-format
 msgid "Progress: %d%% completed\n"
 msgstr ""
@@ -1371,8 +1371,8 @@ msgstr ""
 #: gnokii/gnokii-dial.c:99 gnokii/gnokii-dial.c:152 gnokii/gnokii-dial.c:192
 #: gnokii/gnokii-dial.c:223 gnokii/gnokii-dial.c:254 gnokii/gnokii-dial.c:422
 #: gnokii/gnokii-logo.c:288 gnokii/gnokii-logo.c:458
-#: gnokii/gnokii-monitor.c:431 gnokii/gnokii-monitor.c:434
-#: gnokii/gnokii-monitor.c:457 gnokii/gnokii-other.c:186
+#: gnokii/gnokii-monitor.c:432 gnokii/gnokii-monitor.c:435
+#: gnokii/gnokii-monitor.c:458 gnokii/gnokii-other.c:186
 #: gnokii/gnokii-phonebook.c:275 gnokii/gnokii-phonebook.c:282
 #: gnokii/gnokii-phonebook.c:461 gnokii/gnokii-profile.c:176
 #: gnokii/gnokii-profile.c:225 gnokii/gnokii-security.c:187
@@ -1380,12 +1380,12 @@ msgstr ""
 #: gnokii/gnokii-settings.c:122 gnokii/gnokii-settings.c:146
 #: gnokii/gnokii-settings.c:180 gnokii/gnokii-settings.c:204
 #: gnokii/gnokii-sms.c:549 gnokii/gnokii-sms.c:1086 gnokii/gnokii-sms.c:1214
-#: gnokii/gnokii-sms.c:1244 gnokii/gnokii-sms.c:1275 gnokii/gnokii-sms.c:1412
-#: gnokii/gnokii-sms.c:1414 gnokii/gnokii-wap.c:94 gnokii/gnokii-wap.c:129
+#: gnokii/gnokii-sms.c:1244 gnokii/gnokii-sms.c:1275 gnokii/gnokii-sms.c:1413
+#: gnokii/gnokii-sms.c:1415 gnokii/gnokii-wap.c:94 gnokii/gnokii-wap.c:129
 #: gnokii/gnokii-wap.c:162 gnokii/gnokii-wap.c:360 gnokii/gnokii-wap.c:435
-#: smsd/mysql.c:63 smsd/mysql.c:82 smsd/mysql.c:124 smsd/mysql.c:160
-#: smsd/mysql.c:168 smsd/mysql.c:219 smsd/pq.c:70 smsd/pq.c:95 smsd/pq.c:139
-#: smsd/pq.c:180 smsd/pq.c:229
+#: smsd/mysql.c:63 smsd/mysql.c:82 smsd/mysql.c:315 smsd/mysql.c:323
+#: smsd/mysql.c:374 smsd/pq.c:70 smsd/pq.c:95 smsd/pq.c:139 smsd/pq.c:180
+#: smsd/pq.c:229
 #, fuzzy, c-format
 msgid "Error: %s\n"
 msgstr "Fehler"
@@ -1921,166 +1921,166 @@ msgstr ""
 msgid "Entering monitor mode...\n"
 msgstr "Betrete Monitormodus...\n"
 
-#: gnokii/gnokii-monitor.c:234
+#: gnokii/gnokii-monitor.c:235
 #, c-format
 msgid "RFLevel: %d\n"
 msgstr "Empfangsstärke: %d\n"
 
-#: gnokii/gnokii-monitor.c:237
+#: gnokii/gnokii-monitor.c:238
 #, c-format
 msgid "Battery: %d\n"
 msgstr "Batterie: %d\n"
 
-#: gnokii/gnokii-monitor.c:240
+#: gnokii/gnokii-monitor.c:241
 #, c-format
 msgid "Power Source: %s\n"
 msgstr "Stromquelle: %s\n"
 
-#: gnokii/gnokii-monitor.c:240
+#: gnokii/gnokii-monitor.c:241
 msgid "AC/DC"
 msgstr "Gleichspannung"
 
-#: gnokii/gnokii-monitor.c:240
+#: gnokii/gnokii-monitor.c:241
 msgid "battery"
 msgstr "Batterie"
 
-#: gnokii/gnokii-monitor.c:244
+#: gnokii/gnokii-monitor.c:245
 #, c-format
 msgid "SIM: Used %d, Free %d\n"
 msgstr "SIM: Benutzt %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:248
+#: gnokii/gnokii-monitor.c:249
 #, c-format
 msgid "Phone: Used %d, Free %d\n"
 msgstr "Telefon: Benutzt %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:252
+#: gnokii/gnokii-monitor.c:253
 #, c-format
 msgid "DC: Used %d, Free %d\n"
 msgstr "DC: Benutzt %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:256
+#: gnokii/gnokii-monitor.c:257
 #, c-format
 msgid "EN: Used %d, Free %d\n"
 msgstr "EN: Benutzt %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:260
+#: gnokii/gnokii-monitor.c:261
 #, c-format
 msgid "FD: Used %d, Free %d\n"
 msgstr "FD: Benutzt %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:264
+#: gnokii/gnokii-monitor.c:265
 #, c-format
 msgid "LD: Used %d, Free %d\n"
 msgstr "LD: Benutzt %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:268
+#: gnokii/gnokii-monitor.c:269
 #, c-format
 msgid "MC: Used %d, Free %d\n"
 msgstr "MC: Benutzt  %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:272
+#: gnokii/gnokii-monitor.c:273
 #, c-format
 msgid "ON: Used %d, Free %d\n"
 msgstr "ON: Benutzt %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:276
+#: gnokii/gnokii-monitor.c:277
 #, c-format
 msgid "RC: Used %d, Free %d\n"
 msgstr "RC: Benutzt %d, Frei %d\n"
 
-#: gnokii/gnokii-monitor.c:279
+#: gnokii/gnokii-monitor.c:280
 #, fuzzy, c-format
 msgid "SMS Messages: Unread %d, Number %d\n"
 msgstr "SMS Nachrichten: Ungelesen %d, Anzahl %d\n"
 
-#: gnokii/gnokii-monitor.c:282
+#: gnokii/gnokii-monitor.c:283
 #, fuzzy, c-format
 msgid "Network: %s, %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"
 msgstr "Netzwerk: %s (%s), LAC: %s, Zellnummer: %s\n"
 
-#: gnokii/gnokii-monitor.c:291
+#: gnokii/gnokii-monitor.c:292
 #, c-format
 msgid "Cell broadcast received on channel %d: %s\n"
 msgstr ""
 
-#: gnokii/gnokii-monitor.c:300
+#: gnokii/gnokii-monitor.c:301
 #, c-format
 msgid "Leaving monitor mode...\n"
 msgstr "Verlasse Monitormodus...\n"
 
-#: gnokii/gnokii-monitor.c:307
+#: gnokii/gnokii-monitor.c:308
 #, fuzzy, c-format
 msgid "Call in progress: %-3s\n"
 msgstr "Anruf in Arbeit: %s\n"
 
-#: gnokii/gnokii-monitor.c:308 gnokii/gnokii-monitor.c:310
-#: gnokii/gnokii-monitor.c:312 gnokii/gnokii-monitor.c:314
-#: gnokii/gnokii-monitor.c:316 gnokii/gnokii-monitor.c:318
-#: gnokii/gnokii-monitor.c:320 gnokii/gnokii-monitor.c:322
+#: gnokii/gnokii-monitor.c:309 gnokii/gnokii-monitor.c:311
+#: gnokii/gnokii-monitor.c:313 gnokii/gnokii-monitor.c:315
+#: gnokii/gnokii-monitor.c:317 gnokii/gnokii-monitor.c:319
+#: gnokii/gnokii-monitor.c:321 gnokii/gnokii-monitor.c:323
 #: gnokii/gnokii-settings.c:200
 msgid "on"
 msgstr "an"
 
-#: gnokii/gnokii-monitor.c:308 gnokii/gnokii-monitor.c:310
-#: gnokii/gnokii-monitor.c:312 gnokii/gnokii-monitor.c:314
-#: gnokii/gnokii-monitor.c:316 gnokii/gnokii-monitor.c:318
-#: gnokii/gnokii-monitor.c:320 gnokii/gnokii-monitor.c:322
+#: gnokii/gnokii-monitor.c:309 gnokii/gnokii-monitor.c:311
+#: gnokii/gnokii-monitor.c:313 gnokii/gnokii-monitor.c:315
+#: gnokii/gnokii-monitor.c:317 gnokii/gnokii-monitor.c:319
+#: gnokii/gnokii-monitor.c:321 gnokii/gnokii-monitor.c:323
 #: gnokii/gnokii-settings.c:200
 msgid "off"
 msgstr "out"
 
-#: gnokii/gnokii-monitor.c:309
+#: gnokii/gnokii-monitor.c:310
 #, fuzzy, c-format
 msgid "Unknown: %-3s\n"
 msgstr "Unbekannt: %s\n"
 
-#: gnokii/gnokii-monitor.c:311
+#: gnokii/gnokii-monitor.c:312
 #, fuzzy, c-format
 msgid "Unread SMS: %-3s\n"
 msgstr "Ungelesene SMS: %s\n"
 
-#: gnokii/gnokii-monitor.c:313
+#: gnokii/gnokii-monitor.c:314
 #, fuzzy, c-format
 msgid "Voice call: %-3s\n"
 msgstr "Sprachanruf: %s\n"
 
-#: gnokii/gnokii-monitor.c:315
+#: gnokii/gnokii-monitor.c:316
 #, fuzzy, c-format
 msgid "Fax call active: %-3s\n"
 msgstr "Aktiver Faxanruf: %s\n"
 
-#: gnokii/gnokii-monitor.c:317
+#: gnokii/gnokii-monitor.c:318
 #, fuzzy, c-format
 msgid "Data call active: %-3s\n"
 msgstr "Aktiver Datenanruf: %s\n"
 
-#: gnokii/gnokii-monitor.c:319
+#: gnokii/gnokii-monitor.c:320
 #, fuzzy, c-format
 msgid "Keyboard lock: %-3s\n"
 msgstr "Tastatursperre: %s\n"
 
-#: gnokii/gnokii-monitor.c:321
+#: gnokii/gnokii-monitor.c:322
 #, fuzzy, c-format
 msgid "SMS storage full: %-3s\n"
 msgstr "SMS Speicher voll: %s\n"
 
-#: gnokii/gnokii-monitor.c:407
+#: gnokii/gnokii-monitor.c:408
 #, fuzzy, c-format
 msgid "Entered display monitoring mode...\n"
 msgstr "Betrete Monitormodus...\n"
 
-#: gnokii/gnokii-monitor.c:424 gnokii/gnokii-sms.c:1405
+#: gnokii/gnokii-monitor.c:425 gnokii/gnokii-sms.c:1406
 #, c-format
 msgid "Shutting down\n"
 msgstr ""
 
-#: gnokii/gnokii-monitor.c:426
+#: gnokii/gnokii-monitor.c:427
 #, fuzzy, c-format
 msgid "Leaving display monitor mode...\n"
 msgstr "Verlasse Monitormodus...\n"
 
-#: gnokii/gnokii-monitor.c:467
+#: gnokii/gnokii-monitor.c:468
 #, c-format
 msgid " usage: --netmonitor {reset|off|field|devel|next|nr}\n"
 msgstr ""
@@ -3437,12 +3437,12 @@ msgid ""
 "\n"
 msgstr ""
 
-#: gnokii/gnokii-sms.c:1397
+#: gnokii/gnokii-sms.c:1398
 #, fuzzy, c-format
 msgid "Entered sms reader mode...\n"
 msgstr "Betrete Monitormodus...\n"
 
-#: gnokii/gnokii-sms.c:1407
+#: gnokii/gnokii-sms.c:1408
 #, fuzzy, c-format
 msgid "Exiting sms reader mode...\n"
 msgstr "Betrete Monitormodus...\n"
@@ -3970,22 +3970,17 @@ msgstr ""
 msgid "Connection to database '%s' on host '%s' failed.\n"
 msgstr ""
 
-#: smsd/mysql.c:123
-#, c-format
-msgid "%d: INSERT INTO inbox failed.\n"
-msgstr ""
-
-#: smsd/mysql.c:159
+#: smsd/mysql.c:314
 #, c-format
 msgid "%d: SELECT FROM outbox command failed.\n"
 msgstr ""
 
-#: smsd/mysql.c:167
+#: smsd/mysql.c:322
 #, c-format
 msgid "%d: Store Mysql Result Failed.\n"
 msgstr ""
 
-#: smsd/mysql.c:218 smsd/pq.c:228
+#: smsd/mysql.c:373 smsd/pq.c:228
 #, c-format
 msgid "%d: UPDATE command failed.\n"
 msgstr ""
@@ -4044,7 +4039,17 @@ msgstr ""
 msgid "Sending to %s successful.\n"
 msgstr "Sende SMS an %s via SMS-Center %s\n"
 
-#: smsd/smsd.c:447
+#: smsd/smsd.c:446
+#, c-format
+msgid "Inserting sms from %s successful.\n"
+msgstr ""
+
+#: smsd/smsd.c:454
+#, fuzzy, c-format
+msgid "Duplicated sms from %s.\n"
+msgstr "Fehler beim Schreiben von Datei: %s\n"
+
+#: smsd/smsd.c:462
 #, c-format
 msgid ""
 "Inserting sms from %s unsuccessful.\n"
@@ -4052,11 +4057,6 @@ msgid ""
 "Text: %s\n"
 "\n"
 "Exiting."
-msgstr ""
-
-#: smsd/smsd.c:456
-#, c-format
-msgid "Inserting sms from %s successful.\n"
 msgstr ""
 
 #: utils/mgnokiidev.c:172

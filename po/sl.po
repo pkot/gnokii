@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnokii\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2007-06-03 21:13+0200\n"
+"POT-Creation-Date: 2007-07-07 18:47+0200\n"
 "PO-Revision-Date: 2002-04-24 09:41+0100\n"
 "Last-Translator: Bo¹tjan Müller <neonatus@neonatus.net>\n"
 "Language-Team: Slovenian <translation-team-sl@lists.sourceforge.net>\n"
@@ -268,7 +268,7 @@ msgstr "Spomin telefona..."
 msgid "Currently selected memory"
 msgstr "Ne morem dodeliti spomina!"
 
-#: common/gsm-common.c:98
+#: common/gsm-common.c:98 common/phones/nk6100.c:1624
 msgid "SMS Inbox"
 msgstr ""
 
@@ -365,7 +365,7 @@ msgid "SMS Folder 20"
 msgstr ""
 
 #: common/gsm-common.c:122 common/gsm-sms.c:393 common/libfunctions.c:168
-#: common/nokia-decoding.c:127 common/phones/nk6100.c:3971 common/vcard.c:69
+#: common/nokia-decoding.c:127 common/phones/nk6100.c:4016 common/vcard.c:69
 #: gnokii/gnokii-calendar.c:140 gnokii/gnokii-phonebook.c:213
 #: gnokii/gnokii-profile.c:72 gnokii/gnokii-profile.c:84
 #: gnokii/gnokii-profile.c:95 gnokii/gnokii-profile.c:107
@@ -555,7 +555,7 @@ msgstr "Datoteka %s obstaja.\n"
 msgid "Overwrite? (yes/no) "
 msgstr "Prepi¹em? (yes/no) "
 
-#: common/gsm-filetypes.c:1074 common/phones/nk6510.c:1307
+#: common/gsm-filetypes.c:1074 common/phones/nk6510.c:1316
 #: gnokii/gnokii-phonebook.c:449 gnokii/gnokii-sms.c:539
 #: gnokii/gnokii-sms.c:870
 msgid "yes"
@@ -967,29 +967,29 @@ msgid "Birthday date"
 msgstr "Rojstni dan"
 
 #
-#: common/nokia-decoding.c:403 common/phones/nk6100.c:974 common/vcard.c:54
+#: common/nokia-decoding.c:403 common/phones/nk6100.c:980 common/vcard.c:54
 #: gnokii/gnokii-phonebook.c:195 xgnokii/xgnokii.c:232 xgnokii/xgnokii.c:1041
 #, c-format
 msgid "Family"
 msgstr "Dru¾ina"
 
-#: common/nokia-decoding.c:404 common/phones/nk6100.c:975
+#: common/nokia-decoding.c:404 common/phones/nk6100.c:981
 #: xgnokii/xgnokii.c:233 xgnokii/xgnokii.c:1053
 msgid "VIP"
 msgstr "VIP"
 
-#: common/nokia-decoding.c:405 common/phones/nk6100.c:976 common/vcard.c:60
+#: common/nokia-decoding.c:405 common/phones/nk6100.c:982 common/vcard.c:60
 #: gnokii/gnokii-phonebook.c:201 xgnokii/xgnokii.c:234 xgnokii/xgnokii.c:1065
 #, c-format
 msgid "Friends"
 msgstr "Prijatelji"
 
-#: common/nokia-decoding.c:406 common/phones/nk6100.c:977
+#: common/nokia-decoding.c:406 common/phones/nk6100.c:983
 #: xgnokii/xgnokii.c:235 xgnokii/xgnokii.c:1077
 msgid "Colleagues"
 msgstr "Kolegi"
 
-#: common/nokia-decoding.c:407 common/phones/nk6100.c:978
+#: common/nokia-decoding.c:407 common/phones/nk6100.c:984
 #: xgnokii/xgnokii.c:236 xgnokii/xgnokii.c:1089
 msgid "Other"
 msgstr "Ostali"
@@ -1003,33 +1003,33 @@ msgstr "Napaka pri pisanju!\n"
 msgid "Read ack error!\n"
 msgstr "Napaka pri branju ack-a!\n"
 
-#: common/phones/nk6100.c:1497 xgnokii/xgnokii.c:532 xgnokii/xgnokii_sms.c:855
+#: common/phones/nk6100.c:1506 xgnokii/xgnokii.c:532 xgnokii/xgnokii_sms.c:855
 #, c-format
 msgid "Set %d"
 msgstr "Nastavljen %d"
 
 #
-#: common/phones/nk6100.c:1989
+#: common/phones/nk6100.c:2033
 #, c-format
 msgid "Personal"
 msgstr "Osebno"
 
-#: common/phones/nk6100.c:1992 common/phones/nk6100.c:2019
+#: common/phones/nk6100.c:2036 common/phones/nk6100.c:2063
 #, c-format
 msgid "Car"
 msgstr "Avto"
 
-#: common/phones/nk6100.c:1995 common/phones/nk6100.c:2022
+#: common/phones/nk6100.c:2039 common/phones/nk6100.c:2066
 #, c-format
 msgid "Headset"
 msgstr "Slu¹alke"
 
-#: common/phones/nk6100.c:1998 common/phones/nk6100.c:2025
+#: common/phones/nk6100.c:2042 common/phones/nk6100.c:2069
 #, c-format
 msgid "Unknown (%d)"
 msgstr "Neznana (%d)"
 
-#: common/phones/nk6100.c:2004 xgnokii/xgnokii_contacts.c:925
+#: common/phones/nk6100.c:2048 xgnokii/xgnokii_contacts.c:925
 #: xgnokii/xgnokii_contacts.c:1015 xgnokii/xgnokii_contacts.c:1162
 #: xgnokii/xgnokii_contacts.c:1204 xgnokii/xgnokii_contacts.c:1245
 #: xgnokii/xgnokii_contacts.c:1318 xgnokii/xgnokii_contacts.c:1410
@@ -1038,30 +1038,30 @@ msgid "General"
 msgstr "Splo¹ni"
 
 #
-#: common/phones/nk6100.c:2007
+#: common/phones/nk6100.c:2051
 #, c-format
 msgid "Silent"
 msgstr "Tiho"
 
-#: common/phones/nk6100.c:2010 gnokii/gnokii-calendar.c:131
+#: common/phones/nk6100.c:2054 gnokii/gnokii-calendar.c:131
 #: xgnokii/xgnokii_calendar.c:174
 #, c-format
 msgid "Meeting"
 msgstr "Sreèanje"
 
 #
-#: common/phones/nk6100.c:2013
+#: common/phones/nk6100.c:2057
 #, c-format
 msgid "Outdoor"
 msgstr "Na prostem"
 
 #
-#: common/phones/nk6100.c:2016
+#: common/phones/nk6100.c:2060
 #, c-format
 msgid "Pager"
 msgstr ""
 
-#: common/phones/nk6510.c:1302
+#: common/phones/nk6510.c:1311
 #, c-format
 msgid ""
 "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
@@ -1069,12 +1069,12 @@ msgid ""
 "Do you really want to continue? "
 msgstr ""
 
-#: common/phones/nk6510.c:1305
+#: common/phones/nk6510.c:1314
 #, fuzzy, c-format
 msgid "(yes/no) "
 msgstr "Prepi¹em? (yes/no) "
 
-#: common/phones/nk6510.c:1614 common/phones/nk6510.c:1666
+#: common/phones/nk6510.c:1648 common/phones/nk6510.c:1700
 #, c-format
 msgid "Progress: %d%% completed\n"
 msgstr ""
@@ -1381,8 +1381,8 @@ msgstr "HitroKlicanje ¹t. %d: %d:%d\n"
 #: gnokii/gnokii-dial.c:99 gnokii/gnokii-dial.c:152 gnokii/gnokii-dial.c:192
 #: gnokii/gnokii-dial.c:223 gnokii/gnokii-dial.c:254 gnokii/gnokii-dial.c:422
 #: gnokii/gnokii-logo.c:288 gnokii/gnokii-logo.c:458
-#: gnokii/gnokii-monitor.c:431 gnokii/gnokii-monitor.c:434
-#: gnokii/gnokii-monitor.c:457 gnokii/gnokii-other.c:186
+#: gnokii/gnokii-monitor.c:432 gnokii/gnokii-monitor.c:435
+#: gnokii/gnokii-monitor.c:458 gnokii/gnokii-other.c:186
 #: gnokii/gnokii-phonebook.c:275 gnokii/gnokii-phonebook.c:282
 #: gnokii/gnokii-phonebook.c:461 gnokii/gnokii-profile.c:176
 #: gnokii/gnokii-profile.c:225 gnokii/gnokii-security.c:187
@@ -1390,12 +1390,12 @@ msgstr "HitroKlicanje ¹t. %d: %d:%d\n"
 #: gnokii/gnokii-settings.c:122 gnokii/gnokii-settings.c:146
 #: gnokii/gnokii-settings.c:180 gnokii/gnokii-settings.c:204
 #: gnokii/gnokii-sms.c:549 gnokii/gnokii-sms.c:1086 gnokii/gnokii-sms.c:1214
-#: gnokii/gnokii-sms.c:1244 gnokii/gnokii-sms.c:1275 gnokii/gnokii-sms.c:1412
-#: gnokii/gnokii-sms.c:1414 gnokii/gnokii-wap.c:94 gnokii/gnokii-wap.c:129
+#: gnokii/gnokii-sms.c:1244 gnokii/gnokii-sms.c:1275 gnokii/gnokii-sms.c:1413
+#: gnokii/gnokii-sms.c:1415 gnokii/gnokii-wap.c:94 gnokii/gnokii-wap.c:129
 #: gnokii/gnokii-wap.c:162 gnokii/gnokii-wap.c:360 gnokii/gnokii-wap.c:435
-#: smsd/mysql.c:63 smsd/mysql.c:82 smsd/mysql.c:124 smsd/mysql.c:160
-#: smsd/mysql.c:168 smsd/mysql.c:219 smsd/pq.c:70 smsd/pq.c:95 smsd/pq.c:139
-#: smsd/pq.c:180 smsd/pq.c:229
+#: smsd/mysql.c:63 smsd/mysql.c:82 smsd/mysql.c:315 smsd/mysql.c:323
+#: smsd/mysql.c:374 smsd/pq.c:70 smsd/pq.c:95 smsd/pq.c:139 smsd/pq.c:180
+#: smsd/pq.c:229
 #, fuzzy, c-format
 msgid "Error: %s\n"
 msgstr "Napaka !\n"
@@ -1942,170 +1942,170 @@ msgstr ""
 msgid "Entering monitor mode...\n"
 msgstr "Vstopam v nadzorni naèin...\n"
 
-#: gnokii/gnokii-monitor.c:234
+#: gnokii/gnokii-monitor.c:235
 #, c-format
 msgid "RFLevel: %d\n"
 msgstr "RFLevel: %d\n"
 
-#: gnokii/gnokii-monitor.c:237
+#: gnokii/gnokii-monitor.c:238
 #, c-format
 msgid "Battery: %d\n"
 msgstr "Baterija: %d\n"
 
-#: gnokii/gnokii-monitor.c:240
+#: gnokii/gnokii-monitor.c:241
 #, c-format
 msgid "Power Source: %s\n"
 msgstr "Vrsta napajanja: %s\n"
 
 #
-#: gnokii/gnokii-monitor.c:240
+#: gnokii/gnokii-monitor.c:241
 msgid "AC/DC"
 msgstr "AC/DC"
 
 #
-#: gnokii/gnokii-monitor.c:240
+#: gnokii/gnokii-monitor.c:241
 msgid "battery"
 msgstr "baterija"
 
-#: gnokii/gnokii-monitor.c:244
+#: gnokii/gnokii-monitor.c:245
 #, c-format
 msgid "SIM: Used %d, Free %d\n"
 msgstr "SIM: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:248
+#: gnokii/gnokii-monitor.c:249
 #, c-format
 msgid "Phone: Used %d, Free %d\n"
 msgstr "Telefon: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:252
+#: gnokii/gnokii-monitor.c:253
 #, c-format
 msgid "DC: Used %d, Free %d\n"
 msgstr "DC: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:256
+#: gnokii/gnokii-monitor.c:257
 #, c-format
 msgid "EN: Used %d, Free %d\n"
 msgstr "EN: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:260
+#: gnokii/gnokii-monitor.c:261
 #, c-format
 msgid "FD: Used %d, Free %d\n"
 msgstr "FD: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:264
+#: gnokii/gnokii-monitor.c:265
 #, c-format
 msgid "LD: Used %d, Free %d\n"
 msgstr "LD: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:268
+#: gnokii/gnokii-monitor.c:269
 #, c-format
 msgid "MC: Used %d, Free %d\n"
 msgstr "MC: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:272
+#: gnokii/gnokii-monitor.c:273
 #, c-format
 msgid "ON: Used %d, Free %d\n"
 msgstr "ON: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:276
+#: gnokii/gnokii-monitor.c:277
 #, c-format
 msgid "RC: Used %d, Free %d\n"
 msgstr "RC: V uporabi %d, Prosto %d\n"
 
-#: gnokii/gnokii-monitor.c:279
+#: gnokii/gnokii-monitor.c:280
 #, c-format
 msgid "SMS Messages: Unread %d, Number %d\n"
 msgstr "SMS Sporoèil: Neprebranih %d, ©tevilo %d \n"
 
-#: gnokii/gnokii-monitor.c:282
+#: gnokii/gnokii-monitor.c:283
 #, c-format
 msgid "Network: %s, %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"
 msgstr ""
 
-#: gnokii/gnokii-monitor.c:291
+#: gnokii/gnokii-monitor.c:292
 #, c-format
 msgid "Cell broadcast received on channel %d: %s\n"
 msgstr "Oddaja celice sprejeta na kanalu %d: %s\n"
 
-#: gnokii/gnokii-monitor.c:300
+#: gnokii/gnokii-monitor.c:301
 #, c-format
 msgid "Leaving monitor mode...\n"
 msgstr "Zapu¹èam nadzorni naèin...\n"
 
-#: gnokii/gnokii-monitor.c:307
+#: gnokii/gnokii-monitor.c:308
 #, c-format
 msgid "Call in progress: %-3s\n"
 msgstr "Klic v poteku: %-3s\n"
 
-#: gnokii/gnokii-monitor.c:308 gnokii/gnokii-monitor.c:310
-#: gnokii/gnokii-monitor.c:312 gnokii/gnokii-monitor.c:314
-#: gnokii/gnokii-monitor.c:316 gnokii/gnokii-monitor.c:318
-#: gnokii/gnokii-monitor.c:320 gnokii/gnokii-monitor.c:322
+#: gnokii/gnokii-monitor.c:309 gnokii/gnokii-monitor.c:311
+#: gnokii/gnokii-monitor.c:313 gnokii/gnokii-monitor.c:315
+#: gnokii/gnokii-monitor.c:317 gnokii/gnokii-monitor.c:319
+#: gnokii/gnokii-monitor.c:321 gnokii/gnokii-monitor.c:323
 #: gnokii/gnokii-settings.c:200
 msgid "on"
 msgstr "vklopljen"
 
-#: gnokii/gnokii-monitor.c:308 gnokii/gnokii-monitor.c:310
-#: gnokii/gnokii-monitor.c:312 gnokii/gnokii-monitor.c:314
-#: gnokii/gnokii-monitor.c:316 gnokii/gnokii-monitor.c:318
-#: gnokii/gnokii-monitor.c:320 gnokii/gnokii-monitor.c:322
+#: gnokii/gnokii-monitor.c:309 gnokii/gnokii-monitor.c:311
+#: gnokii/gnokii-monitor.c:313 gnokii/gnokii-monitor.c:315
+#: gnokii/gnokii-monitor.c:317 gnokii/gnokii-monitor.c:319
+#: gnokii/gnokii-monitor.c:321 gnokii/gnokii-monitor.c:323
 #: gnokii/gnokii-settings.c:200
 msgid "off"
 msgstr "izklopljen"
 
-#: gnokii/gnokii-monitor.c:309
+#: gnokii/gnokii-monitor.c:310
 #, c-format
 msgid "Unknown: %-3s\n"
 msgstr "Neznan: %-3s\n"
 
-#: gnokii/gnokii-monitor.c:311
+#: gnokii/gnokii-monitor.c:312
 #, c-format
 msgid "Unread SMS: %-3s\n"
 msgstr "Neprebran SMS: %-3s\n"
 
-#: gnokii/gnokii-monitor.c:313
+#: gnokii/gnokii-monitor.c:314
 #, c-format
 msgid "Voice call: %-3s\n"
 msgstr "Glasovni klic: %-3s\n"
 
-#: gnokii/gnokii-monitor.c:315
+#: gnokii/gnokii-monitor.c:316
 #, c-format
 msgid "Fax call active: %-3s\n"
 msgstr "Fax klic aktiven: %-3s\n"
 
-#: gnokii/gnokii-monitor.c:317
+#: gnokii/gnokii-monitor.c:318
 #, c-format
 msgid "Data call active: %-3s\n"
 msgstr "Podatkovni klic aktiven: %-3s\n"
 
-#: gnokii/gnokii-monitor.c:319
+#: gnokii/gnokii-monitor.c:320
 #, c-format
 msgid "Keyboard lock: %-3s\n"
 msgstr "Zaklepanje tipkovnice: %-3s\n"
 
-#: gnokii/gnokii-monitor.c:321
+#: gnokii/gnokii-monitor.c:322
 #, c-format
 msgid "SMS storage full: %-3s\n"
 msgstr "SMS pomnilnik poln: %-3s\n"
 
 #
-#: gnokii/gnokii-monitor.c:407
+#: gnokii/gnokii-monitor.c:408
 #, c-format
 msgid "Entered display monitoring mode...\n"
 msgstr "Vstopil v nadzorni naèin zaslona...\n"
 
 #
-#: gnokii/gnokii-monitor.c:424 gnokii/gnokii-sms.c:1405
+#: gnokii/gnokii-monitor.c:425 gnokii/gnokii-sms.c:1406
 #, c-format
 msgid "Shutting down\n"
 msgstr "Izklapljam\n"
 
-#: gnokii/gnokii-monitor.c:426
+#: gnokii/gnokii-monitor.c:427
 #, c-format
 msgid "Leaving display monitor mode...\n"
 msgstr "Zapu¹èam nadzorni naèin zaslona...\n"
 
-#: gnokii/gnokii-monitor.c:467
+#: gnokii/gnokii-monitor.c:468
 #, c-format
 msgid " usage: --netmonitor {reset|off|field|devel|next|nr}\n"
 msgstr ""
@@ -3489,13 +3489,13 @@ msgid ""
 msgstr ""
 
 #
-#: gnokii/gnokii-sms.c:1397
+#: gnokii/gnokii-sms.c:1398
 #, c-format
 msgid "Entered sms reader mode...\n"
 msgstr "Vstopam v naèin smsreader (bralca sms sporoèil)...\n"
 
 #
-#: gnokii/gnokii-sms.c:1407
+#: gnokii/gnokii-sms.c:1408
 #, c-format
 msgid "Exiting sms reader mode...\n"
 msgstr "Izstopam iz smsreader naèina...\n"
@@ -4042,22 +4042,17 @@ msgstr "Dogodek %d neuspel z povratno kodo %d!\n"
 msgid "Connection to database '%s' on host '%s' failed.\n"
 msgstr ""
 
-#: smsd/mysql.c:123
-#, c-format
-msgid "%d: INSERT INTO inbox failed.\n"
-msgstr ""
-
-#: smsd/mysql.c:159
+#: smsd/mysql.c:314
 #, c-format
 msgid "%d: SELECT FROM outbox command failed.\n"
 msgstr ""
 
-#: smsd/mysql.c:167
+#: smsd/mysql.c:322
 #, c-format
 msgid "%d: Store Mysql Result Failed.\n"
 msgstr ""
 
-#: smsd/mysql.c:218 smsd/pq.c:228
+#: smsd/mysql.c:373 smsd/pq.c:228
 #, c-format
 msgid "%d: UPDATE command failed.\n"
 msgstr ""
@@ -4116,7 +4111,17 @@ msgstr ""
 msgid "Sending to %s successful.\n"
 msgstr "Po¹iljanje SMS-a %s ...\n"
 
-#: smsd/smsd.c:447
+#: smsd/smsd.c:446
+#, c-format
+msgid "Inserting sms from %s successful.\n"
+msgstr ""
+
+#: smsd/smsd.c:454
+#, fuzzy, c-format
+msgid "Duplicated sms from %s.\n"
+msgstr "Profila %s ni bilo mogoèe nastaviti\n"
+
+#: smsd/smsd.c:462
 #, c-format
 msgid ""
 "Inserting sms from %s unsuccessful.\n"
@@ -4124,11 +4129,6 @@ msgid ""
 "Text: %s\n"
 "\n"
 "Exiting."
-msgstr ""
-
-#: smsd/smsd.c:456
-#, c-format
-msgid "Inserting sms from %s successful.\n"
 msgstr ""
 
 #: utils/mgnokiidev.c:172
