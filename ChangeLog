@@ -33,6 +33,8 @@
  * gnokii updates
     o update callback functions to match current libgnokii
                                                         (Pawel Kot)
+ * smsd updates
+    o add support for multipart SMS for MySQL backend        (ecze)
 
 0.6.17
 ======

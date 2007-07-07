@@ -417,9 +417,9 @@ GNOKII_API gint WriteSMS (gn_sms *sms)
 }
 
 
-static void ReadSMS (gpointer d, gpointer userData)
+static void ReadSMS(gpointer d, gpointer userData)
 {
-  gn_sms *data = (gn_sms *) d;
+  gn_sms *data = (gn_sms *)d;
   PhoneEvent *e;
   gint error;
   
@@ -432,34 +432,41 @@ static void ReadSMS (gpointer d, gpointer userData)
     }
     else */
     {  
-      gn_log_xdebug ("%d. %s   ", data->number, data->remote.number);
-      gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
+      gn_log_xdebug("%d. %s   ", data->number, data->remote.number);
+      gn_log_xdebug("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
                      data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
                      data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
                      data->user_data[0].u.text);
-      error = (*DB_InsertSMS) (data, smsdConfig.phone);
+      error = (*DB_InsertSMS)(data, smsdConfig.phone);
     }
-    
-    if (smsdConfig.logFile)
-    {
-      if (error)
-      {
-        LogFile (_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting."),
+
+    switch (error) {
+    case SMSD_OK:
+      if (smsdConfig.logFile)
+        LogFile(_("Inserting sms from %s successful.\n"), data->remote.number);
+      e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
+      e->event = Event_DeleteSMSMessage;
+      e->data = data;
+      InsertEvent(e);
+      break;
+    case SMSD_DUPLICATE:
+      if (smsdConfig.logFile)
+        LogFile(_("Duplicated sms from %s.\n"), data->remote.number);
+      e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
+      e->event = Event_DeleteSMSMessage;
+      e->data = data;
+      InsertEvent(e);
+      break;
+    default:
+      if (smsdConfig.logFile)
+        LogFile(_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting."),
                  data->remote.number, data->smsc_time.year,
                  data->smsc_time.month, data->smsc_time.day,
                  data->smsc_time.hour, data->smsc_time.minute,
                  data->smsc_time.second, data->smsc_time.timezone,
                  data->user_data[0].u.text);
-        MainExit (1);
-      }
-      else
-        LogFile (_("Inserting sms from %s successful.\n"), data->remote.number);
+      break;
     }
-    
-    e = (PhoneEvent *) g_malloc (sizeof (PhoneEvent));
-    e->event = Event_DeleteSMSMessage;
-    e->data = data;
-    InsertEvent (e);
   }
 }
 

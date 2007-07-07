@@ -33,6 +33,11 @@
 #include <glib.h>
 #include "gnokii.h"
 
+/* error definition */
+#define SMSD_OK		0
+#define SMSD_NOK	1
+#define SMSD_DUPLICATE	2
+
 typedef enum {
   SMSD_READ_REPORTS = 1
 } SMSDSettings;

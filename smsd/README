@@ -56,6 +56,18 @@ not_after      - sms will not be send after this time (default 23:59:59).
 SMSD is multi threaded program. If you list processes you will see more then
 one instance of smsd.
 
+MySQL module supports incoming multipart SMSes. It uses special table called
+'multipartinbox':
+number     - same as inbox
+smsdate    - same as inbox
+insertdate - same as inbox
+text       - same as inbox
+phone      - same as inbox
+processed  - same as inbox
+refnum     - identifier of the multipart series (all parts have the same
+             refnum)
+maxnum     - total number of SMS parts
+curnum     - number of current part within the series
 
 
 THE FILE MODULE

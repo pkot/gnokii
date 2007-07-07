@@ -1,3 +1,7 @@
+* Sat Jul  7 2007 Pawel Kot
+- add support for multipart SMS for MySQL backend (ecze)
+
+
 * Fri Nov 17 2006 Pawel Kot
 - reconnect only on timeout
 

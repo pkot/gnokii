@@ -87,48 +87,203 @@ GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
 }
 
 
-GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const phone)
+GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phone)
 {
   GString *buf, *phnStr;
   gchar *text;
-
+  MYSQL_RES *res;
+  MYSQL_ROW row;
 
   if (phone[0] == '\0')
-    phnStr = g_string_new ("");
+    phnStr = g_string_new("");
   else
   {
-    phnStr = g_string_sized_new (32);
-    g_string_sprintf (phnStr, "'%s',", phone);
+    phnStr = g_string_sized_new(32);
+    g_string_sprintf(phnStr, "'%s',", phone);
   }
 
 /* MySQL has own escape function.    
   text = strEscape (data->UserData[0].u.Text);
 */
-  text = g_malloc (strlen ((gchar *) data->user_data[0].u.text) * 2 + 1);
-  mysql_real_escape_string (&mysqlIn, text, data->user_data[0].u.text, strlen ((gchar *) data->user_data[0].u.text));
+  text = g_malloc(strlen((gchar *)data->user_data[0].u.text) * 2 + 1);
+  mysql_real_escape_string(&mysqlIn, text, data->user_data[0].u.text, strlen((gchar *)data->user_data[0].u.text));
   
-  buf = g_string_sized_new (256);
-  g_string_sprintf (buf, "INSERT INTO inbox (number, smsdate, \
-                    text, %s processed) VALUES ('%s', \
-                    '%04d-%02d-%02d %02d:%02d:%02d', '%s', %s '0')",
-                    phone[0] != '\0' ? "phone," : "", data->remote.number,
+  if (data->udh.udh[0].type == GN_SMS_UDH_ConcatenatedMessages) { // Multipart Message !
+    /* Check for duplicates */
+    buf = g_string_sized_new(MAX_SQL_CMD_LEN);
+    g_string_sprintf(buf, "SELECT count(id) FROM multipartinbox \
+                          WHERE text = '%s' AND refnum = %i AND \
+                          maxnum = %i AND curnum = %i AND \
+                          smsdate = '%04d-%02d-%02d %02d:%02d:%02d'",
+                    text, data->udh.udh[0].u.concatenated_short_message.reference_number,
+                    data->udh.udh[0].u.concatenated_short_message.maximum_number,
+                    data->udh.udh[0].u.concatenated_short_message.current_number,
                     data->smsc_time.year, data->smsc_time.month,
                     data->smsc_time.day, data->smsc_time.hour,
-                    data->smsc_time.minute, data->smsc_time.second, text, phnStr->str);
-  g_free (text);
+                    data->smsc_time.minute, data->smsc_time.second);
+    if (mysql_real_query(&mysqlIn, buf->str, buf->len))
+    {
+      gn_log_xdebug("%d: multipart select failed.\n", __LINE__);
+      gn_log_xdebug("%s\n", buf);
+      gn_log_xdebug("Error: %s\n", mysql_error(&mysqlIn));
+      g_string_free(buf, TRUE);
+      return SMSD_NOK;
+    }
+    res = mysql_store_result(&mysqlIn);
+    row = mysql_fetch_row(res);
+    if (atoi(row[0]) > 0)
+    {
+      gn_log_xdebug("%d: SMS already stored in the database.\n", __LINE__);
+      g_string_free(buf, TRUE);
+      return SMSD_DUPLICATE;
+    }
+
+    /* insert into multipart */
+    g_string_sprintf(buf, "INSERT INTO multipartinbox (number, smsdate, \
+                          text, refnum , maxnum , curnum, %s processed) VALUES ('%s', \
+                          '%04d-%02d-%02d %02d:%02d:%02d', '%s', %i, %i, %i, %s '0')",
+                          phone[0] != '\0' ? "phone," : "", data->remote.number,
+                          data->smsc_time.year, data->smsc_time.month,
+                          data->smsc_time.day, data->smsc_time.hour,
+                          data->smsc_time.minute, data->smsc_time.second, text,
+                          data->udh.udh[0].u.concatenated_short_message.reference_number,
+                          data->udh.udh[0].u.concatenated_short_message.maximum_number,
+                          data->udh.udh[0].u.concatenated_short_message.current_number, phnStr->str);
+
+    if (mysql_real_query(&mysqlIn, buf->str, buf->len))
+    {
+      gn_log_xdebug("%d: INSERT INTO multipartinbox failed.\n", __LINE__);
+      gn_log_xdebug("%s\n", buf);      
+      gn_log_xdebug("Error: %s\n", mysql_error(&mysqlIn));
+      g_string_free(buf, TRUE);
+      return SMSD_NOK;
+    }
+
+    /* If all parts are already in multipart inbox, move it into inbox */
+    g_string_sprintf (buf, "SELECT count(DISTINCT text) FROM multipartinbox \
+                           WHERE number='%s' AND refnum=%i AND maxnum=%i and processed = 0" ,
+                      data->remote.number,
+                      data->udh.udh[0].u.concatenated_short_message.reference_number,
+                      data->udh.udh[0].u.concatenated_short_message.maximum_number);
+    if (mysql_real_query(&mysqlOut, buf->str, buf->len))
+    {
+      gn_log_xdebug("%d: SELECT FROM multipartinbox failed.\n", __LINE__);
+      gn_log_xdebug("%s\n", buf);
+      gn_log_xdebug("Error: %s\n", mysql_error(&mysqlOut));
+      g_string_free(buf, TRUE);
+      return SMSD_NOK;
+    }
+
+    if (!(res = mysql_store_result(&mysqlOut)))
+    {
+      gn_log_xdebug("%d: Store Mysql Result Failed.\n", __LINE__);
+      gn_log_xdebug("Error: %s\n", mysql_error(&mysqlOut));
+      g_string_free(buf, TRUE);
+      return SMSD_NOK;
+    }
+    row = mysql_fetch_row(res);
+    gn_xlog_print("maxnumber: %s - count: %i\n", row[0], data->udh.udh[0].u.concatenated_short_message.maximum_number);
+    if (atoi(row[0]) == data->udh.udh[0].u.concatenated_short_message.maximum_number ) /* all parts collected */
+    {
+      gchar *tmpText;
+      g_string_sprintf(buf, "SELECT DISTINCT text FROM multipartinbox \
+                            WHERE number='%s' AND refnum=%i AND maxnum=%i ORDER BY curnum",
+                      data->remote.number,
+                      data->udh.udh[0].u.concatenated_short_message.reference_number,
+                      data->udh.udh[0].u.concatenated_short_message.maximum_number);
+      if (mysql_real_query(&mysqlOut, buf->str, buf->len))
+      {
+        gn_log_xdebug("%d: SELECT text from multipartinbox failed.\n", __LINE__);
+        gn_log_xdebug("%s\n", buf);
+        gn_log_xdebug("Error: %s\n", mysql_error(&mysqlOut));
+        g_string_free(buf, TRUE);
+        return SMSD_NOK;
+      }
+      if (!(res = mysql_store_result(&mysqlOut)))
+      {
+        gn_log_xdebug("%d: Store Mysql Result Failed.\n", __LINE__);
+        gn_log_xdebug("Error: %s\n", mysql_error(&mysqlOut));
+        g_string_free(buf, TRUE);
+        return SMSD_NOK;
+      }
+      g_free(text);
+      text = g_malloc(GN_SMS_LONG_MAX_LENGTH);
+      tmpText = g_malloc(GN_SMS_MAX_LENGTH);
+      text[0] = '\0';
+      while ((row = mysql_fetch_row(res)))
+      {
+        mysql_real_escape_string(&mysqlIn, tmpText, row[0], strlen(row[0]));
+        strcat(text, tmpText);
+      }
+      g_free(tmpText);
+      g_string_sprintf(buf, "UPDATE multipartinbox SET processed = 1 \
+                            WHERE number=%s AND refnum=%i AND maxnum=%i",
+                      data->remote.number,
+                      data->udh.udh[0].u.concatenated_short_message.reference_number,
+                      data->udh.udh[0].u.concatenated_short_message.maximum_number);
+      if (mysql_real_query(&mysqlIn, buf->str, buf->len))
+      {
+        gn_log_xdebug("%d: DELETE FROM multipartinbox failed.\n", __LINE__);
+        gn_log_xdebug("%s\n", buf);
+        gn_log_xdebug("Error: %s\n", mysql_error(&mysqlIn));
+        g_string_free(buf, TRUE);
+        return SMSD_NOK;
+      }
+      mysql_free_result(res);
+    } else {
+      g_string_free(buf, TRUE);
+      return SMSD_NOK;
+    }
+    g_string_free(buf, TRUE);
+  }
+
+  buf = g_string_sized_new(MAX_SQL_CMD_LEN);
+  gn_log_xdebug("Message: %s\n", text);
+  /* Detect duplicates */
+  g_string_sprintf(buf, "SELECT count(id) FROM inbox \
+                        WHERE text = '%s' AND smsdate = '%04d-%02d-%02d %02d:%02d:%02d'",
+		  text, data->smsc_time.year, data->smsc_time.month,
+		  data->smsc_time.day, data->smsc_time.hour,
+		  data->smsc_time.minute, data->smsc_time.second);
+  if (mysql_real_query(&mysqlIn, buf->str, buf->len))
+  {
+    gn_log_xdebug("%d: SELECT inbox failed.\n", __LINE__);
+    gn_log_xdebug("%s\n", buf);
+    gn_log_xdebug("Error: %s\n", mysql_error(&mysqlIn));
+    g_string_free(buf, TRUE);
+    return SMSD_NOK;
+  }
+  res = mysql_store_result(&mysqlIn);
+  row = mysql_fetch_row(res);
+  if (atoi(row[0]) > 0)
+  {
+    gn_log_xdebug("%d: MSG already stored in database.\n", __LINE__);
+    g_string_free(buf, TRUE);
+    return SMSD_DUPLICATE;
+  }
+
+  g_string_sprintf(buf, "INSERT INTO inbox (number, smsdate, \
+                   text, %s processed) VALUES ('%s', \
+                   '%04d-%02d-%02d %02d:%02d:%02d', '%s', %s '0')",
+                   phone[0] != '\0' ? "phone," : "", data->remote.number,
+                   data->smsc_time.year, data->smsc_time.month,
+                   data->smsc_time.day, data->smsc_time.hour,
+                   data->smsc_time.minute, data->smsc_time.second, text, phnStr->str);
+  g_free(text);
   g_string_free(phnStr, TRUE);
 
-  if (mysql_real_query (&mysqlIn, buf->str, buf->len))
+  if (mysql_real_query(&mysqlIn, buf->str, buf->len))
   {
-    g_print (_("%d: INSERT INTO inbox failed.\n"), __LINE__);
-    g_print (_("Error: %s\n"), mysql_error (&mysqlIn));
+    gn_log_xdebug("%d: INSERT INTO inbox failed.\n", __LINE__);
+    gn_log_xdebug("%s\n", buf);
+    gn_log_xdebug("Error: %s\n", mysql_error(&mysqlIn));
     g_string_free(buf, TRUE);
-    return (1);
+    return SMSD_NOK;
   }
-  
+
   g_string_free(buf, TRUE);
-  
-  return (0);
+
+  return SMSD_OK;
 }
 
 
