@@ -25,6 +25,8 @@
  * nk6510 driver updates
     o add support for incoming sms callbacks            (Pawel Kot)
     o add support for occurrences field in calendar (Keith Packard)
+    o account for phonebook blocks not sent due to limited packet
+      space                                         (Keith Packard)
  * build system updates
     o detect getline() presence and provide its substitute
                                            (Guido Falsi, Pawel Kot)

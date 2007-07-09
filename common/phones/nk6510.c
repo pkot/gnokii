@@ -2131,15 +2131,19 @@ static gn_error NK6510_GetSpeedDial(gn_data *data, struct gn_statemachine *state
 	return NK6510_ReadPhonebookLocation(data, state, NK6510_MEMORY_SPEEDDIALS, data->speed_dial->number);
 }
 
-static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block, unsigned int maxsize)
+static unsigned char PackBlock(u8 id, u8 size, int *no, u8 *buf, u8 *block, unsigned int maxsize)
 {
-	if (size + 5 > maxsize) return 0;
+	if (size + 5 > maxsize) {
+		dprintf("Block packing failure -- not enough space\n");
+		return 0;
+	}
 	*(block++) = id;
 	*(block++) = 0;
 	*(block++) = 0;
 	*(block++) = size + 5;
 	*(block++) = 0xff; /* no; */
 	memcpy(block, buf, size);
+	++*no;
 	return (size + 5);
 }
 
@@ -2151,6 +2155,7 @@ static gn_error NK6510_SetSpeedDial(gn_data *data, struct gn_statemachine *state
 				 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
 				 0x01}; /* blocks */
 	char string[40];
+	int block = 0;
 
 	dprintf("Setting speeddial...\n");
 	req[13] = (data->speed_dial->number >> 8);
@@ -2167,7 +2172,7 @@ static gn_error NK6510_SetSpeedDial(gn_data *data, struct gn_statemachine *state
 		string[7] = 0x05;
 	memcpy(string + 8, "\x0B\x02", 2);
 
-	PackBlock(0x1a, 10, 1, string, req + 22, 40 - 22);
+	PackBlock(0x1a, 10, &block, string, req + 22, 40 - 22);
 	SEND_MESSAGE_BLOCK(NK6510_MSG_PHONEBOOK, 38);
 }
 
@@ -2202,7 +2207,7 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	string[0] = data->bitmap->number + 1;
 	string[1] = 0;
 	string[2] = 0x55;
-	count += PackBlock(0x1e, 3, block++, string, req + count, 400 - count);
+	count += PackBlock(0x1e, 3, &block, string, req + count, 400 - count);
 
 	/* Logo */
 	string[0] = data->bitmap->width;
@@ -2210,13 +2215,13 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	string[2] = string[3] = 0x00;
 	string[4] = 0x7e;
 	memcpy(string + 5, data->bitmap->bitmap, data->bitmap->size);
-	count += PackBlock(0x1b, data->bitmap->size + 5, block++, string, req + count, 400 - count);
+	count += PackBlock(0x1b, data->bitmap->size + 5, &block, string, req + count, 400 - count);
 
 	/* Name */
 	i = strlen(data->bitmap->text);
 	i = char_unicode_encode((string + 1), data->bitmap->text, i);
 	string[0] = i;
-	count += PackBlock(0x07, i + 1, block++, string, req + count, 400 - count);
+	count += PackBlock(0x07, i + 1, &block, string, req + count, 400 - count);
 
 	/* Ringtone */
 	if(data->bitmap->ringtone<0) {
@@ -2239,7 +2244,7 @@ static gn_error SetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 		string[9] = 0x00;
 		string[10] = 0x07;
 	}
-	count += PackBlock(0x37, 11, block++, string, req + count, 400-count);
+	count += PackBlock(0x37, 11, &block, string, req + count, 400-count);
 
 	req[21] = block;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_PHONEBOOK, count);
@@ -2316,13 +2321,13 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 		/* Name */
 		j = char_unicode_encode((string + 1), entry->name, strlen(entry->name));
 		string[0] = j;
-		count += PackBlock(0x07, j + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+		count += PackBlock(0x07, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 
 		/* Group */
 		string[0] = entry->caller_group + 1;
 		string[1] = 0;
 		string[2] = 0x55;
-		count += PackBlock(0x1e, 3, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+		count += PackBlock(0x1e, 3, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 		/* We don't require the application to feel in any subentry.
 		 * if it is not filled in, let's take just one number we have.
 		 */
@@ -2333,7 +2338,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 			j = char_unicode_encode((string + 5), entry->number, j);
 			string[j + 1] = 0;
 			string[4] = j;
-			count += PackBlock(0x0b, j + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+			count += PackBlock(0x0b, j + 5, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 		} else {
 			/* Default Number */
 			defaultn = 999;
@@ -2348,7 +2353,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 				j = char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
 				string[j + 1] = 0;
 				string[4] = j;
-				count += PackBlock(0x0b, j + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+				count += PackBlock(0x0b, j + 5, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 			}
 			/* Rest of the numbers */
 			for (i = 0; i < entry->subentries_count; i++)
@@ -2370,7 +2375,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 						j = char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
 						string[j + 1] = 0;
 						string[4] = j;
-						count += PackBlock(0x0b, j + 5, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+						count += PackBlock(0x0b, j + 5, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 					}
 					break;
 				case GN_PHONEBOOK_ENTRY_Date:
@@ -2393,7 +2398,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 					string[j + 1] = 0;
 					string[0] = j;
-					count += PackBlock(entry->subentries[i].entry_type, j + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+					count += PackBlock(entry->subentries[i].entry_type, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 					break;
 				}
 			/* Addresses */
@@ -2428,7 +2433,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 						j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 						string[j + 1] = 0;
 						string[0] = j + 2;
-						count += PackBlock(entry->subentries[i].entry_type, j + 1, block++, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+						count += PackBlock(entry->subentries[i].entry_type, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 						break;
 					default:
 						break;
