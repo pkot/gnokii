@@ -182,7 +182,7 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
       return SMSD_NOK;
     }
     row = mysql_fetch_row(res);
-    gn_xlog_print("maxnumber: %s - count: %i\n", row[0], data->udh.udh[0].u.concatenated_short_message.maximum_number);
+    gn_log_xdebug("maxnumber: %s - count: %i\n", row[0], data->udh.udh[0].u.concatenated_short_message.maximum_number);
     if (atoi(row[0]) == data->udh.udh[0].u.concatenated_short_message.maximum_number ) /* all parts collected */
     {
       gchar *tmpText;
@@ -344,7 +344,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
       sms.remote.type = GN_GSM_NUMBER_Unknown;
     
     if (row[2] != NULL)
-      strncpy ((gchar *) sms.user_data[0].u.text, row[2], GN_SMS_LONG_MAX_LENGTH + 1);
+      strncpy((gchar *)sms.user_data[0].u.text, row[2], 10 * GN_SMS_MAX_LENGTH + 1);
     else
       *sms.user_data[0].u.text = '\0';
     sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';

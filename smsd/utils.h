@@ -34,6 +34,8 @@
 
 #include <glib.h>
 
+#define MAX_SQL_CMD_LEN	65536
+
 extern gchar *strEscape (const gchar *const s);
 
 #endif /* __smsd_utils_h_ */

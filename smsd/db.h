@@ -34,8 +34,6 @@
 #include "smsd.h"
 #include "gnokii.h"
 
-#define MAX_SQL_CMD_LEN	65536
-
 GNOKII_API void (*DB_Bye) (void);
 GNOKII_API gint (*DB_ConnectInbox) (const DBConfig);
 GNOKII_API gint (*DB_ConnectOutbox) (const DBConfig);
