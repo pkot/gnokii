@@ -27,6 +27,8 @@
     o add support for occurrences field in calendar (Keith Packard)
     o account for phonebook blocks not sent due to limited packet
       space                                         (Keith Packard)
+    o set of address blocks counts as one data block
+                                                    (Keith Packard)
  * build system updates
     o detect getline() presence and provide its substitute
                                            (Guido Falsi, Pawel Kot)

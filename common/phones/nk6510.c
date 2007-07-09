@@ -2303,9 +2303,11 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 		0x00, 0x00,  /* location */
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /* blocks */
 	char string[GN_PHONEBOOK_ENTRY_MAX_LENGTH];
-	int block, i, j, defaultn, has_address = 0;
+	int block, i, j, defaultn;
 	unsigned int count = 22;
 	gn_phonebook_entry *entry;
+	unsigned int postal_count;
+	int postal_block = 0;
 
 	if (data->phonebook_entry)
 		entry = data->phonebook_entry;
@@ -2380,6 +2382,8 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 					break;
 				case GN_PHONEBOOK_ENTRY_Date:
 				case GN_PHONEBOOK_ENTRY_Birthday:
+					if (GN_PHONEBOOK_ENTRY_MAX_LENGTH - count < 12) /* 12 is size of date/birthday record */
+						break;
 					req[count++] = entry->subentries[i].entry_type;
 					req[count++] = 0x00;
 					req[count++] = 0x00;
@@ -2402,17 +2406,8 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 					break;
 				}
 			/* Addresses */
-			for (i = 0; i < entry->subentries_count; i++)  {
-				if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_ExtendedAddress ||
-					entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Street ||
-					entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_City ||
-					entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_StateProvince ||
-					entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_ZipCode ||
-					entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Country)
-					has_address++;
-			}
-			dprintf("address parts: %d\n", has_address);
-			if (has_address) {
+			if (GN_PHONEBOOK_ENTRY_MAX_LENGTH - count > 13) { /* 13 is size of base address main part */
+				postal_count = count;
 				req[count++] = GN_PHONEBOOK_ENTRY_PostalAddress;
 				req[count++] = 0x00;
 				req[count++] = 0x00;
@@ -2420,7 +2415,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 				req[count++] = 0xff;
 				req[count++] = 0x00;
 				req[count++] = 0x00;
-				req[count++] = has_address;
+				req[count++] = 0x00;
 				for (i = 0; i < entry->subentries_count; i++) {
 					switch (entry->subentries[i].entry_type) {
 					case GN_PHONEBOOK_ENTRY_ExtendedAddress:
@@ -2432,12 +2427,18 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 						j = strlen(entry->subentries[i].data.number);
 						j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 						string[j + 1] = 0;
-						string[0] = j + 2;
-						count += PackBlock(entry->subentries[i].entry_type, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+						string[0] = j;
+						count += PackBlock(entry->subentries[i].entry_type, j + 1, &postal_block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 						break;
 					default:
 						break;
 					}
+				}
+				if (postal_block > 0) {
+					req[postal_count + 7] = postal_block;
+					block++;
+				} else {
+					count = postal_count;
 				}
 			}
 		}
