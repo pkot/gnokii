@@ -2005,6 +2005,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 {
 	unsigned char blocks;
 	int memtype;
+	char *req = state->last_msg;
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */
@@ -2020,6 +2021,11 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		break;
 	case 0x08:  /* Read Memory response */
+		/* Check if it is a response to read request */
+		if (req && req[3] != 0x7) {
+			dprintf("Got read memory response back at unexpected time\n");
+			return GN_ERR_UNSOLICITED;
+		}
 		if (data->phonebook_entry) {
 			data->phonebook_entry->empty = true;
 			data->phonebook_entry->caller_group = 5; /* no group */
@@ -2071,6 +2077,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 
 	case 0x0c: /* Write memory location */
 		if (message[6] == 0x0f) {
+			dprintf("response 0x10 error 0x%x\n", message[10]);
 			switch (message[10]) {
 			case 0x0f: return GN_ERR_WRONGDATAFORMAT; /* I got this when sending incorrect
 								     block (with 0 length) */
@@ -2086,6 +2093,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		break;
 	case 0x10:
 		if (message[6] == 0x0f) {
+			dprintf("response 0x10 error 0x%x\n", message[10]);
 			switch (message[10]) {
 			case 0x33: return GN_ERR_WRONGDATAFORMAT;
 			case 0x34: return GN_ERR_INVALIDLOCATION;

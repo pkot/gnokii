@@ -30,6 +30,8 @@
     o set of address blocks counts as one data block
                                                     (Keith Packard)
     o treat Postal entries as addresses             (Keith Packard)
+    o when processing incoming phone book messages, skip unrelated
+      errors                                        (Keith Packard)
  * build system updates
     o detect getline() presence and provide its substitute
                                            (Guido Falsi, Pawel Kot)
