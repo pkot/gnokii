@@ -1,4 +1,5 @@
-file for the GNOKII tool suite.
+dnl
+dnl Makefile for the GNOKII tool suite.
 dnl
 dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
 dnl                2000 Karel Zak, Pawe³ Kot
