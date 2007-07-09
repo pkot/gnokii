@@ -77,6 +77,8 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetActiveCalls(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyGetSMSMemorySize(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_error AT_Identify(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state);
@@ -114,6 +116,8 @@ static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetDateTime(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetActiveCalls(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_OnSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetSMSMemorySize(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -163,6 +167,9 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetDateTime,           AT_GetDateTime,           ReplyGetDateTime },
 	{ GN_OP_SendDTMF,              AT_SendDTMF,              Reply },
 	{ GN_OP_GetActiveCalls,        AT_GetActiveCalls,        ReplyGetActiveCalls },
+	{ GN_OP_OnSMS,                 AT_OnSMS,                 Reply },
+	{ GN_OP_AT_IncomingSMS,        NULL,                     ReplyIncomingSMS },
+	{ GN_OP_AT_GetSMSMemorySize,   AT_GetSMSMemorySize,      ReplyGetSMSMemorySize },
 };
 
 char *strip_quotes(char *s)
@@ -1243,6 +1250,29 @@ static gn_error AT_GetActiveCalls(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetActiveCalls, data, state);
 }
 
+static gn_error AT_OnSMS(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+
+	if (sm_message_send(12, GN_OP_OnSMS, "AT+CNMI=2,1\r", state))
+		return GN_ERR_NOTREADY;
+
+	error = sm_block_no_retry(GN_OP_OnSMS, data, state);
+	if (error == GN_ERR_NONE) {
+		AT_DRVINST(state)->on_sms = data->on_sms;
+		AT_DRVINST(state)->sms_callback_data = data->callback_data;
+	}
+	return error;
+}
+
+static gn_error AT_GetSMSMemorySize(gn_data *data, struct gn_statemachine *state)
+{
+	if (sm_message_send(18, GN_OP_AT_GetSMSMemorySize, "AT+CPMS=\"ME\",\"SM\"\r", state))
+		return GN_ERR_NOTREADY;
+
+	return sm_block_no_retry(GN_OP_AT_GetSMSMemorySize, data, state);
+}
+
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -2002,6 +2032,93 @@ static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn
 	return GN_ERR_UNSOLICITED;
 }
 
+static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	at_line_buffer buf;
+	char *memory, *pos;
+	int index, i;
+	gn_memory_type mem;
+	int freesms = 0;
+	gn_error error = GN_ERR_NONE;
+
+	if (!drvinst->on_sms)
+		return GN_ERR_UNSOLICITED;
+
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+
+	mem = GN_MT_XX;
+
+	if (strncmp(buf.line1, "+CMTI: ", 7))
+		return GN_ERR_UNSOLICITED;
+
+	pos = strrchr(buf.line1, ',');
+	if (pos == NULL)
+		return GN_ERR_UNSOLICITED;
+	pos[0] = '\0';
+	pos++;
+	index = atoi(pos);
+
+	memory = strip_quotes(buf.line1 + 7);
+	if (memory == NULL)
+		return GN_ERR_UNSOLICITED;
+	for (i = 0; i < NR_MEMORIES; i++) {
+		if (!strcmp(memory, memorynames[i])) {
+			mem = i;
+			break;
+		}
+	}
+
+	if (mem == GN_MT_XX)
+		return GN_ERR_UNSOLICITED;
+
+	/* Ugly workaround for at least Nokia behaviour. Reply is of form:
+	 * +CMTI: <memory>, <location>
+	 * <memory> is the memory where the message is stored and can be "ME" or "SM".
+	 * <location> is a place in "MT" memory which consists of "SM" and "ME".
+	 * order is that "SM" memory goes first, "ME" memory goes second.
+	 * So if the memory is "ME" we need to substract from <location> size of "SM"
+	 * memory to get the location (we cannot read from "MT" memory
+	 */
+	dprintf("A %d %d\n", mem, GN_MT_ME);
+	if (mem == GN_MT_ME) {
+		dprintf("B %d %d\n", drvinst->smmemorysize, index);
+		if (drvinst->smmemorysize < 0)
+			error = AT_GetSMSMemorySize(data, state);
+		dprintf("C %d %d\n", drvinst->smmemorysize, index);
+		/* ignore errors */
+		if ((error == GN_ERR_NONE) && (index > drvinst->smmemorysize))
+			index -= drvinst->smmemorysize;
+		dprintf("D %d %d\n", drvinst->smmemorysize, index);
+	}
+
+	dprintf("Received message folder %s index %d\n", memorynames[mem], index);
+
+	if (!data->sms) {
+		freesms = 1;
+		data->sms = calloc(1, sizeof(gn_sms));
+		if (!data->sms)
+			return GN_ERR_INTERNALERROR;
+	}
+
+	memset(data->sms, 0, sizeof(gn_sms));
+	data->sms->memory_type = mem;
+	data->sms->number = index;
+
+	error = gn_sms_get(data, state);
+	if (error == GN_ERR_NONE) {
+		error = GN_ERR_UNSOLICITED;
+		drvinst->on_sms(data->sms, state, drvinst->sms_callback_data);
+	}
+
+	if (freesms)
+		free(data->sms);
+
+	return error;
+}
+
 static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -2151,13 +2268,13 @@ static gn_error ReplyGetActiveCalls(int messagetype, unsigned char *buffer, int 
 
 	memset(data->call_active, 0, GN_CALL_MAX_PARALLEL * sizeof(gn_call_active));
 
-	if (strncmp(buf.line1, "AT+CPAS: ", 6)) {
+	if (strncmp(buf.line1, "AT+CPAS: ", 8)) {
 		return GN_ERR_UNKNOWN;
 	}
 
 	data->call_active->call_id = 1;
 
-	switch (atoi(buf.line2 + strlen ("+CPAS: "))) {
+	switch (atoi(buf.line2 + strlen("+CPAS: "))) {
 	case 0:
 		status = GN_CALL_Idle;
 		break;
@@ -2197,6 +2314,29 @@ static gn_error ReplyGetActiveCalls(int messagetype, unsigned char *buffer, int 
 	drvinst->prev_state = data->call_active->state;
 	snprintf(data->call_active->name, GN_PHONEBOOK_NAME_MAX_LENGTH, _("Unknown"));
 	data->call_active->number[0] = '\0';
+
+	return GN_ERR_NONE;
+}
+
+static gn_error ReplyGetSMSMemorySize(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	at_line_buffer buf;
+	gn_error error;
+
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return error;
+
+	buf.line1 = buffer + 1;
+	buf.length = length;
+	splitlines(&buf);
+
+	dprintf("1: %s\n", buf.line1);
+	dprintf("2: %s\n", buf.line2);
+	if (sscanf(buf.line2, "+CPMS: %*d,%d,%*d,%d", &drvinst->mememorysize, &drvinst->smmemorysize) != 2)
+		return GN_ERR_FAILED;
+	dprintf("saved sizes: %d %d\n", drvinst->mememorysize, drvinst->smmemorysize);
+	drvinst->smsmemorytype = GN_MT_ME;
 
 	return GN_ERR_NONE;
 }
@@ -2250,6 +2390,8 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->last_call_type = GN_CALL_Voice;
 	drvinst->last_call_status = GN_CALL_Idle;
 	drvinst->prev_state = GN_CALL_Idle;
+	drvinst->mememorysize = -1;
+	drvinst->smmemorysize = -1;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {

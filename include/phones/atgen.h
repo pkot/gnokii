@@ -45,6 +45,8 @@ typedef enum {
 	GN_OP_AT_Prompt,
 	GN_OP_AT_GetMemoryRange,
 	GN_OP_AT_Ring,
+	GN_OP_AT_IncomingSMS,
+	GN_OP_AT_GetSMSMemorySize,
 	GN_OP_AT_Max	/* don't append anything after this entry */
 } at_operation;
 
@@ -72,6 +74,7 @@ typedef struct {
 	int if_pos;
 	int no_smsc;
 
+	/* CBPS (phonebook related) */
 	gn_memory_type memorytype;
 	int memoryoffset;
 	int memorysize;
@@ -79,6 +82,10 @@ typedef struct {
 	at_charset availcharsets;
 	at_charset defaultcharset;
 	at_charset charset;
+
+	/* CPMS (sms related) */
+	int smmemorysize;
+	int mememorysize;
 
 	/* For call notifications via AT+CLIP */
 	int clip_supported;

@@ -11,6 +11,7 @@
     o fix sms outbox reading                    (Clemens Fruhwirth)
     o don't segfault if data->battery_unit is not allocated
                                                    (Bastien Nocera)
+    o add support for SMS notifications (Bastien Nocera, Pawel Kot)
  * libgnokii updates
     o add void *callback_data argument to callbacks
                                         (Bastien Nocera, Pawel Kot)
