@@ -49,8 +49,8 @@
 gn_connection_type gn_get_connectiontype(const char *connection_type_string);
 
 /* SMS */
-gn_error sms_parse(int offset, gn_data *data);
-gn_error sms_request(gn_data *data, struct gn_statemachine *state);
+gn_error gn_sms_parse(gn_data *data);
+gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state);
 gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms);
 gn_timestamp *sms_timestamp_unpack(unsigned char *number, gn_timestamp *dt);
 unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number);
