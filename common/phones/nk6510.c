@@ -2878,9 +2878,8 @@ static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachin
 				0x00};
 	gn_error error;
 
-	data->calnote_list->location[0] = 0;
-	/* Be sure it is 0 */
-	data->calnote_list->last = 0;
+	if (!data->calnote_list->last)
+		data->calnote_list->location[0] = 0;
 	do {
 		dprintf("Read %d of %d calendar entries\n", data->calnote_list->last, data->calnote_list->number);
 		req[8] = data->calnote_list->location[LAST_INDEX] / 256;
@@ -2898,6 +2897,9 @@ static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachin
 }
 #undef LAST_INDEX
 
+/* To get fresh information from the phone
+ * set data->calnote_list->list to 0
+ */
 static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NOTREADY;

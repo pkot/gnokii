@@ -33,6 +33,7 @@
     o when processing incoming phone book messages, skip unrelated
       errors                                        (Keith Packard)
     o avoid duplicate phonebook subentries          (Keith Packard)
+    o speed up reading calendar entries             (Keith Packard)
  * build system updates
     o detect getline() presence and provide its substitute
                                            (Guido Falsi, Pawel Kot)
