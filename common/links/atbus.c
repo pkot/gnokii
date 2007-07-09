@@ -151,7 +151,7 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 {
 	int error;
 	atbus_instance *bi = AT_BUSINST(sm);
-	int unsolicited, count, messagetype;
+	int unsolicited, count;
 	char *start;
 
 	if (!bi)
