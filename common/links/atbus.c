@@ -151,7 +151,8 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 {
 	int error;
 	atbus_instance *bi = AT_BUSINST(sm);
-	int unsolicited, count;
+	int unsolicited, count, messagetype;
+	char *start;
 
 	if (!bi)
 		return;
@@ -170,10 +171,10 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 		bi->rbuf_pos = 1;
 		bi->rbuf[1] = '\0';
 	}
+	unsolicited = 0;
 	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 2, "\r\n", 2)) {
 		/* try to find previous <cr><lf> */
-		char *start = findcrlfbw(bi->rbuf + bi->rbuf_pos - 2, bi->rbuf_pos - 1);
-		unsolicited = 0;
+		start = findcrlfbw(bi->rbuf + bi->rbuf_pos - 2, bi->rbuf_pos - 1);
 		/* if not found, start at buffer beginning */
 		if (!start)
 			start = bi->rbuf+1;
@@ -191,23 +192,13 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 			bi->rbuf[0] = GN_AT_CME;
 			bi->rbuf[1] = error / 256;
 			bi->rbuf[2] = error % 256;
-		} else if (!strncmp(start, "RING", 4)) {
-			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
-			unsolicited = 1;
-		} else if (!strncmp(start, "CONNECT", 7)) {
-			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
-			unsolicited = 1;
-		} else if (!strncmp(start, "BUSY", 4)) {
-			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
-			unsolicited = 1;
-		} else if (!strncmp(start, "NO ANSWER", 9)) {
-			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
-			unsolicited = 1;
-		} else if (!strncmp(start, "NO CARRIER", 10)) {
-			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
-			unsolicited = 1;
-		} else if (!strncmp(start, "NO DIALTONE", 11)) {
-			sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+		} else if (!strncmp(start, "RING", 4) ||
+			   !strncmp(start, "CONNECT", 7) ||
+			   !strncmp(start, "BUSY", 4) ||
+			   !strncmp(start, "NO ANSWER", 9) ||
+			   !strncmp(start, "NO CARRIER", 10) ||
+			   !strncmp(start, "NO DIALTONE", 11)) {
+			bi->rbuf[0] = GN_OP_AT_Ring;
 			unsolicited = 1;
 		} else if (*start == '+') {
 			/* check for possible unsolicited responses */
@@ -217,30 +208,29 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 					unsolicited = 1;
 			} else if (!strncmp(start + 1, "CPIN:", 5))
 				bi->rbuf[0] = GN_AT_OK;
-			else if (!strncmp(start + 1, "CRING:", 6)) {
-				sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+			else if (!strncmp(start + 1, "CRING:", 6) ||
+				 !strncmp(start + 1, "CLIP:", 5) ||
+				 !strncmp(start + 1, "CLCC:", 5)) {
+				bi->rbuf[0] = GN_OP_AT_Ring;
 				unsolicited = 1;
-			} else if (!strncmp(start + 1, "CLIP:", 5)) {
-				sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
-				unsolicited = 1;
-			} else if (!strncmp(start + 1, "CLCC:", 5)) {
-				sm_incoming_function(GN_OP_AT_Ring, start, bi->rbuf_pos - 1 - (start - bi->rbuf), sm);
+			} else if (!strncmp(start + 1, "CMTI:", 5)) {
+				bi->rbuf[0] = GN_OP_AT_IncomingSMS;
 				unsolicited = 1;
 			}
-		}
-		if (unsolicited) {
-			*start = '\0';
-			bi->rbuf_pos = start - bi->rbuf;
 		}
 	}
 	/* check if SMS prompt is found */
 	if (bi->rbuf_pos > 4 && !strncmp(bi->rbuf + bi->rbuf_pos - 4, "\r\n> ", 4))
 		bi->rbuf[0] = GN_AT_PROMPT;
 	if (bi->rbuf[0] != GN_AT_NONE) {
+		int rbuf_pos = bi->rbuf_pos;
 		at_dprintf("read : ", bi->rbuf + 1, bi->rbuf_pos - 1);
-		sm_incoming_function(sm->last_msg_type, bi->rbuf, bi->rbuf_pos - 1, sm);
 		bi->rbuf_pos = 1;
 		bi->binlen = 1;
+		if (unsolicited)
+			sm_incoming_function(bi->rbuf[0], start, rbuf_pos - 1 - (start - bi->rbuf), sm);
+		else
+			sm_incoming_function(sm->last_msg_type, bi->rbuf, rbuf_pos - 1, sm);
 		return;
 	}
 #if 0
