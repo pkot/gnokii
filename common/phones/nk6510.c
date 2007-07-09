@@ -2366,7 +2366,19 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 				count += PackBlock(0x0b, j + 5, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 			}
 			/* Rest of the numbers */
-			for (i = 0; i < entry->subentries_count; i++)
+			for (i = 0; i < entry->subentries_count; i++) {
+				int duplicate = 0;
+				/* Ignore duplicates */
+				for (j = 0; j < i; j++) {
+					if (entry->subentries[i].entry_type == entry->subentries[j].entry_type &&
+					    entry->subentries[i].number_type == entry->subentries[j].number_type &&
+					    !strcmp(entry->subentries[i].data.number, entry->subentries[j].data.number)) {
+						duplicate = 1;
+						break;
+					}
+				}
+				if (duplicate)
+					break;
 				switch (entry->subentries[i].entry_type) {
 				case GN_PHONEBOOK_ENTRY_ExtendedAddress:
 				case GN_PHONEBOOK_ENTRY_Postal:
@@ -2379,6 +2391,8 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 				case GN_PHONEBOOK_ENTRY_FirstName:
 					break;
 				case GN_PHONEBOOK_ENTRY_Number:
+					if (j < i)
+						break;
 					if (i != defaultn) {
 						string[0] = entry->subentries[i].number_type;
 						string[1] = string[2] = string[3] = 0;
@@ -2414,6 +2428,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 					count += PackBlock(entry->subentries[i].entry_type, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 					break;
 				}
+			}
 			/* Addresses */
 			if (GN_PHONEBOOK_ENTRY_MAX_LENGTH - count > 13) { /* 13 is size of base address main part */
 				postal_count = count;
@@ -2426,6 +2441,18 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 				req[count++] = 0x00;
 				req[count++] = 0x00;
 				for (i = 0; i < entry->subentries_count; i++) {
+					int duplicate = 0;
+					/* Ignore duplicates */
+					for (j = 0; j < i; j++) {
+						if (entry->subentries[i].entry_type == entry->subentries[j].entry_type &&
+						    entry->subentries[i].number_type == entry->subentries[j].number_type &&
+						    !strcmp(entry->subentries[i].data.number, entry->subentries[j].data.number)) {
+							duplicate = 1;
+							break;
+						}
+					}
+					if (duplicate)
+						break;
 					switch (entry->subentries[i].entry_type) {
 					case GN_PHONEBOOK_ENTRY_ExtendedAddress:
 					case GN_PHONEBOOK_ENTRY_Postal:
