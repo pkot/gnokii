@@ -204,6 +204,19 @@ int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachin
 					break;
 				}
 
+				if (calnote.recurrence != GN_CALNOTE_NEVER) {
+					fprintf(stdout, _("   The event will be repeated "));
+					switch (calnote.occurrences) {
+					case 0:
+						fprintf(stdout, _("forever."));
+						break;
+					default:
+						fprintf(stdout, _("%d times."), calnote.occurrences);
+						break;
+					}
+					fprintf(stdout, "\n");
+				}
+
 				fprintf(stdout, _("   Text: %s\n"), calnote.text);
 
 				switch (calnote.type) {

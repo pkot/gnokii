@@ -21,8 +21,10 @@
     o extend cell broadcast callback with gn_statemachine
       argument                                          (Pawel Kot)
     o fix splitting long messages                  (Robert Gerlach)
+    o add support for occurrences field in calendar (Keith Packard)
  * nk6510 driver updates
     o add support for incoming sms callbacks            (Pawel Kot)
+    o add support for occurrences field in calendar (Keith Packard)
  * build system updates
     o detect getline() presence and provide its substitute
                                            (Guido Falsi, Pawel Kot)
@@ -36,6 +38,7 @@
  * gnokii updates
     o update callback functions to match current libgnokii
                                                         (Pawel Kot)
+    o add support for occurrences field in calendar     (Pawel Kot)
  * smsd updates
     o add support for multipart SMS for MySQL backend
                                                    (Alain Degreffe)

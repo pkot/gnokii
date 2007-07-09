@@ -250,22 +250,34 @@ GNOKII_API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	case GN_CALNOTE_NEVER: 
 		break; 
 	case GN_CALNOTE_DAILY: 
-		fprintf(f, "RRULE:FREQ=DAILY\r\n"); 
+		calnote->occurrences ?
+			fprintf(f, "RRULE:FREQ=DAILY\r\n") :
+			fprintf(f, "RRULE:FREQ=DAILY;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	case GN_CALNOTE_WEEKLY: 
-		fprintf(f, "RRULE:FREQ=WEEKLY\r\n"); 
+		calnote->occurrences ?
+			fprintf(f, "RRULE:FREQ=WEEKLY\r\n") :
+			fprintf(f, "RRULE:FREQ=WEEKLY;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	case GN_CALNOTE_2WEEKLY: 
-		fprintf(f, "RRULE:FREQ=WEEKLY;INTERVAL=2\r\n"); 
+		calnote->occurrences ?
+			fprintf(f, "RRULE:FREQ=WEEKLY;INTERVAL=2\r\n") :
+			fprintf(f, "RRULE:FREQ=WEEKLY;INTERVAL=2;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	case GN_CALNOTE_MONTHLY: 
-		fprintf(f, "RRULE:FREQ=MONTHLY\r\n"); 
+		calnote->occurrences ?
+			fprintf(f, "RRULE:FREQ=MONTHLY\r\n") :
+			fprintf(f, "RRULE:FREQ=MONTHLY;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	case GN_CALNOTE_YEARLY: 
-		fprintf(f, "RRULE:FREQ=YEARLY\r\n"); 
+		calnote->occurrences ?
+			fprintf(f, "RRULE:FREQ=YEARLY\r\n") :
+			fprintf(f, "RRULE:FREQ=YEARLY;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	default: 
-		fprintf(f, "RRULE:FREQ=HOURLY;INTERVAL=%d\r\n", calnote->recurrence); 
+		calnote->occurrences ?
+			fprintf(f, "RRULE:FREQ=HOURLY;INTERVAL=%d\r\n", calnote->recurrence) :
+			fprintf(f, "RRULE:FREQ=HOURLY;INTERVAL=%d;COUNT=%d\r\n", calnote->recurrence, calnote->occurrences);
 		break; 
 	} 
 	fprintf(f, "END:VEVENT\r\n"); 

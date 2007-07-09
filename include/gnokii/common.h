@@ -378,6 +378,7 @@ typedef struct {
 	char phone_number[GN_CALNOTE_NUMBER_MAX_LENGTH]; /* For Call only: the phone number */
 	char mlocation[GN_CALNOTE_MAX_LENGTH];           /* For Meeting only: the location field */
 	gn_calnote_recurrence recurrence;                /* Recurrence of the note */
+	int occurrences;                                 /* Number of recurrence events; 0 for infinity */
 } gn_calnote;
 
 /* List of Calendar Notes in phone */
