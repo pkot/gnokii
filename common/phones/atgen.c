@@ -2268,7 +2268,7 @@ static gn_error ReplyGetActiveCalls(int messagetype, unsigned char *buffer, int 
 
 	memset(data->call_active, 0, GN_CALL_MAX_PARALLEL * sizeof(gn_call_active));
 
-	if (strncmp(buf.line1, "AT+CPAS: ", 8)) {
+	if (strncmp(buf.line1, "AT+CPAS", 7)) {
 		return GN_ERR_UNKNOWN;
 	}
 
