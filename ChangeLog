@@ -22,6 +22,8 @@
       argument                                          (Pawel Kot)
     o fix splitting long messages                  (Robert Gerlach)
     o add support for occurrences field in calendar (Keith Packard)
+    o add function for checking available connection types
+                                                        (Pawel Kot)
  * nk6510 driver updates
     o add support for incoming sms callbacks            (Pawel Kot)
     o add support for occurrences field in calendar (Keith Packard)

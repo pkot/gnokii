@@ -199,6 +199,11 @@ GNOKII_API const char *gn_lib_get_supported_connection( const int num );
    The state variable will be initialized if a phone was found. */
 GNOKII_API gn_error gn_lib_search_one_connected_phone( struct gn_statemachine **state );
 
+/* use this function to check whether the connection type is enabled
+   0 - not supported
+   1 - supported */
+GNOKII_API int gn_lib_is_connectiontype_supported(gn_connection_type ct);
+
 /* Misc */
 GNOKII_API gn_memory_type gn_str2memory_type(const char *s);
 GNOKII_API const char *gn_memory_type2str(gn_memory_type mt);
