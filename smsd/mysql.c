@@ -347,7 +347,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
       strncpy((gchar *)sms.user_data[0].u.text, row[2], 10 * GN_SMS_MAX_LENGTH + 1);
     else
       *sms.user_data[0].u.text = '\0';
-    sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';
+    sms.user_data[0].u.text[10 * GN_SMS_MAX_LENGTH] = '\0';
     sms.user_data[0].length = strlen ((gchar *) sms.user_data[0].u.text);
     sms.user_data[0].type = GN_SMS_DATA_Text;
     sms.user_data[1].type = GN_SMS_DATA_None;
