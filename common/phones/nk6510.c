@@ -2338,7 +2338,7 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 		string[1] = 0;
 		string[2] = 0x55;
 		count += PackBlock(0x1e, 3, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
-		/* We don't require the application to feel in any subentry.
+		/* We don't require the application to fill in any subentry.
 		 * if it is not filled in, let's take just one number we have.
 		 */
 		if (!entry->subentries_count) {
