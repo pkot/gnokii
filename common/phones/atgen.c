@@ -252,7 +252,7 @@ char *memorynames[] = {
 	"CB", /* Currently selected memory */
 };
 
-#define NR_MEMORIES (sizeof (memorynames) / sizeof ((memorynames)[0]))
+#define NR_MEMORIES (sizeof(memorynames) / sizeof((memorynames)[0]))
 
 typedef struct {
 	char *str;
@@ -1253,11 +1253,16 @@ static gn_error AT_GetActiveCalls(gn_data *data, struct gn_statemachine *state)
 static gn_error AT_OnSMS(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
+	int i = 2;
+	char req[13];
 
-	if (sm_message_send(12, GN_OP_OnSMS, "AT+CNMI=2,1\r", state))
-		return GN_ERR_NOTREADY;
+	do {
+		snprintf(req, 13, "AT+CNMI=%d,1\r", i);
+		if (sm_message_send(12, GN_OP_OnSMS, req, state))
+			return GN_ERR_NOTREADY;
 
-	error = sm_block_no_retry(GN_OP_OnSMS, data, state);
+		error = sm_block_no_retry(GN_OP_OnSMS, data, state);
+	} while (i-- && error);
 	if (error == GN_ERR_NONE) {
 		AT_DRVINST(state)->on_sms = data->on_sms;
 		AT_DRVINST(state)->sms_callback_data = data->callback_data;
@@ -2074,26 +2079,6 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	if (mem == GN_MT_XX)
 		return GN_ERR_UNSOLICITED;
 
-	/* Ugly workaround for at least Nokia behaviour. Reply is of form:
-	 * +CMTI: <memory>, <location>
-	 * <memory> is the memory where the message is stored and can be "ME" or "SM".
-	 * <location> is a place in "MT" memory which consists of "SM" and "ME".
-	 * order is that "SM" memory goes first, "ME" memory goes second.
-	 * So if the memory is "ME" we need to substract from <location> size of "SM"
-	 * memory to get the location (we cannot read from "MT" memory
-	 */
-	dprintf("A %d %d\n", mem, GN_MT_ME);
-	if (mem == GN_MT_ME) {
-		dprintf("B %d %d\n", drvinst->smmemorysize, index);
-		if (drvinst->smmemorysize < 0)
-			error = AT_GetSMSMemorySize(data, state);
-		dprintf("C %d %d\n", drvinst->smmemorysize, index);
-		/* ignore errors */
-		if ((error == GN_ERR_NONE) && (index > drvinst->smmemorysize))
-			index -= drvinst->smmemorysize;
-		dprintf("D %d %d\n", drvinst->smmemorysize, index);
-	}
-
 	dprintf("Received message folder %s index %d\n", memorynames[mem], index);
 
 	if (!data->sms) {
@@ -2107,6 +2092,7 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	data->sms->memory_type = mem;
 	data->sms->number = index;
 
+	dprintf("get sms %d\n", index);
 	error = gn_sms_get(data, state);
 	if (error == GN_ERR_NONE) {
 		error = GN_ERR_UNSOLICITED;
@@ -2331,11 +2317,8 @@ static gn_error ReplyGetSMSMemorySize(int messagetype, unsigned char *buffer, in
 	buf.length = length;
 	splitlines(&buf);
 
-	dprintf("1: %s\n", buf.line1);
-	dprintf("2: %s\n", buf.line2);
 	if (sscanf(buf.line2, "+CPMS: %*d,%d,%*d,%d", &drvinst->mememorysize, &drvinst->smmemorysize) != 2)
 		return GN_ERR_FAILED;
-	dprintf("saved sizes: %d %d\n", drvinst->mememorysize, drvinst->smmemorysize);
 	drvinst->smsmemorytype = GN_MT_ME;
 
 	return GN_ERR_NONE;

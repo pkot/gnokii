@@ -46,6 +46,8 @@
 
 static at_send_function_type writephonebook;
 
+#define NR_MEMORIES 12 /* (sizeof(memorynames) / sizeof((memorynames)[0])) */
+
 static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	if (writephonebook == NULL)
@@ -53,6 +55,89 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	if (data->memory_status && data->memory_status->memory_type == GN_MT_ME)
 		return GN_ERR_NOTSUPPORTED;
 	return (*writephonebook)(data, state);
+}
+
+static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	at_line_buffer buf;
+	char *memory, *pos;
+	int index, i;
+	gn_memory_type mem;
+	int freesms = 0;
+	gn_error error = GN_ERR_NONE;
+
+	if (!drvinst->on_sms)
+		return GN_ERR_UNSOLICITED;
+
+	buf.line1 = buffer;
+	buf.length= length;
+	splitlines(&buf);
+
+	mem = GN_MT_XX;
+
+	if (strncmp(buf.line1, "+CMTI: ", 7))
+		return GN_ERR_UNSOLICITED;
+
+	pos = strrchr(buf.line1, ',');
+	if (pos == NULL)
+		return GN_ERR_UNSOLICITED;
+	pos[0] = '\0';
+	pos++;
+	index = atoi(pos);
+
+	memory = strip_quotes(buf.line1 + 7);
+	if (memory == NULL)
+		return GN_ERR_UNSOLICITED;
+	for (i = 0; i < NR_MEMORIES; i++) {
+		if (!strcmp(memory, memorynames[i])) {
+			mem = i;
+			break;
+		}
+	}
+
+	if (mem == GN_MT_XX)
+		return GN_ERR_UNSOLICITED;
+
+	/* Ugly workaround for at least Nokia behaviour. Reply is of form:
+	 * +CMTI: <memory>, <location>
+	 * <memory> is the memory where the message is stored and can be "ME" or "SM".
+	 * <location> is a place in "MT" memory which consists of "SM" and "ME".
+	 * order is that "SM" memory goes first, "ME" memory goes second.
+	 * So if the memory is "ME" we need to substract from <location> size of "SM"
+	 * memory to get the location (we cannot read from "MT" memory
+	 */
+	if (mem == GN_MT_ME) {
+		if (drvinst->smmemorysize < 0)
+			error = gn_sm_functions(GN_OP_AT_GetSMSMemorySize, data, state);
+		/* ignore errors */
+		if ((error == GN_ERR_NONE) && (index > drvinst->smmemorysize))
+			index -= drvinst->smmemorysize;
+	}
+
+	dprintf("Received message folder %s index %d\n", memorynames[mem], index);
+
+	if (!data->sms) {
+		freesms = 1;
+		data->sms = calloc(1, sizeof(gn_sms));
+		if (!data->sms)
+			return GN_ERR_INTERNALERROR;
+	}
+
+	memset(data->sms, 0, sizeof(gn_sms));
+	data->sms->memory_type = mem;
+	data->sms->number = index;
+
+	error = gn_sms_get(data, state);
+	if (error == GN_ERR_NONE) {
+		error = GN_ERR_UNSOLICITED;
+		drvinst->on_sms(data->sms, state, drvinst->sms_callback_data);
+	}
+
+	if (freesms)
+		free(data->sms);
+
+	return error;
 }
 
 void at_nokia_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
@@ -67,4 +152,6 @@ void at_nokia_init(char* foundmodel, char* setupmodel, struct gn_statemachine *s
 	/* receive) */
 	if (!strncasecmp("0301", foundmodel, 4))
 		AT_DRVINST(state)->no_smsc = 1;
+
+	at_insert_recv_function(GN_OP_AT_IncomingSMS, ReplyIncomingSMS, state);
 }

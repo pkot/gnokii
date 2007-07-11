@@ -13,6 +13,8 @@
                                                    (Bastien Nocera)
     o add support for SMS notifications (Bastien Nocera, Pawel Kot)
     o fix in unsolicited messages handling              (Pawel Kot)
+    o make SMS notifications more portable and move specific Nokia
+      stuff to atnok.c                                  (Pawel Kot)
  * libgnokii updates
     o add void *callback_data argument to callbacks
                                         (Bastien Nocera, Pawel Kot)
