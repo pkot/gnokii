@@ -622,7 +622,7 @@ static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 	/* User Data Header */
 	if (rawsms->udh_indicator & 0x40) { /* UDH header available */
 		dprintf("UDH found\n");
-		sms_udh_decode(rawsms->user_data, udh);
+		return sms_udh_decode(rawsms->user_data, udh);
 	}
 
 	return GN_ERR_NONE;
@@ -691,7 +691,7 @@ static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
 		break;
 	/* Plain text message */
 	default:
-		sms_data_decode(rawsms->user_data + sms->udh.length,        /* Skip the UDH */
+		return sms_data_decode(rawsms->user_data + sms->udh.length, /* Skip the UDH */
 				(unsigned char *)&sms->user_data[0].u.text, /* With a plain text message we have only 1 part */
 				rawsms->length,                             /* Length of the decoded text */
 				rawsms->user_data_length,                   /* Length of the encoded text (in full octets) without UDH */
@@ -1264,9 +1264,8 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 		if (sms->udh.udh[i].type == GN_SMS_UDH_ConcatenatedMessages)
 			sms_concat_header_encode(rawsms, sms->udh.udh[i].u.concatenated_short_message.current_number,
 						sms->udh.udh[i].u.concatenated_short_message.maximum_number);
-	sms_data_encode(sms, rawsms);
 
-	return GN_ERR_NONE;
+	return sms_data_encode(sms, rawsms);
 }
 
 static void sms_dump_raw(gn_sms_raw *rawsms)
