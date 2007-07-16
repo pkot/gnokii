@@ -2097,6 +2097,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			switch (message[10]) {
 			case 0x33: return GN_ERR_WRONGDATAFORMAT;
 			case 0x34: return GN_ERR_INVALIDLOCATION;
+			case 0x3b: return GN_ERR_EMPTYLOCATION;
 			default:   return GN_ERR_UNHANDLEDFRAME;
 			}
 		}
