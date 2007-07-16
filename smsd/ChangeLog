@@ -1,3 +1,8 @@
+* Mon Jul 16 2007 Jan Derfinak
+- Switch reconnect flag (part of the MYSQL structure) to on for MySQL 5.0.13
+  and newer. It was by default on in versions of the API older than 5.0.3.
+
+
 * Sat Jul  7 2007 Pawel Kot
 - add support for multipart SMS for MySQL backend (Alain Degreffe)
 

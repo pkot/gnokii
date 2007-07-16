@@ -51,7 +51,14 @@ GNOKII_API void DB_Bye (void)
 
 GNOKII_API gint DB_ConnectInbox (DBConfig connect)
 {
+#if MYSQL_VERSION_ID >= 50013
+  my_bool reconnect = 1;
+#endif
+
   mysql_init (&mysqlIn);
+#if MYSQL_VERSION_ID >= 50013
+  mysql_options (&mysqlIn, MYSQL_OPT_RECONNECT, &reconnect);
+#endif
   if (!mysql_real_connect (&mysqlIn,
                            connect.host[0] != '\0' ? connect.host : NULL,
                            connect.user[0] != '\0' ? connect.user : NULL,
@@ -70,7 +77,14 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
 
 GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
 {
+#if MYSQL_VERSION_ID >= 50013
+  my_bool reconnect = 1;
+#endif
+
   mysql_init (&mysqlOut);
+#if MYSQL_VERSION_ID >= 50013
+  mysql_options (&mysqlOut, MYSQL_OPT_RECONNECT, &reconnect);
+#endif
   if (!mysql_real_connect (&mysqlOut,
                            connect.host[0] != '\0' ? connect.host : NULL,
                            connect.user[0] != '\0' ? connect.user : NULL,
