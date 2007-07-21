@@ -550,7 +550,7 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 		*t = GN_LOG_T_STDERR;
 	else {
 		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), "logging", opt, val);
-		fprintf(stderr, _("Use either \"%s\" or \"%s\".\n"), "yes", "no");
+		fprintf(stderr, _("Use either \"%s\" or \"%s\".\n"), "off", "on");
 		fprintf(stderr, _("Assuming: %s\n"), "off");
 		*t = GN_LOG_T_NONE;
 	}

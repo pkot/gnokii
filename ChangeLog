@@ -29,6 +29,8 @@
     o fix memory leak in gn_sms_send() when sms_prepare() fails
       (found by valgrind) and pass on more return values from
       encode/decode functions                       (Daniele Forsi)
+    o fix error message for "debug" option in gnokiirc: supported
+      values have always been "off" and "on" (Carles Pina i Estany)
  * nk6510 driver updates
     o add support for incoming sms callbacks            (Pawel Kot)
     o add support for occurrences field in calendar (Keith Packard)
