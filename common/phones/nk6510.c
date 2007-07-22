@@ -658,12 +658,11 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 	unsigned char *block = message;
 
 	ResetLayout(message, data);
-	/*
+
 	dprintf("Trying to parse message....\n");
-	dprintf("Blocks: %i\n", message[0]);
 	dprintf("Type: %i\n", message[1]);
 	dprintf("Length: %i\n", message[2]);
-	*/
+
 	data->raw_sms->udh_indicator = message[3];
 	data->raw_sms->dcs = message[5];
 
@@ -1365,17 +1364,19 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *message, int 
 			freesms = 1;
 			data->sms = calloc(1, sizeof(gn_sms));
 		}
-		/* FIXME: memleak */
-		if (!data->raw_sms || !data->sms)
+		if (!data->raw_sms || !data->sms) {
 			e = GN_ERR_INTERNALERROR;
-		ParseLayout(message + 8, data);
+			goto err;
+		}
+		ParseLayout(message + 9, data);
 		e = gn_sms_parse(data);
 		if ((e == GN_ERR_NONE) && DRVINSTANCE(state)->on_sms)
 			e = DRVINSTANCE(state)->on_sms(data->sms, state, DRVINSTANCE(state)->sms_callback_data);
 
-		if (freerawsms)
+err:
+		if (freerawsms && data->raw_sms)
 			free(data->raw_sms);
-		if (freesms)
+		if (freesms && data->sms)
 			free(data->sms);
 		break;
 	}
