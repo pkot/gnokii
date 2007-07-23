@@ -891,6 +891,10 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r Get MSid              { 0xb5, 0x01, 0x2f, msid, 0x25 }
     s Get info about phone  { 0xc8, 0x01 }
     r Get info about phone  { 0xc8, 0x01, 0x00, "V ", "firmware", 0x0a, "firmware date", 0x0a, "model", 0x0a, "(c) NMP.", 0x00 }
+                            third byte is an error code
+                              0x00 OK
+                              0x03 value not exists?
+                              0x08 value not set?
     s Get MCU SW Checksum   { 0xc8, 0x02 }
     r Get MCU SW Checksum   { 0xc8, 0x02, 0x00, checksum (4 bytes),0x00 }
     s DPS External SW       { 0xc7, 0x03 }
@@ -929,12 +933,16 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     s Set Product Code      { 0xcb, 0x01, product code, 0x00 }
     s Set Order Number      { 0xcb, 0x02, number, 0x00 }
     s Set Prod.Ser.Number   { 0xcb, 0x03, number, 0x00 }
+    the following 4 values are shown in the "warranty screens" opened typing *#92702689# on phone keyboard
     s Get (original ?)IMEI  { 0xcc, 0x01 }
     r Get (original ?)IMEI  { 0xcc, 0x01, IMEI, 0x00 }
-    s Get Manufacture Month { 0xcc, 0x02 }
-    r Get Manufacture Month { 0xcc, 0x02, 0x00, string, 0x00 }
-    s Get Purchare date     { 0xcc, 0x04 }
-    r Get Purchare date     { 0xcc, 0x04, 0x00, string, 0x00 }
+    s Get Manufacture Date  { 0xcc, 0x02 }
+    r Get Manufacture Date  { 0xcc, 0x02, 0x00, string, 0x00 }
+                            string format is MMYY
+    s Get Repaired Date     { 0xcc, 0x03 }
+    r Get Repaired Date     { 0xcc, 0x03, 0x00, string, 0x00 }
+    s Get Purchasing Date   { 0xcc, 0x04 }
+    r Get Purchasing Date   { 0xcc, 0x04, 0x00, string, 0x00 }
     s Set "Made" date       { 0xcd, 0x02, string, 0x00 }
     s Make "all" phone tests{ 0xce,0x1d,0xfe,0x23,0x00,0x00}
     s Make one phone test   { 0xce,0x1d,num1,num2,num3,num4}

@@ -2,6 +2,8 @@
 =========================
  * documentation updates
     o add sample gnokiirc for windows                 (Jari Turkia)
+    o update Docs/protocol/nk6110.txt with some details about the
+      warranty screens data                         (Daniele Forsi)
  * at driver updates
     o mark SMS messages as read/unread/sent/unsent where possible
                                                    (Bastien Nocera)
