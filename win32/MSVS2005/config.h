@@ -40,7 +40,7 @@
 
 
 #undef VERSION
-#define VERSION "0.6.17cvs"
+#define VERSION "0.6.18"
 
 /* We support Bluetooth and IRDA on MSVS 2005 */
 #define HAVE_BLUETOOTH 1

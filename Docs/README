@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
                          (C) 2001 - 2007 Paweł Kot
-                 Last update 21 June 2007  Version 0.6.17
+                 Last update 24 July 2007  Version 0.6.18
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.17 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.18 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -137,7 +137,7 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.6.17-i386.rpm
+rpm -i gnokii-0.6.18-i386.rpm
 
 If you are using a Debian based system, you may use basic
 
@@ -145,7 +145,7 @@ apt-get install gnokii xgnokii
 
 if you want to base on the official Debian package, or
 
-dpkg -i gnokii_0.6.17_i386.deb xgnokii_0.6.17_i386.deb
+dpkg -i gnokii_0.6.18_i386.deb xgnokii_0.6.18_i386.deb
 
 On Slackware you can use installpkg or pkgtool.
 
@@ -400,6 +400,12 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20070724 Version 0.6.18
+Fix callback (call, sms, cell broadcast) support and add it in AT driver.
+Fix long sms splitting. Add --showsmsfolderstatus support in nk6100 driver.
+Add support for multipart smses in smsd's mysql backend. Add better support
+for extended phonebook.
+
 20070621 Version 0.6.17
 Fix most of xgnokii memleaks. Fix gnokii options parsing. Fix most of
 uninitialized variables usage. Introduce support for more than one phone
