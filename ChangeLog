@@ -1,7 +1,9 @@
 0.6.19 (not released yet)
 =========================
- * libgnokii updats
+ * libgnokii updates
     o match declaration with definition                 (Pawel Kot)
+ * build system updates
+    o define u_int8_t where not present                 (Pawel Kot)
 
 0.6.18
 ======

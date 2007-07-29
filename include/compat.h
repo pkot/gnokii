@@ -291,6 +291,10 @@ int getline(char **line, size_t *len, FILE *stream);
 	typedef int int32_t;
 #endif
 
+#ifndef HAVE_U_INT8_T
+	typedef u_int_8_t;
+#endif
+
 #ifdef HAVE_WCRTOMB
 #  define MBSTATE mbstate_t
 #  define MBSTATE_ENC_CLEAR(x) memset(&(x), 0, sizeof(mbstate_t))
