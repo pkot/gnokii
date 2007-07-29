@@ -711,7 +711,7 @@ static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
  * the highlevel SMS. In data->raw_sms there's SMS read by the phone
  * driver, data->sms is the place for the parsed SMS.
  */
-GNOKII_API gn_error gn_sms_parse(gn_data *data)
+gn_error gn_sms_parse(gn_data *data)
 {
 	if (!data->raw_sms || !data->sms) return GN_ERR_INTERNALERROR;
 	/* Let's assume at the moment that all messages are PDU coded */
@@ -727,7 +727,7 @@ GNOKII_API gn_error gn_sms_parse(gn_data *data)
  * phone driver. Note that raw_sms field in the gn_data structure must
  * be initialized
  */
-GNOKII_API gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
+gn_error gn_sms_request(gn_data *data, struct gn_statemachine *state)
 {
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 	return gn_sm_functions(GN_OP_GetSMS, data, state);
