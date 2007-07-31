@@ -797,38 +797,34 @@ int string_base64(const char *instring)
 */
 int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
-	char *in1, *pin, *pout;
+	char *pin, *pout;
 	char *outtemp = NULL;
-	int inleft, outleft, inprocessed;
-	unsigned int i1, i2, i3, i4;
-
-
-	/* copy the input string, need multiple of 3 chars */
-	in1 = malloc(inlen + 3);
-	memset(in1, 0, inlen + 3);
-	memcpy(in1, instring, inlen);
+	int inleft, outleft, inprocessed, inl = strlen(instring);
 
 	pout = outstring;
-	inleft = inlen;
+	inleft = inl;
 	outleft = outlen;
 	inprocessed = 0;
-	pin = in1;
+	pin = instring;
 
-	for (; (outleft > 3) && (inprocessed < inlen); ) {
-		if (!(*pin))
-			break;
+	while (inprocessed < inl) {
+		int a, b, c;
+		unsigned int i1, i2, i3, i4;
+
+		a = *pin++;
+		b = (*pin) ? *(pin++) : 0;
+		c = (*pin) ? *(pin++) : 0;
 
 		/* calculate the indexes */
-		i1 = (pin[0] & 0xFC) >> 2;
-		i2 = ((pin[0] & 0x03) << 4) | ((pin[1] & 0xF0) >> 4);
-		i3 = ((pin[1] & 0x0F) << 2) | ((pin[2] & 0xC0) >> 6);
-		i4 = pin[2] & 0x3F;
-		pin += 3;
-
-		/* assign the characters or the padding char, if necessary */
+		i1 = (a & 0xfc) >> 2;
 		*(pout++) = base64_alphabet[i1];
+
+		i2 = ((a & 0x03) << 4) | ((b & 0xf0) >> 4);
 		*(pout++) = base64_alphabet[i2];
+
 		inleft--;
+
+		i3 = ((b & 0x0f) << 2) | ((c & 0xc0) >> 6);
 		if (!inleft) {
 			*(pout++) = '=';
 		} else {
@@ -836,6 +832,7 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 			inleft--;
 		}
 
+		i4 = c & 0x3f;
 		if (!inleft)
 			*(pout++) = '=';
 		else {
@@ -848,11 +845,10 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 		outleft -= 4;
 	}
 
-	if (outleft > 0) *pout = 0;
+	*pout = 0;
+
 	if (outtemp)
 		free(outtemp);
-
-	free(in1);
 
 	return pout - outstring;
 }
