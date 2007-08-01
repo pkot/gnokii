@@ -45,28 +45,27 @@
 */
 static int ldif_entry_write(FILE *f, const char *parameter, const char *value, int convertToUTF8)
 {
-	char *buf;
+	char *buf = NULL;
 	int n, inlen, buflen;
 
 	if (string_base64(value)) {
 		inlen = strlen(value);
-		buf = NULL;
-		n = 3 * inlen;
+		n = 2 * inlen * 4 / 3; /* * 2   -> UTF8
+					* * 4/3 -> base 64
+					*/
+		if (n % 4)
+			n += (4 - (n % 4)); /* base 64 padds with '=' to length dividable by 4 */
 
-		do {
-			buflen = n;
-			if (buf) free(buf);
-			buf = malloc(buflen + 1);
-			if (convertToUTF8)
-				n = utf8_base64_encode(buf, buflen, value, inlen);
-			else
-				n = base64_encode(buf, buflen, value, inlen);
-		} while (n >= buflen);
+		buflen = n;
+		buf = malloc(buflen + 1);
+		if (convertToUTF8)
+			n = utf8_base64_encode(buf, buflen, value, inlen);
+		else
+			n = base64_encode(buf, buflen, value, inlen);
 
 		fprintf(f, "%s:: %s\n", parameter, buf);
 
 		free(buf);
-
 	} else {
 		fprintf(f, "%s: %s\n", parameter, value);
 	}
