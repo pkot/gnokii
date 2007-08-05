@@ -665,6 +665,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 
 	data->raw_sms->udh_indicator = message[3];
 	data->raw_sms->dcs = message[5];
+	data->raw_sms->reference = message[4];
 
 	switch (message[1]) {
 	case 0x00: /* deliver */
@@ -676,6 +677,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 	case 0x01: /* delivery report */
 		dprintf("Type: Delivery Report\n");
 		data->raw_sms->type = GN_SMS_MT_DeliveryReport;
+		dprintf("Reference id: %d\n", data->raw_sms->reference);
 		block = message + 20;
 		memcpy(data->raw_sms->smsc_time, message + 6, 7);
 		memcpy(data->raw_sms->time, message + 13, 7);
@@ -928,7 +930,8 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			int len;
 			strcpy(data->sms_folder_list->folder[j].name, "               ");
 
-			if (message[i] != 0x01) return GN_ERR_UNHANDLEDFRAME;
+			if (message[i] != 0x01)
+				return GN_ERR_UNHANDLEDFRAME;
 			data->sms_folder_list->folder_id[j] = get_gn_memory_type(message[i + 2]);
 			data->sms_folder_list->folder[j].folder_id = data->sms_folder_list->folder_id[j];
 			dprintf("Folder(%i) name: ", message[i + 2]);
@@ -1454,7 +1457,8 @@ err:
 	case NK6510_SUBSMS_SMS_SEND_STATUS: /* 0x03 */
 		switch (message[8]) {
 		case NK6510_SUBSMS_SMS_SEND_OK: /* 0x00 */
-			dprintf("SMS sent\n");
+			dprintf("SMS sent (reference: %d)\n", message[10]);
+			data->raw_sms = message[10];
 			e = GN_ERR_NONE;
 			break;
 

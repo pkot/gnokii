@@ -3,7 +3,9 @@
  * libgnokii updates
     o match declaration with definition                 (Pawel Kot)
     o fix base64 encoding (closes
-    https://bugzilla.altlinux.org/show_bug.cgi?id=9994) (Pawel Kot) 
+    https://bugzilla.altlinux.org/show_bug.cgi?id=9994) (Pawel Kot)
+    o read reference id from send sms reply and from delivery
+      report                                            (Pawel Kot)
  * build system updates
     o define u_int8_t where not present                 (Pawel Kot)
 
