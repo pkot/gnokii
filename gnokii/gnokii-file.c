@@ -367,6 +367,8 @@ int getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 		fprintf(stderr, _("Failed to get info for %s: %s\n"), path, gn_error_print(error));
 	else {
 		char *pos = strrchr(path, '/');
+		if (!pos)
+			pos = strrchr(path, '\\');
 
 		if (pos)
 			*(pos+1) = 0;

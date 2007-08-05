@@ -8,6 +8,8 @@
       report                                            (Pawel Kot)
  * build system updates
     o define u_int8_t where not present                 (Pawel Kot)
+ * gnokii updates
+    o fix getallfiles                               (Richard Lewis)
 
 0.6.18
 ======
