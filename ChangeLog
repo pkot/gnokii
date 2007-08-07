@@ -8,6 +8,9 @@
       report                                            (Pawel Kot)
  * build system updates
     o define u_int8_t where not present                 (Pawel Kot)
+    o include sys/time.h from gnokii.h also when compiling under
+      cygwin (closes https://savannah.nongnu.org/patch/?5656)
+                                                    (Daniele Forsi)
  * gnokii updates
     o fix getallfiles                               (Richard Lewis)
 
