@@ -105,6 +105,10 @@ GNOKII_API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 		ldif_entry_write(f, "telephoneNumber", entry->number, 1);
 	}
 
+	if (entry->address.has_address) {
+		ldif_entry_write(f, "homePostalAddress", entry->address.post_office_box, 1);
+	}
+
 	/* Add ext. pbk info if required */
 	for (i = 0; i < entry->subentries_count; i++) {
 		switch (entry->subentries[i].entry_type) {
