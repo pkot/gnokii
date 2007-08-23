@@ -387,18 +387,14 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 			break;
 		default:
 			if (!gn_line_get(stdin, line, MAX_INPUT_LINE_LEN))
-				return 0; /* it means we read an empty line, but that's not an error */
+				goto out; /* it means we read an empty line, but that's not an error */
 			else
 				error = gn_file_phonebook_raw_parse(&entry, oline);
 			break;
 		}
 
-		if (error == GN_ERR_WRONGDATAFORMAT) {
-			fprintf(stderr, "%s\n", gn_error_print(error));
-			break;
-		}
-
-		error = GN_ERR_NONE;
+		if (error != GN_ERR_NONE)
+			goto out;
 
 		if (find_free) {
 #if 0
@@ -424,10 +420,8 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 #if 0
 			}
 #endif
-			if (error != GN_ERR_NONE) {
-				fprintf(stderr, "%s\n", gn_error_print(error));
-				break;
-			}
+			if (error != GN_ERR_NONE)
+				goto out;
 		}
 
 		if (!confirm) {
@@ -446,8 +440,10 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 					while (confirm < 0) {
 						fprintf(stdout, _("Overwrite? (yes/no) "));
 						gn_line_get(stdin, ans, 7);
-						if (!strcmp(ans, _("yes"))) confirm = 1;
-						else if (!strcmp(ans, _("no"))) confirm = 0;
+						if (!strcmp(ans, _("yes")))
+							confirm = 1;
+						else if (!strcmp(ans, _("no")))
+							confirm = 0;
 						else {
 							fprintf(stdout, _("\nIncorrect answer [%s]. Assuming 'no'.\n"), ans);
 							confirm = 0;
@@ -458,8 +454,7 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 					confirm = 0;
 				}
 			} else {
-				fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
-				return -1;
+				goto out;
 			}
 		}
 
@@ -480,6 +475,10 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 			fprintf (stderr, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
 				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 	}
+out:
+	if (error != GN_ERR_NONE)
+		fprintf(stderr, _("Write failed (%s): memory type: %s, loc: %d, name: %s, number: %s\n"),
+			gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 	return error;
 }
 

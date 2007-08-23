@@ -18,6 +18,8 @@
       http://bugs.gentoo.org/show_bug.cgi?id=188362)  (Alin Nastac)
  * gnokii updates
     o fix getallfiles                               (Richard Lewis)
+    o return non-zero error code when writephonebook fails (closes
+      https://savannah.nongnu.org/bugs/index.php?20817) (Pawel Kot)
 
 0.6.18
 ======
