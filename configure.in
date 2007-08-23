@@ -466,17 +466,23 @@ else
       else
          XINCL=""
       fi
+	echo 
+      if test "x$x_libraries" != "x"; then
+         XLIBS="-L$x_libraries"
+      else
+         XLIBS=""
+      fi
       CPPFLAGS="$CPPFLAGS $XINCL"
       AC_CHECK_HEADERS(X11/xpm.h,
           [ AC_CHECK_LIB(Xpm, XpmWriteFileFromXpmImage,
-                [ XPM_CFLAGS="$XINCL" XPM_LIBS="-L$x_libraries -lXpm -lX11"
+                [ XPM_CFLAGS="$XINCL"
+                  XPM_LIBS="$XLIBS -lXpm -lX11"
                   AC_DEFINE(XPM) ],
                 AC_MSG_WARN(Cannot found library libXpm - disabling XPM support.),
-                [ -L$x_libraries -lX11 ]
+                [ $XLIBS -lX11 ]
             )
           ]
       )
-
       if test "x$PTHREAD_LIBS" = xerror; then
          x_support="no"
          GTK_CFLAGS=""

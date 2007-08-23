@@ -14,6 +14,8 @@
     o include sys/time.h from gnokii.h also when compiling under
       cygwin (closes https://savannah.nongnu.org/patch/?5656)
                                                     (Daniele Forsi)
+    o don't allow empty '-L' argument with Xlibs (closes
+      http://bugs.gentoo.org/show_bug.cgi?id=188362)  (Alin Nastac)
  * gnokii updates
     o fix getallfiles                               (Richard Lewis)
 
