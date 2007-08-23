@@ -20,6 +20,10 @@
     o fix getallfiles                               (Richard Lewis)
     o return non-zero error code when writephonebook fails (closes
       https://savannah.nongnu.org/bugs/index.php?20817) (Pawel Kot)
+ * xgnokii changes
+    o try to avoid xgnokii freeze on exit for blacklisted phones;
+      this is not a fix, just nasty workaround (closes
+      https://savannah.nongnu.org/bugs/index.php?20841  (Pawel Kot)
 
 0.6.18
 ======

@@ -1217,6 +1217,7 @@ void *GUI_Connect(void *a)
 	if (fbusinit() != GN_ERR_NONE) {
 		gn_log_xdebug("Initialization failed...\n");
 		MainExit(NULL);
+		return NULL;
 	}
 
 	if (!xgnokiiConfig.allowBreakage &&				/* User did not allow to break the phone */
@@ -1229,6 +1230,7 @@ void *GUI_Connect(void *a)
 			   "\tallow_breakage = 1\n\n"
 			   "in xgnokii section in your config file.\n"
 			   "See http://thread.gmane.org/gmane.linux.drivers.gnokii/3195 for details.\n"));
+		return NULL;
 	}
 
 	gn_log_xdebug("Phone connected. Starting monitoring...\n");
