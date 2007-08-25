@@ -59,7 +59,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	state->device.type = device_type;
 	state->device.device_instance = NULL;
 
-	dprintf("Serial device: opening device %s\n", file);
+	dprintf("Serial device: opening device %s\n", (device_type == GN_CT_DKU2LIBUSB) ? "USB" : file);
 
 	switch (state->device.type) {
 	case GN_CT_DKU2:
