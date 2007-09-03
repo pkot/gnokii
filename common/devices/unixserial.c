@@ -218,7 +218,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	/* Open device */
 
 	/* O_NONBLOCK MUST be used here as the CLOCAL may be currently off
-	 * and if DCD is down the "open" syscall would be stuck wating for DCD.
+	 * and if DCD is down the "open" syscall would be stuck waiting for DCD.
 	 */
 	fd = serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
@@ -269,7 +269,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 
 	retcode = fcntl(fd, F_SETFL, 0);
 	if (retcode == -1) {
-		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
+		perror("Gnokii serial_opendevice: fcntl(F_SETFL)");
 		serial_close(fd, state);
 		return -1;
 	}
@@ -287,7 +287,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 #if !(__unices__)
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1) {
-		perror("Gnokii serial_opendevice: fnctl(F_SETOWN)");
+		perror("Gnokii serial_opendevice: fcntl(F_SETOWN)");
 		serial_close(fd, state);
 		return -1;
 	}
@@ -312,7 +312,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	}
 
 	if (retcode == -1) {
-		perror("Gnokii serial_opendevice: fnctl(F_SETFL)");
+		perror("Gnokii serial_opendevice: fcntl(F_SETFL)");
 		serial_close(fd, state);
 		return -1;
 	}

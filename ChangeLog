@@ -8,7 +8,8 @@
       report                                            (Pawel Kot)
     o in gn_phonebook2ldif() output homePostalAddress when it isn't
       in a subentry (fixes https://savannah.nongnu.org/bugs/?19963)
-                                                   (Daniele Forsi)
+                                                    (Daniele Forsi)
+    o fix some typos                                (Daniele Forsi)
  * build system updates
     o define u_int8_t where not present                 (Pawel Kot)
     o include sys/time.h from gnokii.h also when compiling under

@@ -158,7 +158,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 #if !(__unices__)
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1){
-		perror(_("Gnokii tcp_opendevice: fnctl(F_SETOWN)"));
+		perror(_("Gnokii tcp_opendevice: fcntl(F_SETOWN)"));
 		tcp_close(fd, state);
 		return -1;
 	}
@@ -181,7 +181,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 #  endif
 #endif
 	if (retcode == -1) {
-		perror(_("Gnokii tcp_opendevice: fnctl(F_SETFL)"));
+		perror(_("Gnokii tcp_opendevice: fcntl(F_SETFL)"));
 		tcp_close(fd, state);
 		return -1;
 	}
