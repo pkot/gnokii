@@ -1458,7 +1458,7 @@ err:
 		switch (message[8]) {
 		case NK6510_SUBSMS_SMS_SEND_OK: /* 0x00 */
 			dprintf("SMS sent (reference: %d)\n", message[10]);
-			data->raw_sms = message[10];
+			data->raw_sms->reference = message[10];
 			e = GN_ERR_NONE;
 			break;
 

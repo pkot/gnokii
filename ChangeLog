@@ -26,6 +26,8 @@
     o try to avoid xgnokii freeze on exit for blacklisted phones;
       this is not a fix, just nasty workaround (closes
       https://savannah.nongnu.org/bugs/index.php?20841  (Pawel Kot)
+ * nk6510 driver updates
+    o fix segfault for sendsms                          (Pawel Kot)
 
 0.6.18
 ======
