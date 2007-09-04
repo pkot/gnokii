@@ -309,12 +309,11 @@ int serial_opendevice(const char *file, int with_odd_parity,
 			retcode = ioctl(fd, FIOASYNC, &with_async);
 #  endif
 #endif
-	}
-
-	if (retcode == -1) {
-		perror("Gnokii serial_opendevice: fcntl(F_SETFL)");
-		serial_close(fd, state);
-		return -1;
+		if (retcode == -1) {
+			perror("Gnokii serial_opendevice: fcntl(F_SETFL)");
+			serial_close(fd, state);
+			return -1;
+		}
 	}
 
 	return fd;

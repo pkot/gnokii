@@ -10,6 +10,7 @@
       in a subentry (fixes https://savannah.nongnu.org/bugs/?19963)
                                                     (Daniele Forsi)
     o fix some typos                                (Daniele Forsi)
+    o minor code cleanup in unixserial.c            (Daniele Forsi)
  * build system updates
     o define u_int8_t where not present                 (Pawel Kot)
     o include sys/time.h from gnokii.h also when compiling under
