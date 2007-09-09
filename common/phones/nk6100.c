@@ -1338,6 +1338,7 @@ static bool CheckIncomingSMS(struct gn_statemachine *state, int pos)
 {
 	gn_data data;
 	gn_sms sms;
+	gn_sms_raw rawsms;
 	gn_error error;
 
 	if (!DRVINSTANCE(state)->on_sms) {
@@ -1355,8 +1356,9 @@ static bool CheckIncomingSMS(struct gn_statemachine *state, int pos)
 	DRVINSTANCE(state)->sms_notification_in_progress = true;
 
 	memset(&sms, 0, sizeof(sms));
-	sms.memory_type = GN_MT_SM;
-	sms.number = pos;
+	memset(&rawsms, 0, sizeof(rawsms));
+	rawsms.memory_type = sms.memory_type = GN_MT_SM;
+	rawsms.number = sms.number = pos;
 	gn_data_clear(&data);
 	data.sms = &sms;
 
@@ -1371,6 +1373,9 @@ static bool CheckIncomingSMS(struct gn_statemachine *state, int pos)
 	dprintf("deleting sms#%hd\n", sms.number);
 	gn_data_clear(&data);
 	data.sms = &sms;
+	data.raw_sms = &rawsms;
+	rawsms.memory_type = sms.memory_type;
+	rawsms.number = sms.number = pos;
 	DeleteSMSMessage(&data, state);
 
 	DRVINSTANCE(state)->sms_notification_in_progress = false;

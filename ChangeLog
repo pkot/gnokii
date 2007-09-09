@@ -28,6 +28,9 @@
       https://savannah.nongnu.org/bugs/index.php?20841  (Pawel Kot)
  * nk6510 driver updates
     o fix segfault for sendsms                          (Pawel Kot)
+ * nk6100 driver updates
+    o do not segfault when using --getsmsreader (closes
+      http://savannah.nongnu.org/patch/?6189)                (Sami)
 
 0.6.18
 ======
