@@ -22,6 +22,7 @@
     o fix getallfiles                               (Richard Lewis)
     o return non-zero error code when writephonebook fails (closes
       https://savannah.nongnu.org/bugs/index.php?20817) (Pawel Kot)
+    o initialize networkinfo structure for --getnetworkinfo   (jra)
  * xgnokii changes
     o try to avoid xgnokii freeze on exit for blacklisted phones;
       this is not a fix, just nasty workaround (closes
