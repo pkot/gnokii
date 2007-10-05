@@ -27,7 +27,7 @@ include $(TOPDIR)/Makefile.global
 # Change is just once per release!
 GNOKII_MAJOR = 6
 GNOKII_MINOR = 3
-GNOKII_RELEASE = 0
+GNOKII_RELEASE = 1
 ifdef WIN32_CROSS
 LIBTOOL_UNDEF = -no-undefined
 LIBTOOL_VER = -version-info $(GNOKII_MAJOR):$(GNOKII_RELEASE):$(GNOKII_MINOR) -avoid-version
