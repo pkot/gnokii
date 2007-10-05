@@ -748,7 +748,7 @@ GNOKII_API gn_error gn_sms_get(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->sms)
 		return GN_ERR_INTERNALERROR;
-	if (data->sms->number < 1)
+	if (data->sms->number < 0)
 		return GN_ERR_EMPTYLOCATION;
 	if (data->sms->memory_type > GN_MT_LAST)
 		return GN_ERR_INVALIDMEMORYTYPE;

@@ -1,5 +1,5 @@
-0.6.19 (not released yet)
-=========================
+0.6.19
+======
  * libgnokii updates
     o match declaration with definition                 (Pawel Kot)
     o fix base64 encoding (closes
@@ -11,6 +11,7 @@
                                                     (Daniele Forsi)
     o fix some typos                                (Daniele Forsi)
     o minor code cleanup in unixserial.c            (Daniele Forsi)
+    o some phones allow SMS location 0                    (El Chef)
  * build system updates
     o define u_int8_t where not present                 (Pawel Kot)
     o include sys/time.h from gnokii.h also when compiling under
