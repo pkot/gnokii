@@ -202,6 +202,18 @@ static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_DeletePhonebook, data, state);
 }
 
+static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data->network_info)
+		return GN_ERR_INTERNALERROR;
+
+	/* Sony Ericsson phones can't do CREG=2 (only CREG=1), so just
+	 * skip that and only do COPS */
+
+	if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+COPS?\r", state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+}
 
 void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
@@ -209,4 +221,5 @@ void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemac
 	at_insert_recv_function(GN_OP_ReadPhonebook, ReplyReadPhonebook, state);
 	at_insert_send_function(GN_OP_WritePhonebook, AT_WritePhonebook, state);
 	at_insert_send_function(GN_OP_DeletePhonebook, AT_DeletePhonebook, state);
+	at_insert_send_function(GN_OP_GetNetworkInfo, AT_GetNetworkInfo, state);
 }

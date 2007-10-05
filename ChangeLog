@@ -32,6 +32,9 @@
  * nk6100 driver updates
     o do not segfault when using --getsmsreader (closes
       http://savannah.nongnu.org/patch/?6189)                (Sami)
+ * atgen driver updates
+    o Sony Ericsson phones can't do CREG=2 (only CREG=1), so just
+      skip that and only do COPS in getnetworkinfo            (jra)
 
 0.6.18
 ======
