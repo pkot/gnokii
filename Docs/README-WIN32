@@ -26,7 +26,7 @@ The solution will contain three projects: gnokii.dll, gnokii.exe and setup.
 The setup build will fail on Visual C++ Express edition as the setup tools are
 available only in the commercial Visual Studio.
 
-You may want to change the compiler run-time library settings to singe
+You may want to change the compiler run-time library settings to single
 threaded / debug single threaded to have much smaller binaries.
 
 
