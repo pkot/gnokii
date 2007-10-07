@@ -28,6 +28,10 @@
 
 */
 
+#include "config.h"
+
+#ifdef HAVE_PCSC
+
 #include "phones/pcsc.h"
 
 /* prototypes for functions related to libgnokii */
@@ -622,3 +626,5 @@ static LONG pcsc_open_reader_name(LPCSTR reader_name) {
 
 	return ret;
 }
+
+#endif /* HAVE_PCSC */

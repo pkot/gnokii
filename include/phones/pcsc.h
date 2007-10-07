@@ -31,7 +31,6 @@
 #ifndef _gnokii_phones_pcsc_h
 #define _gnokii_phones_pcsc_h
 
-#include "config.h"
 #include "compat.h"
 #include "gnokii.h"
 #include "phones/generic.h"
