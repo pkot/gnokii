@@ -18,6 +18,7 @@ INSTALL_DOCS = 	README \
 		README-6110 \
 		README-6510 \
 		README-7110 \
+		README-DKU2 \
 		README-MacOSX \
 		README-WIN32 \
 		README-dancall \
@@ -28,12 +29,11 @@ INSTALL_DOCS = 	README \
 		CREDITS \
 		Bugs \
 		DataCalls-QuickStart \
-		gettext-howto \
+		FAQ \
+		KNOWN_BUGS \
 		gnokii.nol \
-		packaging-howto \
 		gnokii-ir-howto \
 		gnokii-IrDA-Linux \
-		gnokii-hackers-howto \
 		ringtones.txt \
 		logos.txt \
 		sample/gnokiirc \
