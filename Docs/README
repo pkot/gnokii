@@ -85,7 +85,7 @@ models. Don't use it with other phones.
 The last application provided with the suite is mgnokiidev which is
 used by gnokiid to create on demand a symbolic link between
 /dev/gnokii and the pseudo tty used by gnokiid for the virtual modem
-interface.  It's operation is transparent under normal usage as gnokiid
+interface.  Its operation is transparent under normal usage as gnokiid
 takes care of calling it when required.
 
 There are also several third-party applications using libgnokii, namely:

@@ -123,7 +123,7 @@ or
     $ CFLAGS="-I/usr/local/include -L/usr/local/lib" ./configure \
 	--prefix=/usr --enable-security
 
-and the euivalent with autogen.sh
+and the equivalent with autogen.sh
 
 
 Compilation
