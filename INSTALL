@@ -133,13 +133,6 @@ Start the compilation process by typing
 
     $ make
 
-or
-
-    $ make gnokii-debug
-
-The second form creates statically linked binaries. These are mainly used 
-for debugging the software.
-
 
 Installation
 ------------
