@@ -1,4 +1,11 @@
-When you report some problems with gnokii please attach the following information:
+Before reporting a problem with gnokii make sure that problem still exists
+with current gnokii release (refer to http://www.gnokii.org/ to find out the
+most recent version) or even with current CVS version. If gnokii version
+provided by your distribution please contact the package maintainer to
+upgrade it.
+
+When you report some problems with gnokii please attach the following
+information:
  - phone model
  - connection type (irda/cable with its type)
  - gnokii version (gnokii --version) along with source for it: cvs,
