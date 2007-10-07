@@ -51,6 +51,8 @@ GNOKII_API gn_memory_type gn_str2memory_type(const char *s)
 	X(RC);
 	X(MC);
 	X(LD);
+	X(BD);
+	X(SD);
 	X(MT);
 	X(IN);
 	X(OU);
@@ -92,6 +94,8 @@ GNOKII_API const char *gn_memory_type2str(gn_memory_type mt)
 	case GN_MT_RC: return _("Received numbers");
 	case GN_MT_MC: return _("Missed numbers");
 	case GN_MT_LD: return _("Last dialed");
+	case GN_MT_BD: return _("Barred dialing numbers");
+	case GN_MT_SD: return _("Service dialing numbers");
 	case GN_MT_MT: return _("Combined ME and SIM phonebook");
 	case GN_MT_TA: return _("Computer memory");
 	case GN_MT_CB: return _("Currently selected memory");

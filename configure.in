@@ -442,6 +442,41 @@ if test "$enable_bluetooth" == "yes"; then
 	fi
 fi
 
+dnl ======================== Checks for libpcsclite
+USE_LIBPCSCLITE="no"
+AC_ARG_ENABLE(libpcsclite,
+              AC_HELP_STRING([--enable-libpcsclite],
+                             [enable libpcsclite support (default is autodetected)]
+                            ),,
+              [enable_libpcsclite=yes])
+if test "$enable_libpcsclite" == "yes"; then
+	PKG_CHECK_MODULES(LIBPCSCLITE, libpcsclite >= 1.4.2, USE_LIBPCSCLITE=yes, USE_LIBPCSCLITE=no)
+	if test "$USE_LIBPCSCLITE" == yes; then
+		OLD_CFLAGS="$CFLAGS"
+		CFLAGS="$LIBPCSCLITE_CFLAGS $OLD_CFLAGS"
+		AC_MSG_CHECKING([if libpcsclite includes are installed and usable])
+		AC_TRY_COMPILE([#include <PCSC/wintypes.h>
+				#include <PCSC/winscard.h>],
+				[SCARDCONTEXT hContext;
+				SCARDHANDLE hCard;
+				DWORD dwActiveProtocol;
+				SCARD_IO_REQUEST *pioSendPci, pioRecvPci;
+				BYTE buf[256];],
+				USE_LIBPCSCLITE=yes,
+				USE_LIBPCSCLITE=no)
+		AC_MSG_RESULT($USE_LIBPCSCLITE)
+		CFLAGS="$OLD_CFLAGS"
+	fi
+	if test "$USE_LIBPCSCLITE" == no; then
+		LIBPCSCLITE_CFLAGS=""
+		LIBPCSCLITE_LIBS=""
+	else
+		AC_DEFINE([HAVE_PCSC], [1], [Define if you have libpcsclite])
+		CFLAGS="$CFLAGS $LIBPCSCLITE_CFLAGS"
+		LIBS="$LIBS $LIBPCSCLITE_LIBS"
+	fi
+fi
+
 dnl ======================== Checks for X base support
 
 if test "$no_x" = yes -o "$with_x" = "no"; then
@@ -810,6 +845,7 @@ echo "
     ical read support:  $USE_LIBICAL
     Bluetooth:          $USE_BLUETOOTH
     libusb support:     $USE_LIBUSB
+    libpcsclite support:$USE_LIBPCSCLITE
     Security:           $security
     Build Shared Lib:   $shared
     Build Static Lib:   $static

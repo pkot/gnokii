@@ -52,7 +52,8 @@ typedef enum {
 	GN_CT_TCP,      /* TCP network connection */
 	GN_CT_M2BUS,	/* Serial connection with M2BUS protocol */
 	GN_CT_DKU2,	/* DKU2 usb connection using nokia_dku2 kernel driver */
-	GN_CT_DKU2LIBUSB /* DKU2 usb connection using libusb */
+	GN_CT_DKU2LIBUSB, /* DKU2 usb connection using libusb */
+	GN_CT_PCSC      /* PC/SC SIM Card reader using libpsclite */
 } gn_connection_type;
 
 /* Maximum length of device name for serial port */
@@ -75,6 +76,8 @@ typedef enum {
 	GN_MT_RC, /* Received numbers */
 	GN_MT_MC, /* Missed numbers */
 	GN_MT_LD, /* Last dialed */
+	GN_MT_BD, /* Barred Dialing Numbers */
+	GN_MT_SD, /* Service Dialing Numbers */
 	GN_MT_MT, /* combined ME and SIM phonebook */
 	GN_MT_TA, /* for compatibility only: TA=computer memory */
 	GN_MT_CB, /* Currently selected memory */

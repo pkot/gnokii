@@ -466,6 +466,9 @@ static struct { gn_connection_type ct; const char *str; } connectiontypes[] = {
 #ifdef HAVE_LIBUSB
 	{ GN_CT_DKU2LIBUSB, "dku2libusb" },
 #endif
+#ifdef HAVE_PCSC
+	{ GN_CT_PCSC,       "pcsc" },
+#endif
 #ifndef WIN32
 	{ GN_CT_TCP,        "tcp" },
 #endif

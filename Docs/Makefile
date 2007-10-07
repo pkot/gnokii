@@ -20,6 +20,7 @@ INSTALL_DOCS = 	README \
 		README-7110 \
 		README-DKU2 \
 		README-MacOSX \
+		README-PCSC \
 		README-WIN32 \
 		README-dancall \
 		README-ericsson \

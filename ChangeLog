@@ -2,6 +2,13 @@
 =========================
  * libgnokii updates
     o add support for Nokia 6070 and 2630               (Pawel Kot)
+    o add a driver for PC/SC SIM card readers using libpcsclite;
+      see Docs/README-PCSC for details              (Daniele Forsi)
+    o add two new phonebook memory types: SD for "Service Dialing
+      Numbers" and BD for "Barred Dialing Numbers" (not all SIM
+      cards provide them and currently only the pcsc driver
+      supports them)                                (Daniele Forsi)
+
  * build system updates
     o add FAQ, KNOWN_BUGS and README-DKU2 to the list of files
       installed with "make install-docs" and remove
