@@ -102,6 +102,8 @@ connection = serial
 # For infrared connection with phones other than Nokia 6110/6130/6150 use:
 # connection = irda
 # Don't forget to run: 'irattach irda0 -s' or similiar before running gnokii
+# For connection with a PC/SC compatible Smart Card reader use:
+# connection = pcsc
 
 # Set this to 'yes' if you want gnokii to set and check the lock file in
 # /var/lock directory. It avoids potential conflicts with other serial
