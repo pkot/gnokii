@@ -63,7 +63,7 @@ subclause : command
 
 #define GN_PCSC_FILE_STRUCTURE_TRANSPARENT 0
 #define GN_PCSC_FILE_STRUCTURE_LINEAR_FIXED 1
-#define GN_PCSC_FILE_STRUCTURE_CYCLIC 2
+#define GN_PCSC_FILE_STRUCTURE_CYCLIC 3
 
 #define GN_PCSC_FILE_TYPE_MF 1
 #define GN_PCSC_FILE_TYPE_DF 2
@@ -87,6 +87,8 @@ subclause : command
 #define GN_PCSC_FILE_EF_SMS 0x6F3C
 /* Mobile Subscriber Integrated Services Digital Network Number */
 #define GN_PCSC_FILE_EF_MSISDN 0x6F40
+/* Last Numbers Dialed */
+#define GN_PCSC_FILE_EF_LND 0x6F44
 /* Service Dialing Numbers */
 #define GN_PCSC_FILE_EF_SDN 0x6F49
 /* Barred Dialing Numbers */

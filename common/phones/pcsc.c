@@ -190,6 +190,8 @@ static LONG get_memory_type(gn_memory_type memory_type) {
 		return GN_PCSC_FILE_EF_ECC;
 	case GN_MT_FD:
 		return GN_PCSC_FILE_EF_FDN;
+	case GN_MT_LD:
+		return GN_PCSC_FILE_EF_LND;
 	case GN_MT_ON:
 		return GN_PCSC_FILE_EF_MSISDN;
 	case GN_MT_SD:
@@ -542,6 +544,7 @@ static LONG pcsc_read_file(PCSC_IOSTRUCT *ios, LONG file_id) {
 	case GN_PCSC_FILE_STRUCTURE_TRANSPARENT:
 		ret = pcsc_cmd_read_binary(ios, ios->pbRecvBuffer[2] * 256 + ios->pbRecvBuffer[3]);
 		break;
+	case GN_PCSC_FILE_STRUCTURE_CYCLIC:
 	case GN_PCSC_FILE_STRUCTURE_LINEAR_FIXED:
 		ret = pcsc_cmd_read_record(ios, ios->bRecordNumber, ios->pbRecvBuffer[14]);
 		break;
