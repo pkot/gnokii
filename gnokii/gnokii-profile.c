@@ -138,6 +138,7 @@ int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *st
 	int max_profiles;
 	int start, stop, i;
 	gn_profile p;
+	gn_ringtone_list rl;
 	gn_error error = GN_ERR_NOTSUPPORTED;
 
 	/* Hopefully is 64 larger as FB38_MAX* / FB61_MAX* */
@@ -165,8 +166,10 @@ int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *st
 		sleep(1);
 
 	p.number = 0;
+	memset(&rl, 0, sizeof(gn_ringtone_list));
 	gn_data_clear(data);
 	data->profile = &p;
+	data->ringtone_list = &rl;
 	error = gn_sm_functions(GN_OP_GetProfile, data, state);
 
 	switch (error) {
@@ -214,6 +217,7 @@ int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *st
 
 	gn_data_clear(data);
 	data->profile = &p;
+	data->ringtone_list = &rl;
 
 	for (i = start; i <= stop; i++) {
 		p.number = i;

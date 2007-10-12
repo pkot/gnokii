@@ -17,6 +17,7 @@
       that list                                     (Daniele Forsi)
  * gnokii updates
     o add error handling for security commands          (Pawel Kot)
+    o getprofile requires ringtone_list being allocated (Pawel Kot)
 
 0.6.19
 ======
