@@ -50,6 +50,9 @@ TOPLEVEL_DOCS = ChangeLog \
 
 all: compile
 
+# build the apps after building the library
+$(BIN_DIRS) $(GTK_DIRS): common
+
 compile: $(DIRS)
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
