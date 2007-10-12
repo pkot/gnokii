@@ -15,6 +15,8 @@
       installed with "make install-docs" and remove
       gnokii-hackers-howto, gettext-howto and packaging-howto from
       that list                                     (Daniele Forsi)
+ * gnokii updates
+    o add error handling for security commands          (Pawel Kot)
 
 0.6.19
 ======
