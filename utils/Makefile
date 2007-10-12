@@ -32,15 +32,6 @@ install-generic:
 install: install-generic
 	$(LIBTOOL) --mode=install $(INSTALL) mgnokiidev $(DESTDIR)$(sbindir)
 
-install-strip: install-generic
-	$(LIBTOOL) --mode=install $(INSTALL) -s mgnokiidev $(DESTDIR)$(sbindir)
-
-install-suid: install-generic
-	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 4750 mgnokiidev $(DESTDIR)$(sbindir)
-
-install-ss: install-generic
-	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 4750 -s mgnokiidev $(DESTDIR)$(sbindir)
-
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend
 

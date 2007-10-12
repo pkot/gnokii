@@ -35,13 +35,22 @@ GTK_DIRS =	xgnokii
 INSTALL_DIRS =	$(BIN_DIRS) \
 		common
 
-INSTALL_SIMPLE =	po \
-			intl \
-			include
+INSTALL_SIMPLE = po \
+		 intl
+
+INSTALL_INCLUDES = include
 
 DOCS_DIR = 	Docs
 
-all: $(DIRS)
+TOPLEVEL_DOCS = ChangeLog \
+		COPYING \
+		COPYRIGHT \
+		MAINTAINERS \
+		TODO
+
+all: compile
+
+compile: $(DIRS)
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
 		    if [ -e $$dir/Makefile ]; then \
@@ -50,17 +59,8 @@ all: $(DIRS)
 		done \
 	fi
 	@echo "done"
-	@echo "##########################################"
-	@echo "###"
-	@echo "### It is strongly recommended to run:"
-	@echo "### $(MAKE) install"
-	@echo "### now. Otherwise gnokii may not work."
-	@echo "###"
-	@echo "##########################################"
 
-dummy:
-
-$(DIRS): dummy
+$(DIRS):
 	$(MAKE) -C $@
 
 clean:
@@ -117,7 +117,7 @@ dep:
 test:
 	( cd testsuite; ./testit )
 
-install: all
+install-binaries: compile
 	@for dir in $(INSTALL_DIRS); do \
 		if [ -e $$dir/Makefile ]; then \
 			$(MAKE) -C $$dir install; \
@@ -139,86 +139,30 @@ install: all
 	fi
 
 	@echo "done"
-	@echo "#####################################################"
-	@echo "###"
-	@echo "### Please make sure to have $(libdir) in"
-	@echo "### the system defaults or in /etc/ld.so.conf and run"
-	@echo "### /sbin/ldconfig at some time. Otherwise gnokii may"
-	@echo "### not work."
-	@echo "###"
-	@echo "#####################################################"
+
+install-includes:
+	@for dir in $(INSTALL_INCLUDES); do \
+		if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install; \
+		fi; \
+	done
 
 install-docs:
+	$(INSTALL) -d $(DESTDIR)$(docdir)
+	@for xxx in $(TOPLEVEL_DOCS); do \
+	    if [ -e $$xxx ]; then \
+		$(INSTALL_DATA) $$xxx $(DESTDIR)$(docdir)/$$xxx; \
+	    fi; \
+	done
 	$(MAKE) -C $(DOCS_DIR) install
 	@echo "done"
 
-install-strip:
-	@for dir in $(INSTALL_DIRS); do \
-		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir install-strip; \
-		fi; \
-	done
-
-	@for dir in $(INSTALL_SIMPLE); do \
-		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir install; \
-		fi; \
-	done
-
-	@if [ "$(GTK_LIBS)" ]; then \
-		for dir in $(GTK_DIRS); do \
-			if [ -e $$dir/Makefile ]; then \
-				$(MAKE) -C $$dir install-strip; \
-			fi; \
-		done \
-	fi
-
+install-docs-devel:
+	$(MAKE) -C $(DOCS_DIR) install-devel
 	@echo "done"
 
-install-suid:
-	@for dir in $(INSTALL_DIRS); do \
-		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir install-suid; \
-		fi; \
-	done
+install: compile install-binaries install-docs
 
-	@for dir in $(INSTALL_SIMPLE); do \
-		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir install; \
-		fi; \
-	done
+install-devel: compile install-binaries install-includes install-docs install-docs-devel
 
-	@if [ "$(GTK_LIBS)" ]; then \
-		for dir in $(GTK_DIRS); do \
-			if [ -e $$dir/Makefile ]; then \
-				$(MAKE) -C $$dir install-suid; \
-			fi; \
-		done \
-	fi
-
-	@echo "done"
-
-install-ss:
-	@for dir in $(INSTALL_DIRS); do \
-		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir install-ss; \
-		fi; \
-	done
-
-	@for dir in $(INSTALL_SIMPLE); do \
-		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir install; \
-		fi; \
-	done
-
-	@if [ "$(GTK_LIBS)" ]; then \
-		for dir in $(GTK_DIRS); do \
-			if [ -e $$dir/Makefile ]; then \
-				$(MAKE) -C $$dir install-ss; \
-			fi; \
-		done \
-	fi
-
-	@echo "done"
-
-.PHONY: all install clean distclean dep depend install-docs
+.PHONY: all compile install clean distclean dep depend install-binaries install-docs install-docs-devel $(DIRS)

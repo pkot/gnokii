@@ -103,15 +103,6 @@ install:
 	$(INSTALL_DATA) gnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	@echo
 
-install-strip: install
-	@echo
-
-install-suid: install
-	@echo
-
-install-ss: install
-	@echo
-
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend
 

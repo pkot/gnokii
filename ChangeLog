@@ -15,6 +15,7 @@
       installed with "make install-docs" and remove
       gnokii-hackers-howto, gettext-howto and packaging-howto from
       that list                                     (Daniele Forsi)
+    o simplify Makefiles, remove obsolete targets       (Pawel Kot)
  * gnokii updates
     o add error handling for security commands          (Pawel Kot)
     o getprofile requires ringtone_list being allocated (Pawel Kot)

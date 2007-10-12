@@ -26,7 +26,6 @@ INSTALL_DOCS = 	README \
 		README-ericsson \
 		README-siemens \
 		README-Symbian \
-		README.libsms \
 		CREDITS \
 		Bugs \
 		DataCalls-QuickStart \
@@ -61,6 +60,9 @@ GNOKII1_MAN=man/gnokii.1 man/sendsms.1
 GNOKII8_MAN=man/gnokiid.8 man/mgnokiidev.8
 XGNOKII_MAN=man/xgnokii.1x
 
+DEVEL_DOCS =    CodingStyle \
+		README.libsms
+
 all:
 	@echo
 
@@ -84,6 +86,15 @@ install:
 		$(INSTALL) -d $(DESTDIR)$(xmandir); \
 		$(INSTALL_DATA) $(XGNOKII_MAN) $(DESTDIR)$(xmandir); \
 	fi
+	@echo "done"
+
+install-devel:
+	$(INSTALL) -d $(DESTDIR)$(docdir)
+	@for xxx in $(DEVEL_DOCS); do \
+	    if [ -e $$xxx ]; then \
+		$(INSTALL_DATA) $$xxx $(DESTDIR)$(docdir)/$$xxx; \
+	    fi; \
+	done
 	@echo "done"
 
 clean:

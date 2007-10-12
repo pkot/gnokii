@@ -22,30 +22,9 @@ clean:
 	$(LIBTOOL) --mode=clean $(RM) gnokiid $(OBJS)
 	$(RM) *~ depend core *.bak
 
-install: all
+install: gnokiid
 	$(INSTALL) -d $(DESTDIR)/$(sbindir)
 	$(LIBTOOL) --mode=install $(INSTALL) gnokiid $(DESTDIR)/$(sbindir)
-
-install-strip: all
-	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(LIBTOOL) --mode=install $(INSTALL) -s gnokiid $(DESTDIR)/$(sbindir)
-	@echo "done"
-
-install-suid: all
-	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
-		/usr/sbin/groupadd gnokii; \
-	fi
-	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 4750 gnokiid $(DESTDIR)/$(sbindir)
-	@echo "done"
-
-install-ss: all
-	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
-		/usr/sbin/groupadd gnokii; \
-	fi
-	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 4750 -s gnokiid $(DESTDIR)/$(sbindir)
-	@echo "done"
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend

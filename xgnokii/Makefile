@@ -47,7 +47,7 @@ clean:
 	$(LIBTOOL) --mode=clean $(RM) xgnokii $(OBJS)
 	$(RM) *~ xpm/*~ depend
 
-install: all
+install: xgnokii
 	$(INSTALL) -d $(DESTDIR)$(xbindir)
 	$(LIBTOOL) --mode=install $(INSTALL) xgnokii $(DESTDIR)$(xbindir)
 	$(INSTALL_DATA) xgnokii.pc $(DESTDIR)$(libdir)/pkgconfig
@@ -67,72 +67,6 @@ install: all
 	 rm -f POSIX ; ln -sf en_US POSIX)
 	$(INSTALL) -d $(DESTDIR)$(datadir)/applications
 	$(INSTALL_DATA) xgnokii.desktop $(DESTDIR)$(datadir)/applications
-
-install-strip: all
-	$(INSTALL) -d $(DESTDIR)$(xbindir)
-	$(LIBTOOL) --mode=install $(INSTALL) -s xgnokii $(DESTDIR)$(xbindir)
-	$(INSTALL_DATA) xgnokii.pc $(DESTDIR)$(libdir)/pkgconfig
-	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help
-	( cd $(HELP_DIR); \
-	  $(FIND) . -type d \! -path "*CVS*" \
-	       -exec $(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help/{} \; ; \
-	  $(FIND) . -type f \! -path "*CVS*" \
-	       -exec $(INSTALL_DATA) {} $(DESTDIR)$(xgnokii_libdir)/help/{} \; \
-	)
-	$(INSTALL_DATA) ../Docs/CREDITS $(DESTDIR)$(xgnokii_libdir)/help/en_US
-	$(INSTALL_DATA) ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
-	$(INSTALL) -d $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	$(INSTALL_DATA) ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
-	 rm -f C ; ln -sf en_US C; \
-	 rm -f POSIX; ln -sf en_US POSIX)
-	@echo "done"
-
-install-suid: all
-	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
-		/usr/sbin/groupadd gnokii; \
-	fi
-	$(INSTALL) -d $(DESTDIR)$(xbindir)
-	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 0750 xgnokii $(DESTDIR)$(xbindir)
-	$(INSTALL_DATA) xgnokii.pc $(DESTDIR)$(libdir)/pkgconfig
-	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xgnokii_libdir)/help
-	( cd $(HELP_DIR); \
-	  $(FIND) . -type d \! -path "*CVS*" \
-	       -exec $(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xgnokii_libdir)/help/{} \; ; \
-	  $(FIND) . -type f \! -path "*CVS*" \
-	       -exec $(INSTALL) -o root -g gnokii {} $(DESTDIR)$(xgnokii_libdir)/help/{} \; \
-	)
-	$(INSTALL) -o root -g gnokii ../Docs/CREDITS $(DESTDIR)$(xgnokii_libdir)/help/en_US
-	$(INSTALL) -o root -g gnokii ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
-	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	$(INSTALL) -o root -g gnokii ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
-	 rm -f C ; ln -sf en_US C; \
-	 rm -f POSIX; ln -sf en_US POSIX)
-	@echo
-
-install-ss: all
-	@if [ -z "/bin/grep -e '^gnokii:' /etc/group" ]; then \
-		/usr/sbin/groupadd gnokii; \
-	fi
-	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xbindir)
-	$(LIBTOOL) --mode=install $(INSTALL) -o root -g gnokii -m 0750 -s xgnokii $(DESTDIR)$(xbindir)
-	$(INSTALL_DATA) xgnokii.pc $(DESTDIR)$(libdir)/pkgconfig
-	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xgnokii_libdir)/help
-	( cd $(HELP_DIR); \
-	  $(FIND) . -type d \! -path "*CVS*" \
-	       -exec $(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xgnokii_libdir)/help/{} \; ; \
-	  $(FIND) . -type f \! -path "*CVS*" \
-	       -exec $(INSTALL) -o root -g gnokii {} $(DESTDIR)$(xgnokii_libdir)/help/{} \; \
-	)
-	$(INSTALL) -o root -g gnokii ../Docs/CREDITS $(DESTDIR)$(xgnokii_libdir)/help/en_US
-	$(INSTALL) -o root -g gnokii ../COPYING $(DESTDIR)$(xgnokii_libdir)/help/en_US
-	$(INSTALL) -o root -g gnokii -d $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	$(INSTALL) -o root -g gnokii ../Docs/sample/gnokiirc $(DESTDIR)$(xgnokii_libdir)/help/en_US/sample
-	(cd $(DESTDIR)$(xgnokii_libdir)/help; \
-	 rm -f C ; ln -sf en_US C; \
-	 rm -f POSIX; ln -sf en_US POSIX)
-	@echo
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend
