@@ -74,10 +74,6 @@ clean:
 	    fi; \
 	done
 
-ifdef OWN_GETOPT
-	$(MAKE) -C getopt clean
-endif
-
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
 		    if [ -e $$dir/Makefile ]; then \
