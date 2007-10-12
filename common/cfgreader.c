@@ -405,21 +405,21 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 	memset(cfg, '\0', sizeof(gn_config));
 
 	/* You need to specify at least model and port in the phone section */
-	if (!(val = gn_cfg_get(gn_cfg_info, section, "model")))
-		/* strcpy(cfg->model, def->model); */
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "model"))) {
+		fprintf(stderr, _("You need to define 'model' in the config file.\n"));
 		return false;
-	else
+	} else
 		snprintf(cfg->model, sizeof(cfg->model), "%s", val);
 
-	if (!(val = gn_cfg_get(gn_cfg_info, section, "port")))
-		/* strcpy(cfg->port_device, def->port_device); */
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "port"))) {
+		fprintf(stderr, _("You need to define 'port' in the config file.\n"));
 		return false;
-	else
+	} else
 		snprintf(cfg->port_device, sizeof(cfg->port_device), "%s", val);
 
-	if (!(val = gn_cfg_get(gn_cfg_info, section, "connection")))
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "connection"))) {
 		cfg->connection_type = def->connection_type;
-	else {
+	} else {
 		cfg->connection_type = gn_get_connectiontype(val);
 		if (cfg->connection_type == GN_CT_NONE) {
 			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "connection", val);
@@ -660,7 +660,7 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	gn_config_default.use_locking = 0;
 
 	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default)) {
-		fprintf(stderr, _("No [global] section in %s config file.\n"), file);
+		fprintf(stderr, _("No or incorrect [global] section in %s config file.\n"), file);
 		return GN_ERR_NOPHONE;
 	}
 
