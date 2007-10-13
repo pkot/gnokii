@@ -74,6 +74,7 @@ GNOKII_API char *gn_error_print(gn_error e)
 	case GN_ERR_NOLOG:                 return _("Incorrect logging section configuration.");
 	case GN_ERR_NOMODEL:               return _("No phone model specified in the config file.");
 	case GN_ERR_NOPORT:                return _("No port specified in the config file.");
+	case GN_ERR_NOCONNECTION:          return _("No connection type specified in the config file.");
 	default:                           return _("Unknown error.");
 	}
 }

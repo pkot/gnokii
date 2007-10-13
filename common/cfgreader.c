@@ -171,7 +171,7 @@ struct gn_cfg_header *cfg_memory_read(const char **lines)
 			continue;
 		}
 
-			/* Line not part of any heading */
+		/* Line not part of any heading */
 		fprintf(stderr, _("Orphaned line: %s\n"), line);
 
 		free(buf);
@@ -397,7 +397,7 @@ char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key,
 	return NULL;
 }
 
-static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_config *def)
+static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_config *def)
 {
 	const char *val;
 	char ch;
@@ -406,24 +406,25 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 
 	/* You need to specify at least model and port in the phone section */
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "model"))) {
-		fprintf(stderr, _("You need to define 'model' in the config file.\n"));
-		return false;
+		fprintf(stderr, _("You need to define '%s' in the config file.\n"), "model");
+		return GN_ERR_NOMODEL;
 	} else
 		snprintf(cfg->model, sizeof(cfg->model), "%s", val);
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "port"))) {
-		fprintf(stderr, _("You need to define 'port' in the config file.\n"));
-		return false;
+		fprintf(stderr, _("You need to define '%s' in the config file.\n"), "port");
+		return GN_ERR_NOPORT;
 	} else
 		snprintf(cfg->port_device, sizeof(cfg->port_device), "%s", val);
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "connection"))) {
-		cfg->connection_type = def->connection_type;
+		fprintf(stderr, _("You need to define '%s' in the config file.\n"), "connection");
+		return GN_ERR_NOCONNECTION;
 	} else {
 		cfg->connection_type = gn_get_connectiontype(val);
 		if (cfg->connection_type == GN_CT_NONE) {
 			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "connection", val);
-			return false;
+			return GN_ERR_NOCONNECTION;
 		}
 	}
 
@@ -534,7 +535,7 @@ static bool cfg_psection_load(gn_config *cfg, const char *section, const gn_conf
 		cfg->use_locking = def->use_locking;
 	}
 
-	return true;
+	return GN_ERR_NONE;
 }
 
 static bool cfg_get_log_target(gn_log_target *t, const char *opt)
@@ -561,6 +562,7 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 #define MAX_PATH_LEN 200
 GNOKII_API gn_error gn_cfg_read_default()
 {
+	gn_error error;
 	char *homedir;
 	char rcfile[MAX_PATH_LEN];
 #ifdef WIN32
@@ -580,20 +582,21 @@ GNOKII_API gn_error gn_cfg_read_default()
 	const char globalrc[] = "/etc/gnokiirc";
 
 	homedir = getenv("HOME");
-	if (homedir) strncpy(rcfile, homedir, MAX_PATH_LEN);
+	if (homedir)
+		strncpy(rcfile, homedir, MAX_PATH_LEN);
 	strncat(rcfile, "/.gnokiirc", MAX_PATH_LEN);
 #endif
 
 	/* Try opening .gnokirc from users home directory first */
-	if (gn_cfg_file_read(rcfile)) {
+	if ((error = gn_cfg_file_read(rcfile)) != GN_ERR_NONE) {
+		fprintf(stderr, _("Couldn't read %s config file.\n"), rcfile);
 		/* It failed so try for /etc/gnokiirc */
-		if (gn_cfg_file_read(globalrc)) {
+		if ((error == GN_ERR_NOCONFIG) && ((error = gn_cfg_file_read(globalrc)) != GN_ERR_NONE)) {
 			/* That failed too so exit */
-			fprintf(stderr, _("Couldn't open %s or %s.\n"), rcfile, globalrc);
-			return GN_ERR_NOCONFIG;
+			fprintf(stderr, _("Couldn't read %s config file.\n"), globalrc);
 		}
 	}
-	return GN_ERR_NONE;
+	return error;
 }
 
 /* DEPRECATED */
@@ -615,9 +618,10 @@ GNOKII_API gn_error gn_cfg_read(char **bindir)
 static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 {
 	char *val;
+	gn_error error;
 
 	if (file == NULL && lines == NULL) {
-		dprintf("Couldn't open a config file or memory.\n");
+		fprintf(stderr, _("Couldn't open a config file or memory.\n"));
 		return GN_ERR_NOCONFIG;
 	}
 
@@ -638,9 +642,9 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	if (gn_cfg_info == NULL) {
 		/* this is bad, but the previous was much worse - bozo */
 		if (file)
-			dprintf("Couldn't open %s config file.\n", file);
+			fprintf(stderr, _("Couldn't read %s config file.\n"), file);
 		else
-			dprintf("Couldn't read config\n");
+			fprintf(stderr, _("Couldn't read config.\n"));
 		return GN_ERR_NOCONFIG;
 	}
 	strcpy(gn_config_default.model, "");
@@ -659,10 +663,8 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	gn_config_default.sm_retry = 0;
 	gn_config_default.use_locking = 0;
 
-	if (!cfg_psection_load(&gn_config_global, "global", &gn_config_default)) {
-		fprintf(stderr, _("No or incorrect [global] section in %s config file.\n"), file);
-		return GN_ERR_NOPHONE;
-	}
+	if ((error = cfg_psection_load(&gn_config_global, "global", &gn_config_default)) != GN_ERR_NONE)
+		return error;
 
 	/* hack to support [sms] / smsc_timeout parameter */
 	if (gn_config_global.smsc_timeout < 0) {

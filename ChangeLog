@@ -9,6 +9,7 @@
       cards provide them and currently only the pcsc driver
       supports them)                                (Daniele Forsi)
     o improve error messages while parsing config file  (Pawel Kot)
+    o enhance error handling for parsing config         (Pawel Kot)
  * pcsc driver
    o add support for LD memory (Last Dialed Numbers)(Daniele Forsi)
  * build system updates
