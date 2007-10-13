@@ -21,6 +21,9 @@
  * gnokii updates
     o add error handling for security commands          (Pawel Kot)
     o getprofile requires ringtone_list being allocated (Pawel Kot)
+ * at driver updates
+    o fix buffer size calculating in AT_WritePhonebook
+                                                      (Daniel Burr)
 
 0.6.19
 ======
