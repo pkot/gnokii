@@ -464,7 +464,7 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 		error = gn_sm_functions(GN_OP_WritePhonebook, data, state);
 
 		if (error == GN_ERR_NONE) {
-			fprintf (stderr, 
+			fprintf(stderr, 
 				 _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), 
 				 gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 			/* If the location was not specified and there are
@@ -472,7 +472,7 @@ int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine
 			 * location */
 			default_location++;
 		} else
-			fprintf (stderr, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
+			fprintf(stderr, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
 				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 	}
 out:
