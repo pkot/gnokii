@@ -78,7 +78,7 @@ GNOKII_API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 #ifdef HAVE_LIBICAL
 #  define MAX_PROP_INDEX 5
 	icalcomponent *pIcal = NULL;
-	struct icaltimetype stime = {0}, etime = {0}, atime = {0};
+	struct icaltimetype stime = {0}, etime = {0}/*, atime = {0}*/;
 	icalproperty *properties[MAX_PROP_INDEX+1] = {0}; /* order and number of properties vary */
 	int iprop = 0;
 	char compuid[64];
@@ -391,13 +391,13 @@ GNOKII_API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 		/* alarm */
 		alarm = icalcomponent_get_first_component(comp, ICAL_VALARM_COMPONENT);
 		if (alarm) {
-			struct icaldurationtype trigger_duration = {0};
-			struct icaltriggertype trigger_value = {0};
 			icalproperty *trigger = NULL;
-			struct icaltimetype alarm_start = {0};
 
 			trigger = icalcomponent_get_first_property(alarm, ICAL_TRIGGER_PROPERTY);
 			if (trigger) {
+				struct icaltriggertype trigger_value;
+				struct icaltimetype alarm_start;
+
 				trigger_value = icalvalue_get_trigger(icalproperty_get_value(trigger));
 				if (icaltriggertype_is_null_trigger(trigger_value) ||
 						icaltriggertype_is_bad_trigger(trigger_value)) {
@@ -425,11 +425,11 @@ GNOKII_API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 		}
 
 		str = icalcomponent_get_location(compresult);
-		if (!str) str = "";
+		if (!str)
+			str = "";
 		snprintf(calnote->mlocation, sizeof(calnote->mlocation), "%s", str);
 
 		dprintf("Component found\n%s\n", icalcomponent_as_ical_string(compresult));
-
 	}
 	if (compresult)
 		icalcomponent_free(compresult);
@@ -498,7 +498,6 @@ GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
 #ifdef HAVE_LIBICAL
 	icalparser *parser = NULL;
 	icalcomponent *comp = NULL, *compresult = NULL;
-	struct icaltimetype dtstart = {0};
 
 	parser = icalparser_new();
 	if (!parser) {
@@ -523,7 +522,6 @@ GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
 		dprintf("No component found.\n");
 		return GN_ERR_EMPTYLOCATION;
 	} else {
-		const char *priostr = NULL;
 		icalproperty *priority = icalcomponent_get_first_property(compresult, ICAL_PRIORITY_PROPERTY);
 
 		/* summary goes into text */
