@@ -700,13 +700,14 @@ GNOKII_API gn_error gn_cfg_memory_read(const char **lines)
 GNOKII_API gn_error gn_cfg_phone_load(const char *iname, struct gn_statemachine *state)
 {
 	char section[256];
+	gn_error error;
 
 	if (iname == NULL || *iname == '\0') {
 		state->config = gn_config_global;
 	} else {
 		snprintf(section, sizeof(section), "phone_%s", iname);
-		if (!cfg_psection_load(&state->config, section, &gn_config_global))
-			return GN_ERR_NOPHONE;
+		if ((error = cfg_psection_load(&state->config, section, &gn_config_global)) != GN_ERR_NONE)
+			return error;
 	}
 
 	if (state->config.model[0] == '\0') {
