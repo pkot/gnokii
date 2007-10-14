@@ -23,6 +23,7 @@
  * at driver updates
     o fix buffer size calculating in AT_WritePhonebook
                                                       (Daniel Burr)
+    o fix SMS-SUBMIT parsing                            (Pawel Kot)
 
 0.6.19
 ======

@@ -1607,7 +1607,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 {
 	at_line_buffer buf;
 	gn_error ret = GN_ERR_NONE;
-	unsigned int sms_len, l, offset = 0;
+	unsigned int sms_len, l, extraoffset, offset = 0;
 	unsigned char *tmp;
 	gn_error error;
  	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -1714,10 +1714,12 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 		data->raw_sms->more_messages       = tmp[offset] & 0x04;
 		// bits 3 and 4 of the first octet unused;
 		data->raw_sms->report_status       = tmp[offset] & 0x20;
+		extraoffset = 10;
 	} else if (data->raw_sms->type == GN_SMS_MT_Submit) {
 		dprintf("SMS-SUBMIT found\n");
 		data->raw_sms->reject_duplicates   = tmp[offset] & 0x04;
 		data->raw_sms->validity_indicator  = (tmp[offset] & 0x18) >> 3;
+		extraoffset = 3;
 	} else {
 		dprintf("Unknown PDU type %d\n", data->raw_sms->type);
 		return GN_ERR_INTERNALERROR;
@@ -1734,7 +1736,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 
 	l = (tmp[offset] % 2) ? tmp[offset] + 1 : tmp[offset];
 	l = l / 2 + 2;
-	if (l + offset + 10 > sms_len || l > GN_SMS_NUMBER_MAX_LENGTH) {
+	if (l + offset + extraoffset > sms_len || l > GN_SMS_NUMBER_MAX_LENGTH) {
 		dprintf("Invalid remote number length (%d)\n", l);
 		ret = GN_ERR_INTERNALERROR;
 		goto out;
