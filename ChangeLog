@@ -17,6 +17,7 @@
       that list                                     (Daniele Forsi)
     o simplify Makefiles, remove obsolete targets       (Pawel Kot)
     o don't fail on parallel builds                 (Daniele Forsi)
+    o fix compilation warnings           (Pawel Kot, Daniele Forsi)
  * gnokii updates
     o add error handling for security commands          (Pawel Kot)
     o getprofile requires ringtone_list being allocated (Pawel Kot)

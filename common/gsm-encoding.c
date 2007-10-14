@@ -794,11 +794,12 @@ int string_base64(const char *instring)
 /*
    Encodes a null-terminated input string with base64 encoding.
    The buffer outstring needs to be at least 1.333 times bigger than the input string length.
-   outlen is the size of the oustring buffer excluding null termination.
+   outlen is the size of the outstring buffer excluding null termination.
 */
 int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
-	char *pin, *pout;
+	const char *pin;
+	char *pout;
 	char *outtemp = NULL;
 	int inleft, outleft;
 
@@ -807,7 +808,7 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 	outleft = outlen;
 	pin = instring;
 
-	/* This is in case someone have us not appropriate buffer for outstring */
+	/* This is in case someone passes a buffer not appropriate for outstring */
 	while (outleft > 3 && inleft > 0) {
 		int a, b, c;
 		unsigned int i1, i2, i3, i4;
