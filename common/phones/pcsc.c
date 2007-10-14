@@ -93,7 +93,7 @@ SCARDCONTEXT hContext;
 SCARDHANDLE hCard;
 DWORD dwActiveProtocol;
 SCARD_IO_REQUEST *pioSendPci, pioRecvPci;
-BYTE buf[256];
+BYTE buf[MAX_BUFFER_SIZE];
 PCSC_IOSTRUCT IoStruct = { buf, sizeof(buf), 0, 0 };
 
 #ifdef DEBUG
@@ -583,7 +583,7 @@ static LONG pcsc_file_get_contents(PCSC_IOSTRUCT *ios, LONG file_id) {
 	DWORD dwFileLength;
 
 	/* allocate a buffer for the "stat" command */
-	ios->dwRecvLength = 256;
+	ios->dwRecvLength = MAX_BUFFER_SIZE;
 	ios->pbRecvBuffer = malloc(ios->dwRecvLength);  /* FIXME this memory is leaked after the following errors */
 	if (!ios->pbRecvBuffer) return SCARD_E_NO_MEMORY;
 
