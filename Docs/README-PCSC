@@ -22,13 +22,10 @@ If you have more than one reader, you might find it useful to specify
 the name of you reader in the port parameter (look at the debug output
 from pcscd or gnokii if you don't know the exact string to use).
 
-The first release implements only the functions needed by the gnokii
-commands --identify and --getphonebook:
-- GN_OP_Init
-- GN_OP_Terminate
-- GN_OP_Identify
-- GN_OP_GetMemoryStatus
-- GN_OP_ReadPhonebook
+Implemented commands for gnokii are:
+--identify
+--getphonebook
+--getfile
 This means that writing to the phonebook is not supported and reading
 or writing short messages isn't supported either.
 
@@ -39,6 +36,16 @@ Note that:
 - some SIM cards only have numbers in SM, so reading from the
   other memories will fail
 - some phones do not write to the LD memory
+
+The --getfile command can read the MF, a DF or an EF, if the SIM allows it.
+A path name must start with 'B:' and the slash '/' or the backslash '\\'
+can be used as separators (in some shells the backslash must be doubled).
+All names are 4 digits hex numbers (case insensitive).
+Interesting files are the phonebook in raw format:
+  gnokii --getfile b:/7f10/6f3a
+and the SMSs in raw format:
+  gnokii --getfile b:/7f10/6f3c
+Do not try random numbers, read the GSM standard instead.
 
 
 * Bugs *

@@ -10,8 +10,6 @@
       supports them)                                (Daniele Forsi)
     o improve error messages while parsing config file  (Pawel Kot)
     o enhance error handling for parsing config         (Pawel Kot)
- * pcsc driver
-   o add support for LD memory (Last Dialed Numbers)(Daniele Forsi)
  * build system updates
     o add FAQ, KNOWN_BUGS and README-DKU2 to the list of files
       installed with "make install-docs" and remove

@@ -36,6 +36,7 @@
 
 /* prototypes for functions related to libgnokii */
 
+static gn_error GetFile(gn_data *data, struct gn_statemachine *state);
 static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error Identify(gn_data *data, struct gn_statemachine *state);
 static gn_error Initialise(struct gn_statemachine *state);
@@ -51,9 +52,10 @@ static LONG pcsc_cmd_get_response(PCSC_IOSTRUCT *ios, BYTE length);
 static LONG pcsc_cmd_read_binary(PCSC_IOSTRUCT *ios, LONG length);
 static LONG pcsc_cmd_read_record(PCSC_IOSTRUCT *ios, BYTE record, BYTE length);
 static LONG pcsc_cmd_select(PCSC_IOSTRUCT *ios, LONG file_id);
+static LONG pcsc_file_get_contents(PCSC_IOSTRUCT *ios, LONG file_id);
 static LONG pcsc_open_reader_name(LPCSTR reader_name);
 static LONG pcsc_open_reader_number(LONG number);
-static LONG pcsc_read_file(PCSC_IOSTRUCT *ios, LONG file_id);
+static LONG pcsc_read_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE record);
 static LONG pcsc_stat_file(PCSC_IOSTRUCT *ios, LONG file_id);
 
 /* prototypes for functions converting between the two libraries */
@@ -217,6 +219,8 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return GetMemoryStatus(data, state);
 	case GN_OP_ReadPhonebook:
 		return ReadPhonebook(data, state);
+	case GN_OP_GetFile:
+		return GetFile(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -299,6 +303,54 @@ static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state) {
 	return get_gn_error(&IoStruct, ret);
 }
 
+static gn_error GetFile(gn_data *data, struct gn_statemachine *state) {
+	LONG file_id;
+	LONG ret;
+	gn_file *file = NULL;
+	unsigned char *pos, buf[4];
+	gn_error error = GN_ERR_NONE;
+
+	if (!data || !data->file) {
+		return GN_ERR_INTERNALERROR;
+	}
+	file = data->file;
+
+	/* emulated path starts with B: or b: */
+	pos = file->name;
+	if (*pos != 'B' && *pos != 'b') return GN_ERR_INVALIDLOCATION;
+	pos++;
+	if (*pos != ':') return GN_ERR_INVALIDLOCATION;
+	pos++;
+	/* the rest of the path is made of groups of 4 hex digits with a slash or backslash as separator */
+	if (strlen(pos) % 5) return GN_ERR_INVALIDLOCATION;
+
+	/* the last group of digits is the file id, the previous groups, if any, are the directories
+	   eg: b:/7f10/6f3c */
+	while (*pos && error == GN_ERR_NONE) {
+		if (*pos != '\\' && *pos != '/') return GN_ERR_INVALIDLOCATION;
+		pos++;
+		hex2bin(buf, pos, 2);
+		file_id = buf[0] * 256 + buf[1];
+		pos += 4;
+		if (*pos) {
+			/* intermediate IDs are treated as directories */
+			ret = pcsc_change_dir(&IoStruct, file_id);
+			error = get_gn_error(&IoStruct, ret);
+		} else {
+			PCSC_IOSTRUCT ios;
+			/* the last ID is read as a file */
+			ret = pcsc_file_get_contents(&ios, file_id);
+			error = get_gn_error(&ios, ret);
+			/* fill in libgnokii fields */
+			snprintf(file->name, sizeof(file->name), "%04lx", file_id);
+			file->file = ios.pbRecvBuffer;
+			file->file_length = ios.dwReceived - 2;
+		}
+	}
+
+	return error;
+}
+
 static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state) {
 	LONG file;
 	LONG ret;
@@ -317,14 +369,13 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state) {
 	if (pe->location < 1 || pe->location > 255) {
 		return GN_ERR_INVALIDLOCATION;
 	}
-	IoStruct.bRecordNumber = pe->location;
 
 	dprintf("Reading phonebook location (%d/%d)\n", pe->memory_type, pe->location);
 	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
 
-	ret = pcsc_read_file(&IoStruct, file);
+	ret = pcsc_read_file_record(&IoStruct, file, pe->location);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
 
@@ -336,7 +387,7 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state) {
 
 	/* layout of buffer is: 0..241 octects with alpha tag", 14 octects for number, 2 octects for SW
 		(so for EF_ADN subtract 14 for number and 2 for SW) */
-	/* FIXME: "14" is not right for all types of numbers (eg EF_ECC) */
+		/* FIXME: "14" is not right for all types of numbers (it's 15 for EF_BDN, it's completely different for EF_ECC) */
 	if (IoStruct.dwReceived < 16) return GN_ERR_INTERNALERROR;
 	number_start = IoStruct.dwReceived - 14 - 2;
 	/* mark the entry as empty only if both name and number are missing */
@@ -525,8 +576,78 @@ static LONG pcsc_cmd_read_record(PCSC_IOSTRUCT *ios, BYTE record, BYTE length) {
 	return ret;
 }
 
-static LONG pcsc_read_file(PCSC_IOSTRUCT *ios, LONG file_id) {
-/* copy file contents to the provided buffer */
+static LONG pcsc_file_get_contents(PCSC_IOSTRUCT *ios, LONG file_id) {
+/* copy file contents in a newly allocated buffer which must be freed by the caller */
+	LONG ret;
+	BYTE bRecordLength, bRecordCount, *pbFileBuffer, bFileStructure;
+	DWORD dwFileLength;
+
+	/* allocate a buffer for the "stat" command */
+	ios->dwRecvLength = 256;
+	ios->pbRecvBuffer = malloc(ios->dwRecvLength);  /* FIXME this memory is leaked after the following errors */
+	if (!ios->pbRecvBuffer) return SCARD_E_NO_MEMORY;
+
+	ret = pcsc_stat_file(ios, file_id);
+	if (ret != SCARD_S_SUCCESS) return ret;
+	if (ios->dwReceived < 2) return SCARD_F_UNKNOWN_ERROR;
+	/* "soft" failure that needs to be catched by the caller */
+	if (ios->pbRecvBuffer[ios->dwReceived - 2] != 0x90) return SCARD_S_SUCCESS;
+
+	if (ios->dwReceived <= 6) return SCARD_F_UNKNOWN_ERROR;
+	switch (ios->pbRecvBuffer[6]) {
+	case GN_PCSC_FILE_TYPE_MF:
+	case GN_PCSC_FILE_TYPE_DF:
+		/* reuse the buffer even if it's bigger than needed */
+		dprintf("file %04x length %d\n", file_id, ios->dwReceived - 2);
+		return SCARD_S_SUCCESS;
+	case GN_PCSC_FILE_TYPE_EF:
+		break;
+	default:
+		return SCARD_E_INVALID_PARAMETER;
+	}
+
+	if (ios->dwReceived <= 13) return SCARD_F_UNKNOWN_ERROR;
+	dwFileLength = ios->pbRecvBuffer[2] * 256 + ios->pbRecvBuffer[3];
+	bFileStructure = ios->pbRecvBuffer[13];
+	bRecordLength = ios->pbRecvBuffer[14];
+	dprintf("file %04x length %d\n", file_id, dwFileLength);
+	/* 2 extra bytes are needed to store the last SW (the previous SWs are overwritten by the following reads)
+	   having the SW after file contents is consistent with the other functions */
+	free(ios->pbRecvBuffer);
+	ios->pbRecvBuffer = malloc(dwFileLength + 2);
+	if (!ios->pbRecvBuffer) return SCARD_E_NO_MEMORY;
+
+	switch (bFileStructure) {
+	case GN_PCSC_FILE_STRUCTURE_TRANSPARENT:
+		ret = pcsc_cmd_read_binary(ios, dwFileLength);
+		break;
+	case GN_PCSC_FILE_STRUCTURE_CYCLIC:
+	case GN_PCSC_FILE_STRUCTURE_LINEAR_FIXED:
+		bRecordCount = dwFileLength / bRecordLength;
+		pbFileBuffer = ios->pbRecvBuffer;
+		ios->bRecordNumber = 1;
+		while (bRecordCount-- && ret == SCARD_S_SUCCESS) {
+			ret = pcsc_cmd_read_record(ios, ios->bRecordNumber++, bRecordLength);
+			ios->pbRecvBuffer += bRecordLength;
+		}
+		/* pretend we filled the buffer in one pass */
+		ios->pbRecvBuffer = pbFileBuffer;
+		/* use the actual number of records read */
+		ios->dwReceived = (ios->bRecordNumber - 1) * bRecordLength + 2;
+		break;
+	default:
+		ret = SCARD_E_INVALID_PARAMETER;
+	}
+
+	if (ret != SCARD_S_SUCCESS) {
+		dprintf("%s error %lX: %s\n", __FUNCTION__, ret, pcsc_stringify_error(ret));
+	}
+
+	return ret;
+}
+
+static LONG pcsc_read_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE record) {
+/* copy contents of a record from a file to the provided buffer */
 	LONG ret;
 
 	ret = pcsc_stat_file(ios, file_id);
@@ -535,18 +656,15 @@ static LONG pcsc_read_file(PCSC_IOSTRUCT *ios, LONG file_id) {
 	/* "soft" failure that needs to be catched by the caller */
 	if (ios->pbRecvBuffer[ios->dwReceived - 2] != 0x90) return SCARD_S_SUCCESS;
 
-	/* TODO: handle GN_PCSC_FILE_TYPE_MF and GN_PCSC_FILE_TYPE_DF */
+	/* records can only be read from EFs */
 	if (ios->dwReceived <= 6) return SCARD_F_UNKNOWN_ERROR;
 	if (ios->pbRecvBuffer[6] != GN_PCSC_FILE_TYPE_EF) return SCARD_E_INVALID_PARAMETER;
 
 	if (ios->dwReceived <= 13) return SCARD_F_UNKNOWN_ERROR;
 	switch (ios->pbRecvBuffer[13]) {
-	case GN_PCSC_FILE_STRUCTURE_TRANSPARENT:
-		ret = pcsc_cmd_read_binary(ios, ios->pbRecvBuffer[2] * 256 + ios->pbRecvBuffer[3]);
-		break;
 	case GN_PCSC_FILE_STRUCTURE_CYCLIC:
 	case GN_PCSC_FILE_STRUCTURE_LINEAR_FIXED:
-		ret = pcsc_cmd_read_record(ios, ios->bRecordNumber, ios->pbRecvBuffer[14]);
+		ret = pcsc_cmd_read_record(ios, record, ios->pbRecvBuffer[14]);
 		break;
 	default:
 		ret = SCARD_E_INVALID_PARAMETER;
