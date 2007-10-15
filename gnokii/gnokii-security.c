@@ -137,7 +137,8 @@ static int get_password(const char *prompt, char *pass, int length)
 #else
 	/* FIXME: manual says: Do not use getpass */
 	char *s = NULL;
-	int err, s_len, fd = fileno(stdin);
+	int err, fd = fileno(stdin);
+	size_t s_len;
 
 	if (isatty(fd)) {
 		strncpy(pass, getpass(prompt), length - 1);
