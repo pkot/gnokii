@@ -1052,44 +1052,6 @@ gn_error gn_file_bitmap_save(char *filename, gn_bmp *bitmap, gn_phone *info)
 	return GN_ERR_NONE;
 }
 
-
-/* FIXME - this should not ask for confirmation here - I'm not sure what calls it though */
-/* mode == 0 -> overwrite
- * mode == 1 -> ask
- * mode == 2 -> append
- */
-int gn_file_text_save(char *filename, char *text, int mode)
-{
-	FILE *file;
-	int confirm = -1;
-	char ans[5];
-	struct stat buf;
-
-	/* Ask before overwriting */
-	if ((mode == 1) && (stat(filename, &buf) == 0)) {
-		fprintf(stdout, _("File %s exists.\n"), filename);
-		while (confirm < 0) {
-			fprintf(stdout, _("Overwrite? (yes/no) "));
-			gn_line_get(stdin, ans, 4);
-			if (!strcmp(ans, _("yes"))) confirm = 1;
-			else if (!strcmp(ans, _("no"))) confirm = 0;
-		}
-		if (!confirm) return -1;
-	}
-
-	if (mode == 2) file = fopen(filename, "a");
-	else file = fopen(filename, "w");
-
-	if (!file) {
-		fprintf(stderr, _("Can't open file %s for writing!\n"),  filename);
-		return -1;
-	}
-	fprintf(file, "%s\n", text);
-	fclose(file);
-	return 2;
-}
-
-
 #ifdef XPM
 void file_xpm_save(char *filename, gn_bmp *bitmap)
 {

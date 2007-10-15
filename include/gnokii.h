@@ -238,9 +238,6 @@ GNOKII_API void gn_timestamp_get(gn_timestamp *dt, int *year, int *month, int *d
  * filled in before the phone initialization */
 extern GNOKII_API struct gn_cfg_header *gn_cfg_info GNOKII_DEPRECATED;
 
-/* Files */
-GNOKII_API int gn_file_text_save(char *filename, char *text, int mode) GNOKII_DEPRECATED;
-
 /* Zero the gn_data structure */
 GNOKII_API void gn_data_clear(gn_data *data);
 extern GNOKII_API gn_phone *gn_gsm_info;
