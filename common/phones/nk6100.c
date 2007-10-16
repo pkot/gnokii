@@ -3695,6 +3695,8 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 		switch (message[4]) {
 			case 0x6f: /* Insert SIM card */
 				return GN_ERR_NOTREADY;
+			case 0x79:
+				return GN_ERR_SIMPROBLEM;
 			case 0x88:
 			case 0x8d:
 				dprintf("Message: Security code wrong.\n");

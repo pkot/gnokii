@@ -30,6 +30,12 @@
     o fix buffer size calculating in AT_WritePhonebook
                                                       (Daniel Burr)
     o fix SMS-SUBMIT parsing                            (Pawel Kot)
+ * documentation updates
+    o update Docs/protocol/nk6110.txt with another error code for
+      "Get code status err"                         (Daniele Forsi)
+ * nk6100 driver updates
+    o add error code GN_ERR_SIMPROBLEM for --changesecuritycode
+                                                    (Daniele Forsi)
 
 0.6.19
 ======

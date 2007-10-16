@@ -538,8 +538,11 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     r Change code ok        { 0x0005 }
     r Get code status err   { 0x0006, reason }
                             where reason: 0x6f: SIM card not ready
+                                          0x79: ??? (see note)
                                           0x88: current code wrong (or not needed?)
                                           0x8d: current code wrong
+                            Note: 0x79 was observed when trying to change the code on
+                            an expired SIM (it still can be changed via phone menus)
     s Status request        { 0x0007, 0x01 }
     r pin recvd             { 0x0008, accepted }
                             where accepted: 0x0c (or 0x06): OK
