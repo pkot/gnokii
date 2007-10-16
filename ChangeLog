@@ -11,6 +11,7 @@
     o improve error messages while parsing config file  (Pawel Kot)
     o enhance error handling for parsing config         (Pawel Kot)
     o remove gn_file_text_save() from API               (Pawel Kot)
+    o remove getline() replacement from compat.c    (Daniele Forsi)
  * build system updates
     o add FAQ, KNOWN_BUGS and README-DKU2 to the list of files
       installed with "make install-docs" and remove
@@ -24,6 +25,7 @@
     o getprofile requires ringtone_list being allocated (Pawel Kot)
     o replace gn_file_text_save() with local writefile()
                                                         (Pawel Kot)
+    o add getline() replacement to gnokii-utils.c   (Daniele Forsi)
  * at driver updates
     o fix buffer size calculating in AT_WritePhonebook
                                                       (Daniel Burr)

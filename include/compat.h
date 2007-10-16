@@ -211,13 +211,6 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 time_t timegm(struct tm *tm);
 #endif
 
-#ifndef HAVE_GETLINE
-#  ifdef HAVE_SYS_PARAM_H
-#    include <sys/param.h>
-#  endif
-int getline(char **line, size_t *len, FILE *stream);
-#endif
-
 /*
  * The following code was taken from W. Richard Stevens'
  * "UNIX Network Programming", Volume 1, Second Edition.
