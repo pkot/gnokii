@@ -521,6 +521,12 @@ GNOKII_API int gn_lib_is_connectiontype_supported(gn_connection_type ct)
 #else
 		return 0;
 #endif
+	case GN_CT_PCSC:
+#ifdef HAVE_PCSC
+		return 1;
+#else
+		return 0;
+#endif
 	case GN_CT_TCP:
 #ifndef WIN32
 		return 0;
