@@ -144,7 +144,7 @@ int sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	error = gn_sms_send(data, state);
 
 	if (error == GN_ERR_NONE)
-		fprintf(stdout, _("Send succeeded!\n"));
+		fprintf(stderr, _("Send succeeded!\n"));
 	else
 		fprintf(stderr, _("SMS Send failed (%s)\n"), gn_error_print(error));
 
@@ -210,7 +210,7 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		fprintf(stderr, _("Getting ringtone %d failed: %s\n"), ringtone.location, gn_error_print(error));
 		return error;
 	}
-	fprintf(stdout, _("Getting ringtone %d (\"%s\") succeeded!\n"), ringtone.location, ringtone.name);
+	fprintf(stderr, _("Getting ringtone %d (\"%s\") succeeded!\n"), ringtone.location, ringtone.name);
 
 	if (!filename) {
 		fprintf(stderr, _("Internal gnokii error: null filename\n"));
@@ -319,7 +319,7 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	}
 
 	if (error == GN_ERR_NONE)
-		fprintf(stdout, _("Send succeeded!\n"));
+		fprintf(stderr, _("Send succeeded!\n"));
 	else
 		fprintf(stderr, _("Send failed: %s\n"), gn_error_print(error));
 
@@ -410,7 +410,7 @@ int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	gn_sm_functions(GN_OP_PlayTone, data, state);
 
 	if (error == GN_ERR_NONE)
-		fprintf(stdout, _("Play succeeded!\n"));
+		fprintf(stderr, _("Play succeeded!\n"));
 	else
 		fprintf(stderr, _("Play failed: %s\n"), gn_error_print(error));
 

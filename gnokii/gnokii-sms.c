@@ -345,7 +345,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	error = gn_sms_send(data, state);
 
 	if (error == GN_ERR_NONE)
-		fprintf(stdout, _("Send succeeded!\n"));
+		fprintf(stderr, _("Send succeeded!\n"));
 	else
 		fprintf(stderr, _("SMS Send failed (%s)\n"), gn_error_print(error));
 
@@ -1244,7 +1244,7 @@ int createsmsfolder(char *name, gn_data *data, struct gn_statemachine *state)
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 	else 
-		fprintf(stdout, _("Folder with name: %s successfully created!\n"), folder.name);
+		fprintf(stderr, _("Folder with name: %s successfully created!\n"), folder.name);
 	return error;
 }
 
@@ -1275,7 +1275,7 @@ int deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *state)
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 	else 
-		fprintf(stdout, _("Number %i of 'My Folders' successfully deleted!\n"), folder.folder_id);
+		fprintf(stderr, _("Number %i of 'My Folders' successfully deleted!\n"), folder.folder_id);
 	return error;
 }
 

@@ -327,7 +327,7 @@ int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemach
 		error = gn_sm_functions(GN_OP_WriteCalendarNote, data, state);
 
 		if (error == GN_ERR_NONE)
-			fprintf(stdout, _("Successfully written!\n"));
+			fprintf(stderr, _("Successfully written!\n"));
 		else
 			fprintf(stderr, _("Failed to write calendar note: %s\n"), gn_error_print(error));
 	}
