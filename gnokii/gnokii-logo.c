@@ -149,7 +149,7 @@ int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *stat
 	data->sms = &sms;
 	error = gn_sms_send(data, state);
 
-	if (error == GN_ERR_NONE) fprintf(stderr, _("Send succeeded!\n"));
+	if (error == GN_ERR_NONE) fprintf(stdout, _("Send succeeded!\n"));
 	else fprintf(stderr, _("SMS Send failed (%s)\n"), gn_error_print(error));
 
 	return error;

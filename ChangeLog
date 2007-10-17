@@ -26,6 +26,8 @@
     o replace gn_file_text_save() with local writefile()
                                                         (Pawel Kot)
     o add getline() replacement to gnokii-utils.c   (Daniele Forsi)
+    o print to stdout all messages indicating success
+                                                    (Daniele Forsi)
  * at driver updates
     o fix buffer size calculating in AT_WritePhonebook
                                                       (Daniel Burr)

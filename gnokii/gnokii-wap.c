@@ -123,7 +123,7 @@ int writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachi
 
 	switch (error) {
 	case GN_ERR_NONE:
-		fprintf(stderr, _("WAP bookmark nr. %d successfully written!\n"), wapbookmark.location);
+		fprintf(stdout, _("WAP bookmark nr. %d successfully written!\n"), wapbookmark.location);
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
