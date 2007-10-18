@@ -1725,7 +1725,10 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	struct tm t, *loctime;
 	time_t caltime;
 	int size = 0;
-	char *loc, *tmp;
+	char *tmp;
+#ifdef ENABLE_NLS
+	char *loc;
+#endif
 	char *buf = NULL, *aux = NULL;
 
 	t.tm_sec = sms->smsc_time.second;
@@ -1741,15 +1744,18 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	caltime = mktime(&t);
 	loctime = localtime(&caltime);
 
+#ifdef ENABLE_NLS
 	loc = setlocale(LC_ALL, "C");
-
+#endif
 	CONCAT(buf, tmp, size, "From %s@%s %s", 3, sms->remote.number, from, asctime(loctime));
 
 	tmp = calloc(MAX_DATE_LENGTH, sizeof(char));
 	if (!tmp)
 		goto error;
 	strftime(tmp, MAX_DATE_LENGTH - 1, "Date: %a, %d %b %Y %H:%M:%S %z (%Z)\n", loctime);
+#ifdef ENABLE_NLS
 	setlocale(LC_ALL, loc);
+#endif
 	APPEND(buf, tmp, size);
 
 	CONCAT(buf, tmp, size, "From: %s@%s\n", 2, sms->remote.number, from);
