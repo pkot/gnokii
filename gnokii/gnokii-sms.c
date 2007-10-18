@@ -607,11 +607,11 @@ void getsms_usage(FILE *f, int exitval)
 			"        --force-file filename\n"
 			"        -F filename                 save sms to the file overwriting it if\n"
 			"                                    the file already exists;\n"
-			"                                    if multiple SMS are being read, message\n"
-			"                                    identifier is appended to the file name\n"
-			"        --file filename\n"
+			"                                    file is in mbox format\n"
 			"        -f filename                 as above but user is prompted before\n"
 			"                                    overwriting the file\n"
+			"        --append-file filename\n"
+			"        -a filename                 as above but append to the exising file\n"
 			"        --delete\n"
 			"        -d                          delete message after reading\n"
 			"\n"
@@ -640,6 +640,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 		{ "delete",     no_argument,       NULL, 'd' },
 		{ "file",       required_argument, NULL, 'f' },
 		{ "force-file", required_argument, NULL, 'F' },
+		{ "append-file",required_argument, NULL, 'a' },
 		{ NULL,         0,                 NULL, 0 }
 	};
 
@@ -660,16 +661,21 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 
 	*filename = '\0';
 	/* parse all options (beginning with '-') */
-	while ((i = getopt_long(argc, argv, "f:F:d", options, NULL)) != -1) {
+	while ((i = getopt_long(argc, argv, "f:F:a:d", options, NULL)) != -1) {
 		switch (i) {
 		case 'd':
 			del = 1;
 			dprintf("del\n");
 			break;
+		/* append mode */
+		case 'a':
+			mode = 2;
+			goto parsefile;
 		/* force mode -- don't ask to overwrite */
 		case 'F':
 			mode = 0;
 		case 'f':
+parsefile:
 			if (optarg) {
 				memset(&filename, 0, sizeof(filename));
 				strncpy(filename, optarg, sizeof(filename));
@@ -912,8 +918,10 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				fprintf(stdout, "%s\n", message_text);
 				if ((mode != -1) && *filename) {
 					char buf[1024];
-					sprintf(buf, "%s%d", filename, count);
-					mode = writefile(buf, message_text, mode);
+					char *mbox = gn_sms2mbox(&message, "gnokii");
+					snprintf(buf, 1023, "%s", filename);
+					mode = writefile(buf, mbox, mode);
+					free(mbox);
 				}
 			}
 			if (del) {
@@ -1348,7 +1356,8 @@ static gn_error smsslave(gn_sms *message, struct gn_statemachine *state, void *c
 		snprintf(buf, sizeof(buf), "%s/mail_%d_", smsdir, msgno);
 	else if (sscanf(s, "%d/%d:%d-%d-", &i1, &i2, &msgno, &msgpart) == 4)
 		snprintf(buf, sizeof(buf), "%s/mail_%d_%03d", smsdir, msgno, msgpart);
-	else	snprintf(buf, sizeof(buf), "%s/sms_%s_%d_%d", smsdir, number, getpid(), unknown++);
+	else
+		snprintf(buf, sizeof(buf), "%s/sms_%s_%d_%d", smsdir, number, getpid(), unknown++);
 	if ((output = fopen(buf, "r")) != NULL) {
 		fprintf(stderr, _("### Exists?!\n"));
 		return GN_ERR_FAILED;

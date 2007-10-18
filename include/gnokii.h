@@ -317,6 +317,8 @@ GNOKII_API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemach
 GNOKII_API gn_error gn_sms_delete(gn_data *data, struct gn_statemachine *state);
 GNOKII_API gn_error gn_sms_delete_no_validate(gn_data *data, struct gn_statemachine *state);
 
+GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from);
+
 /* Call service */
 GNOKII_API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state);
 GNOKII_API gn_error gn_call_check_active(struct gn_statemachine *state);

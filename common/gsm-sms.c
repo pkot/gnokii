@@ -34,6 +34,7 @@
 
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 #include "gnokii-internal.h"
 #include "gnokii.h"
@@ -161,9 +162,17 @@ static char *sms_timestamp_print(u8 *number)
 		int c;
 		char buf2[4];
 		switch (i) {
-		case 0: case 1: c = '-'; break;
-		case 3: case 4: c = ':'; break;
-		default: c = ' '; break;
+		case 0:
+		case 1:
+			c = '-';
+			break;
+		case 3:
+		case 4:
+			c = ':';
+			break;
+		default:
+			c = ' ';
+			break;
 		}
 		snprintf(buf2, 4, "%d%d%c", number[i] & 0x0f, number[i] >> 4, c);
 		strcat(buffer, buf2);
@@ -174,8 +183,10 @@ static char *sms_timestamp_print(u8 *number)
 	 * some are not. If your operator does use incompatible SMSC and wrong
 	 * sign disturbs you, change the sign here.
 	 */
-	if (number[6] & 0x08) strcat(buffer, "-");
-	else strcat(buffer, "+");
+	if (number[6] & 0x08)
+		strcat(buffer, "-");
+	else
+		strcat(buffer, "+");
 	/* The timezone is given in quarters. The base is GMT. */
 	sprintf(buf, "%02d00", (10 * (number[6] & 0x07) + (number[6] >> 4)) / 4);
 	strcat(buffer, buf);
@@ -197,16 +208,20 @@ static char *sms_timestamp_print(u8 *number)
  */
 gn_timestamp *sms_timestamp_unpack(unsigned char *number, gn_timestamp *dt)
 {
-	if (!dt) return NULL;
+	if (!dt)
+		return NULL;
 	memset(dt, 0, sizeof(gn_timestamp));
-	if (!number) return dt;
+	if (!number)
+		return dt;
 
-	dt->year     =  10 * (number[0] & 0x0f) + (number[0] >> 4);
+	dt->year = 10 * (number[0] & 0x0f) + (number[0] >> 4);
 
 	/* Ugly hack, but according to the GSM specs, the year is stored
          * as the 2 digit number. */
-	if (dt->year < 70) dt->year += 2000;
-	else dt->year += 1900;
+	if (dt->year < 70)
+		dt->year += 2000;
+	else
+		dt->year += 1900;
 
 	dt->month    =  10 * (number[1] & 0x0f) + (number[1] >> 4);
 	dt->day      =  10 * (number[2] & 0x0f) + (number[2] >> 4);
@@ -221,7 +236,8 @@ gn_timestamp *sms_timestamp_unpack(unsigned char *number, gn_timestamp *dt)
 	 * some are not. If your operator does use incompatible SMSC and wrong
 	 * sign disturbs you, change the sign here.
 	 */
-	if (number[6] & 0x08) dt->timezone = -dt->timezone;
+	if (number[6] & 0x08)
+		dt->timezone = -dt->timezone;
 
 	return dt;
 }
@@ -234,14 +250,18 @@ gn_timestamp *sms_timestamp_unpack(unsigned char *number, gn_timestamp *dt)
  */
 unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
 {
-	if (!number) return NULL;
+	if (!number)
+		return NULL;
 	memset(number, 0, GN_SMS_DATETIME_MAX_LENGTH);
-	if (!dt) return number;
+	if (!dt)
+		return number;
 
 	/* Ugly hack, but according to the GSM specs, the year is stored
          * as the 2 digit number. */
-	if (dt->year < 2000) dt->year -= 1900;
-	else dt->year -= 2000;
+	if (dt->year < 2000)
+		dt->year -= 1900;
+	else
+		dt->year -= 2000;
 
 	number[0]    = (dt->year   / 10) | ((dt->year   % 10) << 4);
 	number[1]    = (dt->month  / 10) | ((dt->month  % 10) << 4);
@@ -257,7 +277,8 @@ unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
 	 * some are not. If your operator does use incompatible SMSC and wrong
 	 * sign disturbs you, change the sign here.
 	 */
-	if (dt->timezone < 0) number[6] |= 0x08;
+	if (dt->timezone < 0)
+		number[6] |= 0x08;
 
 	return number;
 }
@@ -1621,4 +1642,146 @@ GNOKII_API void gn_wap_push_init(gn_wap_push *wp)
 	wp->header.public_id 	= TAG_SI;
 	wp->header.charset 	= WAPPush_CHARSET;
 	wp->header.stl 		= 0x00; /* string table length */
+}
+
+static char *status2str(gn_sms_message_status status)
+{
+	switch (status) {
+	case GN_SMS_Unread:
+		return "Unread";
+	case GN_SMS_Sent:
+		return "Sent";
+	case GN_SMS_Unsent:
+		return "Unsent";
+	default:
+		return "Read";
+	}
+}
+
+#define MAX_TEXT_SUMMARY	20
+#define MAX_SUBJECT_LENGTH	25
+#define MAX_DATE_LENGTH		255
+
+/* Don't know how to do it better (ie. wo count parameter) in simple way */
+static int calculate_length(int count, char *fmt, ...)
+{
+	char *str;
+	int len = 0;
+	va_list ap;
+
+	va_start(ap, fmt);
+	for (; count > 0; count--) {
+		str = va_arg(ap, char *);
+		len += strlen(str);
+	}
+	va_end(ap);
+	return len;
+}
+
+/* Here we allocate and prepare the line according to the pattern.
+ * Remember to call free(). */
+#define ALLOC(src, pattern, no_args, args...) \
+do { \
+	int alloclen = calculate_length(no_args + 1, "", pattern, args) + 1; \
+	src = calloc(alloclen, sizeof(char)); \
+	if (!src) \
+		goto error; \
+	sprintf(src, pattern, args); \
+} while (0)
+
+/* Here we allocate place for the line to append and we append it.
+ * We free() the appended line. */
+#define APPEND(dst, src, size) \
+do { \
+	char *ndst; \
+	int old = size; \
+	size += strlen(src); \
+	ndst = realloc(dst, size + 1); \
+	if (!ndst) { \
+		free(dst); \
+		goto error; \
+	} else { \
+		dst = ndst; \
+	} \
+	dst[old] = 0; \
+	strcat(dst, src); \
+	dst[size] = 0; \
+	free(src); \
+} while (0)
+
+#define CONCAT(dst, src, size, pattern, no_args, args...) \
+do { \
+	ALLOC(src, pattern, no_args, args); \
+	APPEND(dst, src, size); \
+} while (0);
+
+/* Returns allocated space for mbox-compatible formatted SMS */
+/* TODO:
+ *   o add encoding information
+ *   o support non-text SMS (MMS, EMS, delivery report, ...)
+ */
+GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
+{
+	struct tm t, *loctime;
+	time_t caltime;
+	int size = 0;
+	char *loc, *tmp;
+	char *buf = NULL, *aux = NULL;
+
+	t.tm_sec = sms->smsc_time.second;
+	t.tm_min = sms->smsc_time.minute;
+	t.tm_hour = sms->smsc_time.hour;
+	t.tm_mday = sms->smsc_time.day;
+	t.tm_mon = sms->smsc_time.month;
+	t.tm_year = sms->smsc_time.year - 1900;
+#ifdef HAVE_TM_GMTON
+	if (sms->smsc_time.timezone)
+		t.tm_gmtoff = sms->smsc_time.timezone * 3600;
+#endif
+	caltime = mktime(&t);
+	loctime = localtime(&caltime);
+
+	loc = setlocale(LC_ALL, "C");
+
+	CONCAT(buf, tmp, size, "From %s@%s %s", 3, sms->remote.number, from, asctime(loctime));
+
+	tmp = calloc(MAX_DATE_LENGTH, sizeof(char));
+	if (!tmp)
+		goto error;
+	strftime(tmp, MAX_DATE_LENGTH - 1, "Date: %a, %d %b %Y %H:%M:%S %z (%Z)\n", loctime);
+	setlocale(LC_ALL, loc);
+	APPEND(buf, tmp, size);
+
+	CONCAT(buf, tmp, size, "From: %s@%s\n", 2, sms->remote.number, from);
+	CONCAT(buf, tmp, size, "X-GSM-SMSC: %s\n", 1, sms->smsc.number);
+	CONCAT(buf, tmp, size, "X-GSM-Status: %s\n", 1, status2str(sms->status));
+	CONCAT(buf, tmp, size, "X-GSM-Memory: %s\n", 1, gn_memory_type2str(sms->memory_type));
+
+	aux = calloc(5, sizeof(char)); /* assuming location will never have more than 4 digits */
+	if (!aux)
+		goto error;
+	sprintf(aux, "%d", sms->number);
+	CONCAT(buf, tmp, size, "X-GSM-Location: %s\n", 1, aux);
+	free(aux);
+
+	if (strlen(sms->user_data[0].u.text) < MAX_SUBJECT_LENGTH) {
+		CONCAT(buf, tmp, size, "Subject: %s\n\n", 1, sms->user_data[0].u.text);
+	} else {
+		aux = calloc(MAX_TEXT_SUMMARY + 1, sizeof(char));
+		if (!aux)
+			goto error;
+		strncpy(aux, sms->user_data[0].u.text, MAX_TEXT_SUMMARY);
+		CONCAT(buf, tmp, size, "Subject: %s...\n\n", 1, aux);
+		free(aux);
+	}
+
+	CONCAT(buf, tmp, size, "%s\n\n", 1, sms->user_data[0].u.text);
+
+	return buf;
+error:
+	if (buf)
+		free(buf);
+	if (aux)
+		free(aux);
+	return NULL;
 }

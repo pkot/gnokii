@@ -12,6 +12,8 @@
     o enhance error handling for parsing config         (Pawel Kot)
     o remove gn_file_text_save() from API               (Pawel Kot)
     o remove getline() replacement from compat.c    (Daniele Forsi)
+    o add gn_sms2mbox() function that converts SMS to mbox
+      compliant format                                  (Pawel Kot)
  * build system updates
     o add FAQ, KNOWN_BUGS and README-DKU2 to the list of files
       installed with "make install-docs" and remove
@@ -26,6 +28,11 @@
     o replace gn_file_text_save() with local writefile()
                                                         (Pawel Kot)
     o add getline() replacement to gnokii-utils.c   (Daniele Forsi)
+    o gnokii --getsms new --append-file/-a switch to append SMS
+      to an existing file                               (Pawel Kot)
+    o gnokii --getsms -f/-F/-a use now mbox compliant format for
+      stored sms, all sms read are stored in the same file
+                                                        (Pawel Kot)
  * at driver updates
     o fix buffer size calculating in AT_WritePhonebook
                                                       (Daniel Burr)

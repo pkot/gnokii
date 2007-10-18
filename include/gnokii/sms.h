@@ -369,7 +369,7 @@ typedef struct {
 	int delivery_report;                /* Do we request the delivery report? Only for setting. */
 	gn_sms_message_status status;       /* Status of the message read/unread/sent/unsent. */
 	unsigned int validity;              /* Message validity in minutes. Only for setting. */
-	gn_memory_type memory_type  ;       /* Memory type where the message is/should be stored. */
+	gn_memory_type memory_type;         /* Memory type where the message is/should be stored. */
 	unsigned int number;                /* Location of the message in the memory/folder. */
 
 	/* Number related fields */
