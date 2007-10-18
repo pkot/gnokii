@@ -1662,32 +1662,35 @@ static char *status2str(gn_sms_message_status status)
 #define MAX_SUBJECT_LENGTH	25
 #define MAX_DATE_LENGTH		255
 
-/* Don't know how to do it better (ie. wo count parameter) in simple way */
-static int calculate_length(int count, char *fmt, ...)
+/* From snprintf(3) manual */
+static char *allocate(char *fmt, ...)
 {
-	char *str;
-	int len = 0;
+	char *str, *nstr;
+	int len, size = 100;
 	va_list ap;
 
-	va_start(ap, fmt);
-	for (; count > 0; count--) {
-		str = va_arg(ap, char *);
-		len += strlen(str);
-	}
-	va_end(ap);
-	return len;
-}
+	str = calloc(100, sizeof(char));
+	if (!str)
+		return NULL;
 
-/* Here we allocate and prepare the line according to the pattern.
- * Remember to call free(). */
-#define ALLOC(src, pattern, no_args, args...) \
-do { \
-	int alloclen = calculate_length(no_args + 1, "", pattern, args) + 1; \
-	src = calloc(alloclen, sizeof(char)); \
-	if (!src) \
-		goto error; \
-	sprintf(src, pattern, args); \
-} while (0)
+	while (1) {
+		va_start(ap, fmt);
+		len = vsnprintf(str, size, fmt, ap);
+		va_end(ap);
+		if (len >= size) /* too small buffer */
+			size = len + 1;
+		else if (len > -1) /* buffer OK */
+			return str;
+		else /* let's try with larger buffer */
+			size *= 2;
+		nstr = realloc(str, size);
+		if (!nstr) {
+			free(str);
+			return NULL;
+		}
+		str = nstr;
+	}
+}
 
 /* Here we allocate place for the line to append and we append it.
  * We free() the appended line. */
@@ -1700,18 +1703,18 @@ do { \
 	if (!ndst) { \
 		free(dst); \
 		goto error; \
-	} else { \
-		dst = ndst; \
 	} \
+	dst = ndst; \
 	dst[old] = 0; \
 	strcat(dst, src); \
-	dst[size] = 0; \
 	free(src); \
 } while (0)
 
-#define CONCAT(dst, src, size, pattern, no_args, args...) \
+#define CONCAT(dst, src, size, pattern, args...) \
 do { \
-	ALLOC(src, pattern, no_args, args); \
+	src = allocate(pattern, args); \
+	if (!src) \
+		goto error; \
 	APPEND(dst, src, size); \
 } while (0);
 
@@ -1747,7 +1750,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 #ifdef ENABLE_NLS
 	loc = setlocale(LC_ALL, "C");
 #endif
-	CONCAT(buf, tmp, size, "From %s@%s %s", 3, sms->remote.number, from, asctime(loctime));
+	CONCAT(buf, tmp, size, "From %s@%s %s", sms->remote.number, from, asctime(loctime));
 
 	tmp = calloc(MAX_DATE_LENGTH, sizeof(char));
 	if (!tmp)
@@ -1758,30 +1761,30 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 #endif
 	APPEND(buf, tmp, size);
 
-	CONCAT(buf, tmp, size, "From: %s@%s\n", 2, sms->remote.number, from);
-	CONCAT(buf, tmp, size, "X-GSM-SMSC: %s\n", 1, sms->smsc.number);
-	CONCAT(buf, tmp, size, "X-GSM-Status: %s\n", 1, status2str(sms->status));
-	CONCAT(buf, tmp, size, "X-GSM-Memory: %s\n", 1, gn_memory_type2str(sms->memory_type));
+	CONCAT(buf, tmp, size, "From: %s@%s\n", sms->remote.number, from);
+	CONCAT(buf, tmp, size, "X-GSM-SMSC: %s\n", sms->smsc.number);
+	CONCAT(buf, tmp, size, "X-GSM-Status: %s\n", status2str(sms->status));
+	CONCAT(buf, tmp, size, "X-GSM-Memory: %s\n", gn_memory_type2str(sms->memory_type));
 
 	aux = calloc(5, sizeof(char)); /* assuming location will never have more than 4 digits */
 	if (!aux)
 		goto error;
 	sprintf(aux, "%d", sms->number);
-	CONCAT(buf, tmp, size, "X-GSM-Location: %s\n", 1, aux);
+	CONCAT(buf, tmp, size, "X-GSM-Location: %s\n", aux);
 	free(aux);
 
 	if (strlen(sms->user_data[0].u.text) < MAX_SUBJECT_LENGTH) {
-		CONCAT(buf, tmp, size, "Subject: %s\n\n", 1, sms->user_data[0].u.text);
+		CONCAT(buf, tmp, size, "Subject: %s\n\n", sms->user_data[0].u.text);
 	} else {
 		aux = calloc(MAX_TEXT_SUMMARY + 1, sizeof(char));
 		if (!aux)
 			goto error;
 		strncpy(aux, sms->user_data[0].u.text, MAX_TEXT_SUMMARY);
-		CONCAT(buf, tmp, size, "Subject: %s...\n\n", 1, aux);
+		CONCAT(buf, tmp, size, "Subject: %s...\n\n", aux);
 		free(aux);
 	}
 
-	CONCAT(buf, tmp, size, "%s\n\n", 1, sms->user_data[0].u.text);
+	CONCAT(buf, tmp, size, "%s\n\n", sms->user_data[0].u.text);
 
 	return buf;
 error:
