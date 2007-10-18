@@ -116,12 +116,16 @@ delete the notes with numbers from \fIstart_number\fR to \fIend_number\fR from c
 
 .SS SMS
 .TP 
-.BR "\-\-getsms \fImemory_type\fR \fIstart\fP [\fIend\fP] [\-f|\-\-file \fIfile\fP] [\-F|\-\-force\-file \fIfile\fR] [\-d|\-\-delete]"
+.BR "\-\-getsms \fImemory_type\fR \fIstart\fP [\fIend\fP] [\-f|\-\-file \fIfile\fP] [\-F|\-\-force\-file \fIfile\fR] [\-a|\-\-append\-file \fIfile\fR] [\-d|\-\-delete]"
 gets SMS messages from specified \fImemory type\fR starting at entry \fIstart\fR and ending at \fIend\fR.
 For the \fImemory types\fR you usually use SM for the SIM card and ME for the phone memory. The exception are the phones supported by nk7110 (Nokia 7110/6210/6250) and nk6510 (Nokia 6310/6510/8310) drivers. For these you should use IN for the Inbox, OU for the Outbox, AR for the Archive, TE for the Templates and F1, F2, ... for your own folders.
 \fIend\fR can be a number or the string 'end'.
 If \fIend\fR is not specified only one location \- \fIstart\fR is read.
-If \-\-file \fIfile\fR is used entries are saved in \fIfile\fR. If \fIfile\fR already exists, user is prompted whether to overwrite it or if \-\-force\-file \fIfile\fR is used gnokii overwrites the file without asking. If none of these switches is used entries are dumped to stdout.
+Messages are printed to stdout. Additionally, if \-\-file \fIfile\fR is
+used, messages are saved in \fIfile\fR in mbox format. If \fIfile\fR already
+exists, user is prompted whether to overwrite it. If \-\-force\-file \fIfile\fR
+is used gnokii overwrites the file without asking. If \-\-append\-file
+\fIfile\fR is used messages are appended to the file.
 If \-\-delete switch is used, the message is deleted after reading.
 .TP 
 .BR "\-\-deletesms \fImemory_type\fP \fIstart\fP [\fIend\fP]"
