@@ -237,7 +237,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			case GN_BMP_NewOperatorLogo:
 				if (!bitmap.width)
 					goto empty_bitmap;
-				fprintf(stdout, _("Operator logo for %s (%s) network got successfully\n"),
+				fprintf(stderr, _("Operator logo for %s (%s) network got successfully\n"),
 						bitmap.netcode, gn_network_name_get(bitmap.netcode));
 				if (argc == optind + 2) {
 					strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
@@ -250,7 +250,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			case GN_BMP_StartupLogo:
 				if (!bitmap.width)
 					goto empty_bitmap;
-				fprintf(stdout, _("Startup logo got successfully\n"));
+				fprintf(stderr, _("Startup logo got successfully\n"));
 				if (argc == optind + 2) {
 					strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
@@ -263,7 +263,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				if (!bitmap.width)
 					fprintf(stderr, _("Your phone doesn't have logo uploaded !\n"));
 				else
-					fprintf(stdout, _("Caller logo got successfully\n"));
+					fprintf(stderr, _("Caller logo got successfully\n"));
 				fprintf(stdout, _("Caller group name: %s, ringing tone: %s (%d)\n"),
 					bitmap.text, get_ringtone_name(bitmap.ringtone, data, state), bitmap.ringtone);
 				if (argc == optind + 3) {

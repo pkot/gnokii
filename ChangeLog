@@ -33,6 +33,9 @@
     o gnokii --getsms -f/-F/-a use now mbox compliant format for
       stored sms, all sms read are stored in the same file
                                                         (Pawel Kot)
+    o write more messages to stderr; the rule is that diagnostics
+      indicating success or failure go to stderr, while information
+      read from the phone goes to stdout            (Daniele Forsi)
  * at driver updates
     o fix buffer size calculating in AT_WritePhonebook
                                                       (Daniel Burr)

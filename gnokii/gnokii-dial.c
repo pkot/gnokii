@@ -146,7 +146,7 @@ int setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state)
 
 	switch (error) {
 	case GN_ERR_NONE:
-		fprintf(stdout, _("Successfully written!\n"));
+		fprintf(stderr, _("Successfully written!\n"));
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));

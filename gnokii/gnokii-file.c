@@ -213,7 +213,7 @@ int deletefile(char *filename, gn_data *data, struct gn_statemachine *state)
 	if ((error = gn_sm_functions(GN_OP_DeleteFile, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to delete %s: %s\n"), filename, gn_error_print(error));
 	else {
-		fprintf(stdout, _("Deleted: %s\n"), filename);
+		fprintf(stderr, _("Deleted: %s\n"), filename);
 	}
 	return error;
 }
@@ -233,7 +233,7 @@ int deletefilebyid(char *id, gn_data *data, struct gn_statemachine *state)
 	if ((error = gn_sm_functions(GN_OP_DeleteFileById, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to delete %s: %s\n"), id, gn_error_print(error));
 	else {
-		fprintf(stdout, _("Deleted: %s\n"), id);
+		fprintf(stderr, _("Deleted: %s\n"), id);
 	}
 	return error;
 }
@@ -380,7 +380,7 @@ int getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 			if ((error = gn_sm_functions(GN_OP_GetFile, data, state)) != GN_ERR_NONE)
 				fprintf(stderr, _("Failed to get file %s: %s\n"), data->file->name, gn_error_print(error));
 			else {
-				fprintf(stdout, _("Got file %s.\n"), filename2);
+				fprintf(stderr, _("Got file %s.\n"), filename2);
 				f = fopen(filename2, "w");
 				if (!f) {
 					fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);

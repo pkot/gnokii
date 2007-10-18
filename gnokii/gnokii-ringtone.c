@@ -498,9 +498,9 @@ gn_error deleteringtone(int argc, char *argv[], gn_data *data, struct gn_statema
 	for (i = start; i <= end; i++) {
 		ringtone.location = i;
 		if ((error = gn_sm_functions(GN_OP_DeleteRingtone, data, state)) == GN_ERR_NONE)
-			printf(_("Ringtone %d deleted\n"), i);
+			fprintf(stderr, _("Ringtone %d deleted\n"), i);
 		else
-			printf(_("Failed to delete ringtone %d: %s\n"), i, gn_error_print(error));
+			fprintf(stderr, _("Failed to delete ringtone %d: %s\n"), i, gn_error_print(error));
 	}
 
 	return GN_ERR_NONE;
