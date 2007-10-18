@@ -33,7 +33,7 @@ OBJS =	generic.lo \
 	atsam.lo \
 	gnapplet.lo \
 	fake.lo \
-	pcsc.lo \
+	pcsc.lo
 
 #	nk2110.lo
 #	dc2711.lo
