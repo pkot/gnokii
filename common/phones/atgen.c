@@ -85,13 +85,13 @@ static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetRevision(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetIMEI(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetManufacturer(gn_data *data, struct gn_statemachine *state);
-static gn_error AT_GetBattery(gn_data *data,  struct gn_statemachine *state);
-static gn_error AT_GetRFLevel(gn_data *data,  struct gn_statemachine *state);
-static gn_error AT_GetMemoryStatus(gn_data *data,  struct gn_statemachine *state);
-static gn_error AT_GetMemoryRange(gn_data *data,  struct gn_statemachine *state);
-static gn_error AT_ReadPhonebook(gn_data *data,  struct gn_statemachine *state);
-static gn_error AT_WritePhonebook(gn_data *data,  struct gn_statemachine *state);
-static gn_error AT_DeletePhonebook(gn_data *data,  struct gn_statemachine *state);
+static gn_error AT_GetBattery(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetRFLevel(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetMemoryRange(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state);
@@ -809,7 +809,7 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
-	sprintf(req, "AT+CPBR=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
+	sprintf(req, "AT+CPBR=%d\r", data->phonebook_entry->location + drvinst->memoryoffset);
 	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_ReadPhonebook, data, state);
@@ -1430,7 +1430,8 @@ static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int len
 	drvinst->memoryoffset = 0;
 	drvinst->memorysize = 100;
 
-	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return error;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
