@@ -129,6 +129,33 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 	return GN_ERR_NONE;
 }
 
+static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	gn_error error;
+	char *buf = buffer;
+	int counter = 0;
+
+	if (!data->memory_status)
+		return GN_ERR_INTERNALERROR;
+
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return error;
+
+	while ((buf = strchr(buf, '\r'))) {
+		buf++;
+		if (strlen(buf) > 6 &&
+			(!strncmp(buf, "+CPBR:", 6) || !strncmp(buf + 1, "+CPBR:", 6)))
+			counter++;
+	}
+	data->memory_status->used = counter;
+	data->memory_status->free = drvinst->memorysize - counter;
+
+	dprintf("Got %d entries\n", counter);
+	return error;
+}
+
+
 static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -145,6 +172,26 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_ReadPhonebook, data, state);
+}
+
+static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	gn_error ret = GN_ERR_NONE;
+	char req[32];
+
+	ret = se_at_memory_type_set(data->memory_status->memory_type,  state);
+	if (ret)
+		return ret;
+	ret = state->driver.functions(GN_OP_AT_GetMemoryRange, data, state);
+	if (ret)
+		return ret;
+	memset(req, 0, 32);
+	snprintf(req, 31, "AT+CPBR=%d,%d\r", drvinst->memoryoffset + 1, drvinst->memorysize + drvinst->memoryoffset);
+	ret = sm_message_send(strlen(req), GN_OP_GetMemoryStatus, req, state);
+	if (ret)
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 }
 
 static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
@@ -215,6 +262,7 @@ static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
 }
 
+
 void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
 	at_insert_send_function(GN_OP_ReadPhonebook, AT_ReadPhonebook, state);
@@ -222,4 +270,6 @@ void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemac
 	at_insert_send_function(GN_OP_WritePhonebook, AT_WritePhonebook, state);
 	at_insert_send_function(GN_OP_DeletePhonebook, AT_DeletePhonebook, state);
 	at_insert_send_function(GN_OP_GetNetworkInfo, AT_GetNetworkInfo, state);
+	at_insert_send_function(GN_OP_GetMemoryStatus, AT_GetMemoryStatus, state);
+	at_insert_recv_function(GN_OP_GetMemoryStatus, ReplyMemoryStatus, state);
 }
