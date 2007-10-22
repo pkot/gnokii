@@ -1175,7 +1175,11 @@ void	gn_atem_string_out(char *buffer)
 				break;
 		}
 
-		write(PtyWRFD, &out_char, 1);
+		if (write(PtyWRFD, &out_char, 1) < 0) {
+			fprintf(stderr, _("Failed to output string.\n"));
+			perror("write");
+			return;
+		}
 		count++;
 	}
 }

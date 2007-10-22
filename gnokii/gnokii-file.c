@@ -255,6 +255,7 @@ int getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	if (argc < optind)
 		getfile_usage(stderr, -1);
 
+	memset(filename2, 0, 512);
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", optarg);
 
@@ -266,30 +267,33 @@ int getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	else {
 		if (argc == optind) {
 			if (strrchr(optarg, '/'))
-				strncpy(filename2, strrchr(optarg, '/') + 1, 512);
+				strncpy(filename2, strrchr(optarg, '/') + 1, 511);
 			else if (strrchr(optarg, '\\'))
-				strncpy(filename2, strrchr(optarg, '\\') + 1, 512);
+				strncpy(filename2, strrchr(optarg, '\\') + 1, 511);
 			else
 				strcpy(filename2, "default.dat");
 			fprintf(stdout, _("Got file %s.  Save to [%s]: "), optarg, filename2);
 			gn_line_get(stdin, filename2, 512);
 			if (filename2[0] == 0) {
 				if (strrchr(optarg, '/'))
-					strncpy(filename2, strrchr(optarg, '/') + 1, 512);
+					strncpy(filename2, strrchr(optarg, '/') + 1, 511);
 				else if (strrchr(optarg, '\\'))
-					strncpy(filename2, strrchr(optarg, '\\') + 1, 512);
+					strncpy(filename2, strrchr(optarg, '\\') + 1, 511);
 				else
 					strcpy(filename2, "default.dat");
 			}
-			f = fopen(filename2, "w");
 		} else {
-			f = fopen(argv[optind], "w");
+			strncpy(filename2, argv[optind], 511);
 		}
+		f = fopen(filename2, "w");
 		if (!f) {
 			fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 			return GN_ERR_FAILED;
 		}
-		fwrite(fi.file, fi.file_length, 1, f);
+		if (fwrite(fi.file, fi.file_length, 1, f) < 0) {
+			fprintf(stderr, _("Failed write to file %s.\n"), filename2);
+			error = GN_ERR_FAILED;
+		}
 		fclose(f);
 		free(fi.file);
 	}
@@ -314,6 +318,7 @@ int getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	if (argc < optind)
 		getfilebyid_usage(stderr, -1);
 
+	memset(filename2, 0, 512);
 	memset(&fi, 0, sizeof(fi));
 	set_fileid(&fi, optarg);
 
@@ -329,16 +334,19 @@ int getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		error = gn_sm_functions(GN_OP_GetFileById, data, state);
 		if (error == GN_ERR_NONE) {
 			if (argc == optind) {
-				strncpy(filename2, fi.name, 512);
-				f = fopen(filename2, "w");
+				strncpy(filename2, fi.name, 511);
 			} else {
-				f = fopen(argv[optind], "w");
+				strncpy(filename2, argv[optind], 511);
 			}
+			f = fopen(filename2, "w");
 			if (!f) {
 				fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 				return GN_ERR_FAILED;
 			}
-			fwrite(fi.file, fi.file_length, 1, f);
+			if (fwrite(fi.file, fi.file_length, 1, f) < 0) {
+				fprintf(stderr, _("Failed write to file %s.\n"), filename2);
+				error = GN_ERR_FAILED;
+			}
 			fclose(f);
 			free(fi.file);
 		} else {
@@ -386,7 +394,11 @@ int getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 					fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 					return GN_ERR_FAILED;
 				}
-				fwrite(data->file->file, data->file->file_length, 1, f);
+				if (fwrite(data->file->file, data->file->file_length, 1, f) < 0) {
+					fprintf(stderr, _("Failed to write file %s.\n"), filename2);
+					fclose(f);
+					return GN_ERR_FAILED; 
+				}
 				fclose(f);
 				free(data->file->file);
 			}

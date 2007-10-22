@@ -14,6 +14,7 @@
     o remove getline() replacement from compat.c    (Daniele Forsi)
     o add gn_sms2mbox() function that converts SMS to mbox
       compliant format                                  (Pawel Kot)
+    o add sanity checking for fwrite()/write() calls    (Pawel Kot)
  * build system updates
     o add FAQ, KNOWN_BUGS and README-DKU2 to the list of files
       installed with "make install-docs" and remove
@@ -36,6 +37,7 @@
     o write more messages to stderr; the rule is that diagnostics
       indicating success or failure go to stderr, while information
       read from the phone goes to stdout            (Daniele Forsi)
+    o add sanity checking for fwrite()/write() calls    (Pawel Kot)
  * at driver updates
     o fix buffer size calculating in AT_WritePhonebook
                                                       (Daniel Burr)
