@@ -44,6 +44,9 @@
     o fix buffer size calculating in AT_WritePhonebook
                                                       (Daniel Burr)
     o fix SMS-SUBMIT parsing                            (Pawel Kot)
+    o calculate phonebook size for SonyEricsson: they don't answer
+      with memory stats to AT+CPBS, calculate it by reading and
+      counting entries (which is fast)                  (Pawel Kot)
  * documentation updates
     o update Docs/protocol/nk6110.txt with another error code for
       "Get code status err"                         (Daniele Forsi)
