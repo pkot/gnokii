@@ -156,7 +156,12 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 
 	if (!bi)
 		return;
-	
+
+	if (bi->rbuf_pos >= bi->rbuf_size) {
+		bi->rbuf_size += RBUF_SEG;
+		bi->rbuf = realloc(bi->rbuf, bi->rbuf_size);
+	}
+
 	bi->rbuf[bi->rbuf_pos++] = rx_char;
 	bi->rbuf[bi->rbuf_pos] = '\0';
 
@@ -231,6 +236,9 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 			sm_incoming_function(bi->rbuf[0], start, rbuf_pos - 1 - (start - bi->rbuf), sm);
 		else
 			sm_incoming_function(sm->last_msg_type, bi->rbuf, rbuf_pos - 1, sm);
+		free(bi->rbuf);
+		bi->rbuf = NULL;
+		bi->rbuf_size = 0;
 		return;
 	}
 #if 0
@@ -282,6 +290,8 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 	/* Fill in the link functions */
 	state->link.loop = &atbus_loop;
 	state->link.send_message = &at_send_message;
+	businst->rbuf = NULL;
+	businst->rbuf_size = 0;
 	businst->rbuf_pos = 1;
 	businst->binlen = 1;
 	AT_BUSINST(state) = businst;
