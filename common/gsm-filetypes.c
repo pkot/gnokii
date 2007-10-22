@@ -736,7 +736,7 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 				fread(buffer, 1, 1, file);
 				sizeimage++;
 				i++;
-				if (i == 5) i = 1; /* each line is written in multiply of 4 bytes */
+				if (i == 5) i = 1; /* each line is written in multiples of 4 bytes */
 			}
 			if (x <= bitmap->width && y <= bitmap->height) { /* we have top left corner ! */
 				if (first_black) {
@@ -1126,13 +1126,13 @@ void file_bmp_save(FILE *file, gn_bmp *bitmap)
 			if (pos == 7) { //new byte !
 				sizeimage++;
 				i++;
-				if (i == 5) i = 1; //each line is written in multiply of 4 bytes
+				if (i == 5) i = 1; //each line is written in multiples of 4 bytes
 			}
 			pos--;
 			if (pos < 0) pos = 7; //going to new byte
 		}
 		pos = 7; //going to new byte
-		while (i != 5) { //each line is written in multiply of 4 bytes
+		while (i != 5) { //each line is written in multiples of 4 bytes
 			sizeimage++;
 			i++;
 		}
@@ -1157,7 +1157,7 @@ void file_bmp_save(FILE *file, gn_bmp *bitmap)
 			if (pos == 7) { //new byte !
 				if (x != 0) fwrite(buffer, 1, sizeof(buffer), file);
 				i++;
-				if(i == 5) i = 1; //each line is written in multiply of 4 bytes
+				if(i == 5) i = 1; //each line is written in multiples of 4 bytes
 				buffer[0] = 0;
 			}
 			if (gn_bmp_point(bitmap, x, y)) buffer[0] |= (1 << pos);
@@ -1166,7 +1166,7 @@ void file_bmp_save(FILE *file, gn_bmp *bitmap)
 		}
 		pos = 7; //going to new byte
 		fwrite(buffer, 1, sizeof(buffer), file);
-		while (i != 5) { //each line is written in multiply of 4 bytes
+		while (i != 5) { //each line is written in multiples of 4 bytes
 			buffer[0] = 0;
 			fwrite(buffer, 1, sizeof(buffer), file);
 			i++;

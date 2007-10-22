@@ -200,7 +200,7 @@ gn_error sm_error_get(unsigned char messagetype, struct gn_statemachine *state)
 
 
 
-/* Indicate that the phone code is waiting for an response */
+/* Indicate that the phone code is waiting for a response */
 /* This does not actually wait! */
 gn_error sm_wait_for(unsigned char messagetype, gn_data *data, struct gn_statemachine *state)
 {
