@@ -519,10 +519,15 @@ GNOKII_API char *gn_device_lock(const char* port)
 	}
 	sprintf(buffer, "%10ld gnokii\n", (long)getpid());
 	/* Probably we should add some error checking in here */
-	write(fd, buffer, strlen(buffer));
+	if (write(fd, buffer, strlen(buffer)) < 0) {
+		fprintf(stderr, _("Failed to write to the lockfile %s.\n"), lock_file);
+		goto failed;
+	}
 	close(fd);
 	return lock_file;
 failed:
+	if (fd > -1)
+		close(fd);
 	free(lock_file);
 	return NULL;
 #else
