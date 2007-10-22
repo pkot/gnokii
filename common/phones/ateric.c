@@ -56,6 +56,11 @@ static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 }
 
+/* 
+ * Reminder: SonyEricsson doesn't return <used> and <total> values of memory usage:
+ * > AT+CPBS?
+ * +CPBS: "ME"
+ */
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_line_buffer buf;
