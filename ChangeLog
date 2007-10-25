@@ -48,6 +48,8 @@
     o calculate phonebook size for SonyEricsson: they don't answer
       with memory stats to AT+CPBS, calculate it by reading and
       counting entries (which is fast)                  (Pawel Kot)
+    o fix SetDateTime for Sony Ericsson, which requires timezone
+      to be added                                       (Pawel Kot)
  * documentation updates
     o update Docs/protocol/nk6110.txt with another error code for
       "Get code status err"                         (Daniele Forsi)

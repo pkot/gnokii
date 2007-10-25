@@ -47,6 +47,7 @@ typedef enum {
 	GN_OP_AT_Ring,
 	GN_OP_AT_IncomingSMS,
 	GN_OP_AT_GetSMSMemorySize,
+	GN_OP_AT_PrepareDateTime,
 	GN_OP_AT_Max	/* don't append anything after this entry */
 } at_operation;
 
@@ -104,6 +105,8 @@ typedef struct {
 	void *cb_callback_data;	/* to be passed as callback_data to on_cell_broadcast */
 	void *call_callback_data;	/* to be passed as callback_data to call_notification */
 	void *sms_callback_data;	/* to be passed as callback_data to on_sms */
+
+	char *timezone;
 } at_driver_instance;
 
 #define AT_DRVINST(s) (*((at_driver_instance **)(&(s)->driver.driver_instance)))

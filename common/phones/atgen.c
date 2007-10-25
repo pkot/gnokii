@@ -114,6 +114,7 @@ static gn_error AT_CancelCall(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetDateTime(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_PrepareDateTime(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetActiveCalls(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_OnSMS(gn_data *data, struct gn_statemachine *state);
@@ -165,6 +166,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_GetNetworkInfo,        AT_GetNetworkInfo,        ReplyGetNetworkInfo },
 	{ GN_OP_SetDateTime,           AT_SetDateTime,           Reply },
 	{ GN_OP_GetDateTime,           AT_GetDateTime,           ReplyGetDateTime },
+	{ GN_OP_AT_PrepareDateTime,    AT_PrepareDateTime,       Reply },
 	{ GN_OP_SendDTMF,              AT_SendDTMF,              Reply },
 	{ GN_OP_GetActiveCalls,        AT_GetActiveCalls,        ReplyGetActiveCalls },
 	{ GN_OP_OnSMS,                 AT_OnSMS,                 Reply },
@@ -1184,15 +1186,30 @@ static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state)
 {
-	char req[29];
-
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	char req[64];
+	gn_timestamp aux;
 	gn_timestamp *dt = data->datetime;
 
-	sprintf(req, "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d\"\r",
-		dt->year % 100, dt->month, dt->day,
-		dt->hour, dt->minute, dt->second);
+	memset(&aux, 0, sizeof(gn_timestamp));
+	/* Make sure GetDateTime doesn't overwrite dt */
+	data->datetime = &aux;
+	/* ignore errors */
+	AT_GetDateTime(data, state);
+	AT_PrepareDateTime(data, state);
 
-	if (sm_message_send(28, GN_OP_SetDateTime, req, state))
+	data->datetime = dt;
+	memset(req, 0, 64);
+	if (drvinst->timezone)
+		sprintf(req, "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d%s\"\r",
+			dt->year % 100, dt->month, dt->day,
+			dt->hour, dt->minute, dt->second, drvinst->timezone);
+	else
+		sprintf(req, "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d\"\r",
+			dt->year % 100, dt->month, dt->day,
+			dt->hour, dt->minute, dt->second);
+
+	if (sm_message_send(strlen(req), GN_OP_SetDateTime, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_SetDateTime, data, state);
 }
@@ -1202,6 +1219,13 @@ static gn_error AT_GetDateTime(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(9, GN_OP_GetDateTime, "AT+CCLK?\r", state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_GetDateTime, data, state);
+}
+
+static gn_error AT_PrepareDateTime(gn_data *data, struct gn_statemachine *state)
+{
+	if (sm_message_send(10, GN_OP_AT_PrepareDateTime, "AT+CCLK=?\r", state))
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_AT_PrepareDateTime, data, state);
 }
 
 
@@ -2219,9 +2243,12 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 
 static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	int cnt;
 	at_line_buffer buf;
 	gn_error error;
 	gn_timestamp *dt;
+	char timezone[6];
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
 		return error;
@@ -2232,10 +2259,20 @@ static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int len
 	splitlines(&buf);
 
 	dt = data->datetime;
-	if (sscanf(buf.line2, "+CCLK: \"%d/%d/%d,%d:%d:%d\"",
-		   &dt->year, &dt->month, &dt->day,
-		   &dt->hour, &dt->minute, &dt->second) != 6)
+	memset(timezone, 0, 6);
+	cnt = sscanf(buf.line2, "+CCLK: \"%d/%d/%d,%d:%d:%d%[+-1234567890]\"",
+		     &dt->year, &dt->month, &dt->day,
+		     &dt->hour, &dt->minute, &dt->second, timezone);
+	switch (cnt) {
+	case 7:
+		drvinst->timezone = realloc(drvinst->timezone, strlen(timezone) + 1);
+		strcpy(drvinst->timezone, timezone);
+		break;
+	case 6:
+		break;
+	default:
 		return GN_ERR_FAILED;
+	}
 
 	if (dt->year < 100)
 		dt->year += 2000;
@@ -2385,6 +2422,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->prev_state = GN_CALL_Idle;
 	drvinst->mememorysize = -1;
 	drvinst->smmemorysize = -1;
+	drvinst->timezone = NULL;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {
@@ -2461,6 +2499,8 @@ out:
 static gn_error Terminate(gn_data *data, struct gn_statemachine *state)
 {
 	if (AT_DRVINST(state)) {
+		if (AT_DRVINST(state)->timezone)
+			free(AT_DRVINST(state)->timezone);
 		free(AT_DRVINST(state));
 		AT_DRVINST(state) = NULL;
 	}
