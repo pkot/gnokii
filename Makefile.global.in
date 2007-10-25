@@ -29,10 +29,10 @@ mandir         = @mandir@
 man1dir        = ${mandir}/man1/
 man8dir        = ${mandir}/man8/
 xmandir        = @XGNOKIIDIR@/man/man1/
-docdir         = ${prefix}/share/doc/${PACKAGE}
 datarootdir    = @datarootdir@
+docdir         = @docdir@
 datadir        = @datadir@
-locdir         = @datadir@/locale
+locdir         = @localedir@
 
 BIN_MODE       = 0755
 TEXT_MODE      = 0444
