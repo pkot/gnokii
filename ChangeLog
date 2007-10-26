@@ -65,6 +65,9 @@
  * link layer updates
     o make DKU-5 connection initialisation working again
                                                         (Pawel Kot)
+ * translation updates
+    o updated Italian translation and fixed Content-Type to match
+      actual encoding of text which was UTF-8       (Daniele Forsi)
 
 0.6.19
 ======
