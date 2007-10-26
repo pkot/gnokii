@@ -56,6 +56,10 @@
  * nk6100 driver updates
     o add error code GN_ERR_SIMPROBLEM for --changesecuritycode
                                                     (Daniele Forsi)
+ * xgnokii updates
+    o when exporting the phonebook to a file in raw format handle
+      backslashes as escapes like in gnokii --getphonebook (closes
+      https://savannah.nongnu.org/bugs/?20815)      (Daniele Forsi)
 
 0.6.19
 ======

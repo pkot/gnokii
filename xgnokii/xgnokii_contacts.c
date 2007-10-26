@@ -2808,69 +2808,20 @@ static void ExportVCARD(FILE * f)
 	fclose(f);
 }
 
-static char *escape_semicolon(char *src)
-{
-	int i, j, len = strlen(src);
-	char *dest;
-
-	dest = calloc(2 * len, sizeof(char));
-	for (i = 0, j = 0; i < len; i++, j++) {
-		if (src[i] == ';')
-			dest[j++] = '\\';
-		dest[j] = src[i];
-	}
-	dest[j] = 0;
-	return dest;
-}
-
 static void ExportNative(FILE * f)
 {
-	gchar buf[IO_BUF_LEN], buf2[16];
-	register gint i, j;
+	register gint i;
 	PhonebookEntry *pbEntry;
-
+	char *memory_type_string;
 
 	for (i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++) {
 		pbEntry = g_ptr_array_index(contactsMemory, i);
-
 		if (pbEntry->status != E_Deleted && pbEntry->status != E_Empty) {
-			char *aux;
-			aux = escape_semicolon(pbEntry->entry.name);
-			strcpy(buf, aux);
-			strcat(buf, ";");
-			free(aux);
-
-			strcat(buf, pbEntry->entry.number);
-			strcat(buf, ";");
-
 			if (pbEntry->entry.memory_type == GN_MT_ME)
-				sprintf(buf2, "ME;%d;%d", i + 1, pbEntry->entry.caller_group);
+				memory_type_string = "ME";
 			else
-				sprintf(buf2, "SM;%d;%d", i - memoryStatus.MaxME + 1,
-					pbEntry->entry.caller_group);
-			strcat(buf, buf2);
-
-			/* Add ext. pbk info if required */
-			if (phoneMonitor.supported & PM_EXTPBK) {
-				for (j = 0; j < pbEntry->entry.subentries_count; j++)
-					switch (pbEntry->entry.subentries[j].entry_type) {
-					case GN_PHONEBOOK_ENTRY_Date:
-						break;
-					default:
-						sprintf(buf2, ";%d;%d;%d;",
-							pbEntry->entry.subentries[j].entry_type,
-							pbEntry->entry.subentries[j].number_type,
-							pbEntry->entry.subentries[j].id);
-						strcat(buf, buf2);
-
-						aux = escape_semicolon(pbEntry->entry.subentries[j].data.number);
-						strcat(buf,
-						       pbEntry->entry.subentries[j].data.number);
-						free(aux);
-						break;
-					}
-			}
-			fprintf(f, "%s\n", buf);
+				memory_type_string = "SM";
+			gn_file_phonebook_raw_write(f, &pbEntry->entry, memory_type_string);
 		}
 	}
 
