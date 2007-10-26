@@ -45,7 +45,7 @@ GNOKII_API char *gn_error_print(gn_error e)
 	case GN_ERR_INVALIDSECURITYCODE:   return _("Invalid Security code.");
 	case GN_ERR_INTERNALERROR:         return _("Problem occurred internal to model specific code.");
 	case GN_ERR_NOTIMPLEMENTED:        return _("Command called isn't implemented in model.");
-	case GN_ERR_NOTSUPPORTED:          return _("Function or connection type not supported by the phone.");
+	case GN_ERR_NOTSUPPORTED:          return _("Function or connection type not supported by the phone or by the phone driver.");
 	case GN_ERR_USERCANCELED:          return _("User aborted the action.");
 	case GN_ERR_UNKNOWN:               return _("Unknown error - well better than nothing!!");
 	case GN_ERR_MEMORYFULL:            return _("The specified memory is full.");
