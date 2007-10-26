@@ -65,6 +65,10 @@ A. If you own not Nokia phone it will be probably supported by the AT driver
     - dc2711 driver:
         + Dancall 2711 and 2713
 
+   Symbian series60 3rd edition (most Nokia n and e series) are not
+   supported by gnapplet driver due to changes in Symbian API. For now you
+   can get some functionality using AT driver.
+
 -------------------------------------------------------------------------------
 Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
    running gnokii. What's wrong?
@@ -318,4 +322,9 @@ Q. Gnokii does not work with my Fedora system with planetccrma patches.
 A. There is nothing wrong with gnokii. Please contact people from
    planetccrma responsible for the kernel patches and ask them to fix the
    problem.
+-------------------------------------------------------------------------------
+Q. Please help me configure my Nokia eXX/nYY to work with gnokii.
 
+A. Nokia e and n series are Symbian Series60 3rd Edition based. Our gnapplet
+   driver is not compatible with this OS (yet). You can get limited
+   functionality (due to Symbian limitation) by using AT driver.
