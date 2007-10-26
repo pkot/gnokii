@@ -17,6 +17,8 @@
     o add sanity checking for fwrite()/write() calls    (Pawel Kot)
     o make incoming buffer size for atbus link driver dynamically
       allocatable (was fixed size)                      (Pawel Kot)
+    o prevent strip_slashes() from stripping non-slashes
+                                                        (Pawel Kot)
  * build system updates
     o add FAQ, KNOWN_BUGS and README-DKU2 to the list of files
       installed with "make install-docs" and remove
