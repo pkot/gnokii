@@ -109,11 +109,10 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
         
 	res = device_select(&timeout, state);
 	/* Read from the port only when select succeeds */
-	while (res > 0 && t) {
+	if (res > 0) {
 		/* Avoid 'device temporarily unavailable' error */
 		usleep(50);
 		res = device_read(buffer, 255, state);
-		t = gn_lib_cfg_get("global", "brokenread") ? atoi(gn_lib_cfg_get("global", "brokenread")) : 0;
 	}
 	return res;
 }
