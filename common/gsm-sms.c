@@ -1710,9 +1710,9 @@ do { \
 	free(src); \
 } while (0)
 
-#define CONCAT(dst, src, size, pattern, args...) \
+#define CONCAT(dst, src, size, pattern, ...) \
 do { \
-	src = allocate(pattern, args); \
+	src = allocate(pattern, __VA_ARGS__); \
 	if (!src) \
 		goto error; \
 	APPEND(dst, src, size); \
