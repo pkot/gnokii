@@ -13,11 +13,12 @@ Quickstart
     $ autoheader				# only for CVS copies
     $ autoconf					# only for CVS copies
     $ ./configure [<options>]
-    [ instead of above commands you can simply run ./autogen.sh [<options>]]
+    [ instead of above commands you can simply run ./autogen.sh [<options>] ]
     $ make
     # groupadd gnokii
-    # make [install|install-suid|install-strip|install-ss]
-    # make install-docs
+    # make install
+    [ optionally, if you want to compile other programs using gnokii ]
+    # make install-devel
     $ cp Docs/sample/gnokiirc ~/.gnokiirc
     $ $EDITOR ~/.gnokiirc
 
@@ -137,31 +138,12 @@ Start the compilation process by typing
 Installation
 ------------
 
-Now switch to the root account and add a group named "gnokii". Gnokii 
-really needs an own group. It is added with
-
-    # groupadd gnokii
-
-
-Install the binaries into the system with one of the four following lines:
+Install the binaries into the system with the following line:
 
     # make install
-    # make install-suid
-    # make install-strip
-    # make install-ss          # <-- suid AND strip
 
 'install' target is the usual installation process that you would need in
 most cases.
-'install-suid' target sets more restrictive permissions. Only gnokii group
-members will have access to gnokii files. Remember to create the gnokii
-group.
-'install-strip' target strips the prepared binaries on install.
-'install-ss' target does both strip and suid.
-When you need to use mgnokiidev and don't want to setup it manually,
-install-suid will be a good choice.
-We don't recommend to strip the binaries as the debug symbols may give us
-some valuable input in case of problems.
-For distribution packaging install-ss target will be probably wise choice.
 
 Note that you will need to adjust /dev/ttyS* or /dev/ircomm* and /var/lock
 permissions and ownership before starting using gnokii.
@@ -172,9 +154,9 @@ variable:
 
     $ make DESTDIR=/somewhere install
 
-To install the documentation type
+To install gnokii headers type
 
-    # make install-docs
+    # make install-devel
 
 
 Clean-up
