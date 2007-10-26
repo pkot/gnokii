@@ -342,6 +342,19 @@ GNOKII_API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, cons
 	return NULL;
 }
 
+int cfg_section_exists(struct gn_cfg_header *cfg, const char *section)
+{
+	struct gn_cfg_header *h;
+
+	if (!cfg || !section)
+		return false;
+	/* Search for section name */
+	for (h = cfg; h != NULL; h = h->next)
+		if (!strcmp(section, h->section))
+			return true;
+	return false;
+}
+
 /*
  * Return all the entries of the given section.
  */
@@ -403,6 +416,11 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 	char ch;
 
 	memset(cfg, '\0', sizeof(gn_config));
+
+	if (!cfg_section_exists(gn_cfg_info, section)) {
+		fprintf(stderr, _("No %s section in the config file.\n"), section);
+		return GN_ERR_NOPHONE;
+	}
 
 	/* You need to specify at least model and port in the phone section */
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "model"))) {
