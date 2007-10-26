@@ -609,6 +609,7 @@ void getsms_usage(FILE *f, int exitval)
 			"        -F filename                 save sms to the file overwriting it if\n"
 			"                                    the file already exists;\n"
 			"                                    file is in mbox format\n"
+			"        --file filename\n"
 			"        -f filename                 as above but user is prompted before\n"
 			"                                    overwriting the file\n"
 			"        --append-file filename\n"
