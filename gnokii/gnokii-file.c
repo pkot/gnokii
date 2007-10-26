@@ -291,7 +291,7 @@ int getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			return GN_ERR_FAILED;
 		}
 		if (fwrite(fi.file, fi.file_length, 1, f) < 0) {
-			fprintf(stderr, _("Failed write to file %s.\n"), filename2);
+			fprintf(stderr, _("Failed to write to file %s.\n"), filename2);
 			error = GN_ERR_FAILED;
 		}
 		fclose(f);
@@ -344,7 +344,7 @@ int getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 				return GN_ERR_FAILED;
 			}
 			if (fwrite(fi.file, fi.file_length, 1, f) < 0) {
-				fprintf(stderr, _("Failed write to file %s.\n"), filename2);
+				fprintf(stderr, _("Failed to write to file %s.\n"), filename2);
 				error = GN_ERR_FAILED;
 			}
 			fclose(f);
@@ -395,7 +395,7 @@ int getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 					return GN_ERR_FAILED;
 				}
 				if (fwrite(data->file->file, data->file->file_length, 1, f) < 0) {
-					fprintf(stderr, _("Failed to write file %s.\n"), filename2);
+					fprintf(stderr, _("Failed to write to file %s.\n"), filename2);
 					fclose(f);
 					return GN_ERR_FAILED; 
 				}
