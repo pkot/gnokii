@@ -96,7 +96,7 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
 {
 	struct timeval timeout;
 	unsigned char buffer[255];
-	int res;
+	int res, t = 1;
 
 	/* Communication with the phone looks strange here. I am unable to
 	 * read the whole answer from the port with DKU-5 cable and
@@ -109,10 +109,11 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
         
 	res = device_select(&timeout, state);
 	/* Read from the port only when select succeeds */
-	while (res > 0) {
+	while (res > 0 && t) {
 		/* Avoid 'device temporarily unavailable' error */
 		usleep(50);
 		res = device_read(buffer, 255, state);
+		t = gn_lib_cfg_get("global", "brokenread") ? atoi(gn_lib_cfg_get("global", "brokenread")) : 0;
 	}
 	return res;
 }

@@ -62,6 +62,9 @@
     o when exporting the phonebook to a file in raw format handle
       backslashes as escapes like in gnokii --getphonebook (closes
       https://savannah.nongnu.org/bugs/?20815)      (Daniele Forsi)
+ * link layer updates
+    o make DKU-5 connection initialisation working again
+                                                        (Pawel Kot)
 
 0.6.19
 ======
