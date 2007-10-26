@@ -41,6 +41,7 @@ libical support:	libical-0.24, you may want to use gnokii internal iCal
 			and todo entries into iCal files and reading such
 			files.
 libusb support:		libusb (for DKU2 cables support)
+SIM readers support:    libpcsclite (to use a Smart Card reader instead of a phone)
 
 Sources:
 http://www.xfree86.org/					libX11, libXpm
@@ -49,6 +50,7 @@ http://www.kernel.org/					Linux kernel includes
 http://www.bluez.org/					bluez (Linux Bluetooth stack)
 http://sourceforge.net/projects/freeassociation/	libical
 http://libusb.sf.net/					libusb
+http://pcsclite.alioth.debian.org/                      libpcsclite
 
 For xgnokii you may want download gnokii-artwork package from
 http://www.gnokii.org/download/gnokii, the package containing mobile
