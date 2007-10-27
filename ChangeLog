@@ -1,5 +1,5 @@
-0.6.20 (not released yet)
-=========================
+0.6.20
+======
  * libgnokii updates
     o add support for Nokia 6070 and 2630               (Pawel Kot)
     o add a driver for PC/SC SIM card readers using libpcsclite;

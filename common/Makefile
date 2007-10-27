@@ -25,9 +25,9 @@ include $(TOPDIR)/Makefile.global
 #  - if you change API in backward incompatible manner (removing things,
 #    changing things), increase GNOKII_MAJOR, set GNOKII_RELEASE to 0
 # Change is just once per release!
-GNOKII_MAJOR = 6
-GNOKII_MINOR = 3
-GNOKII_RELEASE = 1
+GNOKII_MAJOR = 7
+GNOKII_MINOR = 4
+GNOKII_RELEASE = 0
 ifdef WIN32_CROSS
 LIBTOOL_UNDEF = -no-undefined
 LIBTOOL_VER = -version-info $(GNOKII_MAJOR):$(GNOKII_RELEASE):$(GNOKII_MINOR) -avoid-version

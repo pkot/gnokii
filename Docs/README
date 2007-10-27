@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
                          (C) 2001 - 2007 Paweł Kot
-                Last update  5 October 2007  Version 0.6.19
+                Last update 27 October 2007  Version 0.6.20
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.19 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.20 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -137,7 +137,7 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.6.19-i386.rpm
+rpm -i gnokii-0.6.20-i386.rpm
 
 If you are using a Debian based system, you may use basic
 
@@ -145,7 +145,7 @@ apt-get install gnokii xgnokii
 
 if you want to base on the official Debian package, or
 
-dpkg -i gnokii_0.6.19_i386.deb xgnokii_0.6.19_i386.deb
+dpkg -i gnokii_0.6.20_i386.deb xgnokii_0.6.20_i386.deb
 
 On Slackware you can use installpkg or pkgtool.
 
@@ -400,6 +400,12 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20071027 Version 0.6.20
+Add support for SIM Card Readers (pcsc driver). Improve SMS saving to the
+external files. Fix several segmentation faults. Make DKU-5 connection
+working again. Better support for SonyEricsson phones (phonebook, date and
+time functions). Some code cleanups.
+
 20071005 Version 0.6.19
 Various bugfixes. See ChangeLog for the details.
 
