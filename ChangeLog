@@ -1,9 +1,13 @@
 0.6.21 (not released yet)
 =========================
  * xgnokii updates
-    o update xgnokii desktopo file                      (Pawel Kot)
+    o update xgnokii desktop file                       (Pawel Kot)
  * link layer updates
     o improve DKU-5 initialization stage                (Pawel Kot)
+ * at driver updates
+    o return an error from at_memory_type_set() when a phonebook
+      memory type supported by libgnokii isn't supported by the
+      phone's AT+CPBS= command                      (Daniele Forsi)
 
 0.6.20
 ======
