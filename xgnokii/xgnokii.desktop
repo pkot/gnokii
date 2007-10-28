@@ -1,11 +1,12 @@
 [Desktop Entry]
-Version=0.9.4
-Name=Xgnokii Mobile Phone Tool
-GenericName=Mobile Phone Tool
-Comment=Mobile phone tool suite
-Icon=xgnokii
+Version=1.0
+Name=Mobile Phone Suite
+Name[pl]=Menedżer telefonu komórkowego
+Comment=Manage your mobile phone
+Comment[pl]=Zarządzaj swoim telefonem komórkowym
+Icon=cellphone
 Exec=xgnokii
 Terminal=false
 Type=Application
 Encoding=UTF-8
-Categories=Application;Calendar;ContactManagement;Utility;GTK;
+Categories=Utility;Telephony;Calendar;ContactManagement;GTK;
