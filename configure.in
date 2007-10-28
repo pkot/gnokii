@@ -554,7 +554,7 @@ AC_CHECK_LIB(socket, socket)
 dnl ======================== Additional switches
 
 AC_ARG_ENABLE(security,
-   [  --enable-security       enable all security features ],
+   [  --enable-security       enable all security features @<:@default=no@:>@],
    [ if test x$enable_security = xyes; then
 	AC_DEFINE(SECURITY)
      	security="yes"
