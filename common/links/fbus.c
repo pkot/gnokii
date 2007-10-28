@@ -96,7 +96,7 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
 {
 	struct timeval timeout;
 	unsigned char buffer[255];
-	int res, t = 1;
+	int res, offset = 0, waitformore = 1;
 
 	/* Communication with the phone looks strange here. I am unable to
 	 * read the whole answer from the port with DKU-5 cable and
@@ -109,10 +109,18 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
         
 	res = device_select(&timeout, state);
 	/* Read from the port only when select succeeds */
-	if (res > 0) {
+	while (res > 0 && waitformore) {
 		/* Avoid 'device temporarily unavailable' error */
 		usleep(50);
-		res = device_read(buffer, 255, state);
+		res = device_read(buffer + offset, 255, state);
+		/* The whole answer is read */
+		if (strstr(buffer, "OK"))
+			waitformore = 0;
+		offset += res;
+		res = offset;
+		/* The phone is already in AT mode */
+		if (strchr(buffer, 0x55))
+			res = 0;
 	}
 	return res;
 }
@@ -142,8 +150,10 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
 	 * timeout for the answer.
 	 */
 	res = send_command("AT\r\n", 4, state);
-	res = send_command("AT&F\r\n", 6, state);
-	res = send_command("AT*NOKIAFBUS\r\n", 14, state);
+	if (res)
+		res = send_command("AT&F\r\n", 6, state);
+	if (res)
+		res = send_command("AT*NOKIAFBUS\r\n", 14, state);
 	device_changespeed(115200, state);
 
 	if (type != GN_CT_Bluetooth && type != GN_CT_TCP) { 
