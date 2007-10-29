@@ -8,6 +8,8 @@
     o return an error from at_memory_type_set() when a phonebook
       memory type supported by libgnokii isn't supported by the
       phone's AT+CPBS= command                      (Daniele Forsi)
+ * build system updates
+    o change location of gnapplet.sis                   (Pawel Kot)
 
 0.6.20
 ======
