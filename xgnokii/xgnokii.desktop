@@ -2,6 +2,7 @@
 Version=1.0
 Name=Xgnokii
 GenericName=Mobile Phone Suite
+GenericName[pl]=Menedżer telefonu komórkowego
 Comment=Manage your mobile phone
 Comment[pl]=Zarządzaj swoim telefonem komórkowym
 Icon=cellphone
@@ -9,4 +10,4 @@ Exec=xgnokii
 Terminal=false
 Type=Application
 Encoding=UTF-8
-Categories=Utility;Telephony;Calendar;ContactManagement;GTK;
+Categories=Utility;TelephonyTools;Calendar;ContactManagement;Office;GTK;
