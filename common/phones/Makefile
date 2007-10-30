@@ -17,6 +17,8 @@
 TOPDIR=../..
 include $(TOPDIR)/Makefile.global
 
+CFLAGS += $(LIBPCSCLITE_CFLAGS)
+
 OBJS =	generic.lo \
 	nokia.lo \
 	nk7110.lo \

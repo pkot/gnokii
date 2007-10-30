@@ -38,6 +38,8 @@ LIBTOOL_VER = -version-info $(GNOKII_MAJOR):$(GNOKII_RELEASE):$(GNOKII_MINOR)
 LIBTOOL_RPATH=-rpath $(libdir)
 endif
 
+LIBS   += $(LIBPCSCLITE_LIBS)
+
 OBJS =	libfunctions.lo \
 	gsm-api.lo \
 	gsm-error.lo \
