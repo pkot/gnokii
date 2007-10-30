@@ -466,8 +466,10 @@ if test "$enable_libpcsclite" == "yes"; then
 				USE_LIBPCSCLITE=no)
 		AC_MSG_RESULT($USE_LIBPCSCLITE)
 		CFLAGS="$OLD_CFLAGS"
+		if test "$USE_LIBPCSCLITE" == yes; then
+			AC_DEFINE([HAVE_PCSC], [1], [Define if you have libpcsclite])
+		fi
 	fi
-	AC_DEFINE([HAVE_PCSC], [1], [Define if you have libpcsclite])
 fi
 
 dnl ======================== Checks for X base support
