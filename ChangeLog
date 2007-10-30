@@ -10,6 +10,8 @@
       phone's AT+CPBS= command                      (Daniele Forsi)
  * build system updates
     o change location of gnapplet.sis                   (Pawel Kot)
+ * libgnokii updates
+    o new error code GN_ERR_ASYNC                       (Pawel Kot)
 
 0.6.20
 ======

@@ -87,7 +87,9 @@ typedef enum {
 	GN_ERR_NOLOG,			/* Incorrect logging section configuration */
 	GN_ERR_NOMODEL,			/* No phone model specified */
 	GN_ERR_NOPORT,			/* No port specified */
-	GN_ERR_NOCONNECTION		/* No connection type specified */
+	GN_ERR_NOCONNECTION,		/* No connection type specified */
+
+	GN_ERR_ASYNC			/* The actual response will be sent asynchronously */
 } gn_error;
 
 GNOKII_API char *gn_error_print(gn_error e);
