@@ -12,6 +12,7 @@
     o change location of gnapplet.sis                   (Pawel Kot)
  * libgnokii updates
     o new error code GN_ERR_ASYNC                       (Pawel Kot)
+    o add support for async way of send_sms()           (Pawel Kot)
 
 0.6.20
 ======

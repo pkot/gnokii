@@ -1398,7 +1398,8 @@ err:
 			break;
 		}
 
-		if (e != GN_ERR_NONE) break;
+		if (e != GN_ERR_NONE)
+			break;
 
 		data->message_center->id = message[8];
 		data->message_center->format = message[10];
@@ -1412,7 +1413,8 @@ err:
 			case 0x82: /* Number */
 				switch (message[offset + 2]) {
 				case 0x01: /* Default number */
-					if (message[offset + 4] % 2) message[offset + 4]++;
+					if (message[offset + 4] % 2)
+						message[offset + 4]++;
 					message[offset + 4] = message[offset + 4] / 2 + 1;
 					snprintf(data->message_center->recipient.number,
 						 GN_SMS_NUMBER_MAX_LENGTH + 1, "%s", char_bcd_number_get(message + offset + 4));
@@ -1448,7 +1450,7 @@ err:
 		if (strlen(data->message_center->smsc.number) == 0) {
 			sprintf(data->message_center->smsc.number, "(none)");
 		}
-		if(strlen(data->message_center->name) == 0) {
+		if (strlen(data->message_center->name) == 0) {
 			data->message_center->name[0] = '\0';
 		}
 
@@ -1458,7 +1460,10 @@ err:
 		switch (message[8]) {
 		case NK6510_SUBSMS_SMS_SEND_OK: /* 0x00 */
 			dprintf("SMS sent (reference: %d)\n", message[10]);
-			data->raw_sms->reference = message[10];
+			if (data->raw_sms)
+				data->raw_sms->reference = message[10];
+			else
+				dprintf("Warning: no data->raw_sms allocated and got send_sms() response\n");
 			e = GN_ERR_NONE;
 			break;
 
@@ -1482,9 +1487,19 @@ err:
 		dprintf("SMS received\n");
 		break;
 
+	case 0x22:
+		dprintf("SMS has been delivered to the phone and the phone is trying to send it.\n");
+		dprintf("No information about sending status yet\n");
+		dprintf("SMS sending status will be transmitted asynchronously\n");
+		dprintf("Message reference: %d\n", message[5]);
+		if (data->raw_sms->reference)
+			data->raw_sms->reference = message[5];
+		else
+			dprintf("Warning: no data->raw_sms allocated and got response for send_sms()\n");
+		e = GN_ERR_ASYNC;
+		break;
 	case NK6510_SUBSMS_SMS_RCVD: /* 0x10 */
 	case NK6510_SUBSMS_CELLBRD_OK: /* 0x21 */
-	case NK6510_SUBSMS_CELLBRD_FAIL: /* 0x22 */
 	case NK6510_SUBSMS_READ_CELLBRD: /* 0x23 */
 	case NK6510_SUBSMS_SMSC_OK: /* 0x31 */
 	case NK6510_SUBSMS_SMSC_FAIL: /* 0x32 */
