@@ -23,8 +23,8 @@ clean:
 	$(RM) *~ depend core *.bak
 
 install: gnokiid
-	$(INSTALL) -d $(DESTDIR)/$(sbindir)
-	$(LIBTOOL) --mode=install $(INSTALL) gnokiid $(DESTDIR)/$(sbindir)
+	$(INSTALL) -d $(DESTDIR)$(sbindir)
+	$(LIBTOOL) --mode=install $(INSTALL) gnokiid $(DESTDIR)$(sbindir)
 
 depend dep:
 	$(CC) $(CFLAGS) -MM *.c >depend
