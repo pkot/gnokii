@@ -870,7 +870,7 @@ static gn_error gnapplet_incoming_power(int messagetype, unsigned char *message,
 		percent = pkt_get_uint8(&pkt);
 		source = pkt_get_uint8(&pkt);
 		if (error != GN_ERR_NONE) return error;
-		if (data->battery_unit) *data->battery_unit = GN_RF_Percentage;
+		if (data->battery_unit) *data->battery_unit = GN_BU_Percentage;
 		if (data->battery_level) *data->battery_level = percent;
 		if (data->power_source) *data->power_source = source;
 		break;
