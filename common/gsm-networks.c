@@ -378,7 +378,7 @@ static gn_network networks[] = {
 	{"266 01", "Gibtel GSM"},
 	{"268 01", "vodafone"},
 	{"268 03", "OPTIMUS"},
-	{"268 06", "TMN"},
+	{"268 06", "P TMN"},
 	{"270 01", "LUXGSM"},
 	{"270 77", "TANGO"},
 	{"272 01", "Vodafone"},
