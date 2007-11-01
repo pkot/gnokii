@@ -1492,7 +1492,7 @@ err:
 		dprintf("No information about sending status yet\n");
 		dprintf("SMS sending status will be transmitted asynchronously\n");
 		dprintf("Message reference: %d\n", message[5]);
-		if (data->raw_sms->reference)
+		if (data->raw_sms)
 			data->raw_sms->reference = message[5];
 		else
 			dprintf("Warning: no data->raw_sms allocated and got response for send_sms()\n");
