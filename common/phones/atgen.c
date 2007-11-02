@@ -2134,8 +2134,10 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 		drvinst->on_sms(data->sms, state, drvinst->sms_callback_data);
 	}
 
-	if (freesms)
+	if (freesms) {
 		free(data->sms);
+		data->sms = NULL;
+	}
 
 	return error;
 }
@@ -2500,8 +2502,10 @@ out:
 static gn_error Terminate(gn_data *data, struct gn_statemachine *state)
 {
 	if (AT_DRVINST(state)) {
-		if (AT_DRVINST(state)->timezone)
+		if (AT_DRVINST(state)->timezone) {
 			free(AT_DRVINST(state)->timezone);
+			AT_DRVINST(state)->timezone = NULL;
+		}
 		free(AT_DRVINST(state));
 		AT_DRVINST(state) = NULL;
 	}
