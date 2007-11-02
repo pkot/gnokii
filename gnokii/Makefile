@@ -34,9 +34,6 @@ all: gnokii
 gnokii: $(OBJS) $(TOPDIR)/common/libgnokii.la
 	$(LIBTOOL) --mode=link $(CC) $(TARGET) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(PRGNAME)
 
-$(TOPDIR)/getopt/libgetopt.a:
-	$(MAKE) -C $(TOPDIR)/getopt
-
 clean:
 	$(LIBTOOL) --mode=clean $(RM) gnokii $(OBJS)
 	$(RM) *~ depend *.exe core *.bak

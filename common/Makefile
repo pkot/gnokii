@@ -72,15 +72,6 @@ endif
 
 all: libgnokii.la
 
-phones/libPHONES.la:
-	$(MAKE) -C phones libPHONES.la
-
-links/libLINKS.la:
-	$(MAKE) -C links libLINKS.la
-
-devices/libDEVICES.la:
-	$(MAKE) -C devices libDEVICES.la
-
 libgnokii.la: $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la
 	$(LIBTOOL) --mode=link $(CC) $(LDFLAGS) $(LIBTOOL_UNDEF) -o libgnokii.la $(OBJS) phones/libPHONES.la links/libLINKS.la devices/libDEVICES.la $(LIBTOOL_VER) $(LIBTOOL_RPATH) $(LDLIBS)
 

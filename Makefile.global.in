@@ -100,3 +100,7 @@ LDLIBS = $(LIBS) $(ICONV_LIBS) $(INTL_LIBS) $(XPM_LIBS)
 
 %.lo: %.c
 	$(LIBTOOL) --mode=compile $(CC) $(CFLAGS) $(CPPFLAGS) -o $@ -c $<
+
+%.a %.la:
+	$(MAKE) -C $(@D) $(@F)
+
