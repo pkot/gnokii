@@ -19,15 +19,9 @@ BIN_DIRS = gnokii
 
 ifndef WIN32
 BIN_DIRS += gnokiid utils
-DATA_DIR = common/data
 endif
 
-DIRS += common/phones \
-	common/links \
-	common/devices \
-	$(DATA_DIR) \
-	common \
-	$(BIN_DIRS) \
+DIRS += $(BIN_DIRS) \
 	po
 
 GTK_DIRS =	xgnokii
@@ -50,9 +44,6 @@ TOPLEVEL_DOCS = ChangeLog \
 
 all: compile
 
-# build the apps after building the library
-$(BIN_DIRS) $(GTK_DIRS): common
-
 compile: $(DIRS)
 	@if [ "$(GTK_LIBS)" ]; then \
 		for dir in $(GTK_DIRS); do \
@@ -68,7 +59,7 @@ $(DIRS):
 
 clean:
 	$(RM) *~ *.orig *.rej include/*~ include/*.orig include/*.rej testsuite/myout*
-	@for dir in $(DIRS); do \
+	@for dir in $(DIRS) common; do \
 	    if [ -e $$dir/Makefile ]; then \
 		$(MAKE) -C $$dir clean; \
 	    fi; \
