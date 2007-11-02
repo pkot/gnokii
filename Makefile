@@ -21,7 +21,8 @@ ifndef WIN32
 BIN_DIRS += gnokiid utils
 endif
 
-DIRS += $(BIN_DIRS) \
+DIRS += common \
+	$(BIN_DIRS) \
 	po
 
 GTK_DIRS =	xgnokii
@@ -53,6 +54,9 @@ compile: $(DIRS)
 		done \
 	fi
 	@echo "done"
+
+# build the apps after building the library   
+$(BIN_DIRS) $(GTK_DIRS): common
 
 $(DIRS):
 	$(MAKE) -C $@
