@@ -23,15 +23,16 @@ endif
 
 DIRS += common \
 	$(BIN_DIRS) \
-	po
+	$(INTL_DIR) \
+	$(POSUB)
 
 GTK_DIRS =	xgnokii
 
 INSTALL_DIRS =	$(BIN_DIRS) \
 		common
 
-INSTALL_SIMPLE = po \
-		 intl
+INSTALL_SIMPLE = $(INTL_DIR) \
+		 $(POSUB)
 
 INSTALL_INCLUDES = include
 
@@ -63,7 +64,7 @@ $(DIRS):
 
 clean:
 	$(RM) *~ *.orig *.rej include/*~ include/*.orig include/*.rej testsuite/myout*
-	@for dir in $(DIRS) common; do \
+	@for dir in $(DIRS); do \
 	    if [ -e $$dir/Makefile ]; then \
 		$(MAKE) -C $$dir clean; \
 	    fi; \
