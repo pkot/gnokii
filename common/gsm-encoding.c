@@ -149,7 +149,7 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 {
 #ifdef HAVE_ICONV
 	size_t nconv;
-	char *pin;
+	ICONV_CONST char *pin;
 	char *pout;
 	size_t inlen;
 	size_t outlen;
@@ -178,7 +178,7 @@ static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 {
 #ifdef HAVE_ICONV
 	size_t nconv;
-	char *pin;
+	ICONV_CONST char *pin;
 	char *pout;
 	size_t inlen;
 	size_t outlen;
