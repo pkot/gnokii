@@ -14,6 +14,8 @@
  * libgnokii updates
     o new error code GN_ERR_ASYNC                       (Pawel Kot)
     o add support for async way of send_sms()           (Pawel Kot)
+ * gnapplet driver updates
+    o add support for setactiveprofile             (BORBELY Zoltan)
 
 0.6.20
 ======
