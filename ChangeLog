@@ -16,6 +16,10 @@
     o add support for async way of send_sms()           (Pawel Kot)
  * gnapplet driver updates
     o add support for setactiveprofile             (BORBELY Zoltan)
+ * gnokii updates
+    o fix --getphonebook not reading the last entries in two cases
+      when some entries before those meant to be read were empty
+                                                    (Daniele Forsi)
 
 0.6.20
 ======
