@@ -5,6 +5,9 @@
     o reading contacts from phone would miss the last entries if
       phonebook contained holes (see gnokii fix for --getphonebook
       below)                                        (Daniele Forsi)
+    o importing contacts from file now replaces entries with the
+      same location number leaving the others untouched (in prior
+      versions the others were deleted)             (Daniele Forsi)
  * link layer updates
     o improve DKU-5 initialization stage                (Pawel Kot)
  * at driver updates

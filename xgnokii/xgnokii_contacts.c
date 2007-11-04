@@ -2905,8 +2905,6 @@ static void ExportContacts(void)
 static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 {
 	FILE *f;
-	PhoneEvent *e;
-	D_MemoryStatus *ms;
 	PhonebookEntry *pbEntry;
 	gn_phonebook_entry gsmEntry;
 	gchar buf[IO_BUF_LEN];
@@ -2923,108 +2921,11 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 		return;
 	}
 
-	if (contactsMemoryInitialized == TRUE) {
-		for (i = 0; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++) {
-			pbEntry = g_ptr_array_index(contactsMemory, i);
-			g_free(pbEntry);
-		}
-		g_ptr_array_free(contactsMemory, TRUE);
-		contactsMemory = NULL;
-		gtk_clist_clear(GTK_CLIST(clist));
-		contactsMemoryInitialized = FALSE;
-		memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME =
-		    memoryStatus.MaxSM = memoryStatus.UsedSM = memoryStatus.FreeSM = 0;
-		statusInfo.ch_ME = statusInfo.ch_SM = 0;
-		RefreshStatusInfo();
+	if (contactsMemoryInitialized == FALSE) {
+		ReadContactsMain();
 	}
-
-	ms = (D_MemoryStatus *) g_malloc(sizeof(D_MemoryStatus));
-	ms->memoryStatus.memory_type = GN_MT_ME;
-	e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
-	e->event = Event_GetMemoryStatus;
-	e->data = ms;
-	GUI_InsertEvent(e);
-	pthread_mutex_lock(&memoryMutex);
-	pthread_cond_wait(&memoryCond, &memoryMutex);
-	pthread_mutex_unlock(&memoryMutex);
-
-	if (ms->status == GN_ERR_NONE || ms->status == GN_ERR_NOTSUPPORTED) {
-		memoryStatus.MaxME = ms->memoryStatus.used + ms->memoryStatus.free;
-		memoryStatus.UsedME = 0;
-		memoryStatus.FreeME = memoryStatus.MaxME;
-	} else {
-		/* Phone don't support ME (5110) */
-		memoryStatus.MaxME = memoryStatus.UsedME = memoryStatus.FreeME = 0;
-	}
-
-	ms->memoryStatus.memory_type = GN_MT_SM;
-	e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
-	e->event = Event_GetMemoryStatus;
-	e->data = ms;
-	GUI_InsertEvent(e);
-	pthread_mutex_lock(&memoryMutex);
-	pthread_cond_wait(&memoryCond, &memoryMutex);
-	pthread_mutex_unlock(&memoryMutex);
-
-	if (ms->status == GN_ERR_NONE || ms->status == GN_ERR_NOTSUPPORTED) {
-		memoryStatus.MaxSM = ms->memoryStatus.used + ms->memoryStatus.free;
-		memoryStatus.UsedSM = 0;
-		memoryStatus.FreeSM = memoryStatus.MaxSM;
-	} else {
-		/* guess that there are 100 entries */
-		memoryStatus.MaxSM = memoryStatus.FreeSM = 100;
-		memoryStatus.UsedSM = 0;
-	}
-	g_free(ms);
 
 	statusInfo.ch_ME = statusInfo.ch_SM = 0;
-
-	RefreshStatusInfo();
-
-	contactsMemory = g_ptr_array_new();
-
-	for (i = 1; i <= memoryStatus.MaxME; i++) {
-		if ((pbEntry = (PhonebookEntry *) g_malloc(sizeof(PhonebookEntry))) == NULL) {
-			fclose(f);
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-			g_ptr_array_free(contactsMemory, TRUE);
-			return;
-		}
-
-		pbEntry->entry.empty = FALSE;
-		pbEntry->entry.name[0] = '\0';
-		pbEntry->entry.number[0] = '\0';
-		pbEntry->entry.memory_type = GN_MT_ME;
-		pbEntry->entry.caller_group = GN_PHONEBOOK_GROUP_None;
-		pbEntry->status = E_Deleted;	/* I must set status to E_Deleted, since I   */
-		/* I want clear empty entries when saving to */
-		/* to phone                                  */
-		pbEntry->entry.subentries_count = 0;
-
-		g_ptr_array_add(contactsMemory, (gpointer) pbEntry);
-		pbEntry = NULL;
-	}
-
-	for (i = 1; i <= memoryStatus.MaxSM; i++) {
-		if ((pbEntry = (PhonebookEntry *) g_malloc(sizeof(PhonebookEntry))) == NULL) {
-			fclose(f);
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-			g_ptr_array_free(contactsMemory, TRUE);
-			return;
-		}
-
-		pbEntry->entry.empty = FALSE;
-		pbEntry->entry.name[0] = '\0';
-		pbEntry->entry.number[0] = '\0';
-		pbEntry->entry.memory_type = GN_MT_SM;
-		pbEntry->entry.caller_group = GN_PHONEBOOK_GROUP_None;
-		pbEntry->status = E_Deleted;
-		pbEntry->entry.subentries_count = 0;
-
-		g_ptr_array_add(contactsMemory, (gpointer) pbEntry);
-		pbEntry = NULL;
-	}
-
 
 	while (fgets(buf, IO_BUF_LEN, f)) {
 		if (gn_file_phonebook_raw_parse(&gsmEntry, buf) == GN_ERR_NONE) {
@@ -3033,30 +2934,29 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 			    && i > 0 && i <= memoryStatus.MaxME) {
 				pbEntry = g_ptr_array_index(contactsMemory, i - 1);
 
-				if (pbEntry->status == E_Deleted) {
-					pbEntry->entry = gsmEntry;
-					pbEntry->status = E_Changed;
+				if (pbEntry->status == E_Empty || pbEntry->status == E_Deleted) {
 					memoryStatus.UsedME++;
 					memoryStatus.FreeME--;
-					statusInfo.ch_ME = 1;
 				}
+				pbEntry->entry = gsmEntry;
+				pbEntry->status = E_Changed;
+				statusInfo.ch_ME = 1;
 			} else if (gsmEntry.memory_type == GN_MT_SM && memoryStatus.FreeSM > 0
 				   && i > 0 && i <= memoryStatus.MaxSM) {
 				pbEntry =
 				    g_ptr_array_index(contactsMemory, memoryStatus.MaxME + i - 1);
 
-				if (pbEntry->status == E_Deleted) {
-					pbEntry->entry = gsmEntry;
-					pbEntry->status = E_Changed;
+				if (pbEntry->status == E_Empty || pbEntry->status == E_Deleted) {
 					memoryStatus.UsedSM++;
 					memoryStatus.FreeSM--;
-					statusInfo.ch_SM = 1;
 				}
+				pbEntry->entry = gsmEntry;
+				pbEntry->status = E_Changed;
+				statusInfo.ch_SM = 1;
 			}
 		}
 	}
 
-	contactsMemoryInitialized = TRUE;
 	RefreshStatusInfo();
 	GUIEventSend(GUI_EVENT_CONTACTS_CHANGED);
 	GUIEventSend(GUI_EVENT_SMS_NUMBER_CHANGED);
