@@ -504,7 +504,7 @@ static gint A_GetMemoryLocationAll(gpointer data)
 				return GN_ERR_NONE;
 			}
 		}
-		if (error == GN_ERR_NONE) read++;
+		if ((error == GN_ERR_NONE) && (entry.empty == false)) read++;
 		dprintf("Name: %s\n", entry.name);
 		error = mla->InsertEntry(&entry); 
 		/* FIXME: It only works this way at the moment */

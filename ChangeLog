@@ -2,6 +2,9 @@
 =========================
  * xgnokii updates
     o update xgnokii desktop file                       (Pawel Kot)
+    o reading contacts from phone would miss the last entries if
+      phonebook contained holes (see gnokii fix for --getphonebook
+      below)                                        (Daniele Forsi)
  * link layer updates
     o improve DKU-5 initialization stage                (Pawel Kot)
  * at driver updates
