@@ -20,6 +20,7 @@
  * libgnokii updates
     o new error code GN_ERR_ASYNC                       (Pawel Kot)
     o add support for async way of send_sms()           (Pawel Kot)
+    o add ids for Nokia 6030                         (Rishi Pathak)
  * gnapplet driver updates
     o add support for setactiveprofile             (BORBELY Zoltan)
  * gnokii updates

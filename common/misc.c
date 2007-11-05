@@ -200,6 +200,7 @@ static gn_phone_model models[] = {
 	{"6015i", "RH-55",	PM_DEFAULT | PM_NETMONITOR },
 	{"6020",  "RM-30",	PM_DEFAULT | PM_NETMONITOR },
 	{"6021",  "RM-94",	PM_DEFAULT | PM_NETMONITOR | PM_XGNOKIIBREAKAGE},
+	{"6030",  "RM-74",      PM_DEFAULT },
 	{"6050",  "NME-1",	PM_OLD_DEFAULT },
 	{"6070",  "RM-166",	PM_DEFAULT },
 	{"6080",  "NME-2",	PM_OLD_DEFAULT },
