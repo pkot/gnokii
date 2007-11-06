@@ -1034,7 +1034,8 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 
 static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[16];
+	/* Sony Ericsson can return on notification a location that is 9-digits long */
+	unsigned char req[32];
 	gn_error err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 
 	if (err)
@@ -1047,8 +1048,7 @@ static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 	}
 	dprintf("PDU mode set\n");
 
-	sprintf(req, "AT+CMGR=%d\r", data->raw_sms->number);
-	dprintf("%s", req);
+	snprintf(req, sizeof(req), "AT+CMGR=%d\r", data->raw_sms->number);
 	if (sm_message_send(strlen(req), GN_OP_GetSMS, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_GetSMS, data, state);
@@ -1056,12 +1056,11 @@ static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[16];
+	unsigned char req[32];
 	gn_error err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 	if (err)
 		return err;
-	sprintf(req, "AT+CMGD=%d\r", data->sms->number);
-	dprintf("%s", req);
+	snprintf(req, sizeof(req), "AT+CMGD=%d\r", data->sms->number);
 
 	if (sm_message_send(strlen(req), GN_OP_DeleteSMS, req, state))
  		return GN_ERR_NOTREADY;
@@ -1097,7 +1096,7 @@ static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *stat
 	if (data->security_code->type != GN_SCT_Pin)
 		return GN_ERR_NOTIMPLEMENTED;
 
-	sprintf(req, "AT+CPIN=\"%s\"\r", data->security_code->code);
+	snprintf(req, sizeof(req), "AT+CPIN=\"%s\"\r", data->security_code->code);
  	if (sm_message_send(strlen(req), GN_OP_EnterSecurityCode, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_EnterSecurityCode, data, state);

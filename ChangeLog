@@ -14,6 +14,10 @@
     o return an error from at_memory_type_set() when a phonebook
       memory type supported by libgnokii isn't supported by the
       phone's AT+CPBS= command                      (Daniele Forsi)
+    o avoid memory corruption due to too small buffer with getsms
+      and delete sms after incoming sms notification
+      (http://bugzilla.gnome.org/show_bug.cgi?id=487809)
+                                                        (Pawel Kot)
  * build system updates
     o change location of gnapplet.sis                   (Pawel Kot)
     o configure.in and makefiles simplification     (Daniele Forsi)
