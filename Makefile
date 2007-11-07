@@ -21,9 +21,9 @@ ifndef WIN32
 BIN_DIRS += gnokiid utils
 endif
 
-DIRS += common \
+DIRS += $(INTL_DIR) \
+	common \
 	$(BIN_DIRS) \
-	$(INTL_DIR) \
 	$(POSUB)
 
 GTK_DIRS =	xgnokii
