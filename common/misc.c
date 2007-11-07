@@ -460,10 +460,10 @@ GNOKII_API char *gn_device_lock(const char* port)
 		return NULL;
 	}
 	/* I think we don't need to use strncpy, as we should have enough
-	 * buffer due to strlen results
+	 * buffer due to strlen results, but it's safer to do so...
 	 */
-	strcpy(lock_file, lock_path);
-	strcat(lock_file, aux);
+	strncpy(lock_file, lock_path, len);
+	strncat(lock_file, aux, len - strlen(lock_file));
 
 	/* Check for the stale lockfile.
 	 * The code taken from minicom by Miquel van Smoorenburg */
@@ -519,7 +519,7 @@ GNOKII_API char *gn_device_lock(const char* port)
 			fprintf(stderr, _("Cannot create lockfile %s. Please check for existence of the path."), lock_file);
 		goto failed;
 	}
-	sprintf(buffer, "%10ld gnokii\n", (long)getpid());
+	snprintf(buffer, sizeof(buffer), "%10ld gnokii\n", (long)getpid());
 	if (write(fd, buffer, strlen(buffer)) < 0) {
 		fprintf(stderr, _("Failed to write to the lockfile %s.\n"), lock_file);
 		goto failed;

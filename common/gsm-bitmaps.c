@@ -50,8 +50,9 @@
 
 GNOKII_API gn_error gn_bmp_null(gn_bmp *bmp, gn_phone *info)
 {
-	if (!bmp || !info) return GN_ERR_INTERNALERROR;
-	strcpy(bmp->netcode, "000 00");
+	if (!bmp || !info)
+		return GN_ERR_INTERNALERROR;
+	snprintf(bmp->netcode, sizeof(bmp->netcode), "000 00");
 	bmp->width = info->operator_logo_width;
 	bmp->height = info->operator_logo_height;
 	bmp->size = ceiling_to_octet(bmp->width * bmp->height);

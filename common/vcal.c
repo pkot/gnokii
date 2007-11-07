@@ -65,7 +65,7 @@ static char vcal_prodid[64] = {0};
 static inline const char *get_prodid()
 {
 	if (!*vcal_prodid) {
-		sprintf(vcal_prodid, "//Gnokii.org//NONSGML v%s", gnokii_version);
+		snprintf(vcal_prodid, sizeof(vcal_prodid), "//Gnokii.org//NONSGML v%s", gnokii_version);
 	}
 	return vcal_prodid;
 }
@@ -148,7 +148,7 @@ GNOKII_API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 		properties[iprop++] = icalproperty_new_summary(calnote->text);
 		do {
 			char rrule[64];
-			sprintf(rrule, "FREQ=YEARLY;INTERVAL=1;BYMONTH=%d", stime.month);
+			snprintf(rrule, sizeof(rrule), "FREQ=YEARLY;INTERVAL=1;BYMONTH=%d", stime.month);
 			properties[iprop++] = icalproperty_new_rrule(icalrecurrencetype_from_string(rrule));
 		} while (0);
 		stime.is_date = 1;
@@ -160,7 +160,7 @@ GNOKII_API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 		break;
 	}
 
-	sprintf(compuid, "guid.gnokii.org_%d_%d", calnote->location, rand());
+	snprintf(compuid, sizeof(compuid), "guid.gnokii.org_%d_%d", calnote->location, rand());
 
 	pIcal = icalcomponent_vanew(ICAL_VCALENDAR_COMPONENT,
 				    icalproperty_new_version("2.0"),
@@ -449,7 +449,7 @@ GNOKII_API int gn_todo2ical(FILE *f, gn_todo *ctodo)
 	icalcomponent *pIcal = NULL;
 	char compuid[64];
 
-	sprintf(compuid, "guid.gnokii.org_%d_%d", ctodo->location, rand());
+	snprintf(compuid, sizeof(compuid), "guid.gnokii.org_%d_%d", ctodo->location, rand());
 
 	pIcal = icalcomponent_vanew(ICAL_VCALENDAR_COMPONENT,
 				    icalproperty_new_version("2.0"),

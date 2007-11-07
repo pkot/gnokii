@@ -267,23 +267,23 @@ int getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	else {
 		if (argc == optind) {
 			if (strrchr(optarg, '/'))
-				strncpy(filename2, strrchr(optarg, '/') + 1, 511);
+				snprintf(filename2, sizeof(filename2), "%s", strrchr(optarg, '/') + 1);
 			else if (strrchr(optarg, '\\'))
-				strncpy(filename2, strrchr(optarg, '\\') + 1, 511);
+				snprintf(filename2, sizeof(filename2), "%s", strrchr(optarg, '\\') + 1);
 			else
-				strcpy(filename2, "default.dat");
+				snprintf(filename2, sizeof(filename2), "default.dat");
 			fprintf(stdout, _("Got file %s.  Save to [%s]: "), optarg, filename2);
 			gn_line_get(stdin, filename2, 512);
 			if (filename2[0] == 0) {
 				if (strrchr(optarg, '/'))
-					strncpy(filename2, strrchr(optarg, '/') + 1, 511);
+					snprintf(filename2, sizeof(filename2), "%s", strrchr(optarg, '/') + 1);
 				else if (strrchr(optarg, '\\'))
-					strncpy(filename2, strrchr(optarg, '\\') + 1, 511);
+					snprintf(filename2, sizeof(filename2), "%s", strrchr(optarg, '\\') + 1);
 				else
-					strcpy(filename2, "default.dat");
+					snprintf(filename2, sizeof(filename2), "default.dat");
 			}
 		} else {
-			strncpy(filename2, argv[optind], 511);
+			snprintf(filename2, sizeof(filename2), "%s", argv[optind]);
 		}
 		f = fopen(filename2, "w");
 		if (!f) {
@@ -334,9 +334,9 @@ int getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		error = gn_sm_functions(GN_OP_GetFileById, data, state);
 		if (error == GN_ERR_NONE) {
 			if (argc == optind) {
-				strncpy(filename2, fi.name, 511);
+				snprintf(filename2, sizeof(filename2), "%s", fi.name);
 			} else {
-				strncpy(filename2, argv[optind], 511);
+				snprintf(filename2, sizeof(filename2), "%s", argv[optind]);
 			}
 			f = fopen(filename2, "w");
 			if (!f) {
@@ -383,8 +383,8 @@ int getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 
 		for (i = 0; i < fi.file_count; i++) {
 			data->file = fi.files[i];
-			strncpy(filename2, fi.files[i]->name, 512);
-			snprintf(fi.files[i]->name, 512, "%s%s", path, filename2);
+			snprintf(filename2, sizeof(filename2), "%s", fi.files[i]->name);
+			snprintf(fi.files[i]->name, sizeof(fi.files[i]->name), "%s%s", path, filename2);
 			if ((error = gn_sm_functions(GN_OP_GetFile, data, state)) != GN_ERR_NONE)
 				fprintf(stderr, _("Failed to get file %s: %s\n"), data->file->name, gn_error_print(error));
 			else {

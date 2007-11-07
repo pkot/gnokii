@@ -106,9 +106,11 @@ int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *stat
 
 	/* The second argument is the destination, ie the phone number of recipient. */
 	memset(&sms.remote.number, 0, sizeof(sms.remote.number));
-	strncpy(sms.remote.number, argv[optind], sizeof(sms.remote.number) - 1);
-	if (sms.remote.number[0] == '+') sms.remote.type = GN_GSM_NUMBER_International;
-	else sms.remote.type = GN_GSM_NUMBER_Unknown;
+	snprintf(sms.remote.number, sizeof(sms.remote.number), "%s", argv[optind]);
+	if (sms.remote.number[0] == '+')
+		sms.remote.type = GN_GSM_NUMBER_International;
+	else
+		sms.remote.type = GN_GSM_NUMBER_Unknown;
 
 	if (loadbitmap(&sms.user_data[0].u.bitmap, argv[optind+1], type, state) != GN_ERR_NONE)
 		return -1;
@@ -123,8 +125,7 @@ int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *stat
 		 * The fourth argument, if present, is the Network code of the operator.
 		 * Network code is in this format: "xxx yy".
 		 */
-		memset(sms.user_data[0].u.bitmap.netcode, 0, sizeof(sms.user_data[0].u.bitmap.netcode));
-		strncpy(sms.user_data[0].u.bitmap.netcode, argv[optind+2], sizeof(sms.user_data[0].u.bitmap.netcode) - 1);
+		snprintf(sms.user_data[0].u.bitmap.netcode, sizeof(sms.user_data[0].u.bitmap.netcode), "%s", argv[optind+2]);
 		dprintf("Operator code: %s\n", argv[optind+2]);
 	}
 
@@ -138,7 +139,7 @@ int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *stat
 	data->message_center = calloc(1, sizeof(gn_sms_message_center));
 	data->message_center->id = 1;
 	if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
-		strcpy(sms.smsc.number, data->message_center->smsc.number);
+		snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", data->message_center->smsc.number);
 		sms.smsc.type = data->message_center->smsc.type;
 	}
 	free(data->message_center);
@@ -240,7 +241,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				fprintf(stderr, _("Operator logo for %s (%s) network got successfully\n"),
 						bitmap.netcode, gn_network_name_get(bitmap.netcode));
 				if (argc == optind + 2) {
-					strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
+					snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", argv[optind + 1]);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
@@ -252,7 +253,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 					goto empty_bitmap;
 				fprintf(stderr, _("Startup logo got successfully\n"));
 				if (argc == optind + 2) {
-					strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
+					snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", argv[optind + 1]);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
@@ -267,7 +268,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				fprintf(stdout, _("Caller group name: %s, ringing tone: %s (%d)\n"),
 					bitmap.text, get_ringtone_name(bitmap.ringtone, data, state), bitmap.ringtone);
 				if (argc == optind + 3) {
-					strncpy(bitmap.netcode, argv[optind + 2], sizeof(bitmap.netcode) - 1);
+					snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", argv[optind + 2]);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 						return -1;
@@ -332,7 +333,8 @@ int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	switch (bitmap.type) {
 	case GN_BMP_WelcomeNoteText:
 	case GN_BMP_DealerNoteText:
-		if (argc > optind) strncpy(bitmap.text, argv[optind], sizeof(bitmap.text) - 1);
+		if (argc > optind)
+			snprintf(bitmap.text, sizeof(bitmap.text), "%s", argv[optind]);
 		break;
 	case GN_BMP_OperatorLogo:
 		error = (argc > optind) ? ReadBitmapFileDialog(argv[optind], &bitmap, phone) : gn_bmp_null(&bitmap, phone);
@@ -347,14 +349,14 @@ int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			gn_bmp_resize(&bitmap, GN_BMP_OperatorLogo, phone);
 
 		if (argc > optind + 1) {
-			strncpy(bitmap.netcode, argv[optind + 1], sizeof(bitmap.netcode) - 1);
+			snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", argv[optind + 1]);
 			if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 				fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
 				return GN_ERR_UNKNOWN;
 			}
 		} else {
 			if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE)
-				strncpy(bitmap.netcode, networkinfo.network_code, sizeof(bitmap.netcode) - 1);
+				snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", networkinfo.network_code);
 		}
 		break;
 	case GN_BMP_StartupLogo:
@@ -377,10 +379,10 @@ int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			if (gn_sm_functions(GN_OP_GetBitmap, data, state) == GN_ERR_NONE) {
 				/* We have to get the old name and ringtone!! */
 				bitmap.ringtone = oldbit.ringtone;
-				strncpy(bitmap.text, oldbit.text, sizeof(bitmap.text) - 1);
+				snprintf(bitmap.text, sizeof(bitmap.text), "%s", oldbit.text);
 			}
 			if (argc > optind + 2)
-				strncpy(bitmap.text, argv[optind + 2], sizeof(bitmap.text) - 1);
+				snprintf(bitmap.text, sizeof(bitmap.text), "%s", argv[optind + 2]);
 		}
 		break;
 	default:

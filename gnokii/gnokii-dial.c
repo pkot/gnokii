@@ -355,7 +355,7 @@ int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 				divert_usage(stderr, -1);
 			break;
 		case 'n':
-			strncpy(cd.number.number, optarg, sizeof(cd.number.number) - 1);
+			snprintf(cd.number.number, sizeof(cd.number.number), "%s", optarg);
 			if (cd.number.number[0] == '+')
 				cd.number.type = GN_GSM_NUMBER_International;
 			else

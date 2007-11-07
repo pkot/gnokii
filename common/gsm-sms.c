@@ -154,9 +154,9 @@ static char *sms_timestamp_print(u8 *number)
 	/* Ugly hack, but according to the GSM specs, the year is stored
          * as the 2 digit number. */
 	if ((10*(number[0] & 0x0f) + (number[0] >> 4)) < 70)
-		sprintf(buffer, "20");
+		snprintf(buffer, sizeof(buffer), "20");
 	else
-		sprintf(buffer, "19");
+		snprintf(buffer, sizeof(buffer), "19");
 
 	for (i = 0; i < 6; i++) {
 		int c;
@@ -175,7 +175,7 @@ static char *sms_timestamp_print(u8 *number)
 			break;
 		}
 		snprintf(buf2, 4, "%d%d%c", number[i] & 0x0f, number[i] >> 4, c);
-		strcat(buffer, buf2);
+		strncat(buffer, buf2, sizeof(buffer) - strlen(buffer));
 	}
 
 	/* The GSM spec is not clear what is the sign of the timezone when the
@@ -184,12 +184,12 @@ static char *sms_timestamp_print(u8 *number)
 	 * sign disturbs you, change the sign here.
 	 */
 	if (number[6] & 0x08)
-		strcat(buffer, "-");
+		strncat(buffer, "-", sizeof(buffer) - strlen(buffer));
 	else
-		strcat(buffer, "+");
+		strncat(buffer, "+", sizeof(buffer) - strlen(buffer));
 	/* The timezone is given in quarters. The base is GMT. */
-	sprintf(buf, "%02d00", (10 * (number[6] & 0x07) + (number[6] >> 4)) / 4);
-	strcat(buffer, buf);
+	snprintf(buf, sizeof(buf), "%02d00", (10 * (number[6] & 0x07) + (number[6] >> 4)) / 4);
+	strncat(buffer, buf, sizeof(buffer) - strlen(buffer));
 
 	return buffer;
 #undef LOCAL_DATETIME_MAX_LENGTH
@@ -304,7 +304,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 	sms->user_data[0].type = GN_SMS_DATA_Text;
 	sms->user_data[1].type = GN_SMS_DATA_None;
 	if (status < 0x03) {
-		strcpy(sms->user_data[0].u.text, _("Delivered"));
+		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Delivered"));
 		switch (status) {
 		case 0x00:
 			dprintf("SM received by the SME");
@@ -317,7 +317,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			break;
 		}
 	} else if (status & 0x40) {
-		strcpy(sms->user_data[0].u.text, _("Failed"));
+		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Failed"));
 		/* more detailed reason only for debug */
 		if (status & 0x20) {
 			dprintf("Temporary error, SC is not making any more transfer attempts\n");
@@ -384,7 +384,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			}
 		}
 	} else if (status & 0x20) {
-		strcpy(sms->user_data[0].u.text, _("Pending"));
+		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Pending"));
 		/* more detailed reason only for debug */
 		dprintf("Temporary error, SC still trying to transfer SM\n");
 		switch (status) {
@@ -411,7 +411,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			break;
 		}
 	} else {
-		strcpy(sms->user_data[0].u.text, _("Unknown"));
+		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Unknown"));
 
 		/* more detailed reason only for debug */
 		dprintf("Reserved/Specific to SC: %x", status);
@@ -1766,10 +1766,10 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	CONCAT(buf, tmp, size, "X-GSM-Status: %s\n", status2str(sms->status));
 	CONCAT(buf, tmp, size, "X-GSM-Memory: %s\n", gn_memory_type2str(sms->memory_type));
 
-	aux = calloc(5, sizeof(char)); /* assuming location will never have more than 4 digits */
+	aux = calloc(16, sizeof(char)); /* assuming location will never have more than 15 digits */
 	if (!aux)
 		goto error;
-	sprintf(aux, "%d", sms->number);
+	snprintf(aux, 16, "%d", sms->number);
 	CONCAT(buf, tmp, size, "X-GSM-Location: %s\n", aux);
 	free(aux);
 
@@ -1779,7 +1779,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 		aux = calloc(MAX_TEXT_SUMMARY + 1, sizeof(char));
 		if (!aux)
 			goto error;
-		strncpy(aux, sms->user_data[0].u.text, MAX_TEXT_SUMMARY);
+		snprintf(aux, MAX_TEXT_SUMMARY, "%s", sms->user_data[0].u.text);
 		CONCAT(buf, tmp, size, "Subject: %s...\n\n", aux);
 		free(aux);
 	}

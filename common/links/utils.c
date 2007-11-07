@@ -68,11 +68,11 @@ void at_dprintf(char *prefix, char *buf, int len)
 	debug_buf[out++] ='[';
 	while ((in < len) && (out < 1016)) {
 		if (buf[in] == '\n') {
-			sprintf(debug_buf + out,"<lf>");
+			snprintf(debug_buf + out, sizeof(debug_buf) - out, "<lf>");
 			in++;
 			out += 4;
 		} else if (buf[in] == '\r') {
-			sprintf(debug_buf + out,"<cr>");
+			snprintf(debug_buf + out, sizeof(debug_buf) - out, "<cr>");
 			in++;
 			out += 4;
 		} else if (buf[in] < 32) {

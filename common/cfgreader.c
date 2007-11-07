@@ -268,8 +268,7 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 
 		num_lines++;
 		buf = malloc(line_end - line_begin + 1);
-		strncpy(buf, line_begin, line_end - line_begin);
-		buf[line_end - line_begin] = 0;
+		snprintf(buf, line_end - line_begin + 1, "%s", line_begin);
 		split_lines = realloc(split_lines,
 				(num_lines + 1) * sizeof(char*));
 		split_lines[num_lines - 1] = buf;
@@ -506,12 +505,12 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "connect_script")))
-		strcpy(cfg->connect_script, def->connect_script);
+		snprintf(cfg->connect_script, sizeof(cfg->connect_script), "%s", def->connect_script);
 	else
 		snprintf(cfg->connect_script, sizeof(cfg->connect_script), "%s", val);
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "disconnect_script")))
-		strcpy(cfg->disconnect_script, def->disconnect_script);
+		snprintf(cfg->disconnect_script, sizeof(cfg->disconnect_script), "%s", def->disconnect_script);
 	else
 		snprintf(cfg->disconnect_script, sizeof(cfg->disconnect_script), "%s", val);
 
@@ -534,7 +533,7 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 	/* There is no global setting. You need to set irda_string
 	 * in each section if you want it working */
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "irda_string")))
-		strcpy(cfg->irda_string, "");
+		cfg->irda_string[0] = 0;
 	else {
 		snprintf(cfg->irda_string, sizeof(cfg->irda_string), "%s", val);
 		dprintf("Setting irda_string in section %s to %s\n", section, cfg->irda_string);
@@ -665,8 +664,8 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 			fprintf(stderr, _("Couldn't read config.\n"));
 		return GN_ERR_NOCONFIG;
 	}
-	strcpy(gn_config_default.model, "");
-	strcpy(gn_config_default.port_device, "");
+	gn_config_default.model[0] = 0;
+	gn_config_default.port_device[0] = 0;
 	gn_config_default.connection_type = GN_CT_Serial;
 	gn_config_default.init_length = 0;
 	gn_config_default.serial_baudrate = 19200;
@@ -674,9 +673,9 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	gn_config_default.hardware_handshake = false;
 	gn_config_default.require_dcd = false;
 	gn_config_default.smsc_timeout = -1;
-	strcpy(gn_config_default.irda_string, "");
-	strcpy(gn_config_default.connect_script, "");
-	strcpy(gn_config_default.disconnect_script, "");
+	gn_config_default.irda_string[0] = 0;
+	gn_config_default.connect_script[0] = 0;
+	gn_config_default.disconnect_script[0] = 0;
 	gn_config_default.rfcomm_cn = 1;
 	gn_config_default.sm_retry = 0;
 	gn_config_default.use_locking = 0;

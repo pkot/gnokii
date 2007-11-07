@@ -310,7 +310,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->id          = blockstart[4];
 			char_unicode_decode(subentry->data.number, (blockstart + 10), blockstart[9]);
 			if (!subblock_count)
-				strcpy(data->phonebook_entry->number, subentry->data.number);
+				snprintf(data->phonebook_entry->number, sizeof(data->phonebook_entry->number), "%s", subentry->data.number);
 			dprintf("   Type: %d (%02x)\n", subentry->number_type, subentry->number_type);
 			dprintf("   Number: %s\n", subentry->data.number);
 			subblock_count++;
@@ -400,12 +400,23 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 	}
 	if (data->bitmap && data->bitmap->text[0] == '\0') {
 		switch (data->bitmap->number) {
-		case 0: strcpy(data->bitmap->text, _("Family")); break;
-		case 1: strcpy(data->bitmap->text, _("VIP")); break;
-		case 2: strcpy(data->bitmap->text, _("Friends")); break;
-		case 3: strcpy(data->bitmap->text, _("Colleagues")); break;
-		case 4: strcpy(data->bitmap->text, _("Other")); break;
-		default: break;
+		case 0:
+			snprintf(data->bitmap->text, sizeof(data->bitmap->text), "%s", _("Family"));
+			break;
+		case 1:
+			snprintf(data->bitmap->text, sizeof(data->bitmap->text), "%s", _("VIP"));
+			break;
+		case 2:
+			snprintf(data->bitmap->text, sizeof(data->bitmap->text), "%s", _("Friends"));
+			break;
+		case 3:
+			snprintf(data->bitmap->text, sizeof(data->bitmap->text), "%s", _("Colleagues"));
+			break;
+		case 4:
+			snprintf(data->bitmap->text, sizeof(data->bitmap->text), "%s", _("Other"));
+			break;
+		default:
+			break;
 		}
 	}
 	return GN_ERR_NONE;

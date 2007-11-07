@@ -181,13 +181,13 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	error = gn_sm_functions(GN_OP_Identify, data, state);
 
 	if (!data->model[0])
-		strcpy(data->model,        unknown);
+		snprintf(data->model, sizeof(data->model), "%s", unknown);
 	if (!data->manufacturer[0])
-		strcpy(data->manufacturer, unknown);
+		snprintf(data->manufacturer, sizeof(data->manufacturer), "%s", unknown);
 	if (!data->revision[0])
-		strcpy(data->revision,     unknown);
+		snprintf(data->revision, sizeof(data->revision), "%s", unknown);
 	if (!data->imei[0])
-		strcpy(data->imei,         unknown);
+		snprintf(data->imei, sizeof(data->imei), "%s", unknown);
 
 	return LASTERROR(state, error);
 }
@@ -370,15 +370,15 @@ GNOKII_API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
 	return LASTERROR(state, error);
 }
 
-GNOKII_API gn_error gn_lib_set_pb_name( struct gn_statemachine *state, const char *name )
+GNOKII_API gn_error gn_lib_set_pb_name(struct gn_statemachine *state, const char *name)
 {
-	strncpy(state->u.pb_entry.name, name, sizeof(state->u.pb_entry.name)-1);
+	snprintf(state->u.pb_entry.name, sizeof(state->u.pb_entry.name), "%s", name);
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-GNOKII_API gn_error gn_lib_set_pb_number( struct gn_statemachine *state, const char *number )
+GNOKII_API gn_error gn_lib_set_pb_number(struct gn_statemachine *state, const char *number)
 {
-	strncpy(state->u.pb_entry.number, number, sizeof(state->u.pb_entry.number)-1);
+	snprintf(state->u.pb_entry.number, sizeof(state->u.pb_entry.number), "%s", number);
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
@@ -406,8 +406,8 @@ GNOKII_API gn_error gn_lib_set_pb_date( struct gn_statemachine *state, gn_timest
 	return LASTERROR(state, GN_ERR_NONE);
 }
 
-GNOKII_API gn_error gn_lib_set_pb_subentry( struct gn_statemachine *state, const int index, /* index=-1 appends it */
-        gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type, const char *number )
+GNOKII_API gn_error gn_lib_set_pb_subentry(struct gn_statemachine *state, const int index, /* index=-1 appends it */
+        gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type, const char *number)
 {
 	int i = (index==-1) ? gn_lib_get_pb_num_subentries(state) : index;
 	if (i<0 || i>=GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER)
@@ -418,7 +418,7 @@ GNOKII_API gn_error gn_lib_set_pb_subentry( struct gn_statemachine *state, const
 
 	state->u.pb_entry.subentries[i].entry_type  = entry_type;
 	state->u.pb_entry.subentries[i].number_type = number_type;
-	strncpy(state->u.pb_entry.subentries[i].data.number, number, sizeof(state->u.pb_entry.subentries[i].data.number)-1);
+	snprintf(state->u.pb_entry.subentries[i].data.number, sizeof(state->u.pb_entry.subentries[i].data.number), "%s", number);
 	return LASTERROR(state, GN_ERR_NONE);
 }
 

@@ -97,7 +97,7 @@ GNOKII_API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 		char aux2[10];
 
 		memset(aux2, 0, 10);
-		sprintf(aux2, "%d", entry->caller_group);
+		snprintf(aux2, sizeof(aux2), "%d", entry->caller_group);
 		ldif_entry_write(f, "businessGroup", aux2, 1);
 	}
 
@@ -237,7 +237,7 @@ GNOKII_API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 			case GN_PHONEBOOK_NUMBER_Home:
 			case GN_PHONEBOOK_NUMBER_Mobile:
 				dprintf("setting default number to %s\n", entry->subentries[i].data.number);
-				strncpy(entry->number, entry->subentries[i].data.number, sizeof(entry->number));
+				snprintf(entry->number, sizeof(entry->number), "%s", entry->subentries[i].data.number);
 				break;
 			default:
 				dprintf("unknown type\n");

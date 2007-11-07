@@ -597,6 +597,7 @@ int imelody_sms_encode(unsigned char *imelody, unsigned char *message)
 	message[current++] = 0x0c; 	/* iMelody code */
 	message[current++] = strlen(imelody) + 1;
 	message[current++] = 0;		      /* Position in text this melody is at */
+	/* FIXME: check the overflow */
 	strcpy(message + current, imelody);
 
 	return (current + strlen(imelody));

@@ -373,7 +373,7 @@ gn_error pnok_call_make(gn_data *data, struct gn_statemachine *state)
 	if ((err = pnok_extended_cmds_enable(0x01, data, state)))
 		return err;
 
-	strcpy(req + 4, data->call_info->number);
+	snprintf(req + 4, GN_PHONEBOOK_NUMBER_MAX_LENGTH + 1, "%s", data->call_info->number);
 
 	if (sm_message_send(5 + n, 0x40, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x40, data, state);

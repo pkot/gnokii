@@ -208,12 +208,11 @@ static void reply_simpletext(char *l1, char *l2, char *c, char *t, size_t maxlen
 	if ((strncmp(l1, c, n - 2) == 0) && (t != NULL)) {
 		if (strncmp(l2, c, n) == 0)  {
 			for (i = n; isspace(l2[i]); i++) ;
-			strncpy(t, strip_quotes(l2 + i), maxlength);
+			snprintf(t, maxlength, "%s", strip_quotes(l2 + i));
 		} else {
 			for (i = 0; isspace(l2[i]); i++) ;
-			strncpy(t, l2 + i, maxlength);
+			snprintf(t, maxlength, "%s", l2 + i);
 		}
-		t[maxlength - 1] = '\0';
 	}
 }
 
@@ -547,7 +546,7 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
 	if (mt != drvinst->memorytype) {
 		if (mt >= NR_MEMORIES)
 			return GN_ERR_INVALIDMEMORYTYPE;
-		sprintf(req, "AT+CPBS=\"%s\"\r", memorynames[mt]);
+		snprintf(req, sizeof(req), "AT+CPBS=\"%s\"\r", memorynames[mt]);
 		ret = sm_message_send(13, GN_OP_Init, req, state);
 		if (ret)
 			return GN_ERR_NOTREADY;
@@ -584,7 +583,7 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 		if (mt >= NR_MEMORIES)
 			return GN_ERR_INVALIDMEMORYTYPE;
 		gn_data_clear(&data);
-		sprintf(req, "AT+CPMS=\"%s\"\r", memorynames[mt]);
+		snprintf(req, sizeof(req), "AT+CPMS=\"%s\"\r", memorynames[mt]);
 		ret = sm_message_send(13, GN_OP_Init, req, state);
 		if (ret == GN_ERR_NONE)
 			ret = sm_block_no_retry(GN_OP_Init, &data, state);
@@ -812,7 +811,7 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
-	sprintf(req, "AT+CPBR=%d\r", data->phonebook_entry->location + drvinst->memoryoffset);
+	snprintf(req, sizeof(req), "AT+CPBR=%d\r", data->phonebook_entry->location + drvinst->memoryoffset);
 	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_ReadPhonebook, data, state);
@@ -865,7 +864,7 @@ static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	if (ret)
 		return ret;
 
-	len = sprintf(req, "AT+CPBW=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
+	len = snprintf(req, sizeof(req), "AT+CPBW=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
 
 	if (sm_message_send(len, GN_OP_DeletePhonebook, req, state))
 		return GN_ERR_NOTREADY;
@@ -876,40 +875,48 @@ static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 {
 	char req[64], req2[64];
 
-	if (!data->call_divert) return GN_ERR_UNKNOWN;
+	if (!data->call_divert)
+		return GN_ERR_UNKNOWN;
 
-	sprintf(req, "AT+CCFC=");
+	snprintf(req, sizeof(req), "%s", "AT+CCFC=");
 
 	switch (data->call_divert->type) {
 	case GN_CDV_AllTypes:
-		strcat(req, "4");
+		strncat(req, "4", sizeof(req) - strlen(req));
 		break;
 	case GN_CDV_Busy:
-		strcat(req, "1");
+		strncat(req, "1", sizeof(req) - strlen(req));
 		break;
 	case GN_CDV_NoAnswer:
-		strcat(req, "2");
+		strncat(req, "2", sizeof(req) - strlen(req));
 		break;
 	case GN_CDV_OutOfReach:
-		strcat(req, "3");
+		strncat(req, "3", sizeof(req) - strlen(req));
 		break;
 	default:
 		dprintf("3. %d\n", data->call_divert->type);
 		return GN_ERR_NOTIMPLEMENTED;
 	}
 	if (data->call_divert->operation == GN_CDV_Register) {
-		sprintf(req2, ",%d,\"%s\",%d,,,%d",
-			data->call_divert->operation,
-			data->call_divert->number.number,
-			data->call_divert->number.type,
-			data->call_divert->timeout);
-		strcat(req, req2);
+		snprintf(req2, sizeof(req2), ",%d,\"%s\",%d,,,%d",
+			 data->call_divert->operation,
+			 data->call_divert->number.number,
+			 data->call_divert->number.type,
+			 data->call_divert->timeout);
+		if (strlen(req2) + strlen (req) + 1 > sizeof(req))
+			return GN_ERR_FAILED;
+		strncat(req, req2, strlen(req2));
 	} else {
-		sprintf(req2, ",%d", data->call_divert->operation);
-		strcat(req, req2);
+		snprintf(req2, sizeof(req2), ",%d", data->call_divert->operation);
+		if (strlen(req2) + strlen (req) + 1 > sizeof(req))
+			return GN_ERR_FAILED;
+		strncat(req, req2, strlen(req2));
 	}
 
-	strcat(req, "\r");
+	if (strlen(req) + 2 > sizeof(req))
+		return GN_ERR_FAILED;
+
+	strncat(req, "\r", strlen("\r"));
 
 	dprintf("%s", req);
 	if (sm_message_send(strlen(req), GN_OP_CallDivert, req, state))
@@ -1008,9 +1015,9 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	/* Length in AT mode is the length of the full message minus
 	 * SMSC field length */
 	if(drvinst->no_smsc) {
-		sprintf(req, "AT+%s=%d\r", cmd, length);
+		snprintf(req, sizeof(req), "AT+%s=%d\r", cmd, length);
 	} else {
-		sprintf(req, "AT+%s=%d\r", cmd, length - data->raw_sms->message_center[0] - 1);
+		snprintf(req, sizeof(req), "AT+%s=%d\r", cmd, length - data->raw_sms->message_center[0] - 1);
 	}
 	dprintf("Sending initial sequence\n");
 	if (sm_message_send(strlen(req), GN_OP_AT_Prompt, req, state))
@@ -1201,13 +1208,13 @@ static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state)
 	data->datetime = dt;
 	memset(req, 0, 64);
 	if (drvinst->timezone)
-		sprintf(req, "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d%s\"\r",
-			dt->year % 100, dt->month, dt->day,
-			dt->hour, dt->minute, dt->second, drvinst->timezone);
+		snprintf(req, sizeof(req), "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d%s\"\r",
+			 dt->year % 100, dt->month, dt->day,
+			 dt->hour, dt->minute, dt->second, drvinst->timezone);
 	else
-		sprintf(req, "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d\"\r",
-			dt->year % 100, dt->month, dt->day,
-			dt->hour, dt->minute, dt->second);
+		snprintf(req, sizeof(req), "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d\"\r",
+			 dt->year % 100, dt->month, dt->day,
+			 dt->hour, dt->minute, dt->second);
 
 	if (sm_message_send(strlen(req), GN_OP_SetDateTime, req, state))
 		return GN_ERR_NOTREADY;
@@ -1344,7 +1351,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 			endpos = strchr(++pos, '\"');
 		if (endpos) {
 			*endpos = '\0';
-			strcpy(data->phonebook_entry->number, pos);
+			snprintf(data->phonebook_entry->number, sizeof(data->phonebook_entry->number), "%s", pos);
 		}
 
 		/* store name */
@@ -1379,8 +1386,7 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 		if (pos) {
 			*pos++ = '\0';
 			data->message_center->id = 1;
-			strncpy(data->message_center->smsc.number, buf.line2 + 8, GN_BCD_STRING_MAX_LENGTH);
-			data->message_center->smsc.number[GN_BCD_STRING_MAX_LENGTH - 1] = '\0';
+			snprintf(data->message_center->smsc.number, GN_BCD_STRING_MAX_LENGTH, "%s", buf.line2 + 8);
 			/* Now we look for the number type */
 			data->message_center->smsc.type = 0;
 			aux = strchr(pos, ',');
@@ -1392,13 +1398,13 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 				data->message_center->smsc.type = GN_GSM_NUMBER_Unknown;
 		} else {
 			data->message_center->id = 0;
-			strncpy(data->message_center->name, "SMS Center", GN_SMS_CENTER_NAME_MAX_LENGTH);
+			snprintf(data->message_center->name, GN_SMS_CENTER_NAME_MAX_LENGTH, "SMS Center");
 			data->message_center->smsc.type = GN_GSM_NUMBER_Unknown;
 		}
 		data->message_center->default_name = 1; /* use default name */
 		data->message_center->format = GN_SMS_MF_Text; /* whatever */
 		data->message_center->validity = GN_SMS_VP_Max;
-		strcpy(data->message_center->recipient.number, "") ;
+		data->message_center->recipient.number[0] = 0;
 	}
 	return GN_ERR_NONE;
 }

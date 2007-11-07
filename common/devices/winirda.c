@@ -130,7 +130,7 @@ int irda_open(struct gn_statemachine *state)
 	peer.irdaAddressFamily = AF_IRDA;
 	*(DWORD*)peer.irdaDeviceID = daddr;
 	if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
-		strcpy(peer.irdaServiceName, "IrDA:IrCOMM");
+		snprintf(peer.irdaServiceName, sizeof(peer.irdaServiceName), "IrDA:IrCOMM");
 		if (setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, (char *)&x, sizeof(x)) == SOCKET_ERROR) {
 			perror("setsockopt");
 			dprintf("Failed to set irda socket options.\n");
@@ -138,7 +138,7 @@ int irda_open(struct gn_statemachine *state)
 			return -1;
 		}
 	} else
-		strcpy(peer.irdaServiceName, "Nokia:PhoNet");
+		snprintf(peer.irdaServiceName, sizeof(peer.irdaServiceName), "Nokia:PhoNet");
 	/* Connect to the irda socket */
 	if (connect(fd, (struct sockaddr *)&peer, sizeof(peer))) {	/* Connect to service "Nokia:PhoNet" */
 		perror("connect");

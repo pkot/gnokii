@@ -599,10 +599,14 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 {
 	nk6100_driver_instance *drvinst = DRVINSTANCE(state);
 
-	if (data->manufacturer) pnok_manufacturer_get(data->manufacturer);
-	if (data->model) strcpy(data->model, drvinst->model);
-	if (data->imei) strcpy(data->imei, drvinst->imei);
-	if (data->revision) snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", drvinst->sw_version, drvinst->hw_version);
+	if (data->manufacturer)
+		pnok_manufacturer_get(data->manufacturer);
+	if (data->model)
+		snprintf(data->model, sizeof(data->model), "%s", drvinst->model);
+	if (data->imei)
+		snprintf(data->imei, sizeof(data->imei), "%s", drvinst->imei);
+	if (data->revision)
+		snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", drvinst->sw_version, drvinst->hw_version);
 	data->phone = drvinst->pm;
 
 	return GN_ERR_NONE;
@@ -977,12 +981,23 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			memcpy(bmp->bitmap, pos, bmp->size);
 			if (bmp->text[0] == '\0') {
 				switch (bmp->number) {
-				case 0: strcpy(bmp->text, _("Family")); break;
-				case 1: strcpy(bmp->text, _("VIP")); break;
-				case 2: strcpy(bmp->text, _("Friends")); break;
-				case 3: strcpy(bmp->text, _("Colleagues")); break;
-				case 4: strcpy(bmp->text, _("Other")); break;
-				default: break;
+				case 0:
+					snprintf(bmp->text, sizeof(bmp->text), "%s", _("Family"));
+					break;
+				case 1:
+					snprintf(bmp->text, sizeof(bmp->text), "%s", _("VIP"));
+					break;
+				case 2:
+					snprintf(bmp->text, sizeof(bmp->text), "%s", _("Friends"));
+					break;
+				case 3:
+					snprintf(bmp->text, sizeof(bmp->text), "%s", _("Colleagues"));
+					break;
+				case 4:
+					snprintf(bmp->text, sizeof(bmp->text), "%s", _("Other"));
+					break;
+				default:
+					break;
 				}
 			}
 		}
@@ -1621,12 +1636,13 @@ static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 
 static gn_error GetSMSFolders(gn_data *data, struct gn_statemachine *state)
 {
-	if (!data || !data->sms_folder_list) return GN_ERR_INTERNALERROR;
+	if (!data || !data->sms_folder_list)
+		return GN_ERR_INTERNALERROR;
 
 	memset(data->sms_folder_list, 0, sizeof(gn_sms_folder_list));
 
 	data->sms_folder_list->number = 1;
-	strcpy(data->sms_folder_list->folder[0].name, _("SMS Inbox"));
+	snprintf(data->sms_folder_list->folder[0].name, sizeof(data->sms_folder_list->folder[0].name), "%s", _("SMS Inbox"));
 	data->sms_folder_list->folder_id[0] = GN_MT_SM;
 	data->sms_folder_list->folder[0].folder_id = NK6100_MEMORY_SM;
 
@@ -4001,7 +4017,7 @@ static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
 
 #define ADDRINGTONE(id, str) \
 	rl->ringtone[rl->count].location = (id); \
-	strcpy(rl->ringtone[rl->count].name, (str)); \
+	snprintf(rl->ringtone[rl->count].name, sizeof(rl->ringtone[rl->count].name), "%s", (str)); \
 	rl->ringtone[rl->count].user_defined = 0; \
 	rl->ringtone[rl->count].readable = 0; \
 	rl->ringtone[rl->count].writable = 0; \
@@ -4018,10 +4034,11 @@ static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state)
 		ringtone.location = rl->userdef_location + rl->userdef_count;
 		error = GetRingtone(&d, state);
 		if (error == GN_ERR_NONE) {
-			strncpy(rl->ringtone[rl->count].name, ringtone.name, sizeof(ringtone.name) - 1);
+			snprintf(rl->ringtone[rl->count].name, sizeof(rl->ringtone[rl->count].name), "%s", ringtone.name);
 		} else if (error == GN_ERR_WRONGDATAFORMAT) {
-			strncpy(rl->ringtone[rl->count].name, _("Unknown"), sizeof(ringtone.name) - 1);
-		} else break;
+			snprintf(rl->ringtone[rl->count].name, sizeof(rl->ringtone[rl->count].name), "%s", _("Unknown"));
+		} else
+			break;
 		rl->ringtone[rl->count].location = ringtone.location;
 		rl->ringtone[rl->count].user_defined = 1;
 		rl->ringtone[rl->count].readable = 1;

@@ -174,11 +174,11 @@ gn_error file_rtttl_load(FILE *file, gn_ringtone *ringtone)
 	/* This is for buggy RTTTL ringtones without name. */
 	if (buffer[0] != RTTTL_SEP[0]) {
 		strtok(buffer, RTTTL_SEP);
-		sprintf(ringtone->name, "%s", buffer);
+		snprintf(ringtone->name, sizeof(ringtone->name), "%s", buffer);
 		def = strtok(NULL, RTTTL_SEP);
 		notes = strtok(NULL, RTTTL_SEP);
 	} else {
-		sprintf(ringtone->name, "GNOKII");
+		snprintf(ringtone->name, sizeof(ringtone->name), "GNOKII");
 		def = strtok(buffer, RTTTL_SEP);
 		notes = strtok(NULL, RTTTL_SEP);
 	}
@@ -281,7 +281,7 @@ gn_error file_nokraw_load(FILE *file, gn_ringtone *ringtone)
 	int n;
 	gn_error err;
 
-	strcpy(ringtone->name, "GNOKII");
+	snprintf(ringtone->name, sizeof(ringtone->name), "GNOKII");
 
 	if ((n = fread(buf, 1, sizeof(buf), file)) < 0) return GN_ERR_UNKNOWN;
 
@@ -768,7 +768,7 @@ gn_error file_nol_load(FILE *file, gn_bmp *bitmap, gn_phone *info)
 
 
 	fread(buffer, 1, 20, file);
-	sprintf(bitmap->netcode, "%d %02d", buffer[6] + 256 * buffer[7], buffer[8]);
+	snprintf(bitmap->netcode, sizeof(bitmap->netcode), "%d %02d", buffer[6] + 256 * buffer[7], buffer[8]);
 
 	bitmap->width = buffer[10];
 	bitmap->height = buffer[12];
@@ -1416,7 +1416,7 @@ GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char 
 	memset(entry, 0, sizeof(gn_phonebook_entry));
 
 	length = strlen(line);
-	strcpy(backline, line);
+	snprintf(backline, sizeof(line), "%s", line);
 	entry->empty = true;
 	memory_type_char[2] = 0;
 
@@ -1613,7 +1613,8 @@ endloop:
 		entry->subentries[entry->subentries_count].entry_type   = GN_PHONEBOOK_ENTRY_Number;
 		entry->subentries[entry->subentries_count].number_type  = GN_PHONEBOOK_NUMBER_General;
 		entry->subentries[entry->subentries_count].id = 2;
-		strcpy(entry->subentries[entry->subentries_count].data.number, entry->number);
+		snprintf(entry->subentries[entry->subentries_count].data.number,
+			sizeof(entry->subentries[entry->subentries_count].data.number), "%s", entry->number);
 		entry->subentries_count = 1;
 	}
 	return error;

@@ -928,7 +928,9 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		i = 6;
 		for (j = 0; j < data->sms_folder_list->number; j++) {
 			int len;
-			strcpy(data->sms_folder_list->folder[j].name, "               ");
+			snprintf(data->sms_folder_list->folder[j].name,
+				sizeof(data->sms_folder_list->folder[j].name),
+				"%s", "               ");
 
 			if (message[i] != 0x01)
 				return GN_ERR_UNHANDLEDFRAME;
@@ -1445,10 +1447,10 @@ err:
 		data->message_center->default_name = -1;	/* FIXME */
 
 		if (strlen(data->message_center->recipient.number) == 0) {
-			sprintf(data->message_center->recipient.number, "(none)");
+			snprintf(data->message_center->recipient.number, sizeof(data->message_center->recipient.number), "(none)");
 		}
 		if (strlen(data->message_center->smsc.number) == 0) {
-			sprintf(data->message_center->smsc.number, "(none)");
+			snprintf(data->message_center->smsc.number, sizeof(data->message_center->smsc.number), "(none)");
 		}
 		if (strlen(data->message_center->name) == 0) {
 			data->message_center->name[0] = '\0';

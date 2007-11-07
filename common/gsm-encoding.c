@@ -119,7 +119,7 @@ static const char *get_langinfo_codeset(void)
 #  ifdef WIN32
 		/* As suggested by Ben Bryant, http://codesnipers.com/?q=node/46 */
 		char szCP[10];
-		sprintf(szCP, ".%d", GetACP());
+		snprintf(szCP, sizeof(szCP), ".%d", GetACP());
 		codeset = setlocale(LC_ALL, szCP);
 #  else
 		codeset = locale_charset();
@@ -435,7 +435,7 @@ size_t char_hex_encode(char *dest, size_t dest_len, const char *src, size_t len)
 	int i, n = dest_len / 2 >= len ? len : dest_len / 2;
 
 	for (i = 0; i < n; i++)
-		sprintf(dest + i * 2, "%x", char_def_alphabet_encode(src[i]));
+		snprintf(dest + i * 2, 3, "%02x", char_def_alphabet_encode(src[i]));
 	return len * 2;
 }
 
@@ -508,7 +508,7 @@ size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len
 			return i * 4;
 		i += length;
 		/* XXX: We should probably check wchar_t size. */
-		sprintf(dest + (o_len << 2), "%04x", wc);
+		snprintf(dest + (o_len << 2), 5, "%04x", wc);
 	}
 	return len * 4;
 }
@@ -656,9 +656,10 @@ char *char_bcd_number_get(u8 *number)
 		buffer[length] = 0;
 		break;
 	case GN_GSM_NUMBER_International:
-		sprintf(buffer, "+");
+		snprintf(buffer, sizeof(buffer), "+");
 		i++;
-		if (length == GN_BCD_STRING_MAX_LENGTH) length--; /* avoid overflow */
+		if (length == GN_BCD_STRING_MAX_LENGTH)
+			length--; /* avoid overflow */
 	case GN_GSM_NUMBER_Unknown:
 	case GN_GSM_NUMBER_National:
 	case GN_GSM_NUMBER_Network:
@@ -680,8 +681,7 @@ char *char_bcd_number_get(u8 *number)
 
 void gn_char_set_encoding(const char* encoding)
 {
-	strncpy(application_encoding, encoding, sizeof(application_encoding) - 1);
-	application_encoding[sizeof(application_encoding) - 1] = 0;
+	snprintf(application_encoding, sizeof(application_encoding), "%s", encoding);
 }
 
 /* UTF-8 conversion functions */

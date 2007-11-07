@@ -119,8 +119,7 @@ int sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	}
 
 	/* The second argument is the destination, ie the phone number of recipient. */
-	memset(&sms.remote.number, 0, sizeof(sms.remote.number));
-	strncpy(sms.remote.number, argv[optind], sizeof(sms.remote.number) - 1);
+	snprintf(sms.remote.number, sizeof(sms.remote.number) - 1, "%s", argv[optind]);
 	if (sms.remote.number[0] == '+')
 		sms.remote.type = GN_GSM_NUMBER_International;
 	else
@@ -131,7 +130,7 @@ int sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		data->message_center = calloc(1, sizeof(gn_sms_message_center));
 		data->message_center->id = 1;
 		if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
-			strcpy(sms.smsc.number, data->message_center->smsc.number);
+			snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", data->message_center->smsc.number);
 			sms.smsc.type = data->message_center->smsc.type;
 		}
 		free(data->message_center);

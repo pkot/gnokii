@@ -811,7 +811,7 @@ bool	gn_atem_command_plusc(char **buf)
 	/* AT+CGSN is IMEI */
 	if (strncasecmp(*buf, "GSN", 3) == 0) {
 		buf[0] += 3;
-		strcpy(data.imei, "+CME ERROR: 0");
+		snprintf(data.imei, sizeof(data.imei), "+CME ERROR: 0");
 		if (gn_sm_functions(GN_OP_GetImei, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "%s\r\n", data.imei);
 			gn_atem_string_out(buffer);
@@ -824,7 +824,7 @@ bool	gn_atem_command_plusc(char **buf)
 	/* AT+CGMR is Revision (hardware) */
 	if (strncasecmp(*buf, "GMR", 3) == 0) {
 		buf[0] += 3;
-		strcpy(data.revision, "+CME ERROR: 0");
+		snprintf(data.revision, sizeof(data.revision), "+CME ERROR: 0");
 		if (gn_sm_functions(GN_OP_GetRevision, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "%s\r\n", data.revision);
 			gn_atem_string_out(buffer);
@@ -837,7 +837,7 @@ bool	gn_atem_command_plusc(char **buf)
 	/* AT+CGMM is Model code  */
 	if (strncasecmp(*buf, "GMM", 3) == 0) {
 		buf[0] += 3;
-		strcpy(data.model, "+CME ERROR: 0");
+		snprintf(data.model, sizeof(data.model), "+CME ERROR: 0");
 		if (gn_sm_functions(GN_OP_GetModel, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "%s\r\n", data.model);
 			gn_atem_string_out(buffer);
@@ -1101,7 +1101,7 @@ void	gn_atem_modem_result(int code)
 	char	buffer[16];
 
 	if (!(ModemRegisters[REG_VERBOSE] & BIT_VERBOSE)) {
-		sprintf(buffer, "%d\r\n", code);
+		snprintf(buffer, sizeof(buffer), "%d\r\n", code);
 		gn_atem_string_out(buffer);
 	} else {
 		switch (code) {

@@ -108,7 +108,8 @@ static char *whiteend[] = {
 
 
 static void writecolors(char *buf0, char *col0,
-			char *buf1, char *col1, char *buf2, char *col2)
+			char *buf1, char *col1,
+			char *buf2, char *col2)
 {
 	sprintf(buf0, ".	c #%s", col0);
 	sprintf(buf1, "+	c #%s", col1);

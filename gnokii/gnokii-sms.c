@@ -150,7 +150,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	gn_sms_default_submit(&sms);
 
 	memset(&sms.remote.number, 0, sizeof(sms.remote.number));
-	strncpy(sms.remote.number, optarg, sizeof(sms.remote.number) - 1);
+	snprintf(sms.remote.number, sizeof(sms.remote.number), "%s", optarg);
 	if (sms.remote.number[0] == '+') 
 		sms.remote.type = GN_GSM_NUMBER_International;
 	else 
@@ -159,7 +159,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	while ((i = getopt_long(argc, argv, "l:rv:C:8ia:o:w:", options, NULL)) != -1) {
 		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
-			strncpy(sms.smsc.number, optarg, sizeof(sms.smsc.number) - 1);
+			snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", optarg);
 			if (sms.smsc.number[0] == '+') 
 				sms.smsc.type = GN_GSM_NUMBER_International;
 			else
@@ -174,7 +174,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				sendsms_usage(stderr, -1);
 			}
 			if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
-				strcpy(sms.smsc.number, data->message_center->smsc.number);
+				snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", data->message_center->smsc.number);
 				sms.smsc.type = data->message_center->smsc.type;
 			}
 			free(data->message_center);
@@ -193,7 +193,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		case 'a': /* Animation */ {
 			char buf[10240];
 			char *s = buf, *t;
-			strcpy(buf, optarg);
+			snprintf(buf, sizeof(buf), "%s", optarg);
 			sms.user_data[curpos].type = GN_SMS_DATA_Animation;
 			for (i = 0; i < 4; i++) {
 				t = strchr(s, ';');
@@ -317,7 +317,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		data->message_center = calloc(1, sizeof(gn_sms_message_center));
 		data->message_center->id = 1;
 		if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
-			strcpy(sms.smsc.number, data->message_center->smsc.number);
+			snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", data->message_center->smsc.number);
 			sms.smsc.type = data->message_center->smsc.type;
 		} else {
 			fprintf(stderr, _("Cannot read the SMSC number from your phone. If the sms send will fail, please use --smsc option explicitely giving the number.\n"));
@@ -452,7 +452,7 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				savesms_usage(stderr, -1);
 			}
 			if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
-				strcpy(sms.smsc.number, data->message_center->smsc.number);
+				snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", data->message_center->smsc.number);
 				sms.smsc.type = data->message_center->smsc.type;
 			}
 			free(data->message_center);
@@ -489,7 +489,6 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			sms.type = GN_SMS_MT_Deliver;
 			break;
 		case 't': /* set specific date and time of message delivery */
-			tmp[2] = 0;
 			if (strlen(optarg) != 12) {
 				fprintf(stderr, _("Invalid datetime format: %s (should be YYMMDDHHMISS, all digits)!\n"), optarg);
 				return -1;
@@ -499,17 +498,17 @@ int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 					fprintf(stderr, _("Invalid datetime format: %s (should be YYMMDDHHMISS, all digits)!\n"), optarg);
 					return -1;
 				}
-			strncpy(tmp, optarg, 2);
+			snprintf(tmp, sizeof(tmp), "%s", optarg);
 			sms.smsc_time.year	= atoi(tmp) + 1900;
-			strncpy(tmp, optarg+2, 2);
+			snprintf(tmp, sizeof(tmp), "%s", optarg+2);
 			sms.smsc_time.month	= atoi(tmp);
-			strncpy(tmp, optarg+4, 2);
+			snprintf(tmp, sizeof(tmp), "%s", optarg+4);
 			sms.smsc_time.day	= atoi(tmp);
-			strncpy(tmp, optarg+6, 2);
+			snprintf(tmp, sizeof(tmp), "%s", optarg+6);
 			sms.smsc_time.hour	= atoi(tmp);
-			strncpy(tmp, optarg+8, 2);
+			snprintf(tmp, sizeof(tmp), "%s", optarg+8);
 			sms.smsc_time.minute	= atoi(tmp);
-			strncpy(tmp, optarg+10, 2);
+			snprintf(tmp, sizeof(tmp), "%s", optarg+10);
 			sms.smsc_time.second	= atoi(tmp);
 			if (!gn_timestamp_isvalid(sms.smsc_time)) {
 				fprintf(stderr, _("Invalid datetime: %s.\n"), optarg);
@@ -679,12 +678,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 		case 'f':
 parsefile:
 			if (optarg) {
-				memset(&filename, 0, sizeof(filename));
-				strncpy(filename, optarg, sizeof(filename));
-				if (filename[sizeof(filename) - 1]) {
-					filename[sizeof(filename) - 1] = '\0';
-					fprintf(stderr, _("Filename too long - will be truncated to 63 characters.\n"));
-				}
+				snprintf(filename, sizeof(filename), "%s", optarg);
 				fprintf(stderr, _("Saving into %s\n"), filename);
 			} else
 				getsms_usage(stderr, -1);
@@ -1343,7 +1337,7 @@ static gn_error smsslave(gn_sms *message, struct gn_statemachine *state, void *c
 	if (p[0] == '+') {
 		p++;
 	}
-	strcpy(number, p);
+	snprintf(number, sizeof(number), "%s", p);
 	fprintf(stderr, _("SMS received from number: %s\n"), number);
 
 	/* From Pavel Machek's email to the gnokii-ml (msgid: <20020414212455.GB9528@elf.ucw.cz>):

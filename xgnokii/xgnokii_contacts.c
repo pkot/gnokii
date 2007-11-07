@@ -2798,9 +2798,9 @@ static void ExportVCARD(FILE * f)
 			continue;
 
 		if (pbEntry->entry.memory_type == GN_MT_ME)
-			sprintf(location, "ME%d", i + 1);
+			snprintf(location, sizeof(location), "ME%d", i + 1);
 		else
-			sprintf(location, "SM%d", i - memoryStatus.MaxME + 1);
+			snprintf(location, sizeof(location), "SM%d", i - memoryStatus.MaxME + 1);
 
 		gn_phonebook2vcard(f, &pbEntry->entry, location);
 	}

@@ -77,7 +77,7 @@ static char *sam_scan_entry(at_driver_instance *drvinst, char *buffer, gn_phoneb
 		entry->subentries[ix].number_type = number_type;
 		at_decode(drvinst->charset, entry->subentries[ix].data.number, pos, len);
 		if (entry->number[0] == 0 && type == GN_PHONEBOOK_ENTRY_Number)
-			strncpy(entry->number, entry->subentries[ix].data.number, sizeof(entry->number));
+			snprintf(entry->number, sizeof(entry->number), "%s", entry->subentries[ix].data.number);
 	}
 
 	return endpos + 1;
@@ -171,12 +171,16 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 				return GN_ERR_INTERNALERROR;
 			tmp[0] = 0;
 			if (first_name) {
-				strcat(entry->name, first_name);
+				if (strlen(first_name) + strlen(entry->name) + 1 > sizeof(entry->name))
+					return GN_ERR_FAILED;
+				strncat(entry->name, first_name, strlen(first_name));
 				if (last_name)
-					strcat(entry->name, " ");
+					strncat(entry->name, " ", strlen(" "));
 			}
+			if (strlen(last_name) + strlen(entry->name) + 1 > sizeof(entry->name))
+				return GN_ERR_FAILED;
 			if (last_name)
-				strcat(entry->name, last_name);
+				strncat(entry->name, last_name, strlen (last_name));
 			free(tmp);
 		}
 	}
@@ -194,7 +198,7 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state) {
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
-	sprintf(req, "AT+SPBR=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
+	snprintf(req, sizeof(req), "AT+SPBR=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
 	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_ReadPhonebook, data, state);
@@ -214,7 +218,7 @@ static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	if (ret)
 		return ret;
 
-	len = sprintf(req, "AT+SPBW=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
+	len = snprintf(req, sizeof(req), "AT+SPBW=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
 
 	if (sm_message_send(len, GN_OP_DeletePhonebook, req, state))
 		return GN_ERR_NOTREADY;

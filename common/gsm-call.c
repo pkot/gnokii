@@ -63,8 +63,8 @@ GNOKII_API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_
 		call->call_id = call_info->call_id;
 		call->status = GN_CALL_Ringing;
 		call->type = call_info->type;
-		strcpy(call->remote_number, call_info->number);
-		strcpy(call->remote_name, call_info->name);
+		snprintf(call->remote_number, sizeof(call->remote_number), "%s", call_info->number);
+		snprintf(call->remote_name, sizeof(call->remote_name), "%s", call_info->name);
 		gettimeofday(&call->start_time, NULL);
 		memset(&call->answer_time, 0, sizeof(call->answer_time));
 		call->local_originated = false;
@@ -86,8 +86,8 @@ GNOKII_API void gn_call_notifier(gn_call_status call_status, gn_call_info *call_
 			call->state = state;
 			call->call_id = call_info->call_id;
 			call->type = call_info->type;
-			strcpy(call->remote_number, call_info->number);
-			strcpy(call->remote_name, call_info->name);
+			snprintf(call->remote_number, sizeof(call->remote_number), "%s", call_info->number);
+			snprintf(call->remote_name, sizeof(call->remote_name), "%s", call_info->name);
 			gettimeofday(&call->start_time, NULL);
 			memcpy(&call->answer_time, &call->start_time, sizeof(call->answer_time));
 			call->local_originated = false;
@@ -130,8 +130,8 @@ GNOKII_API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemac
 	call->call_id = data->call_info->call_id;
 	call->status = GN_CALL_Dialing;
 	call->type = data->call_info->type;
-	strcpy(call->remote_number, data->call_info->number);
-	strcpy(call->remote_name, data->call_info->name);
+	snprintf(call->remote_number, sizeof(call->remote_number), "%s", data->call_info->number);
+	snprintf(call->remote_name, sizeof(call->remote_name), "%s", data->call_info->name);
 	gettimeofday(&call->start_time, NULL);
 	memset(&call->answer_time, 0, sizeof(call->answer_time));
 	call->local_originated = true;
@@ -225,8 +225,8 @@ GNOKII_API gn_error gn_call_check_active(struct gn_statemachine *state)
 			call->call_id = active[i].call_id;
 			call->status = active[i].state;
 			call->type = GN_CALL_Voice;
-			strcpy(call->remote_number, active[i].number);
-			strcpy(call->remote_name, active[i].name);
+			snprintf(call->remote_number, sizeof(call->remote_number), "%s", active[i].number);
+			snprintf(call->remote_name, sizeof(call->remote_name), "%s", active[i].name);
 			gettimeofday(&call->start_time, NULL);
 			memset(&call->answer_time, 0, sizeof(call->answer_time));
 			call->local_originated = false;

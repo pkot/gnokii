@@ -1163,17 +1163,22 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 		break;
 
 	case NK7110_SUBSMS_FOLDER_LIST_OK: /* Folder list OK, 0x7B */
-		if (!data->sms_folder_list) return GN_ERR_INTERNALERROR;
+		if (!data->sms_folder_list)
+			return GN_ERR_INTERNALERROR;
 		i = 5;
 		memset(data->sms_folder_list, 0, sizeof(gn_sms_folder_list));
 		dprintf("Message: %d SMS Folders received:\n", message[4]);
 
-		strcpy(data->sms_folder_list->folder[1].name, "               ");
+		snprintf(data->sms_folder_list->folder[1].name,
+			sizeof(data->sms_folder_list->folder[1].name),
+			"%s", "               ");
 		data->sms_folder_list->number = message[4];
 
 		for (j = 0; j < message[4]; j++) {
 			int len;
-			strcpy(data->sms_folder_list->folder[j].name, "               ");
+			snprintf(data->sms_folder_list->folder[j].name,
+				sizeof(data->sms_folder_list->folder[j].name),
+				"%s", "               ");
 			data->sms_folder_list->folder_id[j] = get_gn_memory_type(message[i]);
 			data->sms_folder_list->folder[j].folder_id = data->sms_folder_list->folder_id[j];
 			dprintf("Folder Index: %d", data->sms_folder_list->folder_id[j]);
@@ -1457,7 +1462,7 @@ static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		data->message_center->format = message[6];
 		data->message_center->validity = message[8];  /* due to changes in format */
 
-		sprintf(data->message_center->name, "%s", message + 33);
+		snprintf(data->message_center->name, sizeof(data->message_center->name), "%s", message + 33);
 		data->message_center->default_name = -1;	/* FIXME */
 
 		if (message[9] % 2) message[9]++;
@@ -1473,10 +1478,10 @@ static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int 
 		data->message_center->smsc.type = message[22];
 
 		if (strlen(data->message_center->recipient.number) == 0) {
-			sprintf(data->message_center->recipient.number, "(none)");
+			snprintf(data->message_center->recipient.number, sizeof(data->message_center->recipient.number), "(none)");
 		}
 		if (strlen(data->message_center->smsc.number) == 0) {
-			sprintf(data->message_center->smsc.number, "(none)");
+			snprintf(data->message_center->smsc.number, sizeof(data->message_center->smsc.number), "(none)");
 		}
 		if (strlen(data->message_center->name) == 0) {
 			data->message_center->name[0] = '\0';
@@ -2905,7 +2910,7 @@ static gn_error NK7110_GetRingtoneList(gn_data *data, struct gn_statemachine *st
 
 #define ADDRINGTONE(id, str) \
 	rl->ringtone[rl->count].location = (id); \
-	strcpy(rl->ringtone[rl->count].name, (str)); \
+	snprintf(rl->ringtone[rl->count].name, sizeof(rl->ringtone[rl->count].name), "%s", (str)); \
 	rl->ringtone[rl->count].user_defined = 0; \
 	rl->ringtone[rl->count].readable = 0; \
 	rl->ringtone[rl->count].writable = 0; \
@@ -2959,7 +2964,7 @@ static gn_error NK7110_GetRingtoneList(gn_data *data, struct gn_statemachine *st
 		ringtone.location = rl->userdef_location + i;
 		if (NK7110_GetRingtone(&d, state) == GN_ERR_NONE) {
 			rl->ringtone[rl->count].location = ringtone.location;
-			strcpy(rl->ringtone[rl->count].name, ringtone.name);
+			snprintf(rl->ringtone[rl->count].name, sizeof(rl->ringtone[rl->count].name), "%s", ringtone.name);
 			rl->ringtone[rl->count].user_defined = 1;
 			rl->ringtone[rl->count].readable = 1;
 			rl->ringtone[rl->count].writable = 1;

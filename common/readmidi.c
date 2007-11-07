@@ -258,8 +258,7 @@ static int readmt(struct MF *mf, char *s)
 	while (n++ < 4 && (c = mf->Mf_getc(mf)) != EOF) {
 		if (c != *p++) {
 			char buff[32];
-			(void) strcpy(buff, "expecting ");
-			(void) strcat(buff, s);
+			snprintf(buff, sizeof(buff), "expecting %s", s);
 			mferror(mf, buff);
 		}
 	}
@@ -414,7 +413,7 @@ static void badbyte(struct MF *mf, int c)
 {
 	char buff[32];
 
-	(void) sprintf(buff, "unexpected byte: 0x%02x", c);
+	snprintf(buff, sizeof(buff), "unexpected byte: 0x%02x", c);
 	mferror(mf, buff);
 }
 
@@ -1227,7 +1226,7 @@ gn_error file_midi_load(FILE * file, gn_ringtone * ringtone)
 	struct MF *mf;
 
 	ringtone->location = 0;
-	strcpy(ringtone->name, "GNOKII");
+	snprintf(ringtone->name, sizeof(ringtone->name), "GNOKII");
 	ringtone->tempo = 120;
 	ringtone->notes_count = 0;
 
