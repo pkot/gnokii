@@ -273,7 +273,7 @@ static gn_error Terminate(gn_data *data, struct gn_statemachine *state) {
 }
 
 static gn_error Identify(gn_data *data, struct gn_statemachine *state) {
-	SAFE_STRNCPY(data->model, "pcsc", GN_MODEL_MAX_LENGTH);
+	snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", "pcsc");
 
 	return GN_ERR_NONE;
 }
@@ -474,7 +474,7 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state) {
 		pe->name[i] = '\0';
 	}
 	/* decode and copy the number */
-	SAFE_STRNCPY(pe->number, char_bcd_number_get((u8 *)&IoStruct.pbRecvBuffer[number_start]), GN_PHONEBOOK_NUMBER_MAX_LENGTH);
+	snprintf(pe->number, GN_PHONEBOOK_NUMBER_MAX_LENGTH, "%s", char_bcd_number_get((u8 *)&IoStruct.pbRecvBuffer[number_start]));
 	if (IoStruct.pbRecvBuffer[IoStruct.dwReceived - 3] != 0xff) {
 		/* TODO: handle the extension identifier field for numbers or SSCs longer than 20 digits (do they really exist in the wild?) */
 		dprintf("WARNING: Ignoring extension identifier field\n");
