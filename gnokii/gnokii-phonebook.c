@@ -88,7 +88,7 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 {
 	gn_phonebook_entry entry;
 	gn_memory_status memstat;
-	int i, count, start_entry, end_entry, num_entries = INT_MAX;
+	int i, count, start_entry, end_entry, num_entries = INT_MAX, explicit_end = true;
 	gn_error error = GN_ERR_NONE;
 	char *memory_type_string;
 	char location[32];
@@ -143,10 +143,13 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	}
 
 	if (end_entry == INT_MAX) {
+		explicit_end = false;
 		data->memory_status = &memstat;
 		if ((error = gn_sm_functions(GN_OP_GetMemoryStatus, data, state)) == GN_ERR_NONE) {
 			num_entries = memstat.used;
 			end_entry = memstat.used + memstat.free;
+			/* FIXME warn the user like parse_end_value_option() when end_entry < start_entry */
+			if (end_entry < start_entry) end_entry = start_entry;
 		}
 	}
 
@@ -266,26 +269,19 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		case GN_ERR_EMPTYLOCATION:
 			fprintf(stderr, _("Empty memory location. Skipping.\n"));
 			break;
-		case GN_ERR_INVALIDLOCATION:
-			if (end_entry == INT_MAX) {
-				/* Ensure that we quit the loop */
-				num_entries = 0;
-			} else {
-				/* Only print an error if we got a valid end index */
-				fprintf(stderr, _("Error reading from the location %d in memory %s\n"), count, memory_type_string);
-				fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
-			}
-			break;
-		case GN_ERR_TIMEOUT:
-			/* On timeout just exit the loop */
-			num_entries = 0;
 		default:
+			fprintf(stderr, _("Error reading from the location %d in memory %s\n"), count, memory_type_string);
 			fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
-			break;
+			/* some older phones might return GN_ERR_INVALIDLOCATION for lower numbered locations
+			so make it non fatal when a numeric end location was given */
+			if (!((error == GN_ERR_INVALIDLOCATION) && explicit_end)) {
+				return error;
+			}
 		}
 		count++;
 	}
-	return error;
+	/* ignore non fatal errors that might have occurred above */
+	return GN_ERR_NONE;
 }
 
 /* Displays usage of --getphonebook command */

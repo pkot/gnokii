@@ -33,7 +33,8 @@
  * gnokii updates
     o fix --getphonebook not reading the last entries in two cases
       when some entries before those meant to be read were empty
-                                                    (Daniele Forsi)
+      and make it fail on more errors (empty or invalid locations
+      are still handled like in previous versions)  (Daniele Forsi)
     o replace sprintfs() and strcpys() with snprintfs() (Pawel Kot)
 
 0.6.20
