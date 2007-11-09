@@ -4,18 +4,81 @@
 * Notes *
 
 First of all: Phones supported by this driver so far are:
- * Nokia 3650
- * Nokia 6600
- * Siemens SX1
+ * Nokia 3650 (S60 1st)
+ * Nokia 6600 (S60 2nd)
+ * Siemens SX1 (S60 1st)
 
 untested, but it has to work:
- * Nokia 3660
- * Nokia 7650
- * Sony-Ericsson P800
- * Sony-Ericsson P900
+ * S60 1st
+   o Nokia 3660
+   o Nokia 7650
+   o Nokia N-Gage
+   o Nokia N-Gage QD
+   o Sendo X
+ * S60 2nd
+   o Nokia 3230
+   o Nokia 6260
+   o Nokia 6630
+   o Nokia 6670
+   o Nokia 6680
+   o Nokia 6681
+   o Nokia 6682
+   o Nokia N70
+   o Nokia N72
+   o Nokia N90
+   o Panasonic X700
+   o Panasonic X800
+   o Samsung SGH-D710
+   o Samsung SGH-D720
+   o Samsung SGH-D730
+   o Samsung SGH-Z600
 
-untested, maybe works:
- * Nokia Communicator 9210
+These are Symbian phones that will NOT work with this driver. You can get
+limited functionality for them with gnokii using AT driver:
+ * S60 3rd
+   o Nokia 3250
+   o Nokia 5500
+   o Nokia E50-1
+   o Nokia E50-2
+   o Nokia E60
+   o Nokia E61
+   o Nokia E61i
+   o Nokia E65
+   o Nokia E70
+   o Nokia E90
+   o Nokia N71
+   o Nokia N73
+   o Nokia N73ME
+   o Nokia N76
+   o Nokia N80
+   o Nokia N91
+   o Nokia N92
+   o Nokia N93
+   o Nokia N93i
+   o Nokia N95
+ * S80 1st
+   o Nokia 9110
+   o Nokia 9110i
+   o Nokia 9210
+   o Nokia 9210i
+ * S80 2nd
+   o Nokia 9300
+   o Nokia 9300i
+   o Nokia 9500
+ * UIQ 2nd
+   o Arima U300
+   o Benq P30
+   o Motorola A920
+   o Motorola A925
+   o Motorola A1000
+   o Motorola A1010
+   o SonyEricsson P800
+   o SonyEricsson P900
+   o SonyEricsson P910
+ * UIQ 3rd
+   o SonyEricsson P990i
+   o SonyEricsson M600i
+   o SonyEricsson W950i
 
 Most of the modern phones are based on the Symbian OS. These phones have
 broken the convention and replaced the traditional FBUS protocol framework
