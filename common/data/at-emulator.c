@@ -98,7 +98,7 @@ gn_data data;
 
 static gn_sms sms;
 static gn_call_info callinfo;
-static 	char imei[64], model[64], revision[64], manufacturer[64];
+static char imei[GN_IMEI_MAX_LENGTH], model[GN_MODEL_MAX_LENGTH], revision[GN_REVISION_MAX_LENGTH], manufacturer[GN_MANUFACTURER_MAX_LENGTH];
 
 /* Local variables */
 static int	PtyRDFD;	/* File descriptor for reading and writing to/from */
@@ -161,7 +161,8 @@ bool gn_atem_initialise(int read_fd, int write_fd, struct gn_statemachine *vmsm)
 	gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 
 	/* query model, revision and imei */
-	if (gn_sm_functions(GN_OP_Identify, &data, sm) != GN_ERR_NONE) return false;
+	if (gn_sm_functions(GN_OP_Identify, &data, sm) != GN_ERR_NONE)
+		return false;
 
 	/* We're ready to roll... */
 	gn_atem_initialised = true;
@@ -811,7 +812,7 @@ bool	gn_atem_command_plusc(char **buf)
 	/* AT+CGSN is IMEI */
 	if (strncasecmp(*buf, "GSN", 3) == 0) {
 		buf[0] += 3;
-		snprintf(data.imei, sizeof(data.imei), "+CME ERROR: 0");
+		snprintf(data.imei, GN_IMEI_MAX_LENGTH, "+CME ERROR: 0");
 		if (gn_sm_functions(GN_OP_GetImei, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "%s\r\n", data.imei);
 			gn_atem_string_out(buffer);
@@ -824,7 +825,7 @@ bool	gn_atem_command_plusc(char **buf)
 	/* AT+CGMR is Revision (hardware) */
 	if (strncasecmp(*buf, "GMR", 3) == 0) {
 		buf[0] += 3;
-		snprintf(data.revision, sizeof(data.revision), "+CME ERROR: 0");
+		snprintf(data.revision, GN_REVISION_MAX_LENGTH, "+CME ERROR: 0");
 		if (gn_sm_functions(GN_OP_GetRevision, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "%s\r\n", data.revision);
 			gn_atem_string_out(buffer);
@@ -837,7 +838,7 @@ bool	gn_atem_command_plusc(char **buf)
 	/* AT+CGMM is Model code  */
 	if (strncasecmp(*buf, "GMM", 3) == 0) {
 		buf[0] += 3;
-		snprintf(data.model, sizeof(data.model), "+CME ERROR: 0");
+		snprintf(data.model, GN_MODEL_MAX_LENGTH, "+CME ERROR: 0");
 		if (gn_sm_functions(GN_OP_GetModel, &data, sm) == GN_ERR_NONE) {
 			gsprintf(buffer, MAX_LINE_LENGTH, "%s\r\n", data.model);
 			gn_atem_string_out(buffer);

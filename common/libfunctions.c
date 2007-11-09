@@ -181,13 +181,13 @@ static gn_error gn_lib_get_phone_information( struct gn_statemachine *state )
 	error = gn_sm_functions(GN_OP_Identify, data, state);
 
 	if (!data->model[0])
-		snprintf(data->model, sizeof(data->model), "%s", unknown);
+		snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", unknown);
 	if (!data->manufacturer[0])
-		snprintf(data->manufacturer, sizeof(data->manufacturer), "%s", unknown);
+		snprintf(data->manufacturer, GN_MANUFACTURER_MAX_LENGTH, "%s", unknown);
 	if (!data->revision[0])
-		snprintf(data->revision, sizeof(data->revision), "%s", unknown);
+		snprintf(data->revision, GN_REVISION_MAX_LENGTH, "%s", unknown);
 	if (!data->imei[0])
-		snprintf(data->imei, sizeof(data->imei), "%s", unknown);
+		snprintf(data->imei, GN_IMEI_MAX_LENGTH, "%s", unknown);
 
 	return LASTERROR(state, error);
 }
