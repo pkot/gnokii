@@ -602,9 +602,9 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 	if (data->manufacturer)
 		pnok_manufacturer_get(data->manufacturer);
 	if (data->model)
-		snprintf(data->model, sizeof(data->model), "%s", drvinst->model);
+		snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", drvinst->model);
 	if (data->imei)
-		snprintf(data->imei, sizeof(data->imei), "%s", drvinst->imei);
+		snprintf(data->imei, GN_IMEI_MAX_LENGTH, "%s", drvinst->imei);
 	if (data->revision)
 		snprintf(data->revision, GN_REVISION_MAX_LENGTH, "SW %s, HW %s", drvinst->sw_version, drvinst->hw_version);
 	data->phone = drvinst->pm;
