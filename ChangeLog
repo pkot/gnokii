@@ -36,6 +36,8 @@
       and make it fail on more errors (empty or invalid locations
       are still handled like in previous versions)  (Daniele Forsi)
     o replace sprintfs() and strcpys() with snprintfs() (Pawel Kot)
+ * translation updates
+    o new Portugal translation                        (Pedro Silva)
 
 0.6.20
 ======
