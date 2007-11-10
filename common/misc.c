@@ -134,6 +134,7 @@ static gn_phone_model models[] = {
 	{"3108",  "RH-6",	PM_OLD_DEFAULT },
 	{"3110",  "NHE-8",	PM_OLD_DEFAULT | PM_DATA },
 	{"3110",  "0310" ,	PM_OLD_DEFAULT | PM_DATA }, /* NHE-8 */
+	{"3110c", "RM-237",     PM_DEFAULT }, /* Nokia 3110 classic */
 	{"3120",  "RH-19",	PM_DEFAULT },
 	{"3120b", "RH-50",	PM_DEFAULT },
 	{"3200",  "RH-30",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
