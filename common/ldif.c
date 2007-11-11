@@ -165,14 +165,18 @@ GNOKII_API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 #define STORE(a, b) STORE2(a, b, (void) 0)
 #define STORE_BASE64(a, b) STORE2_BASE64(a, b, (void) 0)
 
-#define STORESUB(a, c) STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
+#define STORESUB(a, c) if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
+				STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
 				entry->subentries[entry->subentries_count].entry_type = c);
-#define STORESUB_BASE64(a, c) STORE2_BASE64(a, entry->subentries[entry->subentries_count++].data.number, \
+#define STORESUB_BASE64(a, c) if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
+				STORE2_BASE64(a, entry->subentries[entry->subentries_count++].data.number, \
 				entry->subentries[entry->subentries_count].entry_type = c);
-#define STORENUM(a, c) STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
+#define STORENUM(a, c) if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
+				STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
 					entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
 					entry->subentries[entry->subentries_count].number_type = c);
-#define STORENUM_BASE64(a, c) STORE2_BASE64(a, entry->subentries[entry->subentries_count++].data.number, \
+#define STORENUM_BASE64(a, c) if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
+				STORE2_BASE64(a, entry->subentries[entry->subentries_count++].data.number, \
 					entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
 					entry->subentries[entry->subentries_count].number_type = c);
 #undef ERROR

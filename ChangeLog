@@ -29,6 +29,8 @@
     o add ids for Nokia 3110 classic            (Jens Wilhelm Wulf)
     o replace sprintfs() and strcpys() with snprintfs   (Pawel Kot,
                                                     Bastien Nocera)
+    o return an error when trying to read from file more phonebook
+      subentries than the space allocated           (Daniele Forsi)
  * gnapplet driver updates
     o add support for setactiveprofile             (BORBELY Zoltan)
  * gnokii updates
