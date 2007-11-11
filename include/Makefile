@@ -29,7 +29,7 @@ INSTALL_HEADERS = gnokii.h \
 all:
 	@echo
 
-install:
+install-devel:
 	$(INSTALL) -d $(DESTDIR)$(includedir)/gnokii
 	@for xxx in $(INSTALL_HEADERS); do \
 	    if [ -e $$xxx ]; then \

@@ -1,5 +1,7 @@
 0.6.22 (not released yet)
 =========================
+ * build system updates
+    o make install and install-devel work correctly     (Pawel Kot)
 
 0.6.21
 ======

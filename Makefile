@@ -139,7 +139,7 @@ install-binaries: compile
 install-includes:
 	@for dir in $(INSTALL_INCLUDES); do \
 		if [ -e $$dir/Makefile ]; then \
-			$(MAKE) -C $$dir install; \
+			$(MAKE) -C $$dir install-devel; \
 		fi; \
 	done
 
@@ -159,6 +159,6 @@ install-docs-devel:
 
 install: compile install-binaries install-docs
 
-install-devel: compile install-binaries install-includes install-docs install-docs-devel
+install-devel: compile install-includes install-docs-devel
 
 .PHONY: all compile install clean distclean dep depend install-binaries install-docs install-docs-devel $(DIRS)
