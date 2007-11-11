@@ -94,6 +94,23 @@ static int str2ba(const char *str, bdaddr_t *ba)
 
 #endif
 
+/* From: http://www.kegel.com/dkftpbench/nonblocking.html */
+static int setNonblocking(int fd)
+{
+	int retcode, flags;
+
+#if defined(O_NONBLOCK)
+	if ((flags = fcntl(fd, F_GETFL, 0)) == -1)
+		flags = 0;
+	retcode = fcntl(fd, F_SETFL, flags | O_NONBLOCK);
+#else
+	flags = 1;
+	retcode = ioctl(fd, FIOASYNC, &flags);
+#endif
+
+	return retcode;
+}
+
 int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state)
 {
 	bdaddr_t bdaddr;
@@ -119,6 +136,11 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 		close(fd);
 		return -1;
 	}
+
+	/* Ignore errors. If the socket was not set in the async way,
+	 * we can live with that.
+	 */
+	setNonblocking(fd);
 
 	return fd;
 }

@@ -43,6 +43,8 @@
     o replace sprintfs() and strcpys() with snprintfs() (Pawel Kot)
  * translation updates
     o new Portugal translation                        (Pedro Silva)
+ * device layer updates
+    o make BlueZ connection non blocking on read()      (Pawel Kot)
 
 0.6.20
 ======
