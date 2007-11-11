@@ -104,6 +104,9 @@ distclean:
 install:
 	$(INSTALL) -d $(DESTDIR)$(libdir)
 	$(LIBTOOL) --mode=install $(INSTALL) libgnokii.la $(DESTDIR)$(libdir)
+	@echo
+
+install-includes:
 	$(INSTALL) -d $(DESTDIR)$(libdir)/pkgconfig
 	$(INSTALL_DATA) gnokii.pc $(DESTDIR)$(libdir)/pkgconfig
 	@echo

@@ -34,7 +34,8 @@ INSTALL_DIRS =	$(BIN_DIRS) \
 INSTALL_SIMPLE = $(INTL_DIR) \
 		 $(POSUB)
 
-INSTALL_INCLUDES = include
+INSTALL_INCLUDES = include \
+		   common
 
 DOCS_DIR = 	Docs
 

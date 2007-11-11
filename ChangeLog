@@ -22,6 +22,8 @@
  * build system updates
     o change location of gnapplet.sis                   (Pawel Kot)
     o configure.in and makefiles simplification     (Daniele Forsi)
+    o install gnokii.pc with install-devel and not install target
+                                                        (Pawel Kot)
  * libgnokii updates
     o new error code GN_ERR_ASYNC                       (Pawel Kot)
     o add support for async way of send_sms()           (Pawel Kot)
