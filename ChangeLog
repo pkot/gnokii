@@ -11,6 +11,7 @@
     o replace sprintfs() with snprintfs()               (Pawel Kot)
  * link layer updates
     o improve DKU-5 initialization stage                (Pawel Kot)
+    o be careful with return value from read()          (Pawel Kot)
  * at driver updates
     o return an error from at_memory_type_set() when a phonebook
       memory type supported by libgnokii isn't supported by the

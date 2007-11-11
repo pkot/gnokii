@@ -78,7 +78,8 @@ static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 	else
 		type = GN_CT_Serial;
 
-	if (dlr3) dlr3 = 1;
+	if (dlr3)
+		dlr3 = 1;
 	/* Open device. */
 	if (!device_open(state->config.port_device, false, false, false, type, state)) {
 		perror(_("Couldn't open FBUS device"));
@@ -116,7 +117,8 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
 		/* The whole answer is read */
 		if (strstr(buffer, "OK"))
 			waitformore = 0;
-		offset += res;
+		if (res > 0)
+			offset += res;
 		res = offset;
 		/* The phone is already in AT mode */
 		if (strchr(buffer, 0x55))
@@ -375,9 +377,7 @@ static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 					frm_num = i->message_buffer[i->frame_length - 2];
 					seq_num = i->message_buffer[i->frame_length - 1];
 
-
 					/* 0x40 in the sequence number indicates first frame of a message */
-
 					if ((seq_num & 0x40) == 0x40) {
 						/* Fiddle around and malloc some memory */
 						m->message_length = 0;
@@ -632,7 +632,7 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 	request[0] = message_type;
 	request[1] = message_seq;
 
-	dprintf("[Sending Ack of type %02x, seq: %x]\n",message_type, message_seq);
+	dprintf("[Sending Ack of type %02x, seq: %x]\n", message_type, message_seq);
 
 	return fbus_tx_send_frame(2, 0x7f, request, state);
 }

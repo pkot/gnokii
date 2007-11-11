@@ -95,7 +95,8 @@ static bool phonet_open(struct gn_statemachine *state)
 		device_write(&init_sequence, 7, state);
 		while (total < 7) {
 			n = device_read(&init_resp + total, 7 - total, state);
-			total += n;
+			if (n > 0)
+				total += n;
 		}
 		for (i = 0; i < n; i++) {
 			if (init_resp[i] != init_pattern[i]) {
