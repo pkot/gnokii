@@ -1,15 +1,14 @@
-# SOME DESCRIPTIVE TITLE.
-# Copyright (C) YEAR 1999-2006 Hugh Blemings, Pavel Janik, Pawel Kot
-# This file is distributed under the same license as the PACKAGE package.
+# This is the Portuguese locale definition for Gnokii.
+# Copyright (C) 1999-2007 Hugh Blemings, Pavel Janik, Pawel Kot
+# This file is distributed under the same license as the gnokii package.
 # Pedro Silva <pedros@avelas-lab.com>, 2007.
 #
-#, fuzzy
 msgid ""
 msgstr ""
 "Project-Id-Version: gnokii 0.6.20\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
 "POT-Creation-Date: 2007-10-25 12:02+0100\n"
-"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"PO-Revision-Date: 2007-11-11 18:40+0100\n"
 "Last-Translator: Pedro Silva <pedros@avelas-lab.com>\n"
 "Language-Team: Portuguese <pedros@avelas-lab.com>\n"
 "MIME-Version: 1.0\n"
@@ -218,7 +217,7 @@ msgstr "ERRO: Modem DCD está desligado e o parametro global/require_dcd está a
 #: common/devices/winbluetooth.c:70 common/devices/winirda.c:113
 #, c-format
 msgid "Failed to initialize socket subsystem: need WINSOCK2. Please upgrade.\n"
-msgstr "Falha ao inicializar subsistema socket: preciso do WINSOCK2. Por fazer faça um upgrade."
+msgstr "Falha ao inicializar subsistema socket: preciso do WINSOCK2. Por fazer faça um upgrade.\n"
 
 #: common/gsm-common.c:88
 msgid "Internal memory"
@@ -1098,7 +1097,7 @@ msgstr ""
 #: gnokii/gnokii-calendar.c:121
 #, c-format
 msgid "%d (%d). Type: "
-msgstr ""%d (%d). Tipo: ""
+msgstr "%d (%d). Tipo: "
 
 #: gnokii/gnokii-calendar.c:125 xgnokii/xgnokii_calendar.c:162
 #, c-format
@@ -1197,7 +1196,7 @@ msgid "   Repeat: every year\n"
 msgstr "   Repetir: todos os anos\n"
 
 #: gnokii/gnokii-calendar.c:203
-#, c-format
+#, fuzzy, c-format
 msgid "   Repeat: %d hours\n"
 msgstr "   Repetir: de %d em %d horas\n"
 
@@ -1704,7 +1703,7 @@ msgstr ""
 #: gnokii/gnokii-logo.c:227 gnokii/gnokii-logo.c:234
 #, c-format
 msgid "currently empty\n"
-msgstr "De momento vazio."
+msgstr "De momento vazio\n"
 
 #: gnokii/gnokii-logo.c:230
 #, c-format
@@ -5888,3 +5887,4 @@ msgstr ""
 #: xgnokii/xgnokii_xring.c:927
 msgid "Set tempo"
 msgstr ""
+
