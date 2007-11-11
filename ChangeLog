@@ -1,5 +1,5 @@
-0.6.21 (not released yet)
-=========================
+0.6.21
+======
  * xgnokii updates
     o update xgnokii desktop file                       (Pawel Kot)
     o reading contacts from phone would miss the last entries if
