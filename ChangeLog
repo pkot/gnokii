@@ -2,6 +2,7 @@
 =========================
  * build system updates
     o make install and install-devel work correctly     (Pawel Kot)
+    o xgnokii.pc should be installed with install-devel (Pawel Kot)
 
 0.6.21
 ======
