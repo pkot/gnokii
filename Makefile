@@ -142,6 +142,15 @@ install-includes:
 			$(MAKE) -C $$dir install-devel; \
 		fi; \
 	done
+	@if [ "$(GTK_LIBS)" ]; then \
+		for dir in $(GTK_DIRS); do \
+		    if [ -e $$dir/Makefile ]; then \
+			$(MAKE) -C $$dir install-devel; \
+		    fi; \
+		done \
+	fi
+	@echo "done"
+
 
 install-docs:
 	$(INSTALL) -d $(DESTDIR)$(docdir)
