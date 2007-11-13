@@ -99,7 +99,8 @@ PCSC_IOSTRUCT IoStruct = { buf, sizeof(buf), 0, 0 };
 #ifdef DEBUG
 #define DUMP_BUFFER(ret, str, buf, len) pcsc_dump_buffer(ret, __FUNCTION__, str, buf, len)
 
-void pcsc_dump_buffer(LONG ret, char *func, char *str, BYTE *buf, LONG len) {
+void pcsc_dump_buffer(LONG ret, char *func, char *str, BYTE *buf, LONG len)
+{
 	if (ret != SCARD_S_SUCCESS) {
 		dump("%s: %s (0x%lX)\n", func, pcsc_stringify_error(ret), ret);
 	} else {
@@ -117,7 +118,8 @@ void pcsc_dump_buffer(LONG ret, char *func, char *str, BYTE *buf, LONG len) {
 
 /* helper functions */
 
-static gn_error ios2gn_error(PCSC_IOSTRUCT *ios) {
+static gn_error ios2gn_error(PCSC_IOSTRUCT *ios)
+{
 /* Convert a card status condition code into a libgnokii error code */
 	if (!ios || ios->dwReceived < 2) return GN_ERR_NONE;
 	/* check for a "soft" error */
@@ -150,7 +152,8 @@ static gn_error ios2gn_error(PCSC_IOSTRUCT *ios) {
 	}
 }
 
-static gn_error get_gn_error(PCSC_IOSTRUCT *ios, LONG ret) {
+static gn_error get_gn_error(PCSC_IOSTRUCT *ios, LONG ret)
+{
 /* Convert a libpcsclite error code into a libgnokii error code */
 	switch (ret) {
 	case SCARD_S_SUCCESS:
@@ -183,7 +186,8 @@ static gn_error get_gn_error(PCSC_IOSTRUCT *ios, LONG ret) {
 	}
 }
 
-static LONG get_memory_type(gn_memory_type memory_type) {
+static LONG get_memory_type(gn_memory_type memory_type)
+{
 /* Convert a libgnokii memory_type into a GSM file ID */
 	switch (memory_type) {
 	case GN_MT_SM:
@@ -207,7 +211,8 @@ static LONG get_memory_type(gn_memory_type memory_type) {
 
 /* functions for libgnokii stuff */
 
-static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state) {
+static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
+{
 	switch (op) {
 	case GN_OP_Init:
 		return Initialise(state);
@@ -228,7 +233,8 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 }
 
 /* Initialise is the only function allowed to 'use' state */
-static gn_error Initialise(struct gn_statemachine *state) {
+static gn_error Initialise(struct gn_statemachine *state)
+{
 	LONG ret;
 	LONG reader_number;
 	char *aux = NULL;
@@ -258,7 +264,8 @@ static gn_error Initialise(struct gn_statemachine *state) {
 	return get_gn_error(NULL, ret);
 }
 
-static gn_error Terminate(gn_data *data, struct gn_statemachine *state) {
+static gn_error Terminate(gn_data *data, struct gn_statemachine *state)
+{
 	LONG ret;
 
 	/* we're going to terminate even if this call returns error */
@@ -272,13 +279,15 @@ static gn_error Terminate(gn_data *data, struct gn_statemachine *state) {
 	return get_gn_error(NULL, ret);
 }
 
-static gn_error Identify(gn_data *data, struct gn_statemachine *state) {
+static gn_error Identify(gn_data *data, struct gn_statemachine *state)
+{
 	snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", "pcsc");
 
 	return GN_ERR_NONE;
 }
 
-static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state) {
+static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
+{
 	LONG file;
 	LONG ret;
 
@@ -303,7 +312,8 @@ static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state) {
 	return get_gn_error(&IoStruct, ret);
 }
 
-static gn_error GetFile(gn_data *data, struct gn_statemachine *state) {
+static gn_error GetFile(gn_data *data, struct gn_statemachine *state)
+{
 	LONG file_id;
 	LONG ret;
 	gn_file *file = NULL;
@@ -351,7 +361,8 @@ static gn_error GetFile(gn_data *data, struct gn_statemachine *state) {
 	return error;
 }
 
-static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state) {
+static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state)
+{
 	LONG file;
 	LONG ret;
 	BYTE *buf, *temp;
@@ -488,7 +499,8 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state) {
 
 /* functions for libpcsc stuff */
 
-static LONG pcsc_cmd_get_response(PCSC_IOSTRUCT *ios, BYTE length) {
+static LONG pcsc_cmd_get_response(PCSC_IOSTRUCT *ios, BYTE length)
+{
 /* fetch the data that the card has prepared */
 	LONG ret = SCARD_S_SUCCESS;
 	BYTE pbSendBuffer[] = { GN_PCSC_CMD_GET_RESPONSE, 0x00, 0x00, 0x00 };
@@ -501,7 +513,8 @@ static LONG pcsc_cmd_get_response(PCSC_IOSTRUCT *ios, BYTE length) {
 	return ret;
 }
 
-static LONG pcsc_cmd_select(PCSC_IOSTRUCT *ios, LONG file_id) {
+static LONG pcsc_cmd_select(PCSC_IOSTRUCT *ios, LONG file_id)
+{
 /* this is similar to open() or chdir(), depending on the file id */
 	LONG ret = SCARD_S_SUCCESS;
 	BYTE pbSendBuffer[] = { GN_PCSC_CMD_SELECT, 0x00, 0x00, 0x02, 0x00, 0x00 };
@@ -518,14 +531,16 @@ static LONG pcsc_cmd_select(PCSC_IOSTRUCT *ios, LONG file_id) {
 	return ret;
 }
 
-static LONG pcsc_change_dir(PCSC_IOSTRUCT *ios, LONG directory_id) {
+static LONG pcsc_change_dir(PCSC_IOSTRUCT *ios, LONG directory_id)
+{
 /* select the specified directory */
 
 	/* checking if it is really a "Directory File" would require getting the response to check the type of file e.g. using pcsc_stat_file() */
 	return pcsc_cmd_select(ios, directory_id);
 }
 
-static LONG pcsc_stat_file(PCSC_IOSTRUCT *ios, LONG file_id) {
+static LONG pcsc_stat_file(PCSC_IOSTRUCT *ios, LONG file_id)
+{
 /* fill the buffer with file information */
 	LONG ret;
 
@@ -541,7 +556,8 @@ static LONG pcsc_stat_file(PCSC_IOSTRUCT *ios, LONG file_id) {
 	return pcsc_cmd_get_response(ios, ios->pbRecvBuffer[1]);
 }
 
-static LONG pcsc_cmd_read_binary(PCSC_IOSTRUCT *ios, LONG length) {
+static LONG pcsc_cmd_read_binary(PCSC_IOSTRUCT *ios, LONG length)
+{
 /* copy a smart card "transparent file" contents to the provided buffer */
 	LONG ret = SCARD_S_SUCCESS;
 	BYTE pbSendBuffer[] = { GN_PCSC_CMD_READ_BINARY, 0x00, 0x00, 0x00 };
@@ -561,7 +577,8 @@ static LONG pcsc_cmd_read_binary(PCSC_IOSTRUCT *ios, LONG length) {
 	return ret;
 }
 
-static LONG pcsc_cmd_read_record(PCSC_IOSTRUCT *ios, BYTE record, BYTE length) {
+static LONG pcsc_cmd_read_record(PCSC_IOSTRUCT *ios, BYTE record, BYTE length)
+{
 /* copy a smart card "linear fixed file" contents to the provided buffer */
 	LONG ret = SCARD_S_SUCCESS;
 	BYTE pbSendBuffer[] = { GN_PCSC_CMD_READ_RECORD, 0x00, GN_PCSC_FILE_READ_ABS, 0x00 };
@@ -576,7 +593,8 @@ static LONG pcsc_cmd_read_record(PCSC_IOSTRUCT *ios, BYTE record, BYTE length) {
 	return ret;
 }
 
-static LONG pcsc_file_get_contents(PCSC_IOSTRUCT *ios, LONG file_id) {
+static LONG pcsc_file_get_contents(PCSC_IOSTRUCT *ios, LONG file_id)
+{
 /* copy file contents in a newly allocated buffer which must be freed by the caller */
 	LONG ret;
 	BYTE bRecordLength, bRecordCount, *pbFileBuffer, bFileStructure;
@@ -646,7 +664,8 @@ static LONG pcsc_file_get_contents(PCSC_IOSTRUCT *ios, LONG file_id) {
 	return ret;
 }
 
-static LONG pcsc_read_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE record) {
+static LONG pcsc_read_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE record)
+{
 /* copy contents of a record from a file to the provided buffer */
 	LONG ret;
 
@@ -677,12 +696,14 @@ static LONG pcsc_read_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE record)
 	return ret;
 }
 
-static LONG pcsc_close_reader() {
+static LONG pcsc_close_reader()
+{
 /* disconnect from reader */
 	return SCardDisconnect(hCard, SCARD_UNPOWER_CARD);
 }
 
-static LONG pcsc_open_reader_number(LONG number) {
+static LONG pcsc_open_reader_number(LONG number)
+{
 /* connect to a reader by number, 0 is the first reader (as configured in /etc/reader.conf) */
 	LONG ret;
 	LONG len;
@@ -719,7 +740,8 @@ static LONG pcsc_open_reader_number(LONG number) {
 	return ret;
 }
 
-static LONG pcsc_open_reader_name(LPCSTR reader_name) {
+static LONG pcsc_open_reader_name(LPCSTR reader_name)
+{
 /* connect to a reader by name, case sensitive (as configured in /etc/reader.conf) */
 	LONG ret;
 
