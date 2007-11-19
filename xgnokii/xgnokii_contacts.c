@@ -2349,11 +2349,11 @@ static void SaveContacts(void)
 		/* Save Phone memory */
 		for (i = 0; i < memoryStatus.MaxME; i++) {
 			pbEntry = g_ptr_array_index(contactsMemory, i);
-			gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
-				pbEntry->entry.number, (int) pbEntry->entry.memory_type,
-				pbEntry->entry.caller_group, (int) pbEntry->status);
-
 			if (pbEntry->status == E_Changed || pbEntry->status == E_Deleted) {
+				gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
+					pbEntry->entry.number, (int) pbEntry->entry.memory_type,
+					pbEntry->entry.caller_group, (int) pbEntry->status);
+
 				pbEntry->entry.location = i + 1;
 				error = SaveContactsInsertEvent(pbEntry);
 				if (error != GN_ERR_NONE) {
@@ -2369,12 +2369,11 @@ static void SaveContacts(void)
 		/* Save SIM memory */
 		for (i = memoryStatus.MaxME; i < memoryStatus.MaxME + memoryStatus.MaxSM; i++) {
 			pbEntry = g_ptr_array_index(contactsMemory, i);
-
-			gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
-				pbEntry->entry.number, (int) pbEntry->entry.memory_type,
-				pbEntry->entry.caller_group, (int) pbEntry->status);
-
 			if (pbEntry->status == E_Changed || pbEntry->status == E_Deleted) {
+				gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
+					pbEntry->entry.number, (int) pbEntry->entry.memory_type,
+					pbEntry->entry.caller_group, (int) pbEntry->status);
+
 				pbEntry->entry.location = i - memoryStatus.MaxME + 1;
 				error = SaveContactsInsertEvent(pbEntry);
 				if (error != GN_ERR_NONE) {
@@ -2482,10 +2481,11 @@ void GUI_RefreshContacts(void)
 						     memoryPixmaps.simMemPix, memoryPixmaps.mask);
 
 			gtk_clist_set_row_data(GTK_CLIST(clist), row_i++, (gpointer) pbEntry);
+
+			gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
+				pbEntry->entry.number, (int) pbEntry->entry.memory_type,
+				pbEntry->entry.caller_group, (int) pbEntry->status);
 		}
-		gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
-			pbEntry->entry.number, (int) pbEntry->entry.memory_type,
-			pbEntry->entry.caller_group, (int) pbEntry->status);
 	}
 
 	gtk_clist_sort(GTK_CLIST(clist));
