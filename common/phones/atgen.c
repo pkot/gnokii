@@ -2433,6 +2433,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->mememorysize = -1;
 	drvinst->smmemorysize = -1;
 	drvinst->timezone = NULL;
+	/* FIXME: detect if from AT+CNMI=? */
 	drvinst->cnmi_mode = 3;
 
 	drvinst->if_pos = 0;
