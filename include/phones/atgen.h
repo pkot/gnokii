@@ -88,6 +88,16 @@ typedef struct {
 	int smmemorysize;
 	int mememorysize;
 
+	/* CNMI -- sms notifications */
+	/* 1: discard indication and reject new SMs when TE-TA link is
+	 *    reserved; otherwise forward directly;
+	 * 2: buffer new Sms when TE-TA link is reserved and flush them to TE
+	 *    after reservation; otherwise forward directly to the TE;
+	 * 3: forward directly to TE;
+	 */
+	/* Default should be 3. Specific drivers can overwrite. */
+	int cnmi_mode;
+
 	/* For call notifications via AT+CLIP */
 	int clip_supported;
 	gn_call_type last_call_type;

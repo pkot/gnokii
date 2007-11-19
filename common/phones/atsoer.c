@@ -265,6 +265,9 @@ static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 
 void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
+	/* Sony Ericssons support just mode 2 */
+	AT_DRVINST(state)->cnmi_mode = 2;
+
 	at_insert_send_function(GN_OP_ReadPhonebook, AT_ReadPhonebook, state);
 	at_insert_recv_function(GN_OP_ReadPhonebook, ReplyReadPhonebook, state);
 	at_insert_send_function(GN_OP_WritePhonebook, AT_WritePhonebook, state);

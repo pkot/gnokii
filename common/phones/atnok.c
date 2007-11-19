@@ -153,5 +153,8 @@ void at_nokia_init(char* foundmodel, char* setupmodel, struct gn_statemachine *s
 	if (!strncasecmp("0301", foundmodel, 4))
 		AT_DRVINST(state)->no_smsc = 1;
 
+	/* Nokias support just mode 1 */
+	AT_DRVINST(state)->cnmi_mode = 1;
+
 	at_insert_recv_function(GN_OP_AT_IncomingSMS, ReplyIncomingSMS, state);
 }

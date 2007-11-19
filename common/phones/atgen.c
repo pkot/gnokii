@@ -1283,17 +1283,19 @@ static gn_error AT_GetActiveCalls(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_OnSMS(gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_error error;
-	int i = 2;
+	int mode;
 	char req[13];
 
+	mode = drvinst->cnmi_mode;
 	do {
-		snprintf(req, 13, "AT+CNMI=%d,1\r", i);
-		if (sm_message_send(12, GN_OP_OnSMS, req, state))
+		snprintf(req, sizeof(req), "AT+CNMI=%d,1\r", mode);
+		if (sm_message_send(strlen(req), GN_OP_OnSMS, req, state))
 			return GN_ERR_NOTREADY;
 
 		error = sm_block_no_retry(GN_OP_OnSMS, data, state);
-	} while (i-- && error);
+	} while (mode-- && error);
 	if (error == GN_ERR_NONE) {
 		AT_DRVINST(state)->on_sms = data->on_sms;
 		AT_DRVINST(state)->sms_callback_data = data->callback_data;
@@ -2431,6 +2433,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->mememorysize = -1;
 	drvinst->smmemorysize = -1;
 	drvinst->timezone = NULL;
+	drvinst->cnmi_mode = 3;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {
