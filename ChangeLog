@@ -8,6 +8,9 @@
                                                         (Pawel Kot)
     o don't fallback to default memory type if desired on is not
       available                                    (Bastien Nocera)
+ * xgnokii updates
+    o change the way phonebooks entries are deleted (closes
+      https://savannah.nongnu.org/bugs/?20816)      (Daniele Forsi)
 
 0.6.21
 ======

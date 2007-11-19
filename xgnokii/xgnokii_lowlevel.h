@@ -52,6 +52,7 @@ typedef enum {
 	Event_GetMemoryLocationAll,
 	Event_WriteMemoryLocation,
 	Event_WriteMemoryLocationAll,
+	Event_DeleteMemoryLocation,
 	Event_GetCalendarNote,
 	Event_GetCalendarNoteAll,
 	Event_WriteCalendarNote,

@@ -2304,12 +2304,37 @@ static void CreateProgressDialog(gint maxME, gint maxSM)
 }
 
 
+static gint SaveContactsInsertEvent(PhonebookEntry *pbEntry)
+{
+	PhoneEvent *e;
+	D_MemoryLocation *ml;
+	gn_error error;
+
+	ml = (D_MemoryLocation *) g_malloc(sizeof(D_MemoryLocation));
+	ml->entry = &(pbEntry->entry);
+	e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
+	if (pbEntry->status == E_Deleted) {
+		e->event = Event_DeleteMemoryLocation;
+	} else {
+		e->event = Event_WriteMemoryLocation;
+	}
+	e->data = ml;
+	GUI_InsertEvent(e);
+	pthread_mutex_lock(&memoryMutex);
+	pthread_cond_wait(&memoryCond, &memoryMutex);
+	pthread_mutex_unlock(&memoryMutex);
+
+	error = ml->status;
+	g_free(ml);
+
+	return error;
+}
+
 static void SaveContacts(void)
 {
 	register gint i;
 	PhonebookEntry *pbEntry;
-	PhoneEvent *e;
-	D_MemoryLocation *ml;
+	gn_error error;
 
 	if (progressDialog.dialog == NULL) {
 		CreateProgressDialog(memoryStatus.MaxME, memoryStatus.MaxSM);
@@ -2327,30 +2352,15 @@ static void SaveContacts(void)
 			gn_log_xdebug("%d;%s;%s;%d;%d;%d\n", pbEntry->entry.empty, pbEntry->entry.name,
 				pbEntry->entry.number, (int) pbEntry->entry.memory_type,
 				pbEntry->entry.caller_group, (int) pbEntry->status);
+
 			if (pbEntry->status == E_Changed || pbEntry->status == E_Deleted) {
-				if (pbEntry->status == E_Deleted) {
-					pbEntry->entry.name[0] = '\0';
-					pbEntry->entry.number[0] = '\0';
-					pbEntry->entry.caller_group = GN_PHONEBOOK_GROUP_None;
-				}
-
 				pbEntry->entry.location = i + 1;
-				ml = (D_MemoryLocation *) g_malloc(sizeof(D_MemoryLocation));
-				ml->entry = &(pbEntry->entry);
-				e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
-				e->event = Event_WriteMemoryLocation;
-				e->data = ml;
-				GUI_InsertEvent(e);
-				pthread_mutex_lock(&memoryMutex);
-				pthread_cond_wait(&memoryCond, &memoryMutex);
-				pthread_mutex_unlock(&memoryMutex);
-
-				if (ml->status != GN_ERR_NONE) {
+				error = SaveContactsInsertEvent(pbEntry);
+				if (error != GN_ERR_NONE) {
 					g_print(_
-						("%s: line %d: Can't write ME memory entry number %d! Error: %d\n"),
-						__FILE__, __LINE__, i + 1, ml->status);
+						("%s: line %d: Can't write ME memory entry number %d! Error: %s\n"),
+						__FILE__, __LINE__, i + 1, gn_error_print(error));
 				}
-				g_free(ml);
 			}
 			gtk_progress_set_value(GTK_PROGRESS(progressDialog.pbarME), i + 1);
 			GUI_Refresh();
@@ -2365,30 +2375,13 @@ static void SaveContacts(void)
 				pbEntry->entry.caller_group, (int) pbEntry->status);
 
 			if (pbEntry->status == E_Changed || pbEntry->status == E_Deleted) {
-				if (pbEntry->status == E_Deleted) {
-					pbEntry->entry.name[0] = '\0';
-					pbEntry->entry.number[0] = '\0';
-					pbEntry->entry.caller_group = GN_PHONEBOOK_GROUP_None;
-				}
-
 				pbEntry->entry.location = i - memoryStatus.MaxME + 1;
-				ml = (D_MemoryLocation *) g_malloc(sizeof(D_MemoryLocation));
-				ml->entry = &(pbEntry->entry);
-				e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
-				e->event = Event_WriteMemoryLocation;
-				e->data = ml;
-				GUI_InsertEvent(e);
-				pthread_mutex_lock(&memoryMutex);
-				pthread_cond_wait(&memoryCond, &memoryMutex);
-				pthread_mutex_unlock(&memoryMutex);
-
-				if (ml->status != GN_ERR_NONE) {
+				error = SaveContactsInsertEvent(pbEntry);
+				if (error != GN_ERR_NONE) {
 					g_print(_
-						("%s: line %d: Can't write SM memory entry number %d! Error: %d\n"),
-						__FILE__, __LINE__, i - memoryStatus.MaxME + 1,
-						ml->status);
+						("%s: line %d: Can't write SM memory entry number %d! Error: %s\n"),
+						__FILE__, __LINE__, i - memoryStatus.MaxME + 1, gn_error_print(error));
 				}
-				g_free(ml);
 			}
 			gtk_progress_set_value(GTK_PROGRESS(progressDialog.pbarSM),
 					       i - memoryStatus.MaxME + 1);
