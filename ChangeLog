@@ -3,11 +3,12 @@
  * build system updates
     o make install and install-devel work correctly     (Pawel Kot)
     o xgnokii.pc should be installed with install-devel (Pawel Kot)
- * AT driver updates
+ * at driver updates
     o make CNMI mode argument configurable in at_driver_instance
                                                         (Pawel Kot)
-    o don't fallback to default memory type if desired on is not
+    o don't fallback to default memory type if desired one is not
       available                                    (Bastien Nocera)
+    o new specific driver for Motorola             (Bastien Nocera)
  * xgnokii updates
     o change the way phonebooks entries are deleted (closes
       https://savannah.nongnu.org/bugs/?20816)      (Daniele Forsi)

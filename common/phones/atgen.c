@@ -46,6 +46,7 @@
 #include "phones/atgen.h"
 #include "phones/atbosch.h"
 #include "phones/ateric.h"
+#include "phones/atmot.h"
 #include "phones/atnok.h"
 #include "phones/atsie.h"
 #include "phones/atsoer.h"
@@ -2389,6 +2390,8 @@ static gn_error Reply(int messagetype, unsigned char *buffer, int length, gn_dat
 	return at_error_get(buffer, state);
 }
 
+#define at_manufacturer_compare(pattern)	strncasecmp(manufacturer, pattern, strlen(pattern))
+
 static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst;
@@ -2483,18 +2486,20 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	if (ret)
 		goto out;
 
-	if (!strncasecmp(manufacturer, "bosch", 5))
+	if (!at_manufacturer_compare("bosch"))
 		at_bosch_init(model, setupdata->model, state);
-	else if (!strncasecmp(manufacturer, "ericsson", 8))
+	else if (!at_manufacturer_compare("ericsson"))
 		at_ericsson_init(model, setupdata->model, state);
-	else if (!strncasecmp(manufacturer, "nokia", 5))
+	else if (!at_manufacturer_compare("nokia"))
 		at_nokia_init(model, setupdata->model, state);
-	else if (!strncasecmp(manufacturer, "siemens", 7))
+	else if (!at_manufacturer_compare("siemens"))
 		at_siemens_init(model, setupdata->model, state);
-	else if (!strncasecmp(manufacturer, "sony ericsson", 14))
+	else if (!at_manufacturer_compare("sony ericsson"))
 		at_sonyericsson_init(model, setupdata->model, state);
-	else if (!strncasecmp(manufacturer, "samsung", 7))
+	else if (!at_manufacturer_compare("samsung"))
 		at_samsung_init(model, setupdata->model, state);
+	else if (!at_manufacturer_compare("motorola"))
+		at_motorola_init(model, setupdata->model, state);
 	
 	StoreDefaultCharset(state);
 

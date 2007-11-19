@@ -29,6 +29,7 @@ OBJS =	generic.lo \
 	atgen.lo \
 	atbosch.lo \
 	ateric.lo \
+	atmot.lo \
 	atnok.lo \
 	atsie.lo \
 	atsoer.lo \
