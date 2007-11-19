@@ -464,11 +464,12 @@ static gint A_GetMemoryLocationAll(gpointer data)
 	gn_data_clear(&gdat);
 
 	error = mla->status = GN_ERR_NONE;
-	entry.memory_type = mla->type;
 	gdat.phonebook_entry = &entry;
 
 	pthread_mutex_lock(&memoryMutex);
 	for (i = mla->min; i <= mla->max; i++) {
+		memset(&entry, 0, sizeof(entry));
+		entry.memory_type = mla->type;
 		entry.location = i;
 		error = gn_sm_functions(GN_OP_ReadPhonebook, &gdat, statemachine);
 		if (error != GN_ERR_NONE && error != GN_ERR_INVALIDLOCATION &&

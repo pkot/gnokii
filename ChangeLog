@@ -12,6 +12,8 @@
  * xgnokii updates
     o change the way phonebooks entries are deleted (closes
       https://savannah.nongnu.org/bugs/?20816)      (Daniele Forsi)
+    o make sure it didn't copy subentries from previously read
+      phonebook entry                               (Daniele Forsi)
 
 0.6.21
 ======
