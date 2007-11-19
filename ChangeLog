@@ -6,6 +6,8 @@
  * AT driver updates
     o make CNMI mode argument configurable in at_driver_instance
                                                         (Pawel Kot)
+    o don't fallback to default memory type if desired on is not
+      available                                    (Bastien Nocera)
 
 0.6.21
 ======
