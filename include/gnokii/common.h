@@ -279,7 +279,7 @@ typedef struct {
 		/* GN_PHONEBOOK_ENTRY_Image
 		 * GN_PHONEBOOK_ENTRY_RingtoneAdv
 		 */
-		char fileid[6];                                  /* Bitmap or rigntone fileid */
+		char fileid[6];                                  /* Bitmap or ringtone fileid */
 	} data;
 	int id;
 } gn_phonebook_subentry;
