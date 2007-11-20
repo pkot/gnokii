@@ -272,6 +272,15 @@ static gn_error atbus_loop(struct timeval *timeout, struct gn_statemachine *sm)
 		return GN_ERR_INTERNALERROR;
 }
 
+static void atbus_reset(struct gn_statemachine *state)
+{
+	atbus_instance *bi = AT_BUSINST(state);
+	bi->rbuf = NULL;
+	bi->rbuf_size = 0;
+	bi->rbuf_pos = 1;
+	bi->binlen = 1;
+}
+
 
 /* Initialise variables and start the link */
 /* Fixme we allow serial and irda for connection to reduce */
@@ -290,11 +299,9 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 	/* Fill in the link functions */
 	state->link.loop = &atbus_loop;
 	state->link.send_message = &at_send_message;
-	businst->rbuf = NULL;
-	businst->rbuf_size = 0;
-	businst->rbuf_pos = 1;
-	businst->binlen = 1;
+	state->link.reset = &atbus_reset;
 	AT_BUSINST(state) = businst;
+	atbus_reset(state);
 
 	switch (state->config.connection_type) {
 	case GN_CT_Irda:

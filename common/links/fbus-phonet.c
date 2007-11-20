@@ -129,7 +129,6 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		break;
 
 	case FBUS_RX_GetDestination:
-
 		i->message_destination = rx_byte;
 		i->state = FBUS_RX_GetSource;
 
@@ -142,7 +141,6 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		break;
 
 	case FBUS_RX_GetSource:
-
 		i->message_source = rx_byte;
 		i->state = FBUS_RX_GetType;
 
@@ -154,29 +152,24 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		break;
 
 	case FBUS_RX_GetType:
-
 		i->message_type = rx_byte;
 		i->state = FBUS_RX_GetLength1;
 
 		break;
 
 	case FBUS_RX_GetLength1:
-
 		i->message_length = rx_byte << 8;
 		i->state = FBUS_RX_GetLength2;
 
 		break;
 
 	case FBUS_RX_GetLength2:
-
 		i->message_length = i->message_length + rx_byte;
 		i->state = FBUS_RX_GetMessage;
 		i->buffer_count = 0;
-
 		break;
 
 	case FBUS_RX_GetMessage:
-
 		i->message_buffer[i->buffer_count] = rx_byte;
 		i->buffer_count++;
 
@@ -187,7 +180,6 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		}
 
 		/* Is that it? */
-
 		if (i->buffer_count == i->message_length) {
 			sm_incoming_function(i->message_type, i->message_buffer, i->message_length, state);
 			i->state = FBUS_RX_Sync;
@@ -206,13 +198,13 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
 	gn_error	error = GN_ERR_INTERNALERROR;
-	unsigned char	buffer[255];
+	unsigned char	buffer[1024];
 	int		count, res;
 
 	res = device_select(timeout, state);
 
 	if (res > 0) {
-		res = device_read(buffer, 255, state);
+		res = device_read(buffer, sizeof(buffer), state);
 		for (count = 0; count < res; count++) {
 			phonet_rx_statemachine(buffer[count], state);
 		}
@@ -290,6 +282,13 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 	return GN_ERR_NONE;
 }
 
+static void phonet_reset(struct gn_statemachine *state)
+{
+	/* Init variables */
+	FBUSINST(state)->state = FBUS_RX_Sync;
+	FBUSINST(state)->buffer_count = 0;
+}
+
 /* Initialise variables and start the link */
 gn_error phonet_initialise(struct gn_statemachine *state)
 {
@@ -301,6 +300,7 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	/* Fill in the link functions */
 	state->link.loop = &phonet_loop;
 	state->link.send_message = &phonet_send_message;
+	state->link.reset = &phonet_reset;
 
 	if ((FBUSINST(state) = calloc(1, sizeof(phonet_incoming_message))) == NULL)
 		return GN_ERR_MEMORYFULL;
@@ -323,9 +323,7 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 		return error;
 	}
 
-	/* Init variables */
-	FBUSINST(state)->state = FBUS_RX_Sync;
-	FBUSINST(state)->buffer_count = 0;
+	phonet_reset(state);
 
 	return error;
 }

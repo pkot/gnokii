@@ -446,9 +446,13 @@ static gn_error m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
 }
 
 
+static void m2bus_reset(struct gn_statemachine *state)
+{
+	M2BUSINST(state)->i.state = M2BUS_RX_Sync;
+}
+
 /* Initialise variables and start the link */
 /* state is only passed around to allow for muliple state machines (one day...) */
-
 gn_error m2bus_initialise(struct gn_statemachine *state)
 {
 	gn_error err;
@@ -457,15 +461,16 @@ gn_error m2bus_initialise(struct gn_statemachine *state)
 		return GN_ERR_FAILED;
 
 	/* Fill in the link functions */
-	state->link.loop = m2bus_loop;
-	state->link.send_message = m2bus_send_message;
+	state->link.loop = &m2bus_loop;
+	state->link.send_message = &m2bus_send_message;
+	state->link.reset = &m2bus_reset;
 
 	/* Start up the link */
 	if ((M2BUSINST(state) = calloc(1, sizeof(m2bus_link))) == NULL)
 		return GN_ERR_MEMORYFULL;
 
 	M2BUSINST(state)->request_sequence_number = 2;
-	M2BUSINST(state)->i.state = M2BUS_RX_Sync;
+	m2bus_reset(state);
 
 	if (state->config.connection_type == GN_CT_Infrared) {
 		err = GN_ERR_FAILED;

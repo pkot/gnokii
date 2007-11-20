@@ -93,6 +93,8 @@ void sm_reset(struct gn_statemachine *state)
 		state->current_state = GN_SM_Initialised;
 		state->waiting_for_number = 0;
 		state->received_number = 0;
+		if (state->link.reset)
+			state->link.reset(state);
 	}
 }
 
@@ -248,7 +250,6 @@ static gn_error __sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_
 			s = gn_sm_loop(1, state);  /* Timeout=100ms */
 			gettimeofday(&now, NULL);
 		} while (timercmp(&next, &now, >) && (s == GN_SM_MessageSent));
-
 		if (s == GN_SM_WaitingForResponse || s == GN_SM_ResponseReceived) break;
 
 		if (state->config.sm_retry) {
@@ -288,9 +289,11 @@ gn_error sm_block_timeout(int waitfor, int t, gn_data *data, struct gn_statemach
 
 	for (retry = 0; retry < 3; retry++) {
 		err = __sm_block_timeout(waitfor, t, data, state);
-		if (err == GN_ERR_NONE || err != GN_ERR_TIMEOUT) return err;
-		if (retry < 2)
+		if (err == GN_ERR_NONE || err != GN_ERR_TIMEOUT)
+			return err;
+		if (retry < 2) {
 			sm_message_send(state->last_msg_size, state->last_msg_type, state->last_msg, state);
+		}
 	}
 	return GN_ERR_TIMEOUT;
 }

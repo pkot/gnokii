@@ -19,6 +19,10 @@
                                                     (Daniele Forsi)
     o when a phonebook entry is successfully saved or deleted do
       not process it again                          (Daniele Forsi)
+ * link layer updates
+    o reset link layer status when resending message    (Pawel Kot)
+    o extend buffer for the reply as a workaround for libusb
+      problem                                           (Pawel Kot)
 
 0.6.21
 ======

@@ -268,10 +268,15 @@ static gn_error gnbus_send_message(unsigned int messagesize, unsigned char messa
 }
 
 
+static void gnbus_reset(struct gn_statemachine *state)
+{
+	GNBUSINST(state)->i.state = GNBUS_RX_Sync;
+	GNBUSINST(state)->i.checksum_idx = 0;
+}
+
 /*
  * Initialise variables and start the link
  */
-
 gn_error gnbus_initialise(struct gn_statemachine *state)
 {
 	int conn_type;
@@ -280,15 +285,15 @@ gn_error gnbus_initialise(struct gn_statemachine *state)
 		return GN_ERR_FAILED;
 
 	/* Fill in the link functions */
-	state->link.loop = gnbus_loop;
-	state->link.send_message = gnbus_send_message;
+	state->link.loop = &gnbus_loop;
+	state->link.send_message = &gnbus_send_message;
+	state->link.reset = &gnbus_reset;
 
 	/* Start up the link */
 	if ((GNBUSINST(state) = calloc(1, sizeof(gnbus_link))) == NULL)
 		return GN_ERR_MEMORYFULL;
 
-	GNBUSINST(state)->i.state = GNBUS_RX_Sync;
-	GNBUSINST(state)->i.checksum_idx = 0;
+	gnbus_reset(state);
 
 	if (state->config.connection_type == GN_CT_Irda && strcasecmp(state->config.port_device, "IrDA:IrCOMM"))
 		conn_type = GN_CT_Serial;

@@ -334,6 +334,7 @@ gn_error cbus_initialise(struct gn_statemachine *state)
 	/* Fill in the link functions */
 	state->link.loop = &cbus_loop;
 	state->link.send_message = &cbus_send_message;
+	state->link.reset = NULL;
 	CBUSINST(state) = businst;
 
 	if (state->config.connection_type == GN_CT_Serial) {

@@ -491,7 +491,7 @@ static gn_error fbus_loop(struct timeval *timeout, struct gn_statemachine *state
 
 	res = device_select(timeout, state);
 	if (res > 0) {
-		res = device_read(buffer, 255, state);
+		res = device_read(buffer, sizeof(buffer), state);
 		for (count = 0; count < res; count++)
 			fbus_rx_statemachine(buffer[count], state);
 	} else
@@ -638,13 +638,26 @@ static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemach
 }
 
 
+static void fbus_reset(struct gn_statemachine *state)
+{
+	int count;
+
+	/* Init variables */
+	FBUSINST(state)->i.state = FBUS_RX_Sync;
+	FBUSINST(state)->i.buffer_count = 0;
+	for (count = 0; count < FBUS_MESSAGE_MAX_TYPES; count++) {
+		FBUSINST(state)->messages[count].malloced = 0;
+		FBUSINST(state)->messages[count].frames_to_go = 0;
+		FBUSINST(state)->messages[count].message_length = 0;
+		FBUSINST(state)->messages[count].message_buffer = NULL;
+	}
+}
+
 /* Initialise variables and start the link */
 /* state is only passed around to allow for multiple state machines (one day...) */
-
 gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 {
 	unsigned char init_char = 0x55;
-	int count;
 	bool connection = false;
 
 	if (!state)
@@ -653,6 +666,7 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 	/* Fill in the link functions */
 	state->link.loop = &fbus_loop;
 	state->link.send_message = &fbus_send_message;
+	state->link.reset = &fbus_reset;
 
 	/* Check for a valid init length */
 	if (state->config.init_length == 0)
@@ -717,21 +731,14 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 	/* I believe that we need/can do this for any phone to get the UART synced */
 
 	if (state->config.connection_type != GN_CT_Bluetooth && state->config.connection_type != GN_CT_TCP) {
+		int count;
 		for (count = 0; count < state->config.init_length; count++) {
 			usleep(100);
 			device_write(&init_char, 1, state);
 		}
 	}
 
-	/* Init variables */
-	FBUSINST(state)->i.state = FBUS_RX_Sync;
-	FBUSINST(state)->i.buffer_count = 0;
-	for (count = 0; count < FBUS_MESSAGE_MAX_TYPES; count++) {
-		FBUSINST(state)->messages[count].malloced = 0;
-		FBUSINST(state)->messages[count].frames_to_go = 0;
-		FBUSINST(state)->messages[count].message_length = 0;
-		FBUSINST(state)->messages[count].message_buffer = NULL;
-	}
+	fbus_reset(state);
 
 	return GN_ERR_NONE;
 }

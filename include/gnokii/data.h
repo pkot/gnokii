@@ -120,6 +120,7 @@ typedef struct {
 	gn_error (*send_message)(unsigned int messagesize, unsigned char messagetype, unsigned char *message,
 				 struct gn_statemachine *state);
 	void *link_instance;
+	void (*reset)(struct gn_statemachine *state);
 } gn_link;
 
 typedef struct {
