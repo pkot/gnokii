@@ -154,6 +154,36 @@ void RefreshStatusInfo(void)
 }
 
 
+static void RefreshEntryRow(PhonebookEntry *newPbEntry, gint row)
+{
+	gchar string[100];
+
+	gtk_clist_set_text(GTK_CLIST(clist), row, 0, newPbEntry->entry.name);
+
+	if (newPbEntry->entry.subentries_count > 0) {
+		snprintf(string, 100, "%s *", newPbEntry->entry.number);
+		gtk_clist_set_text(GTK_CLIST(clist), row, 1, string);
+	} else
+		gtk_clist_set_text(GTK_CLIST(clist), row, 1, newPbEntry->entry.number);
+
+	if (newPbEntry->entry.memory_type == GN_MT_ME) {
+		gtk_clist_set_text(GTK_CLIST(clist), row, 2, "P");
+		gtk_clist_set_pixmap(GTK_CLIST(clist), row, 2,
+					memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
+	} else {
+		gtk_clist_set_text(GTK_CLIST(clist), row, 2, "S");
+		gtk_clist_set_pixmap(GTK_CLIST(clist), row, 2,
+					memoryPixmaps.simMemPix, memoryPixmaps.mask);
+	}
+	if (phoneMonitor.supported & PM_CALLERGROUP)
+		gtk_clist_set_text(GTK_CLIST(clist), row, 3, xgnokiiConfig.callerGroups[newPbEntry->entry.caller_group]);
+	else
+		gtk_clist_set_text(GTK_CLIST(clist), row, 3, "");
+
+	gtk_clist_set_row_data(GTK_CLIST(clist), row, (gpointer) newPbEntry);
+}
+
+
 static inline void SetGroup0(GtkWidget * item, gpointer data)
 {
 	((EditEntryData *) data)->newGroup = 0;
@@ -284,6 +314,128 @@ inline PhonebookEntry *GUI_GetEntry(gn_memory_type type, gint nr)
 }
 
 
+static PhonebookEntry *ChangeEntryMemoryType(PhonebookEntry *oldPbEntry)
+{
+	PhonebookEntry *newPbEntry;
+
+	if (oldPbEntry->entry.memory_type == GN_MT_SM) {
+		if ((newPbEntry = FindFreeEntry(GN_MT_ME)) == NULL) {
+			gtk_label_set_text(GTK_LABEL(errorDialog.text),
+						_("Can't change memory type!"));
+			gtk_widget_show(errorDialog.dialog);
+			return NULL;
+		}
+
+		newPbEntry->entry = oldPbEntry->entry;
+		newPbEntry->entry.memory_type = GN_MT_ME;
+
+		newPbEntry->status = E_Changed;
+		oldPbEntry->status = E_Deleted;
+
+		memoryStatus.UsedME++;
+		memoryStatus.FreeME--;
+		memoryStatus.UsedSM--;
+		memoryStatus.FreeSM++;
+		statusInfo.ch_ME = statusInfo.ch_SM = 1;
+
+	} else {
+		if ((newPbEntry = FindFreeEntry(GN_MT_SM)) == NULL) {
+			gtk_label_set_text(GTK_LABEL(errorDialog.text),
+						_("Can't change memory type!"));
+			gtk_widget_show(errorDialog.dialog);
+			return NULL;
+		}
+
+		newPbEntry->entry = oldPbEntry->entry;
+		newPbEntry->entry.memory_type = GN_MT_SM;
+
+		newPbEntry->status = E_Changed;
+		oldPbEntry->status = E_Deleted;
+
+		memoryStatus.UsedME--;
+		memoryStatus.FreeME++;
+		memoryStatus.UsedSM++;
+		memoryStatus.FreeSM--;
+		statusInfo.ch_ME = statusInfo.ch_SM = 1;
+	}
+
+	return newPbEntry;
+}
+
+
+static PhonebookEntry *EditPhonebookEntry(EditEntryData *data) {
+	gchar **number;
+	PhonebookEntry *current_entry = data->pbEntry;
+	gn_memory_type chosen_memory_type;
+	gint max_name_length, max_number_length;
+
+	if (GTK_TOGGLE_BUTTON(data->memoryTypePhone)->active) {
+		chosen_memory_type = GN_MT_ME;
+		max_name_length = max_phonebook_name_length;
+		max_number_length = max_phonebook_number_length;
+	} else {
+		chosen_memory_type = GN_MT_SM;
+		max_name_length = max_phonebook_sim_name_length;
+		max_number_length = max_phonebook_sim_number_length;
+	}
+
+	if (strlen(gtk_entry_get_text(GTK_ENTRY(data->name))) >= max_name_length) {
+		GtkWidget *dialog;
+		gint response;
+
+		dialog = gtk_message_dialog_new (GTK_WINDOW(editEditEntryData.dialog),
+			GTK_DIALOG_DESTROY_WITH_PARENT,
+			GTK_MESSAGE_QUESTION,
+			GTK_BUTTONS_OK_CANCEL,
+			_("Phonebook name will be truncated to\n%.*s"),
+			max_name_length - 1,
+			gtk_entry_get_text(GTK_ENTRY(data->name)));
+
+		response = gtk_dialog_run (GTK_DIALOG (dialog));
+ 		gtk_widget_destroy (dialog);
+		if (response != GTK_RESPONSE_OK) return NULL;
+	}
+
+	if (chosen_memory_type != current_entry->entry.memory_type) {
+		/* Memory Type changed SM -> ME or ME -> SM, then get the new entry filled in */
+		if ((current_entry = ChangeEntryMemoryType(current_entry)) == NULL) {
+			return NULL;
+		}
+	} else {
+		/* Memory type not changed -> current_entry will be "edited" directly */
+		current_entry->status = E_Changed;
+
+		if (current_entry->entry.memory_type == GN_MT_ME) {
+			statusInfo.ch_SM = 0;
+			statusInfo.ch_ME = 1;
+		} else {
+			statusInfo.ch_SM = 1;
+			statusInfo.ch_ME = 0;
+		}
+	}
+	snprintf(current_entry->entry.name, max_name_length, "%s",
+			 gtk_entry_get_text(GTK_ENTRY(data->name)));
+
+	if (phoneMonitor.supported & PM_EXTPBK) {
+		number = g_malloc(sizeof(char) * max_number_length);
+		gtk_label_get(GTK_LABEL(data->number), number);
+		snprintf(current_entry->entry.number, max_number_length, "%s", number[0]);
+		snprintf(current_entry->entry.subentries[0].data.number, max_number_length, "%s", number[0]);
+		current_entry->entry.subentries[0].entry_type = GN_PHONEBOOK_ENTRY_Number;
+		current_entry->entry.subentries[0].number_type = GN_PHONEBOOK_NUMBER_General;
+		current_entry->entry.subentries_count = 1;
+		g_free(number);
+	} else {
+		snprintf(current_entry->entry.number, max_number_length, "%s",
+			 gtk_entry_get_text(GTK_ENTRY(data->number)));
+	}
+
+	current_entry->entry.caller_group = data->newGroup;
+
+	return current_entry;
+}
+
+
 static void CloseContacts(GtkWidget * w, gpointer data)
 {
 	gtk_widget_hide(GUI_ContactsWindow);
@@ -304,201 +456,23 @@ static void CancelEditDialog(GtkWidget * widget, gpointer data)
 }
 
 
-
 static void OkEditEntryDialog(GtkWidget * widget, gpointer data)
 {
-	gchar *clist_row[4];
-	gchar **number;
-	PhonebookEntry *new_entry, *current_entry = ((EditEntryData *) data)->pbEntry;
+	PhonebookEntry *current_entry;
 
-	/* Memory Type changed SM -> ME */
-	if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypePhone)->active &&
-	    current_entry->entry.memory_type == GN_MT_SM) {
-		if ((new_entry = FindFreeEntry(GN_MT_ME)) == NULL) {
-			gtk_label_set_text(GTK_LABEL(errorDialog.text),
-					   _("Can't change memory type!"));
-			gtk_widget_show(errorDialog.dialog);
-			return;
-		}
-		snprintf(new_entry->entry.name, max_phonebook_name_length, "%s",
-			 gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)));
+	current_entry = EditPhonebookEntry((EditEntryData *) data);
+	if (current_entry == NULL)
+		return;
 
-		if (phoneMonitor.supported & PM_EXTPBK) {
-			number = g_malloc(sizeof(char) * max_phonebook_number_length);
-			gtk_label_get(GTK_LABEL(((EditEntryData *) data)->number), number);
-			snprintf(new_entry->entry.number, max_phonebook_number_length, "%s", number[0]);
-			snprintf(new_entry->entry.subentries[0].data.number, max_phonebook_number_length, "%s", number[0]);
-			new_entry->entry.subentries[0].entry_type = GN_PHONEBOOK_ENTRY_Number;
-			new_entry->entry.subentries[0].number_type = GN_PHONEBOOK_NUMBER_General;
-			new_entry->entry.subentries_count = 1;
-			g_free(number);
-		} else {
-			snprintf(new_entry->entry.number, max_phonebook_number_length, "%s",
-				 gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)));
-		}
-
-		new_entry->entry.caller_group = ((EditEntryData *) data)->newGroup;
-
-		new_entry->status = E_Changed;
-
-		current_entry->status = E_Deleted;
-
-		memoryStatus.UsedME++;
-		memoryStatus.FreeME--;
-		memoryStatus.UsedSM--;
-		memoryStatus.FreeSM++;
-		statusInfo.ch_ME = statusInfo.ch_SM = 1;
-
-		current_entry = new_entry;
-
-		/* Memory Type changed ME -> SM */
-	} else if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypeSIM)->active &&
-		   current_entry->entry.memory_type == GN_MT_ME) {
-		if ((new_entry = FindFreeEntry(GN_MT_SM)) == NULL) {
-			gtk_label_set_text(GTK_LABEL(errorDialog.text),
-					   _("Can't change memory type!"));
-			gtk_widget_show(errorDialog.dialog);
-			return;
-		}
-		strncpy(new_entry->entry.name,
-			gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
-			max_phonebook_sim_name_length);
-		new_entry->entry.name[max_phonebook_sim_name_length] = '\0';
-
-		if (strlen(gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name))) >
-		    max_phonebook_sim_name_length) {
-			gtk_label_set_text(GTK_LABEL(errorDialog.text),
-					   _("Sorry, phonebook name will be truncated,\n\
-because you save it into SIM memory!"));
-			gtk_widget_show(errorDialog.dialog);
-		}
-
-		if (phoneMonitor.supported & PM_EXTPBK) {
-			number = g_malloc(sizeof(char) * max_phonebook_number_length);
-			gtk_label_get(GTK_LABEL(((EditEntryData *) data)->number), number);
-			snprintf(new_entry->entry.number, max_phonebook_number_length, "%s", number[0]);
-			snprintf(new_entry->entry.subentries[0].data.number, max_phonebook_number_length, "%s", number[0]);
-			new_entry->entry.subentries[0].entry_type = GN_PHONEBOOK_ENTRY_Number;
-			new_entry->entry.subentries[0].number_type = GN_PHONEBOOK_NUMBER_General;
-			new_entry->entry.subentries_count = 1;
-			g_free(number);
-		} else {
-			strncpy(new_entry->entry.number,
-				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)),
-				max_phonebook_sim_number_length);
-			new_entry->entry.number[max_phonebook_sim_number_length] = '\0';
-		}
-
-		new_entry->entry.caller_group = ((EditEntryData *) data)->newGroup;
-
-		new_entry->status = E_Changed;
-
-		current_entry->status = E_Deleted;
-
-		memoryStatus.UsedME--;
-		memoryStatus.FreeME++;
-		memoryStatus.UsedSM++;
-		memoryStatus.FreeSM--;
-		statusInfo.ch_ME = statusInfo.ch_SM = 1;
-
-		current_entry = new_entry;
-	} else {
-		/* Memory type noct changes -> current_entry will be "edited" directly */
-		/* Memory type not changed, phone memory */
-		if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypePhone)->active) {
-			strncpy(current_entry->entry.name,
-				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
-				max_phonebook_name_length);
-			current_entry->entry.name[max_phonebook_name_length] = '\0';
-
-			if (phoneMonitor.supported & PM_EXTPBK) {
-
-			} else {
-				strncpy(current_entry->entry.number,
-					gtk_entry_get_text(GTK_ENTRY
-							   (((EditEntryData *) data)->number)),
-					max_phonebook_number_length);
-				current_entry->entry.number[max_phonebook_number_length] = '\0';
-			}
-		/* Memory type not changed, SIM memory */
-		} else {
-			strncpy(current_entry->entry.name,
-				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
-				max_phonebook_sim_name_length);
-			current_entry->entry.name[max_phonebook_sim_name_length] = '\0';
-
-			if (strlen(gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name))) >
-			    max_phonebook_sim_name_length) {
-				gtk_label_set_text(GTK_LABEL(errorDialog.text),
-						   _("Sorry, phonebook name will be truncated,\n\
-because you save it into SIM memory!"));
-				gtk_widget_show(errorDialog.dialog);
-			}
-
-			if (phoneMonitor.supported & PM_EXTPBK) {
-				number = g_malloc(sizeof(char) * max_phonebook_number_length);
-				gtk_label_get(GTK_LABEL(((EditEntryData *) data)->number), number);
-				snprintf(current_entry->entry.number, max_phonebook_number_length, "%s", number[0]);
-				snprintf(current_entry->entry.subentries[0].data.number, max_phonebook_number_length, "%s", number[0]);
-				current_entry->entry.subentries[0].entry_type = GN_PHONEBOOK_ENTRY_Number;
-				current_entry->entry.subentries[0].number_type = GN_PHONEBOOK_NUMBER_General;
-				current_entry->entry.subentries_count = 1;
-				g_free(number);
-			} else {
-				strncpy(current_entry->entry.number,
-					gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)), 
-					max_phonebook_sim_number_length);
-				current_entry->entry.number[max_phonebook_sim_number_length] = '\0';
-			}
-		}
-
-		current_entry->entry.caller_group = ((EditEntryData *) data)->newGroup;
-
-		current_entry->status = E_Changed;
-
-		if (current_entry->entry.memory_type == GN_MT_ME) {
-			statusInfo.ch_SM = 0;
-			statusInfo.ch_ME = 1;
-		} else {
-			statusInfo.ch_SM = 1;
-			statusInfo.ch_ME = 0;
-		}
-	}
-
-	gtk_widget_hide(GTK_WIDGET(((EditEntryData *) data)->dialog));
-	((EditEntryData *) data)->dialog = NULL;
+	gtk_clist_freeze(GTK_CLIST(clist));
+	RefreshEntryRow(current_entry, ((EditEntryData *) data)->row);
+	gtk_clist_sort(GTK_CLIST(clist));
+	gtk_clist_thaw(GTK_CLIST(clist));
 
 	RefreshStatusInfo();
 
-	gtk_clist_freeze(GTK_CLIST(clist));
-	gtk_clist_remove(GTK_CLIST(clist), ((EditEntryData *) data)->row);
-
-	clist_row[0] = current_entry->entry.name;
-
-	clist_row[1] = current_entry->entry.number;
-
-	if (current_entry->entry.memory_type == GN_MT_ME)
-		clist_row[2] = "P";
-	else
-		clist_row[2] = "S";
-	if (phoneMonitor.supported & PM_CALLERGROUP)
-		clist_row[3] =
-		    xgnokiiConfig.callerGroups[current_entry->entry.caller_group];
-	else
-		clist_row[3] = "";
-	gtk_clist_insert(GTK_CLIST(clist), ((EditEntryData *) data)->row, clist_row);
-	if (current_entry->entry.memory_type == GN_MT_ME)
-		gtk_clist_set_pixmap(GTK_CLIST(clist), ((EditEntryData *) data)->row, 2,
-				     memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
-	else
-		gtk_clist_set_pixmap(GTK_CLIST(clist), ((EditEntryData *) data)->row, 2,
-				     memoryPixmaps.simMemPix, memoryPixmaps.mask);
-
-	gtk_clist_set_row_data(GTK_CLIST(clist), ((EditEntryData *) data)->row,
-			       (gpointer) current_entry);
-
-	gtk_clist_sort(GTK_CLIST(clist));
-	gtk_clist_thaw(GTK_CLIST(clist));
+	gtk_widget_hide(GTK_WIDGET(((EditEntryData *) data)->dialog));
+	((EditEntryData *) data)->dialog = NULL;
 }
 
 
@@ -542,168 +516,42 @@ static void OkDeleteEntryDialog(GtkWidget * widget, gpointer data)
 
 static void OkNewEntryDialog(GtkWidget * widget, gpointer data)
 {
-	gchar *clist_row[4];
-	PhonebookEntry *entry;
+	gchar *clist_row[4] = {"", "", "", ""};
+	PhonebookEntry *current_entry;
 
-	if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypePhone)->active &&
-	    ((EditEntryData *) data)->pbEntry->entry.memory_type == GN_MT_SM) {
-		if ((entry = FindFreeEntry(GN_MT_ME)) == NULL) {
-			gtk_label_set_text(GTK_LABEL(errorDialog.text),
-					   _("Can't change memory type!"));
-			gtk_widget_show(errorDialog.dialog);
-			return;
-		}
-		strncpy(entry->entry.name,
-			gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
-			max_phonebook_name_length);
-		entry->entry.name[max_phonebook_name_length] = '\0';
+	current_entry = EditPhonebookEntry((EditEntryData *) data);
+	if (current_entry == NULL)
+		return;
 
-		if (phoneMonitor.supported & PM_EXTPBK) {
-		} else {
-			strncpy(entry->entry.number,
-				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)),
-				max_phonebook_number_length);
-			entry->entry.number[max_phonebook_number_length] = '\0';
-		}
+	((EditEntryData *) data)->pbEntry = current_entry;
 
-		entry->entry.caller_group = ((EditEntryData *) data)->newGroup;
+	gtk_clist_freeze(GTK_CLIST(clist));
+	gtk_clist_insert(GTK_CLIST(clist), 1, clist_row);
+	RefreshEntryRow(current_entry, 1);
+	gtk_clist_sort(GTK_CLIST(clist));
+	gtk_clist_thaw(GTK_CLIST(clist));
 
-		entry->status = E_Changed;
-
-		((EditEntryData *) data)->pbEntry = entry;
-	} else if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypeSIM)->active &&
-		   ((EditEntryData *) data)->pbEntry->entry.memory_type == GN_MT_ME) {
-		if ((entry = FindFreeEntry(GN_MT_SM)) == NULL) {
-			gtk_label_set_text(GTK_LABEL(errorDialog.text),
-					   _("Can't change memory type!"));
-			gtk_widget_show(errorDialog.dialog);
-			return;
-		}
-		strncpy(entry->entry.name,
-			gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
-			max_phonebook_sim_name_length);
-		entry->entry.name[max_phonebook_sim_name_length] = '\0';
-
-		if (strlen(gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name))) >
-		    max_phonebook_sim_name_length) {
-			gtk_label_set_text(GTK_LABEL(errorDialog.text),
-					   _("Sorry, phonebook name will be truncated,\n\
-because you save it into SIM memory!"));
-			gtk_widget_show(errorDialog.dialog);
-		}
-
-		if (phoneMonitor.supported & PM_EXTPBK) {
-		} else {
-			strncpy(entry->entry.number,
-				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->number)),
-				max_phonebook_sim_number_length);
-			entry->entry.number[max_phonebook_sim_number_length] = '\0';
-		}
-
-		entry->entry.caller_group = ((EditEntryData *) data)->newGroup;
-
-		entry->status = E_Changed;
-
-		((EditEntryData *) data)->pbEntry = entry;
-	} else {
-		if (GTK_TOGGLE_BUTTON(((EditEntryData *) data)->memoryTypePhone)->active) {
-			strncpy(((EditEntryData *) data)->pbEntry->entry.name,
-				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
-				max_phonebook_name_length);
-			((EditEntryData *) data)->pbEntry->entry.name[max_phonebook_name_length] = '\0';
-
-			if (phoneMonitor.supported & PM_EXTPBK) {
-			} else {
-				strncpy(((EditEntryData *) data)->pbEntry->entry.number,
-					gtk_entry_get_text(GTK_ENTRY
-							   (((EditEntryData *) data)->number)),
-					max_phonebook_number_length);
-				((EditEntryData *) data)->pbEntry->entry.
-				    name[max_phonebook_number_length] = '\0';
-			}
-		} else {
-			strncpy(((EditEntryData *) data)->pbEntry->entry.name,
-				gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name)),
-				max_phonebook_sim_name_length);
-			((EditEntryData *) data)->pbEntry->entry.
-			    name[max_phonebook_sim_name_length] = '\0';
-
-			if (strlen(gtk_entry_get_text(GTK_ENTRY(((EditEntryData *) data)->name))) >
-			    max_phonebook_sim_name_length) {
-				gtk_label_set_text(GTK_LABEL(errorDialog.text),
-						   _("Sorry, phonebook name will be truncated,\n\
-because you save it into SIM memory!"));
-				gtk_widget_show(errorDialog.dialog);
-			}
-
-			if (phoneMonitor.supported & PM_EXTPBK) {
-			} else {
-				strncpy(((EditEntryData *) data)->pbEntry->entry.number,
-					gtk_entry_get_text(GTK_ENTRY
-							   (((EditEntryData *) data)->number)),
-					max_phonebook_sim_number_length);
-				((EditEntryData *) data)->pbEntry->entry.
-				    name[max_phonebook_sim_number_length] = '\0';
-			}
-		}
-
-		((EditEntryData *) data)->pbEntry->entry.caller_group = ((EditEntryData *) data)->newGroup;
-
-		((EditEntryData *) data)->pbEntry->status = E_Changed;
-	}
-
+	/* GN_MT_ME is set by default by the caller (this is why ME is always shown as modified even if adding a new SM entry) */
+	memoryStatus.UsedME++;
+	memoryStatus.FreeME--;
 	if (((EditEntryData *) data)->pbEntry->entry.memory_type == GN_MT_ME) {
-		memoryStatus.UsedME++;
-		memoryStatus.FreeME--;
 		statusInfo.ch_ME = 1;
 	} else {
-		memoryStatus.UsedSM++;
-		memoryStatus.FreeSM--;
 		statusInfo.ch_SM = 1;
 	}
 
-	gtk_widget_hide(GTK_WIDGET(((EditEntryData *) data)->dialog));
-	((EditEntryData *) data)->dialog = NULL;
-
 	RefreshStatusInfo();
 
-	gtk_clist_freeze(GTK_CLIST(clist));
-	clist_row[0] = ((EditEntryData *) data)->pbEntry->entry.name;
-
-	clist_row[1] = ((EditEntryData *) data)->pbEntry->entry.number;
-
-	if (((EditEntryData *) data)->pbEntry->entry.memory_type == GN_MT_ME)
-		clist_row[2] = "P";
-	else
-		clist_row[2] = "S";
-	if (phoneMonitor.supported & PM_CALLERGROUP)
-		clist_row[3] =
-		    xgnokiiConfig.callerGroups[((EditEntryData *) data)->pbEntry->entry.caller_group];
-	else
-		clist_row[3] = "";
-	gtk_clist_insert(GTK_CLIST(clist), 1, clist_row);
-
-	if (((EditEntryData *) data)->pbEntry->entry.memory_type == GN_MT_ME)
-		gtk_clist_set_pixmap(GTK_CLIST(clist), 1, 2,
-				     memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
-	else
-		gtk_clist_set_pixmap(GTK_CLIST(clist), 1, 2,
-				     memoryPixmaps.simMemPix, memoryPixmaps.mask);
-
-	gtk_clist_set_row_data(GTK_CLIST(clist), 1, (gpointer) ((EditEntryData *) data)->pbEntry);
-
-	gtk_clist_sort(GTK_CLIST(clist));
-	gtk_clist_thaw(GTK_CLIST(clist));
+	gtk_widget_hide(GTK_WIDGET(((EditEntryData *) data)->dialog));
+	((EditEntryData *) data)->dialog = NULL;
 }
 
 
 static void OkChangeEntryDialog(GtkWidget * widget, gpointer data)
 {
-	gchar *clist_row[4];
 	gint row;
-	PhonebookEntry *oldPbEntry, *newPbEntry;
 	GList *sel;
-	gchar string[100];
+	PhonebookEntry *newPbEntry, *oldPbEntry;
 
 	sel = GTK_CLIST(clist)->selection;
 
@@ -713,84 +561,19 @@ static void OkChangeEntryDialog(GtkWidget * widget, gpointer data)
 
 	while (sel != NULL) {
 		row = GPOINTER_TO_INT(sel->data);
+
 		oldPbEntry = (PhonebookEntry *) gtk_clist_get_row_data(GTK_CLIST(clist), row);
+		newPbEntry = ChangeEntryMemoryType(oldPbEntry);
+		if (newPbEntry)
+			RefreshEntryRow(newPbEntry, row);
 
 		sel = sel->next;
-
-		if (oldPbEntry->entry.memory_type == GN_MT_SM) {
-			if ((newPbEntry = FindFreeEntry(GN_MT_ME)) == NULL) {
-				gtk_label_set_text(GTK_LABEL(errorDialog.text),
-						   _("Can't change memory type!"));
-				gtk_widget_show(errorDialog.dialog);
-				return;
-			}
-
-			newPbEntry->entry = oldPbEntry->entry;
-			newPbEntry->entry.memory_type = GN_MT_ME;
-
-			newPbEntry->status = E_Changed;
-			oldPbEntry->status = E_Deleted;
-
-			memoryStatus.UsedME++;
-			memoryStatus.FreeME--;
-			memoryStatus.UsedSM--;
-			memoryStatus.FreeSM++;
-			statusInfo.ch_ME = statusInfo.ch_SM = 1;
-
-		} else {
-			if ((newPbEntry = FindFreeEntry(GN_MT_SM)) == NULL) {
-				gtk_label_set_text(GTK_LABEL(errorDialog.text),
-						   _("Can't change memory type!"));
-				gtk_widget_show(errorDialog.dialog);
-				return;
-			}
-
-			newPbEntry->entry = oldPbEntry->entry;
-			newPbEntry->entry.name[max_phonebook_sim_name_length] = '\0';
-			newPbEntry->entry.memory_type = GN_MT_SM;
-
-			newPbEntry->status = E_Changed;
-			oldPbEntry->status = E_Deleted;
-
-			memoryStatus.UsedME--;
-			memoryStatus.FreeME++;
-			memoryStatus.UsedSM++;
-			memoryStatus.FreeSM--;
-			statusInfo.ch_ME = statusInfo.ch_SM = 1;
-		}
-
-		gtk_clist_remove(GTK_CLIST(clist), row);
-
-		clist_row[0] = newPbEntry->entry.name;
-
-		if (newPbEntry->entry.subentries_count > 0) {
-			snprintf(string, 100, "%s *", newPbEntry->entry.number);
-			clist_row[1] = string;
-		} else
-			clist_row[1] = newPbEntry->entry.number;
-
-		if (newPbEntry->entry.memory_type == GN_MT_ME)
-			clist_row[2] = "P";
-		else
-			clist_row[2] = "S";
-		if (phoneMonitor.supported & PM_CALLERGROUP)
-			clist_row[3] = xgnokiiConfig.callerGroups[newPbEntry->entry.caller_group];
-		else
-			clist_row[3] = "";
-		gtk_clist_insert(GTK_CLIST(clist), row, clist_row);
-		if (newPbEntry->entry.memory_type == GN_MT_ME)
-			gtk_clist_set_pixmap(GTK_CLIST(clist), row, 2,
-					     memoryPixmaps.phoneMemPix, memoryPixmaps.mask);
-		else
-			gtk_clist_set_pixmap(GTK_CLIST(clist), row, 2,
-					     memoryPixmaps.simMemPix, memoryPixmaps.mask);
-
-		gtk_clist_set_row_data(GTK_CLIST(clist), row, (gpointer) newPbEntry);
 	}
 
-	RefreshStatusInfo();
 	gtk_clist_sort(GTK_CLIST(clist));
 	gtk_clist_thaw(GTK_CLIST(clist));
+
+	RefreshStatusInfo();
 }
 
 
@@ -2358,8 +2141,8 @@ static void SaveContacts(void)
 				error = SaveContactsInsertEvent(pbEntry);
 				if (error != GN_ERR_NONE) {
 					g_print(_
-						("%s: line %d: Can't write ME memory entry number %d! Error: %s\n"),
-						__FILE__, __LINE__, i + 1, gn_error_print(error));
+						("%s: line %d: Can't write %s memory entry number %d! Error: %s\n"),
+						__FILE__, __LINE__, "ME", i + 1, gn_error_print(error));
 				}
 			}
 			gtk_progress_set_value(GTK_PROGRESS(progressDialog.pbarME), i + 1);
@@ -2378,8 +2161,8 @@ static void SaveContacts(void)
 				error = SaveContactsInsertEvent(pbEntry);
 				if (error != GN_ERR_NONE) {
 					g_print(_
-						("%s: line %d: Can't write SM memory entry number %d! Error: %s\n"),
-						__FILE__, __LINE__, i - memoryStatus.MaxME + 1, gn_error_print(error));
+						("%s: line %d: Can't write %s memory entry number %d! Error: %s\n"),
+						__FILE__, __LINE__, "SM", i - memoryStatus.MaxME + 1, gn_error_print(error));
 				}
 			}
 			gtk_progress_set_value(GTK_PROGRESS(progressDialog.pbarSM),

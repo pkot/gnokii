@@ -14,6 +14,9 @@
       https://savannah.nongnu.org/bugs/?20816)      (Daniele Forsi)
     o make sure it didn't copy subentries from previously read
       phonebook entry                               (Daniele Forsi)
+    o fix moving phonebook entries from SIM to phone and vice versa
+      (closes https://savannah.nongnu.org/bugs/?21580)
+                                                    (Daniele Forsi)
 
 0.6.21
 ======
