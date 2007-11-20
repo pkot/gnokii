@@ -17,6 +17,8 @@
     o fix moving phonebook entries from SIM to phone and vice versa
       (closes https://savannah.nongnu.org/bugs/?21580)
                                                     (Daniele Forsi)
+    o when a phonebook entry is successfully saved or deleted do
+      not process it again                          (Daniele Forsi)
 
 0.6.21
 ======

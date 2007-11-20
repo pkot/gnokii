@@ -2108,6 +2108,19 @@ static gint SaveContactsInsertEvent(PhonebookEntry *pbEntry)
 	pthread_mutex_unlock(&memoryMutex);
 
 	error = ml->status;
+	if (error == GN_ERR_NONE) {
+		switch (pbEntry->status) {
+			case E_Changed:
+				pbEntry->status = E_Unchanged;
+				break;
+			case E_Deleted:
+				pbEntry->status = E_Empty;
+				break;
+			default:
+				break;
+		}
+	}
+
 	g_free(ml);
 
 	return error;
