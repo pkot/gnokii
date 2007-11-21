@@ -26,9 +26,12 @@
     o reset link layer status when resending message    (Pawel Kot)
     o extend buffer for the reply as a workaround for libusb
       problem                                           (Pawel Kot)
+    o improve DKU-5 initialization again              (Jari Turkia)
  * libgnokii updates
     o export delivery report status as enum, not only text
                                                    (Bastien Nocera)
+ * nk6510 driver updates
+    o don't free driver instance too early (Jari Turkia, Pawel Kot)
 
 0.6.21
 ======
