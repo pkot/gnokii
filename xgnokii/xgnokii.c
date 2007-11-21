@@ -935,9 +935,9 @@ static void OptionsApplyCallback(GtkWidget * widget, gpointer data)
 
 	/* Phone */
 	max_phonebook_sim_name_length = GNOKII_MIN(GN_PHONEBOOK_NAME_MAX_LENGTH,
-	    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(configDialogData.phone.simNameLen)) + 1);
+	    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(configDialogData.phone.simNameLen))) + 1;
 	max_phonebook_name_length = GNOKII_MIN(GN_PHONEBOOK_NAME_MAX_LENGTH,
-	    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(configDialogData.phone.phoneNameLen)) + 1);
+	    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(configDialogData.phone.phoneNameLen))) + 1;
 	g_free(xgnokiiConfig.maxSIMLen);
 	g_free(xgnokiiConfig.maxPhoneLen);
 	xgnokiiConfig.maxSIMLen = g_strdup_printf("%d", max_phonebook_sim_name_length - 1);
