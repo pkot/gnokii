@@ -3,6 +3,7 @@
  * build system updates
     o make install and install-devel work correctly     (Pawel Kot)
     o xgnokii.pc should be installed with install-devel (Pawel Kot)
+    o add MS Visual C++ 2008 project files            (Jari Turkia)
  * at driver updates
     o make CNMI mode argument configurable in at_driver_instance
                                                         (Pawel Kot)
