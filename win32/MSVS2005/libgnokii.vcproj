@@ -304,6 +304,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\common\phones\atmot.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\phones\atnok.c"
 				>
 				<FileConfiguration
