@@ -19,6 +19,8 @@
                                                     (Daniele Forsi)
     o when a phonebook entry is successfully saved or deleted do
       not process it again                          (Daniele Forsi)
+    o do not let the user write phonebook names longer than the
+      space allocated by libgnokii                  (Daniele Forsi)
  * link layer updates
     o reset link layer status when resending message    (Pawel Kot)
     o extend buffer for the reply as a workaround for libusb

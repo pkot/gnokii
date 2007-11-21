@@ -1284,7 +1284,7 @@ static void CreateEditDialog(EditEntryData * editEntryData, gchar * title, GtkSi
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	editEntryData->name = gtk_entry_new_with_max_length(100);
+	editEntryData->name = gtk_entry_new_with_max_length(GN_PHONEBOOK_NAME_MAX_LENGTH);
 
 	gtk_box_pack_end(GTK_BOX(hbox), editEntryData->name, FALSE, FALSE, 2);
 	gtk_widget_show(editEntryData->name);

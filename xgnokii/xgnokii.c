@@ -934,14 +934,14 @@ static void OptionsApplyCallback(GtkWidget * widget, gpointer data)
 	register gint i;
 
 	/* Phone */
-	max_phonebook_sim_name_length =
-	    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(configDialogData.phone.simNameLen));
-	max_phonebook_name_length =
-	    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(configDialogData.phone.phoneNameLen));
+	max_phonebook_sim_name_length = GNOKII_MIN(GN_PHONEBOOK_NAME_MAX_LENGTH,
+	    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(configDialogData.phone.simNameLen)) + 1);
+	max_phonebook_name_length = GNOKII_MIN(GN_PHONEBOOK_NAME_MAX_LENGTH,
+	    gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(configDialogData.phone.phoneNameLen)) + 1);
 	g_free(xgnokiiConfig.maxSIMLen);
 	g_free(xgnokiiConfig.maxPhoneLen);
-	xgnokiiConfig.maxSIMLen = g_strdup_printf("%d", max_phonebook_sim_name_length);
-	xgnokiiConfig.maxPhoneLen = g_strdup_printf("%d", max_phonebook_name_length);
+	xgnokiiConfig.maxSIMLen = g_strdup_printf("%d", max_phonebook_sim_name_length - 1);
+	xgnokiiConfig.maxPhoneLen = g_strdup_printf("%d", max_phonebook_name_length - 1);
 
 	/* ALARM */
 	/* From fbus-6110.c 
@@ -1801,14 +1801,14 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	adj = (GtkAdjustment *) gtk_adjustment_new(0.0, 1.0, 100.0, 1.0, 10.0, 0.0);
+	adj = (GtkAdjustment *) gtk_adjustment_new(0.0, 1.0, GN_PHONEBOOK_NAME_MAX_LENGTH, 1.0, 10.0, 0.0);
 	configDialogData.phone.simNameLen = gtk_spin_button_new(adj, 0, 0);
 	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(configDialogData.phone.simNameLen), TRUE);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(configDialogData.phone.simNameLen), TRUE);
 	gtk_box_pack_start(GTK_BOX(hbox), configDialogData.phone.simNameLen, FALSE, FALSE, 2);
 	gtk_widget_show(configDialogData.phone.simNameLen);
 
-	adj = (GtkAdjustment *) gtk_adjustment_new(0.0, 1.0, 100.0, 1.0, 10.0, 0.0);
+	adj = (GtkAdjustment *) gtk_adjustment_new(0.0, 1.0, GN_PHONEBOOK_NAME_MAX_LENGTH, 1.0, 10.0, 0.0);
 	configDialogData.phone.phoneNameLen = gtk_spin_button_new(adj, 0, 0);
 	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(configDialogData.phone.phoneNameLen), TRUE);
 	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(configDialogData.phone.phoneNameLen), TRUE);
@@ -2368,8 +2368,8 @@ static void ReadConfig(void)
 	max_phonebook_number_length = max_phonebook_sim_number_length =
 	    GN_PHONEBOOK_NUMBER_MAX_LENGTH;
 	GUI_ReadXConfig();
-	max_phonebook_name_length = atoi(xgnokiiConfig.maxPhoneLen);
-	max_phonebook_sim_name_length = atoi(xgnokiiConfig.maxSIMLen);
+	max_phonebook_name_length = GNOKII_MIN(GN_PHONEBOOK_NAME_MAX_LENGTH, atoi(xgnokiiConfig.maxPhoneLen) + 1);
+	max_phonebook_sim_name_length = GNOKII_MIN(GN_PHONEBOOK_NAME_MAX_LENGTH, atoi(xgnokiiConfig.maxSIMLen) + 1);
 
 #ifndef WIN32
 	xgnokiiConfig.xgnokiidir = DefaultXGnokiiDir;
