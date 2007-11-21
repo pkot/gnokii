@@ -304,6 +304,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 	sms->user_data[0].type = GN_SMS_DATA_Text;
 	sms->user_data[1].type = GN_SMS_DATA_None;
 	if (status < 0x03) {
+		sms->user_data[0].dr_status = GN_SMS_DR_Status_Delivered;
 		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Delivered"));
 		switch (status) {
 		case 0x00:
@@ -321,7 +322,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 		/* more detailed reason only for debug */
 		if (status & 0x20) {
 			dprintf("Temporary error, SC is not making any more transfer attempts\n");
-
+			sms->user_data[0].dr_status = GN_SMS_DR_Status_Failed_Permanent;
 			switch (status) {
 			case 0x60:
 				dprintf("Congestion");
@@ -347,6 +348,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			}
 		} else {
 			dprintf("Permanent error, SC is not making any more transfer attempts\n");
+			sms->user_data[0].dr_status = GN_SMS_DR_Status_Failed_Temporary;
 			switch (status) {
 			case 0x40:
 				dprintf("Remote procedure error");
@@ -384,6 +386,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			}
 		}
 	} else if (status & 0x20) {
+		sms->user_data[0].dr_status = GN_SMS_DR_Status_Pending;
 		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Pending"));
 		/* more detailed reason only for debug */
 		dprintf("Temporary error, SC still trying to transfer SM\n");
@@ -411,6 +414,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			break;
 		}
 	} else {
+		sms->user_data[0].dr_status = GN_SMS_DR_Status_Invalid;
 		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Unknown"));
 
 		/* more detailed reason only for debug */
@@ -664,6 +668,7 @@ static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
 
 	error = sms_header_decode(rawsms, sms, &sms->udh);
 	ERROR();
+	sms->user_data[0].dr_status = GN_SMS_DR_Status_None;
 	switch (sms->type) {
 	case GN_SMS_MT_DeliveryReport:
 		sms_status(rawsms->report_status, sms);

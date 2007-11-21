@@ -26,6 +26,9 @@
     o reset link layer status when resending message    (Pawel Kot)
     o extend buffer for the reply as a workaround for libusb
       problem                                           (Pawel Kot)
+ * libgnokii updates
+    o export delivery report status as enum, not only text
+                                                   (Bastien Nocera)
 
 0.6.21
 ======
