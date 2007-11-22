@@ -2233,7 +2233,7 @@ static GtkWidget *CreateSaveQuestionDialog(GtkSignalFunc SaveFunc, GtkSignalFunc
 	gtk_widget_show(pixmap);
 
 	label = gtk_label_new(_("You have made changes in your\ncontacts directory.\n\
-\n\nDo you want save these changes into phone?\n"));
+\n\nDo you want to save these changes into your phone?\n"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
