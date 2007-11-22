@@ -34,6 +34,8 @@
       and importing phonebook entries in LDIF format (instead of
       businessGroup and callerGroup)     (Pawel Kot, Daniele Forsi)
     o add function to return connection name            (Pawel Kot)
+    o make gn_gsm_initialise() print the "phone instance config" in
+      a format that can be copied into gnokiirc     (Daniele Forsi)
  * nk6510 driver updates
     o don't free driver instance too early (Jari Turkia, Pawel Kot)
 
