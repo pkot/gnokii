@@ -491,6 +491,15 @@ GNOKII_API const char *gn_lib_get_supported_connection(const int num)
 	return connectiontypes[num].str;
 }
 
+GNOKII_API const char *gn_lib_get_connection_name(gn_connection_type ct)
+{
+	int i;
+	for (i = 0; i < sizeof(connectiontypes)/sizeof(connectiontypes[0]); i++)
+		if (ct == connectiontypes[i].ct)
+			return connectiontypes[i].str;
+	return NULL;
+}
+
 GNOKII_API int gn_lib_is_connectiontype_supported(gn_connection_type ct)
 {
 	switch (ct) {

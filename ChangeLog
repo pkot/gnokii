@@ -33,6 +33,7 @@
     o use businessCategory for caller group number when exporting
       and importing phonebook entries in LDIF format (instead of
       businessGroup and callerGroup)     (Pawel Kot, Daniele Forsi)
+    o add function to return connection name            (Pawel Kot)
  * nk6510 driver updates
     o don't free driver instance too early (Jari Turkia, Pawel Kot)
 
