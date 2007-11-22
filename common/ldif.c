@@ -96,9 +96,8 @@ GNOKII_API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry)
 	if (entry->caller_group) {
 		char aux2[10];
 
-		memset(aux2, 0, 10);
 		snprintf(aux2, sizeof(aux2), "%d", entry->caller_group);
-		ldif_entry_write(f, "businessGroup", aux2, 1);
+		ldif_entry_write(f, "businessCategory", aux2, 1);
 	}
 
 	if (entry->subentries_count == 0) {
@@ -225,7 +224,7 @@ GNOKII_API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 		STORENUM("telephoneNumber: ", GN_PHONEBOOK_NUMBER_General);
 		STORENUM_BASE64("telephoneNumber:: ", GN_PHONEBOOK_NUMBER_General);
 		
-		STOREINT("callerGroup: ", entry->caller_group);
+		STOREINT("businessCategory: ", entry->caller_group);
 
 		if (BEGINS("\n"))
 			break;

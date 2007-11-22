@@ -30,6 +30,9 @@
  * libgnokii updates
     o export delivery report status as enum, not only text
                                                    (Bastien Nocera)
+    o use businessCategory for caller group number when exporting
+      and importing phonebook entries in LDIF format (instead of
+      businessGroup and callerGroup)     (Pawel Kot, Daniele Forsi)
  * nk6510 driver updates
     o don't free driver instance too early (Jari Turkia, Pawel Kot)
 
