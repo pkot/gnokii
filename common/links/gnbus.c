@@ -47,6 +47,7 @@
 #include "gnokii.h"
 #include "device.h"
 #include "links/gnbus.h"
+#include "links/utils.h"
 
 #include "gnokii-internal.h"
 

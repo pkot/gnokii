@@ -50,6 +50,7 @@
 #include "device.h"
 
 #include "links/fbus-3110.h"
+#include "links/utils.h"
 
 static bool fb3110_serial_open(struct gn_statemachine *state);
 static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemachine *state);

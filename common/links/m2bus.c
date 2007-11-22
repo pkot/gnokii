@@ -48,6 +48,7 @@
 #include "gnokii.h"
 #include "device.h"
 #include "links/m2bus.h"
+#include "links/utils.h"
 
 #include "gnokii-internal.h"
 

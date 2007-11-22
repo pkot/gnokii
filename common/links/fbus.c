@@ -51,6 +51,7 @@
 #include "gnokii.h"
 #include "device.h"
 #include "links/fbus.h"
+#include "links/utils.h"
 #include "gnokii-internal.h"
 
 static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
