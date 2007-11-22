@@ -198,7 +198,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
 	gn_error	error = GN_ERR_INTERNALERROR;
-	unsigned char	buffer[1024];
+	unsigned char	buffer[BUFFER_SIZE];
 	int		count, res;
 
 	res = device_select(timeout, state);

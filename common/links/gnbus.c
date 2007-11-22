@@ -178,7 +178,7 @@ static void gnbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine 
 
 static gn_error gnbus_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
-	unsigned char buffer[256];
+	unsigned char buffer[BUFFER_SIZE];
 	int count, res;
 
 	res = device_select(timeout, state);

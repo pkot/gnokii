@@ -301,7 +301,7 @@ static bool cbus_open_serial(char *device, struct gn_statemachine *state)
  */
 static gn_error cbus_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
-	unsigned char buffer[255];
+	unsigned char buffer[BUFFER_SIZE];
 	int count, res;
 
 	res = device_select(timeout, state);

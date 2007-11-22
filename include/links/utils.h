@@ -37,6 +37,9 @@
 
 #include "gnokii.h"
 
+/* Needs to be a multiplication of 64 */
+#define BUFFER_SIZE	256
+
 gn_error link_terminate(struct gn_statemachine *state);
 void at_dprintf(char *prefix, char *buf, int len);
 
