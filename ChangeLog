@@ -24,8 +24,8 @@
       space allocated by libgnokii                  (Daniele Forsi)
  * link layer updates
     o reset link layer status when resending message    (Pawel Kot)
-    o extend buffer for the reply as a workaround for libusb
-      problem                                           (Pawel Kot)
+    o buffer for statemachine should be of 64 multiplication size
+      (that helps in USB connection)                    (Pawel Kot)
     o improve DKU-5 initialization again              (Jari Turkia)
  * libgnokii updates
     o export delivery report status as enum, not only text
