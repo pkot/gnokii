@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
                          (C) 2001 - 2007 Paweł Kot
-               Last update 11 November 2007  Version 0.6.21
+               Last update 24 November 2007  Version 0.6.22
 
 - Contents -
 
@@ -24,7 +24,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.21 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.22 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -137,7 +137,7 @@ If you downloaded gnokii as a pre-built binary you should install it in the
 conventional manner for the package type in question. For example if you
 downloaded a .rpm file you can install it by running the following as root.
 
-rpm -i gnokii-0.6.21-i386.rpm
+rpm -i gnokii-0.6.22-i386.rpm
 
 If you are using a Debian based system, you may use basic
 
@@ -145,7 +145,7 @@ apt-get install gnokii xgnokii
 
 if you want to base on the official Debian package, or
 
-dpkg -i gnokii_0.6.21_i386.deb xgnokii_0.6.21_i386.deb
+dpkg -i gnokii_0.6.22_i386.deb xgnokii_0.6.22_i386.deb
 
 On Slackware you can use installpkg or pkgtool.
 
@@ -400,6 +400,15 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20071124 Version 0.6.22
+Fix phonebook entries deletion from xgnokii. Fix moving phonebook entries
+from SIM to phone and vice versa from xgnokii. Fix initialization for some
+DKU-5 cases. Fix not working message retries. Fix non working SMS reading on
+DKU-2 connection. Fixes for Motorola compatibility (SMS notification and
+model reading). Fix installation issues. Add possibility to build gnokii
+with MS Visual Studio 2008. gnapplet now registers its bluetooth service so
+you can check if it's running.
+
 20071111 Version 0.6.21
 Implement various new FBUS protocol findings. Make bluetooth connection non
 blocking. Avoid weird memory corruptions. Improve DKU-5 initialization
