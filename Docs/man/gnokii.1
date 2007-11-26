@@ -1,4 +1,4 @@
-.TH "gnokii" "1" "May 7, 2007" "Dag Wieers, Pawel Kot, Daniele Forsi" "gnokii"
+.TH "gnokii" "1" "Nov 26, 2007" "Dag Wieers, Pawel Kot" "gnokii"
 .SH "NAME"
 gnokii \- modem/fax driver for the mobile phones
 .SH "SYNOPSIS"
@@ -184,7 +184,7 @@ set SMSC parameters read from STDIN. See \fI\-\-raw\fP output of \fI\-\-getsmsc\
 create SMS folder with name \fIname\fR.
 
 .TP 
-.BR "\-\-createsmsfolder \fInumber\fP"
+.BR "\-\-deletesmsfolder \fInumber\fP"
 delete folder # \fInumber\fR of 'My Folders'.
 
 .TP 
@@ -210,13 +210,17 @@ set or clear welcome note.
 .TP
 .BR "\-\-getlogo startup [\fIlogofile\fP [\fInetwork_code\fP]]"
 .TP
-.BR "\-\-getlogo caller [\fIcaller_group_number\fP [\fIlogofile\fP [\fInetwork code\fP]]]"
+.BR "\-\-getlogo caller [\fIcaller_group_number\fP [\fIlogofile\fP [\fInetwork_code\fP]]]"
 get operator, startup or caller logo.
 .TP
 .BR "\-\-getlogo {dealer|text}"
 get welcome note.
 .TP
 .BR "\-\-viewlogo \fIlogofile\fP"
+print the \fIlogofile\fP as ASCII art.
+Formats that are automatically detected are: NOL, NGG, NSM, NLM, BMP, I61, GGP, XPM. The OTA format can be used only if the filename ends with the .otb extension.
+.PP
+Format of \fInetwork_code\fP parameter is 3 digits MCC, a space, 2 digits MNC surrounded by single or double quotes, eg. "123 45".
 
 .SS RINGTONES
 .TP 
