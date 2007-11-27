@@ -1,3 +1,28 @@
+* Wed 21 Nov 2007 Daniele Forsi
+- never let the user write a phonebook name longer than
+  GN_PHONEBOOK_NAME_MAX_LENGTH and allocate memory for string terminator too
+
+* Tue 20 Nov 2007 Daniele Forsi
+- fix moving phonebook entries from SM to ME or from ME to SM
+  closes https://savannah.nongnu.org/bugs/?21580
+
+* Mon 19 Nov 2007 Daniele Forsi
+- fix deleting phonebook entries
+  fixes original submission of https://savannah.nongnu.org/bugs/?20816
+
+* Sun 4 Nov 2007 Daniele Forsi
+- when importing contacts from file overwrite entries with same location
+  number; leave untouched other entries
+- fix optimization to read the phonebook when empty entries are present
+
+* Fri 26 Oct 2007 Daniele Forsi
+- when exporting the phonebook in raw format use the same function as gnokii
+  closes https://savannah.nongnu.org/bugs/?20815
+
+* Tue 19 Dec 2006 Daniele Forsi
+- clear the text box after deleting a note and update the list after adding a
+  note in the Calendar window
+
 * Sun 17 Dec 2006 Pawel Kot
 - Add support for blacklisting phones based on PM_XGNOKIIBREAKAGE
   capability.
