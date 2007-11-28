@@ -4,7 +4,10 @@
     o add further details for logo commands to gnokii man page
                                                     (Daniele Forsi)
     o update xgnokii/ChangeLog                      (Daniele Forsi)
- 
+ * build system updates
+    o don't include packaging directory in the release tarballs
+                                                        (Pawel Kot)
+
 0.6.22
 ======
  * build system updates

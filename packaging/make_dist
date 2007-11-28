@@ -43,6 +43,8 @@ cp -r ${SRC_DIR} /tmp/gnokii-${VERSION}
    cd patches/kernel_2.6
    autoconf
    cd ../..
+   # remove packaging dir
+   rm -rf packaging
    # prepare the tarballs
    cd ..
    tar -cz --exclude CVS -f /tmp/gnokii-${VERSION}.tar.gz gnokii-${VERSION}
