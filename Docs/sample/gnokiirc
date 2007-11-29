@@ -177,7 +177,9 @@ bindir = /usr/local/sbin/
 # variables when running the scripts.
 # Handy for use for $VAR substitutions in your chat(8) script.
 [connect_script]
+# Don't put your phone number here!!!
 TELEPHONE = 12345678
+
 [disconnect_script]
 
 
