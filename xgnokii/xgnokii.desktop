@@ -9,5 +9,4 @@ Icon=cellphone
 Exec=xgnokii
 Terminal=false
 Type=Application
-Encoding=UTF-8
 Categories=Utility;TelephonyTools;Calendar;ContactManagement;Office;GTK;
