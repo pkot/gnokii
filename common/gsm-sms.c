@@ -712,7 +712,9 @@ static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
 			gn_bmp_sms_read(GN_BMP_PictureMessage,
 					rawsms->user_data + rawsms->user_data[0] + 7,
 					NULL, &sms->user_data[0].u.bitmap);
+#ifdef DEBUG
 			gn_bmp_print(&sms->user_data[0].u.bitmap, stderr);
+#endif
 		}
 		break;
 	/* Plain text message */
