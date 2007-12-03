@@ -40,3 +40,5 @@ HELP_DIR = docs/help
 
 pkgconfig_DATA = xgnokii.pc
 pkgconfigdir = $(libdir)/pkgconfig
+
+EXTRA_DIST = VERSION

@@ -8,8 +8,20 @@ dnl
 dnl  $Id$
 dnl
 
+
+# Before making a release, the GNOKII_LT_VERSION string should be modified.
+# The string is of the form C:R:A.
+# - If interfaces have been changed or added, but binary compatibility has
+#   been preserved, change to C+1:0:A+1
+# - If binary compatibility has been broken (eg removed or changed interfaces)
+#   change to C+1:0:0
+# - If the interface is the same as the previous version, change to C:R+1:A
+GNOKII_LT_VERSION_CURRENT=9
+GNOKII_LT_VERSION_REVISION=6
+GNOKII_LT_VERSION_AGE=0
+
 AC_INIT([gnokii],
-	 [0.6.22],
+	 [0.6.23],
 	 [http://www.gnokii.org])
 
 AC_CONFIG_AUX_DIR(config)
@@ -65,16 +77,7 @@ AC_RELOCATABLE
 
 AM_ICONV
 
-# Before making a release, the GNOKII_LT_VERSION string should be modified.
-# The string is of the form C:R:A.
-# - If interfaces have been changed or added, but binary compatibility has
-#   been preserved, change to C+1:0:A+1
-# - If binary compatibility has been broken (eg removed or changed interfaces)
-#   change to C+1:0:0
-# - If the interface is the same as the previous version, change to C:R+1:A
-GNOKII_LT_VERSION_CURRENT=9
-GNOKII_LT_VERSION_REVISION=6
-GNOKII_LT_VERSION_AGE=0
+dnl ======================== Libtool versioning
 GNOKII_LT_VERSION=$GNOKII_LT_VERSION_CURRENT:$GNOKII_LT_VERSION_REVISION:$GNOKII_LT_VERSION_AGE
 AC_SUBST(GNOKII_LT_VERSION)
 
@@ -88,6 +91,7 @@ AC_SUBST(LIBGNOKII_VERSION_MAJOR)
 AC_SUBST(LIBGNOKII_VERSION_MINOR)
 AC_SUBST(LIBGNOKII_VERSION_RELEASE)
 AC_SUBST(LIBGNOKII_VERSION_STRING)
+AC_DEFINE_UNQUOTED(VERSION, "$VERSION", [The current version])
 
 dnl ======================== Default setting
 dnl Add the languages which your application supports to po/LINGUAS
@@ -131,13 +135,13 @@ AC_ARG_ENABLE(rlpdebug,
 )
 
 if test $debug = "yes"; then
-	AC_DEFINE(DEBUG)
+	AC_DEFINE(DEBUG, 1, [Whether debug is turned on])
 fi
 if test $xdebug = "yes"; then
-	AC_DEFINE(XDEBUG)
+	AC_DEFINE(XDEBUG, 1, [Whether xdebug is turned on])
 fi
 if test $rlpdebug = "yes"; then
-	AC_DEFINE(RLP_DEBUG)
+	AC_DEFINE(RLP_DEBUG, 1, [Whether rlpdebug is turned on])
 fi
 
 dnl ======================== Set gcc CFLAGS if we use gcc
@@ -206,7 +210,7 @@ AC_CACHE_CHECK(for tm_gmtoff in struct tm, ac_cv_have_tm_gmtoff,
 		ac_cv_have_tm_gmtoff=yes,
 		ac_cv_have_tm_gmtoff=no)])
 if test $ac_cv_have_tm_gmtoff = yes; then
-	AC_DEFINE(HAVE_TM_GMTON)
+	AC_DEFINE(HAVE_TM_GMTON, 1, [Whether tm_gmtoff is available])
 fi
 
 AC_CACHE_CHECK(for timer operations, ac_cv_have_timeops,
@@ -215,7 +219,7 @@ AC_CACHE_CHECK(for timer operations, ac_cv_have_timeops,
 		ac_cv_have_timeops=yes,
 		ac_cv_have_timeops=no)])
 if test $ac_cv_have_timeops = yes; then
-        AC_DEFINE(HAVE_TIMEOPS)
+        AC_DEFINE(HAVE_TIMEOPS, 1, [Whether timer operations are available])
 fi
 
 have_termios="no"
@@ -226,7 +230,7 @@ AC_CACHE_CHECK(for cfsetspeed in termios.h, ac_cv_have_cfsetspeed,
 		ac_cv_have_cfsetspeed=yes,
 		ac_cv_have_cfsetspeed=no)])
 if test $ac_cv_have_cfsetspeed = yes; then
-        AC_DEFINE(HAVE_CFSETSPEED)
+        AC_DEFINE(HAVE_CFSETSPEED, 1, [Whether cfsetspeed is available])
         have_termios="yes"
 fi
 
@@ -237,8 +241,8 @@ if test $have_termios = "no"; then
 			ac_cv_have_cfsetiospeed=yes,
 			ac_cv_have_cfsetiospeed=no)])
 	if test $ac_cv_have_cfsetiospeed = yes; then
-		AC_DEFINE(HAVE_CFSETISPEED)
-		AC_DEFINE(HAVE_CFSETOSPEED)
+		AC_DEFINE(HAVE_CFSETISPEED, 1, [Whether cfsetispeed is available])
+		AC_DEFINE(HAVE_CFSETOSPEED, 1, [Whether cfsetospeed is available])
 		have_termios="yes"
 	fi
 fi
@@ -250,7 +254,7 @@ if test $have_termios = "no"; then
 			ac_cv_have_c_iospeed=yes,
 			ac_cv_have_c_iospeed=yes)])
 	if test ac_cv_have_c_iospeed = yes; then
-		AC_DEFINE(HAVE_TERMIOS_CSPEED)
+		AC_DEFINE(HAVE_TERMIOS_CSPEED, 1, [Whether c_ispeed and c_ospeed are available])
 	fi
 fi
 
@@ -365,7 +369,7 @@ AC_ARG_ENABLE(irda,
               [enable_irda=yes])
 if test "$enable_irda" == "yes"; then
 	AC_CHECK_HEADER(linux/irda.h,
-		[AC_DEFINE(HAVE_IRDA)
+		[AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available])
 		 USE_IRDA="yes"],,
 		[#include <sys/socket.h>
 		 #include <sys/ioctl.h>
@@ -401,7 +405,7 @@ if test "$enable_bluetooth" == "yes"; then
 			ac_cv_have_sockaddr_rc=yes,
 			ac_cv_have_sockaddr_rc=no)])
 	if test $ac_cv_have_sockaddr_rc = yes; then
-		AC_DEFINE(HAVE_BLUETOOTH)
+		AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 		AC_DEFINE(HAVE_BLUETOOTH_BLUEZ,[],[Compile on Linux])
 		USE_BLUETOOTH="yes"
 		LIBS="$LIBS -lbluetooth"
@@ -425,7 +429,7 @@ if test "$enable_bluetooth" == "yes"; then
 		ac_cv_have_iobluetooth=no)
 
 	if test $ac_cv_have_iobluetooth = yes; then
-		AC_DEFINE(HAVE_BLUETOOTH)
+		AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 		AC_DEFINE(HAVE_BLUETOOTH_MACOSX,[],[Compile on Darwin / Mac OSX])
 		USE_BLUETOOTH="yes"
 		LIBS="$LIBS $PTHREAD_LIBS -framework CoreFoundation -framework IOBluetooth -framework Foundation"
@@ -447,7 +451,7 @@ if test "$enable_bluetooth" == "yes"; then
 			ac_cv_have_sockaddr_rfcomm=no)])
 
 	if test $ac_cv_have_sockaddr_rfcomm = yes; then
-		AC_DEFINE(HAVE_BLUETOOTH)
+		AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 		AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH,[],[Compile on FreeBSD])
 		USE_BLUETOOTH="yes"
 		AC_CHECK_LIB(bluetooth, bt_aton,
@@ -522,7 +526,7 @@ else
           [ AC_CHECK_LIB(Xpm, XpmWriteFileFromXpmImage,
                 [ XPM_CFLAGS="$XINCL"
                   XPM_LIBS="$XLIBS -lXpm -lX11"
-                  AC_DEFINE(XPM) ],
+                  AC_DEFINE(XPM, 1, [Whether the Xpm library is available]) ],
                 AC_MSG_WARN(Cannot found library libXpm - disabling XPM support.),
                 [ $XLIBS -lX11 ]
             )
@@ -580,7 +584,7 @@ dnl ======================== Additional switches
 AC_ARG_ENABLE(security,
    [  --enable-security       enable all security features @<:@default=no@:>@],
    [ if test x$enable_security = xyes; then
-	AC_DEFINE(SECURITY)
+	AC_DEFINE(SECURITY, 1, [Whether security features are enabled])
      	security="yes"
      else
 	security="no"
@@ -591,7 +595,7 @@ AC_ARG_ENABLE(security,
 AC_ARG_ENABLE(win32,
    [  --enable-win32          if you want win32 support ],
    [ if test x$enable_win32 = xyes; then
-	AC_DEFINE(WIN32)
+	AC_DEFINE(WIN32, 1, [Whether compiling on Win32])
 	WIN32=1
 	if test x$cross_compiling = xyes; then
 		AC_DEFINE(WIN32_CROSS, 1, [Define if you cross compile win32.])
@@ -600,7 +604,7 @@ AC_ARG_ENABLE(win32,
 	else
  		win32="yes"
 	fi
-	AC_CHECK_HEADER(af_irda.h, [AC_DEFINE(HAVE_IRDA) USE_IRDA="yes"])
+	AC_CHECK_HEADER(af_irda.h, [AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available]) USE_IRDA="yes"])
      else
 	win32="no"
      fi ],
@@ -614,7 +618,7 @@ AC_ARG_ENABLE(unix98test,
                           default is enabled],
    [ if test x$enable_unix98test = xno; then
 	unix98test="no"
-        AC_DEFINE(USE_UNIX98PTYS)
+        AC_DEFINE(USE_UNIX98PTYS, 1, [Whether Unix98 support is available])
      else
 	unix98test="yes"
      fi ],
@@ -654,9 +658,9 @@ int main()
 	exit(0);
 }
                 ],
-                AC_DEFINE(USE_UNIX98PTYS),
+                AC_DEFINE(USE_UNIX98PTYS, 1, [Whether Unix98 support is available]),
                 AC_MSG_WARN("No unix98ptys"),
-		AC_DEFINE(USE_UNIX98PTYS))
+		AC_DEFINE(USE_UNIX98PTYS, 1, [Whether Unix98 support is available])
    ]
 )
 
@@ -666,7 +670,7 @@ AC_TRY_COMPILE( [#define _XOPEN_SOURCE 500
 		 #include <sys/types.h>
 		 #include <sys/socket.h>],
 		[struct msghdr msg; msg.msg_control;],
-		AC_DEFINE(HAVE_MSGHDR_MSG_CONTROL)
+		AC_DEFINE(HAVE_MSGHDR_MSG_CONTROL, 1, [Whether struct msghdr has a msg_control member])
 )
 
 dnl ======================== Checks for header files.
@@ -696,7 +700,7 @@ AC_CACHE_CHECK(for __ptr_t, ac_cv_c___ptr_t,
 		[__ptr_t foo = NULL;],
 		ac_cv_c___ptr_t=yes, ac_cv_c___ptr_t=no)])
 if test $ac_cv_c___ptr_t = yes; then
-	AC_DEFINE(HAVE_PTR_T, 1)
+	AC_DEFINE(HAVE_PTR_T, 1, [Whether __ptr_t is available])
 fi
 
 dnl ======================== Checks for library functions.
@@ -719,7 +723,7 @@ int main()
 	exit ((buf[2] != 0) || (snprintf(NULL, 0, "%d", 100) != 3));
 }],ac_cv_func_snprintf_c99=yes,ac_cv_func_snprintf_c99=no,ac_cv_func_snprintf_c99=no)])
 if test $ac_cv_func_snprintf_c99 = yes; then
-	AC_DEFINE(HAVE_C99_SNPRINTF)
+	AC_DEFINE(HAVE_C99_SNPRINTF, 1, [Whether snprintf is available])
 fi
 AC_CACHE_CHECK(for ISO C99 compliant vsnprintf,ac_cv_func_vsnprintf_c99,
 	[AC_TRY_RUN([
@@ -746,20 +750,19 @@ int main()
 	exit ((buf[2] != 0) || (doit(NULL, 0, "%d", 100) != 3));
 }],ac_cv_func_vsnprintf_c99=yes,ac_cv_func_vsnprintf_c99=no,ac_cv_func_vsnprintf_c99=no)])
 if test $ac_cv_func_vsnprintf_c99 = yes; then
-	AC_DEFINE(HAVE_C99_VSNPRINTF)
+	AC_DEFINE(HAVE_C99_VSNPRINTF, 1, [Whether vsnprintf is available])
 fi
 
 CFLAGS="$CFLAGS $NLS_CFLAGS"
 LIBS="$LIBS $NLS_LIBS"
 
-PACKAGE=gnokii
 XPACKAGE=xgnokii
-VERSION=`cat VERSION`
 XVERSION=`cat xgnokii/VERSION`
-AC_DEFINE_UNQUOTED(VERSION, "$VERSION")
-AC_DEFINE_UNQUOTED(XVERSION, "$XVERSION")
+AC_DEFINE_UNQUOTED(XVERSION, "$XVERSION", [The current xgnokii version])
+
 if test "$x_support" = yes; then
-	AC_DEFINE_UNQUOTED(XGNOKIIDIR, "`eval echo $XGNOKIIDIR`")
+	AC_EXPAND_DIR(xgnokii_dir, "${XGNOKIIDIR}")
+	AC_DEFINE_UNQUOTED(XGNOKIIDIR, "$xgnokii_dir", [Base directory for xgnokii])
 fi
 HAVE_XGNOKII=$x_support
 
