@@ -168,6 +168,12 @@ if test "x$GCC" = "xyes"; then
 		ac_cv_have_hidden_visibility=yes,
 		ac_cv_have_hidden_visibility=no)
   AC_MSG_RESULT($ac_cv_have_hidden_visibility)
+  CFLAGS="-fno-strict-aliasing"
+  AC_MSG_CHECKING(if gcc supports $CFLAGS compiler option)
+  AC_TRY_COMPILE( [], [ int main() { return 0; } ],
+		ac_cv_have_strict_aliasing=yes,
+		ac_cv_have_strict_aliasing=no)
+  AC_MSG_RESULT($ac_cv_have_strict_aliasing)
 
   CFLAGS="$OLD_CFLAGS"
   if test $ac_cv_have_no_pointer_sign = yes; then
@@ -175,6 +181,9 @@ if test "x$GCC" = "xyes"; then
   fi
   if test $ac_cv_have_hidden_visibility = yes; then
     CFLAGS="$CFLAGS -fvisibility=hidden"
+  fi
+  if test $ac_cv_have_strict_aliasing = yes; then
+    CFLAGS="$CFLAGS -fno-strict-aliasing"
   fi
 fi
 
