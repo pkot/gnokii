@@ -6,3 +6,4 @@ gnokii.pc
 gnvcal.c
 Makefile
 Makefile.in
+.deps

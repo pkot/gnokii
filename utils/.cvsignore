@@ -3,3 +3,4 @@ mgnokiidev
 *.lo
 Makefile
 Makefile.in
+.deps
