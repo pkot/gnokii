@@ -829,6 +829,13 @@ AC_SUBST(HAVE_LIBUSB)
 
 AC_OUTPUT(
 	  Makefile
+	  Docs/Makefile
+	  Docs/man/Makefile
+	  Docs/sample/Makefile
+	  Docs/sample/logo/Makefile
+	  Docs/sample/vCalendar/Makefile
+	  Docs/sample/ringtone/Makefile
+	  Docs/sample/ppp/Makefile
 	  include/Makefile
 	  include/gnokii.h
 	  include/win32/Makefile
