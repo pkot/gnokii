@@ -828,6 +828,7 @@ AC_OUTPUT(
 	  include/phones/Makefile
 	  include/links/Makefile
 	  include/gnokii/Makefile
+	  common/gnokii.pc
 	  common/Makefile
 	  common/data/Makefile
 	  common/devices/Makefile
@@ -836,6 +837,7 @@ AC_OUTPUT(
 	  gnokii/Makefile
 	  gnokiid/Makefile
 	  utils/Makefile
+	  xgnokii/xgnokii.pc
 	  xgnokii/Makefile
 	  po/Makefile.in
   )

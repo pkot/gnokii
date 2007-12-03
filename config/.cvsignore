@@ -2,3 +2,4 @@ config.rpath
 ltmain.sh
 config.sub
 config.guess
+gnokii.h
