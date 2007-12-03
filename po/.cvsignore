@@ -10,4 +10,5 @@ POTFILES
 Rules-quot
 gnokii.pot
 stamp-po
-
+Makefile
+Makefile.in

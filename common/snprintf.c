@@ -101,7 +101,7 @@ void dummy_snprintf(void) {}
 #define LDOUBLE double
 #endif
 
-#ifdef HAVE_LONG_LONG
+#ifdef HAVE_LONG_LONG_INT
 #define LLONG long long
 #else
 #define LLONG long

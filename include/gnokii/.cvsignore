@@ -1,6 +1,2 @@
-.libs
-*.o
-*.lo
-*.la
 Makefile
 Makefile.in

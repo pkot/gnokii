@@ -3,3 +3,5 @@
 *.lo
 *.la
 gnokii
+Makefile
+Makefile.in

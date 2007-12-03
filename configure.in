@@ -1,18 +1,27 @@
 dnl
 dnl Makefile for the GNOKII tool suite.
 dnl
-dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janík ml.
-dnl                2000 Karel Zak, Pawe³ Kot
+dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janik ml.
+dnl                2000 Karel Zak, Pawel Kot
 dnl                2002 BORBELY Zoltan
 dnl
 dnl  $Id$
 dnl
 
-AC_INIT(gnokii/gnokii.c)
+AC_INIT([gnokii],
+	 [0.6.22],
+	 [http://www.gnokii.org])
 
 AC_CONFIG_AUX_DIR(config)
 
 AC_CANONICAL_SYSTEM
+
+AC_CONFIG_SRCDIR([gnokii/gnokii.c])
+dnl gettext doesn't like the config.status being somewhere else :(
+dnl AC_CONFIG_AUX_DIR(config)
+
+AM_INIT_AUTOMAKE([1.9 dist-bzip2 no-dist-gzip])
+
 AC_PREFIX_DEFAULT("/usr/local")
 
 dnl ======================== Checks for programs.
@@ -57,31 +66,11 @@ AC_RELOCATABLE
 AM_ICONV
 
 dnl ======================== Default setting
-ALL_LINGUAS="cs de et fi nl sk pl it sl fr zh_CN sv pt"
-AC_CHECK_HEADERS(libintl.h)
-AM_GNU_GETTEXT_VERSION(0.14.1)
-AM_GNU_GETTEXT([no-libtool])
-AC_CHECK_FUNCS(locale_charset)
-if test x$am_cv_langinfo_codeset != xyes -a x$ac_cv_func_locale_charset != xyes ; then
-	NEED_LOCALE_CHARSET=1
-fi
-# if msgfmt or xgettext is not present on the system, disable nls build
-if test "$MSGFMT" = ":" -o "$XGETTEXT" = ":"; then
-	USE_NLS="no"
-fi
-
-dnl ======================== Check for include/config.h.in
-AC_MSG_CHECKING([for include/config.h.in])
-if test -f include/config.h.in; then
-	AC_MSG_RESULT(yes)
-else
-	AC_MSG_RESULT(no)
-	echo '*************************************************'
-	echo 'include/config.h.in missing, run autoheader first'
-	echo 'autoheader is part of the autoconf package'
-	echo '*************************************************'
-	exit 1
-fi
+dnl Add the languages which your application supports to po/LINGUAS
+GETTEXT_PACKAGE=gnokii
+AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [Define to the Gettext package name])
+AC_SUBST(GETTEXT_PACKAGE)
+AM_GLIB_GNU_GETTEXT
 
 dnl Let us have $prefix variable available here
 test x"$prefix" = xNONE && prefix="$ac_default_prefix"
@@ -438,7 +427,7 @@ if test "$enable_bluetooth" == "yes"; then
 		AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH,[],[Compile on FreeBSD])
 		USE_BLUETOOTH="yes"
 		AC_CHECK_LIB(bluetooth, bt_aton,
-			    [LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the \`bt_aton' function.])])
+			    [LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the 'bt_aton' function.])])
 	fi
 fi
 
@@ -473,6 +462,8 @@ if test "$enable_libpcsclite" == "yes"; then
 fi
 
 dnl ======================== Checks for X base support
+
+found_gtk=no
 
 if test "$no_x" = yes -o "$with_x" = "no"; then
    x_support="no"
@@ -543,8 +534,22 @@ else
    fi
 fi
 
+AM_CONDITIONAL(HAVE_GTK, test "x$found_gtk" = "xyes")
+
 dnl ======================== Check for libsocket
 AC_CHECK_LIB(socket, socket)
+
+dnl ======================== Checks for glib support for smsd
+
+found_glib=no
+
+PKG_CHECK_MODULES(GLIB, glib-2.0, found_glib=yes, found_glib=no)
+if test "$found_glib" = no; then
+	AC_MSG_WARN(Cannot find glib 2.0.)
+	AC_MSG_WARN(Disabling smsd.)
+fi
+
+AM_CONDITIONAL(GLIB, test "x$found_glib" = "xyes")
 
 dnl ======================== Additional switches
 
@@ -577,6 +582,8 @@ AC_ARG_ENABLE(win32,
      fi ],
    [ win32="no"]
 )
+
+AM_CONDITIONAL(WIN32, test "x$WIN32" = "x1")
 
 AC_ARG_ENABLE(unix98test,
    [  --enable-unix98test     if you want to disable UNIX98 test and assume to use it
@@ -655,20 +662,10 @@ AC_HEADER_TIME
 AC_STRUCT_TM
 AC_CHECK_TYPE([u_int8_t],
     [AC_DEFINE([HAVE_U_INT8_T], 1, 
-       [Define to 1 if the system has the type `u_int8_t'.])])
+       [Define to 1 if the system has the type 'u_int8_t'.])])
 
-AC_CACHE_CHECK(for long long, ac_cv_c_long_long,
-	[AC_TRY_RUN([int main() { long long foo = 0; exit(sizeof(long long) < sizeof(long)); }],
-		ac_cv_c_long_long=yes, ac_cv_c_long_long=no, ac_cv_c_long_long=no)])
-if test $ac_cv_c_long_long = yes; then
-	AC_DEFINE(HAVE_LONG_LONG)
-fi
-AC_CACHE_CHECK(for long double, ac_cv_c_long_double,
-	[AC_TRY_RUN([int main() { long double foo = 0.0; exit(sizeof(long double) < sizeof(double)); }],
-		ac_cv_c_long_double=yes, ac_cv_c_long_double=no, ac_cv_c_long_double=no)])
-if test $ac_cv_c_long_double = yes; then
-	AC_DEFINE(HAVE_LONG_DOUBLE, 1, [Define if your compiler supports the \`long double' type.])
-fi
+AC_TYPE_LONG_LONG_INT
+AC_TYPE_LONG_DOUBLE
 
 AC_CACHE_CHECK(for __ptr_t, ac_cv_c___ptr_t,
 	[AC_TRY_COMPILE([#include <stdio.h>],
@@ -755,7 +752,7 @@ case "$build_os" in
    ;;
 esac
 
-AC_CONFIG_HEADER(include/config.h)
+AC_CONFIG_HEADERS([include/config.h])
 
 AC_SUBST(PACKAGE)
 AC_SUBST(VERSION)
@@ -787,17 +784,26 @@ AC_SUBST(WIN32_CROSS)
 AC_SUBST(HAVE_LIBICAL)
 AC_SUBST(HAVE_LIBUSB)
 
-AC_OUTPUT(
-   Makefile.global
-   intl/Makefile
-   po/Makefile.in
-   packaging/RedHat/gnokii.spec
-   packaging/Slackware/SlackBuild
-   packaging/Slackware/SlackBuild-xgnokii
-   common/gnokii.pc
-   xgnokii/xgnokii.pc
-   )
-
+AC_OUTPUT( po/Makefile.in
+	  Makefile
+	  include/Makefile
+	  include/win32/Makefile
+	  include/data/Makefile
+	  include/devices/Makefile
+	  include/phones/Makefile
+	  include/links/Makefile
+	  include/gnokii/Makefile
+	  common/Makefile
+	  common/data/Makefile
+	  common/devices/Makefile
+	  common/links/Makefile
+	  common/phones/Makefile
+	  gnokii/Makefile
+	  gnokiid/Makefile
+	  utils/Makefile
+	  xgnokii/Makefile
+	  po/Makefile
+  )
 
 dnl ======================== Final report
 
@@ -819,7 +825,8 @@ echo "
     Host system:        $host_os
     Gnokii version:     $VERSION
     Xgnokii version:    $XVERSION
-    X (GTK) support:    $x_support
+    X (GTK+) support:   $x_support
+    smsd support:       $found_glib
     Debug:              $debug
     XDebug:             $xdebug
     RLPDebug:           $rlpdebug
@@ -838,3 +845,4 @@ echo "
   Type '${MAKE}' for compilation and then '${MAKE} install', to
   install gnokii.
 "
+

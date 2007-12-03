@@ -3,3 +3,5 @@
 *.lo
 *.la
 smsd
+Makefile
+Makefile.in

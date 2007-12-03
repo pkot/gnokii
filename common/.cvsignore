@@ -4,4 +4,5 @@
 *.la
 gnokii.pc
 gnvcal.c
-
+Makefile
+Makefile.in

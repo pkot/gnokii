@@ -1,0 +1,27 @@
+AM_CFLAGS = $(LIBPCSCLITE_CFLAGS)
+
+noinst_LTLIBRARIES = libPHONES.la
+libPHONES_la_SOURCES = \
+	generic.c \
+	nokia.c \
+	nk7110.c \
+	nk6510.c \
+	nk6160.c \
+	nk6100.c \
+	nk3110.c \
+	atgen.c \
+	atbosch.c \
+	ateric.c \
+	atmot.c \
+	atnok.c \
+	atsie.c \
+	atsoer.c \
+	atsam.c \
+	gnapplet.c \
+	fake.c \
+	pcsc.c
+
+#	nk2110.lo
+#	dc2711.lo
+
+

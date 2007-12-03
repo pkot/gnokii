@@ -4,3 +4,5 @@
 *.la
 xgnokii
 xgnokii.pc
+Makefile
+Makefile.in

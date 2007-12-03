@@ -1,3 +1,4 @@
 config.h
 config.h.in
-
+Makefile
+Makefile.in
