@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999      Pavel Janík ml., Hugh Blemings
+  Copyright (C) 1999      Pavel Janik ml., Hugh Blemings
   Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2001-2004 Pawel Kot
   Copyright (C) 2001      Chris Kemp, Marian Jancar
@@ -2359,7 +2359,7 @@ static void ReadConfig(void)
 	if (!xgnokiiConfig.bindir)
 		xgnokiiConfig.bindir = gn_lib_cfg_get("gnokiid", "bindir");
 	if (!xgnokiiConfig.bindir)
-		xgnokiiConfig.bindir = g_strdup("/usr/local/sbin");
+		xgnokiiConfig.bindir = g_strdup(SBINDIR);
 	if (gn_lib_cfg_get("xgnokii", "allow_breakage"))
 		xgnokiiConfig.allowBreakage = atoi(gn_lib_cfg_get("xgnokii", "allow_breakage"));
 	else

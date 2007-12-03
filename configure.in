@@ -776,6 +776,9 @@ case "$build_os" in
    ;;
 esac
 
+AC_EXPAND_DIR(mgnokiidev_bindir, "${sbindir}")
+AC_DEFINE_UNQUOTED(SBINDIR, "$mgnokiidev_bindir", [Where mgnokiidev gets installed])
+
 AC_CONFIG_HEADERS([include/config.h])
 
 AC_SUBST(PACKAGE)

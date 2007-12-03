@@ -23,7 +23,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999      Tim Potter
-  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2000      Jan Derfinak
   Copyright (C) 2001      Jan Kratochvil
   Copyright (C) 2001-2005 Pawel Kot
@@ -627,7 +627,7 @@ GNOKII_API gn_error gn_cfg_read(char **bindir)
 	if (!*bindir)
 		*bindir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
 	if (!*bindir)
-		*bindir = "/usr/local/sbin";
+		*bindir = SBINDIR;
 
 	return retval;
 }

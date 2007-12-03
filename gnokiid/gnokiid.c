@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999-2000  Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2001-2004  Pawel Kot
   Copyright (C) 2002       Manfred Jonsson
   Copyright (C) 2002-2003  BORBELY Zoltan
@@ -149,7 +149,7 @@ int main(int argc, char *argv[])
 
 	BinDir = gn_lib_cfg_get("global", "bindir");
 	if (!BinDir) BinDir = gn_lib_cfg_get("gnokiid", "bindir");
-	if (!BinDir) BinDir = "/usr/local/sbin";
+	if (!BinDir) BinDir = SBINDIR;
 
 	if (gn_cfg_phone_load("", &temp_state) != GN_ERR_NONE) exit(-1);
 
