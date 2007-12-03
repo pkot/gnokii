@@ -818,7 +818,7 @@ AC_SUBST(WIN32_CROSS)
 AC_SUBST(HAVE_LIBICAL)
 AC_SUBST(HAVE_LIBUSB)
 
-AC_OUTPUT( po/Makefile.in
+AC_OUTPUT(
 	  Makefile
 	  include/Makefile
 	  include/gnokii.h
@@ -837,7 +837,7 @@ AC_OUTPUT( po/Makefile.in
 	  gnokiid/Makefile
 	  utils/Makefile
 	  xgnokii/Makefile
-	  po/Makefile
+	  po/Makefile.in
   )
 
 dnl ======================== Final report
