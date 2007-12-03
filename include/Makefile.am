@@ -16,4 +16,6 @@ EXTRA_HEADERS = \
 		 pkt.h \
 		 sms-nokia.h
 
+CLEANFILES = gnokii.h
 
+EXTRA_DIST = gnokii.h.in
