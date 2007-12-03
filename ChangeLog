@@ -8,6 +8,7 @@
     o don't include packaging directory in the release tarballs
                                                         (Pawel Kot)
     o don't allow to build without debug                (Pawel Kot)
+    o switch build system to automake              (Bastien Nocera)
 
 0.6.22
 ======
