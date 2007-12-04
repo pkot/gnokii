@@ -4,6 +4,7 @@ gnokii_SOURCES = gnokii.c gnokii-calendar.c gnokii-dial.c gnokii-file.c gnokii-l
 	gnokii-settings.c gnokii-sms.c gnokii-todo.c gnokii-utils.c gnokii-wap.c gnokii-app.h
 
 gnokii_LDADD = $(top_builddir)/common/libgnokii.la
+gnokii_CFLAGS = -I$(top_srcdir)/include
 
 #if OWN_GETOPT
 #	gnokii_LDADD += $(TOPDIR)/getopt/libgetopt.la

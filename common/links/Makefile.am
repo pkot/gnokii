@@ -10,3 +10,5 @@ libLINKS_la_SOURCES = \
 
 libLINKS_la_CFLAGS =		\
 	-I$(top_srcdir)/include
+
+EXTRA_DIST = cbus.c

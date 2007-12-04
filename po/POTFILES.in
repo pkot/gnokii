@@ -53,11 +53,11 @@ gnokii/gnokii-utils.c
 gnokii/gnokii-wap.c
 gnokii/gnokii.c
 gnokiid/gnokiid.c
-smsd/file.c
-smsd/lowlevel.c
-smsd/mysql.c
-smsd/pq.c
-smsd/smsd.c
+#smsd/file.c
+#smsd/lowlevel.c
+#smsd/mysql.c
+#smsd/pq.c
+#smsd/smsd.c
 utils/mgnokiidev.c
 xgnokii/xgnokii.desktop.in
 xgnokii/xgnokii.c
