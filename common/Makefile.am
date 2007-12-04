@@ -61,4 +61,4 @@ gnvcal.c: vcal.lx
 	$(LEX) -ognvcal.c vcal.lx
 
 CLEANFILES = gnvcal.c
-EXTRA_DIST = gnokii.pc.in
+EXTRA_DIST = gnokii.pc.in gnvcal.c
