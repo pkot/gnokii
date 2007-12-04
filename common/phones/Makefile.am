@@ -21,7 +21,6 @@ libPHONES_la_SOURCES = \
 	fake.c \
 	pcsc.c
 
-#	nk2110.lo
-#	dc2711.lo
+EXTRA_DIST = nk2110.c dc2711.c
 
 
