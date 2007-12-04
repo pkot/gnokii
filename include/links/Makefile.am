@@ -10,3 +10,5 @@ EXTRA_HEADERS = \
 		m2bus.h \
 		utils.h
 
+EXTRA_DIST = $(EXTRA_HEADERS)
+

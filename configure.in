@@ -857,6 +857,8 @@ AC_OUTPUT(
 	  xgnokii/xgnokii.pc
 	  xgnokii/Makefile
 	  po/Makefile.in
+	  testsuite/Makefile
+	  testsuite/data/Makefile
   )
 
 dnl ======================== Final report

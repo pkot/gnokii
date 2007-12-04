@@ -1,4 +1,4 @@
-SUBDIRS = include common gnokii po
+SUBDIRS = include common gnokii po testsuite
 
 # FIXME add Docs
 

@@ -1,11 +1,17 @@
 #!/bin/bash
-(
-	cd ..
-	./configure --disable-shared
-	make || ( echo "*** Compile FAILED"; sleep 10 )
-)
-export HOME=`pwd`
-GNOKII=../gnokii/gnokii
+
+if [ $# -eq 2 ] ; then
+	export HOME=$1
+	export GNOKII=$2
+elif [ $# -eq 0 ] ; then
+	export HOME=`pwd`
+	export GNOKII=../gnokii/gnokii
+else
+	echo "*** Usage: ./testit [Path to test files] [Path to gnokii] ***"
+	exit 1
+fi
+
+RETVAL=0
 for A in test.0.identify test.1.sms test.10.oplogo test.11.ringtone test.13.emspicture test.14.oplogo-xpm test.16.imelody test.17.picture2 test.18.emsanimation test.2.concatsms; do
     echo -n "Doing $A... "
     B=`echo $A | sed s/test/out/`
@@ -15,5 +21,9 @@ for A in test.0.identify test.1.sms test.10.oplogo test.11.ringtone test.13.emsp
     else
 	echo '*** FAILED'
 	diff -u $B my$B
+	RETVAL=1
     fi
 done
+
+return $RETVAL
+

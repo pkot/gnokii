@@ -19,4 +19,4 @@ EXTRA_HEADERS =				\
 
 CLEANFILES = gnokii.h
 
-EXTRA_DIST = gnokii.h.in
+EXTRA_DIST = gnokii.h.in $(EXTRA_HEADERS)

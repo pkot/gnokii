@@ -11,3 +11,4 @@ EXTRA_HEADERS = \
 		unixserial.h \
 		winserial.h
 
+EXTRA_DIST = $(EXTRA_HEADERS)

@@ -19,3 +19,4 @@ EXTRA_HEADERS = \
 		nokia.h \
 		pcsc.h
 
+EXTRA_DIST = $(EXTRA_HEADERS)
