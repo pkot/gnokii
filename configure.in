@@ -856,6 +856,7 @@ AC_OUTPUT(
 	  utils/Makefile
 	  xgnokii/xgnokii.pc
 	  xgnokii/Makefile
+	  xgnokii/xpm/Makefile
 	  po/Makefile.in
 	  testsuite/Makefile
 	  testsuite/data/Makefile
