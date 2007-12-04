@@ -291,12 +291,13 @@ http://cvs.savannah.nongnu.org/viewcvs/?root=gnokii
 
 Once you have the sources, you will need to run the following commands
 
-	autopoint -f
 	libtoolize -c -f
+	glib-gettextize -f
 	# under FreeBSD you may want to provide additional parameter to
 	# aclocal: -I /usr/local/share/aclocal
 	aclocal -I m4
-	autoheader
+	autoheader -I m4
+	automake --add-missing
 	autoconf
 	./configure
 	make

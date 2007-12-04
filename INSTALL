@@ -7,15 +7,15 @@ Gnokii installation instructions
 Quickstart
 ==========
 
-    $ autopoint -f				# only for CVS copies
     $ libtoolize -c -f				# only for CVS copies
+    $ glib-gettextize -f			# only for CVS copies
     $ aclocal -I m4				# only for CVS copies
-    $ autoheader				# only for CVS copies
+    $ autoheader -I m4				# only for CVS copies
+    $ automake --add-missing			# only for CVS copies
     $ autoconf					# only for CVS copies
     $ ./configure [<options>]
     [ instead of above commands you can simply run ./autogen.sh [<options>] ]
     $ make
-    # groupadd gnokii
     # make install
     [ optionally, if you want to compile other programs using gnokii ]
     # make install-devel
@@ -65,10 +65,11 @@ Preparations
 
 If you retrieved this copy from CVS, then first call
 
-    $ autopoint -f
     $ libtoolize -c -f
+    $ glib-gettextize -f
     $ aclocal -I m4
-    $ autoheader
+    $ autoheader -I m4
+    $ automake --add-missing			# only for CVS copies
     $ autoconf
 
 Now you have to determine your system specific settings.
@@ -89,9 +90,6 @@ Basic options are:
     --enable-security
 	Set if you want to enable all security features supported by your 
         mobile (PIN change, etc.).
-
-    --disable-debug
-	Set if you don't want debug code compiled in.
 
     --disable-rlpdebug
 	Set if you don't want RLP code compiled in.
