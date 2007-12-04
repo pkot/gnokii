@@ -33,15 +33,11 @@ working on this translation.
 If you get the OK from the maintainer, there are several
 steps to do:
 
-- add the code of your language to the ALL_LINGUAS line
-  in the configure.in file
+- add the code of your language to the po/LINGUAS file
+  respecting the alphabetical order
 
   Caution: the language code may differ from the country
   code, e.g. czech language is cs, Czech Republic is cz 
-
-- run autoconf to recreate configure script
-
-- reconfigure the package (./configure)
 
 - in the po directory, copy gnokii.pot to <country>.po
 

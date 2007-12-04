@@ -1,4 +1,4 @@
-SUBDIRS = man sample
+SUBDIRS = man sample protocol
 
 DEVEL_DOCS =    CodingStyle \
 		README.libsms
@@ -22,36 +22,13 @@ EXTRA_DIST = 	README \
 		DataCalls-QuickStart \
 		FAQ \
 		KNOWN_BUGS \
+		gettext-howto \
 		gnokii.nol \
+		gnokii-hackers-howto \
 		gnokii-ir-howto \
 		gnokii-IrDA-Linux \
+		packaging-howto \
 		ringtones.txt \
 		logos.txt \
 		$(DEVEL_DOCS)
-
-		sample/gnokiirc \
-		sample/magic \
-		sample/logo/pacman.xpm \
-		sample/logo/gnokii.xpm \
-		sample/logo/gnokiiop.xpm \
-		sample/logo/horse.xpm \
-		sample/logo/bronto.xpm \
-		sample/logo/horse2.xpm \
-		sample/ringtone/star.imelody \
-		sample/ringtone/star.rtttl \
-		sample/vCalendar/test.vcs \
-		sample/ppp/cimd-connect \
-		sample/ppp/ppp-FILES \
-		sample/ppp/options \
-		sample/ppp/pap-secrets \
-		sample/ppp/ppp-hscsd \
-		sample/ppp/ppp-6210-modem \
-		sample/ppp/ppp-gnokii \
-		sample/ppp/ppp-on
-
-GNOKII1_MAN=man/gnokii.1 man/sendsms.1
-GNOKII8_MAN=man/gnokiid.8 man/mgnokiidev.8
-XGNOKII_MAN=man/xgnokii.1x
-
-
 

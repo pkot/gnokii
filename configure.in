@@ -831,6 +831,7 @@ AC_OUTPUT(
 	  Makefile
 	  Docs/Makefile
 	  Docs/man/Makefile
+	  Docs/protocol/Makefile
 	  Docs/sample/Makefile
 	  Docs/sample/logo/Makefile
 	  Docs/sample/vCalendar/Makefile
