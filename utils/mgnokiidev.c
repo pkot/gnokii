@@ -34,6 +34,8 @@
 
 */
 
+#include "config.h"
+
 /* See common/data/virtmodem.c for explanation */
 #ifdef	__OpenBSD__
 #  include <sys/types.h>

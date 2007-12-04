@@ -22,11 +22,13 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999-2000  Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2002       Ladis Michl
   Copyright (C) 2002-2004  BORBELY Zoltan, Pawel Kot
 
 */
+
+#include "config.h"
 
 #include <windows.h>
 #include <string.h>

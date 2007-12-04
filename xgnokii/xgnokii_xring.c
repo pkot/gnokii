@@ -52,6 +52,8 @@
  * HISTORY 
  */
 
+#include "config.h"
+
 #ifndef WIN32
 #  include <unistd.h>
 #endif
@@ -204,7 +206,7 @@ enum {
 	KIE_COUNT
 };
 
-#define WHITE_COUNT 28		/* mitä on pianonkosketin englanniksi */
+#define WHITE_COUNT 28		/* mit? on pianonkosketin englanniksi */
 
 struct GUI {
 	GtkWidget *w;

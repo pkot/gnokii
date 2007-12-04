@@ -36,8 +36,9 @@
 
 */
 
-#include <time.h>
 #include "config.h"
+
+#include <time.h>
 #include "gnokii-internal.h" 
 #include "gnokii.h"
 #include "nokia-decoding.h"

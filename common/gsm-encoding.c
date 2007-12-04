@@ -32,11 +32,12 @@
 
 */
 
+#include "config.h"
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"

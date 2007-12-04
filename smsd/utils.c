@@ -29,6 +29,8 @@
   
 */
 
+#include "config.h"
+
 #include "utils.h"
 
 /* Escapes ' and \ with \. */

@@ -31,6 +31,8 @@
 
 */
 
+#include "config.h"
+
 #ifndef WIN32
 
 #include <termios.h>
@@ -49,7 +51,6 @@
 
 #undef DEBUG
 
-#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"

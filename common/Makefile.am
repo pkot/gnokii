@@ -17,7 +17,9 @@ LIBS   += $(LIBPCSCLITE_LIBS)
 pkgconfig_DATA = gnokii.pc
 pkgconfigdir = $(libdir)/pkgconfig
 
-libgnokii_la_CFLAGS = -DLIBDIR="\"$(libdir)\""
+libgnokii_la_CPPFLAGS = -DLIBDIR="\"$(libdir)\""
+libgnokii_la_CFLAGS = -I$(top_srcdir)/include
+
 libgnokii_la_SOURCES = \
 	libfunctions.c \
 	gsm-api.c \

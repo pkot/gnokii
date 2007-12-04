@@ -21,6 +21,9 @@ libPHONES_la_SOURCES = \
 	fake.c \
 	pcsc.c
 
+libPHONES_la_CFLAGS =		\
+	-I$(top_srcdir)/include
+
 EXTRA_DIST = nk2110.c dc2711.c
 
 

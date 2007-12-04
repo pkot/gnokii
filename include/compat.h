@@ -34,8 +34,6 @@
 #ifndef	_gnokii_compat_h
 #define	_gnokii_compat_h
 
-#include "config.h"
-
 #include <stdlib.h>
 #include <stdio.h>
 

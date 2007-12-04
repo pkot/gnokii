@@ -20,13 +20,15 @@
  * License along with this library; if not, write to the Free
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  *
- * Copyright (C) 1999-2000  Hugh Blemings & Pavel Janík ml.
+ * Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
  * Copyright (C) 2000-2001  Marcel Holtmann <marcel@holtmann.org>
  * Copyright (C) 2001       Chris Kemp
  * Copyright (C) 2002       Ladis Michl
  * Copyright (C) 2002-2003  BORBELY Zoltan, Pawel Kot
  *
  */
+
+#include "config.h"
 
 #include "misc.h"
 #include "gnokii.h"

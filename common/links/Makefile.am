@@ -8,3 +8,5 @@ libLINKS_la_SOURCES = \
 	gnbus.c \
 	utils.c
 
+libLINKS_la_CFLAGS =		\
+	-I$(top_srcdir)/include

@@ -30,6 +30,8 @@
 
 */
 
+#include "config.h"
+
 /* System header files */
 #include <stdio.h>
 #include <string.h>
@@ -41,7 +43,6 @@
 #endif
 
 /* Various header file */
-#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "links/atbus.h"

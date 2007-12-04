@@ -30,11 +30,12 @@
 
 */
 
+#include "config.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"

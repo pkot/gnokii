@@ -29,6 +29,8 @@
 
 */
 
+#include "config.h"
+
 #include <stdio.h>
 
 #include "gnokii-internal.h"

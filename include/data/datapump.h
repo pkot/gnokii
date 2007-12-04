@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janik ml.
 
   Header file for data pump code.
 
@@ -31,7 +31,6 @@
 #ifndef _gnokii_data_datapump_h
 #define _gnokii_data_datapump_h
 
-#include "config.h"
 #include "compat.h"
 #include "gnokii.h"
 

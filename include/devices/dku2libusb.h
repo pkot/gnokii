@@ -32,8 +32,6 @@
 #ifndef _gnokii_dku2libusb_h
 #define _gnokii_dku2libusb_h
 
-#include "config.h"
-
 #ifdef HAVE_LIBUSB
 #  include <usb.h>
 #endif

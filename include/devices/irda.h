@@ -6,7 +6,7 @@
  *
  * A Linux/Unix toolset and driver for Nokia mobile phones.
  *
- * Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+ * Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janik ml.
  * Copyright (C) 2000-2001  Marcel Holtmann <marcel@holtmann.org>
  *
  * This library is free software; you can redistribute it and/or
@@ -28,7 +28,6 @@
 #ifndef __gnokii_irda_h_
 #define __gnokii_irda_h_
 
-#include "config.h"
 #include "gnokii.h"
 
 int irda_open(struct gn_statemachine *state);

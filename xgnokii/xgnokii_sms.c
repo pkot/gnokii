@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
+  Copyright (C) 1999 Pavel Janik ml., Hugh Blemings
   Copyright (C) 1999-2005 Jan Derfinak
   Copyright (C) 2001-2003 Pawel Kot
   Copyright (C) 2002-2003 BORBELY Zoltan
@@ -30,6 +30,9 @@
   Copyright (C) 2003      Uli Hopp
 
 */
+
+#include "config.h"
+
 #ifndef WIN32
 #  include <unistd.h>
 #endif

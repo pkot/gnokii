@@ -31,7 +31,6 @@
 #ifndef _gnokii_pkt_h
 #define _gnokii_pkt_h
 
-#include "config.h"
 #include "compat.h"
 
 typedef struct {

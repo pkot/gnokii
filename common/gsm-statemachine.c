@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2001      Chris Kemp, Manfred Jonsson
   Copyright (C) 2001-2002 Pavel Machek, Ladis Michl
   Copyright (C) 2001-2003 Pawel Kot
@@ -30,6 +30,8 @@
   Copyright (C) 2003      Osma Suominen
 
 */
+
+#include "config.h"
 
 #include "gnokii-internal.h"
 #include "gnokii.h"

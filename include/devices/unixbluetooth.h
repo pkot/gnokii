@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999, 2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2002       Marcel Holtmann <marcel@holtmann.org>
 
 */
@@ -30,7 +30,6 @@
 #ifndef _gnokii_unix_bluetooth_h
 #define _gnokii_unix_bluetooth_h
 
-#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"

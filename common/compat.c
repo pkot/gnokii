@@ -28,6 +28,8 @@
 
 */
 
+#include "config.h"
+
 #ifdef WIN32
 #  include <windows.h>
 #  include <sys/timeb.h>

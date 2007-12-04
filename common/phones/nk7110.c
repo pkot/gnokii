@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2000 Chris Kemp
   Copyright (C) 2001 Ladis Michl, Marian Jancar
   Copyright (C) 2001-2002 Markus Plail
@@ -38,11 +38,12 @@
 
 */
 
+#include "config.h"
+
 #include <string.h>
 #include <stdlib.h>
 #include <ctype.h>
 
-#include "config.h"
 #include "compat.h"
 #include "gnokii.h"
 #include "nokia-decoding.h"

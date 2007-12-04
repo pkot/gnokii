@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2000      Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2000      Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2000-2001 Chris Kemp
   Copyright (C) 2001-2006 Pawel Kot
   Copyright (C) 2001      Manfred Jonsson, Pavel Machek
@@ -37,6 +37,8 @@
 
 */
 
+#include "config.h"
+
 /* System header files */
 
 #include <stdio.h>
@@ -45,7 +47,6 @@
 
 /* Various header file */
 
-#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"

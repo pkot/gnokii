@@ -25,5 +25,8 @@ libDEVICES_la_SOURCES = \
 	dku2libusb.c \
 	bluetooth.c
 
+libDEVICES_la_CFLAGS =		\
+	-I$(top_srcdir)/include
+
 EXTRA_DIST = $(WIN32_FILES) $(UNIX_FILES)
 

@@ -35,7 +35,6 @@
 #ifndef _gnokii_internal_h
 #define _gnokii_internal_h
 
-#include "config.h"
 #include "compat.h"
 #include "misc.h"
 

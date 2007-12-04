@@ -1,4 +1,4 @@
-SUBDIRS = include common gnokii po testsuite
+SUBDIRS = include common gnokii po
 
 # FIXME add Docs
 
@@ -17,7 +17,7 @@ if GLIB
 endif
 
 # FIXME readd smsd
-DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po
+DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po testsuite
 
 EXTRA_DIST =				\
 		ChangeLog		\

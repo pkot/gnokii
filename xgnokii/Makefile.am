@@ -1,3 +1,5 @@
+SUBDIRS = xpm
+
 bin_PROGRAMS = xgnokii
 
 AM_CFLAGS = $(PTHREAD_CFLAGS) \
