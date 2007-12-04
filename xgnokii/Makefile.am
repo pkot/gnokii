@@ -41,4 +41,11 @@ HELP_DIR = docs/help
 pkgconfig_DATA = xgnokii.pc
 pkgconfigdir = $(libdir)/pkgconfig
 
-EXTRA_DIST = VERSION xgnokii.pc.in
+desktop_in_files = xgnokii.desktop.in
+desktopdir = $(datadir)/applications
+desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
+@INTLTOOL_DESKTOP_RULE@
+
+CLEANFILES = $(desktop_DATA)
+
+EXTRA_DIST = VERSION xgnokii.pc.in $(desktop_in_files)

@@ -1,0 +1,9 @@
+[Desktop Entry]
+_Name=Xgnokii
+_GenericName=Mobile Phone Suite
+_Comment=Manage your mobile phone
+Icon=cellphone
+Exec=xgnokii
+Terminal=false
+Type=Application
+Categories=Utility;TelephonyTools;Calendar;ContactManagement;Office;GTK;

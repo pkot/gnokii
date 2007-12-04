@@ -7,6 +7,7 @@ common/devices/unixirda.c
 common/devices/unixserial.c
 common/devices/winbluetooth.c
 common/devices/winirda.c
+common/gnvcal.c
 common/gsm-bitmaps.c
 common/gsm-common.c
 common/gsm-error.c
@@ -25,6 +26,7 @@ common/links/gnbus.c
 common/links/m2bus.c
 common/misc.c
 common/nokia-decoding.c
+common/phones/atgen.c
 common/phones/generic.c
 common/phones/nk2110.c
 common/phones/nk3110.c
@@ -57,6 +59,7 @@ smsd/mysql.c
 smsd/pq.c
 smsd/smsd.c
 utils/mgnokiidev.c
+xgnokii/xgnokii.desktop.in
 xgnokii/xgnokii.c
 xgnokii/xgnokii_calendar.c
 xgnokii/xgnokii_cfg.c

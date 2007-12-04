@@ -1,7 +1,8 @@
 #!/bin/sh
 
 libtoolize -c -f
-glib-gettextize -f
+glib-gettextize -f -c
+intltoolize --force --copy --automake
 AC_LOCAL_FLAGS="-I m4/"
 if [ "`uname -s`"x = "FreeBSD"x ]; then
 	AC_LOCAL_FLAGS="${AC_LOCAL_FLAGS} -I /usr/local/share/aclocal"
