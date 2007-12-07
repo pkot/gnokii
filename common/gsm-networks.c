@@ -370,7 +370,7 @@ static gn_network networks[] = {
 	{"259 02", "Moldcell"},
 	{"260 01", "PLUS GSM"},
 	{"260 02", "Era"},
-	{"260 03", "IDEA"},
+	{"260 03", "Orange PL"},
 	{"262 01", "D1"},
 	{"262 02", "Vodafone"},
 	{"262 03", "E-Plus"},
