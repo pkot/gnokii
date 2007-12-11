@@ -7,5 +7,5 @@ xgnokiidir=@XGNOKIIDIR@/share/@XPACKAGE@
 Name: xgnokii
 Description: GTK2 gnokii library interface
 Version: @XVERSION@
-Libs: -L${libdir} -lgnokii @LIBS@ @XPM_LIBS@ @LIBICONV@
+Libs: -L${libdir} -lgnokii @LIBS@ @XPM_LIBS@ @INTLLIBS@
 Cflags: -I${includedir} @XPM_CFLAGS@
