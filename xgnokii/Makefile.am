@@ -1,4 +1,4 @@
-SUBDIRS = xpm
+SUBDIRS = xpm docs
 
 bin_PROGRAMS = xgnokii
 
