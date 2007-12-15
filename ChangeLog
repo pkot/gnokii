@@ -9,6 +9,10 @@
                                                         (Pawel Kot)
     o don't allow to build without debug                (Pawel Kot)
     o switch build system to automake              (Bastien Nocera)
+ * libgnokii updates
+    o update gsm network list (according to
+      http://en.wikipedia.org/wiki/Mobile_network_code) (Pawel Kot,
+                                                   Jakub Jankowski)
 
 0.6.22
 ======
