@@ -211,4 +211,31 @@ size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *st
 	return write(fd, buf, n);
 }
 
+#else /* WIN32 */
+
+int tcp_close(int fd, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+size_t tcp_write(int fd, __const __ptr_t buf, size_t n, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+{
+	return -1;
+}
+
 #endif /* WIN32 */
