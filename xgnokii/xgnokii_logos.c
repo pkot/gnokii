@@ -993,7 +993,7 @@ void GetLogoEvent(GtkWidget * widget)
 
 	/* prepare data for event */
 	sscanf(netcou, "%s (%[^)])", network, country);
-	strncpy(bitmap.netcode, gn_network_code_find(network, country), 7);
+	strncpy(bitmap.netcode, gn_network_code_find(network, country), sizeof(bitmap.netcode));
 	data->bitmap = &bitmap;
 	e->event = Event_GetBitmap;
 	e->data = data;
@@ -1035,7 +1035,7 @@ void SetLogoEvent(GtkWidget * widget)
 
 	/* prepare data */
 	sscanf(netcou, "%s (%[^)])", network, country);
-	strncpy(bitmap.netcode, gn_network_code_find(network, country), 7);
+	strncpy(bitmap.netcode, gn_network_code_find(network, country), sizeof(bitmap.netcode));
 
 	if (bitmap.type == GN_BMP_CallerLogo) {
 		/* above condition must be there, because if you launch logos before
@@ -1315,7 +1315,7 @@ void ExportLogoFileMain(gchar * name)
 
 	tbitmap = bitmap;
 
-	strncpy(tbitmap.netcode, gn_network_code_get(networkInfo.network_code), 7);
+	strncpy(tbitmap.netcode, gn_network_code_get(networkInfo.network_code), sizeof(tbitmap.netcode));
 
 	error = gn_file_bitmap_save(name, &tbitmap, &statemachine->driver.phone);
 	if (error != GN_ERR_NONE) {

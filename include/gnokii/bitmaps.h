@@ -57,14 +57,15 @@ typedef enum {
 
 #define GN_BMP_MAX_SIZE 1000
 
-/* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
+#define MCC_MNC_SIZE	8
 
+/* Structure to hold incoming/outgoing bitmaps (and welcome-notes). */
 typedef struct {
 	unsigned char height;    /* Bitmap height (pixels) */
 	unsigned char width;     /* Bitmap width (pixels) */
 	unsigned int size;       /* Bitmap size (bytes) */
 	gn_bmp_types type;       /* Bitmap type */
-	char netcode[7];         /* Network operator code */
+	char netcode[MCC_MNC_SIZE]; /* Network operator code */
 	char text[256];          /* Text used for welcome-note or callergroup name */
 	char dealertext[256];    /* Text used for dealer welcome-note */
 	int dealerset;           /* Is dealer welcome-note set now ? */

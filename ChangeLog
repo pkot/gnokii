@@ -13,6 +13,9 @@
     o update gsm network list (according to
       http://en.wikipedia.org/wiki/Mobile_network_code) (Pawel Kot,
                                                    Jakub Jankowski)
+    o use defines instead of harcoding values           (Pawel Kot)
+ * xgnokii updates
+    o avoid to use hardcodes                            (Pawel Kot)
 
 0.6.22
 ======
