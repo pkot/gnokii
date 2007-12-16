@@ -86,6 +86,13 @@ AC_LIBTOOL_WIN32_DLL
 define([AC_PROVIDE_AC_LIBTOOL_WIN32_DLL])
 AC_PROG_LIBTOOL
 
+#
+# Make libtool use --silent when --silent is passed to make
+#
+changequote(,)dnl
+LIBTOOL="${LIBTOOL} \$(shell echo \"\$(MFLAGS)\" | awk '/^[^ ]*s/ { print \"--silent\" }')"
+changequote([,])dnl
+
 GNOKII_LT_VERSION=$GNOKII_LT_VERSION_CURRENT:$GNOKII_LT_VERSION_REVISION:$GNOKII_LT_VERSION_AGE
 AC_SUBST(GNOKII_LT_VERSION)
 
