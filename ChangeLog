@@ -15,6 +15,7 @@
       http://en.wikipedia.org/wiki/Mobile_network_code) (Pawel Kot,
                                                    Jakub Jankowski)
     o use defines instead of harcoding values           (Pawel Kot)
+    o correct FBUS sequence number initialization (Burkhard Soehne)
  * xgnokii updates
     o avoid to use hardcodes                            (Pawel Kot)
 

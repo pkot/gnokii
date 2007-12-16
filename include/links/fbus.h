@@ -95,6 +95,7 @@ typedef struct {
 	fbus_incoming_frame i;
 	fbus_incoming_message messages[FBUS_MESSAGE_MAX_TYPES];
 	u8 request_sequence_number;
+	u8 init_frame;
 } fbus_link;
 
 gn_error fbus_initialise(int attempt, struct gn_statemachine *state);

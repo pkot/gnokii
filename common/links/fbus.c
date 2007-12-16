@@ -589,6 +589,14 @@ static gn_error fbus_send_message(unsigned int messagesize, unsigned char messag
 	seqnum = 0x40 + FBUSINST(state)->request_sequence_number;
 	FBUSINST(state)->request_sequence_number =
 	    (FBUSINST(state)->request_sequence_number + 1) & 0x07;
+	/*
+	 * For the very first time sequence number should be ORed with
+	 * 0x20. It should initialize sequence counter in the phone.
+	 */
+	if (FBUSINST(state)->init_frame) {
+		seqnum |= 0x20;
+		FBUSINST(state)->init_frame = 0;
+	}
 
 	if (messagesize > FBUS_CONTENT_MAX_LENGTH) {
 
@@ -679,6 +687,7 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 		return GN_ERR_MEMORYFULL;
 
 	FBUSINST(state)->request_sequence_number = 0;
+	FBUSINST(state)->init_frame = 1;
 
 	switch (state->config.connection_type) {
 	case GN_CT_Infrared:
