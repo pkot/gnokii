@@ -43,6 +43,10 @@
 
 #include "sms-nokia.h"
 
+#ifdef ENABLE_NLS
+#  include <locale.h>
+#endif
+
 #undef ERROR
 #define ERROR() do { if (error != GN_ERR_NONE) return error; } while (0)
 
