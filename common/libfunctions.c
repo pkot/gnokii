@@ -475,7 +475,7 @@ static struct { gn_connection_type ct; const char *str; } connectiontypes[] = {
 	{ GN_CT_Tekram,     "tekram" }
 };
 
-gn_connection_type gn_get_connectiontype(const char *connection_type_string)
+GNOKII_API gn_connection_type gn_get_connectiontype(const char *connection_type_string)
 { 
 	int i;
 	for (i = 0; i < sizeof(connectiontypes)/sizeof(connectiontypes[0]); i++)

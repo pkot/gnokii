@@ -18,6 +18,8 @@
                                                    Jakub Jankowski)
     o use defines instead of harcoding values           (Pawel Kot)
     o correct FBUS sequence number initialization (Burkhard Soehne)
+    o make the function gn_get_connectiontype() visible even when
+      compiling with -fvisibility=hidden            (Daniele Forsi)
  * xgnokii updates
     o avoid to use hardcodes                            (Pawel Kot)
 
