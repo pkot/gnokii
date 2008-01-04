@@ -232,9 +232,9 @@ time_t timegm(struct tm *tm);
 #  define mkdir(dirname, accessrights)	_mkdir(dirname)
 /*
  * This is inspired by Marcin Wiacek <marcin-wiacek@topnet.pl>, it should help
- * windows compilers (MS VC 6)
+ * windows compilers (MSVC 6)
  */
-#  define inline /* Not supported */
+#  define inline __inline
 #  define strcasecmp stricmp
 #  define strncasecmp strnicmp
 #  if !defined(HAVE_UNISTD_H) || defined(__MINGW32__)
