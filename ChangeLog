@@ -22,6 +22,7 @@
       compiling with -fvisibility=hidden            (Daniele Forsi)
  * xgnokii updates
     o avoid to use hardcodes                            (Pawel Kot)
+    o avoid segfault on calendar fetching               (Pawel Kot)
 
 0.6.22
 ======

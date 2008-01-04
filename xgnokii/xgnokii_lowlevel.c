@@ -627,6 +627,9 @@ static gint A_GetCalendarNoteAll(gpointer data)
 
 	gn_data_clear(&gdat);
 
+	memset(&entry, 0, sizeof(entry));
+	memset(&list, 0, sizeof(list));
+
 	pthread_mutex_lock(&calendarMutex);
 	while (1) {
 		entry.location = i;
