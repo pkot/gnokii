@@ -58,9 +58,9 @@ static void cbus_wait_for_idle(int timeout, struct gn_statemachine *state)
 	} while (n != prev);
 }
 
-static gn_error cbus_write(unsigned char *d, int len, struct gn_statemachine *state)
+static gn_error cbus_write(unsigned char *d, size_t len, struct gn_statemachine *state)
 {
-	int res;
+	size_t res;
 
 	cbus_wait_for_idle(300, state);
 
@@ -185,7 +185,7 @@ static void cbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 			bi->frame_header1 = bi->prev_rx_byte;
 			bi->frame_header2 = rx_byte;
 			bi->csum = bi->prev_rx_byte ^ rx_byte;
-			bi->msg_pos = 0;
+			bi->unique = bi->msg_pos = 0;
 		}
 		break;
 
@@ -275,12 +275,13 @@ static void cbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *
 
 static gn_error bus_reset(struct gn_statemachine *state)
 {
+#ifndef WIN32
 	tcsendbreak(device_getfd(state), 0);
+#endif
 	cbus_wakeup1(state);
-	sm_block(0, 100 ,NULL, state);
-	usleep(50000);
+	sm_block_no_retry_timeout(0, 100, NULL, state);
 	cbus_wakeup2(state);
-	sm_block(0, 100, NULL, state);
+	sm_block_no_retry_timeout(0, 100, NULL, state);
 	return GN_ERR_NONE;
 }
 
@@ -302,8 +303,9 @@ static bool cbus_open_serial(char *device, struct gn_statemachine *state)
  */
 static gn_error cbus_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
+	int count;
+	size_t res;
 	unsigned char buffer[BUFFER_SIZE];
-	int count, res;
 
 	res = device_select(timeout, state);
 	if (res > 0) {

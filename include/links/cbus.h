@@ -46,17 +46,18 @@ typedef enum {
 	CBUS_RX_Ack
 } cbus_rx_state;
 
-typedef struct{
+typedef struct {
 	cbus_rx_state state;
-	int frame_header1;
-	int frame_header2;
-	int frame_type1;
-	int frame_type2;
 	int msg_len;
 	int msg_pos;
+	unsigned char prev_rx_byte;
+	unsigned char frame_header1;
+	unsigned char frame_header2;
+	unsigned char frame_type1;
+	unsigned char frame_type2;
+	unsigned char unique;
 	unsigned char csum;
 	unsigned char msg[CBUS_MAX_MSG_LENGTH];
-	unsigned char prev_rx_byte;
 } cbus_instance;
 
 #define CBUSINST(s) (*((cbus_instance **)(&(s)->link.link_instance)))
