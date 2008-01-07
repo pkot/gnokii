@@ -75,10 +75,22 @@ subclause : command
 #define GN_PCSC_PARAMETER_OFFSET_FILEID_HI 5
 #define GN_PCSC_PARAMETER_OFFSET_FILEID_LO 6
 
+/* misc defines */
+#define GN_PCSC_ICCID_MAX_LENGTH 21
+#define GN_PCSC_IMSI_MAX_LENGTH 16
+
 /* some file identifiers (full list is in subclause 10.7) */
 
-/* This is the container of the files we are interested in */
+/* This is the top level container */
+#define GN_PCSC_FILE_MF 0x3F00
+/* ICC Identification */
+#define GN_PCSC_FILE_EF_ICCID 0x2FE2
+/* This is the container of phonebooks and SMS */
 #define GN_PCSC_FILE_DF_TELECOM 0x7F10
+/* This is the container of GSM specific information */
+#define GN_PCSC_FILE_DF_GSM 0x7F20
+/* International Mobile Subscriber Identity (IMSI) */
+#define GN_PCSC_FILE_EF_IMSI 0x6F07
 /* Abbreviated Dialing Numbers */
 #define GN_PCSC_FILE_EF_ADN 0x6F3A
 /* Fixed Dialing Numbers */
@@ -93,9 +105,12 @@ subclause : command
 #define GN_PCSC_FILE_EF_SDN 0x6F49
 /* Barred Dialing Numbers */
 #define GN_PCSC_FILE_EF_BDN 0x6F4D
+/* Administrative data */
+#define GN_PCSC_FILE_EF_AD 0x6FAD
+/* Phase Identification */
+#define GN_PCSC_FILE_EF_PHASE 0x6FAE
 /* Emergency Call Codes */
 #define GN_PCSC_FILE_EF_ECC 0x6FB7
-
 /* a convenience define */
 #define GN_PCSC_FILE_UNKNOWN 0x0000
 

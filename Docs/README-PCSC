@@ -29,6 +29,22 @@ Implemented commands for gnokii are:
 This means that writing to the phonebook is not supported and reading
 or writing short messages isn't supported either.
 
+The --identify command returns the following information:
+- IMEI
+  The string "Unknown" (this is a constant string)
+- Manufacturer
+  Operator name and country name converted using existing libgnokii
+  functions from MNC and MCC extracted from the IMSI (IMSI, MCC and MNC
+  are printed when debug = on)
+- Model
+  The string "SIM/USIM" (this is a constant string)
+- Product name
+  The string "pcsc" (this is a constant string)
+- Revision
+  a string similar to "Phase 2+ SIM" indicating the Phase Identification of
+  the SIM (possible values are 1, 2 and 2+)
+When debug = on this command also prints the ICCID.
+
 The --getphonebook command can read from SM, EN, FD, ON, SD, BD and LD.
 Use memory SD to read Service Dialing Numbers and BD to read Barred
 Dialing Numbers.
@@ -53,13 +69,6 @@ Do not try random numbers, read the GSM standard instead.
 - GN_OP_GetMemoryStatus returns total space instead of used space.
 
 - Memory EN isn't actually supported.
-
-- The --identify command returns the following fixed information:
-IMEI         : Unknown
-Manufacturer : Unknown
-Model        : SIM/USIM
-Product name : pcsc
-Revision     : Unknown
 
 
 * Troubleshooting *

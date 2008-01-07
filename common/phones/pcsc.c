@@ -64,6 +64,13 @@ static gn_error get_gn_error(PCSC_IOSTRUCT *ios, LONG ret);
 static LONG get_memory_type(gn_memory_type memory_type);
 static gn_error ios2gn_error(PCSC_IOSTRUCT *ios);
 
+/* higher level functions */
+
+static gn_error get_iccid(char *result);
+static gn_error get_imsi(char *result);
+static gn_error get_mnc_len(int *len);
+static gn_error get_phase(const char **phase);
+
 /* Some globals */
 
 gn_driver driver_pcsc = {
@@ -97,7 +104,7 @@ BYTE buf[MAX_BUFFER_SIZE];
 PCSC_IOSTRUCT IoStruct = { buf, sizeof(buf), 0, 0 };
 
 #ifdef DEBUG
-#define DUMP_BUFFER(ret, str, buf, len) pcsc_dump_buffer(ret, __FUNCTION__, str, buf, len)
+#define DUMP_BUFFER(ret, str, buf, len) pcsc_dump_buffer(ret, (char *) __FUNCTION__, str, buf, len)
 
 void pcsc_dump_buffer(LONG ret, char *func, char *str, BYTE *buf, LONG len)
 {
@@ -209,6 +216,132 @@ static LONG get_memory_type(gn_memory_type memory_type)
 	}
 }
 
+/* higher level functions */
+
+/* read ICCID and convert it into an ASCII string in the provided buffer (at least GN_PCSC_ICCID_MAX_LENGTH bytes long) */
+static gn_error get_iccid(char *result)
+{
+	PCSC_IOSTRUCT tmp_ios;
+	LONG ret;
+	LONG result_len;
+	BYTE *buf;
+	gn_error error;
+
+	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_MF);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	ret = pcsc_file_get_contents(&tmp_ios, GN_PCSC_FILE_EF_ICCID);
+	error = get_gn_error(&tmp_ios, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	/* Convert into ASCII digits */
+	result_len = (GN_PCSC_ICCID_MAX_LENGTH - 1) / 2;
+	buf = tmp_ios.pbRecvBuffer;
+	/* Note: the following ignores the exceptions for some Phase 1 SIM cards (see subclause 10.1.1) */
+	while (result_len--) {
+		if ((*buf & 0xf) == 0xf) break;
+		*result++ = (*buf & 0xf) + '0';
+		if ((*buf & 0xf0) == 0xf0) break;
+		*result++ = ((*buf & 0xf0) >> 4) + '0';
+		buf++;
+	}
+	*result = '\0';
+	free(tmp_ios.pbRecvBuffer);
+
+	return error;
+}
+
+/*
+sets *len to the number of MNC digits in IMSI from Administrative Data (subclause 10.3.18)
+*len is unchanged in case of error
+*/
+static gn_error get_mnc_len(int *len)
+{
+	PCSC_IOSTRUCT tmp_ios;
+	LONG ret;
+	gn_error error;
+
+	*len = 2;
+
+	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_GSM);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	ret = pcsc_file_get_contents(&tmp_ios, GN_PCSC_FILE_EF_AD);
+	error = get_gn_error(&tmp_ios, ret);
+	/* add 2 because dwRecvLength contains SW */
+	if ((error == GN_ERR_NONE) && (tmp_ios.dwReceived >= 4 + 2)) {
+		*len = tmp_ios.pbRecvBuffer[3];
+	}
+	free(tmp_ios.pbRecvBuffer);
+
+	return error;
+}
+
+/* read IMSI and convert it into an ASCII string in the provided buffer (at least GN_PCSC_IMSI_MAX_LENGTH bytes long) */
+static gn_error get_imsi(char *result)
+{
+	PCSC_IOSTRUCT tmp_ios;
+	LONG ret;
+	LONG result_len;
+	BYTE *buf;
+	gn_error error;
+
+	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_GSM);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	ret = pcsc_file_get_contents(&tmp_ios, GN_PCSC_FILE_EF_IMSI);
+	error = get_gn_error(&tmp_ios, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	/* Convert IMSI into ASCII digits (ETSI TS 100 940 V7.21.0 (2003-12) only talks about MCC and MNC parts) */
+	result_len = tmp_ios.pbRecvBuffer[0];
+	buf = tmp_ios.pbRecvBuffer + 1;
+	/* ignore lower nibble of first octet because it is a bit field */
+	*result++ = ((*buf & 0xf0) >> 4) + '0';
+	while (--result_len) {
+		buf++;
+		*result++ = (*buf & 0xf) + '0';
+		*result++ = ((*buf & 0xf0) >> 4) + '0';
+	}
+	*result = '\0';
+	free(tmp_ios.pbRecvBuffer);
+
+	return error;
+}
+
+/*
+sets *phase to a string representing Phase Identification of the SIM (subclause 10.3.19) or leaves it unchanged in case of error
+phase can be "1", "2" or "2+"
+*/
+static gn_error get_phase(const char **phase)
+{
+	PCSC_IOSTRUCT tmp_ios;
+	LONG ret;
+	gn_error error;
+
+	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_GSM);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	ret = pcsc_file_get_contents(&tmp_ios, GN_PCSC_FILE_EF_PHASE);
+	error = get_gn_error(&tmp_ios, ret);
+	/* add 2 because dwRecvLength contains SW */
+	if ((error == GN_ERR_NONE) && (tmp_ios.dwReceived >= 1 + 2)) {
+		switch (tmp_ios.pbRecvBuffer[0]) {
+		case 1: *phase = "1"; break;
+		case 2: *phase = "2"; break;
+		case 3: *phase = "2+"; break;
+		default: dprintf("Unknown Phase Identification 0x%02d\n", tmp_ios.pbRecvBuffer[0]);
+		}
+	}
+	free(tmp_ios.pbRecvBuffer);
+
+	return error;
+}
+
 /* functions for libgnokii stuff */
 
 static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
@@ -281,7 +414,40 @@ static gn_error Terminate(gn_data *data, struct gn_statemachine *state)
 
 static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error error;
+	char imsi[GN_PCSC_IMSI_MAX_LENGTH], iccid[GN_PCSC_ICCID_MAX_LENGTH];
+	const char *phase = "??";
+
+	/* read ICCID */
+	error = get_iccid(iccid);
+	if (error == GN_ERR_NONE) {
+		/* showing this as IMEI would be confusing, so just print it in debug mode */
+		dprintf("ICCID = %s\n", iccid);
+	}
+
+	/* read IMSI */
+	error = get_imsi(imsi);
+	if (error == GN_ERR_NONE) {
+		char mcc[4], mnc[4], net_code[8];
+		int mnc_len = 2;
+
+		/* extract MCC and MNC */
+		snprintf(mcc, sizeof(mcc), "%s", imsi);
+		/* ignore errors, set default value above */
+		get_mnc_len(&mnc_len);
+		snprintf(mnc, sizeof(mnc), "%.*s", mnc_len, imsi + 3);
+		dprintf("IMSI = %s Home PLMN = MCC %s MNC %s\n", imsi, mcc, mnc);
+		snprintf(net_code, sizeof(net_code), "%s %s", mcc, mnc);
+		/* get operator and country names as strings from libgnokii */
+		snprintf(data->manufacturer, GN_MANUFACTURER_MAX_LENGTH, "%s (%s)", gn_network_name_get(net_code), gn_country_name_get(mcc));
+	}
+
 	snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", "pcsc");
+
+	/* read SIM "Phase Identification" */
+	/* ignore errors, set default value above */
+	get_phase(&phase);
+	snprintf(data->revision, GN_REVISION_MAX_LENGTH, _("Phase %s SIM"), phase);
 
 	return GN_ERR_NONE;
 }
@@ -595,7 +761,9 @@ static LONG pcsc_cmd_read_record(PCSC_IOSTRUCT *ios, BYTE record, BYTE length)
 
 static LONG pcsc_file_get_contents(PCSC_IOSTRUCT *ios, LONG file_id)
 {
-/* copy file contents in a newly allocated buffer which must be freed by the caller */
+/* copy file contents in a newly allocated buffer which must be freed by the caller
+Note that this function overwrites ios->pbRecvBuffer and ios->dwRecvLength
+*/
 	LONG ret;
 	BYTE bRecordLength, bRecordCount, *pbFileBuffer, bFileStructure;
 	DWORD dwFileLength;

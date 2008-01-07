@@ -16,13 +16,16 @@
     o update gsm network list (according to
       http://en.wikipedia.org/wiki/Mobile_network_code) (Pawel Kot,
                                                    Jakub Jankowski)
-    o use defines instead of harcoding values           (Pawel Kot)
+    o use defines instead of hardcoding values          (Pawel Kot)
     o correct FBUS sequence number initialization (Burkhard Soehne)
     o make the function gn_get_connectiontype() visible even when
       compiling with -fvisibility=hidden            (Daniele Forsi)
  * xgnokii updates
     o avoid to use hardcodes                            (Pawel Kot)
     o avoid segfault on calendar fetching               (Pawel Kot)
+ * pcsc driver
+    o provide more information to the --identify command (see
+      Docs/README-PCSC for details)                 (Daniele Forsi)
 
 0.6.22
 ======
