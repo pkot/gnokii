@@ -26,6 +26,8 @@
  * pcsc driver
     o provide more information to the --identify command (see
       Docs/README-PCSC for details)                 (Daniele Forsi)
+    o implement --getnetworkinfo (shows information about the last
+      cell visited by the phone containing the SIM) (Daniele Forsi)
 
 0.6.22
 ======

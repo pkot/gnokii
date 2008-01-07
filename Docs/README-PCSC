@@ -26,6 +26,8 @@ Implemented commands for gnokii are:
 --identify
 --getphonebook
 --getfile
+--getnetworkinfo
+
 This means that writing to the phonebook is not supported and reading
 or writing short messages isn't supported either.
 
@@ -35,7 +37,7 @@ The --identify command returns the following information:
 - Manufacturer
   Operator name and country name converted using existing libgnokii
   functions from MNC and MCC extracted from the IMSI (IMSI, MCC and MNC
-  are printed when debug = on)
+  are printed when debug = on); PIN code is needed to read this
 - Model
   The string "SIM/USIM" (this is a constant string)
 - Product name
@@ -62,6 +64,19 @@ Interesting files are the phonebook in raw format:
 and the SMSs in raw format:
   gnokii --getfile b:/7f10/6f3c
 Do not try random numbers, read the GSM standard instead.
+
+The --getnetworkinfo command returns the following information about the
+last cell visited by the phone containing the SIM:
+- Network
+  Operator and country names converted using existing libgnokii functions
+  from MNC and MCC
+- Network code
+  MCC (3 digits) and MCC (2 or 3 digits)
+- LAC
+  Location Area Code as 4 hex digits
+- Cell id
+  Always 0 because it isn't stored together with the other information
+PIN code is needed to execute this command.
 
 
 * Bugs *

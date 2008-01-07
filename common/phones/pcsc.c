@@ -38,6 +38,7 @@
 
 static gn_error GetFile(gn_data *data, struct gn_statemachine *state);
 static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
+static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
 static gn_error Identify(gn_data *data, struct gn_statemachine *state);
 static gn_error Initialise(struct gn_statemachine *state);
 static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state);
@@ -355,6 +356,8 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return Identify(data, state);
 	case GN_OP_GetMemoryStatus:
 		return GetMemoryStatus(data, state);
+	case GN_OP_GetNetworkInfo:
+		return GetNetworkInfo(data, state);
 	case GN_OP_ReadPhonebook:
 		return ReadPhonebook(data, state);
 	case GN_OP_GetFile:
@@ -476,6 +479,44 @@ static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	}
 
 	return get_gn_error(&IoStruct, ret);
+}
+
+static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
+{
+	LONG ret;
+	gn_error error;
+
+	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_GSM);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	ret = pcsc_cmd_select(&IoStruct, GN_PCSC_FILE_EF_LOCI);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	ret = pcsc_cmd_read_binary(&IoStruct, 9);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	data->network_info->cell_id[0] = 0;
+	data->network_info->cell_id[1] = 0;
+	data->network_info->LAC[0] = IoStruct.pbRecvBuffer[7];
+	data->network_info->LAC[1] = IoStruct.pbRecvBuffer[8];
+	data->network_info->network_code[0] = '0' + (IoStruct.pbRecvBuffer[4] & 0x0f);
+	data->network_info->network_code[1] = '0' + (IoStruct.pbRecvBuffer[4] >> 4);
+	data->network_info->network_code[2] = '0' + (IoStruct.pbRecvBuffer[5] & 0x0f);
+	data->network_info->network_code[3] = ' ';
+	data->network_info->network_code[4] = '0' + (IoStruct.pbRecvBuffer[6] & 0x0f);
+	data->network_info->network_code[5] = '0' + (IoStruct.pbRecvBuffer[6] >> 4);
+	/* 3-digits MNC */
+	if ((IoStruct.pbRecvBuffer[5] & 0xf0) != 0xf0) {
+		data->network_info->network_code[6] = '0' + (IoStruct.pbRecvBuffer[5] >> 4);
+		data->network_info->network_code[7] = '\0';
+	} else {
+		data->network_info->network_code[6] = '\0';
+	}
+
+	return error;
 }
 
 static gn_error GetFile(gn_data *data, struct gn_statemachine *state)
