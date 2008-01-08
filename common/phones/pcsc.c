@@ -22,9 +22,10 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2007 Daniele Forsi
+  Copyright (C) 2007-2008 Daniele Forsi
 
   This file provides functions for accessing PC/SC SIM smart cards.
+  Where not otherwise noted the document referenced is ETSI TS 100 977 V8.13.0 (2005-06).
 
 */
 
@@ -732,9 +733,19 @@ static LONG pcsc_cmd_select(PCSC_IOSTRUCT *ios, LONG file_id)
 
 	PCSC_TRANSMIT(ret, "cmd_select", pbSendBuffer, ios);
 
-	/* this should never happen */
-	if ((ret == SCARD_S_SUCCESS) && (ios->dwReceived < 2)) ret = SCARD_F_UNKNOWN_ERROR;
-
+	if (ret != SCARD_S_SUCCESS) return ret;
+	/* short reads should never happen (minimum lengths taken from subclause 9.2.1) */
+	switch (ios->pbRecvBuffer[6]) {
+	case GN_PCSC_FILE_TYPE_MF:
+	case GN_PCSC_FILE_TYPE_DF:
+		if (ios->dwReceived < 22) ret = SCARD_F_UNKNOWN_ERROR;
+		break;
+	case GN_PCSC_FILE_TYPE_EF:
+		if (ios->dwReceived < 14) ret = SCARD_F_UNKNOWN_ERROR;
+		break;
+	default:
+		ret = SCARD_E_INVALID_PARAMETER;
+	}
 	return ret;
 }
 
@@ -752,9 +763,8 @@ static LONG pcsc_stat_file(PCSC_IOSTRUCT *ios, LONG file_id)
 	LONG ret;
 
 	ret = pcsc_cmd_select(ios, file_id);
-	if (ret != SCARD_S_SUCCESS) {
-		return ret;
-	}
+	if (ret != SCARD_S_SUCCESS) return ret;
+
 	/* "soft" failure that needs to be catched by the caller */
 	if (ios->pbRecvBuffer[ios->dwReceived - 2] != 0x9f) {
 		return SCARD_S_SUCCESS;
@@ -816,11 +826,9 @@ Note that this function overwrites ios->pbRecvBuffer and ios->dwRecvLength
 
 	ret = pcsc_stat_file(ios, file_id);
 	if (ret != SCARD_S_SUCCESS) return ret;
-	if (ios->dwReceived < 2) return SCARD_F_UNKNOWN_ERROR;
 	/* "soft" failure that needs to be catched by the caller */
 	if (ios->pbRecvBuffer[ios->dwReceived - 2] != 0x90) return SCARD_S_SUCCESS;
 
-	if (ios->dwReceived <= 6) return SCARD_F_UNKNOWN_ERROR;
 	switch (ios->pbRecvBuffer[6]) {
 	case GN_PCSC_FILE_TYPE_MF:
 	case GN_PCSC_FILE_TYPE_DF:
@@ -833,9 +841,9 @@ Note that this function overwrites ios->pbRecvBuffer and ios->dwRecvLength
 		return SCARD_E_INVALID_PARAMETER;
 	}
 
-	if (ios->dwReceived <= 13) return SCARD_F_UNKNOWN_ERROR;
 	dwFileLength = ios->pbRecvBuffer[2] * 256 + ios->pbRecvBuffer[3];
 	bFileStructure = ios->pbRecvBuffer[13];
+	if (ios->dwReceived <= 15) return SCARD_F_UNKNOWN_ERROR;
 	bRecordLength = ios->pbRecvBuffer[14];
 	dprintf("file %04x length %d\n", file_id, dwFileLength);
 	/* 2 extra bytes are needed to store the last SW (the previous SWs are overwritten by the following reads)
@@ -880,18 +888,16 @@ static LONG pcsc_read_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE record)
 
 	ret = pcsc_stat_file(ios, file_id);
 	if (ret != SCARD_S_SUCCESS) return ret;
-	if (ios->dwReceived < 2) return SCARD_F_UNKNOWN_ERROR;
 	/* "soft" failure that needs to be catched by the caller */
 	if (ios->pbRecvBuffer[ios->dwReceived - 2] != 0x90) return SCARD_S_SUCCESS;
 
 	/* records can only be read from EFs */
-	if (ios->dwReceived <= 6) return SCARD_F_UNKNOWN_ERROR;
 	if (ios->pbRecvBuffer[6] != GN_PCSC_FILE_TYPE_EF) return SCARD_E_INVALID_PARAMETER;
 
-	if (ios->dwReceived <= 13) return SCARD_F_UNKNOWN_ERROR;
 	switch (ios->pbRecvBuffer[13]) {
 	case GN_PCSC_FILE_STRUCTURE_CYCLIC:
 	case GN_PCSC_FILE_STRUCTURE_LINEAR_FIXED:
+		if (ios->dwReceived <= 14) return SCARD_F_UNKNOWN_ERROR;
 		ret = pcsc_cmd_read_record(ios, record, ios->pbRecvBuffer[14]);
 		break;
 	default:
