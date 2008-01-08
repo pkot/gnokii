@@ -733,19 +733,6 @@ static LONG pcsc_cmd_select(PCSC_IOSTRUCT *ios, LONG file_id)
 
 	PCSC_TRANSMIT(ret, "cmd_select", pbSendBuffer, ios);
 
-	if (ret != SCARD_S_SUCCESS) return ret;
-	/* short reads should never happen (minimum lengths taken from subclause 9.2.1) */
-	switch (ios->pbRecvBuffer[6]) {
-	case GN_PCSC_FILE_TYPE_MF:
-	case GN_PCSC_FILE_TYPE_DF:
-		if (ios->dwReceived < 22) ret = SCARD_F_UNKNOWN_ERROR;
-		break;
-	case GN_PCSC_FILE_TYPE_EF:
-		if (ios->dwReceived < 14) ret = SCARD_F_UNKNOWN_ERROR;
-		break;
-	default:
-		ret = SCARD_E_INVALID_PARAMETER;
-	}
 	return ret;
 }
 
@@ -770,7 +757,22 @@ static LONG pcsc_stat_file(PCSC_IOSTRUCT *ios, LONG file_id)
 		return SCARD_S_SUCCESS;
 	}
 	/* get file structure and length */
-	return pcsc_cmd_get_response(ios, ios->pbRecvBuffer[1]);
+	ret = pcsc_cmd_get_response(ios, ios->pbRecvBuffer[1]);
+	if (ret != SCARD_S_SUCCESS) return ret;
+
+	/* short reads should never happen (minimum lengths taken from subclause 9.2.1) */
+	switch (ios->pbRecvBuffer[6]) {
+	case GN_PCSC_FILE_TYPE_MF:
+	case GN_PCSC_FILE_TYPE_DF:
+		if (ios->dwReceived < 22) ret = SCARD_F_UNKNOWN_ERROR;
+		break;
+	case GN_PCSC_FILE_TYPE_EF:
+		if (ios->dwReceived < 14) ret = SCARD_F_UNKNOWN_ERROR;
+		break;
+	default:
+		ret = SCARD_E_INVALID_PARAMETER;
+	}
+	return ret;
 }
 
 static LONG pcsc_cmd_read_binary(PCSC_IOSTRUCT *ios, LONG length)
