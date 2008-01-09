@@ -229,14 +229,13 @@ time_t timegm(struct tm *tm);
 #endif
 
 #ifdef WIN32
-#  define mkdir(dirname, accessrights)	_mkdir(dirname)
-/*
- * This is inspired by Marcin Wiacek <marcin-wiacek@topnet.pl>, it should help
- * windows compilers (MSVC 6)
- */
-#  define inline __inline
-#  define strcasecmp stricmp
-#  define strncasecmp strnicmp
+#  ifdef _MSC_VER
+#    define inline __inline
+#    define mkdir(dirname, accessrights) _mkdir(dirname)
+#    define strcasecmp _stricmp
+#    define strncasecmp _strnicmp
+#    define snprintf _snprintf
+#  endif /* _MSC_VER */
 #  if !defined(HAVE_UNISTD_H) || defined(__MINGW32__)
 #    define sleep(x) Sleep((x) * 1000)
 #    define usleep(x) Sleep(((x) < 1000) ? 1 : ((x) / 1000))

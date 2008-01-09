@@ -38,7 +38,7 @@
 
 #include "misc.h"
 #include "gnokii.h"
-#include "devices/winserial.h"
+#include "devices/serial.h"
 
 #define USECOMM      /* yes, we need the COMM API */
 

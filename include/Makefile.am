@@ -1,4 +1,4 @@
-SUBDIRS = data devices gnokii links phones win32
+SUBDIRS = data devices gnokii links phones
 
 gnokiidir = $(includedir)
 gnokii_HEADERS = gnokii.h

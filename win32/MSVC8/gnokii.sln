@@ -1,0 +1,29 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 9.00
+# Visual C++ Express 2005
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libgnokii", "libgnokii.vcproj", "{AB5E11A5-79E3-4722-82BC-25FD9FF71471}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gnokii", "gnokii.vcproj", "{0E0CED41-EECB-4D26-A2C6-62C6157C5219}"
+	ProjectSection(ProjectDependencies) = postProject
+		{AB5E11A5-79E3-4722-82BC-25FD9FF71471} = {AB5E11A5-79E3-4722-82BC-25FD9FF71471}
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{AB5E11A5-79E3-4722-82BC-25FD9FF71471}.Debug|Win32.ActiveCfg = Debug|Win32
+		{AB5E11A5-79E3-4722-82BC-25FD9FF71471}.Debug|Win32.Build.0 = Debug|Win32
+		{AB5E11A5-79E3-4722-82BC-25FD9FF71471}.Release|Win32.ActiveCfg = Release|Win32
+		{AB5E11A5-79E3-4722-82BC-25FD9FF71471}.Release|Win32.Build.0 = Release|Win32
+		{0E0CED41-EECB-4D26-A2C6-62C6157C5219}.Debug|Win32.ActiveCfg = Debug|Win32
+		{0E0CED41-EECB-4D26-A2C6-62C6157C5219}.Debug|Win32.Build.0 = Debug|Win32
+		{0E0CED41-EECB-4D26-A2C6-62C6157C5219}.Release|Win32.ActiveCfg = Release|Win32
+		{0E0CED41-EECB-4D26-A2C6-62C6157C5219}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

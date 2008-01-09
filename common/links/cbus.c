@@ -28,21 +28,13 @@
 
  */
 
-#include "config.h"
-
-/* System header files */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 #include <errno.h>
 
-/* Various header files */
+#include "config.h"
 #include "compat.h"
-#include "misc.h"
-
-#include "gnokii-internal.h"
-
 #include "device.h"
+#include "misc.h"
+#include "gnokii-internal.h"
 #include "links/utils.h"
 #include "links/cbus.h"
 
@@ -68,7 +60,7 @@ static gn_error cbus_write(unsigned char *d, size_t len, struct gn_statemachine 
 		res = device_write(d, len, state);
 		if (res == -1) {
 			if (errno != EAGAIN) {
-				dprintf("I/O error : %m?!\n");
+				dprintf("cbus: %s\n", strerror(errno));
 				return GN_ERR_FAILED;
 			}
 		} else {

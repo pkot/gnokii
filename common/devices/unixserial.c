@@ -35,10 +35,7 @@
 #include "misc.h"
 #include "gnokii.h"
 #include "gnokii-internal.h"
-
-/* Do not compile this file under Win32 systems. */
-
-#ifndef WIN32
+#include "devices/serial.h"
 
 #include <errno.h>
 #include <fcntl.h>
@@ -49,9 +46,7 @@
 #include <sys/ioctl.h>
 #include <sys/types.h>
 #include <sys/wait.h>
-
 #include <termios.h>
-#include "devices/unixserial.h"
 
 #ifdef HAVE_SYS_IOCTL_COMPAT_H
 #  include <sys/ioctl_compat.h>
@@ -499,5 +494,3 @@ gn_error serial_flush(int fd, struct gn_statemachine *state)
 
 	return GN_ERR_NONE;
 }
-
-#endif /* WIN32 */

@@ -38,11 +38,7 @@
 #include "devices/irda.h"
 #include "devices/unixbluetooth.h"
 #include "devices/tcp.h"
-#ifndef WIN32
-#  include "devices/unixserial.h"
-#else
-#  include "devices/winserial.h"
-#endif
+#include "devices/serial.h"
 #include "devices/tekram.h"
 #include "devices/dku2libusb.h"
 
