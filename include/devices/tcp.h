@@ -31,6 +31,7 @@
 
 #include "compat.h"
 #include "misc.h"
+#include "gnokii.h"
 
 int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state);
 int tcp_close(int fd, struct gn_statemachine *state);
