@@ -1,5 +1,5 @@
 /*
-  
+
   $Id$
 
   G N O K I I
@@ -28,9 +28,11 @@
 */
 
 #include "config.h"
-
 #include "misc.h"
-#include "gnokii.h"
+#include "devices/tcp.h"
+#include "devices/serial.h"
+
+#ifndef WIN32
 
 #include <stdio.h>
 #include <fcntl.h>
@@ -45,14 +47,11 @@
 #include <netinet/in.h>
 #include <sys/socket.h>
 #include <netdb.h>
+#include <termios.h>
 
 #ifdef HAVE_SYS_FILE_H
 #  include <sys/file.h>
 #endif
-
-#include <termios.h>
-#include "devices/tcp.h"
-#include "devices/unixserial.h"
 
 #ifdef HAVE_SYS_IOCTL_COMPAT_H
 #  include <sys/ioctl_compat.h>
@@ -65,8 +64,6 @@
 #ifndef O_NONBLOCK
 #  define O_NONBLOCK  0
 #endif
-
-#ifndef WIN32
 
 /* Open the serial port and store the settings. */
 
@@ -109,7 +106,7 @@ static int tcp_open(const char *file)
 		goto fail_free;
 	}
 	free(filedup);
-  
+
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(portul);
 	memcpy(&addr.sin_addr, hostent->h_addr_list[0], sizeof(addr.sin_addr));
@@ -144,7 +141,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 
 	fd = tcp_open(file);
 
-	if (fd < 0) 
+	if (fd < 0)
 		return fd;
 
 	/* handle config file connect_script:
@@ -187,7 +184,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 		tcp_close(fd, state);
 		return -1;
 	}
-  
+
 	return fd;
 }
 
@@ -228,7 +225,7 @@ size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *stat
 	return -1;
 }
 
-size_t tcp_write(int fd, __const __ptr_t buf, size_t n, struct gn_statemachine *state)
+size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
 	return -1;
 }
