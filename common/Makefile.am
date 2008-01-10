@@ -49,9 +49,9 @@ libgnokii_la_SOURCES = \
 	localcharset.c
 
 libgnokii_la_LIBADD = \
-	$(builddir)/phones/libPHONES.la \
-	$(builddir)/links/libLINKS.la \
-	$(builddir)/devices/libDEVICES.la \
+	$(top_builddir)/common/phones/libPHONES.la \
+	$(top_builddir)/common/links/libLINKS.la \
+	$(top_builddir)/common/devices/libDEVICES.la \
 	$(XPM_LIBS)
 
 libgnokii_la_LDFLAGS = 				\
