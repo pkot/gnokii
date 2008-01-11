@@ -17,6 +17,8 @@
     o consolidate winserial.h and unixserial.h        (Ladis Michl)
     o add WIN32 compatibility after automake changes  (Ladis Michl,
                                                        Jari Turkia)
+    o add a script that helps building CVS version on win32
+                                                      (Jari Turkia)
  * libgnokii updates
     o update gsm network list (according to
       http://en.wikipedia.org/wiki/Mobile_network_code) (Pawel Kot,
