@@ -1,3 +1,4 @@
 common/data/at-emulator.c
 common/devices/winserial.c
+common/phones/pcsc.c
 

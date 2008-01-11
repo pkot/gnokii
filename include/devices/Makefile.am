@@ -8,7 +8,6 @@ EXTRA_HEADERS = \
 		tekram.h \
 		unixbluetooth.h \
 		unixirda.h \
-		unixserial.h \
-		winserial.h
+		serial.h
 
 EXTRA_DIST = $(EXTRA_HEADERS)
