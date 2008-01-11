@@ -895,6 +895,7 @@ AC_OUTPUT(
 	  po/Makefile.in
 	  testsuite/Makefile
 	  testsuite/data/Makefile
+	  win32/Makefile
   )
 
 dnl ======================== Final report
