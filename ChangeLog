@@ -12,6 +12,9 @@
     o allow silent (make -s) build                      (Pawel Kot)
     o add missing includes on glibc 2.7
       (http://bugs.gentoo.org/show_bug.cgi?id=203787) (Alin Nastac)
+    o add MSVC8 project files                         (Ladis Michl)
+    o remove obsolete win32 files                     (Ladis Michl)
+    o consolidate winserial.h and unixserial.h        (Ladis Michl)
     o add WIN32 compatibility after automake changes  (Ladis Michl,
                                                        Jari Turkia)
  * libgnokii updates
