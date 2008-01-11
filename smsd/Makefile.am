@@ -19,7 +19,7 @@ libmysql_la_LDFLAGS = $(modules_flags)
 libmysql_la_LIBADD = $(MYSQL_LIBS)
 endif
 
-libfile_la_SOURCES = utils.h utils.c file.c
+libfile_la_SOURCES = file.c db.h utils.h utils.c
 libfile_la_LDFLAGS = $(modules_flags)
 
 smsd_SOURCES = smsd.h smsd.c lowlevel.c lowlevel.h db.h
