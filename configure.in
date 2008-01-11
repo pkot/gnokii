@@ -601,8 +601,29 @@ AM_CONDITIONAL(GLIB, test "x$found_glib" = "xyes")
 
 dnl ======================== Checks for databases support for smsd
 
-AM_CONDITIONAL(HAVE_MYSQL, test "x" = "xno")
-AM_CONDITIONAL(HAVE_POSTGRES, test "x" = "xno")
+have_postgres=no
+AC_PATH_PROG(PGCONFIG, pg_config, no)
+if test x$PGCONFIG != xno ; then
+	have_postgres=yes
+	POSTGRES_LIBS=`$PGCONFIG --libs`
+	POSTGRES_CFLAGS=`$PGCONFIG --cflags`
+	AC_SUBST(POSTGRES_LIBS)
+	AC_SUBST(POSTGRES_CFLAGS)
+fi
+
+AM_CONDITIONAL(HAVE_POSTGRES, test "x$have_postgres" = "xyes")
+
+have_mysql=no
+AC_PATH_PROG(MYSQLCONFIG, mysql_config, no)
+if test x$MYSQLCONFIG != xno ; then
+	have_mysql=yes
+	MYSQL_LIBS=`$MYSQLCONFIG --libs`
+	MYSQL_CFLAGS=`$MYSQLCONFIG --cflags`
+	AC_SUBST(MYSQL_LIBS)
+	AC_SUBST(MYSQL_CFLAGS)
+fi
+
+AM_CONDITIONAL(HAVE_MYSQL, test "x$have_mysql" = "xyes")
 
 dnl ======================== Additional switches
 
@@ -898,6 +919,8 @@ echo "
     Xgnokii version:    $XVERSION
     X (GTK+) support:   $x_support
     smsd support:       $found_glib
+    Postgres support:   $have_postgres
+    MySQL support:      $have_mysql
     Debug:              $debug
     XDebug:             $xdebug
     RLPDebug:           $rlpdebug

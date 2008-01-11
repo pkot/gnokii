@@ -9,12 +9,14 @@ if HAVE_POSTGRES
 plugin_LTLIBRARIES += libpq.la
 libpq_la_SOURCES = pq.c db.h
 libpq_la_LDFLAGS = $(modules_flags)
+libpq_la_LIBADD = $(POSTGRES_LIBS)
 endif
 
 if HAVE_MYSQL
 plugin_LTLIBRARIES += libmysql.la
 libmysql_la_SOURCES = mysql.c db.h
 libmysql_la_LDFLAGS = $(modules_flags)
+libmysql_la_LIBADD = $(MYSQL_LIBS)
 endif
 
 libfile_la_SOURCES = utils.h utils.c file.c
@@ -25,6 +27,8 @@ smsd_LDADD = $(GLIB_LIBS) $(PTHREAD_LIBS) $(top_builddir)/common/libgnokii.la
 
 AM_CFLAGS =				\
 	$(GLIB_CFLAGS)			\
+	$(POSTGRES_CFLAGS)		\
+	$(MYSQL_CFLAGS)			\
 	-DMODULES_DIR=\"${pkglibdir}\"	\
 	$(PTHREAD_CFLAGS)
 
