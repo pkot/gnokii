@@ -235,6 +235,7 @@ time_t timegm(struct tm *tm);
 #    define strcasecmp _stricmp
 #    define strncasecmp _strnicmp
 #    define snprintf _snprintf
+#    define __const const
 #  endif /* _MSC_VER */
 #  if !defined(HAVE_UNISTD_H) || defined(__MINGW32__)
 #    define sleep(x) Sleep((x) * 1000)
