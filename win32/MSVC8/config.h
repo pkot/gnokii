@@ -41,11 +41,6 @@
 #undef VERSION
 #define VERSION "0.6.23cvs"
 
-/* XXX: Needed only for deprecated function
- * GNOKII_API gn_error gn_cfg_read(char **bindir)
- * remove anoce function is gone */
-#define SBINDIR ".\\"
-
 /* We support Bluetooth and IRDA on MSVS 2005 */
 #define HAVE_BLUETOOTH 1
 #define HAVE_IRDA 1

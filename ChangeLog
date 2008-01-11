@@ -20,6 +20,7 @@
     o correct FBUS sequence number initialization (Burkhard Soehne)
     o make the function gn_get_connectiontype() visible even when
       compiling with -fvisibility=hidden            (Daniele Forsi)
+    o remove deprecated gn_cfg_read() function          (Pawel Kot)
  * xgnokii updates
     o avoid to use hardcodes                            (Pawel Kot)
     o avoid segfault on calendar fetching               (Pawel Kot)

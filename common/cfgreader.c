@@ -617,21 +617,6 @@ GNOKII_API gn_error gn_cfg_read_default()
 }
 
 /* DEPRECATED */
-GNOKII_API gn_error gn_cfg_read(char **bindir)
-{
-	gn_error retval;
-
-	retval = gn_cfg_read_default();
-
-	*bindir = gn_cfg_get(gn_cfg_info, "global", "bindir");
-	if (!*bindir)
-		*bindir = gn_cfg_get(gn_cfg_info, "gnokiid", "bindir");
-	if (!*bindir)
-		*bindir = SBINDIR;
-
-	return retval;
-}
-
 static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 {
 	char *val;
