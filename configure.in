@@ -594,8 +594,10 @@ have_postgres=no
 AC_PATH_PROG(PGCONFIG, pg_config, no)
 if test x$PGCONFIG != xno ; then
 	have_postgres=yes
-	POSTGRES_LIBS=`$PGCONFIG --libs`
-	POSTGRES_CFLAGS=`$PGCONFIG --cflags`
+	pg_libdir=`$PGCONFIG --libdir`
+	POSTGRES_LIBS="-L$pg_libdir"
+	pg_includedir=`$PGCONFIG --includedir`
+	POSTGRES_CFLAGS="-I$pg_includedir"
 	AC_SUBST(POSTGRES_LIBS)
 	AC_SUBST(POSTGRES_CFLAGS)
 fi
