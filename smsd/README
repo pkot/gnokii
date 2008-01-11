@@ -205,24 +205,15 @@ Options:
 
 COMPILATION
 
-SMSD is not compiled by default with gnokii 'make' command. You must compile it
-manually by typing 'make' in smsd directory. But before SMSD compilation
-you must right configure gnokii (autoconf, configure).
-
-For example:
-(in gnokii directory)
-gettextize                # only for CVS copies
-autoconf                  # only for CVS copies
-autoheader                # only for CVS copies
-./configure
-[ If you use latest Red Hat with new (0.11) gettext version ]
-[ run autogen.sh with configure options instead of the      ]
-[ above commands. It will do all needed things.             ]
-cd smsd
-vi Makefile (edit paths in "DB Modules" section)
-make
-make libpq.la OR make libmysql.la OR make libfile.la
-make install
+SMSD is now compiled by default with gnokii 'make' command; see detailed
+instructions in top level INSTALL file.
+The configure script autodetects the plugins to build:
+ - the PostgreSQL module is built if pg_config is present
+   (plugin name is libpq.la).
+ - the MySQL module is built if mysql_config is present
+   (plugin name is libmysql.la).
+ - the file module is built if glib is present
+   (plugin name is libfile.la).
 
 Note that you can build all of the modules (libpq, libmysql and libfile) but
 you should use just one.
