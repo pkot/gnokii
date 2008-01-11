@@ -8,7 +8,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gnokii", "gnokii.vcproj", "
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libgnokii", "libgnokii.vcproj", "{93B245DE-6DCE-46E2-BFF1-171383B0643C}"
 EndProject
-Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Gnokii setup", "Gnokii setup\Gnokii setup.vdproj", "{52325EA7-CFC3-488D-A213-2ACF154E30DA}"
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Gnokii setup", "Gnokii_setup\Gnokii_setup.vdproj", "{52325EA7-CFC3-488D-A213-2ACF154E30DA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
