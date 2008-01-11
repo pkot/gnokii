@@ -19,6 +19,7 @@
                                                        Jari Turkia)
     o add a script that helps building CVS version on win32
                                                       (Jari Turkia)
+    o get rid of XGNOKIIDIR                             (Pawel Kot)
  * libgnokii updates
     o update gsm network list (according to
       http://en.wikipedia.org/wiki/Mobile_network_code) (Pawel Kot,

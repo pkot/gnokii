@@ -139,7 +139,7 @@ char folders[GN_SMS_FOLDER_MAX_NUMBER][GN_SMS_MESSAGE_MAX_NUMBER];
 gint foldercount = 0, lastfoldercount = 0;
 
 /* Local variables */
-static char *DefaultXGnokiiDir = XGNOKIIDIR "/share/xgnokii";
+static char *DefaultXGnokiiDir = PREFIX "/share/xgnokii";
 static bool SMSSettingsInitialized = FALSE;
 static bool CallersGroupsInitialized = FALSE;
 static gint hiddenCallDialog;

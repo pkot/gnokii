@@ -566,17 +566,6 @@ else
             AC_MSG_WARN(Disabling xgnokii.)
          else
             x_support="yes"
-
-            XGNOKIIDIR='${prefix}'
-            AC_ARG_WITH(xgnokiidir,
-               [  --with-xgnokiidir=DIR   specifies the base for xgnokii],
-               [ if test x$withval = xyes; then
-                    AC_MSG_WARN(Usage is: --with-xgnokiilib=DIR)
-                 else
-                    XGNOKIIDIR="$withval"
-                 fi
-               ]
-            )
          fi
       fi
    fi
@@ -807,10 +796,6 @@ XPACKAGE=xgnokii
 XVERSION=`cat xgnokii/VERSION`
 AC_DEFINE_UNQUOTED(XVERSION, "$XVERSION", [The current xgnokii version])
 
-if test "$x_support" = yes; then
-	AC_EXPAND_DIR(xgnokii_dir, "${XGNOKIIDIR}")
-	AC_DEFINE_UNQUOTED(XGNOKIIDIR, "$xgnokii_dir", [Base directory for xgnokii])
-fi
 HAVE_XGNOKII=$x_support
 
 case "$INSTALL" in
@@ -829,6 +814,9 @@ esac
 AC_EXPAND_DIR(mgnokiidev_bindir, "${sbindir}")
 AC_DEFINE_UNQUOTED(SBINDIR, "$mgnokiidev_bindir", [Where mgnokiidev gets installed])
 
+AC_EXPAND_DIR(prefix_dir, "${prefix}")
+AC_DEFINE_UNQUOTED(PREFIX, "$prefix_dir", [Root dir for gnokii, xgnokii and smsd])
+
 AC_CONFIG_HEADERS([include/config.h])
 
 AC_SUBST(PACKAGE)
@@ -836,7 +824,6 @@ AC_SUBST(VERSION)
 AC_SUBST(XVERSION)
 AC_SUBST(XPACKAGE)
 
-AC_SUBST(XGNOKIIDIR)
 AC_SUBST(exec_prefix)
 
 AC_SUBST(GLDFLAGS)

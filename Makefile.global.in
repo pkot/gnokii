@@ -21,14 +21,11 @@ exec_prefix    = @exec_prefix@
 
 bindir         = @bindir@
 sbindir        = @sbindir@
-xbindir        = @XGNOKIIDIR@/bin/
 libdir         = @libdir@
-xgnokii_libdir = @XGNOKIIDIR@/share/@XPACKAGE@
 includedir     = @includedir@
 mandir         = @mandir@
 man1dir        = ${mandir}/man1/
 man8dir        = ${mandir}/man8/
-xmandir        = @XGNOKIIDIR@/man/man1/
 datarootdir    = @datarootdir@
 docdir         = @docdir@
 datadir        = @datadir@

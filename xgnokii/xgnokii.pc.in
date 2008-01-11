@@ -2,7 +2,7 @@ prefix=@prefix@
 exec_prefix=@exec_prefix@
 libdir=@libdir@
 includedir=@includedir@
-xgnokiidir=@XGNOKIIDIR@/share/@XPACKAGE@
+xgnokiidir=@prefix@/share/@XPACKAGE@
 
 Name: xgnokii
 Description: GTK2 gnokii library interface
