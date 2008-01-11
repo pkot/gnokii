@@ -599,6 +599,11 @@ fi
 
 AM_CONDITIONAL(GLIB, test "x$found_glib" = "xyes")
 
+dnl ======================== Checks for databases support for smsd
+
+AM_CONDITIONAL(HAVE_MYSQL, test "x" = "xno")
+AM_CONDITIONAL(HAVE_POSTGRES, test "x" = "xno")
+
 dnl ======================== Additional switches
 
 AC_ARG_ENABLE(security,
@@ -847,7 +852,6 @@ AC_OUTPUT(
 	  Docs/sample/ppp/Makefile
 	  include/Makefile
 	  include/gnokii.h
-	  include/win32/Makefile
 	  include/data/Makefile
 	  include/devices/Makefile
 	  include/phones/Makefile
@@ -861,6 +865,7 @@ AC_OUTPUT(
 	  common/phones/Makefile
 	  gnokii/Makefile
 	  gnokiid/Makefile
+	  smsd/Makefile
 	  utils/Makefile
 	  xgnokii/xgnokii.pc
 	  xgnokii/Makefile

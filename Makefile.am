@@ -12,12 +12,11 @@ SUBDIRS += xgnokii
 endif
 
 if GLIB
-# FIXME
-#SUBDIRS += smsd
+SUBDIRS += smsd
 endif
 
 # FIXME readd smsd
-DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po testsuite
+DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po smsd testsuite
 
 EXTRA_DIST =				\
 		ChangeLog		\
