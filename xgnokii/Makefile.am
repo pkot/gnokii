@@ -5,7 +5,9 @@ bin_PROGRAMS = xgnokii
 AM_CFLAGS = $(PTHREAD_CFLAGS) \
 	  $(GTK_CFLAGS) -DGTK_ENABLE_BROKEN
 
-xgnokii_LDADD = $(PTHREAD_LIBS) $(GTK_LIBS) $(top_builddir)/common/libgnokii.la $(top_builddir)/common/data/libDATA.la
+xgnokii_LDADD = \
+	$(PTHREAD_LIBS) $(GTK_LIBS) $(INTLLIBS) \
+	$(top_builddir)/common/libgnokii.la $(top_builddir)/common/data/libDATA.la
 xgnokii_CFLAGS = -I$(top_srcdir)/include $(AM_CFLAGS)
 
 xgnokii_SOURCES = \

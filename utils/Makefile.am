@@ -1,5 +1,6 @@
 sbin_PROGRAMS = mgnokiidev
 mgnokiidev_SOURCES = mgnokiidev.c
+mgnokiidev_LDADD = $(INTLLIBS)
 mgnokiidev_CFLAGS = -I$(top_srcdir)/include
 
 scripts_DATA = sendsms
