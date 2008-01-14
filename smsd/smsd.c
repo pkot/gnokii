@@ -51,6 +51,7 @@
 #endif
 
 #include <glib.h>
+#include <gmodule.h>
 
 #include "misc.h"
 
@@ -85,58 +86,53 @@ static volatile bool db_monitor;
 
 gint LoadDB (void)
 {
-  void *handle;
-  GString *buf;
+  GModule *handle;
+  gchar *buf;
   gchar *error;
-  
-  buf = g_string_sized_new (64);
-  
-  g_string_sprintf (buf, "%s/lib%s.so", smsdConfig.libDir, smsdConfig.dbMod);
 
-  gn_log_xdebug ("Trying to load module %s\n", buf->str);
+  buf = g_module_build_path(smsdConfig.libDir, smsdConfig.dbMod);
+  
+  gn_log_xdebug("Trying to load module %s\n", buf);
     
-  handle = dlopen (buf->str, RTLD_LAZY);
+  handle = g_module_open(buf, G_MODULE_BIND_LAZY);
+  g_free (buf);
   if (!handle)
   {
     g_print ("dlopen error: %s!\n", dlerror());
     return (1);
   }
     
-  DB_Bye = dlsym(handle, "DB_Bye");
-  if ((error = dlerror ()) != NULL)
+  if (g_module_symbol(handle, "DB_Bye", (gpointer *)&DB_Bye) == FALSE)
   {
-    g_print ("%s\n", error);
+    g_print ("Error getting symbol 'DB_Bye': %s\n", g_module_error ());
     return (2);
   }
 
-  DB_ConnectInbox = dlsym(handle, "DB_ConnectInbox");
-  if ((error = dlerror ()) != NULL)
+  if (g_module_symbol(handle, "DB_ConnectInbox", (gpointer *)&DB_ConnectInbox) == FALSE)
   {
-    g_print ("%s\n", error);
+    g_print ("Error getting symbol 'DB_ConnectInbox':  %s\n", g_module_error ());
     return (2);
   }
 
-  DB_ConnectOutbox = dlsym(handle, "DB_ConnectOutbox");
-  if ((error = dlerror ()) != NULL)
+  if (g_module_symbol(handle, "DB_ConnectOutbox", (gpointer *)&DB_ConnectOutbox) == FALSE)
   {
-    g_print ("%s\n", error);
+    g_print ("Error getting symbol 'DB_ConnectOutbox': %s\n", g_module_error ());
     return (2);
   }
-  
-  DB_InsertSMS = dlsym(handle, "DB_InsertSMS");
-  if ((error = dlerror ()) != NULL)
+
+  if (g_module_symbol(handle, "DB_InsertSMS", (gpointer *)&DB_InsertSMS) == FALSE)
   {
-    g_print ("%s\n", error);
+    g_print ("Error getting symbol 'DB_InsertSMS': %s\n", g_module_error ());
     return (2);
   }
-  
-  DB_Look = dlsym(handle, "DB_Look");
+
+  if (g_module_symbol(handle, "DB_Look", (gpointer *)&DB_Look) == FALSE)
   if ((error = dlerror ()) != NULL)
   {
-    g_print ("%s\n", error);
+    g_print ("Error getting symbol 'DB_Look': %s\n", g_module_error ());
     return (2);
   }
-  
+
   return (0);
 }
 

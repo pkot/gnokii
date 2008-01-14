@@ -580,7 +580,7 @@ dnl ======================== Checks for glib support for smsd
 
 found_glib=no
 
-PKG_CHECK_MODULES(GLIB, glib-2.0, found_glib=yes, found_glib=no)
+PKG_CHECK_MODULES(GLIB, glib-2.0 gmodule-2.0, found_glib=yes, found_glib=no)
 if test "$found_glib" = no; then
 	AC_MSG_WARN(Cannot find glib 2.0.)
 	AC_MSG_WARN(Disabling smsd.)
