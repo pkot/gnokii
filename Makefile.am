@@ -1,7 +1,5 @@
 SUBDIRS = include common gnokii po
 
-# FIXME add Docs
-
 if WIN32
 else
 SUBDIRS += gnokiid utils
