@@ -258,8 +258,6 @@ static gn_error get_mnc_len(int *len)
 	LONG ret;
 	gn_error error;
 
-	*len = 2;
-
 	ret = pcsc_read_file(&IoStruct, GN_PCSC_FILE_DF_GSM, GN_PCSC_FILE_EF_AD);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
