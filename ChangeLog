@@ -2,7 +2,7 @@
 ======
  * documentation updates
     o add further details for logo commands to gnokii man page
-                                                    (Daniele Forsi)
+      and fix --getwapsetting/--writewapsetting     (Daniele Forsi)
     o update xgnokii/ChangeLog                      (Daniele Forsi)
  * build system updates
     o don't include packaging directory in the release tarballs
