@@ -20,6 +20,8 @@
     o add a script that helps building CVS version on win32
                                                       (Jari Turkia)
     o get rid of XGNOKIIDIR                             (Pawel Kot)
+    o include sys/time.h from gnokii.h also when compiling under
+      NetBSD                                        (Daniele Forsi)
  * libgnokii updates
     o update gsm network list (according to
       http://en.wikipedia.org/wiki/Mobile_network_code) (Pawel Kot,
