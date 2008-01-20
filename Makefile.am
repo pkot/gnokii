@@ -1,4 +1,4 @@
-SUBDIRS = include common gnokii po patches
+SUBDIRS = include common gnokii po patches Docs
 
 if WIN32
 else
