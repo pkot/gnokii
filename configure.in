@@ -881,6 +881,13 @@ AC_OUTPUT(
 	  xgnokii/Makefile
 	  xgnokii/xpm/Makefile
 	  xgnokii/docs/Makefile
+	  xgnokii/docs/help/pl_PL/netmon/Makefile
+	  xgnokii/docs/help/pl_PL/netmon/gsm/Makefile
+	  xgnokii/docs/help/pl_PL/Makefile
+	  xgnokii/docs/help/en_US/firmware/Makefile
+	  xgnokii/docs/help/en_US/netmon/Makefile
+	  xgnokii/docs/help/en_US/Makefile
+	  xgnokii/docs/help/Makefile
 	  po/Makefile.in
 	  patches/Makefile
 	  testsuite/Makefile
@@ -930,4 +937,5 @@ echo "
   Type '${MAKE}' for compilation and then '${MAKE} install', to
   install gnokii.
 "
+
 

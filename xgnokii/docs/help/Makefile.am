@@ -1,0 +1,1 @@
+SUBDIRS = en_US pl_PL

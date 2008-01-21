@@ -48,3 +48,5 @@ EXTRA_DIST =				\
 	Tool_filled_rectangle.xpm	\
 	Tool_line.xpm			\
 	Tool_rectangle.xpm
+
+
