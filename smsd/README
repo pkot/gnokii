@@ -128,7 +128,7 @@ Options:
 
 -l, --libdir path_to_db_module
 	Specify path to DB modules. If you specify pq module, smsd searches
-	in libdir for file libpq.la (for mysql - libmysql.la). Do not
+	in libdir for file libpq.so (for mysql - libmysql.so). Do not
 	interchange this plugins with default SQL libraries from database
 	distribution!
 
