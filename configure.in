@@ -298,9 +298,11 @@ AC_ARG_WITH(gnugetopt,
 
 OWN_GETOPT=""
 AC_CHECK_FUNC(getopt_long, , [
+        SAVE_LIBS="$LIBS $GETOPT_LIBS"
         LIBS="$LIBS $GETOPT_LIBS"
-           AC_CHECK_LIB(gnugetopt, getopt_long, LIBS="$LIBS -lgnugetopt",
-            OWN_GETOPT="1")])
+           AC_CHECK_LIB(gnugetopt, getopt_long, GETOPT_LIBS="$GETOPT_LIBS -lgnugetopt",
+            OWN_GETOPT="1")
+        LIBS=$SAVE_LIBS])
 
 dnl ======================== Check for libical
 AC_ARG_WITH(libical,
@@ -371,7 +373,8 @@ if test "$enable_libusb" == "yes"; then
 			AC_MSG_RESULT(yes)
 			AC_DEFINE([HAVE_LIBUSB],[1],[Use libusb])
 			USE_LIBUSB="yes"
-			LIBS="$LIBS -lusb"
+			USB_LIBS="-lusb"
+			AC_SUBST(USB_LIBS)
 		],
 		[
 			AC_MSG_RESULT(no)
@@ -381,7 +384,8 @@ fi
 
 dnl ======================== Checks for gethostbyname support
 AC_CHECK_FUNC(gethostbyname, ,
-	AC_CHECK_LIB(nsl, gethostbyname, LIBS="$LIBS -lnsl"))
+	AC_CHECK_LIB(nsl, gethostbyname, TCP_LIBS="-lnsl"
+		     AC_SUBST(TCP_LIBS)))
 
 dnl ======================== Checks for Linux IrDA support
 USE_IRDA="no"
@@ -431,7 +435,8 @@ if test "$enable_bluetooth" == "yes"; then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 		AC_DEFINE(HAVE_BLUETOOTH_BLUEZ,[],[Compile on Linux])
 		USE_BLUETOOTH="yes"
-		LIBS="$LIBS -lbluetooth"
+		BLUETOOTH_LIBS="-lbluetooth"
+		AC_SUBST(BLUETOOTH_LIBS)
 	fi
 fi
 dnl ======================== Checks for MacOSX Bluetooth support
@@ -455,7 +460,8 @@ if test "$enable_bluetooth" == "yes"; then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 		AC_DEFINE(HAVE_BLUETOOTH_MACOSX,[],[Compile on Darwin / Mac OSX])
 		USE_BLUETOOTH="yes"
-		LIBS="$LIBS $PTHREAD_LIBS -framework CoreFoundation -framework IOBluetooth -framework Foundation"
+		BLUETOOTH_LIBS="$PTHREAD_LIBS -framework CoreFoundation -framework IOBluetooth -framework Foundation"
+		AC_SUBST(BLUETOOTH_LIBS)
 	fi
 fi
 
@@ -478,7 +484,7 @@ if test "$enable_bluetooth" == "yes"; then
 		AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH,[],[Compile on FreeBSD])
 		USE_BLUETOOTH="yes"
 		AC_CHECK_LIB(bluetooth, bt_aton,
-			    [LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the 'bt_aton' function.])])
+			    [BLUETOOTH_LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the 'bt_aton' function.]) AC_SUBST(BLUETOOTH_LIBS)])
 	fi
 fi
 
@@ -598,7 +604,7 @@ AC_PATH_PROG(PGCONFIG, pg_config, no)
 if test x$PGCONFIG != xno ; then
 	have_postgres=yes
 	pg_libdir=`$PGCONFIG --libdir`
-	POSTGRES_LIBS="-L$pg_libdir"
+	POSTGRES_LIBS="-L$pg_libdir -lpq"
 	pg_includedir=`$PGCONFIG --includedir`
 	POSTGRES_CFLAGS="-I$pg_includedir"
 	AC_SUBST(POSTGRES_LIBS)

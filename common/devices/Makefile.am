@@ -28,5 +28,10 @@ libDEVICES_la_SOURCES = \
 libDEVICES_la_CFLAGS =		\
 	-I$(top_srcdir)/include
 
+libDEVICES_la_LIBADD =		\
+	$(USB_LIBS)		\
+	$(BLUETOOTH_LIBS)	\
+	$(TCP_LIBS)
+
 EXTRA_DIST = $(WIN32_FILES) $(UNIX_FILES)
 

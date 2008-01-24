@@ -1,26 +1,26 @@
 bin_PROGRAMS = smsd
 
 plugindir = $(libdir)/smsd
-plugin_LTLIBRARIES = libfile.la
+plugin_LTLIBRARIES = libsmsd_file.la
 
-modules_flags = -export_dynamic -avoid-version -module
+modules_flags = -export_dynamic -avoid-version -module -no-undefined
 
 if HAVE_POSTGRES
-plugin_LTLIBRARIES += libpq.la
-libpq_la_SOURCES = pq.c db.h utils.h utils.c
-libpq_la_LDFLAGS = $(modules_flags)
-libpq_la_LIBADD = $(POSTGRES_LIBS)
+plugin_LTLIBRARIES += libsmsd_pq.la
+libsmsd_pq_la_SOURCES = pq.c db.h utils.h utils.c
+libsmsd_pq_la_LDFLAGS = $(modules_flags)
+libsmsd_pq_la_LIBADD = $(POSTGRES_LIBS)
 endif
 
 if HAVE_MYSQL
-plugin_LTLIBRARIES += libmysql.la
-libmysql_la_SOURCES = mysql.c db.h utils.h utils.c
-libmysql_la_LDFLAGS = $(modules_flags)
-libmysql_la_LIBADD = $(MYSQL_LIBS)
+plugin_LTLIBRARIES += libsmsd_mysql.la
+libsmsd_mysql_la_SOURCES = mysql.c db.h utils.h utils.c
+libsmsd_mysql_la_LDFLAGS = $(modules_flags)
+libsmsd_mysql_la_LIBADD = $(MYSQL_LIBS)
 endif
 
-libfile_la_SOURCES = file.c db.h utils.h utils.c
-libfile_la_LDFLAGS = $(modules_flags)
+libsmsd_file_la_SOURCES = file.c db.h utils.h utils.c
+libsmsd_file_la_LDFLAGS = $(modules_flags)
 
 smsd_SOURCES = smsd.h smsd.c lowlevel.c lowlevel.h db.h
 smsd_LDADD = $(GLIB_LIBS) $(PTHREAD_LIBS) $(INTLLIBS) $(top_builddir)/common/libgnokii.la
@@ -31,7 +31,7 @@ AM_CFLAGS =				\
 	$(GLIB_CFLAGS)			\
 	$(POSTGRES_CFLAGS)		\
 	$(MYSQL_CFLAGS)			\
-	-DMODULES_DIR=\"${pkglibdir}\"	\
+	-DMODULES_DIR=\"${plugindir}\"	\
 	$(PTHREAD_CFLAGS)
 
 man_MANS = man/smsd.8
