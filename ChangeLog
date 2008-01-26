@@ -22,6 +22,8 @@
     o get rid of XGNOKIIDIR                             (Pawel Kot)
     o include sys/time.h from gnokii.h also when compiling under
       NetBSD                                        (Daniele Forsi)
+    o add --disable-smsd option to disable smsd compilation and
+      installation                (Fred Lefevere-Laoide, Pawel Kot)
  * libgnokii updates
     o update gsm network list (according to
       http://en.wikipedia.org/wiki/Mobile_network_code) (Pawel Kot,

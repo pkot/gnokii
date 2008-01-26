@@ -544,7 +544,6 @@ else
       else
          XINCL=""
       fi
-	echo 
       if test "x$x_libraries" != "x"; then
          XLIBS="-L$x_libraries"
       else
@@ -589,13 +588,21 @@ dnl ======================== Checks for glib support for smsd
 
 found_glib=no
 
-PKG_CHECK_MODULES(GLIB, glib-2.0 gmodule-2.0, found_glib=yes, found_glib=no)
-if test "$found_glib" = no; then
-	AC_MSG_WARN(Cannot find glib 2.0.)
-	AC_MSG_WARN(Disabling smsd.)
+AC_ARG_ENABLE(smsd,
+	AC_HELP_STRING([--enable-smsd],
+		[enable smsd support (default is autodetected)]),,
+	[enable_smsd=yes])
+
+if test "$enable_smsd" = yes; then
+	PKG_CHECK_MODULES(GLIB, glib-2.0 gmodule-2.0, found_glib=yes, found_glib=no)
+	if test "$found_glib" = no; then
+		AC_MSG_WARN(Cannot find glib 2.0.)
+		AC_MSG_WARN(Disabling smsd.)
+		enable_smsd="no"
+	fi
 fi
 
-AM_CONDITIONAL(GLIB, test "x$found_glib" = "xyes")
+AM_CONDITIONAL(SMSD, test "x$enable_smsd" = "xyes")
 
 dnl ======================== Checks for databases support for smsd
 
@@ -635,7 +642,7 @@ AC_ARG_ENABLE(security,
      else
 	security="no"
      fi ],
-   [ security="no"  ]
+   [ security="no" ]
 )
 
 AC_ARG_ENABLE(win32,
@@ -924,7 +931,7 @@ echo "
     Gnokii version:     $VERSION
     Xgnokii version:    $XVERSION
     X (GTK+) support:   $x_support
-    smsd support:       $found_glib
+    smsd support:       $enable_smsd
     Postgres support:   $have_postgres
     MySQL support:      $have_mysql
     Debug:              $debug
