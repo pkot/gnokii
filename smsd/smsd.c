@@ -138,7 +138,7 @@ gint LoadDB (void)
 
 static void Version (void)
 {
-  g_print ("\nsmsd - version 1.4-cvs		(20041011)\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n");
+  g_print ("smsd - version %s from gnokii %s\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n", SVERSION, VERSION);
 }
 
 

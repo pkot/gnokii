@@ -30,6 +30,9 @@ AC_SUBST(GNOKII_LT_VERSION_AGE)
 dnl xgnokii version
 XVERSION=20071124
 
+dnl smsd version
+SVERSION=1.4-cvs
+
 AC_CANONICAL_SYSTEM
 AC_GNU_SOURCE
 
@@ -814,6 +817,8 @@ XPACKAGE=xgnokii
 AC_DEFINE_UNQUOTED(XVERSION, "$XVERSION", [The current xgnokii version])
 
 HAVE_XGNOKII=$x_support
+
+AC_DEFINE_UNQUOTED(SVERSION, "$SVERSION", [The current SMSD version])
 
 case "$INSTALL" in
   'config/install-sh -c') INSTALL=`pwd`/$INSTALL
