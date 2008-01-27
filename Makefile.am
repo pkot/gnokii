@@ -9,7 +9,7 @@ if HAVE_GTK
 SUBDIRS += xgnokii
 endif
 
-if GLIB
+if SMSD
 SUBDIRS += smsd
 endif
 
