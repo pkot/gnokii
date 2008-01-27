@@ -11,7 +11,7 @@ dnl
 
 AC_INIT([gnokii],
 	 [0.6.23cvs],
-	 [http://www.gnokii.org])
+	 [http://www.gnokii.org/])
 
 # Before making a release, the GNOKII_LT_VERSION string should be modified.
 # The string is of the form C:R:A.
@@ -27,7 +27,7 @@ AC_SUBST(GNOKII_LT_VERSION_CURRENT)
 AC_SUBST(GNOKII_LT_VERSION_REVISION)
 AC_SUBST(GNOKII_LT_VERSION_AGE)
 
-dnl XGnokii version
+dnl xgnokii version
 XVERSION=20071124
 
 AC_CANONICAL_SYSTEM
