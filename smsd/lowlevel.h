@@ -51,14 +51,14 @@ typedef struct {
 } D_SMSMessage;
 
 typedef struct {
-  bool working;
+//  bool working;
   struct {
     gchar *model;
     gchar *revision;
     gchar *version;
   } phone;
   struct {
-    gint    unRead;
+//    gint    unRead;
     gint    number;
     GSList *messages;
   } sms;

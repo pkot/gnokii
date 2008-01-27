@@ -1,3 +1,11 @@
+* Sun Jan 27 2007 Jan Derfinak
+- Added detection of first sms position.
+- Simplified locking of smsMutex.
+- A_DeleteSMSMessage now decrements phoneMonitor.sms.number.
+- phoneMonitor.working and phoneMonitor.sms.unRead commented out. They will
+  be removed in future.
+ 
+
 * Mon Jul 16 2007 Jan Derfinak
 - Switch reconnect flag (part of the MYSQL structure) to on for MySQL 5.0.13
   and newer. It was by default on in versions of the API older than 5.0.3.

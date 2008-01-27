@@ -166,8 +166,9 @@ void InitPhoneMonitor (void)
   phoneMonitor.phone.version = g_strdup (_("unknown"));
   phoneMonitor.phone.revision = g_strdup (_("unknown"));
   phoneMonitor.supported = 0;
-  phoneMonitor.working = FALSE;
-  phoneMonitor.sms.unRead = phoneMonitor.sms.number = 0;
+//  phoneMonitor.working = FALSE;
+//  phoneMonitor.sms.unRead = 0;
+  phoneMonitor.sms.number = 0;
   phoneMonitor.sms.messages = NULL;
   pthread_mutex_init (&smsMutex, NULL);
   pthread_cond_init (&smsCond, NULL);
@@ -204,41 +205,62 @@ static void RefreshSMS (const gint number)
   register gint i;
   
 
-  gn_log_xdebug ("RefreshSMS is running...\n");
+  if (number < 1)
+  {
+    gn_log_xdebug ("RefreshSMS is started with number of sms less than 1.\n\
+This should not happen.\nSkiping.");
+    return;
+  }
+  
+  gn_log_xdebug ("RefreshSMS is running...\nNumber of messages: %d\n", number);
 
-  pthread_mutex_lock (&smsMutex);
   FreeArray (&(phoneMonitor.sms.messages));
   phoneMonitor.sms.number = 0;
-  pthread_mutex_unlock (&smsMutex);
 
   gn_data_clear(&data);
   data.sms_folder_list = &folderlist;
   folder.folder_id = 0;
   data.sms_folder = &folder;
-  
-  i = 0;
+
+  if (smsdConfig.firstSMS < 0)
+  {
+    gn_log_xdebug ("Detecting first SMS position.\n");
+    
+    msg = g_malloc (sizeof (gn_sms));
+    memset (msg, 0, sizeof (gn_sms));
+    msg->memory_type = smsdConfig.memoryType;
+    msg->number = 0;
+    data.sms = msg;
+    
+    if ((error = gn_sms_get (&data, sm)) == GN_ERR_INVALIDLOCATION)
+      smsdConfig.firstSMS = 1;
+    else
+      smsdConfig.firstSMS = 0;
+      
+    gn_log_xdebug ("First SMS position is %d\n", smsdConfig.firstSMS);
+    
+    g_free (msg);
+  }
+    
+  i = smsdConfig.firstSMS;
   while (1)
   {
     msg = g_malloc (sizeof (gn_sms));
     memset (msg, 0, sizeof (gn_sms));
     msg->memory_type = smsdConfig.memoryType;
-    msg->number = ++i;
+    msg->number = i++;
     data.sms = msg;
     
     if ((error = gn_sms_get (&data, sm)) == GN_ERR_NONE)
     {
-      pthread_mutex_lock (&smsMutex);
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
       phoneMonitor.sms.number++;
       
       if (phoneMonitor.sms.number == number)
       {
         pthread_cond_signal (&smsCond);
-        pthread_mutex_unlock (&smsMutex);
         return;
       }
-
-      pthread_mutex_unlock (&smsMutex);
     }
     else if (error == GN_ERR_INVALIDLOCATION)   /* All positions are readed */
     {
@@ -247,7 +269,10 @@ static void RefreshSMS (const gint number)
       break;
     }
     else
+    {  
       g_free (msg);
+      gn_log_xdebug ("gn_sms_get returned %d\n", error);
+    }
 
     usleep (500000);
   }
@@ -257,41 +282,36 @@ static void RefreshSMS (const gint number)
 static gint A_SendSMSMessage (gpointer data)
 {
   D_SMSMessage *d = (D_SMSMessage *) data;
-  gn_error error;
   gn_data *dt;
 
-  error = d->status = GN_ERR_UNKNOWN;
-  if (d)
-  {
-    pthread_mutex_lock (&sendSMSMutex);
-    dt = calloc (1, sizeof (gn_data));
-    if (!d->sms->smsc.number[0])
-    {
-      dt->message_center = calloc (1, sizeof (gn_sms_message_center));
-      dt->message_center->id = 1;
-      if (gn_sm_functions (GN_OP_GetSMSCenter, dt, sm) == GN_ERR_NONE)
-      {
-        strcpy (d->sms->smsc.number, dt->message_center->smsc.number);
-        d->sms->smsc.type = dt->message_center->smsc.type;
-      }
-      free (dt->message_center);
-    }
+  if (!d)
+    return (GN_ERR_UNKNOWN);
     
-    if (!d->sms->smsc.type)
-      d->sms->smsc.type = GN_GSM_NUMBER_Unknown;
-      
-    gn_data_clear (dt);
-    dt->sms = d->sms;
-    error = d->status = gn_sms_send (dt, sm);
-    free (dt);
-    pthread_cond_signal (&sendSMSCond);
-    pthread_mutex_unlock (&sendSMSMutex);
+  pthread_mutex_lock (&sendSMSMutex);
+  dt = calloc (1, sizeof (gn_data));
+  if (!d->sms->smsc.number[0])
+  {
+    dt->message_center = calloc (1, sizeof (gn_sms_message_center));
+    dt->message_center->id = 1;
+    if (gn_sm_functions (GN_OP_GetSMSCenter, dt, sm) == GN_ERR_NONE)
+    {
+      strcpy (d->sms->smsc.number, dt->message_center->smsc.number);
+      d->sms->smsc.type = dt->message_center->smsc.type;
+    }
+    free (dt->message_center);
   }
+  
+  if (!d->sms->smsc.type)
+    d->sms->smsc.type = GN_GSM_NUMBER_Unknown;
+    
+  gn_data_clear (dt);
+  dt->sms = d->sms;
+  d->status = gn_sms_send (dt, sm);
+  free (dt);
+  pthread_cond_signal (&sendSMSCond);
+  pthread_mutex_unlock (&sendSMSMutex);
 
-  if (d->status == GN_ERR_NONE)
-    return GN_ERR_NONE;
-  else
-    return (error);
+  return (d->status);
 }
 
 
@@ -310,8 +330,12 @@ static gint A_DeleteSMSMessage (gpointer data)
   if (dt->sms)
   {
     error = gn_sms_delete (dt, sm);
-//    I don't use copy, I don't need free message.
-//    g_free (sms);
+
+    pthread_mutex_lock (&smsMutex);
+    FreeElement (data, NULL);
+    phoneMonitor.sms.messages = g_slist_remove (phoneMonitor.sms.messages, data);
+    phoneMonitor.sms.number--;
+    pthread_mutex_unlock (&smsMutex);
   }
 
   free (dt);
@@ -362,21 +386,27 @@ static void RealConnect (void *phone)
 
   while (1)
   {
-    phoneMonitor.working = FALSE;
+//    phoneMonitor.working = FALSE;
 
+    pthread_mutex_lock (&smsMutex);
+    
     if (phoneMonitor.supported & PM_FOLDERS)
     {
       data->sms_folder = &SMSFolder;
       SMSFolder.folder_id = smsdConfig.memoryType;
       if ((error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, sm)) == GN_ERR_NONE)
       {
+        gn_log_xdebug ("GN_OP_GetSMSFolderStatus returned  %d\n",
+                       SMSFolder.number);
+        gn_log_xdebug ("phoneMonitor.sms.number %d\n",
+                       phoneMonitor.sms.number);
         if (phoneMonitor.sms.number != SMSFolder.number)
         {
-          phoneMonitor.working = TRUE;
+//          phoneMonitor.working = TRUE;
           RefreshSMS (SMSFolder.number);
-          phoneMonitor.working = FALSE;
+//          phoneMonitor.working = FALSE;
         }
-        phoneMonitor.sms.unRead = 0;
+//        phoneMonitor.sms.unRead = 0;
       }
     }
     else
@@ -388,16 +418,22 @@ static void RealConnect (void *phone)
       data->memory_status = &dummy;
       if ((error = gn_sm_functions (GN_OP_GetSMSStatus, data, sm)) == GN_ERR_NONE)
       {
-        if (phoneMonitor.sms.unRead != SMSStatus.unread ||
+        gn_log_xdebug ("GN_OP_GetSMSStatus returned (number, unread) %d, %d\n",
+                       SMSStatus.number, SMSStatus.unread);
+        gn_log_xdebug ("phoneMonitor %d\n", phoneMonitor.sms.number);
+        if (/* phoneMonitor.sms.unRead != SMSStatus.unread || */
             phoneMonitor.sms.number != SMSStatus.number)
         {
-          phoneMonitor.working = TRUE;
+//          phoneMonitor.working = TRUE;
           RefreshSMS (SMSStatus.number);
-          phoneMonitor.working = FALSE;
+//          phoneMonitor.working = FALSE;
         }
-        phoneMonitor.sms.unRead = SMSStatus.unread;
+//        phoneMonitor.sms.unRead = SMSStatus.unread;
       }
     }
+    
+    pthread_mutex_unlock (&smsMutex);
+    
     if (error != GN_ERR_NONE)
     {
       if (error == GN_ERR_TIMEOUT)
@@ -407,13 +443,13 @@ static void RealConnect (void *phone)
         break;
       }
       else
-        g_print ("%s:%d %s\n", __FILE__, __LINE__, gn_error_print(error));
+        g_print ("%s:%d error: %d, %s\n", __FILE__, __LINE__, error, gn_error_print(error));
     }
 
     while ((event = RemoveEvent ()) != NULL)
     {
       gn_log_xdebug ("Processing Event: %d\n", event->event);
-      phoneMonitor.working = TRUE;
+//      phoneMonitor.working = TRUE;
       if (event->event <= Event_Exit)
         if ((error = DoAction[event->event] (event->data)) != GN_ERR_NONE)
           g_print (_("Event %d failed with return code %d!\n"), event->event, error);
