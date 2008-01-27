@@ -17,8 +17,6 @@ Quickstart
     [ instead of above commands you can simply run ./autogen.sh [<options>] ]
     $ make
     # make install
-    [ optionally, if you want to compile other programs using gnokii ]
-    # make install-devel
     $ cp Docs/sample/gnokiirc ~/.gnokiirc
     $ $EDITOR ~/.gnokiirc
 
@@ -153,10 +151,6 @@ creating a distribution package), you can take an advantage of the DESTDIR
 variable:
 
     $ make DESTDIR=/somewhere install
-
-To install gnokii headers type
-
-    # make install-devel
 
 
 Clean-up
