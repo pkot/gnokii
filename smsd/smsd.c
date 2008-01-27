@@ -87,7 +87,6 @@ gint LoadDB (void)
   GModule *handle;
   gchar *buf;
   gchar *full_name;
-  gchar *error;
 
   full_name = g_strdup_printf ("smsd_%s", smsdConfig.dbMod);
   buf = g_module_build_path(smsdConfig.libDir, full_name);
@@ -128,7 +127,6 @@ gint LoadDB (void)
   }
 
   if (g_module_symbol(handle, "DB_Look", (gpointer *)&DB_Look) == FALSE)
-  if ((error = dlerror ()) != NULL)
   {
     g_print ("Error getting symbol 'DB_Look': %s\n", g_module_error ());
     return (2);
