@@ -37,7 +37,7 @@ AC_CONFIG_SRCDIR([gnokii/gnokii.c])
 dnl gettext doesn't like the config.status being somewhere else :(
 dnl AC_CONFIG_AUX_DIR(config)
 
-AM_INIT_AUTOMAKE([1.9 dist-bzip2 no-dist-gzip])
+AM_INIT_AUTOMAKE([1.8 dist-bzip2 no-dist-gzip])
 
 AC_PREFIX_DEFAULT("/usr/local")
 
