@@ -110,8 +110,8 @@ gn_error readtext(gn_sms_user_data *udata, int input_len)
 		fprintf(stderr, _("Couldn't read from stdin!\n"));
 		return GN_ERR_INTERNALERROR;
 	}
-	if (udata->type != GN_SMS_DATA_iMelody && chars_read > 0 && message_buffer[chars_read - 1] == '\n') 
-		chars_read--;
+	if (udata->type != GN_SMS_DATA_iMelody && chars_read > 0 && message_buffer[chars_read - 1] == '\n')
+		message_buffer[--chars_read] = 0;
 	if (chars_read > input_len || chars_read > sizeof(udata->u.text) - 1) {
 		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, input_len);
 		return GN_ERR_INTERNALERROR;

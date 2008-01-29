@@ -41,6 +41,11 @@
       Docs/README-PCSC for details)                 (Daniele Forsi)
     o implement --getnetworkinfo (shows information about the last
       cell visited by the phone containing the SIM) (Daniele Forsi)
+ * gnokii upadtes
+    o trailing \n with --sendsms was not calculated into sms length
+      but it was added into sms text; as the result if \n was 161st
+      char in the sms and it was the last one we were telling user
+      that just one sms will be sent and we sent two    (Pawel Kot)
 
 0.6.22
 ======
