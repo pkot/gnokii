@@ -3456,6 +3456,7 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		}
 		break;
 	case 0x20:
+		dprintf("Incoming call(?)\n");
 		/*
 		  no idea what this is about
 		  01 56 00 20 02 00 55
