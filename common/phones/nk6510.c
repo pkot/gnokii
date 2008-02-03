@@ -816,8 +816,9 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/* getsms */
 	case 0x03:
-		dprintf("Trying to get message # %i in folder # %i\n", message[9], message[7]);
-		if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+		dprintf("Trying to get message #%i in folder #%i\n", message[9], message[7]);
+		if (!data->raw_sms)
+			return GN_ERR_INTERNALERROR;
 		status = data->raw_sms->status;
 		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
 		data->raw_sms->status = status;
@@ -825,9 +826,12 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 		/* Number of SMS in folder */
 		data->raw_sms->number = message[8] * 256 + message[9];
+		dprintf("Location of SMS in current folder: %d\n", data->raw_sms->number);
 
 		/* MessageType/folder_id */
 		data->raw_sms->memory_type = message[7];
+		dprintf("Memory type/folder id: %d\n", data->raw_sms->memory_type);
+
 		break;
 
 	/* delete sms */
@@ -863,7 +867,8 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 	/* sms status */
 	case 0x09:
 		dprintf("SMS Status received\n");
-		if (!data->sms_status) return GN_ERR_INTERNALERROR;
+		if (!data->sms_status)
+			return GN_ERR_INTERNALERROR;
 		data->sms_status->number = (message[12] * 256 + message[13]) +
 			(message[24] * 256 + message[25]) + data->sms_folder->number;
 		data->sms_status->unread = (message[14] * 256 + message[15]) +
@@ -873,26 +878,32 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 	/* getfolderstatus */
 	case 0x0d:
 		dprintf("Message: SMS Folder status received\n" );
-		if (!data->sms_folder) return GN_ERR_INTERNALERROR;
+		if (!data->sms_folder)
+			return GN_ERR_INTERNALERROR;
 		data->sms_folder->sms_data = 0;
 		memset(data->sms_folder->locations, 0, sizeof(data->sms_folder->locations));
 
 		data->sms_folder->number = message[6] * 256 + message[7];
 		dprintf("Message: Number of Entries: %i\n" , data->sms_folder->number);
-		dprintf("Message: IDs of Entries : ");
-		for (i = 0; i < data->sms_folder->number; i++) {
-			data->sms_folder->locations[i] = message[(i * 2) + 8] * 256 + message[(i * 2) + 9];
-			dprintf("%d, ", data->sms_folder->locations[i]);
+		if (data->sms_folder->number > 0) {
+			dprintf("Message: IDs of Entries : ");
+			for (i = 0; i < data->sms_folder->number; i++) {
+				data->sms_folder->locations[i] = message[(i * 2) + 8] * 256 + message[(i * 2) + 9];
+				dprintf("%d, ", data->sms_folder->locations[i]);
+			}
+			dprintf("\n");
 		}
-		dprintf("\n");
 		break;
 
 	/* get message status */
 	case 0x0f:
-		dprintf("Message: SMS message(%i in folder %i) status received: %i\n",
+		dprintf("Message: SMS message (#%i in folder #%i) status received: %i\n",
 			message[10] * 256 + message[11],  message[12], message[13]);
 
-		if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+		if (!data->raw_sms)
+			return GN_ERR_INTERNALERROR;
+
+		dprintf("Trying to get message #%i from folder #%i\n", data->raw_sms->number, data->raw_sms->memory_type);
 
 		/* Short Message status */
 		data->raw_sms->status = message[13];
@@ -938,7 +949,9 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			if (message[i] != 0x01)
 				return GN_ERR_UNHANDLEDFRAME;
 			data->sms_folder_list->folder_id[j] = get_gn_memory_type(message[i + 2]);
+			dprintf("folder_id[%d]=%d\n", j, data->sms_folder_list->folder_id[j]);
 			data->sms_folder_list->folder[j].folder_id = data->sms_folder_list->folder_id[j];
+			dprintf("folder_id[%d]=%d\n", j, data->sms_folder_list->folder[j].folder_id);
 			dprintf("Folder(%i) name: ", message[i + 2]);
 			len = message[i + 3] << 1;
 			char_unicode_decode(data->sms_folder_list->folder[j].name, message + i + 4, len);
@@ -1074,27 +1087,38 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 
 	dprintf("Getting SMS Folder (%i) status (%i)...\n", req[5], req[4]);
 
+	/*
+	 * Inbox and outbox messages can be either in SIM or phone memory.
+	 * Other folders are just in the phone memory.
+	 */
        	if ((req[5] == NK6510_MEMORY_IN) || (req[5] == NK6510_MEMORY_OU)) { /* special case IN/OUTBOX */
 		dprintf("Special case IN/OUTBOX in GetSMSFolderStatus!\n");
 
-		/* Get folder list */
-		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
+		/* Get ME folder list */
+		dprintf("Get message list from ME\n");
+		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state))
+			return GN_ERR_NOTREADY;
 		error = sm_block(NK6510_MSG_FOLDER, data, state);
-		if (error) return error;
+		if (error)
+			return error;
 
 		memcpy(&phone, data->sms_folder, sizeof(gn_sms_folder));
 
-		/* Get folder status */
+		/* Get SM folder list */
+		dprintf("Get message list from SM\n");
 		req[4] = 0x01;
 		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
 		error = sm_block(NK6510_MSG_FOLDER, data, state);
 
+		/* Append messages from ME to SM */
 		for (i = 0; i < phone.number; i++) {
 			data->sms_folder->locations[data->sms_folder->number] = phone.locations[i] + 1024;
 			data->sms_folder->number++;
 		}
+		dprintf("Total number of messages in the folder: %d\n", data->sms_folder->number);
 		return GN_ERR_NONE;
 	}
+	dprintf("Get message list from the folder (ME)\n");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 10);
 }
 
@@ -1168,6 +1192,7 @@ static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 		    (data->raw_sms->memory_type < 12))
 			return GN_ERR_INVALIDMEMORYTYPE;
 		data->sms_folder->folder_id = data->raw_sms->memory_type;
+		dprintf("Folder id: %d\n", data->sms_folder->folder_id);
 		if ((error = NK6510_GetSMSFolderStatus(data, state)) != GN_ERR_NONE) return error;
 	}
 
@@ -1247,22 +1272,28 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 				   0x01, 0x00};
 	gn_error error;
 
-	dprintf("Getting SMS...\n");
+	dprintf("Getting SMS #%d...\n", data->raw_sms->number);
 
 	error = ValidateSMS(data, state);
-	if (error != GN_ERR_NONE) return error;
+	if (error != GN_ERR_NONE) {
+		dprintf("%s\n", gn_error_print(error));
+		return error;
+	}
 
 	data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
+	dprintf("Getting SMS from location %d\n", data->raw_sms->number);
 
 	error = NK6510_GetSMSMessageStatus(data, state);
 
 	if ((data->raw_sms->memory_type == GN_MT_IN) || (data->raw_sms->memory_type == GN_MT_OU)) {
 		if (data->raw_sms->number > 1024) {
+			dprintf("Substracting 1024 from memory location number\n");
 			data->raw_sms->number -= 1024;
 		} else {
 			req[4] = 0x01;
 		}
 	}
+	dprintf("Getting SMS from location %d\n", data->raw_sms->number);
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
 	req[7] = data->raw_sms->number;
