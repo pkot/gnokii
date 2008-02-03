@@ -53,4 +53,4 @@ desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
 
 CLEANFILES = $(desktop_DATA)
 
-EXTRA_DIST = VERSION xgnokii.pc.in $(desktop_in_files) README.vcard
+EXTRA_DIST = xgnokii.pc.in $(desktop_in_files) README.vcard
