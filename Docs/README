@@ -95,7 +95,7 @@ operations.
 
 There are several gnokii subprojects which are worth mentioning.
 
-gnocky is an alternative GTK2 phone manager suite, though as a replacement
+gnocky is an alternative GTK2 phone manager suite, thought as a replacement
 for xgnokii, however not yet that powerful.
 
 gnokiifs provides a filesystem access to the phone filesystem (if the phone
