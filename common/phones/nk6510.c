@@ -3434,10 +3434,10 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		*/
 		break;
 	case 0x0c: /* RF Level */
+		dprintf("RF level: %f\n", message[8]);
 		if (data->rf_level) {
 			*(data->rf_unit) = GN_RF_Percentage;
 			*(data->rf_level) = message[8];
-			dprintf("RF level %f\n",*(data->rf_level));
 		}
 		break;
 	case 0x1e: /* RF Level change notify */
@@ -3449,10 +3449,10 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		  01 56 00 1E 08 66
 		  01 56 00 1E 0A 66
 		*/
+		dprintf("RF level: %f\n", message[4]);
 		if (data->rf_level) {
 			*(data->rf_unit) = GN_RF_Percentage;
 			*(data->rf_level) = message[4];
-			dprintf("RF level %f\n", *(data->rf_level));
 		}
 		break;
 	case 0x20:
@@ -3463,7 +3463,8 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		*/
 		break;
 	case 0x24:
-		if (length == 18) return GN_ERR_EMPTYLOCATION;
+		if (length == 18)
+			return GN_ERR_EMPTYLOCATION;
 		if (data->bitmap) {
 			data->bitmap->netcode[0] = '0' + (message[12] & 0x0f);
 			data->bitmap->netcode[1] = '0' + (message[12] >> 4);
