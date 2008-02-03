@@ -33,6 +33,8 @@
     o make the function gn_get_connectiontype() visible even when
       compiling with -fvisibility=hidden            (Daniele Forsi)
     o remove deprecated gn_cfg_read() function          (Pawel Kot)
+    o initialize active call table with Idle state for checking
+      active calls                                      (Pawel Kot)
  * xgnokii updates
     o avoid to use hardcodes                            (Pawel Kot)
     o avoid segfault on calendar fetching               (Pawel Kot)
