@@ -917,7 +917,8 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 	/* create folder */
 	case 0x11:
 		dprintf("Create SMS folder status received..\n");
-		if (!data->sms_folder) return GN_ERR_INTERNALERROR;
+		if (!data->sms_folder)
+			return GN_ERR_INTERNALERROR;
 		memset(data->sms_folder, 0, sizeof(gn_sms_folder));
 
 		switch (message[4]) {
@@ -937,7 +938,8 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/* getfolders */
 	case 0x13:
-		if (!data->sms_folder_list) return GN_ERR_INTERNALERROR;
+		if (!data->sms_folder_list)
+			return GN_ERR_INTERNALERROR;
 		memset(data->sms_folder_list, 0, sizeof(gn_sms_folder_list));
 
 		data->sms_folder_list->number = message[5];
@@ -973,15 +975,12 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		case 0x68:
 			dprintf("SMS Folder could not be deleted! Not existant?\n");
 			return GN_ERR_INVALIDLOCATION;
-			break;
 		case 0x6b:
 			dprintf("SMS Folder could not be deleted! Not empty?\n");
 			return GN_ERR_FAILED;
-			break;
 		default:
 			dprintf("SMS Folder could not be deleted! Reason unknown (%02x)\n", message[4]);
 			return GN_ERR_FAILED;
-			break;
 		}
 		break;
 
@@ -1002,6 +1001,24 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 	case 0xca:
 		dprintf("Phone not ready???\n");
 		return GN_ERR_UNHANDLEDFRAME;
+
+	/*
+	 * The phone doesn't support folder list messages.
+	 * We use hardcoded list in that case.
+	 * Note, that it isn't perfect: hardcoded folders don't really equal Inbox or outbox
+	 */
+	case 0xf0:
+		if (!data->sms_folder_list)
+			return GN_ERR_INTERNALERROR;
+		/* Hardcode two folders: Inbox and outbox */
+		data->sms_folder_list->number = 2;
+		data->sms_folder_list->folder_id[0] = GN_MT_IN;
+		data->sms_folder_list->folder[0].folder_id = GN_MT_IN;
+		strcpy(data->sms_folder_list->folder[0].name, "Inbox");
+		data->sms_folder_list->folder_id[1] = GN_MT_OU;
+		data->sms_folder_list->folder[1].folder_id = GN_MT_OU;
+		strcpy(data->sms_folder_list->folder[1].name, "Outbox");
+		break;
 
 	default:
 		dprintf("Message: Unknown message of type 14 : %02x  length: %d\n", message[3], length);
@@ -1087,7 +1104,6 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 	gn_error error;
 	int i;
 	gn_sms_folder phone;
-
 
 	req[5] = get_memory_type(data->sms_folder->folder_id);
 
@@ -1184,14 +1200,16 @@ static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 
 	/* Handle memory_type = 0 explicitely, because sms_folder->folder_id = 0 by default */
-	if (data->raw_sms->memory_type == 0) return GN_ERR_INVALIDMEMORYTYPE;
+	if (data->raw_sms->memory_type == 0)
+		return GN_ERR_INVALIDMEMORYTYPE;
 
 	/* see if the message we want is from the last read folder, i.e. */
 	/* we don't have to get folder status again */
 	if ((!data->sms_folder) || (!data->sms_folder_list))
 		return GN_ERR_INTERNALERROR;
 	if (data->raw_sms->memory_type != data->sms_folder->folder_id) {
-		if ((error = NK6510_GetSMSFolders(data, state)) != GN_ERR_NONE) return error;
+		if ((error = NK6510_GetSMSFolders(data, state)) != GN_ERR_NONE)
+			return error;
 
 		if ((get_memory_type(data->raw_sms->memory_type) >
 		     data->sms_folder_list->folder_id[data->sms_folder_list->number - 1]) ||
@@ -1199,7 +1217,8 @@ static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 			return GN_ERR_INVALIDMEMORYTYPE;
 		data->sms_folder->folder_id = data->raw_sms->memory_type;
 		dprintf("Folder id: %d\n", data->sms_folder->folder_id);
-		if ((error = NK6510_GetSMSFolderStatus(data, state)) != GN_ERR_NONE) return error;
+		if ((error = NK6510_GetSMSFolderStatus(data, state)) != GN_ERR_NONE)
+			return error;
 	}
 
 	if (data->sms_folder->number < data->raw_sms->number) {

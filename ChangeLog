@@ -52,6 +52,8 @@
     o print out rf level information in debug mode even it gnokii
       structures are not initialized                    (Pawel Kot)
     o add call notification handler                     (Pawel Kot)
+    o attempt to "fix" problem with getting folder list on some
+      Series40 phones                                   (Pawel Kot)
 
 0.6.22
 ======
