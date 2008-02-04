@@ -314,7 +314,12 @@ static gint A_SendSMSMessage (gpointer data)
   return (d->status);
 }
 
-
+/*
+ * Argument passed here should be gn_sms structure.
+ * Required fields for sms deletion are:
+ *   - gn_sms.number
+ *   - gn_sms.memory_type
+ */
 static gint A_DeleteSMSMessage (gpointer data)
 {
   gn_data *dt;
@@ -329,13 +334,18 @@ static gint A_DeleteSMSMessage (gpointer data)
   dt->sms_folder_list = &SMSFolderList;
   if (dt->sms)
   {
+    gn_log_xdebug("Deleting SMS %d\n", dt->sms->number);
+    /* FIXME: error handling */
     error = gn_sms_delete (dt, sm);
 
+    gn_log_xdebug("Error: %s\n", gn_error_print(error));
     pthread_mutex_lock (&smsMutex);
     FreeElement (data, NULL);
     phoneMonitor.sms.messages = g_slist_remove (phoneMonitor.sms.messages, data);
     phoneMonitor.sms.number--;
     pthread_mutex_unlock (&smsMutex);
+  } else {
+    gn_log_xdebug("Internal error: dt->sms == NULL\n");
   }
 
   free (dt);
