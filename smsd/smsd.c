@@ -420,7 +420,7 @@ static void ReadSMS(gpointer d, gpointer userData)
   gn_sms *data = (gn_sms *)d;
   PhoneEvent *e;
   gint error;
-  
+
   if (data->type == GN_SMS_MT_Deliver || data->type == GN_SMS_MT_DeliveryReport)
   {
     gn_log_xdebug("%d. %s   ", data->number, data->remote.number);
