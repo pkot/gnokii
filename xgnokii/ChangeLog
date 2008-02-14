@@ -1,3 +1,9 @@
+* Thu 14 Feb 2008 Daniele Forsi
+- In Contacts window connect menu items for "Add reminder", "Add call", "Add
+  meeting", "Add birthday", "Delete note" to the same action as the toolbar
+  buttons and display a dialog for the actions that aren't yet implemented
+  ("Save to phone", "Send via SMS", "Import from file", "Export to file")
+
 * Wed 21 Nov 2007 Daniele Forsi
 - never let the user write a phonebook name longer than
   GN_PHONEBOOK_NAME_MAX_LENGTH and allocate memory for string terminator too

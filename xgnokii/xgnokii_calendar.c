@@ -126,6 +126,12 @@ static AddDialogData addBirthdayDialogData;
 static CalendarDialog calendarDialog = { NULL, NULL };
 static CalTimeDialog calTimeDialog = { NULL, NULL };
 
+static void FunctionNotImplemented(void)
+{
+	gtk_label_set_text(GTK_LABEL(errorDialog.text), _("Function not implemented!"));  
+	gtk_widget_show(errorDialog.dialog);
+}
+
 static inline void Help1(GtkWidget * w, gpointer data)
 {
 	gchar *indx = g_strdup_printf("/help/%s/windows/calendar/index.html", xgnokiiConfig.help_locale);
@@ -1469,19 +1475,19 @@ static void DeleteNote(void)
 static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Branch>"},
 	{NULL, "<control>R", ReadCalNotes, 0, NULL},
-	{NULL, "<control>S", NULL, 0, NULL},
+	{NULL, "<control>S", FunctionNotImplemented, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
-	{NULL, "<control>X", NULL, 0, NULL},
+	{NULL, "<control>X", FunctionNotImplemented, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
-	{NULL, "<control>I", NULL, 0, NULL},
-	{NULL, "<control>E", NULL, 0, NULL},
+	{NULL, "<control>I", FunctionNotImplemented, 0, NULL},
+	{NULL, "<control>E", FunctionNotImplemented, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>W", CloseCalendar, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
-	{NULL, "<control>N", NULL, 0, NULL},
-	{NULL, "<control>C", NULL, 0, NULL},
-	{NULL, "<control>M", NULL, 0, NULL},
-	{NULL, "<control>B", NULL, 0, NULL},
+	{NULL, "<control>N", AddReminder, 0, NULL},
+	{NULL, "<control>C", AddCall, 0, NULL},
+	{NULL, "<control>M", AddMeeting, 0, NULL},
+	{NULL, "<control>B", AddBirthday, 0, NULL},
 	/*
 	{NULL, NULL, NULL, 0, NULL},
 	*/
@@ -1583,25 +1589,25 @@ void GUI_CreateCalendarWindow()
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Save to phone"), NULL,
 				NewPixmap(Send_xpm, GUI_CalendarWindow->window,
 					  &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-				(GtkSignalFunc) NULL, NULL);
+				(GtkSignalFunc) FunctionNotImplemented, NULL);
 
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Send via SMS"), NULL,
 				NewPixmap(SendSMS_xpm, GUI_CalendarWindow->window,
 					  &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-				(GtkSignalFunc) NULL, NULL);
+				(GtkSignalFunc) FunctionNotImplemented, NULL);
 
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
 
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Import from file"), NULL,
 				NewPixmap(Open_xpm, GUI_CalendarWindow->window,
 					  &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-				(GtkSignalFunc) NULL, NULL);
+				(GtkSignalFunc) FunctionNotImplemented, NULL);
 	gtk_toolbar_append_item(GTK_TOOLBAR(toolbar), NULL, _("Export to file"), NULL,
 				NewPixmap(Save_xpm, GUI_CalendarWindow->window,
 					  &GUI_CalendarWindow->style->bg[GTK_STATE_NORMAL]),
-				(GtkSignalFunc) NULL, NULL);
+				(GtkSignalFunc) FunctionNotImplemented, NULL);
 
 	gtk_toolbar_append_space(GTK_TOOLBAR(toolbar));
 	/*

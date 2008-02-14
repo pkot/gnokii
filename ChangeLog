@@ -38,6 +38,11 @@
  * xgnokii updates
     o avoid to use hardcodes                            (Pawel Kot)
     o avoid segfault on calendar fetching               (Pawel Kot)
+    o display a dialog to inform the user that some functions in
+      the Calendar window are not yet implemented ("Save to phone",
+      "Send via SMS", "Import from file", "Export to file"); also
+      make menu items for "Add reminder", "Add call", "Add
+      meeting", "Add birthday", "Delete note" work  (Daniele Forsi)
  * pcsc driver updates
     o provide more information to the --identify command (see
       Docs/README-PCSC for details)                 (Daniele Forsi)
