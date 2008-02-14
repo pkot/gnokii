@@ -1,5 +1,5 @@
 * Thu 14 Feb 2008 Daniele Forsi
-- In Contacts window connect menu items for "Add reminder", "Add call", "Add
+- In Calendar window connect menu items for "Add reminder", "Add call", "Add
   meeting", "Add birthday", "Delete note" to the same action as the toolbar
   buttons and display a dialog for the actions that aren't yet implemented
   ("Save to phone", "Send via SMS", "Import from file", "Export to file")
