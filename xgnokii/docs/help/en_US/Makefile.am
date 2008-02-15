@@ -5,3 +5,7 @@ en_US_DATA =					\
 	styl.css				\
 	index.html
 
+EXTRA_DIST = \
+	faq.html				\
+	styl.css				\
+	index.html

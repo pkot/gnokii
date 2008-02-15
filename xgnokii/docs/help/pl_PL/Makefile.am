@@ -10,3 +10,12 @@ pl_PL_DATA=					\
 	dtmf.html				\
 	calendar.html
 
+EXTRA_DIST = \
+	contacts.html				\
+	xkeyb.html				\
+	sms.html				\
+	speeddial.html				\
+	netmon.html				\
+	index.html				\
+	dtmf.html				\
+	calendar.html
