@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
-                         (C) 2001 - 2007 Paweł Kot
-               Last update 24 November 2007  Version 0.6.22
+                         (C) 2001 - 2008 Paweł Kot
+               Last update 15 February 2008  Version 0.6.23
 
 - Contents -
 
@@ -26,7 +26,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.22 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.23 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -380,6 +380,11 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20080215 Version 0.6.23
+Build system changed to automake (from handmade) which should make
+packagers' life easier. Fix FBUS initialization for DKU-5 (hopefully for the
+last time). Remove some deprecated functions from API. Attempt to read SMS
+from all Series40 Nokias in FBUS mode. Fix some other minor issues.
 
 20071124 Version 0.6.22
 Fix phonebook entries deletion from xgnokii. Fix moving phonebook entries
