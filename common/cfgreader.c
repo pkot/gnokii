@@ -52,6 +52,293 @@
 GNOKII_API struct gn_cfg_header *gn_cfg_info;
 static gn_config gn_config_default, gn_config_global;
 
+/* Handy macros */
+#define FREE(x)	do { if (x) free(x); (x) = NULL; } while (0)
+
+/*
+ * Function to dump configuration pointed by @config
+ * @config:	configuration to be dumped
+ */
+static void cfg_dump(struct gn_cfg_header *config)
+{
+	struct gn_cfg_header *hdr = config;
+
+	dprintf("Dumping configuration.\n");
+	/* Loop over sections */
+	while (hdr) {
+		struct gn_cfg_entry *entry = hdr->entries;
+
+		dprintf("[%s]\n", hdr->section);
+		/* Loop over entries */
+		while (entry) {
+			dprintf("%s = %s\n", entry->key, entry->value);
+			entry = entry->next;
+		}
+		hdr = hdr->next;
+	}
+}
+
+/*
+ * Function to allocate configuration header structure.
+ * Structure is appended to @config.
+ * @config:	existing config structure
+ * @name:	section name; default (if name==NULL) is "global"
+ */
+static struct gn_cfg_header *cfg_header_allocate(struct gn_cfg_header *config, char *name)
+{
+	struct gn_cfg_header *hdr;
+
+	/*
+	 * Allocate memory for the header structure and assign name.
+	 * Default name is "global".
+	 */
+	hdr = calloc(sizeof(struct gn_cfg_header), 1);
+	if (!hdr) {
+		dprintf("Failed to allocate gn_cfg_header.\n");
+		return NULL;
+	}
+	if (name)
+		hdr->section = strdup(name);
+	else
+		hdr->section = strdup("global");
+	if (!hdr->section) {
+		dprintf("Failed to assign a name to gn_cfg_header.\n");
+		free(hdr);
+		return NULL;
+	}
+
+	/* Add to cfg_info list */
+	hdr->prev = config;
+	if (config)
+		config->next = hdr;
+
+	dprintf("Adding new section %s\n", hdr->section);
+
+	return hdr;
+}
+
+/*
+ * Function to find config section identified by @name. If name is not given
+ * "global" section is returned.
+ * @config:	pointer to the configuration structure
+ * @name:	section name
+ */
+static struct gn_cfg_header *cfg_header_get(struct gn_cfg_header *config, char *name)
+{
+	struct gn_cfg_header *hdr = config;
+
+	if (!config)
+		return NULL;
+
+	if (!name)
+		name = "global";
+
+	while (hdr) {
+		if (!strcmp(name, hdr->section))
+			return hdr;
+		hdr = hdr->next;
+	}
+	return NULL;
+}
+
+/*
+ * Function to assign a variable in the given config section.
+ * @config:	given configuration section
+ * @name:	variable (key) name
+ * @value:	variable (key) value
+ * @overwrite:	overwrite existing keys?
+ */
+static struct gn_cfg_header *cfg_variable_set(struct gn_cfg_header *config, char *name, char *value, int overwrite)
+{
+	struct gn_cfg_entry *oldentry, *entry;
+
+	if (!name || !value) {
+		dprintf("Neither name nor value can be NULL.\n");
+		return NULL;
+	}
+
+	/* Find a place in the section, where to add the new entry. */
+	oldentry = config->entries;
+	while (oldentry) {
+		if (!strcmp(name, oldentry->key))
+			break;
+		oldentry = oldentry->next;
+	}
+
+	/* If found and instructed not to overwrite, return */
+	if (oldentry && !overwrite) {
+		dprintf("Key %s already exists in section %s\n", name, config->section);
+		return NULL;
+	}
+
+	/* Allocate new entry */
+	entry = calloc(sizeof(struct gn_cfg_entry), 1);
+	if (!entry) {
+		dprintf("Failed to allocate gn_cfg_entry.\n");
+		return NULL;
+	}
+	entry->key = strdup(name);
+	entry->value = strdup(value);
+	if (!entry->key || !entry->value) {
+		dprintf("Failed to allocate key/value for the entry.\n");
+		FREE(entry->key);
+		FREE(entry->value);
+		free(entry);
+		return NULL;
+	}
+
+	/* Add to existing variables in section. */
+	entry->next = config->entries;
+	if (config->entries)
+		config->entries->prev = entry;
+	config->entries = entry;
+
+	/* Remove the old entry */
+	if (oldentry) {
+		if (oldentry->next)
+			oldentry->next->prev = oldentry->prev;
+		if (oldentry->prev)
+			oldentry->prev->next = oldentry->next;
+		free(oldentry->key);
+		free(oldentry->value);
+		free(oldentry);
+	}
+
+	dprintf("Added %s/%s to section %s.\n", entry->key, entry->value, config->section);
+
+	return config;
+}
+
+/*
+ * Function to assign a variable in the given section. If the section is not
+ * found in the config structure, new section is created.
+ * @config:	configuration
+ * @section:	section name
+ * @name:	variable (key) name
+ * @value:	variable (key) value
+ * @overwrite:	overwrite existing keys?
+ */
+GNOKII_API struct gn_cfg_header *gn_cfg_variable_set(struct gn_cfg_header *config, char *section, char *name, char *value, int overwrite)
+{
+	struct gn_cfg_header *hdr;
+
+	/* Find the appropriate section */
+	hdr = cfg_header_get(config, section);
+	if (!hdr)
+		hdr = cfg_header_allocate(config, section);
+	if (!hdr) {
+		dprintf("Failed to set variable (%s %s %s).\n", section, name, value);
+		return NULL;
+	}
+
+	hdr = cfg_variable_set(hdr, name, value, overwrite);
+
+	return hdr;
+}
+
+/*
+ * Function to create generic configuration section. Basic config consists of model,
+ * connection and port variables. If no section name is given, global one is used.
+ * Please note that valid section names for phone config are: global and phone_*.
+ * @section:	optional section name
+ * @model:	model to be set
+ * @connection:	connection to be set
+ * @port:	port to be set
+ */
+GNOKII_API struct gn_cfg_header *gn_cfg_section_create(char *section, char *model, char *connection, char *port)
+{
+	char *sname;
+	struct gn_cfg_header *hdr = NULL, *config = NULL;
+
+	if (!model | !connection | !port) {
+		dprintf("Neither model nor connection nor port can be NULL.\n");
+		return NULL;
+	}
+
+	sname = (section ? section : "global");
+
+	config = cfg_header_allocate(NULL, sname);
+	if (!config) {
+		dprintf("Failed to create config.\n");
+		return NULL;
+	}
+	hdr = gn_cfg_variable_set(config, sname, "model", model, 1);
+	if (!hdr) {
+		dprintf("Failed to create config.\n");
+		free(config);
+		return NULL;
+	}
+	hdr = gn_cfg_variable_set(config, sname, "connection", connection, 1);
+	if (!hdr) {
+		dprintf("Failed to create config.\n");
+		free(config);
+		return NULL;
+	}
+	hdr = gn_cfg_variable_set(config, sname, "port", port, 1);
+	if (!hdr) {
+		dprintf("Failed to create config.\n");
+		free(config);
+		return NULL;
+	}
+
+	return config;
+}
+
+/*
+ * Function to create generic config. Config is assigned to gn_cfg_info structure.
+ * @model:	model to be set
+ * @connection:	connection to be set
+ * @port:	port to be set
+ */
+GNOKII_API struct gn_cfg_header *gn_cfg_generic_create(char *model, char *connection, char *port)
+{
+	struct gn_cfg_header *config;
+
+	config = gn_cfg_section_create(NULL, model, connection, port);
+	if (!config)
+		return NULL;
+
+	/* Dump config */
+	cfg_dump(config);
+
+	/* Assign to gn_cfg_info. libgnokii needs it so far. */
+	gn_cfg_info = config;
+	return config;
+}
+
+/*
+ * Function to create basic config for bluetooth setup. Config is assigned to gn_cfg_info structure.
+ * @model:	model to be set
+ * @connection:	connection to be set
+ * @port:	port to be set
+ */
+GNOKII_API struct gn_cfg_header *gn_cfg_bluetooth_create(char *model, char *btmac, char *rfchannel)
+{
+	struct gn_cfg_header *hdr, *config;
+
+	if (!model | !btmac | !rfchannel) {
+		dprintf("Neither model nor Bluetooth mac address nor rfcomm channel can be NULL.\n");
+		return NULL;
+	}
+
+	config = gn_cfg_section_create(NULL, model, "bluetooth", btmac);
+	if (!config)
+		return NULL;
+	hdr = gn_cfg_variable_set(config, "global", "rfcomm_channel", rfchannel, 1);
+	if (!hdr) {
+		dprintf("Failed to create config.\n");
+		free(config);
+		return NULL;
+	}
+
+	/* Dump config */
+	cfg_dump(config);
+
+	/* Assign to gn_cfg_info. libgnokii needs it so far. */
+	gn_cfg_info = config;
+	return config;
+}
+
 struct gn_cfg_header *cfg_memory_read(const char **lines)
 {
 	char *line, *buf;

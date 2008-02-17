@@ -1,3 +1,9 @@
+0.6.24 (not released yet)
+=========================
+ * libgnokii changes
+    o prepare new API for config handling; it will allow third
+      party applications to use own configuration       (Pawel Kot)
+
 0.6.23
 ======
  * documentation updates
