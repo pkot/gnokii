@@ -73,10 +73,10 @@ struct gn_cfg_header *cfg_memory_read(const char **lines)
 		buf = line;
 
 		/* Strip leading, trailing whitespace */
-		while(isspace((int) *line))
+		while (isspace((int) *line))
 			line++;
 
-		while((strlen(line) > 0) && isspace((int) line[strlen(line) - 1]))
+		while ((strlen(line) > 0) && isspace((int) line[strlen(line) - 1]))
 			line[strlen(line) - 1] = '\0';
 
 		/* Ignore blank lines and comments */
@@ -146,7 +146,7 @@ struct gn_cfg_header *cfg_memory_read(const char **lines)
 
 			entry->value = strdup(value);
 
-			while((strlen(line) > 0) && isspace((int) line[strlen(line) - 1])) {
+			while ((strlen(line) > 0) && isspace((int) line[strlen(line) - 1])) {
 				line[strlen(line) - 1] = '\0';  /* Remove trailing white */
 			}
 
