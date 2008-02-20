@@ -1,4 +1,5 @@
 EXTRA_DIST =						\
+	gen_gnokii_h.bat				\
 	mingw-cross/mingw-cross.sh			\
 	MSVS2005/Gnokii_setup/Gnokii_setup.vdproj	\
 	MSVS2005/gnokii.sln				\
