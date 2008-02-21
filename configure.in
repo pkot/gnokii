@@ -874,6 +874,7 @@ AC_SUBST(HAVE_LIBUSB)
 
 AC_OUTPUT(
 	  Makefile
+	  getopt/Makefile
 	  Docs/Makefile
 	  Docs/man/Makefile
 	  Docs/protocol/Makefile
