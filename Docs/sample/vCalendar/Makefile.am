@@ -1,2 +1,3 @@
-EXTRA_DIST = 	test.vcs
+vcaldocsdir = $(datadir)/doc/gnokii/sample/vCalendar
+vcaldocs_DATA = test.vcs
 

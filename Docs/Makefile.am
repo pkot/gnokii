@@ -1,9 +1,11 @@
 SUBDIRS = man sample protocol
 
+docsdir = $(datadir)/doc/gnokii
+
 DEVEL_DOCS =    CodingStyle \
 		README.libsms
 
-EXTRA_DIST = 	README \
+docs_DATA = 	README \
 		README-2110 \
 		README-3810 \
 		README-6110 \

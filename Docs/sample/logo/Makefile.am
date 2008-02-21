@@ -1,4 +1,5 @@
-EXTRA_DIST = 	pacman.xpm \
+logodocsdir = $(datadir)/doc/gnokii/sample/logo
+logodocs_DATA = pacman.xpm \
 		gnokii.xpm \
 		gnokiiop.xpm \
 		horse.xpm \

@@ -1,4 +1,5 @@
-EXTRA_DIST = 			\
+protocoldocsdir = $(datadir)/doc/gnokii/protocol
+protocoldocs_DATA= 		\
 	dancall.txt		\
 	gnokiid-at.txt		\
 	nk2110.txt		\

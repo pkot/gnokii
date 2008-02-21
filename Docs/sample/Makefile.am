@@ -1,6 +1,7 @@
 SUBDIRS = ppp logo ringtone vCalendar
 
-EXTRA_DIST = 	gnokiirc	\
+sampledocsdir = $(datadir)/doc/gnokii/sample
+sampledocs_DATA = gnokiirc	\
 		magic		\
 		45-nokiadku2.rules
 

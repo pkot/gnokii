@@ -1,4 +1,5 @@
-EXTRA_DIST = 	cimd-connect \
+pppdocsdir = $(datadir)/doc/gnokii/sample/ppp
+pppdocs_DATA =  cimd-connect \
 		ppp-FILES \
 		options \
 		pap-secrets \
