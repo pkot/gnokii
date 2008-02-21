@@ -1,4 +1,4 @@
-SUBDIRS = include common gnokii po patches Docs getopt
+SUBDIRS = include common gnokii po patches Docs
 
 if WIN32
 else
@@ -13,7 +13,7 @@ if SMSD
 SUBDIRS += smsd
 endif
 
-DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po smsd win32 testsuite patches
+DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po smsd win32 testsuite patches getopt
 
 EXTRA_DIST =				\
 		ChangeLog		\
