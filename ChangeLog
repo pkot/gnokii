@@ -3,6 +3,8 @@
  * libgnokii changes
     o prepare new API for config handling; it will allow third
       party applications to use own configuration       (Pawel Kot)
+    o add id for Nokia 5300 to misc.c only; use model=series40 in
+      gnokiirc for this and similar phones          (Daniele Forsi)
 
 0.6.23
 ======

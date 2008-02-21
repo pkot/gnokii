@@ -194,6 +194,7 @@ static gn_phone_model models[] = {
 	{"5185",  "NSD-1A",	PM_OLD_DEFAULT },
 	{"5190",  "NSB-1",	PM_OLD_DEFAULT | PM_NETMONITOR | PM_DATA | PM_AUTHENTICATION },
 	{"5210",  "NSM-5",	PM_DEFAULT },
+	{"5300",  "RM-146",	PM_DEFAULT },
 	{"5510",  "NPM-5",	PM_OLD_DEFAULT },
 	{"6010",  "NPM-10",	PM_OLD_DEFAULT },
 	{"6010",  "NPM-10X",	PM_OLD_DEFAULT },
