@@ -25,11 +25,12 @@ from pcscd or gnokii if you don't know the exact string to use).
 Implemented commands for gnokii are:
 --identify
 --getphonebook
+--getsms
 --getfile
 --getnetworkinfo
 
-This means that writing to the phonebook is not supported and reading
-or writing short messages isn't supported either.
+This means that writing to the phonebook is not supported and writing
+short messages isn't supported either.
 
 The --identify command returns the following information:
 - IMEI
@@ -54,6 +55,9 @@ Note that:
 - some SIM cards only have numbers in SM, so reading from the
   other memories will fail
 - some phones do not write to the LD memory
+
+The --getsms command can only read from SM memory.
+Start number is 1, end number depends on SIM card.
 
 The --getfile command can read the MF, a DF or an EF, if the SIM allows it.
 A path name must start with 'B:' and the slash '/' or the backslash '\\'
@@ -81,9 +85,12 @@ PIN code is needed to execute this command.
 
 * Bugs *
 
-- GN_OP_GetMemoryStatus returns total space instead of used space.
+- GN_OP_GetMemoryStatus and GN_OP_GetSMSStatus always return total space
+  instead of used space.
 
 - Memory EN isn't actually supported.
+
+- GN_OP_GetSMS doesn't mark deleted SMS as such.
 
 
 * Troubleshooting *

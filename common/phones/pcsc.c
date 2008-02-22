@@ -40,6 +40,8 @@
 static gn_error GetFile(gn_data *data, struct gn_statemachine *state);
 static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error Identify(gn_data *data, struct gn_statemachine *state);
 static gn_error Initialise(struct gn_statemachine *state);
 static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state);
@@ -338,6 +340,10 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return GetMemoryStatus(data, state);
 	case GN_OP_GetNetworkInfo:
 		return GetNetworkInfo(data, state);
+	case GN_OP_GetSMS:
+		return GetSMSMessage(data, state);
+	case GN_OP_GetSMSStatus:
+		return GetSMSStatus(data, state);
 	case GN_OP_ReadPhonebook:
 		return ReadPhonebook(data, state);
 	case GN_OP_GetFile:
@@ -489,6 +495,68 @@ static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 	}
 
 	return error;
+}
+
+static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state)
+{
+/* See Subclause 10.5.3 */
+	LONG file;
+	LONG ret;
+	gn_error error = GN_ERR_NONE;
+	unsigned char *tmp;
+	unsigned int sms_len, l, extraoffset, offset = 0;
+
+	if (!data || !data->raw_sms || !data->sms) {
+		return GN_ERR_INTERNALERROR;
+	}
+	if (data->raw_sms->memory_type != GN_MT_SM) {
+		return GN_ERR_INVALIDMEMORYTYPE;
+	}
+	if ((data->raw_sms->number < 1) || (data->raw_sms->number > 255)) {
+		return GN_ERR_INVALIDLOCATION;
+	}
+	file = GN_PCSC_FILE_EF_SMS;
+
+	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	ret = pcsc_read_file_record(&IoStruct, file, data->raw_sms->number);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	/* skip SIM entry status FIXME handle deleted messages */
+	tmp = IoStruct.pbRecvBuffer + 1;
+	/* substract 1 for SIM entry status and 2 for SW */
+	sms_len = IoStruct.dwReceived - 3;
+	offset = 0;
+
+	ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, GN_SMS_PDU_DEFAULT);
+
+	return get_gn_error(&IoStruct, ret);
+}
+
+static gn_error GetSMSStatus(gn_data *data, struct gn_statemachine *state)
+{
+	LONG file;
+	LONG ret;
+
+	if (!data || !data->sms_status) {
+		return GN_ERR_INTERNALERROR;
+	}
+	file = GN_PCSC_FILE_EF_SMS;
+
+	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
+	if (get_gn_error(&IoStruct, ret) == GN_ERR_NONE) {
+		ret = pcsc_stat_file(&IoStruct, file);
+		if (get_gn_error(&IoStruct, ret) == GN_ERR_NONE) {
+			/* FIXME: this is total space (should read all SMS to check which are empty or unread) */
+			data->sms_status->number = (IoStruct.pbRecvBuffer[2] * 256 + IoStruct.pbRecvBuffer[3]) / IoStruct.pbRecvBuffer[14];
+			data->sms_status->unread = 0;
+		}
+	}
+
+	return get_gn_error(&IoStruct, ret);
 }
 
 static gn_error GetFile(gn_data *data, struct gn_statemachine *state)
@@ -899,7 +967,6 @@ static LONG pcsc_read_file(PCSC_IOSTRUCT *ios, LONG dir_id, LONG file_id)
 
 	dwFileLength = ios->pbRecvBuffer[2] * 256 + ios->pbRecvBuffer[3];
 	bFileStructure = ios->pbRecvBuffer[13];
-	bRecordLength = ios->pbRecvBuffer[14];
 
 	switch (bFileStructure) {
 	case GN_PCSC_FILE_STRUCTURE_TRANSPARENT:
@@ -907,6 +974,7 @@ static LONG pcsc_read_file(PCSC_IOSTRUCT *ios, LONG dir_id, LONG file_id)
 		break;
 	case GN_PCSC_FILE_STRUCTURE_CYCLIC:
 	case GN_PCSC_FILE_STRUCTURE_LINEAR_FIXED:
+		bRecordLength = ios->pbRecvBuffer[14];
 		bRecordCount = dwFileLength / bRecordLength;
 		pbFileBuffer = ios->pbRecvBuffer;
 		ios->bRecordNumber = 1;
