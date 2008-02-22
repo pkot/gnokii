@@ -504,7 +504,7 @@ static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state)
 	LONG ret;
 	gn_error error = GN_ERR_NONE;
 	unsigned char *tmp;
-	unsigned int sms_len, l, extraoffset, offset = 0;
+	unsigned int sms_len, offset = 0;
 
 	if (!data || !data->raw_sms || !data->sms) {
 		return GN_ERR_INTERNALERROR;
