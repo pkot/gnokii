@@ -754,6 +754,163 @@ gn_error gn_sms_parse(gn_data *data)
 }
 
 /**
+ * gn_sms_pdu2raw - Copy PDU data into gn_sms_raw structure
+ * @rawsms: gn_sms_raw structure to be filled
+ * @pdu: buffer containing PDU data
+ * @pdu_len: length of buffer containing PDU data
+ * @flags: GN_SMS_PDU_* flags to control copying
+ *
+ * This function fills a gn_sms_raw structure copying raw values from
+ * a buffer containing PDU data.
+ */
+gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int flags)
+{
+	gn_error ret = GN_ERR_NONE;
+	unsigned int l, extraoffset, offset = 0;
+
+	if (!flags & GN_SMS_PDU_NOSMSC) {
+		l = pdu[offset] + 1;
+		if (l > pdu_len || l > GN_SMS_SMSC_NUMBER_MAX_LENGTH) {
+			dprintf("Invalid message center length (%d)\n", l);
+			ret = GN_ERR_INTERNALERROR;
+			goto out;
+		}
+		memcpy(rawsms->message_center, pdu, l);
+		offset += l;
+	}
+
+	rawsms->reject_duplicates   = 0;
+	rawsms->report_status       = 0;
+	rawsms->reference           = 0;
+	rawsms->reply_via_same_smsc = 0;
+	rawsms->report              = 0;
+
+	dprintf("rawsms->type: %d\n", rawsms->type);
+
+	rawsms->type                = (pdu[offset] & 0x03) << 1;
+	switch (rawsms->type) {
+	case GN_SMS_MT_Deliver:
+		dprintf("SMS-DELIVER found\n");
+		rawsms->more_messages       = pdu[offset] & 0x04;
+		// bits 3 and 4 of the first octet unused;
+		rawsms->report_status       = pdu[offset] & 0x20;
+		extraoffset = 10;
+		break;
+	case GN_SMS_MT_Submit:
+		dprintf("SMS-SUBMIT found\n");
+		rawsms->reject_duplicates   = pdu[offset] & 0x04;
+		rawsms->validity_indicator  = (pdu[offset] & 0x18) >> 3;
+		extraoffset = 3;
+		break;
+	case GN_SMS_MT_Command:
+		/* TP-Message-Type-Indicator */
+		rawsms->type                = GN_SMS_MT_StatusReport;
+		/* TP-User-Data-Header-Indication */
+		rawsms->udh_indicator       = pdu[offset] & 0x40;
+		/* TP-More-Messages-to-Send */
+		rawsms->more_messages       = pdu[offset] & 0x04;
+		/* TP-Status-Report-Qualifier */
+		rawsms->report              = pdu[offset] & 0x10;
+		offset++;
+		/* TP-Message-Reference */
+		rawsms->reference           = pdu[offset++];
+		/* TP-Recipient-Address */
+		/* TP-Service-Centre-Time-Stamp */
+		/* TP-Discharge-Time */
+		/* TP-Status */
+		/* TP-Parameter-Indicator */
+		/* TP-Protocol-Identifier */
+		/* TP-Data-Coding-Scheme */
+		/* TP-User-Data-Length */
+		/* TP-User-Data */
+		extraoffset = 0;
+#if 0
+		dprintf("SMS-COMMAND found\n");
+		/* TP-Message-Type-Indicator */
+		/** decoded above **/
+		offset = 5;
+		/* TP-User-Data-Header-Indication */
+		rawsms->udh_indicator       = pdu[offset] & 0x40;
+		/* TP-Status-Report-Request */
+		rawsms->report_status       = pdu[offset] & 0x08;
+		offset++;
+		/* TP-Message Reference */
+		rawsms->reference           = pdu[offset++];
+		/* TP-Protocol-Identifier */
+		rawsms->pid                 = pdu[offset++];
+		/* TP-Command-Type */
+		dprintf("TP-Command-Type 0x%02x\n", pdu[offset++]);
+		/* TP-Message-Number */
+		dprintf("TP-Message-Number 0x%02x\n", pdu[offset++]);
+		/* TP-Destination-Address */
+	l = (pdu[offset] % 2) ? pdu[offset] + 1 : pdu[offset];
+	l = l / 2 + 2;
+	memcpy(rawsms->remote_number, pdu + offset, l);
+	offset += l;
+		/* TP-Command-Data-Length */
+		dprintf("TP-Command-Data-Length 0x%02x\n", pdu[offset++]);
+		/* TP-Command-Data */
+		dprintf("TP-Command-Data 0x%02x ...\n", pdu[offset++]);
+		goto out;
+		break;
+#endif
+	default:
+		dprintf("Unknown PDU type %d\n", rawsms->type);
+		return GN_ERR_INTERNALERROR;
+ 	}
+ 	rawsms->more_messages       = pdu[offset];
+	rawsms->udh_indicator       = pdu[offset] & 0x40;
+	offset++;
+
+	if (rawsms->type == GN_SMS_MT_Submit) {
+		rawsms->reference = pdu[offset++];
+	}
+
+	l = (pdu[offset] % 2) ? pdu[offset] + 1 : pdu[offset];
+	l = l / 2 + 2;
+	if (l + offset + extraoffset > pdu_len || l > GN_SMS_NUMBER_MAX_LENGTH) {
+		dprintf("Invalid remote number length (%d)\n", l);
+		ret = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+	memcpy(rawsms->remote_number, pdu + offset, l);
+	offset += l;
+	rawsms->pid                 = pdu[offset++];
+	rawsms->dcs                 = pdu[offset++];
+	if (rawsms->type == GN_SMS_MT_Deliver) {
+		memcpy(rawsms->smsc_time, pdu + offset, 7);
+		offset += 7;
+	}
+	if (rawsms->type == GN_SMS_MT_Submit) {
+		if (rawsms->validity_indicator == GN_SMS_VP_None) {
+			offset += 0;
+		} else if (rawsms->validity_indicator == GN_SMS_VP_RelativeFormat) {
+			// FIXME save this info
+			offset += 1;
+		} else if (rawsms->validity_indicator == GN_SMS_VP_EnhancedFormat ||
+			   rawsms->validity_indicator == GN_SMS_VP_AbsoluteFormat) {
+			// FIXME save this info
+			offset += 7;
+		} else { 
+			dprintf("Internal Error on validity_indicator");
+			return GN_ERR_INTERNALERROR;
+		}
+	}
+	rawsms->length              = pdu[offset++];
+	rawsms->user_data_length = rawsms->length;
+	if (rawsms->udh_indicator & 0x40)
+		rawsms->user_data_length -= pdu[offset] + 1;
+	if (pdu_len - offset > 1000) {
+		dprintf("Phone gave as poisonous (too short?) reply, either phone went crazy or communication went out of sync\n");
+		ret = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+	memcpy(rawsms->user_data, pdu + offset, pdu_len - offset);
+out:
+	return ret;
+}
+
+/**
  * gn_sms_request - High-level function for the explicit SMS reading from the phone
  * @data: GSM data for the phone driver
  * @state: current statemachine state

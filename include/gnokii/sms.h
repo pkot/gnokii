@@ -63,6 +63,10 @@
 #define GN_SMS_USER_DATA_MAX_LENGTH   512
 #define GN_SMS_VP_MAX_LENGTH            8
 
+/* flags for encoding/decoding PDU */
+#define GN_SMS_PDU_DEFAULT		0
+#define GN_SMS_PDU_NOSMSC		1
+
 /*** MEMORY INFO ***/
 typedef struct {
 	int Unread;		/* Number of unread messages */

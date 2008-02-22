@@ -5,6 +5,13 @@
       party applications to use own configuration       (Pawel Kot)
     o add id for Nokia 5300 to misc.c only; use model=series40 in
       gnokiirc for this and similar phones          (Daniele Forsi)
+    o create a new function moving code from atgen.c to split raw
+      fields of a PDU coded SMS and copy them to gn_sms_raw struct
+      for later decoding                 (Daniele Forsi, Pawel Kot)
+ * at driver updates
+    o in ReplyGetSMS() use the new function to split raw fields of
+      a PDU coded SMS (code refactoring, no functional changes)
+                                                    (Daniele Forsi)
 
 0.6.23
 ======
