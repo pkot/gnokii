@@ -1,4 +1,4 @@
-rem @echo off
+@echo off
 
 set GNOKII_H_IN_PATH=..\include
 set SED=sed.exe
@@ -12,10 +12,10 @@ findstr /r /c:"^GNOKII_LT_VERSION_" ..\configure.in > %TEMP%\gnokii_ver.txt
 for /F %%i in (%TEMP%\gnokii_ver.txt) do set %%i
 del /q %TEMP%\gnokii_ver.txt
 
-echo Got versions!
-echo GNOKII_LT_VERSION_CURRENT: %GNOKII_LT_VERSION_CURRENT%
-echo GNOKII_LT_VERSION_REVISION: %GNOKII_LT_VERSION_REVISION%
-echo GNOKII_LT_VERSION_AGE: %GNOKII_LT_VERSION_AGE%
+rem echo Got versions!
+rem echo GNOKII_LT_VERSION_CURRENT: %GNOKII_LT_VERSION_CURRENT%
+rem echo GNOKII_LT_VERSION_REVISION: %GNOKII_LT_VERSION_REVISION%
+rem echo GNOKII_LT_VERSION_AGE: %GNOKII_LT_VERSION_AGE%
 
 rem Determine LibGnokii version
 set /a LIBGNOKII_VERSION_MAJOR=%GNOKII_LT_VERSION_CURRENT% - %GNOKII_LT_VERSION_AGE%
@@ -46,12 +46,9 @@ echo done!
 goto :EOF
 
 :path_search
-echo Printer!
 set SED_PATH=
-echo on se: %~dp$PATH:1%
 set SED_PATH=%~dp$PATH:1%
 goto :EOF
-
 
 :sed_error
 echo Error! Cannot find sed.exe in path
