@@ -15,6 +15,10 @@
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)
+ * documentation updates
+    o add to gnokii man page the missing options of --sendsms
+      command (--8bit, --concat, --animation and --wappush) and
+      document all its other long options           (Daniele Forsi)
 
 0.6.23
 ======
