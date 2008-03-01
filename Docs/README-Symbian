@@ -3,12 +3,16 @@
 
 * Notes *
 
-First of all: Phones supported by this driver so far are:
+First of all, phones supported by this driver so far are all Symbian
+Series60 prior to 3rd Edition phones. Symbian Series60 3rd Edition and
+Symbian Series80 phones are not supported by this driver.
+
+Tested phones are:
  * Nokia 3650 (S60 1st)
  * Nokia 6600 (S60 2nd)
  * Siemens SX1 (S60 1st)
 
-untested, but it has to work:
+Untested phones, but they have to work:
  * S60 1st
    o Nokia 3660
    o Nokia 7650

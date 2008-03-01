@@ -174,7 +174,9 @@ at http://wiki.gnokii.org/index.php/PreBuiltPackages.
 Once you have installed the binaries, you should copy the sample/gnokiirc
 file from the Docs directory to your home directory and name it .gnokiirc
 Using your favorite editor ensure that the settings are correct for your
-system, the sample file has details of the various options available.
+system, the sample file has details of the various options available. You
+may refer to <http://wiki.gnokii.org/index.php/Config> for the
+configurations known to work.
 
 If you used a pre-built version of gnokii (.rpm, .deb etc) it may have
 installed a /etc/gnokiirc file.  If it has, the settings in this file will

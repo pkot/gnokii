@@ -3,7 +3,7 @@
 
 * Notes *
 
-First of all: Phones supported by this driver so far are:
+First of all, tested with this driver so far are:
  * 6510
  * 8310
  * 6310
@@ -29,9 +29,7 @@ First of all: Phones supported by this driver so far are:
  * 6170
  * 6020
  * 6230i
-All the newest phones should work with this driver, too, i.e. 7610, 7210
-once they are out. If you have any of these phones, please test it with
-model set to 6510 and give report to the ML.
+All Nokia Series40 phones should work with this driver.
 
 Code for the 6510 phones has been tested with DAU-9P and DLR-3P cables and
 IrDA connection. The following conection type values are recommended for the
@@ -68,12 +66,6 @@ The current code is able to:
 
 Hint: For all these phones you can also use AT driver, as they all have a
 builtin hardware modem.
-
-* Bugs *
-
- * when using dlr3p connection type after the several sequent connection the
-   phone got puzzled and you need to reset it to be able to connect it again
-   (or also enable IrDA)
 
 * TODO *
 
