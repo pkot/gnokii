@@ -26,7 +26,7 @@ Send resulting report to gnokii-users@nongnu.org.
 If you want to debug yourself, by default the CVS version adds -g to CFLAGS
 when generating Makefile.global and the defines needed to print debug
 messages when generating include/config.h then in your gnokiirc set debug=on
-to see messages about libgnokii or gnokii and xgnokii=on to see messages
+to see messages about libgnokii or gnokii and xdebug=on to see messages
 about xgnokii or smsd.
 At configure time you may add --disable-shared to build statically linked
 versions that are easier to deal with.
