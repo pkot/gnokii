@@ -2140,7 +2140,12 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 
 		memset(tmp, 0, sizeof(tmp));
 		strings = gnokii_strsplit(buf.line2, ",", 3);
-		format = atoi(strings[1]);
+		/* phone may respond with only the first value as in "+COPS: 0" */
+		if (strings[1]) {
+			format = atoi(strings[1]);
+		} else {
+			format = -1;
+		}
 		switch (format) {
 		case 0: /* network operator name given */
 			pos = strip_quotes(strings[2]);

@@ -12,6 +12,8 @@
     o in ReplyGetSMS() use the new function to split raw fields of
       a PDU coded SMS (code refactoring, no functional changes)
                                                     (Daniele Forsi)
+    o do not segfault when AT+COPS? returns only the first value
+      as in +COPS: 0                                (Daniele Forsi)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)
