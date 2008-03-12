@@ -26,6 +26,8 @@
       document all its other long options           (Daniele Forsi)
     o try to make an impression that all the phones are supported
                                                         (Pawel Kot)
+ * gnokii updates
+    o make --getsmsc understand the "end" keyword   (Daniele Forsi)
 
 0.6.23
 ======

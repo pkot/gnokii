@@ -1058,7 +1058,7 @@ int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		start = gnokii_atoi(argv[optind]);
 		if (errno || start < 0)
 			getsmsc_usage(stderr, -1);
-		stop = (argc > optind+1) ? gnokii_atoi(argv[optind+1]) : start;
+		stop = parse_end_value_option(argc, argv, optind + 1, start);
 		if (errno || stop < 0)
 			getsmsc_usage(stderr, -1);
 
@@ -1088,6 +1088,9 @@ int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		case GN_ERR_NONE:
 			break;
 		default:
+			/* ignore the error when reading until "end" and at least one entry has alreadly been read */
+			if ((error == GN_ERR_INVALIDLOCATION) && (stop == INT_MAX) && (i > start))
+				return GN_ERR_NONE;
 			fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 			return error;
 		}
