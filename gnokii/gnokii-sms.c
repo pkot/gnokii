@@ -1068,7 +1068,7 @@ int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		}
 
 		if (start < 1) {
-			fprintf(stderr, _("SMS center number must be greater than 1\n"));
+			fprintf(stderr, _("SMS center number must be greater than 0\n"));
 			return -1;
 		}
 	} else {

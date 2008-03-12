@@ -3572,8 +3572,8 @@ msgstr "Il numero iniziale del centro messaggi è maggiore di quello finale\n"
 
 #: gnokii/gnokii-sms.c:1077
 #, c-format
-msgid "SMS center number must be greater than 1\n"
-msgstr "Il numero del centro messaggi deve essere maggiore di 1\n"
+msgid "SMS center number must be greater than 0\n"
+msgstr "Il numero del centro messaggi deve essere maggiore di 0\n"
 
 #: gnokii/gnokii-sms.c:1110
 #, c-format
