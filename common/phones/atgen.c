@@ -2081,7 +2081,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 	at_line_buffer buf;
 	char *pos;
 	char **strings;
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 	int i;
 
 	if (!data->network_info)
@@ -2147,6 +2147,9 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 			format = -1;
 		}
 		switch (format) {
+		case -1: /* neither operator name nor code given (eg. no SIM or not registered) */
+			error = GN_ERR_NOTAVAILABLE;
+			break;
 		case 0: /* network operator name given */
 			pos = strip_quotes(strings[2]);
 			at_decode(drvinst->charset, tmp, pos, strlen(pos));
@@ -2173,13 +2176,14 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 				snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), strings[2]);
 			}
 			break;
-		default: /* FIXME: add error handling */
+		default: /* defined formats are in range (0-2) */
+			error = GN_ERR_UNHANDLEDFRAME;
 			break;
 		}
 		gnokii_strfreev(strings);
 	}
 
-	return GN_ERR_NONE;
+	return error;
 }
 
 static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
