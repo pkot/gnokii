@@ -14,6 +14,9 @@
                                                     (Daniele Forsi)
     o do not segfault when AT+COPS? returns only the first value
       as in +COPS: 0                                (Daniele Forsi)
+    o AT protocol supports only one SMS Center, so pretend that its
+      location is number 1 and return GN_ERR_INVALIDLOCATION
+      when requested SMSC location is not 1         (Daniele Forsi)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)

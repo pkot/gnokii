@@ -1086,6 +1086,9 @@ static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
  */
 static gn_error AT_GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
+	/* AT protocol supports only one SMS Center */
+	if (data->message_center && data->message_center->id != 1)
+		return GN_ERR_INVALIDLOCATION;
  	if (sm_message_send(9, GN_OP_GetSMSCenter, "AT+CSCA?\r", state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_GetSMSCenter, data, state);
