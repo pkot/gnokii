@@ -47,8 +47,6 @@
 
 static at_send_function_type writephonebook;
 
-#define NR_MEMORIES 12 /* (sizeof(memorynames) / sizeof((memorynames)[0])) */
-
 static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	if (writephonebook == NULL)
@@ -62,8 +60,8 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
-	char *memory, *pos;
-	int index, i;
+	char *memory_name, *pos;
+	int index;
 	gn_memory_type mem;
 	int freesms = 0;
 	gn_error error = GN_ERR_NONE;
@@ -87,16 +85,10 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	pos++;
 	index = atoi(pos);
 
-	memory = strip_quotes(buf.line1 + 7);
-	if (memory == NULL)
+	memory_name = strip_quotes(buf.line1 + 7);
+	if (memory_name == NULL)
 		return GN_ERR_UNSOLICITED;
-	for (i = 0; i < NR_MEMORIES; i++) {
-		if (!strcmp(memory, memorynames[i])) {
-			mem = i;
-			break;
-		}
-	}
-
+	mem = gn_str2memory_type(memory_name);
 	if (mem == GN_MT_XX)
 		return GN_ERR_UNSOLICITED;
 
@@ -116,7 +108,7 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 			index -= drvinst->smmemorysize;
 	}
 
-	dprintf("Received message folder %s index %d\n", memorynames[mem], index);
+	dprintf("Received message folder %s index %d\n", gn_memory_type2str(mem), index);
 
 	if (!data->sms) {
 		freesms = 1;

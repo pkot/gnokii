@@ -8,6 +8,11 @@
     o create a new function moving code from atgen.c to split raw
       fields of a PDU coded SMS and copy them to gn_sms_raw struct
       for later decoding                 (Daniele Forsi, Pawel Kot)
+    o change gn_memory_type2str() to be the inverse of
+      gn_str2memory_type(), ie converting a numeric gn_memory_type
+      like GN_MT_ME into a short string like "ME"; converting into
+      a more user friendly string like "Internal memory" is now
+      done by gn_memory_type_print()     (Daniele Forsi, Pawel Kot)
  * at driver updates
     o in ReplyGetSMS() use the new function to split raw fields of
       a PDU coded SMS (code refactoring, no functional changes)
@@ -17,6 +22,8 @@
     o AT protocol supports only one SMS Center, so pretend that its
       location is number 1 and return GN_ERR_INVALIDLOCATION
       when requested SMSC location is not 1         (Daniele Forsi)
+    o use gn_str2memory_type() and the new gn_memory_type2str() to
+      convert memory arguments                      (Daniele Forsi)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)
@@ -28,6 +35,8 @@
                                                         (Pawel Kot)
  * gnokii updates
     o make --getsmsc understand the "end" keyword   (Daniele Forsi)
+    o the -f and -F options of --getsms now output short memory
+      names for X-GSM-Memory                        (Daniele Forsi)
 
 0.6.23
 ======

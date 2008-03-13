@@ -241,23 +241,6 @@ gn_driver driver_at = {
 	NULL
 };
 
-char *memorynames[] = {
-	"ME", /* Internal memory of the mobile equipment */
-	"SM", /* SIM card memory */
-	"FD", /* Fixed dial numbers */
-	"ON", /* Own numbers */
-	"EN", /* Emergency numbers */
-	"DC", /* Dialled numbers */
-	"RC", /* Received numbers */
-	"MC", /* Missed numbers */
-	"LD", /* Last dialed */
-	"MT", /* combined ME and SIM phonebook */
-	"TA", /* for compatibility only: TA=computer memory */
-	"CB", /* Currently selected memory */
-};
-
-#define NR_MEMORIES (sizeof(memorynames) / sizeof((memorynames)[0]))
-
 typedef struct {
 	char *str;
 	at_charset charset;
@@ -544,18 +527,20 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_data data;
 	char req[32];
+	const char *memory_name;
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->memorytype) {
-		if (mt >= NR_MEMORIES)
+		memory_name = gn_memory_type2str(mt);
+		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
-		snprintf(req, sizeof(req), "AT+CPBS=\"%s\"\r", memorynames[mt]);
+		snprintf(req, sizeof(req), "AT+CPBS=\"%s\"\r", memory_name);
 		ret = sm_message_send(13, GN_OP_Init, req, state);
-		if (ret)
-			return GN_ERR_NOTREADY;
+		if (ret != GN_ERR_NONE)
+			return ret;
 		gn_data_clear(&data);
 		ret = sm_block_no_retry(GN_OP_Init, &data, state);
-		if (ret)
+		if (ret != GN_ERR_NONE)
 			return ret;
 		drvinst->memorytype = mt;
 
@@ -580,16 +565,19 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_data data;
 	char req[32];
+	const char *memory_name;
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->smsmemorytype) {
-		if (mt >= NR_MEMORIES)
+		memory_name = gn_memory_type2str(mt);
+		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
-		gn_data_clear(&data);
-		snprintf(req, sizeof(req), "AT+CPMS=\"%s\"\r", memorynames[mt]);
+		snprintf(req, sizeof(req), "AT+CPMS=\"%s\"\r", memory_name);
 		ret = sm_message_send(13, GN_OP_Init, req, state);
-		if (ret == GN_ERR_NONE)
-			ret = sm_block_no_retry(GN_OP_Init, &data, state);
+		if (ret != GN_ERR_NONE)
+			return ret;
+		gn_data_clear(&data);
+		ret = sm_block_no_retry(GN_OP_Init, &data, state);
 		if (ret == GN_ERR_NONE)
 			drvinst->smsmemorytype = mt;
 	}
@@ -2013,7 +2001,7 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
 	char *memory, *pos;
-	int index, i;
+	int index;
 	gn_memory_type mem;
 	int freesms = 0;
 	gn_error error = GN_ERR_NONE;
@@ -2040,17 +2028,11 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	memory = strip_quotes(buf.line1 + 7);
 	if (memory == NULL)
 		return GN_ERR_UNSOLICITED;
-	for (i = 0; i < NR_MEMORIES; i++) {
-		if (!strcmp(memory, memorynames[i])) {
-			mem = i;
-			break;
-		}
-	}
-
+	mem = gn_str2memory_type(memory);
 	if (mem == GN_MT_XX)
 		return GN_ERR_UNSOLICITED;
 
-	dprintf("Received message folder %s index %d\n", memorynames[mem], index);
+	dprintf("Received message folder %s index %d\n", gn_memory_type2str(mem), index);
 
 	if (!data->sms) {
 		freesms = 1;

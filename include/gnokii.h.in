@@ -206,6 +206,7 @@ GNOKII_API int gn_lib_is_connectiontype_supported(gn_connection_type ct);
 /* Misc */
 GNOKII_API gn_memory_type gn_str2memory_type(const char *s);
 GNOKII_API const char *gn_memory_type2str(gn_memory_type mt);
+GNOKII_API const char *gn_memory_type_print(gn_memory_type mt);
 GNOKII_API int gn_timestamp_isvalid(const gn_timestamp dt);
 GNOKII_API void gn_timestamp_set(gn_timestamp *dt, int year, int month, int day,
 			int hour, int minute, int second, int timezone);
