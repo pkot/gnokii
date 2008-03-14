@@ -24,6 +24,8 @@
       when requested SMSC location is not 1         (Daniele Forsi)
     o use gn_str2memory_type() and the new gn_memory_type2str() to
       convert memory arguments                      (Daniele Forsi)
+    o implement --showsmsfolderstatus for up to 4 folders
+                                                    (Daniele Forsi)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)

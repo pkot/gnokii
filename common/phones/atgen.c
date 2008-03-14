@@ -67,6 +67,7 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplySendSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -97,6 +98,8 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetSMSFolders(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SendSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SaveSMS(gn_data *data, struct gn_statemachine *state);
@@ -149,6 +152,8 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_CallDivert,            AT_CallDivert,            ReplyCallDivert },
 	{ GN_OP_AT_SetPDUMode,         AT_SetPDUMode,            Reply },
 	{ GN_OP_AT_Prompt,             NULL,                     ReplyGetPrompt },
+	{ GN_OP_GetSMSFolders,         AT_GetSMSFolders,         ReplyGetSMSFolders },
+	{ GN_OP_GetSMSFolderStatus,    AT_GetSMSFolderStatus,    Reply },
 	{ GN_OP_GetSMSStatus,          AT_GetSMSStatus,          ReplyGetSMSStatus },
 	{ GN_OP_SendSMS,               AT_SendSMS,               ReplySendSMS },
 	{ GN_OP_SaveSMS,               AT_SaveSMS,               ReplySendSMS },
@@ -922,6 +927,41 @@ static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_AT_SetPDUMode, data, state);
 }
 
+static gn_error AT_GetSMSFolders(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error ret;
+
+	if (!data || !data->sms_folder_list)
+		return GN_ERR_INTERNALERROR;
+
+	ret = sm_message_send(10, GN_OP_GetSMSFolders, "AT+CPMS=?\r", state);
+	if (ret != GN_ERR_NONE)
+		return ret;
+	return sm_block_no_retry(GN_OP_GetSMSFolders, data, state);
+}
+
+static gn_error AT_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
+{
+	gn_sms_status smsstatus = {0, 0, 0, 0}, *save_smsstatus;
+	gn_memory_status memory_status = {0, 0, 0}, *save_memory_status;
+	gn_error error;
+
+	memory_status.memory_type = data->sms_folder->folder_id;
+
+	save_smsstatus = data->sms_status;
+	data->sms_status = &smsstatus;
+	save_memory_status = data->memory_status;
+	data->memory_status = &memory_status;
+	error = state->driver.functions(GN_OP_GetSMSStatus, data, state);
+	data->memory_status = save_memory_status;
+	data->sms_status = save_smsstatus;
+	if (error != GN_ERR_NONE) return error;
+
+	data->sms_folder->number = smsstatus.number;
+
+	return GN_ERR_NONE;
+}
+
 static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error ret;
@@ -1593,6 +1633,46 @@ static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int lengt
 	case GN_AT_OK: return GN_ERR_INTERNALERROR;
 	default: return at_error_get(buffer, state);
 	}
+}
+
+static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
+{
+	at_line_buffer buf;
+	gn_error error;
+	char *pos, *memory_name;
+	char **items;
+	int i;
+	gn_memory_type memory_type;
+
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+
+	buf.line1 = buffer + 1;
+	buf.length = length;
+	splitlines(&buf);
+
+	if (strncmp("+CPMS:", buf.line2, 6))
+		return GN_ERR_INTERNALERROR;
+
+	/* split a string like +CPMS: ("ME","SM"),("ME","SM"),("ME","SM")
+	   can't use strip_brackets() because it will strip the last ')', not the first
+	 */
+	pos = buf.line2 + 6;
+	while (*pos && *pos != ')')
+		pos++;
+	*pos = '\0';
+	items = gnokii_strsplit(buf.line2 + 8, ",", 4);
+	for (i = 0; items[i]; i++) {
+		memory_name = strip_quotes(items[i]);
+		memory_type = gn_str2memory_type(memory_name);
+
+		data->sms_folder_list->folder_id[i] = memory_type;
+		data->sms_folder_list->folder[i].folder_id = memory_type;
+		snprintf(data->sms_folder_list->folder[i].name, sizeof(data->sms_folder_list->folder[0].name), "%s", gn_memory_type_print(memory_type));
+	}
+	data->sms_folder_list->number = i;
+	gnokii_strfreev(items);
+
+	return GN_ERR_NONE;
 }
 
 static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
