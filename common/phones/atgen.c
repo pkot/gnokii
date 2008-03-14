@@ -944,18 +944,23 @@ static gn_error AT_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *sta
 {
 	gn_sms_status smsstatus = {0, 0, 0, 0}, *save_smsstatus;
 	gn_memory_status memory_status = {0, 0, 0}, *save_memory_status;
-	gn_error error;
+	gn_error ret;
 
 	memory_status.memory_type = data->sms_folder->folder_id;
 
+	/* this driver needs some structures that other drivers don't need
+	   and the callers (eg. gnokii) may not be aware of that
+	   so always use a local copy
+	 */
 	save_smsstatus = data->sms_status;
 	data->sms_status = &smsstatus;
 	save_memory_status = data->memory_status;
 	data->memory_status = &memory_status;
-	error = state->driver.functions(GN_OP_GetSMSStatus, data, state);
+	ret = state->driver.functions(GN_OP_GetSMSStatus, data, state);
 	data->memory_status = save_memory_status;
 	data->sms_status = save_smsstatus;
-	if (error != GN_ERR_NONE) return error;
+	if (ret != GN_ERR_NONE)
+		return ret;
 
 	data->sms_folder->number = smsstatus.number;
 
