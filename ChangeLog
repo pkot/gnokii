@@ -39,6 +39,8 @@
     o make --getsmsc understand the "end" keyword   (Daniele Forsi)
     o the -f and -F options of --getsms now output short memory
       names for X-GSM-Memory                        (Daniele Forsi)
+    o use the new gn_memory_type2str() to show memory name instead
+      of numeric ID in --showsmsfolderstatus output (Daniele Forsi)
 
 0.6.23
 ======

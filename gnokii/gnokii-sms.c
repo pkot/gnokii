@@ -1318,7 +1318,7 @@ int showsmsfolderstatus(gn_data *data, struct gn_statemachine *state)
 			fprintf(stderr, _("Cannot stat folder \"%s\": %s\n"), folders.folder[i].name, gn_error_print(error));
 			return error;
 		}
-		fprintf(stdout, _("%3d %-32s %2u %4u\n"), i, folders.folder[i].name, folders.folder_id[i], folders.folder[i].number);
+		fprintf(stdout, _("%3d %-32s %2s %4u\n"), i, folders.folder[i].name, gn_memory_type2str(folders.folder_id[i]), folders.folder[i].number);
 	}
 
 	return GN_ERR_NONE;
