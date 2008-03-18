@@ -26,6 +26,8 @@
       convert memory arguments                      (Daniele Forsi)
     o implement --showsmsfolderstatus for up to 4 folders
                                                     (Daniele Forsi)
+    o fix setting the current memory on Sony Ericsson phones
+                                                   (Bastien Nocera)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)
@@ -1290,7 +1292,7 @@
     o show the (missed, dialled, etc) calls date and time
                                                         (Pawel Kot)
  * translation updates
-    o updated Estonian translation                  (Hans Motsh‰rg)
+    o updated Estonian translation                  (Hans Motsh√§rg)
     o updated Polish translation                        (Pawel Kot)
  * libgnokii updates
     o return all call dates as subentries               (Pawel Kot)
@@ -1307,15 +1309,15 @@
 0.6.5
 =====
  * translation updates
-    o updated Estonian translation                  (Hans Motsh‰rg)
-    o xgnokii_xring.c was missing from POTFILES.in  (Hans Motsh‰rg)
+    o updated Estonian translation                  (Hans Motsh√§rg)
+    o xgnokii_xring.c was missing from POTFILES.in  (Hans Motsh√§rg)
     o Chinese translation added                        (Funda Wang)
     o update all *.po files (automatically with msgmerge)
                                                         (Pawel Kot)
  * gnokii updates
     o --monitor once will run only once            (BORBELY Zoltan)
     o add the ability to set datetime with gnokii --savesms
-                                                 (Adam Go≥Íbiowski)
+                                                 (Adam Go¬≥√™biowski)
     o support for basic file manipulation              (Chris Kemp)
     o --sendsms will warn when no SMSC cannot be read from the
       phone and advice to use --smsc option             (Pawel Kot)
@@ -1408,12 +1410,12 @@
 0.6.4
 =====
  * build system updates
-    o wrong permissions for gnapplet.sis             (Ville Skytt‰)
+    o wrong permissions for gnapplet.sis             (Ville Skytt√§)
     o when AC_PATH_X returns empty set of x_includes, but X11
       libraries are present in the system, configure would
       incorrectly add -I to XPM_CFLAGS                  (Pawel Kot)
     o use pq_config instead of hardcoding paths in smsd Makefile
-                        (Ville Skytt‰, Bradley Marshall, Pawel Kot)
+                        (Ville Skytt√§, Bradley Marshall, Pawel Kot)
     o fix MSCS debug build                  (Phil Ashby, Pawel Kot)
     o mingw-cross.sh explicitly disables X support (BORBELY Zoltan)
  * AT driver updates
@@ -1465,7 +1467,7 @@
  * xgnokii updates
     o xgnokii tried to open the HTML file according to locale set,
       be smart and try to match the best one is the default is not
-      found                               (Ville Skytt‰, Pawel Kot)
+      found                               (Ville Skytt√§, Pawel Kot)
     o SMS window will be automatically refreshed   (BORBELY Zoltan)
     o config saving and restoring fixed            (BORBELY Zoltan)
     o enlarge room for text in 'Overwrite file?' dialogs to 255
@@ -1606,7 +1608,7 @@
     o accept long phonebook lines (import and export)   (Pawel Kot)
     o fix mixed name/number entry field usage        (Peter Grandi)
     o don't force file mode on installation where not necessary
-      (install -m mode)                   (Ville Skytt‰, Pawel Kot)
+      (install -m mode)                   (Ville Skytt√§, Pawel Kot)
     o update html documentation                         (Pawel Kot)
  * nk6510 series updates
     o added Nokia 3595 to the supported models  (Gunnar Sigurdsson)
@@ -1629,7 +1631,7 @@
  * smsd updates
     o finish libtoolization: use *.lo objects instead of *.o to
       avoid mixing fPIC (libgnokii) and non-fPIC (smsd) code
-                                          (Ville Skytt‰, Pawel Kot)
+                                          (Ville Skytt√§, Pawel Kot)
 
 0.6.1
 =====
@@ -1756,7 +1758,7 @@
     o disable nls support when neither xgettext nor msgfmt is
       found, we're not able to build po/ then           (Pawel Kot)
  * translation updates
-    o new Polish translation                (Daniel KoÊ, Pawel Kot)
+    o new Polish translation                (Daniel Ko√¶, Pawel Kot)
 
 0.5.10
 ======
@@ -1934,12 +1936,12 @@
     o Minor bugs found during the 2003-09-16 -> latest
       changeset review                             (BORBELY Zoltan)
  * translations updates
-    o Estonian translation updated                  (Hans Motsh‰rg)
+    o Estonian translation updated                  (Hans Motsh√§rg)
     o French translation updated                (Olivier Kaloudoff)
  * libgnokii updates
     o utf8 encoding/decoding fixed                 (BORBELY Zoltan)
     o too many lost reply caused phone lockups     (BORBELY Zoltan)
-    o new operators in Finland                       (Timo Mets‰l‰)
+    o new operators in Finland                       (Timo Mets√§l√§)
     o rfcomm_channel config option added           (BORBELY Zoltan)
     o call management API updated                  (BORBELY Zoltan)
  * gnokii updates
@@ -2106,7 +2108,7 @@
     o avoid warnings on Linux when irda headers are detected
                                                          (Pawel Kot)
     o linux/irda.h requires linux/types.h too       (BORBELY Zoltan)
-    o use INSTALL_DATA instead of INSTALL for xgnokii (Ville Skytt‰)
+    o use INSTALL_DATA instead of INSTALL for xgnokii (Ville Skytt√§)
     o mingw cross compilation support               (BORBELY Zoltan)
  * libsms fixes
     o allow to input more then 160 characters for the text sms
@@ -2144,10 +2146,10 @@
  * build system updates
     o build also bz2 archive                             (Pawel Kot)
     o use INSTALL_DATA variable from the configure script
-                                                      (Ville Skytt‰)
+                                                      (Ville Skytt√§)
     o update INSTALL installation notes                  (Pawel Kot)
  * translations updates
-    o Estonian translation updated                   (Hans Motsh‰rg)
+    o Estonian translation updated                   (Hans Motsh√§rg)
     o added French translation                   (Olivier Kaloudoff)
  * 3110 series updates
     o Phonebook support added                        (Osma Suominen)
@@ -2155,9 +2157,9 @@
     o prevent garbage in debug output in getsms      (Osma Suominen)
  * utils updates
     o use --getphonebook and not --getmemory in sendsms utility
-                                                      (Ville Skytt‰)
+                                                      (Ville Skytt√§)
  * smsd updates
-    o make smsd install compliant with FHS            (Ville Skytt‰)
+    o make smsd install compliant with FHS            (Ville Skytt√§)
  * gnokii updates
     o --[gs]etactiveprofile added                   (BORBELY Zoltan)
     o --monitor accepts delay as an argument        (BORBELY Zoltan)
@@ -2267,7 +2269,7 @@
  * general updates
     o fix stupid typo in fbus.c causing Bluetooth not work
                                                    (Marcel Holtmann)
-    o s/JanÌk/Janik/ in the translatable strings         (Pawel Kot)
+    o s/Jan√≠k/Janik/ in the translatable strings         (Pawel Kot)
     o don't use u8 type in the exported headers          (Pawel Kot)
     o add string.h to mgnokiidev                  (Troy Korjuslommi)
     o mention exiting Docs/Bugs and not Docs/Reporting-HOWTO when
@@ -2310,7 +2312,7 @@
     o add make install target for includes subdir        (Pawel Kot)
     o move win32/gnokii_v6 to win32/MSVC6                (Pawel Kot)
     o add missing headers in include/gnokii/*            (Pawel Kot)
-    o s/JanÌk/Janik/ (sorry Pavel), s/Pawe≥/Pawel/ in translatable
+    o s/Jan√≠k/Janik/ (sorry Pavel), s/Pawe¬≥/Pawel/ in translatable
       strings to avoid problems with newer xgettext      (Pawel Kot)
     o some headers cleaup                                (Pawel Kot)
     o try to avoid #ifdef __unices__                     (Pawel Kot)
@@ -2420,7 +2422,7 @@
     o retransmission based solely on timeouts       (BORBELY Zoltan)
  * build system updated
     o avoid problems with recursive loop when installing
-      locales in xgnokii                          (Malte Sch¸nemann)
+      locales in xgnokii                          (Malte Sch√ºnemann)
  * docs updates
     o more info on Nokia 3410 FBUS protocol oddities
  * xgnokii updates
@@ -2516,7 +2518,7 @@
     o sort sms alphabetically                          (Ulrich Hopp)
     o save sms to mailbox                              (Ulrich Hopp)
  * documentation updates
-    o new Estonian translation                       (Hans Motsh‰rg)
+    o new Estonian translation                       (Hans Motsh√§rg)
     o man page update for gnokii --getlocksinfo     (Bertrik Sikken)
     o get 61xx wap info documentation from gammu    (Bertrik Sikken)
  * gnokii updates
@@ -2836,7 +2838,7 @@
     o reflect API changes in gnokii-hackers howto         (Pawel Kot)
     o new FAQ entries: require_dcd and gettextize         (Pawel Kot)
     o MacOS X README                                 (Ruotger Skupin)
- * new Estonian translation                           (Hans Motsh‰rg)
+ * new Estonian translation                           (Hans Motsh√§rg)
 
 0.4.3
 =====
@@ -2927,7 +2929,7 @@
 
 0.4.2a
 ======
- * Just a small typo in the Makefile             (Robert Steinh‰uﬂer)
+ * Just a small typo in the Makefile             (Robert Steinh√§u√üer)
 
 0.4.2
 =====
