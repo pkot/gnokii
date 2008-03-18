@@ -53,15 +53,15 @@ static gn_error se_at_memory_type_set(gn_memory_type mt, struct gn_statemachine 
 
 	if (mt != drvinst->memorytype) {
 		int len;
-		char memtype[10];
 		const char *memory_name;
 
 		memory_name = gn_memory_type2str(mt);
 		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
-		len = at_encode(drvinst->charset, memtype, sizeof(memtype),
-				memory_name, strlen(memory_name));
-		snprintf(req, sizeof(req), "AT+CPBS=\"%s\"\r", memtype);
+		if (strcmp (memory_name, "ON") == 0)
+			memory_name = "BC";
+		len = strlen (memory_name);
+		snprintf(req, sizeof(req), "AT+CPBS=\"%s\"\r", memory_name);
 		ret = sm_message_send(11 + len - 1, GN_OP_Init, req, state);
 		if (ret)
 			return GN_ERR_NOTREADY;
