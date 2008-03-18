@@ -58,9 +58,11 @@ static gn_error se_at_memory_type_set(gn_memory_type mt, struct gn_statemachine 
 		memory_name = gn_memory_type2str(mt);
 		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
-		if (strcmp (memory_name, "ON") == 0)
+
+		/* BC is "Own Business Card" as per the Sony Ericsson documentation */
+		if (strcmp(memory_name, "ON") == 0)
 			memory_name = "BC";
-		len = strlen (memory_name);
+		len = strlen(memory_name);
 		snprintf(req, sizeof(req), "AT+CPBS=\"%s\"\r", memory_name);
 		ret = sm_message_send(11 + len - 1, GN_OP_Init, req, state);
 		if (ret)
