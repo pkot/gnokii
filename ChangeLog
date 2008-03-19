@@ -28,6 +28,9 @@
                                                     (Daniele Forsi)
     o fix setting the current memory on Sony Ericsson phones
                                                    (Bastien Nocera)
+    o in GN_OP_SaveSMS set data->raw_sms->number with location
+      number where message was stored, as expected by gnokii
+      --savesms                                     (Daniele Forsi)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)

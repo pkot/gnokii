@@ -1778,13 +1778,17 @@ static gn_error ReplySendSMS(int messagetype, unsigned char *buffer, int length,
 	buf.length = length;
 	splitlines(&buf);
 
-	/* SendSMS or SaveSMS */
-	if (!strncmp("+CMGW:", buf.line2, 6) ||
-	    !strncmp("+CMGS:", buf.line2, 6))
+	if (!strncmp("+CMGW:", buf.line2, 6)) {
+		/* SaveSMS */
+		data->raw_sms->number = atoi(buf.line2 + 6);
+		dprintf("Message saved (location: %d)\n", data->raw_sms->number);
+	} else if (!strncmp("+CMGS:", buf.line2, 6)) {
+		/* SendSMS */
 		data->raw_sms->reference = atoi(buf.line2 + 6);
-	else
+		dprintf("Message sent (reference: %d)\n", data->raw_sms->reference);
+	} else {
 		data->raw_sms->reference = -1;
-	dprintf("Message sent (reference: %d)\n", data->raw_sms->reference);
+	}
 	return GN_ERR_NONE;
 }
 
