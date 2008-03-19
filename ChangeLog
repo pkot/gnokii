@@ -31,6 +31,8 @@
     o in GN_OP_SaveSMS set data->raw_sms->number with location
       number where message was stored, as expected by gnokii
       --savesms                                     (Daniele Forsi)
+    o in Sony Ericsson driver atsoer.c fix off by one command
+      string length in se_at_memory_type_set()      (Daniele Forsi)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)
