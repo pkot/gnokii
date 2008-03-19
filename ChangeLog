@@ -26,7 +26,9 @@
       convert memory arguments                      (Daniele Forsi)
     o implement --showsmsfolderstatus for up to 4 folders
                                                     (Daniele Forsi)
-    o fix setting the current memory on Sony Ericsson phones
+    o force the encoding to be GSM when we're expecting an "ASCII"
+      answer, fixes a lot of functionality on Sony Ericsson, Samsung
+      and Sagem phones.
                                                    (Bastien Nocera)
     o in GN_OP_SaveSMS set data->raw_sms->number with location
       number where message was stored, as expected by gnokii
