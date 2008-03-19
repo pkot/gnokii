@@ -80,64 +80,6 @@ static gn_error se_at_memory_type_set(gn_memory_type mt, struct gn_statemachine 
 	return ret;
 }
 
-
-static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
-{
-	at_driver_instance *drvinst = AT_DRVINST(state);
-	at_line_buffer buf;
-	char *pos, *endpos;
-	gn_error error;
-
-	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
-		return (error == GN_ERR_UNKNOWN) ? GN_ERR_INVALIDLOCATION : error;
-
-	buf.line1 = buffer + 1;
-	buf.length = length;
-	splitlines(&buf);
-
-	if (strncmp(buf.line1, "AT+CPBR", 7)) {
-		return GN_ERR_UNKNOWN;
-	}
-
-	if (!strncmp(buf.line2, "OK", 2)) {
-		/* Empty phonebook location found */
-		if (data->phonebook_entry) {
-			*(data->phonebook_entry->number) = '\0';
-			*(data->phonebook_entry->name) = '\0';
-			data->phonebook_entry->caller_group = 0;
-			data->phonebook_entry->subentries_count = 0;
-			data->phonebook_entry->empty = true;
-		}
-		return GN_ERR_NONE;
-	}
-	if (data->phonebook_entry) {
-		data->phonebook_entry->caller_group = 0;
-		data->phonebook_entry->subentries_count = 0;
-		data->phonebook_entry->empty = false;
-
-		/* store number */
-		pos = strchr(buf.line2, '\"');
-		endpos = NULL;
-		if (pos)
-			endpos = strchr(++pos, '\"');
-		if (endpos) {
-			*endpos = '\0';
-			at_decode(drvinst->charset, data->phonebook_entry->number, pos, strlen(pos));
-		}
-
-		/* store name */
-		pos = NULL;
-		if (endpos)
-			pos = strchr(endpos+2, ',');
-		endpos = NULL;
-		if (pos) {
-			pos = strip_quotes(pos+1);
-			at_decode(drvinst->charset, data->phonebook_entry->name, pos, strlen(pos));
-		}
-	}
-	return GN_ERR_NONE;
-}
-
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -165,24 +107,6 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 }
 
 
-static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
-{
-	at_driver_instance *drvinst = AT_DRVINST(state);
-	char req[32];
-	gn_error ret;
-
-	ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
-	if (ret)
-		return ret;
-	ret = se_at_memory_type_set(data->phonebook_entry->memory_type, state);
-	if (ret)
-		return ret;
-	snprintf(req, sizeof(req), "AT+CPBR=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
-	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
-		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_ReadPhonebook, data, state);
-}
-
 static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -201,61 +125,6 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	if (ret)
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
-}
-
-static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
-{
-	at_driver_instance *drvinst = AT_DRVINST(state);
-	size_t len;
-	char pnumber[128], name[256], req[256];
-	gn_error ret;
-	
-	ret = se_at_memory_type_set(data->phonebook_entry->memory_type, state);
-	if (ret)
-		return ret;
-	if (data->phonebook_entry->empty)
-		return state->driver.functions(GN_OP_DeletePhonebook, data, state);
-
-	ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
-	if (ret)
-		return ret;
-
-	at_encode(drvinst->charset, pnumber, sizeof(pnumber),
-		data->phonebook_entry->number,
-		strlen(data->phonebook_entry->number));
-	at_encode(drvinst->charset, name, sizeof(name),
-		data->phonebook_entry->name,
-		strlen(data->phonebook_entry->name));
-
-	len = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%s,\"%s\"\r",
-		       data->phonebook_entry->location+drvinst->memoryoffset,
-		       pnumber,
-		       data->phonebook_entry->number[0] == '+' ? "145" : "129",
-		       name);
-	if (sm_message_send(len, GN_OP_WritePhonebook, req, state))
-		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_WritePhonebook, data, state);
-}
-
-static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
-{
-	at_driver_instance *drvinst = AT_DRVINST(state);
-	int len;
-	char req[64];
-	gn_error ret;
-
-	if (!data->phonebook_entry)
-		return GN_ERR_INTERNALERROR;
-
-	ret = se_at_memory_type_set(data->phonebook_entry->memory_type, state);
-	if (ret)
-		return ret;
-
-	len = snprintf(req, sizeof(req), "AT+CPBW=%d\r", data->phonebook_entry->location+drvinst->memoryoffset);
-
-	if (sm_message_send(len, GN_OP_DeletePhonebook, req, state))
-		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_DeletePhonebook, data, state);
 }
 
 static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
@@ -277,11 +146,8 @@ void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemac
 	/* Sony Ericssons support just mode 2 */
 	AT_DRVINST(state)->cnmi_mode = 2;
 
-	at_insert_send_function(GN_OP_ReadPhonebook, AT_ReadPhonebook, state);
-	at_insert_recv_function(GN_OP_ReadPhonebook, ReplyReadPhonebook, state);
-	at_insert_send_function(GN_OP_WritePhonebook, AT_WritePhonebook, state);
-	at_insert_send_function(GN_OP_DeletePhonebook, AT_DeletePhonebook, state);
-	at_insert_send_function(GN_OP_GetNetworkInfo, AT_GetNetworkInfo, state);
 	at_insert_send_function(GN_OP_GetMemoryStatus, AT_GetMemoryStatus, state);
 	at_insert_recv_function(GN_OP_GetMemoryStatus, ReplyMemoryStatus, state);
+	at_insert_send_function(GN_OP_GetNetworkInfo, AT_GetNetworkInfo, state);
+
 }

@@ -247,7 +247,7 @@ gn_driver driver_at = {
 };
 
 typedef struct {
-	char *str;
+	const char *str;
 	at_charset charset;
 } at_charset_map_t;
 
@@ -316,6 +316,58 @@ void at_decode(int charset, char *dst, char *src, int len)
 		dst[len] = 0;
 		break;
 	}
+}
+
+/* Return the string representing the charset */
+static const char *at_charset2str(at_charset charset)
+{
+	int i;
+
+	for (i = 0; atcharsets[i].str != NULL; i++) {
+		if (atcharsets[i].charset == charset)
+			return atcharsets[i].str;
+	}
+	return NULL;
+}
+
+/* Set the requested charset as the current charset */
+static gn_error at_set_charset(gn_data *data, struct gn_statemachine *state, at_charset charset)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	gn_data tmpdata;
+	gn_error error;
+
+	if (drvinst->charset == charset)
+		return GN_ERR_NONE;
+
+	/* load the available charsets if they're not already set */
+	if (drvinst->availcharsets == 0) {
+		error = sm_message_send(10, GN_OP_AT_GetCharset, "AT+CSCS=?\r", state);
+		if (error)
+			return error;
+		gn_data_clear(&tmpdata);
+		error = sm_block_no_retry(GN_OP_AT_GetCharset, &tmpdata, state);
+	}
+
+	/* Try to set the requested charset if it's available */
+	if (drvinst->availcharsets & charset) {
+		const char *charset_s;
+		char req[32];
+
+		charset_s = at_charset2str(charset);
+		snprintf(req, sizeof(req), "AT+CSCS=\"%s\"\r", charset_s);
+		error = sm_message_send(strlen(req), GN_OP_Init, req, state);
+		if (error)
+			return error;
+		error = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
+		if (error)
+			return error;
+		drvinst->charset = charset;
+	} else {
+		error = GN_ERR_NOTSUPPORTED;
+	}
+
+	return error;
 }
 
 at_recv_function_type at_insert_recv_function(int type, at_recv_function_type func, struct gn_statemachine *state)
@@ -777,6 +829,7 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error ret;
 
+	at_set_charset(data, state, AT_CHAR_GSM);
 	ret = at_memory_type_set(data->memory_status->memory_type,  state);
 	if (ret)
 		return ret;
@@ -801,10 +854,11 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	char req[32];
 	gn_error ret;
 
-	ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
+	at_set_charset(data, state, AT_CHAR_GSM);
+	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
-	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
+	ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
 	if (ret)
 		return ret;
 	snprintf(req, sizeof(req), "AT+CPBR=%d\r", data->phonebook_entry->location + drvinst->memoryoffset);
@@ -819,7 +873,8 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	int len, ofs;
 	char req[256], *tmp;
 	gn_error ret;
-	
+
+	at_set_charset(data, state, AT_CHAR_GSM);
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
@@ -973,6 +1028,8 @@ static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->sms_status) return GN_ERR_INTERNALERROR;
 
+	at_set_charset(data, state, AT_CHAR_GSM);
+
         if (data->memory_status) {
                 ret = AT_SetSMSMemoryType(data->memory_status->memory_type,  state);
                 if (ret != GN_ERR_NONE)
@@ -992,7 +1049,10 @@ static gn_error AT_SendSMS(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_SaveSMS(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error ret = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
+	gn_error ret;
+	
+	at_set_charset(data, state, AT_CHAR_GSM);
+	ret = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 	if (ret)
 		return ret;
 	return AT_WriteSMS(data, state, "CMGW");
@@ -1079,7 +1139,10 @@ static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 {
 	/* Sony Ericsson can return on notification a location that is 9-digits long */
 	unsigned char req[32];
-	gn_error err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
+	gn_error err;
+
+	at_set_charset(data, state, AT_CHAR_GSM);
+	err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 
 	if (err)
 		return err;
@@ -1100,7 +1163,10 @@ static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[32];
-	gn_error err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
+	gn_error err;
+	
+	at_set_charset(data, state, AT_CHAR_GSM);
+	err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 	if (err)
 		return err;
 	snprintf(req, sizeof(req), "AT+CMGD=%d\r", data->sms->number);
