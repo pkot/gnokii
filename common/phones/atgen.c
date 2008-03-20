@@ -1420,7 +1420,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
-	char *pos, *endpos;
+	char *pos;
 	gn_error error;
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
@@ -1446,30 +1446,74 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 		return GN_ERR_NONE;
 	}
 	if (data->phonebook_entry) {
+		char *part[6];
+		int parts, quoted;
+
 		data->phonebook_entry->caller_group = GN_PHONEBOOK_GROUP_None;
 		data->phonebook_entry->subentries_count = 0;
 		data->phonebook_entry->empty = false;
 
-		/* store number */
-		pos = strchr(buf.line2, '\"');
-		dprintf("NUMBER: %s\n", pos);
-		endpos = NULL;
-		if (pos)
-			endpos = strchr(++pos, '\"');
-		if (endpos) {
-			*endpos = '\0';
-			snprintf(data->phonebook_entry->number, sizeof(data->phonebook_entry->number), "%s", pos);
+		/* split in several parts a line like +CPBR: 1,"123",129,"Name","2008/03/19,18:57"
+		   part[] must have one more item than the string, otherwise the last *part will point to string tail
+		   commas can appear unescaped inside quotes
+		   quotes can appear only as delimiters
+		 */
+		part[0] = pos = buf.line2 + 7;
+		for (parts = 1; parts < (sizeof(part) / sizeof(*part)); parts++) part[parts] = NULL;
+		quoted = 0;
+		parts = 1;
+		while (*pos && (parts < (sizeof(part) / sizeof(*part)))) {
+			switch (*pos) {
+			case '"':
+				quoted = !quoted;
+				break;
+			case ',':
+				if (!quoted) {
+					*pos = '\0';
+					part[parts] = pos + 1;
+					parts++;
+				}
+				break;
+			}
+			pos++;
+		}
+		/* DEBUG */
+		for (parts=0; part[parts]; parts++) {
+			dprintf("part[%d] = \"%s\"\n", parts, part[parts]);
 		}
 
-		/* store name */
-		pos = NULL;
-		if (endpos)
-			pos = strchr(endpos+2, ',');
-		dprintf("NAME: %s\n", pos);
-		endpos = NULL;
+		/* store number */
+		pos = part[1];
 		if (pos) {
-			pos = strip_quotes(pos+1);
+			dprintf("NUMBER: %s\n", pos);
+			pos = strip_quotes(pos);
+			snprintf(data->phonebook_entry->number, sizeof(data->phonebook_entry->number), "%s", pos);
+		}
+		/* store name */
+		pos = part[3];
+		if (pos) {
+			dprintf("NAME: %s\n", pos);
+			pos = strip_quotes(pos);
 			at_decode(drvinst->charset, data->phonebook_entry->name, pos, strlen(pos));
+		}
+		/* store date/time (usually sent with DC, MC, RC entries) */
+		pos = part[4];
+		if (pos) {
+			dprintf("DATE: %s\n", pos);
+			data->phonebook_entry->date.year = 0;
+			data->phonebook_entry->date.month = 0;
+			data->phonebook_entry->date.day = 0;
+			data->phonebook_entry->date.hour = 0;
+			data->phonebook_entry->date.minute = 0;
+			data->phonebook_entry->date.second = 0;
+			/* seconds may not be present */
+			sscanf(pos, "\"%d/%d/%d,%d:%d:%d\"",
+				&data->phonebook_entry->date.year,
+				&data->phonebook_entry->date.month,
+				&data->phonebook_entry->date.day,
+				&data->phonebook_entry->date.hour,
+				&data->phonebook_entry->date.minute,
+				&data->phonebook_entry->date.second);
 		}
 	}
 	return GN_ERR_NONE;

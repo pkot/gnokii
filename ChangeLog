@@ -37,6 +37,8 @@
       --savesms                                     (Daniele Forsi)
     o in Sony Ericsson driver atsoer.c fix off by one command
       string length in se_at_memory_type_set()      (Daniele Forsi)
+    o parse date and time if sent by phone when reading phonebook
+      entries (eg DC, MC, RC memories)              (Daniele Forsi)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
                                                     (Daniele Forsi)
