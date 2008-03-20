@@ -54,6 +54,9 @@
       names for X-GSM-Memory                        (Daniele Forsi)
     o use the new gn_memory_type2str() to show memory name instead
       of numeric ID in --showsmsfolderstatus output (Daniele Forsi)
+ * nk6100 driver
+    o use "SIM card" instead of "SMS Inbox" as SM folder name for
+      --showsmsfolderstatus                         (Daniele Forsi)
 
 0.6.23
 ======
