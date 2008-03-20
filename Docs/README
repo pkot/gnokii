@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
                          (C) 2001 - 2008 Paweł Kot
-               Last update 15 February 2008  Version 0.6.23
+                 Last update 20 March 2008  Version 0.6.24
 
 - Contents -
 
@@ -26,7 +26,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.23 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.24 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -382,6 +382,11 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20080320 Version 0.6.24
+New API for config handling (more friendly to external apps). Fixes in
+memory types handling and SMS handling in AT driver. Some other bugfixes and
+improvements.
+
 20080215 Version 0.6.23
 Build system changed to automake (from handmade) which should make
 packagers' life easier. Fix FBUS initialization for DKU-5 (hopefully for the

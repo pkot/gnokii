@@ -1,5 +1,5 @@
-0.6.24 (not released yet)
-=========================
+0.6.24
+======
  * libgnokii changes
     o prepare new API for config handling; it will allow third
       party applications to use own configuration       (Paweł Kot)
