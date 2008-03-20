@@ -40,6 +40,8 @@
 static gn_error GetFile(gn_data *data, struct gn_statemachine *state);
 static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSFolders(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSMSStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error Identify(gn_data *data, struct gn_statemachine *state);
@@ -342,6 +344,10 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return GetNetworkInfo(data, state);
 	case GN_OP_GetSMS:
 		return GetSMSMessage(data, state);
+	case GN_OP_GetSMSFolders:
+		return GetSMSFolders(data, state);
+	case GN_OP_GetSMSFolderStatus:
+		return GetSMSFolderStatus(data, state);
 	case GN_OP_GetSMSStatus:
 		return GetSMSStatus(data, state);
 	case GN_OP_ReadPhonebook:
@@ -493,6 +499,43 @@ static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 	} else {
 		data->network_info->network_code[6] = '\0';
 	}
+
+	return error;
+}
+
+static gn_error GetSMSFolders(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data || !data->sms_folder_list)
+		return GN_ERR_INTERNALERROR;
+
+	memset(data->sms_folder_list, 0, sizeof(gn_sms_folder_list));
+
+	data->sms_folder_list->number = 1;
+	snprintf(data->sms_folder_list->folder[0].name, sizeof(data->sms_folder_list->folder[0].name), "%s", gn_memory_type_print(GN_MT_SM));
+	data->sms_folder_list->folder_id[0] = GN_MT_SM;
+	data->sms_folder_list->folder[0].folder_id = GN_PCSC_FILE_EF_SMS;
+
+	return GN_ERR_NONE;
+}
+
+static gn_error GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
+{
+	gn_sms_status sms_status = {0, 0, 0, 0}, *save_sms_status;
+	gn_error error = GN_ERR_NONE;
+
+	if (!data || !data->sms_folder)
+		return GN_ERR_INTERNALERROR;
+
+	if (data->sms_folder->folder_id != GN_PCSC_FILE_EF_SMS)
+		return GN_ERR_INVALIDMEMORYTYPE;
+
+	save_sms_status = data->sms_status;
+	data->sms_status = &sms_status;
+	error = GetSMSStatus(data, state);
+	data->sms_status = save_sms_status;
+	if (error != GN_ERR_NONE) return error;
+
+	data->sms_folder->number = sms_status.number;
 
 	return error;
 }

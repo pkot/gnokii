@@ -24,8 +24,10 @@
       when requested SMSC location is not 1         (Daniele Forsi)
     o use gn_str2memory_type() and the new gn_memory_type2str() to
       convert memory arguments                      (Daniele Forsi)
-    o implement --showsmsfolderstatus for up to 4 folders
-                                                    (Daniele Forsi)
+    o implement the functions to support --showsmsfolderstatus for
+      up to 4 folders                               (Daniele Forsi)
+    o fix setting the current memory on Sony Ericsson phones
+                                                   (Bastien Nocera)
     o force the encoding to be GSM when we're expecting an "ASCII"
       answer, fixes a lot of functionality on Sony Ericsson, Samsung
       and Sagem phones.
@@ -37,6 +39,8 @@
       string length in se_at_memory_type_set()      (Daniele Forsi)
  * pcsc driver updates
     o implement --getsms from SM memory; this can read deleted SMS
+                                                    (Daniele Forsi)
+    o implement the functions to support --showsmsfolderstatus
                                                     (Daniele Forsi)
  * documentation updates
     o add to gnokii man page the missing options of --sendsms
