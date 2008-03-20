@@ -8,3 +8,4 @@ pppdocs_DATA =  cimd-connect \
 		ppp-gnokii \
 		ppp-on
 
+EXTRA_DIST = $(pppdocs_DATA)

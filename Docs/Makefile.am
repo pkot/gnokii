@@ -34,3 +34,4 @@ docs_DATA = 	README \
 		logos.txt \
 		$(DEVEL_DOCS)
 
+EXTRA_DIST = $(docs_DATA)

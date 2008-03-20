@@ -5,3 +5,4 @@ sampledocs_DATA = gnokiirc	\
 		magic		\
 		45-nokiadku2.rules
 
+EXTRA_DIST = $(sampledocs_DATA)

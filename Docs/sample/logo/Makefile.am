@@ -6,3 +6,4 @@ logodocs_DATA = pacman.xpm \
 		bronto.xpm \
 		horse2.xpm
 
+EXTRA_DIST = $(logodocs_DATA)

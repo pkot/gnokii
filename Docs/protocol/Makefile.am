@@ -12,3 +12,4 @@ protocoldocs_DATA= 		\
 	nk7110.txt		\
 	nokia.txt
 
+EXTRA_DIST = $(protocoldocs_DATA)
