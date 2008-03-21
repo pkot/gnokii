@@ -5,7 +5,7 @@ Thank you to, in no particular order...
 *  Everyone on the gnokii mailing list for their interest
    and input into the project.
 
-*  Pavel JanÌk ml. for the majority of work on gnokii 6110 series
+*  Pavel Jan√≠k ml. for the majority of work on gnokii 6110 series
    support, spelling corrections and miscellaneous code cleanups.
 
 *  Serge Odinokov for 6110 series authentication protocol and
@@ -46,7 +46,7 @@ Thank you to, in no particular order...
 *  Emilio Brambilla for SMS notification fixes, setdatetime implementation
    and typing GSM_Default_Alphabet.
 
-*  Pawe≥ Kot for EnterPIN on 6110 Series changes and other things.
+*  Pawe≈Ç Kot for EnterPIN on 6110 Series changes and other things.
 
 *  Konstantinos Agouros for gnokii-perl module.
 
@@ -83,7 +83,7 @@ Thank you to, in no particular order...
 
 *  Sebastian Zagrodzki and Jacek Fiok for Polish .po file.
 
-*  Marcin Wi±cek for all his work and tons of patches.
+*  Marcin WiƒÖcek for all his work and tons of patches.
 
 *  Gabriele Zappi for testing, general help and bug fixes.
 
@@ -93,16 +93,16 @@ Thank you to, in no particular order...
 
 *  Tamar Bondar for updates on SMS handling on 3810 series.
 
-*  Marek RogoziÒski for help in tracing some nasty bugs.
+*  Marek Rogozi≈Ñski for help in tracing some nasty bugs.
 
 *  Pavel Machek for developing 2110 and Duncall support and many clever
    hints.
 
-*  Boπtjan M¸ller for Slovenian translation and other things.
+*  Bo≈°tjan M√ºller for Slovenian translation and other things.
 
-*  Hans Motsh‰rg for Estonian translation and useful bugreports.
+*  Hans Motsh√§rg for Estonian translation and useful bugreports.
 
-*  Marcin P≥awiÒski for preview logos.
+*  Marcin P≈Çawi≈Ñski for preview logos.
 
 *  Martin Lucina for any kind of help he is providing ;-)
 
@@ -124,15 +124,15 @@ Thank you to, in no particular order...
    useful hints and discussions and real help in approaching 0.4.0 release and
    instant help for gnokii development and of course for gnapplet.
 
-*  Przemek ¶widerski for sample hscsd chat script.
+*  Przemek ≈öwiderski for sample hscsd chat script.
 
 *  Balazs Nagy for help in assembling protocol documentation.
 
 *  Hannes Schulz for SMS fixes in AT series.
 
-*  Guillaume LaurËs and Antti Peltonen for the instant bug reports on irc ;-)
+*  Guillaume Laurƒçs and Antti Peltonen for the instant bug reports on irc ;-)
 
-*  Marek Micha≥kiewicz for a few hints, patches and reports.
+*  Marek Micha≈Çkiewicz for a few hints, patches and reports.
 
 *  Petr Cech for SMS center support in AT series.
 
@@ -168,7 +168,7 @@ Thank you to, in no particular order...
 
 *  Reiner Steib for useful patches, bug reports and other hints.
 
-*  Daniel KoÊ for Polish translation.
+*  Daniel Koƒá for Polish translation.
 
 *  Phil Ashby for Windows IrDA support.
 

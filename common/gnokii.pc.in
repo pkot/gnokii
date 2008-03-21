@@ -6,5 +6,5 @@ includedir=@includedir@
 Name: gnokii
 Description: Gnokii library interface
 Version: @VERSION@
-Libs: -L${libdir} -lgnokii @LIBS@ @XPM_LIBS@ @INTLLIBS@
-Cflags: -I${includedir} @XPM_CFLAGS@
+Libs: -L${libdir} -lgnokii
+Cflags: -I${includedir}

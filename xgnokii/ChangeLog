@@ -61,7 +61,7 @@
 - Patch from Pavel Machek <pavel@ucw.cz>. It provides better feedback to user,
   puts GPL into copyright (it belongs there), and fixes docs.
 - Corrected non translatable labels/sentenses in xgnokii.c.
-  Hans Motshärg <hans.motsharg@eyp.ee>
+  Hans MotshÃ¤rg <hans.motsharg@eyp.ee>
 
 * Sun 19 Dec 2000 Jan Derfinak 
 - Functions for detecting phone's capabilites moved to common directory.
@@ -213,7 +213,7 @@ Changes in SMS window:
 xgnokii-19991116
 - Added Net monitor. I thank Andreas Schmidt <mail@aschmidt.de> for idea
   about graphical representation of Net monitor data. I thank also Norbert
-  Hüttisch (nobbi@nobbi.com) for his great web pages about Nokia Net Monitor.
+  HÃ¼ttisch (nobbi@nobbi.com) for his great web pages about Nokia Net Monitor.
 
 
 xgnokii-19991110
