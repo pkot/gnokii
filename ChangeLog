@@ -1,3 +1,9 @@
+0.6.25 (not yet released)
+======
+ * at driver updates
+    o correctly handle different length memory names (like F10) so
+      that phone can respond with ERROR             (Daniele Forsi)
+
 0.6.24
 ======
  * libgnokii changes
