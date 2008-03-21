@@ -49,12 +49,11 @@ static gn_error se_at_memory_type_set(gn_memory_type mt, struct gn_statemachine 
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_data data;
 	char req[32];
+	const char *memory_name;
+	int len;
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->memorytype) {
-		int len;
-		const char *memory_name;
-
 		memory_name = gn_memory_type2str(mt);
 		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
@@ -64,13 +63,12 @@ static gn_error se_at_memory_type_set(gn_memory_type mt, struct gn_statemachine 
 			memory_name = "BC";
 		len = snprintf(req, sizeof(req), "AT+CPBS=\"%s\"\r", memory_name);
 		ret = sm_message_send(len, GN_OP_Init, req, state);
-		if (ret)
-			return GN_ERR_NOTREADY;
+		if (ret != GN_ERR_NONE)
+			return ret;
 		gn_data_clear(&data);
 		ret = sm_block_no_retry(GN_OP_Init, &data, state);
-		if (ret)
+		if (ret != GN_ERR_NONE)
 			return ret;
-
 		drvinst->memorytype = mt;
 
 		gn_data_clear(&data);
