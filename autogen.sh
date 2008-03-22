@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/sh -e
 
 libtoolize -c -f
 glib-gettextize -f -c
