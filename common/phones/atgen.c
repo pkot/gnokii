@@ -2046,6 +2046,8 @@ static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn
 		pos = buf.line1 + 8;
 		if (!strncmp(pos, "VOICE", 5))
 			cinfo.type = GN_CALL_Voice;
+		else if (*pos < ' ') /* some phones reply with "+CRING: <cr><lf>" only */
+			cinfo.type = GN_CALL_Voice;
 		else
 			return GN_ERR_UNHANDLEDFRAME;
 		status = GN_CALL_Incoming;

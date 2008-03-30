@@ -3,6 +3,8 @@
  * at driver updates
     o correctly handle different length memory names (like F10) so
       that phone can respond with ERROR             (Daniele Forsi)
+    o fix call notification for phones that reply with "+CRING: "
+      instead of "+CRING: VOICE"                    (Daniele Forsi)
 
 0.6.24
 ======
