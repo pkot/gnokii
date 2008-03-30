@@ -5,6 +5,9 @@
       that phone can respond with ERROR             (Daniele Forsi)
     o fix call notification for phones that reply with "+CRING: "
       instead of "+CRING: VOICE"                    (Daniele Forsi)
+ * pcsc driver updates
+    o make it compatible also with libpcsclite 1.3.1+
+                                                  (Pavel Kankovsky)
 
 0.6.24
 ======

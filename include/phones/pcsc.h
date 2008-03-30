@@ -39,6 +39,10 @@
 #include <PCSC/wintypes.h>
 #include <PCSC/winscard.h>
 
+#if !HAVE_LPCSTR
+typedef const char *LPCSTR;
+#endif
+
 /*
 some CLAss, INStruction pairs defined by GSM specs
 taken from ETSI TS 100 977 V8.13.0 (2005-06)
