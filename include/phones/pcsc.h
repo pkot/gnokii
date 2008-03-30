@@ -49,12 +49,18 @@ taken from ETSI TS 100 977 V8.13.0 (2005-06)
 subclause : command
    9.2.1  : SELECT
    9.2.3  : READ BINARY
+   9.2.4  : UPDATE BINARY
    9.2.5  : READ RECORD
+   9.2.6  : UPDATE RECORD
+   9.2.9  : VERIFY CHV
    9.2.18 : GET RESPONSE
 */
 #define GN_PCSC_CMD_SELECT       0xA0, 0xA4
 #define GN_PCSC_CMD_READ_BINARY  0xA0, 0xB0
+#define GN_PCSC_CMD_UPDATE_BINARY  0xA0, 0xD6
 #define GN_PCSC_CMD_READ_RECORD  0xA0, 0xB2
+#define GN_PCSC_CMD_UPDATE_RECORD  0xA0, 0xDC
+#define GN_PCSC_CMD_VERIFY_CHV   0xA0, 0x20
 #define GN_PCSC_CMD_GET_RESPONSE 0xA0, 0xC0
 
 /* useful defines from subclause 9.2.5 */
@@ -78,6 +84,7 @@ subclause : command
 #define GN_PCSC_PARAMETER_OFFSET_P3 4
 #define GN_PCSC_PARAMETER_OFFSET_FILEID_HI 5
 #define GN_PCSC_PARAMETER_OFFSET_FILEID_LO 6
+#define GN_PCSC_DATA_OFFSET 5
 
 /* misc defines */
 #define GN_PCSC_ICCID_MAX_LENGTH 21
