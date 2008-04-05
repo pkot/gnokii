@@ -58,6 +58,8 @@ extern const char *locale_charset(void); /* from ../intl/localcharset.c */
 #endif
 
 static const char *base64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+/* BCD digits from Table 10.5.118 of 3GPP TS 04.08 with 'a' replaced by 'p' */
+static const char *bcd_digits = "0123456789*#pbc";
 
 #define GN_CHAR_ALPHABET_SIZE 128
 
@@ -650,7 +652,6 @@ char *char_bcd_number_get(u8 *number)
 	int count, digit, i = 0;
 
 	if (length > GN_BCD_STRING_MAX_LENGTH) length = GN_BCD_STRING_MAX_LENGTH;
-	memset(buffer, 0, GN_BCD_STRING_MAX_LENGTH);
 	switch (number[1]) {
 	case GN_GSM_NUMBER_Alphanumeric:
 		char_7bit_unpack(0, length, length, number + 2, buffer);
@@ -667,14 +668,16 @@ char *char_bcd_number_get(u8 *number)
 	case GN_GSM_NUMBER_Subscriber:
 	case GN_GSM_NUMBER_Abbreviated:
 	default:
-		for (count = 0; count < length - 1; count++) {
-			digit = number[count+2] & 0x0f;
-			if (digit < 10)
-				buffer[i++] = digit + '0';
-			digit = number[count+2] >> 4;
-			if (digit < 10)
-				buffer[i++] = digit + '0';
+		/* start at 2 to skip length and TON (we can't overflow the buffer because i <= GN_BCD_STRING_MAX_LENGTH - 2) */
+		for (count = 2; count <= length; count++) {
+			digit = number[count] & 0x0f;
+			if (digit < 0x0f)
+				buffer[i++] = bcd_digits[digit];
+			digit = number[count] >> 4;
+			if (digit < 0x0f)
+				buffer[i++] = bcd_digits[digit];
 		}
+		buffer[i] = '\0';
 		break;
 	}
 	return buffer;

@@ -13,6 +13,9 @@
       with 0xff                                   (Pavel Kankovsky)
     o implement the functions to support --getsecuritycodestatus
       and --entersecuritycode PIN                 (Pavel Kankovsky)
+ * libgnokii changes
+    o make char_bcd_number_get() decode non numeric codes "*#pbc"
+                                                    (Daniele Forsi)
 
 0.6.24
 ======
