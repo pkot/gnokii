@@ -29,6 +29,9 @@
     o make gn_vcard2phonebook() parse and store the "N:" property
       (closes https://savannah.nongnu.org/bugs/?22611)
                                                     (Daniele Forsi)
+    o move declaration of gn_get_connectiontype() from
+      gnokii-internal.h to gnokii.h because it is a public function
+                                                    (Daniele Forsi)
  * gnokii changes
     o allow to use --entersecuritycode with another gnokii command
                                                   (Pavel Kankovsky)

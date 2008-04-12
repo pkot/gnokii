@@ -44,9 +44,6 @@
 
 #include "gnokii.h"
 
-/* utils */
-gn_connection_type gn_get_connectiontype(const char *connection_type_string);
-
 /* SMS */
 gn_error gn_sms_parse(gn_data *data);
 gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int flags);

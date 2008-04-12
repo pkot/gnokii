@@ -198,6 +198,11 @@ GNOKII_API gn_error gn_lib_search_one_connected_phone( struct gn_statemachine **
    config file */
 GNOKII_API const char *gn_lib_get_connection_name(gn_connection_type ct);
 
+/* use this function to get the enum corresponding to the given connection name.
+   Returns GN_CT_NONE if the connection is unknown or its support isn't compiled
+   in the running library */
+GNOKII_API gn_connection_type gn_get_connectiontype(const char *connection_type_string);
+
 /* use this function to check whether the connection type is enabled
    0 - not supported
    1 - supported */
