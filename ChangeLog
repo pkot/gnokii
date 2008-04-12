@@ -17,6 +17,15 @@
     o make char_bcd_number_get() decode non numeric codes "*#pbc"
                                                     (Daniele Forsi)
     o tm_mon in tm struct starts from 0         (Wiesław Ochmiński)
+    o make vCard output compliant to RFC2426 using underscores
+      instead of hyphens (vCards created by previous versions are
+      still read) and always generating the "N:" property; (fixes a
+      part of https://savannah.nongnu.org/bugs/?22611)
+                                                    (Daniele Forsi)
+    o split phonebook entry information (previously in
+      X_GSM_STORE_AT) into X-GSM-MEMORY and X-GSM-LOCATION like in
+      gnokii mbox file output and use "None" instead of "Unknown"
+      for GN_PHONEBOOK_GROUP_None                   (Daniele Forsi)
  * gnokii changes
     o allow to use --entersecuritycode with another gnokii command
                                                   (Pavel Kankovsky)

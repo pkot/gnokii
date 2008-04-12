@@ -48,8 +48,9 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 	add_slashes(name, entry->name, sizeof(name), strlen(entry->name));
 	fprintf(f, "FN:%s\n", name);
 	fprintf(f, "TEL;TYPE=PREF,VOICE:%s\n", entry->number);
-	fprintf(f, "X_GSM_STORE_AT:%s\n", location);
-	fprintf(f, "X_GSM_CALLERGROUP:%d\n", entry->caller_group);
+	fprintf(f, "X-GSM-MEMORY:%s\n", gn_memory_type2str(entry->memory_type));
+	fprintf(f, "X-GSM-LOCATION:%d\n", entry->location);
+	fprintf(f, "X-GSM-CALLERGROUP:%d\n", entry->caller_group);
 	switch (entry->caller_group) {
 	case GN_PHONEBOOK_GROUP_Family:
 		category = _("Family");
@@ -66,6 +67,9 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 	case GN_PHONEBOOK_GROUP_Others:
 		category = _("Others");
 		break;
+	case GN_PHONEBOOK_GROUP_None:
+		category = _("None");
+		break;
 	default:
 		category = _("Unknown");
 		break;
@@ -79,6 +83,8 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 			entry->person.additional_names[0]   ? entry->person.additional_names   : "",
 			entry->person.honorific_prefixes[0] ? entry->person.honorific_prefixes : "",
 			entry->person.honorific_suffixes[0] ? entry->person.honorific_suffixes : "");
+	else
+		fprintf(f, "N:%s\n", name);
 
 	if (entry->address.has_address)
 		fprintf(f, "ADR;TYPE=HOME,PREF:%s;%s;%s;%s;%s;%s;%s\n",
@@ -125,7 +131,7 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 				fprintf(f, "TEL;TYPE=VOICE:%s\n", entry->subentries[i].data.number);
 				break;
 			default:
-				fprintf(f, "TEL;TYPE=X_UNKNOWN_%d: %s\n", entry->subentries[i].number_type, entry->subentries[i].data.number);
+				fprintf(f, "TEL;TYPE=X-UNKNOWN-%d: %s\n", entry->subentries[i].number_type, entry->subentries[i].data.number);
 				break;
 			}
 			break;
@@ -159,7 +165,7 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 			break;
 		default:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			fprintf(f, "X_GNOKII_%d: %s\n", entry->subentries[i].entry_type, name);
+			fprintf(f, "X-GNOKII-%d: %s\n", entry->subentries[i].entry_type, name);
 			break;
 		}
 	}
@@ -169,8 +175,9 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 }
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
-#define STORE3(a, b) if (BEGINS(a)) { strip_slashes(b, buf+strlen(a), line_len - strlen(a), line_len - strlen(a)); }
-#define STORE2(a, b, c) if (BEGINS(a)) { c; strip_slashes(b, buf+strlen(a), line_len - strlen(a), line_len - strlen(a)); continue; }
+#define STRIP(a, b) strip_slashes(b, buf+strlen(a), line_len - strlen(a), line_len - strlen(a))
+#define STORE3(a, b) if (BEGINS(a)) { STRIP(a, b); }
+#define STORE2(a, b, c) if (BEGINS(a)) { c; STRIP(a, b); continue; }
 #define STORE(a, b) STORE2(a, b, (void) 0)
 #define STOREINT(a, b) if (BEGINS(a)) { b = atoi(buf+strlen(a)); continue; }
 
@@ -181,6 +188,7 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 				STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
 				entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
 				entry->subentries[entry->subentries_count].number_type = c);
+#define STOREMEMTYPE(a, memory_type) if (BEGINS(a)) { STRIP(a, memory_name); memory_type = gn_str2memory_type(memory_name); }
 
 #undef ERROR
 #define ERROR(a) fprintf(stderr, "%s\n", a)
@@ -190,8 +198,10 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 {
 	char buf[1024];
 	char memloc[10];
+	char memory_name[10];
 
 	memset(memloc, 0, 10);
+	memset(memory_name, 0, 10);
 	while (1) {
 		if (!fgets(buf, 1024, f))
 			return -1;
@@ -228,6 +238,8 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 		STORESUB("ADR;TYPE=HOME:", GN_PHONEBOOK_ENTRY_Postal);
 		STORESUB("NOTE:", GN_PHONEBOOK_ENTRY_Note);
 
+#if 1
+		/* libgnokii 0.6.25 deprecates X_GSM_STORE_AT in favour of X-GSM-MEMORY and X-GSM-LOCATION and X_GSM_CALLERGROUP in favour of X-GSM-CALLERGROUP */
 		STORE3("X_GSM_STORE_AT:", memloc);
 		/* if the field is present and correctly formed */
 		if (memloc && (strlen(memloc) > 2)) {
@@ -237,6 +249,10 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 			continue;
 		}
 		STOREINT("X_GSM_CALLERGROUP:", entry->caller_group);
+#endif
+		STOREMEMTYPE("X-GSM-MEMORY:", entry->memory_type);
+		STOREINT("X-GSM-LOCATION:", entry->location);
+		STOREINT("X-GSM-CALLERGROUP:", entry->caller_group);
 
 		STORENUM("TEL;TYPE=HOME:", GN_PHONEBOOK_NUMBER_Home);
 		STORENUM("TEL;TYPE=CELL:", GN_PHONEBOOK_NUMBER_Mobile);
