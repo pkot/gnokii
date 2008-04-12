@@ -17,6 +17,9 @@
     o make char_bcd_number_get() decode non numeric codes "*#pbc"
                                                     (Daniele Forsi)
     o tm_mon in tm struct starts from 0         (Wiesław Ochmiński)
+ * gnokii changes
+    o allow to use --entersecuritycode with another gnokii command
+                                                  (Pavel Kankovsky)
 
 0.6.24
 ======

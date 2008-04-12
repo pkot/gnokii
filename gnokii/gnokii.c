@@ -640,7 +640,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_CONFIGFILE,        1, 100, 0 },
 		{ OPT_CONFIGMODEL,       1, 100, 0 },
 #ifdef SECURITY
-		{ OPT_ENTERSECURITYCODE, 1, 1, 0 },
+		{ OPT_ENTERSECURITYCODE, 1, 100, 0 },
 		{ OPT_CHANGESECURITYCODE,1, 1, 0 },
 #endif
 		{ OPT_SETDATETIME,       0, 5, 0 },
@@ -764,7 +764,7 @@ static int parse_options(int argc, char *argv[])
 	}
 
 	/* Initialise the code for the GSM interface. */
-	if (c != OPT_FOOGLE)
+	if (c != OPT_FOOGLE && state == NULL)
 		businit();
 
 	switch (c) {
@@ -965,6 +965,8 @@ static int parse_options(int argc, char *argv[])
 		break;
 	case OPT_ENTERSECURITYCODE:
 		rc = entersecuritycode(optarg, data, state);
+		if (rc == 0 && optind < argc)
+			return parse_options(argc, argv);
 		break;
 	case OPT_GETSECURITYCODESTATUS:
 		rc = getsecuritycodestatus(data, state);
