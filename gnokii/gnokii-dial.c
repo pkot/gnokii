@@ -77,7 +77,7 @@ void getspeeddial_usage(FILE *f, int exitval)
 }
 
 /* Getting speed dials. */
-int getspeeddial(char *number, gn_data *data, struct gn_statemachine *state)
+gn_error getspeeddial(char *number, gn_data *data, struct gn_statemachine *state)
 {
 	gn_speed_dial	speeddial;
 	gn_error	error;
@@ -114,7 +114,7 @@ void setspeeddial_usage(FILE *f, int exitval)
 }
 
 /* Setting speed dials. */
-int setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_speed_dial entry;
 	gn_error error;
@@ -132,7 +132,7 @@ int setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state)
 		memory_type_string = "SM";
 	} else {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[optind]);
-		return -1;
+		return GN_ERR_INVALIDMEMORYTYPE;
 	}
 
 	entry.number = gnokii_atoi(optarg);
@@ -157,7 +157,7 @@ int setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state)
 }
 
 /* Voice dialing mode. */
-int dialvoice(char *number, gn_data *data, struct gn_statemachine *state)
+gn_error dialvoice(char *number, gn_data *data, struct gn_statemachine *state)
 {
     	gn_call_info call_info;
 	gn_error error;
@@ -179,7 +179,7 @@ int dialvoice(char *number, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-int senddtmf(char *string, gn_data *data, struct gn_statemachine *state)
+gn_error senddtmf(char *string, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
@@ -204,7 +204,7 @@ void answercall_usage(FILE *f, int exitval)
 }
 
 /* Answering incoming call */
-int answercall(char *callid, gn_data *data, struct gn_statemachine *state)
+gn_error answercall(char *callid, gn_data *data, struct gn_statemachine *state)
 {
     	gn_call_info callinfo;
 	gn_error error;
@@ -235,7 +235,7 @@ void hangup_usage(FILE *f, int exitval)
 }
 
 /* Hangup the call */
-int hangup(char *callid, gn_data *data, struct gn_statemachine *state)
+gn_error hangup(char *callid, gn_data *data, struct gn_statemachine *state)
 {
     	gn_call_info callinfo;
 	gn_error error;
@@ -288,7 +288,7 @@ void divert_usage(FILE *f, int exitval)
    --timeout, -m time_in_seconds                     OPT
    --number, -n number                               OPT
  */
-int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	int opt;
 	gn_call_divert cd;

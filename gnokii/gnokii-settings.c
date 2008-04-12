@@ -64,7 +64,7 @@ void settings_usage(FILE *f)
 }
 
 /* Setting the date and time. */
-int setdatetime(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error setdatetime(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	struct tm *now;
 	time_t nowh;
@@ -127,7 +127,7 @@ int setdatetime(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 }
 
 /* In this mode we receive the date and time from mobile phone. */
-int getdatetime(gn_data *data, struct gn_statemachine *state)
+gn_error getdatetime(gn_data *data, struct gn_statemachine *state)
 {
 	gn_timestamp	date_time;
 	gn_error	error;
@@ -151,7 +151,7 @@ int getdatetime(gn_data *data, struct gn_statemachine *state)
 }
 
 /* Setting the alarm. */
-int setalarm(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error setalarm(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_calnote_alarm alarm;
 	gn_error error;
@@ -185,7 +185,7 @@ int setalarm(int argc, char *argv[], gn_data *data, struct gn_statemachine *stat
 }
 
 /* Getting the alarm. */
-int getalarm(gn_data *data, struct gn_statemachine *state)
+gn_error getalarm(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	gn_calnote_alarm alarm;
@@ -208,7 +208,7 @@ int getalarm(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 /* Resets the phone */
-int reset(char *type, gn_data *data, struct gn_statemachine *state)
+gn_error reset(char *type, gn_data *data, struct gn_statemachine *state)
 {
 	gn_data_clear(data);
 	data->reset_type = 0x03;

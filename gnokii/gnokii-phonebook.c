@@ -84,7 +84,7 @@ void getphonebook_usage(FILE *f, int exitval)
 
 /* Get requested range of memory storage entries and output to stdout in
    easy-to-parse format */
-int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_phonebook_entry entry;
 	gn_memory_status memstat;
@@ -110,7 +110,7 @@ int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	memstat.memory_type = gn_str2memory_type(memory_type_string);
 	if (memstat.memory_type == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
-		return -1;
+		return GN_ERR_INVALIDMEMORYTYPE;
 	}
 
 	start_entry = gnokii_atoi(argv[optind]);
@@ -299,7 +299,7 @@ void writephonebook_usage(FILE *f, int exitval)
 /* Read data from stdin, parse and write to phone.  The parsing is relatively
    crude and doesn't allow for much variation from the stipulated format. */
 /* FIXME: I guess there's *very* similar code in xgnokii */
-int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_phonebook_entry entry;
 	gn_error error = GN_ERR_NONE;
@@ -489,7 +489,7 @@ void deletephonebook_usage(FILE *f, int exitval)
 }
 
 /* Delete phonebook entry */
-int deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_phonebook_entry entry;
 	gn_error error;
@@ -504,7 +504,7 @@ int deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachin
 	entry.memory_type = gn_str2memory_type(memory_type_string);
 	if (entry.memory_type == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
-		return -1;
+		return GN_ERR_INVALIDMEMORYTYPE;
 	}
 
 	first_location = gnokii_atoi(argv[optind]);

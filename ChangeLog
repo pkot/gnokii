@@ -20,6 +20,7 @@
  * gnokii changes
     o allow to use --entersecuritycode with another gnokii command
                                                   (Pavel Kankovsky)
+    o all specialized functions return gn_error         (Pawel Kot)
 
 0.6.24
 ======

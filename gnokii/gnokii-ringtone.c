@@ -104,7 +104,7 @@ void ringtone_usage(FILE *f)
 		     ));
 }
 
-int sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms sms;
 	gn_error error = GN_ERR_NOTSUPPORTED;
@@ -156,7 +156,7 @@ void getringtone_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_ringtone ringtone;
 	gn_raw_data rawdata;
@@ -213,7 +213,7 @@ int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 
 	if (!filename) {
 		fprintf(stderr, _("Internal gnokii error: null filename\n"));
-		error = -1;
+		error = GN_ERR_FAILED;
 		goto out;
 	}
 
@@ -246,7 +246,7 @@ void setringtone_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_ringtone ringtone;
 	gn_raw_data rawdata;
@@ -302,7 +302,7 @@ int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 
 		if ((f = fopen(filename, "rb")) == NULL) {
 			fprintf(stderr, _("Failed to load ringtone.\n"));
-			return -1;
+			return GN_ERR_FAILED;
 		}
 		rawdata.length = fread(rawdata.data, 1, rawdata.length, f);
 		fclose(f);
@@ -336,7 +336,7 @@ void playringtone_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_ringtone ringtone;
 	gn_tone tone;
@@ -427,7 +427,7 @@ void ringtoneconvert_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int ringtoneconvert(int argc, char *argv[])
+gn_error ringtoneconvert(int argc, char *argv[])
 {
 	gn_ringtone ringtone;
 	gn_error error;
@@ -450,7 +450,7 @@ int ringtoneconvert(int argc, char *argv[])
 	return error;
 }
 
-int getringtonelist(gn_data *data, struct gn_statemachine *state)
+gn_error getringtonelist(gn_data *data, struct gn_statemachine *state)
 {
 	int i;
 

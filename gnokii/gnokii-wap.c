@@ -69,7 +69,7 @@ void getwapbookmark_usage(FILE *f, int exitval)
 }
 
 /* Getting WAP bookmarks. */
-int getwapbookmark(char *number, gn_data *data, struct gn_statemachine *state)
+gn_error getwapbookmark(char *number, gn_data *data, struct gn_statemachine *state)
 {
 	gn_wap_bookmark	wapbookmark;
 	gn_error	error;
@@ -105,7 +105,7 @@ void writewapbookmark_usage(FILE *f, int exitval)
 }
 
 /* Writing WAP bookmarks. */
-int writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_wap_bookmark	wapbookmark;
 	gn_error	error;
@@ -140,7 +140,7 @@ void deletewapbookmark_usage(FILE *f, int exitval)
 }
 
 /* Deleting WAP bookmarks. */
-int deletewapbookmark(char *number, gn_data *data, struct gn_statemachine *state)
+gn_error deletewapbookmark(char *number, gn_data *data, struct gn_statemachine *state)
 {
 	gn_wap_bookmark	wapbookmark;
 	gn_error	error;
@@ -173,7 +173,7 @@ void getwapsetting_usage(FILE *f, int exitval)
 }
 
 /* Getting WAP settings. */
-int getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_wap_setting	wapsetting;
 	gn_error	error;
@@ -365,7 +365,7 @@ int getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine 
 }
 
 /* Writes WAP settings to phone */
-int writewapsetting(gn_data *data, struct gn_statemachine *state)
+gn_error writewapsetting(gn_data *data, struct gn_statemachine *state)
 {
 	int n;
 	gn_wap_setting wapsetting;
@@ -413,7 +413,7 @@ void activatewapsetting_usage(FILE *f, int exitval)
 }
 
 /* Deleting WAP bookmarks. */
-int activatewapsetting(char *number, gn_data *data, struct gn_statemachine *state)
+gn_error activatewapsetting(char *number, gn_data *data, struct gn_statemachine *state)
 {
 	gn_wap_setting	wapsetting;
 	gn_error	error;

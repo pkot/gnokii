@@ -121,7 +121,7 @@ void sendsms_usage(FILE *f, int exitval)
 }
 
 /* Send SMS messages. */
-int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms sms;
 	gn_error error;
@@ -186,7 +186,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				sendsms_usage(stderr, -1);
 			if (input_len > 255 * GN_SMS_MAX_LENGTH) {
 				fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), input_len, 255 * GN_SMS_MAX_LENGTH);
-				return -1;
+				return GN_ERR_FAILED;
 			}
 			break;
 
@@ -262,7 +262,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				return error;
 			if (sms.user_data[0].length < 1) {
 				fprintf(stderr, _("Empty message. Quitting.\n"));
-				return -1;
+				return GN_ERR_FAILED;
 			}
 			curpos = -1;
 			break;
@@ -274,7 +274,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			
 			if (!optarg || strlen(optarg) > 255) {
 				fprintf(stderr, _("URL is too long (max 255 chars). Quitting.\n"));
-			        return -1;
+			        return GN_ERR_FAILED;
 			}
 			
 			sms.user_data[curpos].type = GN_SMS_DATA_WAPPush;
@@ -290,7 +290,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 			
 			if (gn_wap_push_encode(&wp) != GN_ERR_NONE) {
 			    fprintf(stderr, _("WAP Push encoding failed!\n"));
-			    return -1;
+			    return GN_ERR_FAILED;
 			}
 
 			memcpy(sms.user_data[curpos].u.text, wp.data, wp.data_len);
@@ -332,7 +332,7 @@ int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		if (error != GN_ERR_NONE) return error;
 		if (sms.user_data[curpos].length < 1) {
 			fprintf(stderr, _("Empty message. Quitting.\n"));
-			return -1;
+			return GN_ERR_FAILED;
 		}
 		sms.user_data[curpos].type = GN_SMS_DATA_Text;
 		if (!gn_char_def_alphabet(sms.user_data[curpos].u.text))
@@ -382,7 +382,7 @@ void savesms_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms sms;
 	gn_error error = GN_ERR_INTERNALERROR;
@@ -621,7 +621,7 @@ void getsms_usage(FILE *f, int exitval)
 }
 
 /* Get SMS messages. */
-int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	int i, del = 0;
 	gn_sms_folder folder;
@@ -650,7 +650,7 @@ int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 	memory_type_string = optarg;
 	if (gn_str2memory_type(memory_type_string) == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
-		return -1;
+		return GN_ERR_FAILED;
 	}
 
 	start_message = gnokii_atoi(argv[optind]);
@@ -962,7 +962,7 @@ void deletesms_usage(FILE *f, int exitval)
 }
 
 /* Delete SMS messages. */
-int deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms message;
 	gn_sms_folder folder;
@@ -976,7 +976,7 @@ int deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *sta
 	message.memory_type = gn_str2memory_type(memory_type_string);
 	if (message.memory_type == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
-		return -1;
+		return GN_ERR_INVALIDMEMORYTYPE;
 	}
 
 	start_message = gnokii_atoi(argv[optind]);
@@ -1028,7 +1028,7 @@ void getsmsc_usage(FILE *f, int exitval)
 }
 
 /* Get SMSC number */
-int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_message_center message_center;
 	gn_error error;
@@ -1064,12 +1064,12 @@ int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 
 		if (start > stop) {
 			fprintf(stderr, _("Starting SMS center number is greater than stop\n"));
-			return -1;
+			return GN_ERR_FAILED;
 		}
 
 		if (start < 1) {
 			fprintf(stderr, _("SMS center number must be greater than 0\n"));
-			return -1;
+			return GN_ERR_FAILED;
 		}
 	} else {
 		start = 1;
@@ -1167,7 +1167,7 @@ int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		}
 	}
 
-	return 0;
+	return GN_ERR_NONE;
 }
 
 /* Displays usage of --setsmsc command */
@@ -1181,7 +1181,7 @@ void setsmsc_usage(FILE *f, int exitval)
 }
 
 /* Set SMSC number */
-int setsmsc(gn_data *data, struct gn_statemachine *state)
+gn_error setsmsc(gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_message_center message_center;
 	gn_error error;
@@ -1237,7 +1237,7 @@ void createsmsfolder_usage(FILE *f, int exitval)
 }
 
 /* Creating SMS folder. */
-int createsmsfolder(char *name, gn_data *data, struct gn_statemachine *state)
+gn_error createsmsfolder(char *name, gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_folder	folder;
 	gn_error	error;
@@ -1265,7 +1265,7 @@ void deletesmsfolder_usage(FILE *f, int exitval)
 }
 
 /* Deleting SMS folder. */
-int deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *state)
+gn_error deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_folder	folder;
 	gn_error	error;
@@ -1295,7 +1295,7 @@ void showsmsfolderstatus_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int showsmsfolderstatus(gn_data *data, struct gn_statemachine *state)
+gn_error showsmsfolderstatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_folder_list folders;
 	gn_error error;
@@ -1394,7 +1394,7 @@ void smsreader_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int smsreader(gn_data *data, struct gn_statemachine *state)
+gn_error smsreader(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 

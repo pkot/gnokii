@@ -53,168 +53,168 @@ extern void console_raw(void);
 /* Monitoring functions */
 extern void monitor_usage(FILE *f);
 
-extern int monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int displayoutput(gn_data *data, struct gn_statemachine *state);
-extern int getdisplaystatus(gn_data *data, struct gn_statemachine *state);
-extern int netmonitor(char *m, gn_data *data, struct gn_statemachine *state);
+extern gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error displayoutput(gn_data *data, struct gn_statemachine *state);
+extern gn_error getdisplaystatus(gn_data *data, struct gn_statemachine *state);
+extern gn_error netmonitor(char *m, gn_data *data, struct gn_statemachine *state);
 
 /* SMS functions */
 extern void sms_usage(FILE *f);
 
 extern void sendsms_usage(FILE *f, int exitval);
-extern int sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void savesms_usage(FILE *f, int exitval);
-extern int savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void getsms_usage(FILE *f, int exitval);
-extern int getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void deletesms_usage(FILE *f, int exitval);
-extern int deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 extern void getsmsc_usage(FILE *f, int exitval);
-extern int getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void setsmsc_usage(FILE *f, int exitval);
-extern int setsmsc(gn_data *data, struct gn_statemachine *state);
+extern gn_error setsmsc(gn_data *data, struct gn_statemachine *state);
 
 extern void createsmsfolder_usage(FILE *f, int exitval);
-extern int createsmsfolder(char *name, gn_data *data, struct gn_statemachine *state);
+extern gn_error createsmsfolder(char *name, gn_data *data, struct gn_statemachine *state);
 extern void deletesmsfolder_usage(FILE *f, int exitval);
-extern int deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *state);
+extern gn_error deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *state);
 extern void showsmsfolderstatus_usage(FILE *f, int exitval);
-extern int showsmsfolderstatus(gn_data *data, struct gn_statemachine *state);
+extern gn_error showsmsfolderstatus(gn_data *data, struct gn_statemachine *state);
 
-int smsreader(gn_data *data, struct gn_statemachine *state);
+gn_error smsreader(gn_data *data, struct gn_statemachine *state);
 
 /* Phonebook functions */
 extern void phonebook_usage(FILE *f);
 
 extern void getphonebook_usage(FILE *f, int exitval);
-extern int getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void writephonebook_usage(FILE *f, int exitval);
-extern int writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void deletephonebook_usage(FILE *f, int exitval);
-extern int deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Calendar functions */
 extern void calendar_usage(FILE *f);
 
 extern void getcalendarnote_usage(FILE *f, int exitval);
-extern int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* ToDo functions */
 extern void todo_usage(FILE *f);
 
 extern void gettodo_usage(FILE *f, int exitval);
-extern int gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int deletealltodos(gn_data *data, struct gn_statemachine *state);
+extern gn_error gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error deletealltodos(gn_data *data, struct gn_statemachine *state);
 
 /* Dialling and call handling functions */
 extern void dial_usage(FILE *f);
 
-extern int getspeeddial(char *number, gn_data *data, struct gn_statemachine *state);
-extern int setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int dialvoice(char *number, gn_data *data, struct gn_statemachine *state);
-extern int senddtmf(char *string, gn_data *data, struct gn_statemachine *state);
-extern int answercall(char *callid, gn_data *data, struct gn_statemachine *state);
-extern int hangup(char *callid, gn_data *data, struct gn_statemachine *state);
+extern gn_error getspeeddial(char *number, gn_data *data, struct gn_statemachine *state);
+extern gn_error setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error dialvoice(char *number, gn_data *data, struct gn_statemachine *state);
+extern gn_error senddtmf(char *string, gn_data *data, struct gn_statemachine *state);
+extern gn_error answercall(char *callid, gn_data *data, struct gn_statemachine *state);
+extern gn_error hangup(char *callid, gn_data *data, struct gn_statemachine *state);
 extern void divert_usage(FILE *f, int exitval);
-extern int divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Profile options */
 extern void profile_usage(FILE *f);
 
 extern void getprofile_usage(FILE *f, int exitval);
-extern int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int setprofile(gn_data *data, struct gn_statemachine *state);
-extern int getactiveprofile(gn_data *data, struct gn_statemachine *state);
-extern int setactiveprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error setprofile(gn_data *data, struct gn_statemachine *state);
+extern gn_error getactiveprofile(gn_data *data, struct gn_statemachine *state);
+extern gn_error setactiveprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Phone settings options */
 extern void settings_usage(FILE *f);
 
-extern int setdatetime(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int getdatetime(gn_data *data, struct gn_statemachine *state);
-extern int setalarm(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int getalarm(gn_data *data, struct gn_statemachine *state);
-extern int reset(char *type, gn_data *data, struct gn_statemachine *state);
+extern gn_error setdatetime(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getdatetime(gn_data *data, struct gn_statemachine *state);
+extern gn_error setalarm(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getalarm(gn_data *data, struct gn_statemachine *state);
+extern gn_error reset(char *type, gn_data *data, struct gn_statemachine *state);
 
 /* WAP options */
 extern void wap_usage(FILE *f);
 
-extern int getwapbookmark(char *number, gn_data *data, struct gn_statemachine *state);
+extern gn_error getwapbookmark(char *number, gn_data *data, struct gn_statemachine *state);
 extern void writewapbookmark_usage(FILE *f, int exitval);
-extern int writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int deletewapbookmark(char *number, gn_data *data, struct gn_statemachine *state);
+extern gn_error writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error deletewapbookmark(char *number, gn_data *data, struct gn_statemachine *state);
 extern void getwapsetting_usage(FILE *f, int exitval);
-extern int getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int writewapsetting(gn_data *data, struct gn_statemachine *state);
-extern int activatewapsetting(char *number, gn_data *data, struct gn_statemachine *state);
+extern gn_error getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error writewapsetting(gn_data *data, struct gn_statemachine *state);
+extern gn_error activatewapsetting(char *number, gn_data *data, struct gn_statemachine *state);
 
 /* Logo options */
 extern void logo_usage(FILE *f);
 
-extern int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int viewlogo(char *filename);
+extern gn_error sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error viewlogo(char *filename);
 
 /* Ringtone options */
 extern void ringtone_usage(FILE *f);
 
 extern char *get_ringtone_name(int id, gn_data *data, struct gn_statemachine *state);
 extern void getringtone_usage(FILE *f, int exitval);
-extern int sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void setringtone_usage(FILE *f, int exitval);
-extern int setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void playringtone_usage(FILE *f, int exitval);
-extern int playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void ringtoneconvert_usage(FILE *f, int exitval);
-extern int ringtoneconvert(int argc, char *argv[]);
-extern int getringtonelist(gn_data *data, struct gn_statemachine *state);
+extern gn_error ringtoneconvert(int argc, char *argv[]);
+extern gn_error getringtonelist(gn_data *data, struct gn_statemachine *state);
 extern void deleteringtone_usage(FILE *f, int exitval);
 extern gn_error deleteringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Security options */
 extern void security_usage(FILE *f);
 
-extern int identify(struct gn_statemachine *state);
-extern int getlocksinfo(gn_data *data, struct gn_statemachine *state);
-extern int getsecuritycode(gn_data *data, struct gn_statemachine *state);
+extern gn_error identify(struct gn_statemachine *state);
+extern gn_error getlocksinfo(gn_data *data, struct gn_statemachine *state);
+extern gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state);
 #ifdef SECURITY
 extern void entersecuritycode_usage(FILE *f, int exitval);
-extern int entersecuritycode(char *type, gn_data *data, struct gn_statemachine *state);
-extern int getsecuritycodestatus(gn_data *data, struct gn_statemachine *state);
+extern gn_error entersecuritycode(char *type, gn_data *data, struct gn_statemachine *state);
+extern gn_error getsecuritycodestatus(gn_data *data, struct gn_statemachine *state);
 extern void changesecuritycode_usage(FILE *f, int exitval);
-extern int changesecuritycode(char *type, gn_data *data, struct gn_statemachine *state);
+extern gn_error changesecuritycode(char *type, gn_data *data, struct gn_statemachine *state);
 #endif
 
 /* File options */
 extern void file_usage(FILE *f);
 
-extern int getfilelist(char *path, gn_data *data, struct gn_statemachine *state);
-extern int getfiledetailsbyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int getfileid(char *filename, gn_data *data, struct gn_statemachine *state);
-extern int deletefile(char *filename, gn_data *data, struct gn_statemachine *state);
-extern int deletefilebyid(char *id, gn_data *data, struct gn_statemachine *state);
+extern gn_error getfilelist(char *path, gn_data *data, struct gn_statemachine *state);
+extern gn_error getfiledetailsbyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getfileid(char *filename, gn_data *data, struct gn_statemachine *state);
+extern gn_error deletefile(char *filename, gn_data *data, struct gn_statemachine *state);
+extern gn_error deletefilebyid(char *id, gn_data *data, struct gn_statemachine *state);
 extern void getfile_usage(FILE *f, int exitval);
-extern int getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern void getfilebyid_usage(FILE *f, int exitval);
-extern int getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern int getallfiles(char *path, gn_data *data, struct gn_statemachine *state);
+extern gn_error getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error getallfiles(char *path, gn_data *data, struct gn_statemachine *state);
 extern void putfile_usage(FILE *f, int exitval);
-extern int putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Misc options */
 extern void other_usage(FILE *f);
 
-extern int pmon(gn_data *data, struct gn_statemachine *state);
-extern int presskeysequence(gn_data *data, struct gn_statemachine *state);
-extern int enterchar(gn_data *data, struct gn_statemachine *state);
+extern gn_error pmon(gn_data *data, struct gn_statemachine *state);
+extern gn_error presskeysequence(gn_data *data, struct gn_statemachine *state);
+extern gn_error enterchar(gn_data *data, struct gn_statemachine *state);
 extern void list_gsm_networks(void);
-extern int getnetworkinfo(gn_data *data, struct gn_statemachine *state);
+extern gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state);
 extern int gnokii_atoi(char *string);
 
 /* Compatibility functions */

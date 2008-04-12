@@ -84,7 +84,7 @@ static gn_bmp_types set_bitmap_type(char *s)
 
 /* FIXME: Integrate with sendsms */
 /* The following function allows to send logos using SMS */
-int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms sms;
 	gn_error error;
@@ -113,10 +113,10 @@ int sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *stat
 		sms.remote.type = GN_GSM_NUMBER_Unknown;
 
 	if (loadbitmap(&sms.user_data[0].u.bitmap, argv[optind+1], type, state) != GN_ERR_NONE)
-		return -1;
+		return GN_ERR_FAILED;
 	if (type != sms.user_data[0].u.bitmap.type) {
 		fprintf(stderr, _("Cannot send logo: specified and loaded bitmap type differ!\n"));
-		return -1;
+		return GN_ERR_FAILED;
 	}
 
 	/* If we are sending op logo we can rewrite network code. */
@@ -195,7 +195,7 @@ static gn_error SaveBitmapFileDialog(char *FileName, gn_bmp *bitmap, gn_phone *i
 	return error;
 }
 
-int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_bmp bitmap;
 	gn_error error;
@@ -244,7 +244,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 					snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", argv[optind + 1]);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
-						return -1;
+						return GN_ERR_FAILED;
 					}
 				}
 				break;
@@ -256,7 +256,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 					snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", argv[optind + 1]);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
-						return -1;
+						return GN_ERR_FAILED;
 					}
 				}
 				break;
@@ -271,7 +271,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 					snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", argv[optind + 2]);
 					if (!strcmp(gn_network_name_get(bitmap.netcode), _("unknown"))) {
 						fprintf(stderr, _("Sorry, gnokii doesn't know %s network !\n"), bitmap.netcode);
-						return -1;
+						return GN_ERR_FAILED;
 					}
 				}
 				break;
@@ -280,10 +280,10 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 				break;
 			empty_bitmap:
 				fprintf(stderr, _("Your phone doesn't have logo uploaded !\n"));
-				return -1;
+				return GN_ERR_FAILED;
 			}
 			if ((argc > optind) && (SaveBitmapFileDialog(argv[optind], &bitmap, info) != GN_ERR_NONE))
-				return -1;
+				return GN_ERR_FAILED;
 			break;
 		default:
 			fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
@@ -291,7 +291,7 @@ int getlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 		}
 	} else {
 		fprintf(stderr, _("What kind of logo do you want to get ?\n"));
-		return -1;
+		return GN_ERR_FAILED;
 	}
 
 	return error;
@@ -315,7 +315,7 @@ static gn_error ReadBitmapFileDialog(char *FileName, gn_bmp *bitmap, gn_phone *i
 }
 
 
-int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_bmp bitmap, oldbit;
 	gn_network_info networkinfo;
@@ -464,7 +464,7 @@ int setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state
 	return error;
 }
 
-int viewlogo(char *filename)
+gn_error viewlogo(char *filename)
 {
 	gn_error error;
 	error = gn_file_bitmap_show(filename);

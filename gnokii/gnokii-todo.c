@@ -73,7 +73,7 @@ void gettodo_usage(FILE *f, int exitval)
 }
 
 /* ToDo notes receiving. */
-int gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_todo_list	todolist;
 	gn_todo		todo;
@@ -164,7 +164,7 @@ void writetodo_usage(FILE *f, int exitval)
 }
 
 /* ToDo notes writing */
-int writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_todo todo;
 	gn_error error = GN_ERR_NONE;
@@ -237,7 +237,7 @@ int writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *sta
 }
 
 /* Deleting all ToDo notes */
-int deletealltodos(gn_data *data, struct gn_statemachine *state)
+gn_error deletealltodos(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 

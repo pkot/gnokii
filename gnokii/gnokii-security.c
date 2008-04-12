@@ -69,7 +69,7 @@ void security_usage(FILE *f)
 #endif
 }
 
-int identify(struct gn_statemachine *state)
+gn_error identify(struct gn_statemachine *state)
 {
 	fprintf(stdout, _("IMEI         : %s\n"), gn_lib_get_phone_imei(state));
 	fprintf(stdout, _("Manufacturer : %s\n"), gn_lib_get_phone_manufacturer(state));
@@ -80,7 +80,7 @@ int identify(struct gn_statemachine *state)
 	return gn_lib_lasterror(state);
 }
 
-int getlocksinfo(gn_data *data, struct gn_statemachine *state)
+gn_error getlocksinfo(gn_data *data, struct gn_statemachine *state)
 {
 	gn_locks_info locks_info[4];
 	gn_error error;
@@ -108,7 +108,7 @@ int getlocksinfo(gn_data *data, struct gn_statemachine *state)
 
 #ifdef SECURITY
 
-int getsecuritycode(gn_data *data, struct gn_statemachine *state)
+gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	gn_security_code sc;
@@ -162,7 +162,7 @@ void entersecuritycode_usage(FILE *f, int exitval)
 
 /* In this mode we get the code from the keyboard and send it to the mobile
    phone. */
-int entersecuritycode(char *type, gn_data *data, struct gn_statemachine *state)
+gn_error entersecuritycode(char *type, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	gn_security_code security_code;
@@ -201,7 +201,7 @@ int entersecuritycode(char *type, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-int getsecuritycodestatus(gn_data *data, struct gn_statemachine *state)
+gn_error getsecuritycodestatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_security_code security_code;
 	gn_error err;
@@ -248,7 +248,7 @@ void changesecuritycode_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int changesecuritycode(char *type, gn_data *data, struct gn_statemachine *state)
+gn_error changesecuritycode(char *type, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	gn_security_code security_code;
@@ -276,7 +276,7 @@ int changesecuritycode(char *type, gn_data *data, struct gn_statemachine *state)
 	get_password(_("Retype new code: "), newcode2, sizeof(newcode2));
 	if (strcmp(security_code.new_code, newcode2)) {
 		fprintf(stderr, _("Error: new code differs\n"));
-		return -1;
+		return GN_ERR_FAILED;
 	}
 
 	gn_data_clear(data);

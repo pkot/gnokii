@@ -379,8 +379,9 @@ static int foogle(int argc, char *argv[])
 
 static int parse_options(int argc, char *argv[])
 {
-	int c, rc = -1;
+	int c;
 	int opt_index = -1;
+	gn_error rc;
 
 	/* Every option should be in this array. */
 	static struct option long_options[] = {
@@ -965,7 +966,7 @@ static int parse_options(int argc, char *argv[])
 		break;
 	case OPT_ENTERSECURITYCODE:
 		rc = entersecuritycode(optarg, data, state);
-		if (rc == 0 && optind < argc)
+		if (rc == GN_ERR_NONE && optind < argc)
 			return parse_options(argc, argv);
 		break;
 	case OPT_GETSECURITYCODESTATUS:
@@ -1024,7 +1025,7 @@ static int parse_options(int argc, char *argv[])
 		break;
 #endif
 	default:
-		rc = 1;
+		rc = GN_ERR_FAILED;
 		fprintf(stderr, _("Unknown option: %d\n"), c);
 		break;
 	}

@@ -133,7 +133,7 @@ void getprofile_usage(FILE *f, int exitval)
 }
 
 /* Reads profile from phone and displays its' settings */
-int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	int max_profiles;
 	int start, stop, i;
@@ -156,7 +156,7 @@ int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *st
 			break;
 		default:
 			getprofile_usage(stderr, -1); /* FIXME */
-			return -1;
+			return GN_ERR_FAILED;
 		}
 	}
 
@@ -198,17 +198,17 @@ int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *st
 
 		if (start > stop) {
 			fprintf(stderr, _("Starting profile number is greater than stop\n"));
-			return -1;
+			return GN_ERR_FAILED;
 		}
 
 		if (start < 0) {
 			fprintf(stderr, _("Profile number must be value from 0 to %d!\n"), max_profiles - 1);
-			return -1;
+			return GN_ERR_FAILED;
 		}
 
 		if (stop >= max_profiles) {
 			fprintf(stderr, _("This phone supports only %d profiles!\n"), max_profiles);
-			return -1;
+			return GN_ERR_FAILED;
 		}
 	} else {
 		start = 0;
@@ -264,7 +264,7 @@ int getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *st
 }
 
 /* Writes profiles to phone */
-int setprofile(gn_data *data, struct gn_statemachine *state)
+gn_error setprofile(gn_data *data, struct gn_statemachine *state)
 {
 	int n;
 	gn_profile p;
@@ -301,7 +301,7 @@ int setprofile(gn_data *data, struct gn_statemachine *state)
 }
 
 /* Queries the active profile */
-int getactiveprofile(gn_data *data, struct gn_statemachine *state)
+gn_error getactiveprofile(gn_data *data, struct gn_statemachine *state)
 {
 	gn_profile p;
 	gn_error error;
@@ -331,7 +331,7 @@ void setactiveprofile_usage(FILE *f, int exitval)
 }
 
 /* Select the specified profile */
-int setactiveprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error setactiveprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_profile p;
 	gn_error error;

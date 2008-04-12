@@ -166,7 +166,7 @@ static void displaycall(int call_id)
 /* In monitor mode we don't do much, we just initialise the fbus code.
    Note that the fbus code no longer has an internal monitor mode switch,
    instead compile with DEBUG enabled to get all the gumpf. */
-int monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	float rflevel = -1, batterylevel = -1;
 	gn_power_source powersource = -1;
@@ -196,7 +196,7 @@ int monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		d = !strcasecmp(argv[optind], "once") ? -1 : gnokii_atoi(argv[optind]);
 		if (errno) {
 			fprintf(stderr, _("Argument to --monitor delay needs to be positive number\n"));
-			return -1;
+			return GN_ERR_FAILED;
 		}
 	} else
 		d = 1;
@@ -384,7 +384,7 @@ static void newoutputfn(gn_display_draw_msg *drawmessage)
 	printdisplaystatus(status);
 }
 
-int displayoutput(gn_data *data, struct gn_statemachine *state)
+gn_error displayoutput(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	gn_display_output output;
@@ -440,7 +440,7 @@ int displayoutput(gn_data *data, struct gn_statemachine *state)
 }
 
 /* Getting the status of the display. */
-int getdisplaystatus(gn_data *data, struct gn_statemachine *state)
+gn_error getdisplaystatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_INTERNALERROR;
 	int status;
@@ -470,7 +470,7 @@ void netmonitor_usage(FILE *f, int exitval)
 	exit(exitval);
 }
 
-int netmonitor(char *m, gn_data *data, struct gn_statemachine *state)
+gn_error netmonitor(char *m, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char mode;
 	gn_netmonitor nm;

@@ -84,7 +84,7 @@ static void set_fileid(gn_file *fi, char *arg)
 }
 
 /* Get file list. */
-int getfilelist(char *path, gn_data *data, struct gn_statemachine *state)
+gn_error getfilelist(char *path, gn_data *data, struct gn_statemachine *state)
 {
     	gn_file_list fi;
 	gn_error error;
@@ -108,7 +108,7 @@ int getfilelist(char *path, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-int getfiledetailsbyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getfiledetailsbyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
     	gn_file fi;
     	gn_file_list fil;
@@ -179,7 +179,7 @@ int getfiledetailsbyid(int argc, char *argv[], gn_data *data, struct gn_statemac
 }
 
 /* Get file id */
-int getfileid(char *filename, gn_data *data, struct gn_statemachine *state)
+gn_error getfileid(char *filename, gn_data *data, struct gn_statemachine *state)
 {
     	gn_file fi;
 	gn_error error;
@@ -199,7 +199,7 @@ int getfileid(char *filename, gn_data *data, struct gn_statemachine *state)
 }
 
 /* Delete file */
-int deletefile(char *filename, gn_data *data, struct gn_statemachine *state)
+gn_error deletefile(char *filename, gn_data *data, struct gn_statemachine *state)
 {
     	gn_file fi;
 	gn_error error;
@@ -219,7 +219,7 @@ int deletefile(char *filename, gn_data *data, struct gn_statemachine *state)
 }
 
 /* Delete file */
-int deletefilebyid(char *id, gn_data *data, struct gn_statemachine *state)
+gn_error deletefilebyid(char *id, gn_data *data, struct gn_statemachine *state)
 {
     	gn_file fi;
 	gn_error error;
@@ -245,7 +245,7 @@ void getfile_usage(FILE *f, int exitval)
 }
 
 /* Get file */
-int getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
     	gn_file fi;
 	gn_error error;
@@ -307,7 +307,7 @@ void getfilebyid_usage(FILE *f, int exitval)
 }
 
 /* Get file */
-int getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
     	gn_file fi;
     	gn_file_list fil;
@@ -357,7 +357,7 @@ int getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 }
 
 /* Get all files */
-int getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
+gn_error getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 {
     	gn_file_list fi;
 	gn_error error;
@@ -415,7 +415,7 @@ void putfile_usage(FILE *f, int exitval)
 }
 
 /* Put file */
-int putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
     	gn_file fi;
 	gn_error error;

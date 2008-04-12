@@ -73,7 +73,7 @@ void getcalendarnote_usage(FILE *f, int exitval)
 }
 
 /* Calendar notes receiving. */
-int getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_calnote_list		calnotelist;
 	gn_calnote		calnote;
@@ -265,7 +265,7 @@ void writecalendarnote_usage(FILE *f, int exitval)
 }
 
 /* Writing calendar notes. */
-int writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_calnote calnote;
 	gn_error error = GN_ERR_NONE;
@@ -348,7 +348,7 @@ void deletecalendarnote_usage(FILE *f, int exitval)
 }
 
 /* Calendar note deleting. */
-int deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+gn_error deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_calnote calnote;
 	gn_calnote_list clist;

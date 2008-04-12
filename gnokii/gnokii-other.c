@@ -67,7 +67,7 @@ void other_usage(FILE *f)
 /* pmon allows fbus code to run in a passive state - it doesn't worry about
    whether comms are established with the phone.  A debugging/development
    tool. */
-int pmon(gn_data *data, struct gn_statemachine *state)
+gn_error pmon(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
@@ -83,10 +83,10 @@ int pmon(gn_data *data, struct gn_statemachine *state)
 		usleep(50000);
 	}
 
-	return 0;
+	return GN_ERR_NONE;
 }
 
-static int presskey(gn_data *data, struct gn_statemachine *state)
+static gn_error presskey(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	error = gn_sm_functions(GN_OP_PressPhoneKey, data, state);
@@ -97,7 +97,7 @@ static int presskey(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-int presskeysequence(gn_data *data, struct gn_statemachine *state)
+gn_error presskeysequence(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	unsigned char *syms = "0123456789#*PGR+-UDMN";
@@ -124,7 +124,7 @@ int presskeysequence(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-int enterchar(gn_data *data, struct gn_statemachine *state)
+gn_error enterchar(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char ch;
 	gn_error error = GN_ERR_NONE;
@@ -172,7 +172,7 @@ void list_gsm_networks(void)
 		printf(_("%-7s  %s\n"), network.code, network.name);
 }
 
-int getnetworkinfo(gn_data *data, struct gn_statemachine *state)
+gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state)
 {
 	gn_network_info networkinfo;
 	gn_error error;
