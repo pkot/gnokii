@@ -177,7 +177,7 @@ GNOKII_API gn_error gn_lib_set_pb_subentry    ( struct gn_statemachine *state, c
 GNOKII_API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
         const gn_memory_type memory_type, const int index );
 
-GNOKII_API char *gn_subentrytype2string(gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type);
+GNOKII_API const char *gn_subentrytype2string(gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type);
 
 /* standard helper functions */
 

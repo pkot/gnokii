@@ -32,6 +32,8 @@
     o move declaration of gn_get_connectiontype() from
       gnokii-internal.h to gnokii.h because it is a public function
                                                     (Daniele Forsi)
+    o merge from devel branch the functions to convert enum values
+      into localized strings             (Paweł Kot, Daniele Forsi)
  * gnokii changes
     o allow to use --entersecuritycode with another gnokii command
                                                   (Pavel Kankovsky)

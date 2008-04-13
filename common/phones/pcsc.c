@@ -1324,7 +1324,11 @@ static LONG pcsc_verify_chv(PCSC_IOSTRUCT *ios, BYTE chv_id, BYTE *chv, BYTE chv
 static LONG pcsc_close_reader()
 {
 /* disconnect from reader */
-	return SCardDisconnect(hCard, SCARD_UNPOWER_CARD);
+
+	/* if PIN has been successfully entered, SCARD_LEAVE_CARD leaves the card unprotected
+	   until SCARD_UNPOWER_CARD or SCARD_RESET_CARD are used or it is removed from reader
+	*/
+	return SCardDisconnect(hCard, SCARD_LEAVE_CARD);
 }
 
 static LONG pcsc_open_reader_number(LONG number)

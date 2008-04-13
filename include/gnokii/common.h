@@ -56,6 +56,8 @@ typedef enum {
 	GN_CT_PCSC      /* PC/SC SIM Card reader using libpsclite */
 } gn_connection_type;
 
+GNOKII_API const char *gn_connection_type2str(gn_connection_type t);
+
 /* Maximum length of device name for serial port */
 
 #define GN_DEVICE_NAME_MAX_LENGTH (32)
@@ -109,11 +111,16 @@ typedef enum {
 	GN_MT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions). */
 } gn_memory_type;
 
+GNOKII_API gn_memory_type gn_str2memory_type(const char *s);
+GNOKII_API const char *gn_memory_type2str(gn_memory_type mt);
+
 /* Power source types */
 typedef enum {
 	GN_PS_ACDC = 1, /* AC/DC powered (charging) */
 	GN_PS_BATTERY   /* Internal battery */
 } gn_power_source;
+
+GNOKII_API const char *gn_power_source2str(gn_power_source s);
 
 /* Definition of security codes. */
 typedef enum {
@@ -124,6 +131,8 @@ typedef enum {
 	GN_SCT_Puk2,                /* PUK 2. */
 	GN_SCT_None                 /* Code not needed. */
 } gn_security_code_type;
+
+GNOKII_API const char *gn_security_code_type2str(gn_security_code_type t);
 
 /* Security code definition. */
 typedef struct {
@@ -200,6 +209,8 @@ typedef enum {
 	GN_PHONEBOOK_NUMBER_General = 0x0a,
 } gn_phonebook_number_type;
 
+GNOKII_API const char *gn_phonebook_number_type2str(gn_phonebook_number_type t);
+
 typedef enum {
 	GN_PHONEBOOK_ENTRY_Name            = 0x07,
 	GN_PHONEBOOK_ENTRY_Email           = 0x08,
@@ -234,6 +245,9 @@ typedef enum {
 	GN_PHONEBOOK_ENTRY_Birthday        = 0x57,
 } gn_phonebook_entry_type;
 
+GNOKII_API const char *gn_phonebook_entry_type2str(gn_phonebook_entry_type t);
+GNOKII_API const char *gn_subentrytype2string(gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type);
+
 typedef enum {
 	GN_PHONEBOOK_GROUP_Family,
 	GN_PHONEBOOK_GROUP_Vips,
@@ -242,6 +256,8 @@ typedef enum {
 	GN_PHONEBOOK_GROUP_Others, 
 	GN_PHONEBOOK_GROUP_None,
 } gn_phonebook_group_type;
+
+GNOKII_API const char *gn_phonebook_group_type2str(gn_phonebook_group_type t);
 
 #define GN_PHONEBOOK_PERSON_MAX_LENGTH 64
 
@@ -334,7 +350,6 @@ typedef enum {
 } gn_rf_unit;
 
 /* Define enums for Battery units. */
-
 typedef enum {
 	GN_BU_Arbitrary,
 	GN_BU_Volts,
@@ -351,6 +366,8 @@ typedef enum {
 	GN_CALNOTE_MEMO     = 0x16, /* Memo */
 } gn_calnote_type;
 
+GNOKII_API const char *gn_calnote_type2str(gn_calnote_type t);
+
 typedef enum {
 	GN_CALNOTE_NEVER   = 0,
 	GN_CALNOTE_DAILY   = 24,
@@ -359,6 +376,8 @@ typedef enum {
 	GN_CALNOTE_MONTHLY = 65534,
 	GN_CALNOTE_YEARLY  = 65535
 } gn_calnote_recurrence;
+
+GNOKII_API const char *gn_calnote_recurrence2str(gn_calnote_recurrence r);
 
 #define GN_CALNOTE_MAX_NUMBER       1024 /* FIXME how many are possible? */
 #define GN_CALNOTE_MAX_LENGTH        258
@@ -401,6 +420,8 @@ typedef enum {
 	GN_TODO_HIGH = 1
 } gn_todo_priority;
 
+GNOKII_API const char *gn_todo_priority2str(gn_todo_priority p);
+
 typedef struct {
 	int location;			/* The number of the note in the phone memory */
 	char text[GN_TODO_MAX_LENGTH];		/* The text of the note */
@@ -435,10 +456,14 @@ typedef enum {
 	GN_WAP_SESSION_PERMANENT
 } gn_wap_session;
 
+GNOKII_API const char *gn_wap_session2str(gn_wap_session p);
+
 typedef enum {
 	GN_WAP_AUTH_NORMAL = 0,
 	GN_WAP_AUTH_SECURE
 } gn_wap_authentication;
+
+GNOKII_API const char *gn_wap_authentication2str(gn_wap_authentication p);
 
 typedef enum {
 	GN_WAP_BEARER_GSMDATA = 1,
@@ -447,10 +472,14 @@ typedef enum {
 	GN_WAP_BEARER_USSD    = 9 /* FIXME real value? */
 } gn_wap_bearer;
 
+GNOKII_API const char *gn_wap_bearer2str(gn_wap_bearer p);
+
 typedef enum {
 	GN_WAP_CALL_ANALOGUE,
 	GN_WAP_CALL_ISDN
 } gn_wap_call_type;
+
+GNOKII_API const char *gn_wap_call_type2str(gn_wap_call_type p);
 
 typedef enum {
 	GN_WAP_CALL_AUTOMATIC,
@@ -458,15 +487,21 @@ typedef enum {
 	GN_WAP_CALL_14400
 } gn_wap_call_speed;
 
+GNOKII_API const char *gn_wap_call_speed2str(gn_wap_call_speed p);
+
 typedef enum {
 	GN_WAP_LOGIN_MANUAL,
 	GN_WAP_LOGIN_AUTOLOG
 } gn_wap_login;
 
+GNOKII_API const char *gn_wap_login2str(gn_wap_login p);
+
 typedef enum {
 	GN_WAP_GPRS_ALWAYS,
 	GN_WAP_GPRS_WHENNEEDED
 } gn_wap_gprs;
+
+GNOKII_API const char *gn_wap_gprs2str(gn_wap_gprs p);
 
 typedef struct {
 	int read_before_write;
@@ -542,15 +577,21 @@ typedef enum {
 	GN_PROFILE_MESSAGE_Ascending	= 0x04
 } gn_profile_message_type;
 
+GNOKII_API const char *gn_profile_message_type2str(gn_profile_message_type p);
+
 typedef enum {
 	GN_PROFILE_WARNING_Off		= 0xff,
 	GN_PROFILE_WARNING_On		= 0x04
 } gn_profile_warning_type;
 
+GNOKII_API const char *gn_profile_warning_type2str(gn_profile_warning_type p);
+
 typedef enum {
 	GN_PROFILE_VIBRATION_Off	= 0x00,
 	GN_PROFILE_VIBRATION_On		= 0x01
 } gn_profile_vibration_type;
+
+GNOKII_API const char *gn_profile_vibration_type2str(gn_profile_vibration_type p);
 
 typedef enum {
 	GN_PROFILE_CALLALERT_Ringing		= 0x01,
@@ -561,12 +602,16 @@ typedef enum {
 	GN_PROFILE_CALLALERT_CallerGroups	= 0x07
 } gn_profile_callalert_type;
 
+GNOKII_API const char *gn_profile_callalert_type2str(gn_profile_callalert_type p);
+
 typedef enum {
 	GN_PROFILE_KEYVOL_Off		= 0xff,
 	GN_PROFILE_KEYVOL_Level1	= 0x00,
 	GN_PROFILE_KEYVOL_Level2	= 0x01,
 	GN_PROFILE_KEYVOL_Level3	= 0x02
 } gn_profile_keyvol_type;
+
+GNOKII_API const char *gn_profile_keyvol_type2str(gn_profile_keyvol_type p);
 
 typedef enum {
 	GN_PROFILE_VOLUME_Level1	= 0x06,
@@ -575,6 +620,8 @@ typedef enum {
 	GN_PROFILE_VOLUME_Level4	= 0x09,
 	GN_PROFILE_VOLUME_Level5	= 0x0a,
 } gn_profile_volume_type;
+
+GNOKII_API const char *gn_profile_volume_type2str(gn_profile_volume_type p);
 
 /* Structure to hold profile entries. */
 typedef struct {
@@ -627,12 +674,16 @@ typedef enum {
 	GN_CDV_AllTypes
 } gn_call_divert_type;
 
+GNOKII_API const char *gn_call_divert_type2str(gn_call_divert_type p);
+
 typedef enum {
 	GN_CDV_VoiceCalls = 0x01,
 	GN_CDV_FaxCalls,
 	GN_CDV_DataCalls,
 	GN_CDV_AllCalls
 } gn_call_divert_call_type;
+
+GNOKII_API const char *gn_call_divert_call_type2str(gn_call_divert_call_type p);
 
 typedef enum {
 	GN_CDV_Disable  = 0x00,
@@ -641,6 +692,8 @@ typedef enum {
 	GN_CDV_Register = 0x03,
 	GN_CDV_Erasure  = 0x04
 } gn_call_divert_operation;
+
+GNOKII_API const char *gn_call_divert_operation2str(gn_call_divert_operation p);
 
 typedef struct {
 	gn_call_divert_type           type;
