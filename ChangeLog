@@ -38,6 +38,9 @@
     o allow to use --entersecuritycode with another gnokii command
                                                   (Pavel Kankovsky)
     o all specialized functions return gn_error         (Paweł Kot)
+    o use the new functions to convert enum values into localized
+      strings (merge code from devel branch with minor changes)
+                                                     (Daniele Forsi)
 
 0.6.24
 ======

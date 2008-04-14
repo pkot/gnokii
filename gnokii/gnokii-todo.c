@@ -116,22 +116,8 @@ gn_error gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			if (vcal) {
 				gn_todo2ical(stdout, &todo);
 			} else {
-				fprintf(stdout, _("Todo: %s\n"), todo.text);
-				fprintf(stdout, _("Priority: "));
-				switch (todo.priority) {
-				case GN_TODO_LOW:
-					fprintf(stdout, _("low\n"));
-					break;
-				case GN_TODO_MEDIUM:
-					fprintf(stdout, _("medium\n"));
-					break;
-				case GN_TODO_HIGH:
-					fprintf(stdout, _("high\n"));
-					break;
-				default:
-					fprintf(stdout, _("unknown\n"));
-					break;
-				}
+				fprintf(stdout, _("%s: %s\n"), _("Todo"), todo.text);
+				fprintf(stdout, _("%s: %s\n"), _("Priority"), gn_todo_priority2str(todo.priority));
 			}
 			break;
 		default:

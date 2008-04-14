@@ -38,7 +38,6 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
 
 #include <stdio.h>
@@ -374,48 +373,11 @@ gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	error = gn_sm_functions(GN_OP_CallDivert, data, state);
 
 	if (error == GN_ERR_NONE) {
-		fprintf(stdout, _("Divert type: "));
-		switch (cd.type) {
-		case GN_CDV_AllTypes:
-			fprintf(stdout, _("all\n"));
-			break;
-		case GN_CDV_Busy:
-			fprintf(stdout, _("busy\n"));
-			break;
-		case GN_CDV_NoAnswer:
-			fprintf(stdout, _("noans\n"));
-			break;
-		case GN_CDV_OutOfReach:
-			fprintf(stdout, _("outofreach\n"));
-			break;
-		case GN_CDV_NotAvailable:
-			fprintf(stdout, _("notavail\n"));
-			break;
-		default:
-			fprintf(stdout, _("unknown(0x%02x)\n"), cd.type);
-			break;
-		}
-		fprintf(stdout, _("Call type: "));
-		switch (cd.ctype) {
-		case GN_CDV_AllCalls:
-			fprintf(stdout, _("all\n"));
-			break;
-		case GN_CDV_VoiceCalls:
-			fprintf(stdout, _("voice\n"));
-			break;
-		case GN_CDV_FaxCalls:
-			fprintf(stdout, _("fax\n"));
-			break;
-		case GN_CDV_DataCalls:
-			fprintf(stdout, _("data\n"));
-			break;
-		default:
-			fprintf(stdout, _("unknown(0x%02x)\n"), cd.ctype);
-			break;
-		}
+		fprintf(stdout, _("%s: %s\n"), _("Divert type"), gn_call_divert_type2str(cd.type));
+		fprintf(stdout, _("%s: %s\n"), _("Call type"), gn_call_divert_call_type2str(cd.ctype));
 		if (cd.number.number[0]) {
-			fprintf(stdout, _("Number: %s\n"), cd.number.number);
-			fprintf(stdout, _("Timeout: %d\n"), cd.timeout);
+			fprintf(stdout, _("%s: %s\n"), _("Number"), cd.number.number);
+			fprintf(stdout, _("%s: %d\n"), _("Timeout"), cd.timeout);
 		} else
 			fprintf(stdout, _("Divert isn't active.\n"));
 	} else {

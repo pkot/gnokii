@@ -60,72 +60,6 @@ void profile_usage(FILE *f)
 		));
 }
 
-static char *profile_get_call_alert_string(int code)
-{
-	switch (code) {
-	case GN_PROFILE_CALLALERT_Ringing:	return _("Ringing");
-	case GN_PROFILE_CALLALERT_Ascending:	return _("Ascending");
-	case GN_PROFILE_CALLALERT_RingOnce:	return _("Ring once");
-	case GN_PROFILE_CALLALERT_BeepOnce:	return _("Beep once");
-	case GN_PROFILE_CALLALERT_CallerGroups:	return _("Caller groups");
-	case GN_PROFILE_CALLALERT_Off:		return _("Off");
-	default:				return _("Unknown");
-	}
-}
-
-static char *profile_get_volume_string(int code)
-{
-	switch (code) {
-	case GN_PROFILE_VOLUME_Level1:		return _("Level 1");
-	case GN_PROFILE_VOLUME_Level2:		return _("Level 2");
-	case GN_PROFILE_VOLUME_Level3:		return _("Level 3");
-	case GN_PROFILE_VOLUME_Level4:		return _("Level 4");
-	case GN_PROFILE_VOLUME_Level5:		return _("Level 5");
-	default:				return _("Unknown");
-	}
-}
-
-static char *profile_get_keypad_tone_string(int code)
-{
-	switch (code) {
-	case GN_PROFILE_KEYVOL_Off:		return _("Off");
-	case GN_PROFILE_KEYVOL_Level1:		return _("Level 1");
-	case GN_PROFILE_KEYVOL_Level2:		return _("Level 2");
-	case GN_PROFILE_KEYVOL_Level3:		return _("Level 3");
-	default:				return _("Unknown");
-	}
-}
-
-static char *profile_get_message_tone_string(int code)
-{
-	switch (code) {
-	case GN_PROFILE_MESSAGE_NoTone:		return _("No tone");
-	case GN_PROFILE_MESSAGE_Standard:	return _("Standard");
-	case GN_PROFILE_MESSAGE_Special:	return _("Special");
-	case GN_PROFILE_MESSAGE_BeepOnce:	return _("Beep once");
-	case GN_PROFILE_MESSAGE_Ascending:	return _("Ascending");
-	default:				return _("Unknown");
-	}
-}
-
-static char *profile_get_warning_tone_string(int code)
-{
-	switch (code) {
-	case GN_PROFILE_WARNING_Off:		return _("Off");
-	case GN_PROFILE_WARNING_On:		return _("On");
-	default:				return _("Unknown");
-	}
-}
-
-static char *profile_get_vibration_string(int code)
-{
-	switch (code) {
-	case GN_PROFILE_VIBRATION_Off:		return _("Off");
-	case GN_PROFILE_VIBRATION_On:		return _("On");
-	default:				return _("Unknown");
-	}
-}
-
 void getprofile_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --getprofile [start_number [end_number]] [-r|--raw]\n"));
@@ -240,16 +174,16 @@ gn_error getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachin
 		} else {
 			fprintf(stdout, "%d. \"%s\"\n", p.number, p.name);
 			if (p.default_name == -1) fprintf(stdout, _(" (name defined)\n"));
-			fprintf(stdout, _("Incoming call alert: %s\n"), profile_get_call_alert_string(p.call_alert));
+			fprintf(stdout, _("Incoming call alert: %s\n"), gn_profile_callalert_type2str(p.call_alert));
 			fprintf(stdout, _("Ringing tone: %s (%d)\n"), get_ringtone_name(p.ringtone, data, state), p.ringtone);
-			fprintf(stdout, _("Ringing volume: %s\n"), profile_get_volume_string(p.volume));
-			fprintf(stdout, _("Message alert tone: %s\n"), profile_get_message_tone_string(p.message_tone));
-			fprintf(stdout, _("Keypad tones: %s\n"), profile_get_keypad_tone_string(p.keypad_tone));
-			fprintf(stdout, _("Warning and game tones: %s\n"), profile_get_warning_tone_string(p.warning_tone));
+			fprintf(stdout, _("Ringing volume: %s\n"), gn_profile_volume_type2str(p.volume));
+			fprintf(stdout, _("Message alert tone: %s\n"), gn_profile_message_type2str(p.message_tone));
+			fprintf(stdout, _("Keypad tones: %s\n"), gn_profile_keyvol_type2str(p.keypad_tone));
+			fprintf(stdout, _("Warning and game tones: %s\n"), gn_profile_warning_type2str(p.warning_tone));
 
 			/* FIXME: Light settings is only used for Car */
 			if (p.number == (max_profiles - 2)) fprintf(stdout, _("Lights: %s\n"), p.lights ? _("On") : _("Automatic"));
-			fprintf(stdout, _("Vibration: %s\n"), profile_get_vibration_string(p.vibration));
+			fprintf(stdout, _("Vibration: %s\n"), gn_profile_vibration_type2str(p.vibration));
 
 			/* FIXME: it will be nice to add here reading caller group name. */
 			if (max_profiles != 3) fprintf(stdout, _("Caller groups: 0x%02x\n"), p.caller_groups);

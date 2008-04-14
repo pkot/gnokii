@@ -181,7 +181,7 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 				gn_phonebook2ldif(stdout, &entry);
 				break;
 			default:
-				fprintf(stdout, _("%d. Name: %s\n"), entry.location, entry.name);
+				fprintf(stdout, _("%d. %s: %s\n"), entry.location, _("Name"), entry.name);
 				/* Print out personal information */
 				if (entry.person.has_person) {
 					if (entry.person.honorific_prefixes[0])
@@ -193,54 +193,30 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 					fprintf(stdout, "\n");
 				}
 
-				fprintf(stdout, _("Group: "));
-				switch (entry.caller_group) {
-				case GN_PHONEBOOK_GROUP_Family:
-					fprintf(stdout, _("Family"));
-					break;
-				case GN_PHONEBOOK_GROUP_Vips:
-					fprintf(stdout, _("VIPs"));
-					break;
-				case GN_PHONEBOOK_GROUP_Friends:
-					fprintf(stdout, _("Friends"));
-					break;
-				case GN_PHONEBOOK_GROUP_Work:
-					fprintf(stdout, _("Work"));
-					break;
-				case GN_PHONEBOOK_GROUP_Others:
-					fprintf(stdout, _("Others"));
-					break;
-				case GN_PHONEBOOK_GROUP_None:
-					fprintf(stdout, _("None"));
-					break;
-				default:
-					fprintf(stdout, _("Unknown"));
-					break;
-				}
-				fprintf(stdout, "\n");
+				fprintf(stdout, _("%s: %s\n"), _("Caller group"), gn_phonebook_group_type2str(entry.caller_group));
 
 				/* FIXME: AT driver doesn't set subentries */
 				if (!entry.subentries_count && entry.number) {
-					fprintf(stdout, _("Number: %s\n"), entry.number);
+					fprintf(stdout, _("%s: %s\n"), _("Number"), entry.number);
 				}
 
 				/* Print out address information */
 				if (entry.address.has_address) {
 					fprintf(stdout, _("Address information:\n"));
 					if (entry.address.post_office_box[0])
-						fprintf(stdout, _("  Post office address: %s\n"), entry.address.post_office_box);
+						fprintf(stdout, _("  %s: %s\n"), _("Post office address"), entry.address.post_office_box);
 					if (entry.address.extended_address[0])
-						fprintf(stdout, _("  Extended address: %s\n"), entry.address.extended_address);
+						fprintf(stdout, _("  %s: %s\n"), _("Extended address"), entry.address.extended_address);
 					if (entry.address.street[0])
-						fprintf(stdout, _("  Street: %s\n"), entry.address.street);
+						fprintf(stdout, _("  %s: %s\n"), _("Street"), entry.address.street);
 					if (entry.address.city[0])
-						fprintf(stdout, _("  City: %s\n"), entry.address.city);
+						fprintf(stdout, _("  %s: %s\n"), _("City"), entry.address.city);
 					if (entry.address.state_province[0])
-						fprintf(stdout, _("  State or province: %s\n"), entry.address.state_province);
+						fprintf(stdout, _("  %s: %s\n"), _("State or province"), entry.address.state_province);
 					if (entry.address.zipcode[0])
-						fprintf(stdout, _("  Zipcode: %s\n"), entry.address.zipcode);
+						fprintf(stdout, _("  %s: %s\n"), _("Zip code"), entry.address.zipcode);
 					if (entry.address.country[0])
-						fprintf(stdout, _("  Country: %s\n"), entry.address.country);
+						fprintf(stdout, _("  %s: %s\n"), _("Country"), entry.address.country);
 				}
 				dprintf("subentries count: %d\n", entry.subentries_count);
 				for (i = 0; i < entry.subentries_count; i++) {

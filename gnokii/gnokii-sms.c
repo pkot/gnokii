@@ -709,26 +709,9 @@ parsefile:
 		switch (error) {
 		case GN_ERR_NONE:
 			message_text = NULL;
+			fprintf(stdout, _("%d. %s (%s)\n"), message.number, gn_sms_message_type2str(message.type), gn_sms_message_status2str(message.status));
 			switch (message.type) {
 			case GN_SMS_MT_DeliveryReport:
-				fprintf(stdout, _("%d. Delivery Report "), message.number);
-				switch (message.status) {
-				case GN_SMS_Read:
-					fprintf(stdout, _("(read)\n"));
-					break;
-				case GN_SMS_Unread:
-					fprintf(stdout, _("(unread)\n"));
-					break;
-				case GN_SMS_Sent:
-					fprintf(stdout, _("(sent)\n"));
-					break;
-				case GN_SMS_Unsent:
-					fprintf(stdout, _("(unsent)\n"));
-					break;
-				default:
-					fprintf(stdout, _("(read)\n"));
-					break;
-				}
 				fprintf(stdout, _("Sending date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.smsc_time.day, message.smsc_time.month, message.smsc_time.year, \
 					message.smsc_time.hour, message.smsc_time.minute, message.smsc_time.second);
@@ -755,31 +738,6 @@ parsefile:
 				break;
 			case GN_SMS_MT_Picture:
 			case GN_SMS_MT_PictureTemplate:
-				switch (message.type) {
-				case GN_SMS_MT_PictureTemplate:
-					fprintf(stdout, _("%d. Picture Message Template "), message.number);
-					break;
-				default:
-					fprintf(stdout, _("%d. Picture Message "), message.number);
-					break;
-				}
-				switch (message.status) {
-				case GN_SMS_Read:
-					fprintf(stdout, _("(read)\n"));
-					break;
-				case GN_SMS_Unread:
-					fprintf(stdout, _("(unread)\n"));
-					break;
-				case GN_SMS_Sent:
-					fprintf(stdout, _("(sent)\n"));
-					break;
-				case GN_SMS_Unsent:
-					fprintf(stdout, _("(unsent)\n"));
-					break;
-				default:
-					fprintf(stdout, _("(read)\n"));
-					break;
-				}
 				fprintf(stdout, _("Date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.smsc_time.day, message.smsc_time.month, message.smsc_time.year, \
 					message.smsc_time.hour, message.smsc_time.minute, message.smsc_time.second);
@@ -797,32 +755,6 @@ parsefile:
 				message_text = message.user_data[1].u.text;
 				break;
 			default:
-				switch (message.type) {
-				case GN_SMS_MT_Submit:
-				case GN_SMS_MT_SubmitSent:
-					fprintf(stdout, _("%d. MO Message "), message.number);
-					break;
-				default:
-					fprintf(stdout, _("%d. Inbox Message "), message.number);
-					break;
-				}
-				switch (message.status) {
-				case GN_SMS_Read:
-					fprintf(stdout, _("(read)\n"));
-					break;
-				case GN_SMS_Unread:
-					fprintf(stdout, _("(unread)\n"));
-					break;
-				case GN_SMS_Sent:
-					fprintf(stdout, _("(sent)\n"));
-					break;
-				case GN_SMS_Unsent:
-					fprintf(stdout, _("(unsent)\n"));
-					break;
-				default:
-					fprintf(stdout, _("(read)\n"));
-					break;
-				}
 				fprintf(stdout, _("Date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.smsc_time.day, message.smsc_time.month, message.smsc_time.year, \
 					message.smsc_time.hour, message.smsc_time.minute, message.smsc_time.second);
@@ -845,9 +777,9 @@ parsefile:
 				/* No UDH */
 				if (!message.udh.number)
 					message.udh.udh[0].type = GN_SMS_UDH_None;
+				fprintf(stdout, _("%s:\n"), gn_sms_udh_type2str(message.udh.udh[0].type));
 				switch (message.udh.udh[0].type) {
 				case GN_SMS_UDH_None:
-					fprintf(stdout, _("Text:\n"));
 					break;
 				case GN_SMS_UDH_OpLogo:
 					fprintf(stdout, _("GSM operator logo for %s (%s) network.\n"), bitmap.netcode, gn_network_name_get(bitmap.netcode));
@@ -857,7 +789,6 @@ parsefile:
 						fprintf(stdout, _("Saved by Operator Logo Uploader by Thomas Kessler\n"));
 					offset = 3;
 				case GN_SMS_UDH_CallerIDLogo:
-					fprintf(stdout, _("Logo:\n"));
 					/* put bitmap into bitmap structure */
 					gn_bmp_sms_read(GN_BMP_OperatorLogo, message.user_data[0].u.text + 2 + offset, message.user_data[0].u.text, &bitmap);
 					gn_bmp_print(&bitmap, stdout);
@@ -881,7 +812,6 @@ parsefile:
 					done = true;
 					break;
 				case GN_SMS_UDH_Ringtone:
-					fprintf(stdout, _("Ringtone\n"));
 					done = true;
 					break;
 				case GN_SMS_UDH_ConcatenatedMessages:
@@ -890,19 +820,10 @@ parsefile:
 						message.udh.udh[0].u.concatenated_short_message.maximum_number);
 					break;
 				case GN_SMS_UDH_WAPvCard:
-					fprintf(stdout, _("WAP vCard:\n"));
-					break;
 				case GN_SMS_UDH_WAPvCalendar:
-					fprintf(stdout, _("WAP vCalendar:\n"));
-					break;
 				case GN_SMS_UDH_WAPvCardSecure:
-					fprintf(stdout, _("WAP vCardSecure:\n"));
-					break;
 				case GN_SMS_UDH_WAPvCalendarSecure:
-					fprintf(stdout, _("WAP vCalendarSecure:\n"));
-					break;
 				default:
-					fprintf(stderr, _("Unknown\n"));
 					break;
 				}
 				if (done)
@@ -1109,61 +1030,8 @@ gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				fprintf(stdout, _("No. %d: \"%s\" (default name)\n"), message_center.id, message_center.name);
 			fprintf(stdout, _("SMS center number is %s\n"), message_center.smsc.number);
 			fprintf(stdout, _("Default recipient number is %s\n"), message_center.recipient.number);
-			fprintf(stdout, _("Messages sent as "));
-
-			switch (message_center.format) {
-			case GN_SMS_MF_Text:
-				fprintf(stdout, _("Text"));
-				break;
-			case GN_SMS_MF_Voice:
-				fprintf(stdout, _("VoiceMail"));
-				break;
-			case GN_SMS_MF_Fax:
-				fprintf(stdout, _("Fax"));
-				break;
-			case GN_SMS_MF_Email:
-			case GN_SMS_MF_UCI:
-				fprintf(stdout, _("Email"));
-				break;
-			case GN_SMS_MF_ERMES:
-				fprintf(stdout, _("ERMES"));
-				break;
-			case GN_SMS_MF_X400:
-				fprintf(stdout, _("X.400"));
-				break;
-			default:
-				fprintf(stdout, _("Unknown"));
-				break;
-			}
-
-			fprintf(stdout, "\n");
-			fprintf(stdout, _("Message validity is "));
-
-			switch (message_center.validity) {
-			case GN_SMS_VP_1H:
-				fprintf(stdout, _("1 hour"));
-				break;
-			case GN_SMS_VP_6H:
-				fprintf(stdout, _("6 hours"));
-				break;
-			case GN_SMS_VP_24H:
-				fprintf(stdout, _("24 hours"));
-				break;
-			case GN_SMS_VP_72H:
-				fprintf(stdout, _("72 hours"));
-				break;
-			case GN_SMS_VP_1W:
-				fprintf(stdout, _("1 week"));
-				break;
-			case GN_SMS_VP_Max:
-				fprintf(stdout, _("Maximum time"));
-				break;
-			default:
-				fprintf(stdout, _("Unknown"));
-				break;
-			}
-
-			fprintf(stdout, "\n");
+			fprintf(stdout, _("Messages sent as %s\n"), gn_sms_message_format2str(message_center.format));
+			fprintf(stdout, _("Message validity is %s\n"), gn_sms_vp_time2str(message_center.validity));
 		}
 	}
 

@@ -118,29 +118,7 @@ gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statem
 			if (vcal) {
 				gn_calnote2ical(stdout, &calnote);
 			} else {  /* plaint text output */
-				fprintf(stdout, _("%d (%d). Type: "), i, calnote.location);
-
-				switch (calnote.type) {
-				case GN_CALNOTE_REMINDER:
-					fprintf(stdout, _("Reminder"));
-					break;
-				case GN_CALNOTE_CALL:
-					fprintf(stdout, _("Call"));
-					break;
-				case GN_CALNOTE_MEETING:
-					fprintf(stdout, _("Meeting"));
-					break;
-				case GN_CALNOTE_BIRTHDAY:
-					fprintf(stdout, _("Birthday"));
-					break;
-				case GN_CALNOTE_MEMO:
-					fprintf(stdout, _("Memo"));
-					break;
-				default:
-					fprintf(stdout, _("Unknown"));
-					break;
-				}
-				fprintf(stdout, "\n");
+				fprintf(stdout, _("%d (%d). %s: %s\n"), i, calnote.location, _("Type"), gn_calnote_type2str(calnote.type));
 
 				fprintf(stdout, _("   Start date: %d-%02d-%02d\n"), calnote.time.year,
 					calnote.time.month,
@@ -181,26 +159,18 @@ gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statem
 						calnote.alarm.tone ? _("enabled") : _("disabled"));
 				}
 
+				fprintf(stdout, _("   %s: "), _("Repeat"));
 				switch (calnote.recurrence) {
 				case GN_CALNOTE_NEVER:
-					break;
 				case GN_CALNOTE_DAILY:
-					fprintf(stdout, _("   Repeat: every day\n"));
-					break;
 				case GN_CALNOTE_WEEKLY:
-					fprintf(stdout, _("   Repeat: every week\n"));
-					break;
 				case GN_CALNOTE_2WEEKLY:
-					fprintf(stdout, _("   Repeat: every 2 weeks\n"));
-					break;
 				case GN_CALNOTE_MONTHLY:
-					fprintf(stdout, _("   Repeat: every month\n"));
-					break;
 				case GN_CALNOTE_YEARLY:
-					fprintf(stdout, _("   Repeat: every year\n"));
+					fprintf(stdout,"%s\n", gn_calnote_recurrence2str(calnote.recurrence));
 					break;
 				default:
-					fprintf(stdout, _("   Repeat: %d hours\n"), calnote.recurrence);
+					fprintf(stdout, _("Every %d hours"), calnote.recurrence);
 					break;
 				}
 
@@ -221,10 +191,10 @@ gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statem
 
 				switch (calnote.type) {
 				case GN_CALNOTE_CALL:
-					fprintf(stdout, _("   Phone: %s\n"), calnote.phone_number);
+					fprintf(stdout, _("   %s: %s\n"), _("Phone"), calnote.phone_number);
 					break;
 				case GN_CALNOTE_MEETING:
-					fprintf(stdout, _("   Location: %s\n"), calnote.mlocation);
+					fprintf(stdout, _("   %s: %s\n"), _("Location"), calnote.mlocation);
 					break;
 				case GN_CALNOTE_BIRTHDAY:
 				case GN_CALNOTE_REMINDER:

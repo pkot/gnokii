@@ -86,8 +86,8 @@ gn_error getwapbookmark(char *number, gn_data *data, struct gn_statemachine *sta
 	switch (error) {
 	case GN_ERR_NONE:
 		fprintf(stdout, _("WAP bookmark nr. %d:\n"), wapbookmark.location);
-		fprintf(stdout, _("Name: %s\n"), wapbookmark.name);
-		fprintf(stdout, _("URL: %s\n"), wapbookmark.URL);
+		fprintf(stdout, _("%s: %s\n"), _("Name"), wapbookmark.name);
+		fprintf(stdout, _("%s: %s\n"), _("URL"), wapbookmark.URL);
 
 		break;
 	default:
@@ -217,143 +217,31 @@ gn_error getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemac
 				wapsetting.sms_service_number, wapsetting.sms_server_number);
 		} else {
 			fprintf(stdout, _("WAP bookmark nr. %d:\n"), wapsetting.location);
-			fprintf(stdout, _("Name: %s\n"), wapsetting.name);
-			fprintf(stdout, _("Home: %s\n"), wapsetting.home);
-			fprintf(stdout, _("Session mode: "));
-			switch (wapsetting.session) {
-			case GN_WAP_SESSION_TEMPORARY: 
-				fprintf(stdout, _("temporary\n"));
-				break;
-			case GN_WAP_SESSION_PERMANENT: 
-				fprintf(stdout, _("permanent\n"));
-				break;
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("Connection security: "));
-			if (wapsetting.security)
-				fprintf(stdout, _("yes\n"));
-			else
-				fprintf(stdout, _("no\n"));
-			fprintf(stdout, _("Data bearer: "));
-			switch (wapsetting.bearer) {
-			case GN_WAP_BEARER_GSMDATA:
-				fprintf(stdout, _("GSM data\n"));
-				break;
-			case GN_WAP_BEARER_GPRS:
-				fprintf(stdout, _("GPRS\n"));
-				break;
-			case GN_WAP_BEARER_SMS:
-				fprintf(stdout, _("SMS\n"));
-				break;
-			case GN_WAP_BEARER_USSD:
-				fprintf(stdout, _("USSD\n"));
-				break;
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("GSM data\n"));
-			fprintf(stdout, _("   Authentication type: "));
-			switch (wapsetting.gsm_data_authentication) {
-			case GN_WAP_AUTH_NORMAL:
-				fprintf(stdout, _("normal\n"));
-				break;
-			case GN_WAP_AUTH_SECURE:
-				fprintf(stdout, _("secure\n"));
-				break;
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("   Data call type: "));
-			switch (wapsetting.call_type) {
-			case GN_WAP_CALL_ANALOGUE:
-				fprintf(stdout, _("analogue\n"));
-				break;
-			case GN_WAP_CALL_ISDN:
-				fprintf(stdout, _("ISDN\n"));
-				break;
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("   Data call speed: "));
-			switch (wapsetting.call_speed) {
-			case GN_WAP_CALL_AUTOMATIC:
-				fprintf(stdout, _("automatic\n"));
-				break;
-			case GN_WAP_CALL_9600:
-				fprintf(stdout, _("9600\n"));
-				break;
-			case GN_WAP_CALL_14400:
-				fprintf(stdout, _("14400\n"));
-				break;	
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("   Login type: "));
-			switch (wapsetting.gsm_data_login) {
-			case GN_WAP_LOGIN_MANUAL:
-				fprintf(stdout, _("manual\n"));
-				break;
-			case GN_WAP_LOGIN_AUTOLOG:
-				fprintf(stdout, _("automatic\n"));
-				break;
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("   IP: %s\n"), wapsetting.gsm_data_ip);
-			fprintf(stdout, _("   Number: %s\n"), wapsetting.number);
-			fprintf(stdout, _("   Username: %s\n"), wapsetting.gsm_data_username);
-			fprintf(stdout, _("   Password: %s\n"), wapsetting.gsm_data_password);
-			fprintf(stdout, _("GPRS\n"));
-			fprintf(stdout, _("   connection: "));
-			switch (wapsetting.gprs_connection) {
-			case GN_WAP_GPRS_WHENNEEDED: 
-				fprintf(stdout, _("when needed\n"));
-				break;
-			case GN_WAP_GPRS_ALWAYS: 
-				fprintf(stdout, _("always\n"));
-				break;
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("   Authentication type: "));
-			switch (wapsetting.gprs_authentication) {
-			case GN_WAP_AUTH_NORMAL:
-				fprintf(stdout, _("normal\n"));
-				break;
-			case GN_WAP_AUTH_SECURE:
-				fprintf(stdout, _("secure\n"));
-				break;
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("   Login type: "));
-			switch (wapsetting.gprs_login) {
-			case GN_WAP_LOGIN_MANUAL: 
-				fprintf(stdout, _("manual\n"));
-				break;
-			case GN_WAP_LOGIN_AUTOLOG:
-				fprintf(stdout, _("automatic\n"));
-				break;
-			default: 
-				fprintf(stdout, _("unknown\n"));
-				break;
-			}
-			fprintf(stdout, _("   Access point: %s\n"), wapsetting.access_point_name);
-			fprintf(stdout, _("   IP: %s\n"), wapsetting.gprs_ip);
-			fprintf(stdout, _("   Username: %s\n"), wapsetting.gprs_username);
-			fprintf(stdout, _("   Password: %s\n"), wapsetting.gprs_password);
-			fprintf(stdout, _("SMS\n"));
-			fprintf(stdout, _("   Service number: %s\n"), wapsetting.sms_service_number);
-			fprintf(stdout, _("   Server number: %s\n"), wapsetting.sms_server_number);
+			fprintf(stdout, _("%s: %s\n"), _("Name"), wapsetting.name);
+			fprintf(stdout, _("%s: %s\n"), _("Home"), wapsetting.home);
+			fprintf(stdout, _("%s: %s\n"), _("Session mode"), gn_wap_session2str(wapsetting.session));
+			fprintf(stdout, _("%s: %s\n"), _("Connection security"), (wapsetting.security ? _("yes") : _("no")));
+			fprintf(stdout, _("%s: %s\n"), _("Data bearer"), gn_wap_bearer2str(wapsetting.bearer));
+			fprintf(stdout, _("%s\n"), _("GSM data"));
+			fprintf(stdout, _("   %s: %s\n"), _("Authentication type"), gn_wap_authentication2str(wapsetting.security));
+			fprintf(stdout, _("   %s: %s\n"), _("Data call type"), gn_wap_call_type2str(wapsetting.call_type));
+			fprintf(stdout, _("   %s: %s\n"), _("Data call speed"), gn_wap_call_speed2str(wapsetting.call_speed));
+			fprintf(stdout, _("   %s: %s\n"), _("Login type"), gn_wap_login2str(wapsetting.gsm_data_login));
+			fprintf(stdout, _("   %s: %s\n"), _("IP"), wapsetting.gsm_data_ip);
+			fprintf(stdout, _("   %s: %s\n"), _("Number"), wapsetting.number);
+			fprintf(stdout, _("   %s: %s\n"), _("Username"), wapsetting.gsm_data_username);
+			fprintf(stdout, _("   %s: %s\n"), _("Password"), wapsetting.gsm_data_password);
+			fprintf(stdout, _("%s\n"), _("GPRS"));
+			fprintf(stdout, _("   %s: %s\n"), _("Connection"), gn_wap_gprs2str(wapsetting.gprs_connection));
+			fprintf(stdout, _("   %s: %s\n"), _("Authentication type"), gn_wap_authentication2str(wapsetting.gprs_authentication));
+			fprintf(stdout, _("   %s: %s\n"), _("Login type"), gn_wap_login2str(wapsetting.gprs_login));
+			fprintf(stdout, _("   %s: %s\n"), _("Access point"), wapsetting.access_point_name);
+			fprintf(stdout, _("   %s: %s\n"), _("IP"), wapsetting.gprs_ip);
+			fprintf(stdout, _("   %s: %s\n"), _("Username"), wapsetting.gprs_username);
+			fprintf(stdout, _("   %s: %s\n"), _("Password"), wapsetting.gprs_password);
+			fprintf(stdout, _("%s\n"), _("SMS"));
+			fprintf(stdout, _("   %s: %s\n"), _("Service number"), wapsetting.sms_service_number);
+			fprintf(stdout, _("   %s: %s\n"), _("Server number"), wapsetting.sms_server_number);
 		}
 		break;
 	default:

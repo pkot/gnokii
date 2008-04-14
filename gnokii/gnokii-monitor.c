@@ -238,7 +238,7 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 			fprintf(stdout, _("Battery: %d\n"), (int)batterylevel);
 
 		if (gn_sm_functions(GN_OP_GetPowersource, data, state) == GN_ERR_NONE)
-			fprintf(stdout, _("Power Source: %s\n"), (powersource == GN_PS_ACDC) ? _("AC/DC") : _("battery"));
+			fprintf(stdout, _("Power Source: %s\n"), gn_power_source2str(powersource));
 
 		data->memory_status = &simmemorystatus;
 		if (gn_sm_functions(GN_OP_GetMemoryStatus, data, state) == GN_ERR_NONE)
