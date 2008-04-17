@@ -34,6 +34,8 @@
                                                     (Daniele Forsi)
     o merge from devel branch the functions to convert enum values
       into localized strings             (Paweł Kot, Daniele Forsi)
+    o use the new function to convert enum values into localized
+      strings to output vCard category              (Daniele Forsi)
  * gnokii changes
     o allow to use --entersecuritycode with another gnokii command
                                                   (Pavel Kankovsky)

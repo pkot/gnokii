@@ -41,7 +41,6 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 {
 	int i;
 	char name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
-	const char *category = "";
 
 	fprintf(f, "BEGIN:VCARD\n");
 	fprintf(f, "VERSION:3.0\n");
@@ -62,30 +61,7 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 	fprintf(f, "X-GSM-MEMORY:%s\n", gn_memory_type2str(entry->memory_type));
 	fprintf(f, "X-GSM-LOCATION:%d\n", entry->location);
 	fprintf(f, "X-GSM-CALLERGROUP:%d\n", entry->caller_group);
-	switch (entry->caller_group) {
-	case GN_PHONEBOOK_GROUP_Family:
-		category = _("Family");
-		break;
-	case GN_PHONEBOOK_GROUP_Vips:
-		category = _("VIPs");
-		break;
-	case GN_PHONEBOOK_GROUP_Friends:
-		category = _("Friends");
-		break;
-	case GN_PHONEBOOK_GROUP_Work:
-		category = _("Work");
-		break;
-	case GN_PHONEBOOK_GROUP_Others:
-		category = _("Others");
-		break;
-	case GN_PHONEBOOK_GROUP_None:
-		category = _("None");
-		break;
-	default:
-		category = _("Unknown");
-		break;
-	}
-	fprintf(f, "CATEGORIES:%s\n", category);
+	fprintf(f, "CATEGORIES:%s\n", gn_phonebook_group_type2str(entry->caller_group));
 
 	if (entry->address.has_address)
 		fprintf(f, "ADR;TYPE=HOME,PREF:%s;%s;%s;%s;%s;%s;%s\n",
