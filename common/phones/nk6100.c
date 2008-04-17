@@ -217,14 +217,14 @@ struct {
 	 * Set NULL in the second field for all software versions.
 	 */
 	{ "NSE-3",	"-4.06",	NK6100_CAP_NBS_UPLOAD }, /* 6110 */
-	{ "NHM-5",	NULL,           NK6100_CAP_OLD_KEY_API | NK6100_CAP_PB_UNICODE | NK6100_CAP_NO_PSTATUS | NK6100_CAP_OLD_CALL_API }, /* 3310 */
-	{ "NHM-5NX",	NULL,           NK6100_CAP_OLD_KEY_API | NK6100_CAP_PB_UNICODE | NK6100_CAP_NO_PSTATUS | NK6100_CAP_OLD_CALL_API }, /* 3310 */
-	{ "NHM-6",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3330 */
+	{ "NHM-5",	NULL,           NK6100_CAP_OLD_KEY_API | NK6100_CAP_PB_UNICODE | NK6100_CAP_NO_PSTATUS | NK6100_CAP_OLD_CALL_API | NK6100_CAP_NO_PB_GROUP }, /* 3310 */
+	{ "NHM-5NX",	NULL,           NK6100_CAP_OLD_KEY_API | NK6100_CAP_PB_UNICODE | NK6100_CAP_NO_PSTATUS | NK6100_CAP_OLD_CALL_API | NK6100_CAP_NO_PB_GROUP }, /* 3310 */
+	{ "NHM-6",      NULL,           NK6100_CAP_PB_UNICODE | NK6100_CAP_NO_PB_GROUP }, /* 3330 */
 	{ "NHM-2",      NULL,           NK6100_CAP_PB_UNICODE }, /* 3410 */
 	{ "NSM-3D",     NULL,           NK6100_CAP_PB_UNICODE | NK6100_CAP_CAL_UNICODE }, /* 8250 */
 	{ "RPM-1",	"-4.23",	NK6100_CAP_NBS_UPLOAD }, /* Card Phone 2.0 */
-	{ "NSE-8",	NULL,		NK6100_CAP_OLD_KEY_API | NK6100_CAP_NO_PSTATUS | NK6100_CAP_NO_CB | NK6100_CAP_OLD_CALL_API }, /* 3210 */
-	{ "NSE-9",	NULL,		NK6100_CAP_OLD_KEY_API | NK6100_CAP_NO_PSTATUS | NK6100_CAP_NO_CB | NK6100_CAP_OLD_CALL_API }, /* 3210 */
+	{ "NSE-8",	NULL,		NK6100_CAP_OLD_KEY_API | NK6100_CAP_NO_PSTATUS | NK6100_CAP_NO_CB | NK6100_CAP_OLD_CALL_API | NK6100_CAP_NO_PB_GROUP }, /* 3210 */
+	{ "NSE-9",	NULL,		NK6100_CAP_OLD_KEY_API | NK6100_CAP_NO_PSTATUS | NK6100_CAP_NO_CB | NK6100_CAP_OLD_CALL_API | NK6100_CAP_NO_PB_GROUP }, /* 3210 */
 	{ NULL,		NULL,		0 }
 };
 
@@ -883,7 +883,12 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			n = *pos++;
 			pnok_string_decode(pe->number, sizeof(pe->number), pos, n);
 			pos += n;
-			pe->caller_group = *pos++;
+			if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NO_PB_GROUP) {
+				pe->caller_group = GN_PHONEBOOK_GROUP_None;
+				pos++;
+			} else {
+				pe->caller_group = *pos++;
+			}
 			if (*pos++) {
 				/* date is set */
 				pe->date.year = (pos[0] << 8) + pos[1];

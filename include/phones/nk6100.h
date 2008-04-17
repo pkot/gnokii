@@ -22,7 +22,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2000      Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 2000      Hugh Blemings & Pavel JanÃ­k ml.
   Copyright (C) 2001-2003 Pawel Kot, BORBELY Zoltan
 
   This file provides functions specific to the 6100/5100 series.
@@ -59,6 +59,7 @@
 #define	NK6100_CAP_NO_PSTATUS	16
 #define	NK6100_CAP_NO_CB	32
 #define	NK6100_CAP_CAL_UNICODE	64
+#define	NK6100_CAP_NO_PB_GROUP	128 /* phone doesn't support categories in phonebook entries (caller groups) */
 
 typedef struct {
 	gn_key_code key;

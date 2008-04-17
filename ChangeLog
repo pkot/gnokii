@@ -43,6 +43,10 @@
     o use the new functions to convert enum values into localized
       strings (merge code from devel branch with minor changes)
                                                      (Daniele Forsi)
+ * nk6100 driver updates
+    o Nokia 3210, 3310 and 3330 do not support caller groups (tested
+      for NSE-8, NHM-5 and NHM-6, guessed for NSE-9 and NHM-5NX)
+      so return GN_PHONEBOOK_GROUP_None on reading   (Daniele Forsi)
 
 0.6.24
 ======
