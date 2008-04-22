@@ -611,17 +611,17 @@ static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 	case GN_SMS_MT_Submit:
 		dprintf("Mobile Originated (stored) message:\n");
 		break;
-	case GN_SMS_MT_SubmitSent:
-		dprintf("Mobile Originated (sent) message:\n");
-		break;
 	case GN_SMS_MT_Picture:
 		dprintf("Picture Message:\n");
+		break;
+	case GN_SMS_MT_TextTemplate:
+		dprintf("Text Template:\n");
 		break;
 	case GN_SMS_MT_PictureTemplate:
 		dprintf("Picture Template:\n");
 		break;
-	case GN_SMS_MT_TextTemplate:
-		dprintf("Text Template:\n");
+	case GN_SMS_MT_SubmitSent:
+		dprintf("Mobile Originated (sent) message:\n");
 		break;
 	default:
 		dprintf("Not supported message type: %d\n", sms->type);
