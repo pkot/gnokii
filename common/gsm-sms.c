@@ -611,6 +611,9 @@ static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 	case GN_SMS_MT_Submit:
 		dprintf("Mobile Originated (stored) message:\n");
 		break;
+	case GN_SMS_MT_StatusReport:
+		dprintf("Status Report message:\n");
+		break;
 	case GN_SMS_MT_Picture:
 		dprintf("Picture Message:\n");
 		break;
@@ -765,8 +768,34 @@ gn_error gn_sms_parse(gn_data *data)
  */
 gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int flags)
 {
+#define COPY_REMOTE_NUMBER(pdu, offset) { \
+	l = (pdu[offset] % 2) ? pdu[offset] + 1 : pdu[offset]; \
+	l = l / 2 + 2; \
+	if (l + offset + extraoffset > pdu_len || l > GN_SMS_NUMBER_MAX_LENGTH) { \
+		dprintf("Invalid remote number length (%d)\n", l); \
+		ret = GN_ERR_INTERNALERROR; \
+		goto out; \
+	} \
+	memcpy(rawsms->remote_number, pdu + offset, l); \
+	offset += l; \
+	}
+
+#define COPY_USER_DATA(pdu, offset) { \
+	rawsms->length = pdu[offset++]; \
+	rawsms->user_data_length = rawsms->length; \
+	if (rawsms->udh_indicator) \
+		rawsms->user_data_length -= pdu[offset] + 1; \
+	if (pdu_len - offset > 1000) { \
+		dprintf("Phone gave as poisonous (too short?) reply, either phone went crazy or communication went out of sync\n"); \
+		ret = GN_ERR_INTERNALERROR; \
+		goto out; \
+	} \
+	memcpy(rawsms->user_data, pdu + offset, pdu_len - offset); \
+	}
+
 	gn_error ret = GN_ERR_NONE;
 	unsigned int l, extraoffset, offset = 0;
+	int parameter_indicator;
 
 	if (!flags & GN_SMS_PDU_NOSMSC) {
 		l = pdu[offset] + 1;
@@ -785,45 +814,145 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 	rawsms->reply_via_same_smsc = 0;
 	rawsms->report              = 0;
 
-	dprintf("rawsms->type: %d\n", rawsms->type);
+	/* NOTE: offsets are taken from subclause 9.2.3 "Definition of the TPDU parameters"
+	   *not* from the tables in subclause 9.2.2 "PDU Type repertoire at SM-TL" which ignore unused bits
+	*/
 
-	rawsms->type                = (pdu[offset] & 0x03) << 1;
+	/* NOTE: this function handles only short messages received by the phone.
+	   Since the same TP-MTI value is used both for SC->MS and for MS->SC,
+	   it can't simply shift to get the enum value: (pdu[offset] & 0x03) << 1
+	*/
+
+	/* TP-MTI TP-Message-Type-Indicator 9.2.3.1 */
+	switch (pdu[offset] & 0x03) {
+	case 0x00:
+		rawsms->type = GN_SMS_MT_Deliver;
+		break;
+	case 0x01:
+		rawsms->type = GN_SMS_MT_Submit;
+		break;
+	case 0x02:
+		rawsms->type = GN_SMS_MT_StatusReport;
+		break;
+	case 0x03:
+		dprintf("Reserved TP-MTI found\n");
+		return GN_ERR_INTERNALERROR;
+		break;
+	}
 	switch (rawsms->type) {
 	case GN_SMS_MT_Deliver:
 		dprintf("SMS-DELIVER found\n");
+		/* TP-MMS  TP-More-Messages-to-Send */
 		rawsms->more_messages       = pdu[offset] & 0x04;
 		// bits 3 and 4 of the first octet unused;
+		/* TP-SRI  TP-Status-Report-Indication */
 		rawsms->report_status       = pdu[offset] & 0x20;
+		/* TP-UDHI TP-User-Data-Header-Indication */
+		rawsms->udh_indicator       = pdu[offset] & 0x40;
+		/* TP-RP   TP-Reply-Path */
+		rawsms->reply_via_same_smsc = pdu[offset] & 0x80;
+		offset++;
+		/* TP-OA   TP-Originating-Address */
 		extraoffset = 10;
+		COPY_REMOTE_NUMBER(pdu, offset);
+		/* TP-PID  TP-Protocol-Identifier */
+		rawsms->pid = pdu[offset++];
+		/* TP-DCS  TP-Data-Coding-Scheme */
+		rawsms->dcs = pdu[offset++];
+		/* TP-SCTS TP-Service-Centre-Time-Stamp */
+		memcpy(rawsms->smsc_time, pdu + offset, 7);
+		offset += 7;
+		/* TP-UDL  TP-User-Data-Length */
+		/* TP-UD   TP-User-Data */
+		COPY_USER_DATA(pdu, offset);
 		break;
 	case GN_SMS_MT_Submit:
 		dprintf("SMS-SUBMIT found\n");
+		/* TP-RD   TP-Reject-Duplicates */
 		rawsms->reject_duplicates   = pdu[offset] & 0x04;
+		/* TP-VPF  TP-Validity-Period-Format */
 		rawsms->validity_indicator  = (pdu[offset] & 0x18) >> 3;
+		/* TP-SRR  TP-Status-Report-Request */
+		rawsms->report              = pdu[offset] & 0x20;
+		/* TP-UDHI TP-User-Data-Header-Indication */
+		rawsms->udh_indicator       = pdu[offset] & 0x40;
+		/* TP-RP   TP-Reply-Path */
+		rawsms->reply_via_same_smsc = pdu[offset] & 0x80;
+		offset++;
+		/* TP-MR   TP-Message-Reference */
+		rawsms->reference           = pdu[offset++];
+		/* TP-DA   TP-Destination-Address */
 		extraoffset = 3;
+		COPY_REMOTE_NUMBER(pdu, offset);
+		/* TP-PID  TP-Protocol-Identifier */
+		rawsms->pid = pdu[offset++];
+		/* TP-DCS  TP-Data-Coding-Scheme */
+		rawsms->dcs = pdu[offset++];
+		/* TP-VP   TP-Validity-Period */
+		switch (rawsms->validity_indicator) {
+		case GN_SMS_VP_None:
+			/* nothing to convert */
+			break;
+		case GN_SMS_VP_RelativeFormat:
+			rawsms->validity[0] = pdu[offset++];
+			break;
+		case GN_SMS_VP_EnhancedFormat:
+			/* FALL THROUGH */
+		case GN_SMS_VP_AbsoluteFormat:
+			memcpy(rawsms->validity, pdu + offset, 7);
+			offset += 7;
+			break;
+		default:
+			dprintf("Unknown validity_indicator 0x%02x\n", rawsms->validity_indicator);
+			return GN_ERR_INTERNALERROR;
+		}
+		/* TP-UDL  TP-User-Data-Length */
+		/* TP-UD   TP-User-Data */
+		COPY_USER_DATA(pdu, offset);
+		break;
+	case GN_SMS_MT_StatusReport:
+		dprintf("SMS-STATUS-REPORT found\n");
+		/* TP-MMS  TP-More-Messages-to-Send */
+		rawsms->more_messages       = pdu[offset] & 0x04;
+		/* TP-SRQ  TP-Status-Report-Qualifier */
+		rawsms->report              = pdu[offset] & 0x10;
+		/* TP-UDHI TP-User-Data-Header-Indication */
+		rawsms->udh_indicator       = pdu[offset] & 0x40;
+		offset++;
+		/* TP-MR   TP-Message-Reference */
+		rawsms->reference           = pdu[offset++];
+		/* TP-RA   TP-Recipient-Address */
+		extraoffset = 0;
+		COPY_REMOTE_NUMBER(pdu, offset);
+		/* TP-SCTS TP-Service-Centre-Time-Stamp */
+		memcpy(rawsms->smsc_time, pdu + offset, 7);
+		offset += 7;
+		/* TP-DT   TP-Discharge-Time */
+		memcpy(rawsms->time, pdu + offset, 7);
+		offset += 7;
+		/* TP-ST   TP-Status */
+		rawsms->report              = pdu[offset++];
+		/* TP-PI   TP-Parameter-Indicator */
+		dprintf("TP-Parameter-Indicator: 0x%02x\n", pdu[offset++]);
+		parameter_indicator         = pdu[offset];
+		/* handle the "extension bit" skipping the following octects, if any (see 9.2.3.27 TP-Parameter-Indicator) */
+		while (pdu[offset++] & 0x80)
+			;
+		if (parameter_indicator & 0x01) {
+			/* TP-PID  TP-Protocol-Identifier */
+			rawsms->pid = pdu[offset++];
+		}
+		if (parameter_indicator & 0x02) {
+			/* TP-DCS  TP-Data-Coding-Scheme */
+			rawsms->dcs = pdu[offset++];
+		}
+		if (parameter_indicator & 0x04) {
+			/* TP-UDL  TP-User-Data-Length */
+			/* TP-UD   TP-User-Data */
+			COPY_USER_DATA(pdu, offset);
+		}
 		break;
 	case GN_SMS_MT_Command:
-		/* TP-Message-Type-Indicator */
-		rawsms->type                = GN_SMS_MT_StatusReport;
-		/* TP-User-Data-Header-Indication */
-		rawsms->udh_indicator       = pdu[offset] & 0x40;
-		/* TP-More-Messages-to-Send */
-		rawsms->more_messages       = pdu[offset] & 0x04;
-		/* TP-Status-Report-Qualifier */
-		rawsms->report              = pdu[offset] & 0x10;
-		offset++;
-		/* TP-Message-Reference */
-		rawsms->reference           = pdu[offset++];
-		/* TP-Recipient-Address */
-		/* TP-Service-Centre-Time-Stamp */
-		/* TP-Discharge-Time */
-		/* TP-Status */
-		/* TP-Parameter-Indicator */
-		/* TP-Protocol-Identifier */
-		/* TP-Data-Coding-Scheme */
-		/* TP-User-Data-Length */
-		/* TP-User-Data */
-		extraoffset = 0;
 #if 0
 		dprintf("SMS-COMMAND found\n");
 		/* TP-Message-Type-Indicator */
@@ -854,60 +983,16 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		goto out;
 		break;
 #endif
+		/* FALL THROUGH */
 	default:
 		dprintf("Unknown PDU type %d\n", rawsms->type);
 		return GN_ERR_INTERNALERROR;
- 	}
- 	rawsms->more_messages       = pdu[offset];
-	rawsms->udh_indicator       = pdu[offset] & 0x40;
-	offset++;
-
-	if (rawsms->type == GN_SMS_MT_Submit) {
-		rawsms->reference = pdu[offset++];
 	}
 
-	l = (pdu[offset] % 2) ? pdu[offset] + 1 : pdu[offset];
-	l = l / 2 + 2;
-	if (l + offset + extraoffset > pdu_len || l > GN_SMS_NUMBER_MAX_LENGTH) {
-		dprintf("Invalid remote number length (%d)\n", l);
-		ret = GN_ERR_INTERNALERROR;
-		goto out;
-	}
-	memcpy(rawsms->remote_number, pdu + offset, l);
-	offset += l;
-	rawsms->pid                 = pdu[offset++];
-	rawsms->dcs                 = pdu[offset++];
-	if (rawsms->type == GN_SMS_MT_Deliver) {
-		memcpy(rawsms->smsc_time, pdu + offset, 7);
-		offset += 7;
-	}
-	if (rawsms->type == GN_SMS_MT_Submit) {
-		if (rawsms->validity_indicator == GN_SMS_VP_None) {
-			offset += 0;
-		} else if (rawsms->validity_indicator == GN_SMS_VP_RelativeFormat) {
-			// FIXME save this info
-			offset += 1;
-		} else if (rawsms->validity_indicator == GN_SMS_VP_EnhancedFormat ||
-			   rawsms->validity_indicator == GN_SMS_VP_AbsoluteFormat) {
-			// FIXME save this info
-			offset += 7;
-		} else { 
-			dprintf("Internal Error on validity_indicator");
-			return GN_ERR_INTERNALERROR;
-		}
-	}
-	rawsms->length              = pdu[offset++];
-	rawsms->user_data_length = rawsms->length;
-	if (rawsms->udh_indicator & 0x40)
-		rawsms->user_data_length -= pdu[offset] + 1;
-	if (pdu_len - offset > 1000) {
-		dprintf("Phone gave as poisonous (too short?) reply, either phone went crazy or communication went out of sync\n");
-		ret = GN_ERR_INTERNALERROR;
-		goto out;
-	}
-	memcpy(rawsms->user_data, pdu + offset, pdu_len - offset);
 out:
 	return ret;
+#undef COPY_USER_DATA
+#undef COPY_REMOTE_NUMBER
 }
 
 /**
