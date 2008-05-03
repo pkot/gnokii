@@ -1,4 +1,4 @@
-0.6.25 (not yet released)
+0.6.25
 ======
  * at driver updates
     o correctly handle different length memory names (like F10) so

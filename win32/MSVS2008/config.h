@@ -35,14 +35,13 @@
 #if defined(_MSC_VER) && defined(WIN32)
 #	pragma once
 #else
-#	error This config.h is only for MSVC6 compiler !!!
+#	error This config.h is only for MSVS2008 compiler !!!
 #endif
 
-
 #undef VERSION
-#define VERSION "0.6.24"
+#define VERSION "0.6.25"
 
-/* We support Bluetooth and IRDA on MSVS 2005 */
+/* We support Bluetooth and IRDA on MSVS 2008 */
 #define HAVE_BLUETOOTH 1
 #define HAVE_IRDA 1
 

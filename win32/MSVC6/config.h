@@ -37,10 +37,9 @@
 #else
 #	error This config.h is only for MSVC6 compiler !!!
 #endif
-
 	
 #undef VERSION
-#define VERSION "0.6.24"
+#define VERSION "0.6.25"
 
 /* No bluetooth and no IRDA */
 #undef HAVE_BLUETOOTH
@@ -113,6 +112,9 @@
 /* Define if you want NLS */
 #undef ENABLE_NLS
 
+/* Define if you have <langinfo.h> and nl_langinfo(CODESET). */
+#undef HAVE_LANGINFO_CODESET
+
 /* Define if you want to use Unix98 PTYs */
 #undef USE_UNIX98PTYS
 
@@ -124,5 +126,9 @@
 #pragma warning(disable : 4761) // integral size mismatch in argument; conversion supplied
 #pragma warning(disable : 4018) // signed/unsigned mismatch
 #pragma warning(disable : 4305) // truncation from 'const int ' to 'char '
+#pragma warning(disable : 4996) // 'strnicmp' was declared deprecated
+
+/* Suppress CRT warnings */
+#define _CRT_SECURE_NO_DEPRECATE
 
 #endif // _config_h
