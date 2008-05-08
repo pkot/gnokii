@@ -1,3 +1,5 @@
+DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
+
 bin_PROGRAMS = gnokii
 gnokii_SOURCES = gnokii.c gnokii-calendar.c gnokii-dial.c gnokii-file.c gnokii-logo.c gnokii-monitor.c \
 	gnokii-other.c gnokii-phonebook.c gnokii-profile.c gnokii-ringtone.c gnokii-security.c \

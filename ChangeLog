@@ -1,3 +1,9 @@
+0.6.26 (not yet released)
+======
+ * translation updates
+    o search translations in $(localedir) and use exactly the same
+      code in gnokii, xgnokii, smsd and gnokiid     (Daniele Forsi)
+
 0.6.25
 ======
  * at driver updates

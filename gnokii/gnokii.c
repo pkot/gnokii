@@ -1040,8 +1040,9 @@ int main(int argc, char *argv[])
 
 	/* For GNU gettext */
 #ifdef ENABLE_NLS
-	textdomain("gnokii");
 	setlocale(LC_ALL, "");
+	bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
+	textdomain(GETTEXT_PACKAGE);
 #endif
 
 	opterr = 0;

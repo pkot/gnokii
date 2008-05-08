@@ -2,8 +2,10 @@ SUBDIRS = xpm docs
 
 bin_PROGRAMS = xgnokii
 
-AM_CFLAGS = $(PTHREAD_CFLAGS) \
-	  $(GTK_CFLAGS) -DGTK_ENABLE_BROKEN
+AM_CFLAGS = \
+	$(PTHREAD_CFLAGS) \
+	$(GTK_CFLAGS) -DGTK_ENABLE_BROKEN \
+	-DLOCALEDIR=\"$(localedir)\"
 
 xgnokii_LDADD = \
 	$(PTHREAD_LIBS) $(GTK_LIBS) $(INTLLIBS) \

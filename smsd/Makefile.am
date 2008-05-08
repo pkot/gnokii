@@ -32,6 +32,7 @@ AM_CFLAGS =				\
 	$(POSTGRES_CFLAGS)		\
 	$(MYSQL_CFLAGS)			\
 	-DMODULES_DIR=\"${plugindir}\"	\
+	-DLOCALEDIR=\"$(localedir)\"	\
 	$(PTHREAD_CFLAGS)
 
 man_MANS = man/smsd.8
