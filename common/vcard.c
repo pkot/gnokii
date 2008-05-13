@@ -230,7 +230,7 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 		/* libgnokii 0.6.25 deprecates X_GSM_STORE_AT in favour of X-GSM-MEMORY and X-GSM-LOCATION and X_GSM_CALLERGROUP in favour of X-GSM-CALLERGROUP */
 		STORE3("X_GSM_STORE_AT:", memloc);
 		/* if the field is present and correctly formed */
-		if (memloc && (strlen(memloc) > 2)) {
+		if (strlen(memloc) > 2) {
 			entry->location = atoi(memloc + 2);
 			memloc[2] = 0;
 			entry->memory_type = gn_str2memory_type(memloc);
