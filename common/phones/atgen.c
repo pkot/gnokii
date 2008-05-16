@@ -747,10 +747,9 @@ static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error err;
 
-	if (sm_message_send(8, GN_OP_Identify, "AT+CGMM\r", state))
-		return GN_ERR_NOTREADY;
-	if ((err=sm_block_no_retry(GN_OP_Identify, data, state)) == GN_ERR_NONE)
-		return GN_ERR_NONE;
+	/* prefer AT+GMM over AT+CGMM because it returns a user friendly model name
+	   for some phones (e.g. Sony Ericsson Z310i)
+	 */
 
 	if (sm_message_send(7, GN_OP_Identify, "AT+GMM\r", state))
 		return GN_ERR_NOTREADY;

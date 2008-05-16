@@ -3,6 +3,10 @@
  * translation updates
     o search translations in $(localedir) and use exactly the same
       code in gnokii, xgnokii, smsd and gnokiid     (Daniele Forsi)
+ * at driver updates
+    o use AT+GMM to get the model name as it gives a more readable
+      output for Sony Ericssons and makes no difference for other
+      tested phones                      (Pavel Kot, Daniele Forsi)
 
 0.6.25
 ======
