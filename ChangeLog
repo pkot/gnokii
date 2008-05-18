@@ -6,7 +6,7 @@
  * at driver updates
     o use AT+GMM to get the model name as it gives a more readable
       output for Sony Ericssons and makes no difference for other
-      tested phones                      (Pavel Kot, Daniele Forsi)
+      tested phones                      (Paweł Kot, Daniele Forsi)
 
 0.6.25
 ======
