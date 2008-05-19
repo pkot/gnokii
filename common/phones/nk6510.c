@@ -3440,9 +3440,10 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 	case 0x02:
 		blockstart = message + 6;
 		for (i = 0; i < message[5]; i++) {
-			dprintf("Blockstart: %i\n", blockstart[0]);
+			dprintf("Blockstart: %i, ", blockstart[0]);
 			switch (blockstart[0]) {
 			case 0x00:
+				dprintf("Network status\n");
 				switch (blockstart[2]) {
 				case 0x00:
 					dprintf("Logged into home network.\n");
@@ -3452,10 +3453,16 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 					break;
 				case 0x04:
 				case 0x09:
-					dprintf("Not logged in any network!");
+					dprintf("Not logged in any network.\n");
+				case 0x06:
+				case 0x0b:
+					dprintf("Inactive SIM.\n");
+					break;
+				case 0x08:
+					dprintf("Flight mode.\n");
 					break;
 				default:
-					dprintf("Unknown network status!\n");
+					dprintf("Unknown network status 0x%02x!\n", blockstart[2]);
 					break;
 				}
 				operatorname = malloc(blockstart[5] + 1);
@@ -3464,6 +3471,7 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 				free(operatorname);
 				break;
 			case 0x09:  /* Operator details */
+				dprintf("Operator details\n");
 				/* Network code is stored as 0xBA 0xXC 0xED ("ABC DE"). */
 				if (data->network_info) {
 					data->network_info->cell_id[0] = blockstart[6];
@@ -3480,7 +3488,7 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 				}
 				break;
 			default:
-				dprintf("Unknown operator block %d\n", blockstart[0]);
+				dprintf("Unknown operator block\n");
 				break;
 			}
 			blockstart += blockstart[1];
