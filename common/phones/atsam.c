@@ -26,7 +26,7 @@
   Copyright 2004 Pawel Kot
   Copyright 2007 Ingmar Steen <iksteen@gmail.com>
 
-  This file provides functions specific to at commands on ericsson
+  This file provides functions specific to AT commands on Samsung
   phones. See README for more details on supported mobile phones.
 
 */

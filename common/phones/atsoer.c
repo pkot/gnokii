@@ -25,7 +25,7 @@
   Copyright 2004 Hugo Haas <hugo@larve.net>
   Copyright 2004 Pawel Kot
 
-  This file provides functions specific to at commands on ericsson
+  This file provides functions specific to AT commands on Sony Ericsson
   phones. See README for more details on supported mobile phones.
 
 */
