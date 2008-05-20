@@ -176,7 +176,7 @@ gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state)
 {
 	gn_network_info networkinfo;
 	gn_error error;
-	int cid, lac;
+	int lac, cid;
 	char country[4] = {0, 0, 0, 0};
 
 	gn_data_clear(data);
@@ -189,7 +189,11 @@ gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state)
 		return error;
 	}
 
-	cid = (networkinfo.cell_id[0] << 8) + networkinfo.cell_id[1];
+	/* Ugly, ugly, ... */
+        if (networkinfo.cell_id[2] == 0 && networkinfo.cell_id[3] == 0)  
+        	cid = (networkinfo.cell_id[0] << 8) + networkinfo.cell_id[1];
+	else  
+		cid = (networkinfo.cell_id[0] << 24) + (networkinfo.cell_id[1] << 16) + (networkinfo.cell_id[2] << 8) + networkinfo.cell_id[3];
 	lac = (networkinfo.LAC[0] << 8) + networkinfo.LAC[1];
 	memcpy(country, networkinfo.network_code, 3);
 
@@ -198,7 +202,7 @@ gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state)
 			gn_country_name_get((char *)country));
 	fprintf(stdout, _("Network code : %s\n"), networkinfo.network_code);
 	fprintf(stdout, _("LAC          : %04x\n"), lac);
-	fprintf(stdout, _("Cell id      : %04x\n"), cid);
+	fprintf(stdout, _("Cell id      : %08x\n"), cid);
 
 	return 0;
 }

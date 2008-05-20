@@ -65,6 +65,7 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error Parse_ReplyMemoryRange(gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -589,6 +590,9 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->memorytype) {
+		gn_data_clear(&data);
+		if (drvinst->encode_memory_type)
+			at_set_charset(&data, state, AT_CHAR_GSM);
 		memory_name = gn_memory_type2str(mt);
 		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
@@ -673,17 +677,21 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_data tmpdata;
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 
 	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
+
 	/* check available charsets */
-	error = sm_message_send(10, GN_OP_AT_GetCharset, "AT+CSCS=?\r", state);
-	if (error)
-		return error;
-	gn_data_clear(&tmpdata);
-	error = sm_block_no_retry(GN_OP_AT_GetCharset, &tmpdata, state);
-	if (!error && (drvinst->availcharsets & AT_CHAR_UCS2)) {
+	if (drvinst->availcharsets == 0) {
+		error = sm_message_send(10, GN_OP_AT_GetCharset, "AT+CSCS=?\r", state);
+		if (error)
+			return error;
+		gn_data_clear(&tmpdata);
+		error = sm_block_no_retry(GN_OP_AT_GetCharset, &tmpdata, state);
+	}
+
+	if (!error && (drvinst->availcharsets & AT_CHAR_UCS2) && (drvinst->charset != AT_CHAR_UCS2)) {
 		/* UCS2 charset found. try to set it */
 		error = sm_message_send(15, GN_OP_Init, "AT+CSCS=\"UCS2\"\r", state);
 		if (error)
@@ -694,23 +702,33 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 	}
 	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
+
 	/* no UCS2 charset found or error occured */
-	if (drvinst->availcharsets & (AT_CHAR_GSM | AT_CHAR_HEXGSM)) {
+	if ((drvinst->availcharsets & AT_CHAR_HEXGSM) && (drvinst->charset != AT_CHAR_HEXGSM)) {
 		/* try to set HEX charset */
 		error = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"HEX\"\r", state);
 		if (error)
 			return error;
 		error = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
-		if (error) {
-			/* no support for HEXGSM, be happy with GSM */ 
-			drvinst->charset = AT_CHAR_GSM;
-			error = GN_ERR_NONE;
-		} else
-			drvinst->charset = AT_CHAR_HEXGSM;
-	} else {
-		drvinst->charset = drvinst->defaultcharset;
-		error = (drvinst->charset == AT_CHAR_UNKNOWN) ? error : GN_ERR_NONE;
+		drvinst->charset = AT_CHAR_HEXGSM;
 	}
+	if (drvinst->charset != AT_CHAR_UNKNOWN)
+		return GN_ERR_NONE;
+
+	/* no support for HEXGSM, be happy with GSM */ 
+	if ((drvinst->availcharsets & AT_CHAR_GSM) && (drvinst->charset != AT_CHAR_HEXGSM)) {
+		error = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"GSM\"\r", state);
+		if (error)
+			return error;
+		error = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
+		drvinst->charset = AT_CHAR_GSM;
+	}
+
+	if (drvinst->charset != AT_CHAR_UNKNOWN)
+		return GN_ERR_NONE;
+
+	drvinst->charset = drvinst->defaultcharset;
+	error = (drvinst->charset == AT_CHAR_UNKNOWN) ? error : GN_ERR_NONE;
 	return error;
 }
 
@@ -824,7 +842,6 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error ret;
 
-	at_set_charset(data, state, AT_CHAR_GSM);
 	ret = at_memory_type_set(data->memory_status->memory_type,  state);
 	if (ret)
 		return ret;
@@ -835,12 +852,20 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_GetMemoryRange(gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_error ret;
+	char key[7];
 
-	ret = sm_message_send(10, GN_OP_AT_GetMemoryRange, "AT+CPBR=?\r", state);
-	if (ret)
-		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_AT_GetMemoryRange, data, state);
+	snprintf(key, 7, "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
+	if (map_get(drvinst->cached_capabilities, key)) {
+		ret = Parse_ReplyMemoryRange(data, state);
+	} else {
+		ret = sm_message_send(10, GN_OP_AT_GetMemoryRange, "AT+CPBR=?\r", state);
+		if (ret)
+			return GN_ERR_NOTREADY;
+		ret = sm_block_no_retry(GN_OP_AT_GetMemoryRange, data, state);
+	}
+	return ret;
 }
 
 static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
@@ -849,13 +874,11 @@ static gn_error AT_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	char req[32];
 	gn_error ret;
 
-	at_set_charset(data, state, AT_CHAR_GSM);
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
-	ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
-	if (ret)
-		return ret;
+	/* Try to read in UCS2. Ignore errors. */
+	ret = at_set_charset(data, state, AT_CHAR_UCS2);
 	snprintf(req, sizeof(req), "AT+CPBR=%d\r", data->phonebook_entry->location + drvinst->memoryoffset);
 	if (sm_message_send(strlen(req), GN_OP_ReadPhonebook, req, state))
 		return GN_ERR_NOTREADY;
@@ -867,9 +890,9 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	int len, ofs;
 	char req[256], *tmp;
+	char number[64];
 	gn_error ret;
 
-	at_set_charset(data, state, AT_CHAR_GSM);
 	ret = at_memory_type_set(data->phonebook_entry->memory_type, state);
 	if (ret)
 		return ret;
@@ -879,9 +902,16 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 		ret = state->driver.functions(GN_OP_AT_SetCharset, data, state);
 		if (ret)
 			return ret;
+		memset(number, 0, sizeof(number));
+		if (drvinst->encode_number)
+			at_encode(drvinst->charset, number, sizeof(number),
+				data->phonebook_entry->number,
+				strlen(data->phonebook_entry->number));
+		else
+			strncpy(number, data->phonebook_entry->number, sizeof(number));
 		ofs = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%s,\"",
 			       data->phonebook_entry->location+drvinst->memoryoffset,
-			       data->phonebook_entry->number,
+			       number,
 			       data->phonebook_entry->number[0] == '+' ? "145" : "129");
 		tmp = req + ofs;
 		len = at_encode(drvinst->charset, tmp, sizeof(req) - ofs,
@@ -972,9 +1002,20 @@ static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error error;
+	at_driver_instance *drvinst = AT_DRVINST(state);
+
+	/* If we're already in PDU mode don't send this AT command again */
+	if (drvinst->pdumode)
+		return GN_ERR_NONE;
+
 	if (sm_message_send(10, GN_OP_AT_SetPDUMode, "AT+CMGF=0\r", state))
 		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_AT_SetPDUMode, data, state);
+	error = sm_block_no_retry(GN_OP_AT_SetPDUMode, data, state);
+	/* If we successfully changed mode to PDU, let's store this information */
+	if (error == GN_ERR_NONE)
+		drvinst->pdumode = 1;
+	return error;
 }
 
 static gn_error AT_GetSMSFolders(gn_data *data, struct gn_statemachine *state)
@@ -1269,26 +1310,63 @@ static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *st
 
 static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error;
+	at_driver_instance *drvinst = AT_DRVINST(state);
 
 	if (!data->network_info)
 		return GN_ERR_INTERNALERROR;
 
-	if (sm_message_send(10, GN_OP_GetNetworkInfo, "AT+CREG=2\r", state))
+	if (!drvinst->extended_reg_status) {
+		if (sm_message_send(10, GN_OP_GetNetworkInfo, "AT+CREG=?\r", state))
+			return GN_ERR_NOTREADY;
+
+		/* Let's ignore the error. We try to get as much as possible */
+		sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+	}
+
+	/*
+	 * We only check the registration status when the phone supports it.
+	 * What we want in fact is the LAC ID and CELL ID.
+	 */
+	if (drvinst->extended_reg_status == 2) {
+		if (sm_message_send(10, GN_OP_GetNetworkInfo, "AT+CREG=2\r", state))
+			return GN_ERR_NOTREADY;
+
+		/* Let's ignore the error. We try to get as much as possible */
+		sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+
+		if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+CREG?\r", state))
+			return GN_ERR_NOTREADY;
+
+		/* Let's ignore the error. We try to get as much as possible */
+		sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+	}
+
+	/*
+	 * We want to get the network information in the numerical format (network code).
+	 * Format of the command is as follows:
+	 *   AT+COPS=<MODE>,<FORMAT>,<OPERATOR>
+	 * <MODE> can be one of the following:
+	 *   0 - automatic mode (<OPERATOR> is ignored)
+	 *   1 - manual mode (<OPERATOR> is required)
+	 *   2 - unregister from the network
+	 *   3 - set <FORMAT> field
+	 *   4 - mixed manual and automatic mode (if manual fails, go into the automatic mode)
+	 * <FORMAT> can be one of the following:
+	 *   0 - long alphanumeric format (max 16 chars)
+	 *   1 - short alphanumeric format
+	 *   2 - numeric format (LAI)
+	 * <OPERATOR> should be alphanumeric network name or network code according to <FORMAT> value
+	 */
+	if (sm_message_send(12, GN_OP_GetNetworkInfo, "AT+COPS=3,2\r", state))
 		return GN_ERR_NOTREADY;
-
-	error = sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
-
-	if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+CREG?\r", state))
-		return GN_ERR_NOTREADY;
-
-	if ((error = sm_block_no_retry(GN_OP_GetNetworkInfo, data, state)) != GN_ERR_NONE)
-		return error;
+	/* Ignore the error. Nokias do not support this command and give always network code. */
+	sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
 
 	if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+COPS?\r", state))
 		return GN_ERR_NOTREADY;
 
-	return sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+	sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
+	return GN_ERR_NONE;
 }
 
 static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state)
@@ -1454,7 +1532,8 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 		   quotes can appear only as delimiters
 		 */
 		part[0] = pos = buf.line2 + 7;
-		for (parts = 1; parts < (sizeof(part) / sizeof(*part)); parts++) part[parts] = NULL;
+		for (parts = 1; parts < (sizeof(part) / sizeof(*part)); parts++)
+			part[parts] = NULL;
 		quoted = 0;
 		parts = 1;
 		while (*pos && (parts < (sizeof(part) / sizeof(*part)))) {
@@ -1482,7 +1561,10 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 		if (pos) {
 			dprintf("NUMBER: %s\n", pos);
 			pos = strip_quotes(pos);
-			snprintf(data->phonebook_entry->number, sizeof(data->phonebook_entry->number), "%s", pos);
+			if (drvinst->encode_number)
+				at_decode(drvinst->charset, data->phonebook_entry->number, pos, strlen(pos));
+			else
+				snprintf(data->phonebook_entry->number, sizeof(data->phonebook_entry->number), "%s", pos);
 		}
 		/* store name */
 		pos = part[3];
@@ -1589,6 +1671,34 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 	return GN_ERR_NONE;
 }
 
+static gn_error Parse_ReplyMemoryRange(gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	char *r, *s, *t, *pos;
+	char key[7];
+
+	snprintf(key, 7, "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
+	r = strdup(map_get(drvinst->cached_capabilities, key));
+	s = r + 7;
+	pos = strchr(s, ',');
+	if (pos) {
+		*pos = '\0';
+		s = strip_brackets(s);
+		t = strchr(s, '-');
+		if (t) {
+			int first, last;
+			first = atoi(s);
+			last = atoi(t+1);
+			drvinst->memoryoffset = first - 1;
+			dprintf("Memory offset: %d\n", drvinst->memoryoffset);
+			drvinst->memorysize = last - first + 1;
+			dprintf("Memory size: %d\n", drvinst->memorysize);
+		}
+	}
+	free(r);
+	return GN_ERR_NONE;
+}
+
 /*
  * Response of of a form:
  * +CPBR: (list of supported indexes), <nlength>, <tlength>
@@ -1600,7 +1710,6 @@ static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int len
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
-	char *pos, *s, *t;
 	gn_error error;
 
 	drvinst->memoryoffset = 0;
@@ -1615,20 +1724,10 @@ static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int len
 	splitlines(&buf);
 
 	if (strncmp(buf.line2, "+CPBR: ", 7) == 0) {
-		s = buf.line2 + 7;
-		pos = strchr(s, ',');
-		if (pos) {
-			*pos = '\0';
-			s = strip_brackets(s);
-			t = strchr(s, '-');
-			if (t) {
-				int first, last;
-				first = atoi(s);
-				last = atoi(t+1);
-				drvinst->memoryoffset = first - 1;
-				drvinst->memorysize = last - first + 1;
-			}
-		}
+		char key[7];
+		snprintf(key, 7, "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
+		map_add(&drvinst->cached_capabilities, strdup(key), strdup(buf.line2));
+		Parse_ReplyMemoryRange(data, state);
 	}
 
 	return GN_ERR_NONE;
@@ -1951,7 +2050,8 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 
 	if (!strncmp(buf.line1, "AT+CSCS?", 8)) {
 		/* return current charset */
-		drvinst->charset = AT_CHAR_UNKNOWN; i = 0;
+		drvinst->charset = AT_CHAR_UNKNOWN;
+		i = 0;
 		while (atcharsets[i].str && drvinst->charset != AT_CHAR_UNKNOWN) {
 			if (strstr(buf.line2, atcharsets[i].str))
 				drvinst->charset = atcharsets[i].charset;
@@ -1960,7 +2060,8 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 		return GN_ERR_NONE;
 	} else if (!strncmp(buf.line1, "AT+CSCS=", 8)) {
 		/* return available charsets */
-		drvinst->availcharsets = 0; i = 0;
+		drvinst->availcharsets = 0;
+		i = 0;
 		while (atcharsets[i].str) {
 			if (strstr(buf.line2, atcharsets[i].str))
 				drvinst->availcharsets |= atcharsets[i].charset;
@@ -2268,19 +2369,51 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 	if (!data->network_info)
 		return GN_ERR_INTERNALERROR;
 
-	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
+	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+		return error;
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
 
 	splitlines(&buf);
 
-	if (!strncmp(buf.line1, "AT+CREG?", 8)) {
+	if (!strncmp(buf.line1, "AT+CREG=?", 9)) {
+		/*
+		 * Answer to AT+CREG=? can be one of:
+		 * +CREG: (0-1)
+		 * +CREG: (0,1)
+		 * +CREG: (0-2)
+		 * +CREG: (0,1,2)
+		 * The interesting thing here is whether the phone supports extended mode (2)
+		 */
+		if (strstr(buf.line2, "2"))
+			drvinst->extended_reg_status = 2;
+		else
+			drvinst->extended_reg_status = 1;
+	} else if (!strncmp(buf.line1, "AT+CREG?", 8)) {
 		char tmp[3] = {0, 0, 0};
 
 		strings = gnokii_strsplit(buf.line2, ",", 4);
 		i = strings[3] ? 2 : 1;
 
+		/*
+		 * Reply to AT+CREG? may have one of the forms:
+		 * when we are in basic status presentation mode (MODE=1)
+		 *   +CREG: <MODE>,<STATUS>
+		 * when we are in extended status presentation mode (MODE=2)
+		 *   +CREG: <MODE>,<STATUS>,<LAC>,<CELLID>
+		 * However if we are in MODE=2 and SIM card is inactive we'll
+		 * get (or we might get) the answer as with MODE=1.
+		 * The following code parses just <LAC> and <CELLID> parameters
+		 * from the extended status presentation mode.
+		 * FIXME: parse and return <STATUS> parameter
+		 *   0 - not registered, does not search for the network
+		 *   1 - registered in the home network
+		 *   2 - not registered, searching for the network
+		 *   3 - registration forbidden
+		 *   4 - status unknown
+		 *   5 - registered in roaming
+		 */
 		if (!strings[i] || strlen(strings[i]) < 6 || !strings[i + 1] || strlen(strings[i + 1]) < 6) {
 			gnokii_strfreev(strings);
 			return GN_ERR_FAILED;
@@ -2312,6 +2445,19 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		tmp[1] = pos[3];
 
 		data->network_info->cell_id[1] = strtol(tmp, NULL, 16);
+
+		/* Ugly, ugly... */
+		if (strlen(pos) > 4) {
+			tmp[0] = pos[4];
+			tmp[1] = pos[5];
+
+			data->network_info->cell_id[2] = strtol(tmp, NULL, 16);
+
+			tmp[0] = pos[6];
+			tmp[1] = pos[7];
+
+			data->network_info->cell_id[3] = strtol(tmp, NULL, 16);
+		}
 
 		gnokii_strfreev(strings);
 
@@ -2553,6 +2699,12 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->timezone = NULL;
 	/* FIXME: detect if from AT+CNMI=? */
 	drvinst->cnmi_mode = 3;
+	drvinst->cached_capabilities = NULL;
+	drvinst->pdumode = 0;
+	drvinst->extended_reg_status = 0;
+	drvinst->availcharsets = 0;
+	drvinst->encode_memory_type = 0;
+	drvinst->encode_number = 0;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {
@@ -2631,6 +2783,10 @@ out:
 static gn_error Terminate(gn_data *data, struct gn_statemachine *state)
 {
 	if (AT_DRVINST(state)) {
+		if (AT_DRVINST(state)->cached_capabilities) {
+			map_free(&(AT_DRVINST(state)->cached_capabilities));
+			AT_DRVINST(state)->cached_capabilities = NULL;
+		}
 		if (AT_DRVINST(state)->timezone) {
 			free(AT_DRVINST(state)->timezone);
 			AT_DRVINST(state)->timezone = NULL;

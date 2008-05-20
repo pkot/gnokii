@@ -7,6 +7,21 @@
     o use AT+GMM to get the model name as it gives a more readable
       output for Sony Ericssons and makes no difference for other
       tested phones                      (Paweł Kot, Daniele Forsi)
+    o support 4-bytes cell id                           (Paweł Kot)
+    o cache pdu mode not to issue the command with every sms
+                                                        (Paweł Kot)
+    o cache output of AT+XXXX=? commands which can be reused
+                                                        (Paweł Kot)
+    o handle extended registration status in a sane way (Paweł Kot)
+    o better handle encoding issues wrt numbers and memory types;
+      some phones want them to be encoded using encoding being set
+      (like Sony Ericsson) some want them as ascii (like Nokia)
+                                                        (Paweł Kot)
+    o optimize number of commands sent to the phone for multiple
+      operations like reading entire phonebook or entire inbox
+                                                        (Paweł Kot)
+ * gnokii updates
+    o support 4-bytes cell id                           (Paweł Kot)
 
 0.6.25
 ======

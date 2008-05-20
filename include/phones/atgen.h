@@ -37,6 +37,7 @@
 #define _gnokii_atgen_h_
 
 #include "gnokii-internal.h"
+#include "map.h"
 
 typedef enum {
 	GN_OP_AT_GetCharset = GN_OP_Max,
@@ -118,6 +119,29 @@ typedef struct {
 	void *sms_callback_data;	/* to be passed as callback_data to on_sms */
 
 	char *timezone;
+
+	/* indicates whether phone is in PDU mode */
+	int pdumode;
+
+	/* cached information for AT+XXXX=? commands */
+	struct map *cached_capabilities;
+
+	/*
+	 * Indicated whether phone supports extended registration status
+	 * 0 - not known (we haven't asked yet)
+	 * 1 - extended status not supported
+	 * 2 - extended status supported
+	 */
+	int extended_reg_status;
+
+	/*
+	 * Some phones use encoding setting to encode just names and the other
+	 * entities are encoded using ASCII (Nokia). Other phones encode every
+	 * output with the given encoding and require the same for the input
+	 * (Sony Ericsson).
+	 */
+	int encode_memory_type;
+	int encode_number;
 } at_driver_instance;
 
 #define AT_DRVINST(s) (*((at_driver_instance **)(&(s)->driver.driver_instance)))

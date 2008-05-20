@@ -46,7 +46,8 @@ libgnokii_la_SOURCES = \
 	compat.c \
 	misc.c \
 	snprintf.c \
-	localcharset.c
+	localcharset.c \
+	map.c
 
 libgnokii_la_LIBADD = \
 	$(top_builddir)/common/phones/libPHONES.la \

@@ -124,27 +124,10 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 }
 
-static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
-{
-	if (!data->network_info)
-		return GN_ERR_INTERNALERROR;
-
-	/* Sony Ericsson phones can't do CREG=2 (only CREG=1), so just
-	 * skip that and only do COPS */
-
-	if (sm_message_send(9, GN_OP_GetNetworkInfo, "AT+COPS?\r", state))
-		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_GetNetworkInfo, data, state);
-}
-
-
 void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
 	/* Sony Ericssons support just mode 2 */
 	AT_DRVINST(state)->cnmi_mode = 2;
-
-	at_insert_send_function(GN_OP_GetMemoryStatus, AT_GetMemoryStatus, state);
-	at_insert_recv_function(GN_OP_GetMemoryStatus, ReplyMemoryStatus, state);
-	at_insert_send_function(GN_OP_GetNetworkInfo, AT_GetNetworkInfo, state);
-
+	AT_DRVINST(state)->encode_memory_type = 1;
+	AT_DRVINST(state)->encode_number = 1;
 }
