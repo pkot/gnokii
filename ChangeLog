@@ -20,6 +20,7 @@
     o optimize number of commands sent to the phone for multiple
       operations like reading entire phonebook or entire inbox
                                                         (Paweł Kot)
+    o better handle empty +COPS responses               (Paweł Kot)
  * gnokii updates
     o support 4-bytes cell id                           (Paweł Kot)
 

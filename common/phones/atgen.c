@@ -2476,6 +2476,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		switch (format) {
 		case -1: /* neither operator name nor code given (eg. no SIM or not registered) */
 			error = GN_ERR_NOTAVAILABLE;
+			data->network_info->network_code[0] = 0;
 			break;
 		case 0: /* network operator name given */
 			pos = strip_quotes(strings[2]);
@@ -2505,6 +2506,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 			break;
 		default: /* defined formats are in range (0-2) */
 			error = GN_ERR_UNHANDLEDFRAME;
+			data->network_info->network_code[0] = 0;
 			break;
 		}
 		gnokii_strfreev(strings);
