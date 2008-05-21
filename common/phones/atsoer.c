@@ -77,6 +77,11 @@ static gn_error se_at_memory_type_set(gn_memory_type mt, struct gn_statemachine 
 	return ret;
 }
 
+/*
+ * Calculate phonebook size for SonyEricsson phones: they don't respond
+ * with memory stats to AT+CPBS. Calculate by reading and counting all
+ * entries (which is fast -- just one command).
+ */
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -103,7 +108,11 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 	return error;
 }
 
-
+/*
+ * Calculate phonebook size for SonyEricsson phones: they don't respond
+ * with memory stats to AT+CPBS. Calculate by reading and counting all
+ * entries (which is fast -- just one command).
+ */
 static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -131,6 +140,11 @@ void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemac
 	AT_DRVINST(state)->encode_memory_type = 1;
 	AT_DRVINST(state)->encode_number = 1;
 
+	/*
+	 * Calculate phonebook size for SonyEricsson phones: they don't respond
+	 * with memory stats to AT+CPBS. Calculate by reading and counting all
+	 * entries (which is fast -- just one command).
+	 */
 	at_insert_send_function(GN_OP_GetMemoryStatus, AT_GetMemoryStatus, state);
 	at_insert_recv_function(GN_OP_GetMemoryStatus, ReplyMemoryStatus, state);
 }
