@@ -173,7 +173,7 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	gn_rf_unit rfunit = GN_RF_Arbitrary;
 	gn_battery_unit battunit = GN_BU_Arbitrary;
 	gn_error error;
-	int i, d;
+	int i, d, cid;
 
 	gn_network_info networkinfo;
 	gn_cb_message cbmessage;
@@ -279,10 +279,18 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 		if (gn_sm_functions(GN_OP_GetSMSStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("SMS Messages: Unread %d, Number %d\n"), smsstatus.unread, smsstatus.number);
 
-		if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE)
-			fprintf(stdout, _("Network: %s, %s (%s), LAC: %02x%02x, CellID: %02x%02x\n"),
-			gn_network_name_get(networkinfo.network_code), gn_country_name_get(networkinfo.network_code), networkinfo.network_code,
-			networkinfo.LAC[0], networkinfo.LAC[1], networkinfo.cell_id[0], networkinfo.cell_id[1]);
+		if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE) {
+			/* Ugly, ugly, ... */
+			if (networkinfo.cell_id[2] == 0 && networkinfo.cell_id[3] == 0)
+				cid = (networkinfo.cell_id[0] << 8) + networkinfo.cell_id[1];
+			else
+				cid = (networkinfo.cell_id[0] << 24) + (networkinfo.cell_id[1] << 16) + (networkinfo.cell_id[2] << 8) + networkinfo.cell_id[3];
+
+			fprintf(stdout, _("Network: %s, %s (%s), LAC: %02x%02x, CellID: %08x\n"),
+				gn_network_name_get(networkinfo.network_code), gn_country_name_get(networkinfo.network_code),
+				(*networkinfo.network_code ? networkinfo.network_code : _("undefined")),
+				networkinfo.LAC[0], networkinfo.LAC[1], cid);
+		}
 
 		gn_call_check_active(state);
 		for (i = 0; i < GN_CALL_MAX_PARALLEL; i++)
