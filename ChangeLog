@@ -24,7 +24,7 @@
  * gnokii updates
     o support 4-bytes cell id                           (Paweł Kot)
  * libgnokii updates
-    o do line unfolding when reading vCards (fixes in part
+    o do line unfolding/folding when reading/writing vCards (fixes
       https://savannah.nongnu.org/bugs/index.php?23086)
                                                     (Daniele Forsi)
 
