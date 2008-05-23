@@ -187,24 +187,32 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	}
 
 	while (1) {
-		int line_len;
-		if (!fgets(buf, 1024, f)) {
-			ERROR(_("Vcard began but not ended?"));
-			return -1;
-		}
-		/* There's either "\n" or "\r\n' sequence at the
-		 * end of the line */
-		line_len = strlen(buf);
-		if (buf[line_len - 1] == '\n') {
-			buf[--line_len] = 0;
-		}
-		if (!line_len)
-			continue;
-		if (buf[line_len - 1] == '\r') {
-			buf[--line_len] = 0;
-		}
-		if (!line_len)
-			continue; 
+		int line_len = 0;
+		int c = 0;
+
+		do {
+			if (!fgets(buf + line_len, 1024 - line_len, f)) {
+				ERROR(_("Vcard began but not ended?"));
+				return -1;
+			}
+			/* There's either "\n" or "\r\n' sequence at the
+			 * end of the line */
+			line_len = strlen(buf);
+			if (buf[line_len - 1] == '\n') {
+				buf[--line_len] = 0;
+			}
+			if (!line_len)
+				continue;
+			if (buf[line_len - 1] == '\r') {
+				buf[--line_len] = 0;
+			}
+			if (!line_len)
+				continue; 
+			/* perform line unfolding (see RFC2425) */
+			c = fgetc(f);
+		} while ((c == ' ') || (c == 0x09));
+		/* ungetc() is EOF safe */
+		ungetc(c, f);
 
 		if (BEGINS("N:")) {
 			if (0 < sscanf(buf +2 , "%64[^;];%64[^;];%64[^;];%64[^;];%64[^;]\n",

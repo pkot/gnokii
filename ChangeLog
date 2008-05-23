@@ -23,6 +23,10 @@
     o better handle empty +COPS responses               (Paweł Kot)
  * gnokii updates
     o support 4-bytes cell id                           (Paweł Kot)
+ * libgnokii updates
+    o do line unfolding when reading vCards (fixes in part
+      https://savannah.nongnu.org/bugs/index.php?23086)
+                                                    (Daniele Forsi)
 
 0.6.25
 ======
