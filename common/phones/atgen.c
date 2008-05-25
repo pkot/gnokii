@@ -1039,9 +1039,10 @@ static gn_error AT_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *sta
 
 	memory_status.memory_type = data->sms_folder->folder_id;
 
-	/* this driver needs some structures that other drivers don't need
-	   and the callers (eg. gnokii) may not be aware of that
-	   so always use a local copy
+	/*
+	 * This driver needs some structures that other drivers don't need
+	 * and the callers (eg. gnokii) may not be aware of that
+	 * so always use a local copy.
 	 */
 	save_smsstatus = data->sms_status;
 	data->sms_status = &smsstatus;
@@ -1062,7 +1063,8 @@ static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error ret;
 
-	if (!data->sms_status) return GN_ERR_INTERNALERROR;
+	if (!data->sms_status)
+		return GN_ERR_INTERNALERROR;
 
 	at_set_charset(data, state, AT_CHAR_GSM);
 
@@ -1311,6 +1313,13 @@ static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *st
 static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
+
+	/*
+	 * AT+CREG enables +CREG notifications, so register notification
+	 * callback.
+	 */
+	drvinst->reg_notification = data->reg_notification;
+	drvinst->reg_callback_data = data->callback_data;
 
 	if (!data->network_info)
 		return GN_ERR_INTERNALERROR;
@@ -1862,8 +1871,10 @@ static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int l
 	if (strncmp("+CPMS:", buf.line2, 6))
 		return GN_ERR_INTERNALERROR;
 
-	/* split a string like +CPMS: ("ME","SM"),("ME","SM"),("ME","SM")
-	   can't use strip_brackets() because it will strip the last ')', not the first
+	/*
+	 * Split a string like +CPMS: ("ME","SM"),("ME","SM"),("ME","SM")
+	 * can't use strip_brackets() because it will strip the last ')',
+	 * not the first.
 	 */
 	pos = buf.line2 + 6;
 	while (*pos && *pos != ')')
@@ -2357,6 +2368,56 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	return error;
 }
 
+static gn_error creg_parse(char **strings, int i, gn_network_info *ninfo)
+{
+	char tmp[3] = {0, 0, 0};
+	char *pos;
+
+	if (!strings[i] || strlen(strings[i]) < 6 || !strings[i + 1] || strlen(strings[i + 1]) < 6)
+		return GN_ERR_FAILED;
+
+	pos = strings[i];
+	pos++;
+
+	tmp[0] = pos[0];
+	tmp[1] = pos[1];
+
+	ninfo->LAC[0] = strtol(tmp, NULL, 16);
+
+	tmp[0] = pos[2];
+	tmp[1] = pos[3];
+
+	ninfo->LAC[1] = strtol(tmp, NULL, 16);
+
+
+	pos = strings[i + 1];
+	pos++;
+
+	tmp[0] = pos[0];
+	tmp[1] = pos[1];
+
+	ninfo->cell_id[0] = strtol(tmp, NULL, 16);
+
+	tmp[0] = pos[2];
+	tmp[1] = pos[3];
+
+	ninfo->cell_id[1] = strtol(tmp, NULL, 16);
+
+	/* Ugly, ugly... */
+	if (strlen(pos) > 4) {
+		tmp[0] = pos[4];
+		tmp[1] = pos[5];
+
+		ninfo->cell_id[2] = strtol(tmp, NULL, 16);
+
+		tmp[0] = pos[6];
+		tmp[1] = pos[7];
+
+		ninfo->cell_id[3] = strtol(tmp, NULL, 16);
+	}
+	return GN_ERR_NONE;
+}
+
 static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -2366,18 +2427,15 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 	gn_error error = GN_ERR_NONE;
 	int i;
 
-	if (!data->network_info)
-		return GN_ERR_INTERNALERROR;
-
-	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
-		return error;
-
 	buf.line1 = buffer + 1;
 	buf.length= length;
 
 	splitlines(&buf);
 
 	if (!strncmp(buf.line1, "AT+CREG=?", 9)) {
+		if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+			return error;
+
 		/*
 		 * Answer to AT+CREG=? can be one of:
 		 * +CREG: (0-1)
@@ -2391,7 +2449,12 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		else
 			drvinst->extended_reg_status = 1;
 	} else if (!strncmp(buf.line1, "AT+CREG?", 8)) {
-		char tmp[3] = {0, 0, 0};
+
+		if (!data->network_info)
+			return GN_ERR_INTERNALERROR;
+
+		if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+			return error;
 
 		strings = gnokii_strsplit(buf.line2, ",", 4);
 		i = strings[3] ? 2 : 1;
@@ -2404,8 +2467,6 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		 *   +CREG: <MODE>,<STATUS>,<LAC>,<CELLID>
 		 * However if we are in MODE=2 and SIM card is inactive we'll
 		 * get (or we might get) the answer as with MODE=1.
-		 * The following code parses just <LAC> and <CELLID> parameters
-		 * from the extended status presentation mode.
 		 * FIXME: parse and return <STATUS> parameter
 		 *   0 - not registered, does not search for the network
 		 *   1 - registered in the home network
@@ -2414,56 +2475,46 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		 *   4 - status unknown
 		 *   5 - registered in roaming
 		 */
-		if (!strings[i] || strlen(strings[i]) < 6 || !strings[i + 1] || strlen(strings[i + 1]) < 6) {
-			gnokii_strfreev(strings);
-			return GN_ERR_FAILED;
-		}
+		error = creg_parse(strings, i, data->network_info);
 
-		pos = strings[i];
-		pos++;
+		gnokii_strfreev(strings);
+		
+		if (error != GN_ERR_NONE)
+			return error;
+	} else if (!strncmp(buf.line1, "CREG:", 5)) {
+		gn_network_info info;
+		strings = gnokii_strsplit(buf.line1, ",", 3);
+		i = strings[2] ? 1 : 0;
 
-		tmp[0] = pos[0];
-		tmp[1] = pos[1];
-
-		data->network_info->LAC[0] = strtol(tmp, NULL, 16);
-
-		tmp[0] = pos[2];
-		tmp[1] = pos[3];
-
-		data->network_info->LAC[1] = strtol(tmp, NULL, 16);
-
-
-		pos = strings[i + 1];
-		pos++;
-
-		tmp[0] = pos[0];
-		tmp[1] = pos[1];
-
-		data->network_info->cell_id[0] = strtol(tmp, NULL, 16);
-
-		tmp[0] = pos[2];
-		tmp[1] = pos[3];
-
-		data->network_info->cell_id[1] = strtol(tmp, NULL, 16);
-
-		/* Ugly, ugly... */
-		if (strlen(pos) > 4) {
-			tmp[0] = pos[4];
-			tmp[1] = pos[5];
-
-			data->network_info->cell_id[2] = strtol(tmp, NULL, 16);
-
-			tmp[0] = pos[6];
-			tmp[1] = pos[7];
-
-			data->network_info->cell_id[3] = strtol(tmp, NULL, 16);
-		}
+		/*
+		 * Reply to AT+CREG? is of the form:
+		 *   +CREG: <STATUS>,<LAC>,<CELLID>
+		 * FIXME: parse and return <STATUS> parameter
+		 *   0 - not registered, does not search for the network
+		 *   1 - registered in the home network
+		 *   2 - not registered, searching for the network
+		 *   3 - registration forbidden
+		 *   4 - status unknown
+		 *   5 - registered in roaming
+		 */
+		error = creg_parse(strings, i, &info);
 
 		gnokii_strfreev(strings);
 
+		if (error != GN_ERR_NONE)
+			return error;
+
+		if (drvinst->reg_notification)
+			drvinst->reg_notification(&info, drvinst->reg_callback_data);
 	} else if (!strncmp(buf.line1, "AT+COPS?", 8)) {
 		char tmp[128];
 		int format;
+
+		if (!data->network_info)
+			return GN_ERR_INTERNALERROR;
+
+		if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
+			return error;
 
 		memset(tmp, 0, sizeof(tmp));
 		strings = gnokii_strsplit(buf.line2, ",", 3);

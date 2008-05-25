@@ -134,7 +134,8 @@ int numchar(unsigned char *str, unsigned char ch)
 	int count = 0;
 
 	while (*str && *str != '\r') {
-		if (*str++ == ch) count++;
+		if (*str++ == ch)
+			count++;
 	}
 
 	return count;
@@ -206,11 +207,13 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 			/* check for possible unsolicited responses */
 			if (!strncmp(start + 1, "CREG:", 5)) {
 				count = numchar(start, ',');
-				if (count == 0 || count == 2)
+				if (count == 2) {
+					bi->rbuf[0] = GN_OP_GetNetworkInfo;
 					unsolicited = 1;
-			} else if (!strncmp(start + 1, "CPIN:", 5))
+				}
+			} else if (!strncmp(start + 1, "CPIN:", 5)) {
 				bi->rbuf[0] = GN_AT_OK;
-			else if (!strncmp(start + 1, "CRING:", 6) ||
+			} else if (!strncmp(start + 1, "CRING:", 6) ||
 				 !strncmp(start + 1, "CLIP:", 5) ||
 				 !strncmp(start + 1, "CLCC:", 5)) {
 				bi->rbuf[0] = GN_OP_AT_Ring;

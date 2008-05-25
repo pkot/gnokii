@@ -48,8 +48,16 @@ typedef struct {
 typedef struct {
 	gn_sms_folder *sms_folder;
 	gn_sms_folder_list *sms_folder_list;
-	gn_sms_raw *raw_sms;         /* This is for phone driver, application using libgnokii should not touch this */
-	gn_sms *sms;                 /* This is for user communication, phone driver should not have to touch this one */
+	/*
+	 * This is for phone driver, application using libgnokii should not
+	 * touch this.
+	 */
+	gn_sms_raw *raw_sms;
+	/*
+	 * This is for user communication, phone driver should not have to
+	 * touch this one.
+	 */
+	gn_sms *sms;
 	gn_phonebook_entry *phonebook_entry;
 	gn_speed_dial *speed_dial;
 	gn_memory_status *memory_status;
@@ -104,7 +112,16 @@ typedef struct {
 	gn_call_active *call_active;
 	gn_file_list *file_list;
 	gn_file *file;
-	void *callback_data; /* this is a pointer to some data that will be needed by any callback function */
+	/*
+	 * This is a pointer to some data that may be used by any callback
+	 * function.
+	 */
+	void *callback_data;
+	/*
+	 * This is a callback function for any changes related to the network
+	 * registration parameters changes: status, LAC, cell id.
+	 */
+	void (*reg_notification)(gn_network_info *info, void *callback_data);
 } gn_data;
 
 /* 

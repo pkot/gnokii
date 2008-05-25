@@ -163,9 +163,21 @@ static void displaycall(int call_id)
 #endif
 }
 
-/* In monitor mode we don't do much, we just initialise the fbus code.
-   Note that the fbus code no longer has an internal monitor mode switch,
-   instead compile with DEBUG enabled to get all the gumpf. */
+/* Same code is for getnetworkinfo */
+void networkinfo_print(gn_network_info *info, void *callback_data)
+{
+	int cid;
+
+	/* Ugly, ugly, ... */
+	if (info->cell_id[2] == 0 && info->cell_id[3] == 0)
+		cid = (info->cell_id[0] << 8) + info->cell_id[1];
+	else
+		cid = (info->cell_id[0] << 24) + (info->cell_id[1] << 16) + (info->cell_id[2] << 8) + info->cell_id[3];
+
+	fprintf(stdout, _("LAC: %02x%02x, CellID: %08x\n"),
+		info->LAC[0], info->LAC[1], cid);
+}
+
 gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	float rflevel = -1, batterylevel = -1;
@@ -173,7 +185,7 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	gn_rf_unit rfunit = GN_RF_Arbitrary;
 	gn_battery_unit battunit = GN_BU_Arbitrary;
 	gn_error error;
-	int i, d, cid;
+	int i, d;
 
 	gn_network_info networkinfo;
 	gn_cb_message cbmessage;
@@ -188,9 +200,6 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	gn_memory_status rc_memorystatus   = {GN_MT_RC, 0, 0};
 
 	gn_sms_status smsstatus = {0, 0, 0, 0};
-	/*
-	char Number[20];
-	*/
 	errno = 0;
 	if (argc > optind) {
 		d = !strcasecmp(argv[optind], "once") ? -1 : gnokii_atoi(argv[optind]);
@@ -203,15 +212,19 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 
 	gn_data_clear(data);
 
-	/* We do not want to monitor serial line forever - press Ctrl+C to stop the
-	   monitoring mode. */
+	/*
+	 * We do not want to monitor serial line forever - press Ctrl+C to
+	 * stop the monitoring mode.
+	 */
 	signal(SIGINT, interrupted);
 
 	fprintf(stderr, _("Entering monitor mode...\n"));
 
-	/* Loop here indefinitely - allows you to see messages from GSM code in
-	   response to unknown messages etc. The loops ends after pressing the
-	   Ctrl+C. */
+	/*
+	 * Loop here indefinitely - allows you to see messages from GSM code
+	 * in response to unknown messages etc. The loops ends after pressing
+	 * the Ctrl+C.
+	 */
 	data->rf_unit = &rfunit;
 	data->rf_level = &rflevel;
 	data->battery_unit = &battunit;
@@ -221,6 +234,7 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	data->network_info = &networkinfo;
 	data->on_cell_broadcast = storecbmessage;
 	data->call_notification = callnotifier;
+	data->reg_notification = networkinfo_print;
 	data->callback_data = NULL;
 
 	gn_sm_functions(GN_OP_SetCallNotification, data, state);
@@ -229,6 +243,13 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	cb_ridx = 0;
 	cb_widx = 0;
 	gn_sm_functions(GN_OP_SetCellBroadcast, data, state);
+
+	if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE) {
+		fprintf(stdout, _("Network: %s, %s (%s)\n"),
+			gn_network_name_get(networkinfo.network_code), gn_country_name_get(networkinfo.network_code),
+			(networkinfo.network_code ? networkinfo.network_code : _("undefined")));
+		networkinfo_print(&networkinfo, NULL);
+	}
 
 	while (!bshutdown) {
 		if (gn_sm_functions(GN_OP_GetRFLevel, data, state) == GN_ERR_NONE)
@@ -279,27 +300,14 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 		if (gn_sm_functions(GN_OP_GetSMSStatus, data, state) == GN_ERR_NONE)
 			fprintf(stdout, _("SMS Messages: Unread %d, Number %d\n"), smsstatus.unread, smsstatus.number);
 
-		if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE) {
-			/* Ugly, ugly, ... */
-			if (networkinfo.cell_id[2] == 0 && networkinfo.cell_id[3] == 0)
-				cid = (networkinfo.cell_id[0] << 8) + networkinfo.cell_id[1];
-			else
-				cid = (networkinfo.cell_id[0] << 24) + (networkinfo.cell_id[1] << 16) + (networkinfo.cell_id[2] << 8) + networkinfo.cell_id[3];
-
-			fprintf(stdout, _("Network: %s, %s (%s), LAC: %02x%02x, CellID: %08x\n"),
-				gn_network_name_get(networkinfo.network_code), gn_country_name_get(networkinfo.network_code),
-				(*networkinfo.network_code ? networkinfo.network_code : _("undefined")),
-				networkinfo.LAC[0], networkinfo.LAC[1], cid);
-		}
-
 		gn_call_check_active(state);
 		for (i = 0; i < GN_CALL_MAX_PARALLEL; i++)
 			displaycall(i);
-
 		if (readcbmessage(&cbmessage) == GN_ERR_NONE)
 			fprintf(stdout, _("Cell broadcast received on channel %d: %s\n"), cbmessage.channel, cbmessage.message);
 
-		if (d < 0) break;
+		if (d < 0)
+			break;
 		sleep(d);
 	}
 
