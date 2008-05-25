@@ -210,7 +210,12 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->entry_type  = blockstart[0];
 			subentry->number_type = 0;
 			subentry->id          = blockstart[4];
-			char_unicode_decode(subentry->data.number, (blockstart + 6), blockstart[5]);
+#ifdef DEBUG
+			if (blockstart[5] > GN_PHONEBOOK_NAME_MAX_LENGTH * 2) {
+				dprintf("Entry too long: truncated from %d to %d bytes\n", blockstart[5] / 2, GN_PHONEBOOK_NAME_MAX_LENGTH);
+			}
+#endif
+			char_unicode_decode(subentry->data.number, (blockstart + 6), GNOKII_MIN(blockstart[5], GN_PHONEBOOK_NAME_MAX_LENGTH * 2));
 			dprintf("   Type: %d (%02x)\n", subentry->entry_type, subentry->entry_type);
 			dprintf("   Text: %s\n", subentry->data.number);
 			subblock_count++;
