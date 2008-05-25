@@ -1,3 +1,7 @@
+* Sun May 25 2008 Paweł Kot
+- Avoid "duplicated message" error with concatenated messages on MySQL.
+- More verbose debug information.
+
 * Sun Jan 27 2007 Jan Derfinak
 - Added detection of first sms position.
 - Simplified locking of smsMutex.
@@ -11,11 +15,11 @@
   and newer. It was by default on in versions of the API older than 5.0.3.
 
 
-* Sat Jul  7 2007 Pawel Kot
+* Sat Jul  7 2007 Paweł Kot
 - add support for multipart SMS for MySQL backend (Alain Degreffe)
 
 
-* Fri Nov 17 2006 Pawel Kot
+* Fri Nov 17 2006 Paweł Kot
 - reconnect only on timeout
 
 
@@ -23,7 +27,7 @@
 - exit after unsuccessful insert into DB (Massimo Citterio)
 
 
-* Thu Aug 10 2006 Pawel Kot
+* Thu Aug 10 2006 Paweł Kot
 - fix problems with exporting symbols from shared libraries/plugins with
   newer gcc versions
 
@@ -32,7 +36,7 @@
 - added setlocale() call
 
 
-* Thu May  4 2006 Helge Deller, Pawel Kot
+* Thu May  4 2006 Helge Deller, Paweł Kot
 - Switch smsd to new libgnokii functions
 
 
@@ -58,7 +62,7 @@
 - Switch to glib2.
 
 
-* Fri May 13 2005 Pawel Kot
+* Fri May 13 2005 Paweł Kot
 - README should say about pq/mysql.la not pq/mysql.so
 
 
@@ -78,7 +82,7 @@
 - Make configurable where to look for the new messages.
 
 
-* Sun Oct 17 2004 Pawel Kot <pkot@bezsensu.pl>
+* Sun Oct 17 2004 Paweł Kot
 - Correctly exit when the device is locked.
 
 
@@ -90,15 +94,15 @@
 - Changed LDLIBS for FreeBSD. Idea from <robert@dk-hostmaster.dk>.
 
 
-* Sat Jul 10 2004 Pawel Kot <pkot@bezsensu.pl>
+* Sat Jul 10 2004 Paweł Kot
 - Use pq_config instead of hardcoding paths in Makefile
 
 
-* Sun Jun 27 2004 Pawel Kot <pkot@bezsensu.pl>
+* Sun Jun 27 2004 Paweł Kot
 - Move appending LDLIBS to ../Makefile.global (in case of common libraries)
 
 
-* Sun Jun 20 2004 Pawel Kot <pkot@bezsensu.pl>
+* Sun Jun 20 2004 Paweł Kot
 - Really finish libtolization: use *.lo objects instead of *.o. It avoids
   mixing fPIC (from libgnokii) and non-fPIC (from smsd) code.
 
@@ -109,20 +113,20 @@
   Thanks to Stefan de Konink <stefandekonink@utelisys.com>.
 
 
-* Sun May  9 2004 Pawel Kot <pkot@bezsensu.pl>
+* Sun May  9 2004 Paweł Kot
 - gn_cfg_read changed the signature
 
 
-* Thu Feb 19 2004 BORBELY Zoltan <bozo@andrews.hu>
+* Thu Feb 19 2004 BORBELY Zoltan
 - XDEBUG eliminated, using gn_log_xdebug
 
 
-* Wed Jan 22 2004 BORBELY Zoltan <bozo@andrews.hu>
+* Wed Jan 22 2004 BORBELY Zoltan
 - libtoolization finished
 - Update README to reflect libtoolization
 
 
-* Sun Jan 04 2004 Pawel Kot <pkot@linuxnews.pl>
+* Sun Jan 04 2004 Paweł Kot
 - Update README with some modules clarification
 
 
@@ -140,7 +144,7 @@
 - added alpha support for glib2
 
 
-* Fri Aug 29 2003 Pawel Kot <pkot@linuxnews.pl>
+* Fri Aug 29 2003 Paweł Kot
 - Add the manual page
 
 
@@ -152,7 +156,7 @@
 - compat.h added to file.c, mysql.c and pq.c.
 
 
-* Mon Feb 10 2003 BORBELY Zoltan <bozo@andrews.hu>
+* Mon Feb 10 2003 BORBELY Zoltan
 - Bad SQL statement fixed in the mysql module.
 
 
@@ -164,17 +168,17 @@
 - Version number changed from 1.0 to 1.1-cvs.
 
 
-* Sat Jan 18 2003 Pawel Kot <pkot@linuxnews.pl>
+* Sat Jan 18 2003 Paweł Kot
 - FreeBSD doesn't have libdl and can compile smsd without
   -ldl. Add the comment in the Makefile as well as the
   correct LDLIBS for FreeBSD (disabled by default).
 
 
-* Fri Dec 27 2002 BORBELY Zoltan <bozo@andrews.hu>
+* Fri Dec 27 2002 BORBELY Zoltan
 - Converted libfile.so to new libgnokii API.
 
 
-* Thu Dec 26 2002 Pawel Kot <pkot@linuxnews.pl>
+* Thu Dec 26 2002 Paweł Kot
 - Converted to new libgnokii API.
 
 
@@ -186,7 +190,7 @@
 - Added support for phones with sms folders.
 
 
-* Sun Jul 21 2002 Pawel Kot <pkot@linuxnews.pl>
+* Sun Jul 21 2002 Paweł Kot
 -  When some characters are not from the default alphabet
    encode them in the unicode.
 
@@ -200,12 +204,12 @@
 - Sms's sending still don't work.
 
 
-* Tue Apr 23 2002 Pawel Kot <pkot@linuxnews.pl>
+* Tue Apr 23 2002 Paweł Kot
 - Don't use 'connect' as the variable name.
 - GE_SMSSENDOK is deprecated.
 
 
-* Wed Mar 20 2002 BORBELY Zoltan <bozo@andrews.hu>
+* Wed Mar 20 2002 BORBELY Zoltan
 - GSM_Data structures initialised correctly.
 - Minor locking fixes.
 
@@ -242,7 +246,7 @@
 - More fixes to new structure.
 
 
-* Mon Dec  3 2001 Pawel Kot <pkot@linuxnews.pl>
+* Mon Dec  3 2001 Paweł Kot
 - Updated to the new libsms.
 - Be more friendly to the other postgresql includes and libraries locations.
 - Use libgnokii.so.

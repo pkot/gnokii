@@ -123,6 +123,7 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
   mysql_real_escape_string(&mysqlIn, text, data->user_data[0].u.text, strlen((gchar *)data->user_data[0].u.text));
   
   if (data->udh.udh[0].type == GN_SMS_UDH_ConcatenatedMessages) { // Multipart Message !
+    gn_log_xdebug("Multipart message\n");
     /* Check for duplicates */
     buf = g_string_sized_new(MAX_SQL_CMD_LEN);
     g_string_sprintf(buf, "SELECT count(id) FROM multipartinbox \
@@ -147,7 +148,10 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
     row = mysql_fetch_row(res);
     if (atoi(row[0]) > 0)
     {
-      gn_log_xdebug("%d: SMS already stored in the database.\n", __LINE__);
+      gn_log_xdebug("%d: SMS already stored in the database (refnum=%i, maxnum=%i, curnum=%i).\n", __LINE__,
+                    data->udh.udh[0].u.concatenated_short_message.reference_number,
+                    data->udh.udh[0].u.concatenated_short_message.maximum_number,
+                    data->udh.udh[0].u.concatenated_short_message.current_number);
       g_string_free(buf, TRUE);
       return SMSD_DUPLICATE;
     }
@@ -245,8 +249,9 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
       }
       mysql_free_result(res);
     } else {
+      gn_log_xdebug("Not whole message collected.\n");
       g_string_free(buf, TRUE);
-      return SMSD_NOK;
+      return SMSD_WAITING;
     }
     g_string_free(buf, TRUE);
   }
@@ -296,7 +301,7 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
   }
 
   g_string_free(buf, TRUE);
-
+  gn_log_xdebug("Everything OK\n");
   return SMSD_OK;
 }
 

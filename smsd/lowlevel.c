@@ -231,7 +231,7 @@ This should not happen.\nSkiping.");
     msg->memory_type = smsdConfig.memoryType;
     msg->number = 0;
     data.sms = msg;
-    
+
     if ((error = gn_sms_get (&data, sm)) == GN_ERR_INVALIDLOCATION)
       smsdConfig.firstSMS = 1;
     else
@@ -250,7 +250,7 @@ This should not happen.\nSkiping.");
     msg->memory_type = smsdConfig.memoryType;
     msg->number = i++;
     data.sms = msg;
-    
+    gn_log_xdebug("Reading SMS %d\n", i-1);
     if ((error = gn_sms_get (&data, sm)) == GN_ERR_NONE)
     {
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
@@ -262,14 +262,19 @@ This should not happen.\nSkiping.");
         return;
       }
     }
-    else if (error == GN_ERR_INVALIDLOCATION)   /* All positions are readed */
+    /*
+     * GN_ERR_INVALIDLOCATION indicates all positions are read.
+     * In case when we were reading location 0, ignore potential error.
+     */
+    else if (error == GN_ERR_INVALIDLOCATION && i > 1)
     {
+      gn_log_xdebug("Invalid location\n");
       g_free (msg);
       pthread_cond_signal (&smsCond);
       break;
     }
     else
-    {  
+    {
       g_free (msg);
       gn_log_xdebug ("gn_sms_get returned %d\n", error);
     }

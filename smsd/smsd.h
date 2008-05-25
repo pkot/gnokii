@@ -37,6 +37,7 @@
 #define SMSD_OK		0
 #define SMSD_NOK	1
 #define SMSD_DUPLICATE	2
+#define SMSD_WAITING	3
 
 typedef enum {
   SMSD_READ_REPORTS = 1

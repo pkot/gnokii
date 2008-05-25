@@ -157,6 +157,7 @@ static void Usage (gchar *p)
              "            -t, --phone phone_number\n"
              "            -i, --interval polling_interval_for_incoming_sms's_in_seconds\n"
              "            -S, --maxsms number_of_sms's (only in dumb mode)\n"
+             "            -b, --inbox memoryType\n"
              "            -v, --version\n"
              "            -h, --help\n"), p);
 }
@@ -453,16 +454,27 @@ static void ReadSMS(gpointer d, gpointer userData)
         e->data = data;
         InsertEvent(e);
         break;
+
+      case SMSD_WAITING:
+        if (smsdConfig.logFile) {
+          gn_log_xdebug("Multipart sms from %s. Waiting for the next parts.\n", data->remote.number);
+          LogFile(_("Multipart sms from %s. Waiting for the next parts.\n"), data->remote.number);
+        }
+        e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
+        e->event = Event_DeleteSMSMessage;
+        e->data = data;
+        InsertEvent(e);
+        break;
         
       default:
         if (smsdConfig.logFile) {
-          gn_log_xdebug("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.",
+          gn_log_xdebug("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n",
                   data->remote.number, data->smsc_time.year,
                   data->smsc_time.month, data->smsc_time.day,
                   data->smsc_time.hour, data->smsc_time.minute,
                   data->smsc_time.second, data->smsc_time.timezone,
                   data->user_data[0].u.text);
-          LogFile(_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting."),
+          LogFile(_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n"),
                   data->remote.number, data->smsc_time.year,
                   data->smsc_time.month, data->smsc_time.day,
                   data->smsc_time.hour, data->smsc_time.minute,
