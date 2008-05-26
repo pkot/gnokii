@@ -954,6 +954,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\common\map.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\misc.c"
 				>
 				<FileConfiguration
