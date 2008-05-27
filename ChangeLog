@@ -32,6 +32,8 @@
     o handle no '\n' at the end of the config file      (Paweł Kot)
     o don't allocate memory for comments for in-memory config
       representation                                    (Paweł Kot)
+    o comments in the config files may be started at any position
+      in the line                                       (Paweł Kot)
  * smsd updates
     o avoid "duplicated message" error with concatenated messages
       on MySQL                                          (Paweł Kot)

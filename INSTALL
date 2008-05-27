@@ -180,10 +180,5 @@ It is a plain ASCII file which can be read in any editor. Make sure you do
 not save it in a wordprocessor's binary-format. It has to remain plain 
 text. vi, mcedit, kedit, joe or even emacs are good examples.
 
-Change the settings to fit your system. Lines beginning with a `#' are 
-comments. The file should be self-explaining. Note that `#' not at the line
-beginning is NOT treated as comments. In particular:
-
-    connection = serial # I have DLR-3P cable
-
-will cause problems.
+Change the settings to fit your system. The file should be self-explaining.
+Strings starting with `#' are comments (from `#' sign till end of the line).
