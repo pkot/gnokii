@@ -29,6 +29,7 @@
       limit subentry size to 61 bytes (fixes in part
       https://savannah.nongnu.org/bugs/index.php?23086)
                                                     (Daniele Forsi)
+    o handle no '\n' at the end of the config file      (Paweł Kot)
  * smsd updates
     o avoid "duplicated message" error with concatenated messages
       on MySQL                                          (Paweł Kot)

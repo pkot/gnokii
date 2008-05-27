@@ -535,8 +535,10 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 	} while (ret > 0);
 
 	fclose(handle);
-	lines = realloc(lines, read + 1);
-	lines[read] = '\0';
+	/* Make sure there's '\n' after the last line and NULL-terminate. */
+	lines = realloc(lines, read + 2);
+	lines[read] = '\n';
+	lines[read+1] = '\0';
 
 	/* Now split the lines */
 	split_lines = NULL;
