@@ -547,7 +547,15 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 	copied = 0;
 
 	while ((pos = strchr(line_begin, '\n')) && copied < read) {
-		char *buf;
+		char *buf, *hash, *tmp;
+		int nonempty = 0;
+
+		/* Strip comments from the current line */
+		hash = strchr(line_begin, '#');
+		if (hash && (hash < pos || !pos))
+			line_begin[hash-line_begin] = '\0';
+		else
+			hash = NULL;
 
 		if (!pos) {
 			line_end = lines + read;
@@ -555,12 +563,23 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 			line_end = pos;
 		}
 
-		num_lines++;
-		buf = malloc(line_end - line_begin + 1);
-		snprintf(buf, line_end - line_begin + 1, "%s", line_begin);
-		split_lines = realloc(split_lines,
-				(num_lines + 1) * sizeof(char*));
-		split_lines[num_lines - 1] = buf;
+		/* skip empty lines */
+		tmp = line_begin;
+		nonempty = 0;
+		while (*tmp && tmp < line_end && !nonempty) {
+			if (!isspace(*tmp))
+				nonempty = 1;
+			tmp++;
+		}
+
+		if (nonempty) {
+			num_lines++;
+			buf = malloc((hash ? hash : line_end) - line_begin + 1);
+			snprintf(buf, (hash ? hash : line_end) - line_begin + 1, "%s", line_begin);
+			split_lines = realloc(split_lines,
+					(num_lines + 1) * sizeof(char*));
+			split_lines[num_lines - 1] = buf;
+		}
 
 		if (pos) {
 			copied += (line_end + 1 - line_begin);
