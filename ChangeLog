@@ -48,6 +48,10 @@
     o for GN_OP_GetSMSCenter always provide a default name and set
       default_name field because AT protocol never provides a name
                                                     (Daniele Forsi)
+ * nk7110 driver updates
+    o for GN_OP_GetSMSCenter provide a default name if a name isn't
+      received; fix setting default_name field; when phone numbers
+      are empty do not copy the string "(none)"     (Daniele Forsi)
 
 0.6.25
 ======

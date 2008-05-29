@@ -1458,13 +1458,12 @@ static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int 
 	switch (message[3]) {
 	case NK7110_SUBSMS_SMSC_RCVD: /* 0x34 */
 		dprintf("SMSC Received\n");
-		/* FIXME: Implement all these in gsm-sms.c */
 		data->message_center->id = message[4];
 		data->message_center->format = message[6];
 		data->message_center->validity = message[8];  /* due to changes in format */
 
 		snprintf(data->message_center->name, sizeof(data->message_center->name), "%s", message + 33);
-		data->message_center->default_name = -1;	/* FIXME */
+		data->message_center->default_name = -1;
 
 		if (message[9] % 2) message[9]++;
 		message[9] = message[9] / 2 + 1;
@@ -1477,15 +1476,10 @@ static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int 
 			 sizeof(data->message_center->smsc.number),
 			 "%s", char_bcd_number_get(message + 21));
 		data->message_center->smsc.type = message[22];
-
-		if (strlen(data->message_center->recipient.number) == 0) {
-			snprintf(data->message_center->recipient.number, sizeof(data->message_center->recipient.number), "(none)");
-		}
-		if (strlen(data->message_center->smsc.number) == 0) {
-			snprintf(data->message_center->smsc.number, sizeof(data->message_center->smsc.number), "(none)");
-		}
-		if (strlen(data->message_center->name) == 0) {
-			data->message_center->name[0] = '\0';
+		/* Set a default SMSC name if none was received */
+		if (!data->message_center->name[0]) {
+			snprintf(data->message_center->name, sizeof(data->message_center->name), _("Set %d"), data->message_center->id);
+			data->message_center->default_name = data->message_center->id;
 		}
 
 		break;
