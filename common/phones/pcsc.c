@@ -40,6 +40,7 @@
 static gn_error GetFile(gn_data *data, struct gn_statemachine *state);
 static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
+static gn_error GetSMSCenter(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSMSFolders(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state);
@@ -239,6 +240,96 @@ static LONG get_memory_type(gn_memory_type memory_type)
 	}
 }
 
+static size_t alpha_tag_strlen(BYTE *buf, size_t max_length)
+{
+/* Calculate length of an "alpha tag" (ie the text associated to a phone number)
+ according to subclause 10.5.1 and Annex B */
+	size_t alpha_length;
+
+	switch (*buf) {
+	case 0x80:
+		/* UCS2 alphabet */
+		buf++; /* skip 0x80 */
+		alpha_length = 0;
+		while ((*buf++ != 0xff) && (alpha_length < max_length)) {
+			alpha_length++;
+		}
+		break;
+	case 0x81:
+	case 0x82:
+		/* UCS2 alphabet with different coding schemes */
+		if (buf[1] > max_length) {
+			alpha_length = max_length;
+		} else {
+			alpha_length = buf[1];
+		}
+		break;
+	default:
+		/* GSM Default Alphabet */
+		alpha_length = 0;
+		while ((*buf++ != 0xff) && (alpha_length < max_length)) {
+			alpha_length++;
+		}
+	}
+
+	return alpha_length;
+}
+
+static void alpha_tag_decode(BYTE *dest, BYTE *buf, size_t alpha_length)
+{
+/* Handle decoding according to Annex B */
+	BYTE *temp;
+	int i, ucs2_base;
+
+	switch (*buf) {
+	case 0x80:
+		/* UCS2 alphabet */
+		buf++;
+		char_unicode_decode(dest, buf, alpha_length * 2);
+		break;
+	case 0x81:
+	case 0x82:
+		/* UCS2 alphabet mixed with GSM Default Alphabet */
+		if (*buf == 0x81) {
+			ucs2_base = *(buf+2) << 7;
+			buf += 3;
+		} else {
+			ucs2_base = (*(buf+2) << 8) + *(buf+3);
+			buf += 4;
+		}
+		dprintf("ucs2_base = 0x%04x\n", ucs2_base);
+		temp = (BYTE *) malloc(alpha_length * 2);
+		if (!temp) {
+			dest[0] = '\0';
+			return;
+		}
+		/* Convert to pure UCS2 data in a temporary buffer to use existing libgnokii function */
+		for (i = 0; i < alpha_length; i++, buf++) {
+			if (*buf & 0x80) {
+				/* UCS2 alphabet */
+				dprintf("ucs2 = 0x%04x\n", ucs2_base + (*buf & 0x7f));
+				temp[i * 2] = ((ucs2_base + (*buf & 0x7f)) >> 8) & 0xff;
+				temp[i * 2 + 1] = (ucs2_base + (*buf & 0x7f)) & 0xff;
+			} else {
+				/* GSM Default Alphabet */
+				dprintf("GSM = 0x%02x\n", *buf & 0x7f);
+				temp[i * 2] = 0;
+				temp[i * 2 + 1] = char_def_alphabet_decode(*buf & 0x7f);
+			}
+		}
+		char_unicode_decode(dest, temp, alpha_length * 2);
+		free(temp);
+		break;
+	default:
+		/* GSM Default Alphabet */
+		i = 0;
+		while ((*buf != 0xff) && (i < alpha_length)) {
+			dest[i++] = char_def_alphabet_decode(*buf++);
+		}
+		dest[i] = '\0';
+	}
+}
+
 /* higher level functions */
 
 /* read ICCID and convert it into an ASCII string in the provided buffer (at least GN_PCSC_ICCID_MAX_LENGTH bytes long) */
@@ -358,6 +449,8 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return GetMemoryStatus(data, state);
 	case GN_OP_GetNetworkInfo:
 		return GetNetworkInfo(data, state);
+	case GN_OP_GetSMSCenter:
+		return GetSMSCenter(data, state);
 	case GN_OP_GetSMS:
 		return GetSMSMessage(data, state);
 	case GN_OP_GetSMSFolders:
@@ -529,6 +622,95 @@ static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
+static gn_error GetSMSCenter(gn_data *data, struct gn_statemachine *state)
+{
+/* See Subclause 10.5.6 */
+	LONG file;
+	LONG ret;
+	int alpha_max_len, alpha_length, parameter_indicators;
+	gn_error error;
+
+	if (!data || !data->message_center) {
+		return GN_ERR_INTERNALERROR;
+	}
+	if ((data->message_center->id < 1) || (data->message_center->id > 255)) {
+		return GN_ERR_INVALIDLOCATION;
+	}
+	file = GN_PCSC_FILE_EF_SMSP;
+
+	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	ret = pcsc_read_file_record(&IoStruct, file, data->message_center->id);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	/* Expected layout: 28+Y bytes (subtract 2 for SW) */
+	alpha_max_len = IoStruct.dwReceived - 28 - 2;
+	alpha_length = alpha_tag_strlen(IoStruct.pbRecvBuffer, alpha_max_len);
+	dprintf("Max length of Alpha Identifier is %d\n", alpha_max_len);
+	if (alpha_max_len < 0) return GN_ERR_INTERNALERROR;
+
+	/* Alpha-Identifier */
+	if (alpha_length > 0) {
+		alpha_tag_decode(data->message_center->name, IoStruct.pbRecvBuffer, GNOKII_MIN(sizeof(data->message_center->name), alpha_length));
+		data->message_center->default_name = -1;
+	} else {
+		/* Set a default name */
+		snprintf(data->message_center->name, sizeof(data->message_center->name), _("Set %d"), data->message_center->id);
+		/* From include/gnokii/sms.h: set this flag >= 1 if default name used, otherwise -1 */
+		data->message_center->default_name = data->message_center->id;
+	}
+
+	/* Parameter Indicators */
+	parameter_indicators = IoStruct.pbRecvBuffer[alpha_max_len];
+	dprintf("Parameter Indicators: 0x%02x\n", parameter_indicators);
+	/* Call it empty if no parameter is present */
+	if (parameter_indicators == 0xff) return GN_ERR_EMPTYLOCATION;
+
+	/* TP-Destination Address */
+	if (parameter_indicators & 0x01) {
+		data->message_center->recipient.number[0] = '\0';
+	} else {
+		snprintf(data->message_center->recipient.number, sizeof(data->message_center->recipient.number), "%s", char_bcd_number_get(IoStruct.pbRecvBuffer + alpha_max_len + 1));
+		/* TON - Type of Number */
+		data->message_center->recipient.type = IoStruct.pbRecvBuffer[alpha_max_len + 2];
+	}
+
+	/* TP-Service Centre Address */
+	if (parameter_indicators & 0x02) {
+		data->message_center->smsc.number[0] = '\0';
+	} else {
+		snprintf(data->message_center->smsc.number, sizeof(data->message_center->smsc.number), "%s", char_bcd_number_get(IoStruct.pbRecvBuffer + alpha_max_len + 13));
+		/* TON - Type of Number */
+		data->message_center->smsc.type = IoStruct.pbRecvBuffer[alpha_max_len + 14];
+	}
+
+	/* TP-Protocol Identifier */
+	if (parameter_indicators & 0x04) {
+		dprintf("\tTP-Protocol Identifier: parameter absent\n");
+	} else {
+		data->message_center->format = IoStruct.pbRecvBuffer[alpha_max_len + 25];
+	}
+
+	/* TP-Data Coding Scheme */
+	if (parameter_indicators & 0x08) {
+		dprintf("\tTP-Data Coding Scheme: parameter absent\n");
+	} else {
+		dprintf("\tTP-Data Coding Scheme: 0x%02x\n", IoStruct.pbRecvBuffer[alpha_max_len + 26]);
+	}
+
+	/* TP-Validity Period */
+	if (parameter_indicators & 0x10) {
+		dprintf("\tTP-Validity Period: parameter absent\n");
+	} else {
+		data->message_center->validity = IoStruct.pbRecvBuffer[alpha_max_len + 27];
+	}
+
+	return GN_ERR_NONE;
+}
+
 static gn_error GetSMSFolders(gn_data *data, struct gn_statemachine *state)
 {
 	if (!data || !data->sms_folder_list)
@@ -597,9 +779,9 @@ static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state)
 	/* expected layout: 1 octet status, N octets number, 177-N octets data */
 	if (IoStruct.dwReceived < 178) return GN_ERR_INTERNALERROR;
 
-	/* skip SIM entry status FIXME handle deleted messages */
+	/* skip SIM entry status */
 	tmp = IoStruct.pbRecvBuffer + 1;
-	/* substract 1 for SIM entry status and 2 for SW */
+	/* subtract 1 for SIM entry status and 2 for SW */
 	sms_len = IoStruct.dwReceived - 3;
 
 	ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, GN_SMS_PDU_DEFAULT);
@@ -738,8 +920,7 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	LONG file;
 	LONG ret;
-	BYTE *buf, *temp;
-	int i, number_start, alpha_length, ucs2_base;
+	int number_start, alpha_length;
 	gn_phonebook_entry *pe;
 	gn_error error;
 
@@ -782,81 +963,17 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 		*pe->number = '\0';
 		return GN_ERR_EMPTYLOCATION;
 	}
-	/* calculate length of "alpha tag" (ie the text associated to this number) */
-	buf = IoStruct.pbRecvBuffer;
-	switch (*buf) {
-	case 0x80:
-		/* UCS2 alphabet */
-		buf++; /* skip 0x80 */
-		alpha_length = 0;
-		while ((*buf++ != 0xff) && (alpha_length < number_start)) {
-			alpha_length++;
-		}
-		break;
-	case 0x81:
-	case 0x82:
-		/* UCS2 alphabet with different coding schemes */
-		alpha_length = buf[1];
-		break;
-	default:
-		/* GSM Default Alphabet */
-		alpha_length = 0;
-		while ((*buf++ != 0xff) && (alpha_length < number_start)) {
-			alpha_length++;
-		}
-	}
+
+	/* decode and copy the name */
+	/* calculate length of the "alpha tag" (ie the text associated to this number) because existing libgnokii functions need it */
+	alpha_length = alpha_tag_strlen(IoStruct.pbRecvBuffer, number_start);
 	/* better check, since subclause 10.5.1 says length of alpha tag is 0..241 */
 	if (alpha_length > GN_PHONEBOOK_NAME_MAX_LENGTH) {
 		dprintf("WARNING: Phonebook name too long, %d will be truncated to %d\n", alpha_length, GN_PHONEBOOK_NAME_MAX_LENGTH);
 		alpha_length = GN_PHONEBOOK_NAME_MAX_LENGTH;
 	}
-	/* handle the encoding according to Annex B of ETSI TS 100 977 */
-	buf = IoStruct.pbRecvBuffer;
-	switch (*buf) {
-	case 0x80:
-		/* UCS2 alphabet */
-		buf++;
-		char_unicode_decode(pe->name, buf, alpha_length * 2);
-		break;
-	case 0x81:
-	case 0x82:
-		/* UCS2 alphabet mixed with GSM Default Alphabet */
-		if (*buf == 0x81) {
-			ucs2_base = *(buf+2) << 7;
-			buf += 3;
-		} else {
-			ucs2_base = (*(buf+2) << 8) + *(buf+3);
-			buf += 4;
-		}
-		dprintf("ucs2_base = 0x%04x\n", ucs2_base);
-		temp = (BYTE *) malloc(alpha_length * 2);
-		if (!temp) {
-			return GN_ERR_MEMORYFULL;
-		}
-		for (i = 0; i < alpha_length; i++, buf++) {
-			if (*buf & 0x80) {
-				/* UCS2 alphabet */
-				dprintf("ucs2 = 0x%04x\n", ucs2_base + (*buf & 0x7f));
-				temp[i * 2] = ((ucs2_base + (*buf & 0x7f)) >> 8) & 0xff;
-				temp[i * 2 + 1] = (ucs2_base + (*buf & 0x7f)) & 0xff;
-			} else {
-				/* GSM Default Alphabet */
-				dprintf("GSM = 0x%02x\n", *buf & 0x7f);
-				temp[i * 2] = 0;
-				temp[i * 2 + 1] = char_def_alphabet_decode(*buf & 0x7f);
-			}
-		}
-		char_unicode_decode(pe->name, temp, alpha_length * 2);
-		free(temp);
-		break;
-	default:
-		/* GSM Default Alphabet */
-		i = 0;
-		while ((*buf != 0xff) && (i < alpha_length)) {
-			pe->name[i++] = char_def_alphabet_decode(*buf++);
-		}
-		pe->name[i] = '\0';
-	}
+	alpha_tag_decode(pe->name, IoStruct.pbRecvBuffer, alpha_length);
+
 	/* decode and copy the number */
 	snprintf(pe->number, GN_PHONEBOOK_NUMBER_MAX_LENGTH, "%s", char_bcd_number_get((u8 *)&IoStruct.pbRecvBuffer[number_start]));
 	if (IoStruct.pbRecvBuffer[IoStruct.dwReceived - 3] != 0xff) {

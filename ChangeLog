@@ -38,6 +38,16 @@
     o avoid "duplicated message" error with concatenated messages
       on MySQL                                          (Paweł Kot)
     o more verbose debug information                    (Paweł Kot)
+ * pcsc driver updates
+    o implement GN_OP_GetSMSCenter for --getsmsc    (Daniele Forsi)
+ * nk6510 driver updates
+    o for GN_OP_GetSMSCenter provide a default name if a name isn't 
+      received; fix setting default_name field; when phone numbers
+      are empty do not copy the string "(none)"     (Daniele Forsi)
+ * atgen driver updates
+    o for GN_OP_GetSMSCenter always provide a default name and set
+      default_name field because AT protocol never provides a name
+                                                    (Daniele Forsi)
 
 0.6.25
 ======

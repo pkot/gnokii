@@ -110,6 +110,8 @@ subclause : command
 #define GN_PCSC_FILE_EF_SMS 0x6F3C
 /* Mobile Subscriber Integrated Services Digital Network Number */
 #define GN_PCSC_FILE_EF_MSISDN 0x6F40
+/* Short Message Service Parameters */
+#define GN_PCSC_FILE_EF_SMSP 0x6f42
 /* Last Numbers Dialed */
 #define GN_PCSC_FILE_EF_LND 0x6F44
 /* Service Dialing Numbers */

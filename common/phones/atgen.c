@@ -1625,20 +1625,21 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 			data->message_center->id = 1;
 			snprintf(data->message_center->smsc.number, GN_BCD_STRING_MAX_LENGTH, "%s", buf.line2 + 8);
 			/* Now we look for the number type */
-			data->message_center->smsc.type = 0;
 			aux = strchr(pos, ',');
 			if (aux)
 				data->message_center->smsc.type = atoi(++aux);
 			else if (data->message_center->smsc.number[0] == '+')
 				data->message_center->smsc.type = GN_GSM_NUMBER_International;
-			if (!data->message_center->smsc.type)
+			else
 				data->message_center->smsc.type = GN_GSM_NUMBER_Unknown;
 		} else {
 			data->message_center->id = 0;
-			snprintf(data->message_center->name, GN_SMS_CENTER_NAME_MAX_LENGTH, "SMS Center");
 			data->message_center->smsc.type = GN_GSM_NUMBER_Unknown;
 		}
-		data->message_center->default_name = 1; /* use default name */
+		/* Set a default SMSC name because +CSCA doesn't provide one */
+		snprintf(data->message_center->name, sizeof(data->message_center->name), _("Set %d"), data->message_center->id);
+		data->message_center->default_name = data->message_center->id;
+		/* FIXME? following information is given by AT+CSMP (if supported by phone) but is valid only for text mode */
 		data->message_center->format = GN_SMS_MF_Text; /* whatever */
 		data->message_center->validity = GN_SMS_VP_Max;
 		data->message_center->recipient.number[0] = 0;

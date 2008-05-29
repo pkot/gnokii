@@ -1465,6 +1465,7 @@ err:
 		data->message_center->id = message[8];
 		data->message_center->format = message[10];
 		data->message_center->validity = message[12];  /* due to changes in format */
+		data->message_center->name[0] = '\0';
 
 		parts_no = message[13];
 		offset = 14;
@@ -1495,6 +1496,7 @@ err:
 				char_unicode_decode(data->message_center->name,
 					      message + offset + 4,
 					      message[offset + 2]);
+				data->message_center->default_name = -1;
 				break;
 			default:
 				dprintf("Unknown subtype %02x. Ignoring\n", message[offset]);
@@ -1502,17 +1504,10 @@ err:
 			}
 			offset += message[offset + 1];
 		}
-
-		data->message_center->default_name = -1;	/* FIXME */
-
-		if (strlen(data->message_center->recipient.number) == 0) {
-			snprintf(data->message_center->recipient.number, sizeof(data->message_center->recipient.number), "(none)");
-		}
-		if (strlen(data->message_center->smsc.number) == 0) {
-			snprintf(data->message_center->smsc.number, sizeof(data->message_center->smsc.number), "(none)");
-		}
-		if (strlen(data->message_center->name) == 0) {
-			data->message_center->name[0] = '\0';
+		/* Set a default SMSC name if none was received */
+		if (!data->message_center->name[0]) {
+			snprintf(data->message_center->name, sizeof(data->message_center->name), _("Set %d"), data->message_center->id);
+			data->message_center->default_name = data->message_center->id;
 		}
 
 		break;
@@ -2507,10 +2502,13 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 					break;
 				default:
 					j = strlen(entry->subentries[i].data.number);
+printf("***** data.number \"%s\"\nstrlen %d\n", entry->subentries[i].data.number, j);
 					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 					string[j + 1] = 0;
 					string[0] = j;
+printf("***** j %d count %d\n", j, count);
 					count += PackBlock(entry->subentries[i].entry_type, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+printf("***** GN_PHONEBOOK_ENTRY_MAX_LENGTH - count %d count %d\n", GN_PHONEBOOK_ENTRY_MAX_LENGTH - count, count);
 					break;
 				}
 			}
