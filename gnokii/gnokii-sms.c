@@ -1029,7 +1029,10 @@ gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			else
 				fprintf(stdout, _("No. %d: \"%s\" (default name)\n"), message_center.id, message_center.name);
 			fprintf(stdout, _("SMS center number is %s\n"), message_center.smsc.number);
-			fprintf(stdout, _("Default recipient number is %s\n"), message_center.recipient.number);
+			if (message_center.recipient.number[0])
+				fprintf(stdout, _("Default recipient number is %s\n"), message_center.recipient.number);
+			else
+				fprintf(stdout, _("No default recipient number is defined\n"));
 			fprintf(stdout, _("Messages sent as %s\n"), gn_sms_message_format2str(message_center.format));
 			fprintf(stdout, _("Message validity is %s\n"), gn_sms_vp_time2str(message_center.validity));
 		}
