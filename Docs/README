@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
                          (C) 2001 - 2008 Paweł Kot
-                  Last update  3 May 2008  Version 0.6.25
+                  Last update 30 May 2008  Version 0.6.26
 
 - Contents -
 
@@ -26,7 +26,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.25 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.26 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -382,6 +382,10 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20080530 Version 0.6.26
+Fix infinite loop problem with SMSD. Fix vCard reading/saving problem.
+Better handling of +CREG information in AT driver. Other fixes to AT driver.
+
 20080503 Version 0.6.25
 Allow to use --entersecuritycode with another gnokii command. Use
 standardized functions to print out enums' values. vCard support compliant

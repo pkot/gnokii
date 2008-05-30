@@ -24,7 +24,7 @@
 
   Copyright (C) 2003 Marcus Godehardt
 
-  This is the config.h file for GNOKII for MSVC6 compilers, you can
+  This is the config.h file for GNOKII for MSVS2005 compilers, you can
   edit this manually. This is not auto generated.
 
 */
@@ -39,7 +39,7 @@
 #endif
 
 #undef VERSION
-#define VERSION "0.6.25"
+#define VERSION "0.6.26"
 
 /* We support Bluetooth and IRDA on MSVS 2005 */
 #define HAVE_BLUETOOTH 1

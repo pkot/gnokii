@@ -1,4 +1,4 @@
-0.6.26 (not yet released)
+0.6.26
 ======
  * translation updates
     o search translations in $(localedir) and use exactly the same
@@ -25,6 +25,9 @@
     o correctly parse output for +CREG with LAC bytes swapped
                                                         (Paweł Kot)
     o add separate files for LG and Sagem phones        (Paweł Kot)
+    o for GN_OP_GetSMSCenter always provide a default name and set
+      default_name field because AT protocol never provides a name
+                                                    (Daniele Forsi)
  * gnokii updates
     o support 4-bytes cell id                           (Paweł Kot)
  * libgnokii updates
@@ -49,10 +52,6 @@
     o for GN_OP_GetSMSCenter provide a default name if a name isn't 
       received; fix setting default_name field; when phone numbers
       are empty do not copy the string "(none)"     (Daniele Forsi)
- * atgen driver updates
-    o for GN_OP_GetSMSCenter always provide a default name and set
-      default_name field because AT protocol never provides a name
-                                                    (Daniele Forsi)
  * nk7110 driver updates
     o for GN_OP_GetSMSCenter provide a default name if a name isn't
       received; fix setting default_name field; when phone numbers
