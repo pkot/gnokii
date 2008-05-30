@@ -17,6 +17,8 @@ libPHONES_la_SOURCES = \
 	atsie.c \
 	atsoer.c \
 	atsam.c \
+	atsag.c \
+	atlg.c \
 	gnapplet.c \
 	fake.c \
 	pcsc.c
