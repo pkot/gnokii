@@ -34,6 +34,6 @@
 
 #include "gnokii.h"
 
-void at_sag_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state);
+void at_sagem_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state);
 
 #endif
