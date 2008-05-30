@@ -203,8 +203,8 @@ gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state)
 			gn_network_name_get((char *)networkinfo.network_code),
 			gn_country_name_get((char *)country));
 	fprintf(stdout, _("Network code : %s\n"), (*networkinfo.network_code ? networkinfo.network_code : _("undefined")));
-	fprintf(stdout, _("LAC          : %04x\n"), lac);
-	fprintf(stdout, _("Cell id      : %08x\n"), cid);
+	fprintf(stdout, _("LAC          : %04x (%d)\n"), lac, lac);
+	fprintf(stdout, _("Cell id      : %08x (%d)\n"), cid, cid);
 
 	return 0;
 }
