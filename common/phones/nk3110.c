@@ -27,7 +27,7 @@
   Copyright (C) 2003-2003 BORBELY Zoltan
   Copyright (C) 2003 Osma Suominen
 
-  This file provides functions specific to the 3110 series.
+  This file provides functions specific to the Nokia 3110 series.
   See README for more details on supported mobile phones.
 
 */

@@ -28,7 +28,7 @@
   Copyright (C) 2002 Georg Moritz, Markus Plail, Jan Kratochvil
   Copyright (C) 2003 Bertrik Sikken
 
-  This file provides functions specific to the 6100 series.
+  This file provides functions specific to the Nokia 6100 series.
   See README for more details on supported mobile phones.
 
 */

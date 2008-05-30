@@ -24,7 +24,7 @@
 
   Copyright (C) 2002-2003 BORBELY Zoltan
 
-  This file provides functions specific to the 6160 series.
+  This file provides functions specific to the Nokia 6160 series.
   See README for more details on supported mobile phones.
 
 */

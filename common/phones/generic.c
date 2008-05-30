@@ -27,7 +27,7 @@
   Copyright (C) 2001-2002 Pawel Kot
   Copyright (C) 2002      Ladis Michl
 
-  This file provides useful functions for all phones
+  This file provides useful functions for all phones.
   See README for more details on supported mobile phones.
 
   The various routines are called pgen_(whatever).

@@ -27,7 +27,7 @@
   Copyright (C) 2002 Ladis Michl, Markus Plail
   Copyright (C) 2002-2004 BORBELY Zoltan, Pawel Kot
 
-  This file provides useful functions for all phones
+  This file provides useful functions for all Nokia phones.
   See README for more details on supported mobile phones.
 
   The various routines are called pnok_(whatever).
