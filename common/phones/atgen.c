@@ -2499,6 +2499,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		 *   5 - registered in roaming
 		 */
 		error = creg_parse(strings, i, &info);
+		*(info.network_code) = '\0';
 
 		gnokii_strfreev(strings);
 
