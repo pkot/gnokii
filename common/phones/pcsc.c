@@ -594,6 +594,7 @@ static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 
 static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 {
+/* See Subclause 10.3.17 */
 	LONG ret;
 	gn_error error;
 
@@ -601,6 +602,7 @@ static gn_error GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
 
+	/* See Subclause 10.5.1.3 of 3GPP TS 04.08 version 7.21.0 Release 1998 == ETSI TS 100 940 V7.21.0 (2003-12) */
 	data->network_info->cell_id[0] = 0;
 	data->network_info->cell_id[1] = 0;
 	data->network_info->LAC[0] = IoStruct.pbRecvBuffer[7];
