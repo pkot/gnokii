@@ -34,6 +34,8 @@
       representation                                    (Paweł Kot)
     o comments in the config files may be started at any position
       in the line                                       (Paweł Kot)
+    o add missing quotes to #define LIBGNOKII_VERSION_STRING
+                                                    (Daniele Forsi)
  * smsd updates
     o avoid "duplicated message" error with concatenated messages
       on MySQL                                          (Paweł Kot)
