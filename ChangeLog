@@ -22,6 +22,8 @@
                                                         (Paweł Kot)
     o better handle empty +COPS responses               (Paweł Kot)
     o handle +CREG notifications (registration status)  (Paweł Kot)
+    o correctly parse output for +CREG with LAC bytes swapped
+                                                        (Paweł Kot)
  * gnokii updates
     o support 4-bytes cell id                           (Paweł Kot)
  * libgnokii updates

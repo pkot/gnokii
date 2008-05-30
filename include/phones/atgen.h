@@ -24,7 +24,7 @@
 
   Copyright (C) 2000 Hugh Blemings, Pavel Janik
   Copyright (C) 2001 Manfred Jonsson <manfred.jonsson@gmx.de>
-  Copyright (C) 2002 Pawel Kot
+  Copyright (C) 2002-2008 Pawel Kot
   Copyright (C) 2003 Ladis Michl
   Copyright (C) 2004 Ron Yorston, Hugo Hass
 
@@ -148,6 +148,12 @@ typedef struct {
 	 */
 	int encode_memory_type;
 	int encode_number;
+
+	/*
+	 * Some phones reply with +CREG command with LAC information but with
+	 * the bytes swapped. Default is the natural order.
+	 */
+	int lac_swapped;
 } at_driver_instance;
 
 #define AT_DRVINST(s) (*((at_driver_instance **)(&(s)->driver.driver_instance)))

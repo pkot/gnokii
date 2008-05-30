@@ -24,7 +24,7 @@
 
   Copyright (C) 2001      Manfred Jonsson <manfred.jonsson@gmx.de>
   Copyright (C) 2002      Pavel Machek, Petr Cech
-  Copyright (C) 2002-2004 Pawel Kot
+  Copyright (C) 2002-2008 Pawel Kot
   Copyright (C) 2002-2003 Ladis Michl
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2003-2004 Igor Popik
@@ -2369,10 +2369,11 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	return error;
 }
 
-static gn_error creg_parse(char **strings, int i, gn_network_info *ninfo)
+static gn_error creg_parse(char **strings, int i, gn_network_info *ninfo, int lac_swapped)
 {
 	char tmp[3] = {0, 0, 0};
 	char *pos;
+	int first = 0, second = 1;
 
 	if (!strings[i] || strlen(strings[i]) < 6 || !strings[i + 1] || strlen(strings[i + 1]) < 6)
 		return GN_ERR_FAILED;
@@ -2380,16 +2381,21 @@ static gn_error creg_parse(char **strings, int i, gn_network_info *ninfo)
 	pos = strings[i];
 	pos++;
 
+	/*
+	 * Some phones have reverse order of the bytes in LAC.
+	 */
+	if (lac_swapped) {
+		first = 1;
+		second = 0;
+	}
+
 	tmp[0] = pos[0];
 	tmp[1] = pos[1];
-
-	ninfo->LAC[0] = strtol(tmp, NULL, 16);
+	ninfo->LAC[first] = strtol(tmp, NULL, 16);
 
 	tmp[0] = pos[2];
 	tmp[1] = pos[3];
-
-	ninfo->LAC[1] = strtol(tmp, NULL, 16);
-
+	ninfo->LAC[second] = strtol(tmp, NULL, 16);
 
 	pos = strings[i + 1];
 	pos++;
@@ -2476,7 +2482,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		 *   4 - status unknown
 		 *   5 - registered in roaming
 		 */
-		error = creg_parse(strings, i, data->network_info);
+		error = creg_parse(strings, i, data->network_info, drvinst->lac_swapped);
 
 		gnokii_strfreev(strings);
 		
@@ -2498,7 +2504,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		 *   4 - status unknown
 		 *   5 - registered in roaming
 		 */
-		error = creg_parse(strings, i, &info);
+		error = creg_parse(strings, i, &info, drvinst->lac_swapped);
 		*(info.network_code) = '\0';
 
 		gnokii_strfreev(strings);
@@ -2760,6 +2766,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->availcharsets = 0;
 	drvinst->encode_memory_type = 0;
 	drvinst->encode_number = 0;
+	drvinst->lac_swapped = 0;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {
