@@ -24,7 +24,7 @@
 
   Copyright (C) 2006 Bastien Nocera <hadess@hadess.net>
 
-  This file provides functions specific to AT commands on Siemens phones.
+  This file provides functions specific to AT commands on Motorola phones.
   See README for more details on supported mobile phones.
 
 */

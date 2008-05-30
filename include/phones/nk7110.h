@@ -27,7 +27,7 @@
   Copyright (C) 2001-2003 Pawel Kot, BORBELY Zoltan
   Copyright (C) 2002      Markus Plail
 
-  This file provides functions specific to the 7110 series.
+  This file provides functions specific to the Nokia 7110 series.
   See README for more details on supported mobile phones.
 
   The various routines are called nk7110_(whatever).

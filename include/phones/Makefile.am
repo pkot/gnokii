@@ -3,8 +3,10 @@ EXTRA_HEADERS = \
 		atbosch.h \
 		ateric.h \
 		atgen.h \
+		atlg.h \
 		atmot.h \
 		atnok.h \
+		atsag.h \
 		atsam.h \
 		atsie.h \
 		atsoer.h \

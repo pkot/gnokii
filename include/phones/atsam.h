@@ -25,7 +25,7 @@
   Copyright (C) 2002 Ladislav Michl <ladis@linux-mips.org>
   Copyright (C) 2007 Ingmar Steen <iksteen@gmail.com>
 
-  This file provides functions specific to AT commands on Bosch phones.
+  This file provides functions specific to AT commands on Samsung phones.
   See README for more details on supported mobile phones.
 
 */

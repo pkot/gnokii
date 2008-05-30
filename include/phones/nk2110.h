@@ -24,7 +24,7 @@
 
   Copyright (C) 2000 Pavel Machek
 
-  This file provides functions specific to the 2110 series.
+  This file provides functions specific to the Nokia 2110 series.
   See README for more details on supported mobile phones.
 
   The various routines are called P2110_(whatever).
