@@ -1954,7 +1954,7 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			dprintf("directory\n");
 			break;
 		case 0x01:
-			dprintf("java jed file\n");
+			dprintf("java jad file\n");
 			break;
 		case 0x02:
 			dprintf("image\n");
