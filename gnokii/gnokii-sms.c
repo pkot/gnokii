@@ -612,7 +612,7 @@ void getsms_usage(FILE *f, int exitval)
 			"        -f filename                 as above but user is prompted before\n"
 			"                                    overwriting the file\n"
 			"        --append-file filename\n"
-			"        -a filename                 as above but append to the exising file\n"
+			"        -a filename                 as above but append to the existing file\n"
 			"        --delete\n"
 			"        -d                          delete message after reading\n"
 			"\n"
