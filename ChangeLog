@@ -1,3 +1,11 @@
+0.6.27 (not released yet)
+=========================
+ * win32 updates
+    o make it build again                             (Jari Turkia)
+ * nk6510 driver updates
+    o advance progress indicator for file download in place
+                                                      (Yoni Rabkin)
+
 0.6.26
 ======
  * translation updates

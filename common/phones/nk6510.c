@@ -1721,9 +1721,10 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 		if (err != GN_ERR_NONE)
 			return err;
 		progress = 100 * (data->file->file_length - data->file->togo) / data->file->file_length;
-		fprintf(stderr, _("\rProgress: %3d%% completed\n"), progress);
+		fprintf(stderr, _("Progress: %3d%% completed\r"), progress);
 	}
-	
+	fprintf(stderr, "\n");
+
 	/* Finish the transfer */
 	memcpy(req4+4, data->file->id, NK6510_FILE_ID_LENGTH);
 	if (sm_message_send(sizeof(req4), NK6510_MSG_FILE, req4, state))
