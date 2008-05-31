@@ -661,7 +661,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_SETSPEEDDIAL,      3, 3, 0 },
 		{ OPT_CREATESMSFOLDER,   1, 1, 0 },
 		{ OPT_DELETESMSFOLDER,   1, 1, 0 },
-		{ OPT_GETSMS,            2, 5, 0 },
+		{ OPT_GETSMS,            2, 7, 0 },
 		{ OPT_DELETESMS,         2, 3, 0 },
 		{ OPT_SENDSMS,           1, 10, 0 },
 		{ OPT_SAVESMS,           0, 10, 0 },
