@@ -10,7 +10,7 @@ dnl
 
 
 AC_INIT([gnokii],
-	 [0.6.26],
+	 [0.6.27cvs],
 	 [http://www.gnokii.org/])
 
 # Before making a release, the GNOKII_LT_VERSION string should be modified.
@@ -935,7 +935,7 @@ echo "
 
   A toolset and driver for the mobile phones.
 
-  Copyright (C) 1999-2006  The Gnokii Development Team.
+  Copyright (C) 1999-2008  The Gnokii Development Team.
 
   This program is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -947,6 +947,7 @@ echo "
     Host system:        $host_os
     Gnokii version:     $VERSION
     Xgnokii version:    $XVERSION
+    SMSD version:       $SVERSION
     X (GTK+) support:   $x_support
     smsd support:       $enable_smsd
     Postgres support:   $have_postgres
