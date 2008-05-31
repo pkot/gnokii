@@ -1673,6 +1673,12 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 	gn_error err;
 	int i;
 
+	/* Register callback */
+	if (data->progress_indication) {
+		DRVINSTANCE(state)->progress_indication = data->progress_indication;
+		DRVINSTANCE(state)->progress_callback_data = data->callback_data;
+	}
+
   	if (!data->file)
   		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
@@ -1721,9 +1727,13 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 		if (err != GN_ERR_NONE)
 			return err;
 		progress = 100 * (data->file->file_length - data->file->togo) / data->file->file_length;
-		fprintf(stderr, _("Progress: %3d%% completed\r"), progress);
+		if (!DRVINSTANCE(state)->progress_indication)
+			fprintf(stderr, _("Progress: %3d%% completed\r"), progress);
+		else
+			DRVINSTANCE(state)->progress_indication(progress, DRVINSTANCE(state)->progress_callback_data);
 	}
-	fprintf(stderr, "\n");
+	if (!DRVINSTANCE(state)->progress_indication)
+		fprintf(stderr, "\n");
 
 	/* Finish the transfer */
 	memcpy(req4+4, data->file->id, NK6510_FILE_ID_LENGTH);
@@ -1741,6 +1751,12 @@ static gn_error NK6510_GetFileById(gn_data *data, struct gn_statemachine *state)
 				0x00, 0x00, 0x00, 0x00}; /* Size */
 	gn_error err = GN_ERR_NONE;
 	int i, length;
+
+	/* Register callback */
+	if (data->progress_indication) {
+		DRVINSTANCE(state)->progress_indication = data->progress_indication;
+		DRVINSTANCE(state)->progress_callback_data = data->callback_data;
+	}
 
   	if (!data->file)
   		return GN_ERR_INTERNALERROR;
@@ -1774,9 +1790,13 @@ static gn_error NK6510_GetFileById(gn_data *data, struct gn_statemachine *state)
 		if (err != GN_ERR_NONE)
 			return err;
 		progress = 100 * (data->file->file_length - data->file->togo) / data->file->file_length;
-		fprintf(stderr, _("Progress: %3d%% completed\r"), progress);
+		if (!DRVINSTANCE(state)->progress_indication)
+			fprintf(stderr, _("Progress: %3d%% completed\r"), progress);
+		else
+			DRVINSTANCE(state)->progress_indication(progress, DRVINSTANCE(state)->progress_callback_data);
 	}
-	fprintf(stderr, "\n");
+	if (!DRVINSTANCE(state)->progress_indication)
+		fprintf(stderr, "\n");
 
 	return err;	
 }

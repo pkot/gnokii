@@ -5,6 +5,9 @@
  * nk6510 driver updates
     o advance progress indicator for file download in place
                                                       (Yoni Rabkin)
+ * libgnokii updates
+    o add callback function for advance progress indicator
+                                                        (Paweł Kot)
 
 0.6.26
 ======

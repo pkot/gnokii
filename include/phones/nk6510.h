@@ -204,11 +204,13 @@ typedef struct {
 	void (*on_cell_broadcast)(gn_cb_message *msg, struct gn_statemachine *state, void *callback_data);
 	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info, struct gn_statemachine *state, void *callback_data);
 	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
+	void (*progress_indication)(int progress, void *callback_data);
 
 	/* callback local data */
-	void *cb_callback_data;	/* to be passed as callback_data to on_cell_broadcast */
+	void *cb_callback_data;		/* to be passed as callback_data to on_cell_broadcast */
 	void *call_callback_data;	/* to be passed as callback_data to call_notification */
 	void *sms_callback_data;	/* to be passed as callback_data to on_sms */
+	void *progress_callback_data;	/* to be passed as callback_data to progress_indication */
 } nk6510_driver_instance;
 
 #endif  /* _gnokii_phones_nk6510_h */

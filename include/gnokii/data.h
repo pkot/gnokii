@@ -122,6 +122,11 @@ typedef struct {
 	 * registration parameters changes: status, LAC, cell id.
 	 */
 	void (*reg_notification)(gn_network_info *info, void *callback_data);
+	/*
+	 * This is callback function for file download progress.
+	 * progress is value in range [0, 100].
+	 */
+	void (*progress_indication)(int progress, void *callback_data);
 } gn_data;
 
 /* 
