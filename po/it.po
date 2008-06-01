@@ -1,13 +1,13 @@
 # This is the Italian locale definition for Gnokii.
 # Copyright (C) 2000 Gabriele Stella <gstella@libero.it>
-#               2006, 2007 Daniele Forsi <daniele@forsi.it>
+#               2006-2008 Daniele Forsi <daniele@forsi.it>
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2008-05-31 15:08+0200\n"
-"PO-Revision-Date: 2007-10-26 16:45+0200\n"
+"POT-Creation-Date: 2008-06-01 19:20+0200\n"
+"PO-Revision-Date: 2008-06-01 18:55+0200\n"
 "Last-Translator: Daniele Forsi <daniele@forsi.it>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
 "MIME-Version: 1.0\n"
@@ -457,80 +457,76 @@ msgid "None"
 msgstr "Nessuno"
 
 #: ../common/gsm-common.c:182
-#, fuzzy
 msgid "Serial"
-msgstr "seriale"
+msgstr "Seriale"
 
 #: ../common/gsm-common.c:183
 msgid "Serial DAU9P"
-msgstr ""
+msgstr "Seriale DAU9P"
 
 #: ../common/gsm-common.c:184
 msgid "Serial DLR3P"
-msgstr ""
+msgstr "Seriale DLR3P"
 
 #: ../common/gsm-common.c:185
 msgid "Infrared (old Nokias)"
-msgstr ""
+msgstr "Infrarossi (vecchi Nokia)"
 
 #: ../common/gsm-common.c:186
 msgid "IrDA"
-msgstr ""
+msgstr "IrDA"
 
 #: ../common/gsm-common.c:187
 msgid "Bluetooth"
-msgstr ""
+msgstr "Bluetooth"
 
 #: ../common/gsm-common.c:188
 msgid "Tekram Ir-Dongle"
-msgstr ""
+msgstr "Tekram Ir-Dongle"
 
 #: ../common/gsm-common.c:189
 msgid "TCP"
-msgstr ""
+msgstr "TCP"
 
 #: ../common/gsm-common.c:190
 msgid "M2BUS"
-msgstr ""
+msgstr "M2BUS"
 
 #: ../common/gsm-common.c:191
 msgid "DKU2 (kernel support)"
-msgstr ""
+msgstr "DKU2 (supporto del kernel)"
 
 #: ../common/gsm-common.c:192
 msgid "DKU2 (libusb support)"
-msgstr ""
+msgstr "DKU2 (supporto di libusb)"
 
 #: ../common/gsm-common.c:200
-#, fuzzy
 msgid "AC-DC"
-msgstr "da rete"
+msgstr "Da rete"
 
 #: ../common/gsm-common.c:201
-#, fuzzy
 msgid "Battery"
-msgstr "da batteria"
+msgstr "Da batteria"
 
 #: ../common/gsm-common.c:209
-#, fuzzy
 msgid "Security code"
-msgstr "Il codice di sicurezza è: %s\n"
+msgstr "Codice di sicurezza"
 
 #: ../common/gsm-common.c:210
 msgid "PIN"
-msgstr ""
+msgstr "PIN"
 
 #: ../common/gsm-common.c:211
 msgid "PIN2"
-msgstr ""
+msgstr "PIN2"
 
 #: ../common/gsm-common.c:212
 msgid "PUK"
-msgstr ""
+msgstr "PUK"
 
 #: ../common/gsm-common.c:213
 msgid "PUK2"
-msgstr ""
+msgstr "PUK2"
 
 #: ../common/gsm-common.c:224 ../common/gsm-common.c:225
 #: ../common/gsm-common.c:230
@@ -543,16 +539,15 @@ msgstr "Numero di casa"
 
 #: ../common/gsm-common.c:227
 msgid "Mobile number"
-msgstr "Numero cellulare"
+msgstr "Numero di cellulare"
 
 #: ../common/gsm-common.c:228
 msgid "Fax number"
-msgstr "Numero fax"
+msgstr "Numero di fax"
 
 #: ../common/gsm-common.c:229
-#, fuzzy
 msgid "Work number"
-msgstr "Numero di casa"
+msgstr "Numero di lavoro"
 
 #: ../common/gsm-common.c:231 ../common/gsm-common.c:318
 msgid "Unknown number"
@@ -643,7 +638,6 @@ msgid "User ID"
 msgstr "ID utente"
 
 #: ../common/gsm-common.c:254
-#, fuzzy
 msgid "Push-To-Talk address"
 msgstr "Indirizzo Push-to-talk"
 
@@ -733,127 +727,104 @@ msgid "Text"
 msgstr "Testo"
 
 #: ../common/gsm-common.c:344
-#, fuzzy
 msgid "Linked"
-msgstr "Cerca"
+msgstr "Concatenato"
 
 #: ../common/gsm-common.c:346
-#, fuzzy
 msgid "GSM Operator Logo"
-msgstr "Logo operatore"
+msgstr "Logo operatore GSM"
 
 #: ../common/gsm-common.c:348
-#, fuzzy
 msgid "Multipart Message"
-msgstr "Inoltra il messaggio"
+msgstr "Messaggio multiparte"
 
 #: ../common/gsm-common.c:349
-#, fuzzy
 msgid "WAP vCard"
-msgstr "WAP vCard:\n"
+msgstr "vCard WAP"
 
 #: ../common/gsm-common.c:350
-#, fuzzy
 msgid "WAP vCalendar"
-msgstr "WAP vCalendar:\n"
+msgstr "vCalendar WAP"
 
 #: ../common/gsm-common.c:351
-#, fuzzy
 msgid "WAP vCardSecure"
-msgstr "WAP vCardSecure:\n"
+msgstr "vCardSecure WAP"
 
 #: ../common/gsm-common.c:352
-#, fuzzy
 msgid "WAP vCalendarSecure"
-msgstr "WAP vCalendarSecure:\n"
+msgstr "WAP vCalendarSecure WAP"
 
 #: ../common/gsm-common.c:353
-#, fuzzy
 msgid "Voice Message"
-msgstr "Nuovo messaggio"
+msgstr "Messaggio vocale"
 
 #: ../common/gsm-common.c:354
-#, fuzzy
 msgid "Fax Message"
-msgstr "Messaggio"
+msgstr "Messaggio fax"
 
 #: ../common/gsm-common.c:355
-#, fuzzy
 msgid "Email Message"
-msgstr "Messaggio"
+msgstr "Messaggio email"
 
 #: ../common/gsm-common.c:356
 msgid "WAP Push"
-msgstr ""
+msgstr "WAP Push"
 
 #: ../common/gsm-common.c:357
-#, fuzzy
 msgid "Other Message"
-msgstr "Nuovo messaggio"
+msgstr "Altro messaggio"
 
 #: ../common/gsm-common.c:366
-#, fuzzy
 msgid "Inbox Message"
-msgstr "%d. Messaggi ricevuti "
+msgstr "Messaggio ricevuto"
 
 #: ../common/gsm-common.c:367
-#, fuzzy
 msgid "Delivery Report"
-msgstr "Rapporto di invio"
+msgstr "Rapporto di consegna"
 
 #: ../common/gsm-common.c:368 ../common/gsm-common.c:375
-#, fuzzy
 msgid "MO Message"
-msgstr "Messaggio"
+msgstr "Messaggio inviato"
 
 #: ../common/gsm-common.c:369
 msgid "Submit Report"
-msgstr ""
+msgstr "Rapporto di invio"
 
 #: ../common/gsm-common.c:370
-#, fuzzy
 msgid "Command"
-msgstr "Azienda"
+msgstr "Comando"
 
 #: ../common/gsm-common.c:371
-#, fuzzy
 msgid "Status Report"
-msgstr "Stato"
+msgstr "Rapporto di stato"
 
 #: ../common/gsm-common.c:372
-#, fuzzy
 msgid "Picture Message"
-msgstr "Messaggio con disegno: %s"
+msgstr "Messaggio con disegno"
 
 #: ../common/gsm-common.c:373
-#, fuzzy
 msgid "Template"
-msgstr "Modelli di messaggi"
+msgstr "Modello"
 
 #: ../common/gsm-common.c:374
-#, fuzzy
 msgid "Picture Message Template"
-msgstr "%d. Modello di messaggio con disegno "
+msgstr "Modello di messaggio con disegno"
 
 #: ../common/gsm-common.c:383
-#, fuzzy
 msgid "Read"
-msgstr "letto"
+msgstr "Letto"
 
 #: ../common/gsm-common.c:384
-#, fuzzy
 msgid "Unread"
-msgstr "non letto"
+msgstr "Non letto"
 
 #: ../common/gsm-common.c:385
-#, fuzzy
 msgid "Sent"
-msgstr "Silenzioso"
+msgstr "Inviato"
 
 #: ../common/gsm-common.c:386
-#, fuzzy
 msgid "Unsent"
-msgstr "inviato"
+msgstr "Non inviato"
 
 #: ../common/gsm-common.c:395 ../common/gsm-common.c:610
 #: ../xgnokii/xgnokii.c:548 ../xgnokii/xgnokii.c:1442
@@ -878,7 +849,7 @@ msgstr "Cercapersone"
 
 #: ../common/gsm-common.c:399
 msgid "Email message in 8110i"
-msgstr ""
+msgstr "Messaggio email in 8110i"
 
 #: ../common/gsm-common.c:401 ../xgnokii/xgnokii.c:561
 msgid "X.400"
@@ -936,73 +907,60 @@ msgid "Never"
 msgstr "Mai"
 
 #: ../common/gsm-common.c:437
-#, fuzzy
 msgid "Daily"
-msgstr "giornaliero"
+msgstr "Giornaliero"
 
 #: ../common/gsm-common.c:438
-#, fuzzy
 msgid "Weekly"
-msgstr "settimanale"
+msgstr "Settimanale"
 
 #: ../common/gsm-common.c:439
-#, fuzzy
 msgid "Every 2 weeks"
 msgstr "Ogni due settimane"
 
 #: ../common/gsm-common.c:440
-#, fuzzy
 msgid "Monthly"
-msgstr "mensile"
+msgstr "Mensile"
 
 #: ../common/gsm-common.c:441
-#, fuzzy
 msgid "Yearly"
-msgstr "una volta all'anno"
+msgstr "Una volta all'anno"
 
 #: ../common/gsm-common.c:449
 msgid "Low"
-msgstr ""
+msgstr "Bassa"
 
 #: ../common/gsm-common.c:450
-#, fuzzy
 msgid "Medium"
-msgstr "media\n"
+msgstr "Media"
 
 #: ../common/gsm-common.c:451
-#, fuzzy
 msgid "High"
-msgstr "alta\n"
+msgstr "Alta"
 
 #: ../common/gsm-common.c:461
-#, fuzzy
 msgid "Temporary"
-msgstr "temporaneo\n"
+msgstr "Temporaneo"
 
 #: ../common/gsm-common.c:462
-#, fuzzy
 msgid "Permanent"
-msgstr "continuo\n"
+msgstr "Permanente"
 
 #: ../common/gsm-common.c:470
-#, fuzzy
 msgid "Normal"
-msgstr "normale\n"
+msgstr "Normale"
 
 #: ../common/gsm-common.c:471
-#, fuzzy
 msgid "Secure"
-msgstr "sicuro\n"
+msgstr "Sicuro"
 
 #: ../common/gsm-common.c:479 ../gnokii/gnokii-wap.c:225
-#, fuzzy
 msgid "GSM data"
-msgstr "dati\n"
+msgstr "Dati GSM"
 
 #: ../common/gsm-common.c:480 ../gnokii/gnokii-wap.c:234
-#, fuzzy
 msgid "GPRS"
-msgstr "GPRS\n"
+msgstr "GPRS"
 
 #: ../common/gsm-common.c:481 ../gnokii/gnokii-wap.c:242
 #: ../xgnokii/xgnokii.c:1122 ../xgnokii/xgnokii.c:1868
@@ -1010,19 +968,16 @@ msgid "SMS"
 msgstr "SMS"
 
 #: ../common/gsm-common.c:482
-#, fuzzy
 msgid "USSD"
-msgstr "USSD\n"
+msgstr "USSD"
 
 #: ../common/gsm-common.c:490
-#, fuzzy
 msgid "Analogue"
-msgstr "analogico\n"
+msgstr "Analogico"
 
 #: ../common/gsm-common.c:491
-#, fuzzy
 msgid "ISDN"
-msgstr "ISDN\n"
+msgstr "ISDN"
 
 #: ../common/gsm-common.c:499 ../common/gsm-common.c:510
 #: ../gnokii/gnokii-profile.c:185
@@ -1030,29 +985,24 @@ msgid "Automatic"
 msgstr "Automatiche"
 
 #: ../common/gsm-common.c:500
-#, fuzzy
 msgid "9600"
-msgstr "9600\n"
+msgstr "9600"
 
 #: ../common/gsm-common.c:501
-#, fuzzy
 msgid "14400"
-msgstr "14400\n"
+msgstr "14400"
 
 #: ../common/gsm-common.c:509
-#, fuzzy
 msgid "Manual"
-msgstr "manuale\n"
+msgstr "Manuale"
 
 #: ../common/gsm-common.c:518
-#, fuzzy
 msgid "Always"
-msgstr "sempre\n"
+msgstr "Sempre"
 
 #: ../common/gsm-common.c:519
-#, fuzzy
 msgid "When needed"
-msgstr "quando necessario\n"
+msgstr "Quando necessario"
 
 #: ../common/gsm-common.c:529
 msgid "No tone"
@@ -1120,37 +1070,32 @@ msgid "Level 5"
 msgstr "Livello 5"
 
 #: ../common/gsm-common.c:597
-#, fuzzy
 msgid "Busy"
-msgstr "se occupato\n"
+msgstr "Se occupato"
 
 #: ../common/gsm-common.c:598
-#, fuzzy
 msgid "No answer"
-msgstr "Senza suoneria"
+msgstr "Senza risposta"
 
 #: ../common/gsm-common.c:599
-#, fuzzy
 msgid "Out of reach"
-msgstr "se non raggiungibile\n"
+msgstr "Se non raggiungibile"
 
 #: ../common/gsm-common.c:600
-#, fuzzy
 msgid "Not available"
-msgstr "se non disponibile\n"
+msgstr "Se non disponibile"
 
 #: ../common/gsm-common.c:601 ../common/gsm-common.c:612
 msgid "All"
-msgstr ""
+msgstr "Tutte"
 
 #: ../common/gsm-common.c:609 ../xgnokii/xgnokii.c:565
 msgid "Voice"
 msgstr "Voce"
 
 #: ../common/gsm-common.c:611
-#, fuzzy
 msgid "Data"
-msgstr "Data"
+msgstr "Dati"
 
 #: ../common/gsm-common.c:620 ../xgnokii/xgnokii_data.c:137
 msgid "Disable"
@@ -1162,16 +1107,15 @@ msgstr "Abilita"
 
 #: ../common/gsm-common.c:622
 msgid "Query"
-msgstr ""
+msgstr "Interrogazione"
 
 #: ../common/gsm-common.c:623
-#, fuzzy
 msgid "Register"
-msgstr "Promemoria"
+msgstr "Registrazione"
 
 #: ../common/gsm-common.c:624
 msgid "Erasure"
-msgstr ""
+msgstr "Cancellazione"
 
 #: ../common/gsm-error.c:42
 msgid "No error."
@@ -1327,7 +1271,7 @@ msgstr ""
 
 #: ../common/gsm-error.c:78
 msgid "The actual response will be sent asynchronously."
-msgstr ""
+msgstr "La vera risposta sarà inviata in modo asincrono."
 
 #: ../common/gsm-error.c:79
 msgid "Unknown error."
@@ -1344,9 +1288,9 @@ msgid "Bitmap too large\n"
 msgstr "Bitmap troppo grande\n"
 
 #: ../common/gsm-filetypes.c:1506
-#, fuzzy, c-format
+#, c-format
 msgid "Formatting error: too many subentries\n"
-msgstr "Formato errato: il contenuto della sottovoce è vuoto\n"
+msgstr "Formato errato: troppe sottovoci\n"
 
 #: ../common/gsm-filetypes.c:1515
 #, c-format
@@ -1591,10 +1535,11 @@ msgstr "Altro"
 msgid "Set %d"
 msgstr "Set %d"
 
+# numero del chiamante
 #: ../common/phones/atgen.c:2203
 #, c-format
 msgid "Withheld"
-msgstr ""
+msgstr "Privato"
 
 #: ../common/phones/nk2110.c:786
 msgid "Write error!\n"
@@ -1675,10 +1620,10 @@ msgstr "(si/no) "
 msgid "yes"
 msgstr "si"
 
-#: ../common/phones/nk6510.c:1731 ../common/phones/nk6510.c:1794
-#, fuzzy, c-format
+#: ../common/phones/nk6510.c:1734 ../common/phones/nk6510.c:1797
+#, c-format
 msgid "Progress: %3d%% completed\r"
-msgstr "Avanzamento: %d%% completato\n"
+msgstr "Avanzamento: %d%% completato\r"
 
 #: ../common/phones/nokia.c:336
 msgid "Tried to activate CONTACT SERVICE\n"
@@ -1741,9 +1686,9 @@ msgstr ""
 
 #. plaint text output
 #: ../gnokii/gnokii-calendar.c:121
-#, fuzzy, c-format
+#, c-format
 msgid "%d (%d). %s: %s\n"
-msgstr "%d (%d). Tipo: "
+msgstr "%d (%d). %s: %s\n"
 
 #: ../gnokii/gnokii-calendar.c:121 ../xgnokii/xgnokii_calendar.c:1545
 msgid "Type"
@@ -1800,19 +1745,18 @@ msgid "disabled"
 msgstr "disabilitata"
 
 #: ../gnokii/gnokii-calendar.c:162
-#, fuzzy, c-format
+#, c-format
 msgid "   %s: "
-msgstr "  %s\n"
+msgstr "   %s: "
 
 #: ../gnokii/gnokii-calendar.c:162
-#, fuzzy
 msgid "Repeat"
-msgstr "Ripeti:"
+msgstr "Ripeti"
 
 #: ../gnokii/gnokii-calendar.c:173
-#, fuzzy, c-format
+#, c-format
 msgid "Every %d hours"
-msgstr "ogni %d minuti"
+msgstr "Ogni %d ore"
 
 #: ../gnokii/gnokii-calendar.c:178
 #, c-format
@@ -1844,9 +1788,9 @@ msgstr "   Testo: %s\n"
 #: ../gnokii/gnokii-wap.c:239 ../gnokii/gnokii-wap.c:240
 #: ../gnokii/gnokii-wap.c:241 ../gnokii/gnokii-wap.c:243
 #: ../gnokii/gnokii-wap.c:244
-#, fuzzy, c-format
+#, c-format
 msgid "   %s: %s\n"
-msgstr "   IP: %s\n"
+msgstr "   %s: %s\n"
 
 #: ../gnokii/gnokii-calendar.c:194 ../xgnokii/xgnokii.c:1729
 msgid "Phone"
@@ -1984,9 +1928,9 @@ msgstr "Chiamata veloce n° %d: %d:%d\n"
 #: ../gnokii/gnokii-security.c:240 ../gnokii/gnokii-settings.c:122
 #: ../gnokii/gnokii-settings.c:146 ../gnokii/gnokii-settings.c:180
 #: ../gnokii/gnokii-settings.c:204 ../gnokii/gnokii-sms.c:549
-#: ../gnokii/gnokii-sms.c:1015 ../gnokii/gnokii-sms.c:1093
-#: ../gnokii/gnokii-sms.c:1123 ../gnokii/gnokii-sms.c:1154
-#: ../gnokii/gnokii-sms.c:1293 ../gnokii/gnokii-sms.c:1295
+#: ../gnokii/gnokii-sms.c:1016 ../gnokii/gnokii-sms.c:1094
+#: ../gnokii/gnokii-sms.c:1124 ../gnokii/gnokii-sms.c:1157
+#: ../gnokii/gnokii-sms.c:1296 ../gnokii/gnokii-sms.c:1298
 #: ../gnokii/gnokii-wap.c:94 ../gnokii/gnokii-wap.c:129
 #: ../gnokii/gnokii-wap.c:162 ../gnokii/gnokii-wap.c:248
 #: ../gnokii/gnokii-wap.c:323 ../smsd/mysql.c:70 ../smsd/mysql.c:96
@@ -2013,7 +1957,7 @@ msgstr ""
 
 #: ../gnokii/gnokii-dial.c:133 ../gnokii/gnokii-phonebook.c:112
 #: ../gnokii/gnokii-phonebook.c:482 ../gnokii/gnokii-sms.c:484
-#: ../gnokii/gnokii-sms.c:899
+#: ../gnokii/gnokii-sms.c:900
 #, c-format
 msgid "Unknown memory type %s (use ME, SM, ...)!\n"
 msgstr "Tipo di memoria %s sconosciuto (usare ME, SM, ...)\n"
@@ -2095,29 +2039,26 @@ msgstr ""
 #: ../gnokii/gnokii-wap.c:90 ../gnokii/gnokii-wap.c:220
 #: ../gnokii/gnokii-wap.c:221 ../gnokii/gnokii-wap.c:222
 #: ../gnokii/gnokii-wap.c:223 ../gnokii/gnokii-wap.c:224
-#, fuzzy, c-format
+#, c-format
 msgid "%s: %s\n"
-msgstr "%-7s  %s\n"
+msgstr "%s: %s\n"
 
 #: ../gnokii/gnokii-dial.c:376
-#, fuzzy
 msgid "Divert type"
-msgstr "Deviazione delle chiamate: "
+msgstr "Tipo deviazione"
 
 #: ../gnokii/gnokii-dial.c:377
-#, fuzzy
 msgid "Call type"
-msgstr "Tipo chiamata: "
+msgstr "Tipo chiamata"
 
 #: ../gnokii/gnokii-dial.c:380
-#, fuzzy, c-format
+#, c-format
 msgid "%s: %d\n"
-msgstr "| %s (%d)\n"
+msgstr "%s: %d\n"
 
 #: ../gnokii/gnokii-dial.c:380
-#, fuzzy
 msgid "Timeout"
-msgstr "L2-Timeouts"
+msgstr "Attesa"
 
 #: ../gnokii/gnokii-dial.c:382
 #, c-format
@@ -2559,7 +2500,7 @@ msgstr "CALL%d: %s %s(%s) (callid: %d, durata: %d secondi)\n"
 #: ../gnokii/gnokii-monitor.c:178
 #, c-format
 msgid "LAC: %04x (%d), CellID: %08x (%d)\n"
-msgstr ""
+msgstr "LAC: %04x (%d), ID cella: %08x (%d)\n"
 
 #: ../gnokii/gnokii-monitor.c:208
 #, c-format
@@ -2572,9 +2513,9 @@ msgid "Entering monitor mode...\n"
 msgstr "Inizio della modalità monitor...\n"
 
 #: ../gnokii/gnokii-monitor.c:249
-#, fuzzy, c-format
+#, c-format
 msgid "Network: %s, %s (%s)\n"
-msgstr "Rete         : %s (%s)\n"
+msgstr "Rete: %s, %s (%s)\n"
 
 #: ../gnokii/gnokii-monitor.c:257
 #, c-format
@@ -2713,7 +2654,7 @@ msgstr "Memoria SMS piena: %-3s\n"
 msgid "Entered display monitoring mode...\n"
 msgstr "Inizio della modalità monitor schermo...\n"
 
-#: ../gnokii/gnokii-monitor.c:442 ../gnokii/gnokii-sms.c:1286
+#: ../gnokii/gnokii-monitor.c:442 ../gnokii/gnokii-sms.c:1289
 #, c-format
 msgid "Shutting down\n"
 msgstr "Chiusura\n"
@@ -2779,14 +2720,14 @@ msgid "Network code : %s\n"
 msgstr "Codice rete  : %s\n"
 
 #: ../gnokii/gnokii-other.c:206
-#, fuzzy, c-format
+#, c-format
 msgid "LAC          : %04x (%d)\n"
-msgstr "LAC          : %04x\n"
+msgstr "LAC          : %04x (%d)\n"
 
 #: ../gnokii/gnokii-other.c:207
-#, fuzzy, c-format
+#, c-format
 msgid "Cell id      : %08x (%d)\n"
-msgstr "Ident. cella : %04x\n"
+msgstr "Ident. cella : %08x (%d)\n"
 
 #: ../gnokii/gnokii-phonebook.c:55
 #, c-format
@@ -2853,14 +2794,13 @@ msgstr ""
 "\n"
 
 #: ../gnokii/gnokii-phonebook.c:184
-#, fuzzy, c-format
+#, c-format
 msgid "%d. %s: %s\n"
-msgstr "%d. Nome: %s\n"
+msgstr "%d. %s: %s\n"
 
 #: ../gnokii/gnokii-phonebook.c:196
-#, fuzzy
 msgid "Caller group"
-msgstr "Gruppi chiamanti"
+msgstr "Gruppo chiamanti"
 
 #: ../gnokii/gnokii-phonebook.c:205
 #, c-format
@@ -2871,14 +2811,13 @@ msgstr "Informazioni sull'indirizzo\n"
 #: ../gnokii/gnokii-phonebook.c:211 ../gnokii/gnokii-phonebook.c:213
 #: ../gnokii/gnokii-phonebook.c:215 ../gnokii/gnokii-phonebook.c:217
 #: ../gnokii/gnokii-phonebook.c:219
-#, fuzzy, c-format
+#, c-format
 msgid "  %s: %s\n"
-msgstr "   IP: %s\n"
+msgstr "  %s: %s\n"
 
 #: ../gnokii/gnokii-phonebook.c:207
-#, fuzzy
 msgid "Post office address"
-msgstr "  Indirizzo postale: %s\n"
+msgstr "Indirizzo postale"
 
 #: ../gnokii/gnokii-phonebook.c:227
 #, c-format
@@ -3077,7 +3016,7 @@ msgstr "Gruppi chiamanti: 0x%02x\n"
 msgid "Automatic answer: %s\n"
 msgstr "Risposta automatica: %s\n"
 
-#: ../gnokii/gnokii-profile.c:223 ../gnokii/gnokii-sms.c:1087
+#: ../gnokii/gnokii-profile.c:223 ../gnokii/gnokii-sms.c:1088
 #: ../gnokii/gnokii-wap.c:285
 #, c-format
 msgid "Input line format isn't valid\n"
@@ -3272,14 +3211,14 @@ msgstr ""
 "          --getlocksinfo\n"
 
 #: ../gnokii/gnokii-security.c:64
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "          --entersecuritycode PIN|PIN2|PUK|PUK2 (CMD...)\n"
 "          --getsecuritycodestatus\n"
 "          --getsecuritycode\n"
 "          --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 msgstr ""
-"          --entersecuritycode PIN|PIN2|PUK|PUK2\n"
+"          --entersecuritycode PIN|PIN2|PUK|PUK2 (COMANDO...)\n"
 "          --getsecuritycodestatus\n"
 "          --getsecuritycode\n"
 "          --changesecuritycode PIN|PIN2|PUK|PUK2\n"
@@ -3711,7 +3650,8 @@ msgid ""
 "        -f filename                 as above but user is prompted before\n"
 "                                    overwriting the file\n"
 "        --append-file filename\n"
-"        -a filename                 as above but append to the exising file\n"
+"        -a filename                 as above but append to the existing "
+"file\n"
 "        --delete\n"
 "        -d                          delete message after reading\n"
 "\n"
@@ -3732,11 +3672,12 @@ msgstr ""
 "sovrascrivendolo\n"
 "                                     se esiste già;\n"
 "                                     il file è in formato mbox\n"
-"                                     del messaggio è aggiunto al nome del "
-"file\n"
 "        --file nome_file\n"
 "        -f nome_file                 come sopra, ma all'utente è chiesto se\n"
 "                                     desidera sovrascrivere il file\n"
+"        --append nome_file\n"
+"        -a nome_file                 come sopra, ma aggiugne al file\n"
+"                                     esistente\n"
 "        --delete\n"
 "        -d                           cancella i messaggi dopo la lettura\n"
 "\n"
@@ -3752,9 +3693,9 @@ msgid "Saving into %s\n"
 msgstr "Salvataggio in %s\n"
 
 #: ../gnokii/gnokii-sms.c:712
-#, fuzzy, c-format
+#, c-format
 msgid "%d. %s (%s)\n"
-msgstr "| %s (%d)\n"
+msgstr "%d. %s (%s)\n"
 
 #: ../gnokii/gnokii-sms.c:715
 #, c-format
@@ -3805,9 +3746,9 @@ msgid "Bitmap:\n"
 msgstr "Bitmap:\n"
 
 #: ../gnokii/gnokii-sms.c:780
-#, fuzzy, c-format
+#, c-format
 msgid "%s:\n"
-msgstr "%s\n"
+msgstr "%s:\n"
 
 #: ../gnokii/gnokii-sms.c:785
 #, c-format
@@ -3864,7 +3805,7 @@ msgstr ""
 "Controllare sul manuale di gnokii i tipi di memoria supportati dal telefono\n"
 "usato.\n"
 
-#: ../gnokii/gnokii-sms.c:873
+#: ../gnokii/gnokii-sms.c:874
 #, c-format
 msgid ""
 " usage: --deletesms memory start [end]  deletes messages from memory type\n"
@@ -3890,12 +3831,12 @@ msgstr ""
 "                                       i messaggi fino alla posizione vuota\n"
 "\n"
 
-#: ../gnokii/gnokii-sms.c:919
+#: ../gnokii/gnokii-sms.c:920
 #, c-format
 msgid "Deleted SMS %s %d\n"
 msgstr "SMS %s %d eliminato\n"
 
-#: ../gnokii/gnokii-sms.c:923
+#: ../gnokii/gnokii-sms.c:924
 #, c-format
 msgid ""
 "DeleteSMS %s %d failed!(%s)\n"
@@ -3904,7 +3845,7 @@ msgstr ""
 "DeleteSMS %s %d fallito (%s)\n"
 "\n"
 
-#: ../gnokii/gnokii-sms.c:936
+#: ../gnokii/gnokii-sms.c:937
 #, c-format
 msgid ""
 " usage: --getsmsc [start [end]]       reads message center details from\n"
@@ -3936,52 +3877,52 @@ msgstr ""
 "leggibile\n"
 "\n"
 
-#: ../gnokii/gnokii-sms.c:987
+#: ../gnokii/gnokii-sms.c:988
 #, c-format
 msgid "Starting SMS center number is greater than stop\n"
 msgstr "Il numero iniziale del centro messaggi è maggiore di quello finale\n"
 
-#: ../gnokii/gnokii-sms.c:992
+#: ../gnokii/gnokii-sms.c:993
 #, c-format
 msgid "SMS center number must be greater than 0\n"
 msgstr "Il numero del centro messaggi deve essere maggiore di 0\n"
 
-#: ../gnokii/gnokii-sms.c:1028
+#: ../gnokii/gnokii-sms.c:1029
 #, c-format
 msgid "No. %d: \"%s\" (defined name)\n"
 msgstr "N° %d: «%s» (nome personalizzato)\n"
 
-#: ../gnokii/gnokii-sms.c:1030
+#: ../gnokii/gnokii-sms.c:1031
 #, c-format
 msgid "No. %d: \"%s\" (default name)\n"
 msgstr "N° %d: «%s» (nome predefinito)\n"
 
-#: ../gnokii/gnokii-sms.c:1031
+#: ../gnokii/gnokii-sms.c:1032
 #, c-format
 msgid "SMS center number is %s\n"
 msgstr "Il numero del centro messaggi è %s\n"
 
-#: ../gnokii/gnokii-sms.c:1033
+#: ../gnokii/gnokii-sms.c:1034
 #, c-format
 msgid "Default recipient number is %s\n"
 msgstr "Il numero predefinito del destinatario è %s\n"
 
-#: ../gnokii/gnokii-sms.c:1035
-#, fuzzy, c-format
-msgid "No default recipient number is defined\n"
-msgstr "Il numero predefinito del destinatario è %s\n"
-
 #: ../gnokii/gnokii-sms.c:1036
-#, fuzzy, c-format
-msgid "Messages sent as %s\n"
-msgstr "Messaggi inviati come "
+#, c-format
+msgid "No default recipient number is defined\n"
+msgstr "Nessun numero predefinito per il destinatario\n"
 
 #: ../gnokii/gnokii-sms.c:1037
-#, fuzzy, c-format
-msgid "Message validity is %s\n"
-msgstr "La validità del messaggio è "
+#, c-format
+msgid "Messages sent as %s\n"
+msgstr "Messaggi inviati come %s\n"
 
-#: ../gnokii/gnokii-sms.c:1047
+#: ../gnokii/gnokii-sms.c:1038
+#, c-format
+msgid "Message validity is %s\n"
+msgstr "La validità del messaggio è %s\n"
+
+#: ../gnokii/gnokii-sms.c:1048
 #, c-format
 msgid ""
 " usage: --setsmsc\n"
@@ -3992,7 +3933,7 @@ msgstr ""
 "I dettagli dell'SMSC sono letti dallo standard input.\n"
 "\n"
 
-#: ../gnokii/gnokii-sms.c:1104
+#: ../gnokii/gnokii-sms.c:1105
 #, c-format
 msgid ""
 " usage: --createsmsfolder name     creates SMS folder with given name\n"
@@ -4001,12 +3942,12 @@ msgstr ""
 " Uso: --createsmsfolder nome     crea una cartella per SMS col nome fornito\n"
 "\n"
 
-#: ../gnokii/gnokii-sms.c:1125
+#: ../gnokii/gnokii-sms.c:1126
 #, c-format
 msgid "Folder with name: %s successfully created!\n"
 msgstr "Cartella %s creata con successo\n"
 
-#: ../gnokii/gnokii-sms.c:1132
+#: ../gnokii/gnokii-sms.c:1133
 #, c-format
 msgid ""
 " usage: --deletesmsfolder folderid    removes SMS folder with given id\n"
@@ -4016,17 +3957,17 @@ msgstr ""
 "l'identificativo fornito\n"
 "\n"
 
-#: ../gnokii/gnokii-sms.c:1150
+#: ../gnokii/gnokii-sms.c:1151
 #, c-format
 msgid "Error: Number must be between 1 and %i!\n"
 msgstr "Errore: il numero deve essere compreso tra 1 e %i\n"
 
-#: ../gnokii/gnokii-sms.c:1156
+#: ../gnokii/gnokii-sms.c:1159
 #, c-format
 msgid "Number %i of 'My Folders' successfully deleted!\n"
 msgstr "Numero %i di «My Folders» cancellato\n"
 
-#: ../gnokii/gnokii-sms.c:1163
+#: ../gnokii/gnokii-sms.c:1166
 #, c-format
 msgid ""
 " usage: --showsmsfolderstatus     shows summary of SMS folders\n"
@@ -4035,52 +3976,52 @@ msgstr ""
 " Uso: --showsmsfolderstatus     mostra un riepilogo delle cartelle per SMS\n"
 "\n"
 
-#: ../gnokii/gnokii-sms.c:1180
+#: ../gnokii/gnokii-sms.c:1183
 #, c-format
 msgid "Cannot list available folders: %s\n"
 msgstr "Impossibile elencare le cartelle disponibili: %s\n"
 
-#: ../gnokii/gnokii-sms.c:1184
+#: ../gnokii/gnokii-sms.c:1187
 #, c-format
 msgid "No. Name                             Id #Msg\n"
 msgstr "N°  Nome                             Id #Msg\n"
 
-#: ../gnokii/gnokii-sms.c:1185
+#: ../gnokii/gnokii-sms.c:1188
 #, c-format
 msgid "============================================\n"
 msgstr "============================================\n"
 
-#: ../gnokii/gnokii-sms.c:1189
+#: ../gnokii/gnokii-sms.c:1192
 #, c-format
 msgid "Cannot stat folder \"%s\": %s\n"
 msgstr "Impossibile ottenere informazioni sulla cartella «%s»: %s\n"
 
-#: ../gnokii/gnokii-sms.c:1192
-#, fuzzy, c-format
+#: ../gnokii/gnokii-sms.c:1195
+#, c-format
 msgid "%3d %-32s %2s %4u\n"
-msgstr "%3d %-32s %2u %4u\n"
+msgstr "%3d %-32s %2s %4u\n"
 
-#: ../gnokii/gnokii-sms.c:1215
+#: ../gnokii/gnokii-sms.c:1218
 #, c-format
 msgid "SMS received from number: %s\n"
 msgstr "SMS ricevuto dal numero: %s\n"
 
-#: ../gnokii/gnokii-sms.c:1224
+#: ../gnokii/gnokii-sms.c:1227
 #, c-format
 msgid "Got message %d: %s\n"
 msgstr "Ricevuto il messaggio %d: %s\n"
 
-#: ../gnokii/gnokii-sms.c:1232
+#: ../gnokii/gnokii-sms.c:1235
 #, c-format
 msgid "### Exists?!\n"
 msgstr "### Esiste?!\n"
 
-#: ../gnokii/gnokii-sms.c:1237
+#: ../gnokii/gnokii-sms.c:1240
 #, c-format
 msgid "### Cannot create file %s\n"
 msgstr "### Impossibile creare il file %s\n"
 
-#: ../gnokii/gnokii-sms.c:1261
+#: ../gnokii/gnokii-sms.c:1264
 #, c-format
 msgid ""
 " usage: --smsreader     periodically check sms on the phone and stores them\n"
@@ -4091,12 +4032,12 @@ msgstr ""
 "                       e li memorizza in formato mbox\n"
 "\n"
 
-#: ../gnokii/gnokii-sms.c:1278
+#: ../gnokii/gnokii-sms.c:1281
 #, c-format
 msgid "Entered sms reader mode...\n"
 msgstr "Inizio della modalità di lettura degli SMS...\n"
 
-#: ../gnokii/gnokii-sms.c:1288
+#: ../gnokii/gnokii-sms.c:1291
 #, c-format
 msgid "Exiting sms reader mode...\n"
 msgstr "Fine della modalità di lettura degli SMS...\n"
@@ -4138,14 +4079,12 @@ msgstr ""
 "iniziale\n"
 
 #: ../gnokii/gnokii-todo.c:119
-#, fuzzy
 msgid "Todo"
-msgstr "Promemoria: %s\n"
+msgstr "Promemoria"
 
 #: ../gnokii/gnokii-todo.c:120
-#, fuzzy
 msgid "Priority"
-msgstr "Priorità: "
+msgstr "Priorità"
 
 #: ../gnokii/gnokii-todo.c:133
 #, c-format
@@ -4283,19 +4222,16 @@ msgid "Home"
 msgstr "Home page"
 
 #: ../gnokii/gnokii-wap.c:222
-#, fuzzy
 msgid "Session mode"
-msgstr "Tipo di connessione: "
+msgstr "Modalità di sessione"
 
 #: ../gnokii/gnokii-wap.c:223
-#, fuzzy
 msgid "Connection security"
 msgstr "Sicurezza di connessione: "
 
 #: ../gnokii/gnokii-wap.c:224
-#, fuzzy
 msgid "Data bearer"
-msgstr "Tipo trasporto: "
+msgstr "Trasporto dati"
 
 #: ../gnokii/gnokii-wap.c:225 ../gnokii/gnokii-wap.c:234
 #: ../gnokii/gnokii-wap.c:242 ../smsd/lowlevel.c:136 ../smsd/lowlevel.c:149
@@ -4304,58 +4240,48 @@ msgid "%s\n"
 msgstr "%s\n"
 
 #: ../gnokii/gnokii-wap.c:226 ../gnokii/gnokii-wap.c:236
-#, fuzzy
 msgid "Authentication type"
-msgstr "   Tipo autenticazione: "
+msgstr "Tipo di autenticazione"
 
 #: ../gnokii/gnokii-wap.c:227
-#, fuzzy
 msgid "Data call type"
-msgstr "   Tipo chiamata dati: "
+msgstr "Tipo di chiamata dati"
 
 #: ../gnokii/gnokii-wap.c:228
-#, fuzzy
 msgid "Data call speed"
-msgstr "   Velocità dati: "
+msgstr "Velocità di chiamata dati"
 
 #: ../gnokii/gnokii-wap.c:229 ../gnokii/gnokii-wap.c:237
-#, fuzzy
 msgid "Login type"
-msgstr "   Tipo login: "
+msgstr "Tipo di login"
 
 #: ../gnokii/gnokii-wap.c:230 ../gnokii/gnokii-wap.c:239
-#, fuzzy
 msgid "IP"
-msgstr "VIP"
+msgstr "IP"
 
 #: ../gnokii/gnokii-wap.c:232 ../gnokii/gnokii-wap.c:240
-#, fuzzy
 msgid "Username"
-msgstr "   Nome utente: %s\n"
+msgstr "Nome utente"
 
 #: ../gnokii/gnokii-wap.c:233 ../gnokii/gnokii-wap.c:241
-#, fuzzy
 msgid "Password"
-msgstr "   Password: %s\n"
+msgstr "Password"
 
 #: ../gnokii/gnokii-wap.c:235 ../xgnokii/xgnokii.c:1636
 msgid "Connection"
 msgstr "Collegamento"
 
 #: ../gnokii/gnokii-wap.c:238
-#, fuzzy
 msgid "Access point"
-msgstr "   Punto d'accesso: %s\n"
+msgstr "Punto d'accesso"
 
 #: ../gnokii/gnokii-wap.c:243
-#, fuzzy
 msgid "Service number"
-msgstr "   Numero del servizio: %s\n"
+msgstr "Numero del servizio"
 
 #: ../gnokii/gnokii-wap.c:244
-#, fuzzy
 msgid "Server number"
-msgstr "Numero Centro Messaggi"
+msgstr "Numero del server"
 
 #: ../gnokii/gnokii-wap.c:292
 #, c-format
@@ -4617,7 +4543,7 @@ msgid "%d: SELECT FROM %s.outbox command failed.\n"
 msgstr "%d: il comando SELECT FROM %s.outbox è fallito.\n"
 
 #: ../smsd/smsd.c:148
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Usage:  %s [options]\n"
@@ -4650,6 +4576,7 @@ msgstr ""
 "            -t, --phone numero_telefonico\n"
 "            -i, --interval ogni_quanti_secondi_cercare_nuovi_messaggi\n"
 "            -S, --maxsms numero_sms (solo in modalità stupida)\n"
+"            -b, --inbox tipo_memoria\n"
 "            -v, --version\n"
 "            -h, --help\n"
 
@@ -4669,9 +4596,9 @@ msgid "Cannot load database module %s in directory %s!\n"
 msgstr "Impossibile aprire il modulo di database %s nella directory %s\n"
 
 #: ../smsd/smsd.c:408
-#, fuzzy, c-format
+#, c-format
 msgid "Sending to %s unsuccessful. Error %s\n"
-msgstr "L'invio a %s è fallito. Errore %d\n"
+msgstr "L'invio a %s è fallito. Errore %s\n"
 
 #: ../smsd/smsd.c:411
 #, c-format
@@ -4691,10 +4618,10 @@ msgstr "SMS duplicato da %s.\n"
 #: ../smsd/smsd.c:461
 #, c-format
 msgid "Multipart sms from %s. Waiting for the next parts.\n"
-msgstr ""
+msgstr "SMS multiparte da %s. In attesa delle parti successive.\n"
 
 #: ../smsd/smsd.c:477
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Inserting sms from %s unsuccessful.\n"
 "Date: %02d-%02d-%02d %02d:%02d:%02d+%02d\n"
@@ -4702,11 +4629,11 @@ msgid ""
 "\n"
 "Exiting.\n"
 msgstr ""
-"L'inserimento del messaggio da %s non è riuscito.\n"
+"Inserimento SMS da %s non riuscito.\n"
 "Data: %02d-%02d-%02d %02d:%02d:%02d+%02d\n"
 "Testo: %s\n"
 "\n"
-"Uscita."
+"Uscita.\n"
 
 #: ../utils/mgnokiidev.c:174
 #, c-format
@@ -4715,16 +4642,15 @@ msgstr "mgnokiidev accetta uno ed un solo argomento\n"
 
 #: ../xgnokii/xgnokii.desktop.in.h:1
 msgid "Manage your mobile phone"
-msgstr ""
+msgstr "Gestisce il proprio cellulare"
 
 #: ../xgnokii/xgnokii.desktop.in.h:2
-#, fuzzy
 msgid "Mobile Phone Suite"
-msgstr "Numero cellulare"
+msgstr "Suite per telefoni cellulari"
 
 #: ../xgnokii/xgnokii.desktop.in.h:3
 msgid "Xgnokii"
-msgstr ""
+msgstr "Xgnokii"
 
 #: ../xgnokii/xgnokii.c:228
 msgid "Reading caller groups names ..."
@@ -4736,7 +4662,7 @@ msgstr "Nessun gruppo"
 
 #: ../xgnokii/xgnokii.c:358
 msgid "Short Message received"
-msgstr "Ricevuto un messaggio via SMS"
+msgstr "Ricevuto un messaggio SMS"
 
 #: ../xgnokii/xgnokii.c:364 ../xgnokii/xgnokii_lowlevel.c:1347
 msgid "Working..."
@@ -5098,7 +5024,7 @@ msgstr "Visualizzatore:"
 
 #: ../xgnokii/xgnokii_calendar.c:131
 msgid "Function not implemented!"
-msgstr ""
+msgstr "Funzione non implementata."
 
 #: ../xgnokii/xgnokii_calendar.c:201
 #, c-format
@@ -5520,6 +5446,8 @@ msgid ""
 "Phonebook name will be truncated to\n"
 "%.*s"
 msgstr ""
+"Il nome nella rubrica sarà ridotto a\n"
+"%.*s"
 
 #: ../xgnokii/xgnokii_contacts.c:619
 msgid "Can't find pattern!"
@@ -5644,11 +5572,11 @@ msgid "Saving entries"
 msgstr "Salvataggio contatti"
 
 #: ../xgnokii/xgnokii_contacts.c:2158 ../xgnokii/xgnokii_contacts.c:2178
-#, fuzzy, c-format
+#, c-format
 msgid "%s: line %d: Can't write %s memory entry number %d! Error: %s\n"
 msgstr ""
 "%s: linea %d: impossibile scrivere nella posizione %d della memoria ME. "
-"Errore: %d\n"
+"Errore: %s\n"
 
 #: ../xgnokii/xgnokii_contacts.c:2200
 msgid "Save changes?"
@@ -5659,7 +5587,6 @@ msgid "Don't save"
 msgstr "Non salvare"
 
 #: ../xgnokii/xgnokii_contacts.c:2236
-#, fuzzy
 msgid ""
 "You have made changes in your\n"
 "contacts directory.\n"

@@ -10,6 +10,7 @@
                                                         (Paweł Kot)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
+    o updated Italian translation                   (Daniele Forsi)
  * gnokii updates
     o make --getsms accept at most 6 arguments, not 5 so that
       gnokii --getsms SM 1 2 -d -f myfile actually works; exit
