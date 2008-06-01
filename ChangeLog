@@ -15,8 +15,9 @@
       gnokii --getsms SM 1 2 -d -f myfile actually works; exit
       immediately (and do not delete SMS if --delete was specified)
       when user answers "no" to overwrite prompt    (Daniele Forsi)
-    o make --sendsms and --savesms return GN_ERR_WRONGDATAFORMAT
-      and GN_ERR_INVALIDMEMORYTYPE were appropriate, instead of -1
+    o make --sendsms, --savesms and --getsms return 
+      GN_ERR_WRONGDATAFORMAT and GN_ERR_INVALIDMEMORYTYPE were
+      appropriate, instead of -1 or GN_ERR_FAILED
                                                     (Daniele Forsi)
 0.6.26
 ======

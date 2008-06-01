@@ -262,7 +262,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				return error;
 			if (sms.user_data[0].length < 1) {
 				fprintf(stderr, _("Empty message. Quitting.\n"));
-				return GN_ERR_FAILED;
+				return GN_ERR_WRONGDATAFORMAT;
 			}
 			curpos = -1;
 			break;
@@ -274,7 +274,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			
 			if (!optarg || strlen(optarg) > 255) {
 				fprintf(stderr, _("URL is too long (max 255 chars). Quitting.\n"));
-			        return GN_ERR_FAILED;
+			        return GN_ERR_WRONGDATAFORMAT;
 			}
 			
 			sms.user_data[curpos].type = GN_SMS_DATA_WAPPush;
@@ -650,7 +650,7 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	memory_type_string = optarg;
 	if (gn_str2memory_type(memory_type_string) == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
-		return GN_ERR_FAILED;
+		return GN_ERR_INVALIDMEMORYTYPE;
 	}
 
 	start_message = gnokii_atoi(argv[optind]);
