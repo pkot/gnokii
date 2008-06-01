@@ -19,6 +19,9 @@
       GN_ERR_WRONGDATAFORMAT and GN_ERR_INVALIDMEMORYTYPE were
       appropriate, instead of -1 or GN_ERR_FAILED
                                                     (Daniele Forsi)
+    o make --deletesmsfolder exit with GN_ERR_INVALIDLOCATION when
+      folder number is invalid                      (Daniele Forsi)
+
 0.6.26
 ======
  * translation updates

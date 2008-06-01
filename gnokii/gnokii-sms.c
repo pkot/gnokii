@@ -1147,8 +1147,10 @@ gn_error deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *st
 	folder.folder_id = gnokii_atoi(number);
 	if (!errno && folder.folder_id > 0 && folder.folder_id <= GN_SMS_FOLDER_MAX_NUMBER)
 		data->sms_folder = &folder;
-	else
+	else {
 		fprintf(stderr, _("Error: Number must be between 1 and %i!\n"), GN_SMS_FOLDER_MAX_NUMBER);
+		return GN_ERR_INVALIDLOCATION;
+	}
 
 	error = gn_sm_functions(GN_OP_DeleteSMSFolder, data, state);
 	if (error != GN_ERR_NONE)
