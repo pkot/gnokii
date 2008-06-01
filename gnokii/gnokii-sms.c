@@ -186,7 +186,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				sendsms_usage(stderr, -1);
 			if (input_len > 255 * GN_SMS_MAX_LENGTH) {
 				fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), input_len, 255 * GN_SMS_MAX_LENGTH);
-				return GN_ERR_FAILED;
+				return GN_ERR_INVALIDSIZE;
 			}
 			break;
 
@@ -262,7 +262,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				return error;
 			if (sms.user_data[0].length < 1) {
 				fprintf(stderr, _("Empty message. Quitting.\n"));
-				return GN_ERR_WRONGDATAFORMAT;
+				return GN_ERR_INVALIDSIZE;
 			}
 			curpos = -1;
 			break;
@@ -274,7 +274,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			
 			if (!optarg || strlen(optarg) > 255) {
 				fprintf(stderr, _("URL is too long (max 255 chars). Quitting.\n"));
-			        return GN_ERR_WRONGDATAFORMAT;
+			        return GN_ERR_INVALIDSIZE;
 			}
 			
 			sms.user_data[curpos].type = GN_SMS_DATA_WAPPush;
@@ -332,7 +332,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		if (error != GN_ERR_NONE) return error;
 		if (sms.user_data[curpos].length < 1) {
 			fprintf(stderr, _("Empty message. Quitting.\n"));
-			return GN_ERR_WRONGDATAFORMAT;
+			return GN_ERR_INVALIDSIZE;
 		}
 		sms.user_data[curpos].type = GN_SMS_DATA_Text;
 		if (!gn_char_def_alphabet(sms.user_data[curpos].u.text))
@@ -986,12 +986,12 @@ gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 		if (start > stop) {
 			fprintf(stderr, _("Starting SMS center number is greater than stop\n"));
-			return GN_ERR_FAILED;
+			return GN_ERR_INVALIDLOCATION;
 		}
 
 		if (start < 1) {
 			fprintf(stderr, _("SMS center number must be greater than 0\n"));
-			return GN_ERR_FAILED;
+			return GN_ERR_INVALIDLOCATION;
 		}
 	} else {
 		start = 1;
