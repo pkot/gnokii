@@ -5575,8 +5575,8 @@ msgstr "Salvataggio contatti"
 #, c-format
 msgid "%s: line %d: Can't write %s memory entry number %d! Error: %s\n"
 msgstr ""
-"%s: linea %d: impossibile scrivere nella posizione %d della memoria ME. "
-"Errore: %s\n"
+"%$1s: linea %$2d: impossibile scrivere nella posizione %$4d della memoria %"
+"$3s. Errore: %$5s\n"
 
 #: ../xgnokii/xgnokii_contacts.c:2200
 msgid "Save changes?"
