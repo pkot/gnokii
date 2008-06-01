@@ -12,8 +12,9 @@
     o updated Polish translation                        (Paweł Kot)
  * gnokii updates
     o make --getsms accept at most 6 arguments, not 5 so that
-      gnokii --getsms SM 1 2 -d -f myfile actually works
-                                                    (Daniele Forsi)
+      gnokii --getsms SM 1 2 -d -f myfile actually works; exit
+      immediately (and do not delete SMS if --delete was specified)
+      when user answers "no" to overwrite prompt    (Daniele Forsi)
 
 0.6.26
 ======
