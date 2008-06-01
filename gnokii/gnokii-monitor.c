@@ -245,6 +245,7 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	cb_widx = 0;
 	gn_sm_functions(GN_OP_SetCellBroadcast, data, state);
 
+	memset(&networkinfo, 0, sizeof(gn_network_info));
 	if (gn_sm_functions(GN_OP_GetNetworkInfo, data, state) == GN_ERR_NONE) {
 		fprintf(stdout, _("Network: %s, %s (%s)\n"),
 			gn_network_name_get(networkinfo.network_code), gn_country_name_get(networkinfo.network_code),
