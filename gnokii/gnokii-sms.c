@@ -332,7 +332,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		if (error != GN_ERR_NONE) return error;
 		if (sms.user_data[curpos].length < 1) {
 			fprintf(stderr, _("Empty message. Quitting.\n"));
-			return GN_ERR_FAILED;
+			return GN_ERR_WRONGDATAFORMAT;
 		}
 		sms.user_data[curpos].type = GN_SMS_DATA_Text;
 		if (!gn_char_def_alphabet(sms.user_data[curpos].u.text))
@@ -482,7 +482,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			snprintf(memory_type, 19, "%s", optarg);
 			if (gn_str2memory_type(memory_type) == GN_MT_XX) {
 				fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
-				return -1;
+				return GN_ERR_INVALIDMEMORYTYPE;
 			}
 			break;
 		case 'd': /* type Deliver */
@@ -491,12 +491,12 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		case 't': /* set specific date and time of message delivery */
 			if (strlen(optarg) != 12) {
 				fprintf(stderr, _("Invalid datetime format: %s (should be YYMMDDHHMISS, all digits)!\n"), optarg);
-				return -1;
+				return GN_ERR_WRONGDATAFORMAT;
 			}
 			for (i = 0; i < 12; i++)
 				if (!isdigit(optarg[i])) {
 					fprintf(stderr, _("Invalid datetime format: %s (should be YYMMDDHHMISS, all digits)!\n"), optarg);
-					return -1;
+					return GN_ERR_WRONGDATAFORMAT;
 				}
 			snprintf(tmp, sizeof(tmp), "%s", optarg);
 			sms.smsc_time.year	= atoi(tmp) + 1900;
@@ -512,7 +512,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			sms.smsc_time.second	= atoi(tmp);
 			if (!gn_timestamp_isvalid(sms.smsc_time)) {
 				fprintf(stderr, _("Invalid datetime: %s.\n"), optarg);
-				return -1;
+				return GN_ERR_WRONGDATAFORMAT;
 			}
 			break;
 		default:
@@ -569,7 +569,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		return error;
 	if (sms.user_data[0].length < 1) {
 		fprintf(stderr, _("Empty message. Quitting.\n"));
-		return -1;
+		return GN_ERR_WRONGDATAFORMAT;
 	}
 	if (memory_type[0] != '\0')
 		sms.memory_type = gn_str2memory_type(memory_type);
