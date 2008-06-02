@@ -20,6 +20,9 @@
       return with more specific error codes GN_ERR_WRONGDATAFORMAT,
       GN_ERR_INVALIDMEMORYTYPE and GN_ERR_INVALIDLOCATION were
       appropriate, instead of -1 or GN_ERR_FAILED   (Daniele Forsi)
+ * at driver updates
+    o fix Sagem myW-8 returning the wrong answer to GN_OP_GetModel
+                                                    (Daniele Forsi)
 
 0.6.26
 ======
