@@ -1312,6 +1312,19 @@ GNOKII_API char *gn_network_code_find(char *network_name, char *country_name)
 	return networks[index].code ? networks[index].code : _("undefined");
 }
 
+GNOKII_API char *gn_country_name_translate(char *country_name)
+{
+	/*
+	 * Retrieve the translation of the given @country_name
+	 * if the iso-codes package is installed and NLS is enabled.
+	 *
+	 * Use this function only with gn_country_get() because
+	 * gn_country_name_get() and gn_network2country() alreadly
+	 * return translated names.
+	 */
+	return dgettext("iso_3166", country_name);
+}
+
 GNOKII_API char *gn_country_name_get(char *country_code)
 {
 	int index = 0;
@@ -1319,15 +1332,19 @@ GNOKII_API char *gn_country_name_get(char *country_code)
 	while (countries[index].code &&
 	       strncmp(countries[index].code, country_code, 3)) index++;
 
-	return countries[index].name ? countries[index].name : _("unknown");
+	return countries[index].name ? gn_country_name_translate(countries[index].name) : _("unknown");
 }
 
 GNOKII_API char *gn_country_code_get(char *country_name)
 {
+	/* 
+	 * If the iso-codes package is installed and NLS is enabled
+	 * @country_name must be given in the current language.
+	 */
 	int index = 0;
 
 	while (countries[index].name &&
-	       strcasecmp(countries[index].name, country_name)) index++;
+	       strcasecmp(gn_country_name_translate(countries[index].name), country_name)) index++;
 
 	return countries[index].code ? countries[index].code : _("undefined");
 }

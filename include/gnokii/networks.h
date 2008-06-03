@@ -48,6 +48,7 @@ GNOKII_API char *gn_network_name_get(char *network_code);
 GNOKII_API char *gn_network_code_get(char *network_name);
 GNOKII_API char *gn_network_code_find(char *network_name, char *country_name);
 
+GNOKII_API char *gn_country_name_translate(char *country_name);
 GNOKII_API char *gn_country_name_get(char *country_code);
 GNOKII_API char *gn_country_code_get(char *country_name);
 

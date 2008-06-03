@@ -8,6 +8,8 @@
  * libgnokii updates
     o add callback function for advance progress indicator
                                                         (Paweł Kot)
+    o translate country names if iso-codes package is installed;
+      see INSTALL for details                       (Daniele Forsi)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)
@@ -20,6 +22,7 @@
       return with more specific error codes GN_ERR_WRONGDATAFORMAT,
       GN_ERR_INVALIDMEMORYTYPE and GN_ERR_INVALIDLOCATION were
       appropriate, instead of -1 or GN_ERR_FAILED   (Daniele Forsi)
+    o add country name to --listnetworks output     (Daniele Forsi)
  * at driver updates
     o fix Sagem myW-8 returning the wrong answer to GN_OP_GetModel
                                                     (Daniele Forsi)
