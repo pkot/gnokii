@@ -10,8 +10,9 @@
                                                         (Paweł Kot)
     o translate country names if iso-codes package is installed;
       see INSTALL for details                       (Daniele Forsi)
-    o add some missing MCC to country list and change some names to
-      conform to iso-codes                          (Daniele Forsi)
+    o edit MCC list to be closer to
+      http://en.wikipedia.org/wiki/Mobile_network_code and edit
+      country list to be closer to iso-codes        (Daniele Forsi)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)
