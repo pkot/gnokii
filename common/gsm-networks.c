@@ -218,7 +218,7 @@ static gn_country countries[] = {
 	{"436", "Tajikistan"},
 	{"640", "Tanzania"},
 	{"520", "Thailand"},
-	{"615", "Togolese Republic"},
+	{"615", "Togo"},
 	{"539", "Tonga"},
 	{"374", "Trinidad and Tobago"},
 	{"605", "Tunisia"},
