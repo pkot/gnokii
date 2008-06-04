@@ -29,6 +29,8 @@
  * at driver updates
     o fix Sagem myW-8 returning the wrong answer to GN_OP_GetModel
                                                     (Daniele Forsi)
+    o fix segfault on empty addressbook entry last name on Samsung
+                                                        (Paweł Kot)
 
 0.6.26
 ======
