@@ -1644,7 +1644,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	configDialogData.connection.port = gtk_entry_new_with_max_length(32);
+	configDialogData.connection.port = gtk_entry_new_with_max_length(GN_DEVICE_NAME_MAX_LENGTH);
 	gtk_widget_set_usize(configDialogData.connection.port, 220, 22);
 	gtk_entry_set_editable(GTK_ENTRY(configDialogData.connection.port), FALSE);
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.port, FALSE, FALSE, 2);
@@ -1658,7 +1658,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	configDialogData.connection.model = gtk_entry_new_with_max_length(5);
+	configDialogData.connection.model = gtk_entry_new_with_max_length(GN_MODEL_MAX_LENGTH);
 	gtk_widget_set_usize(configDialogData.connection.model, 220, 22);
 	gtk_entry_set_editable(GTK_ENTRY(configDialogData.connection.model), FALSE);
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.model, FALSE, FALSE, 2);
@@ -1737,7 +1737,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	configDialogData.phone.model = gtk_entry_new_with_max_length(7);
+	configDialogData.phone.model = gtk_entry_new_with_max_length(GN_MODEL_MAX_LENGTH);
 	gtk_widget_set_usize(configDialogData.phone.model, 220, 22);
 	gtk_entry_set_editable(GTK_ENTRY(configDialogData.phone.model), FALSE);
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.phone.model, FALSE, FALSE, 2);
@@ -1751,7 +1751,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	configDialogData.phone.version = gtk_entry_new_with_max_length(7);
+	configDialogData.phone.version = gtk_entry_new_with_max_length(GN_MODEL_MAX_LENGTH);
 	gtk_widget_set_usize(configDialogData.phone.version, 220, 22);
 	gtk_entry_set_editable(GTK_ENTRY(configDialogData.phone.version), FALSE);
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.phone.version, FALSE, FALSE, 2);
@@ -1765,7 +1765,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	configDialogData.phone.revision = gtk_entry_new_with_max_length(64);
+	configDialogData.phone.revision = gtk_entry_new_with_max_length(GN_REVISION_MAX_LENGTH);
 	gtk_widget_set_usize(configDialogData.phone.revision, 220, 22);
 	gtk_entry_set_editable(GTK_ENTRY(configDialogData.phone.revision), FALSE);
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.phone.revision, FALSE, FALSE, 2);
@@ -1779,7 +1779,7 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
 
-	configDialogData.phone.imei = gtk_entry_new_with_max_length(64);
+	configDialogData.phone.imei = gtk_entry_new_with_max_length(GN_IMEI_MAX_LENGTH);
 	gtk_widget_set_usize(configDialogData.phone.imei, 220, 22);
 	gtk_entry_set_editable(GTK_ENTRY(configDialogData.phone.imei), FALSE);
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.phone.imei, FALSE, FALSE, 2);
