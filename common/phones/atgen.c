@@ -579,7 +579,6 @@ static void StoreDefaultCharset(struct gn_statemachine *state)
 	gn_data_clear(&data);
 	error = state->driver.functions(GN_OP_AT_GetCharset, &data, state);
 	drvinst->defaultcharset = error ? AT_CHAR_UNKNOWN : drvinst->charset;
-	drvinst->charset = AT_CHAR_UNKNOWN;
 }
 
 gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
@@ -2066,7 +2065,7 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 		/* return current charset */
 		drvinst->charset = AT_CHAR_UNKNOWN;
 		i = 0;
-		while (atcharsets[i].str && drvinst->charset != AT_CHAR_UNKNOWN) {
+		while (atcharsets[i].str && drvinst->charset == AT_CHAR_UNKNOWN) {
 			if (strstr(buf.line2, atcharsets[i].str))
 				drvinst->charset = atcharsets[i].charset;
 			i++;
