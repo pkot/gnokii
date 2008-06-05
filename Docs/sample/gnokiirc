@@ -116,9 +116,9 @@ use_locking = yes
 # Currently used only by models AT and BIP/CIMD. Defaults to 19200.
 serial_baudrate = 19200
 
-# Force waiting after each send character the specified usec time.
+# Force waiting after each sent character the specified usec time.
 # Value -1 forces the fastest 'block' writing,
-# value 0 writes each character separately without any explicite waiting,
+# value 0 writes each character separately without any explicit waiting,
 # other positive values specify the appropriate 1/1000000 sec delaying.
 # Siemens M20 requires at least "1"!  FIXME: Model-driven autodetection
 #serial_write_usleep = 10000
