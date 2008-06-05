@@ -2356,7 +2356,7 @@ msgstr "Logo del chiamante letto con successo\n"
 #: ../gnokii/gnokii-logo.c:268
 #, c-format
 msgid "Caller group name: %s, ringing tone: %s (%d)\n"
-msgstr "Nome Gruppo chiamante: %s, suoneria: %s (%d)\n"
+msgstr "Nome gruppo chiamanti: %s, suoneria: %s (%d)\n"
 
 #: ../gnokii/gnokii-logo.c:279
 #, c-format
@@ -5504,7 +5504,7 @@ msgstr "telefono"
 
 #: ../xgnokii/xgnokii_contacts.c:1344
 msgid "Caller group:"
-msgstr "Gruppo chiamante:"
+msgstr "Gruppo chiamanti:"
 
 #: ../xgnokii/xgnokii_contacts.c:1407
 msgid "Delete entries"
