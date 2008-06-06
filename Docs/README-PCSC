@@ -29,9 +29,11 @@ Implemented commands for gnokii are:
 --entersecuritycode
 --getphonebook
 --getsms
+--getsmsc
 --getfile
 --getnetworkinfo
 --getsecuritycodestatus
+--showsmsfolderstatus
 
 This means that writing to the phonebook is not supported and writing
 short messages isn't supported either.
@@ -73,6 +75,9 @@ Note that:
 The --getsms command can only read from SM memory.
 Start number is 1, end number depends on SIM card but cannot exceed 255.
 
+The --getsmsc command can read the name of the set, if present.
+Start number is 1, end number depends on SIM card but cannot exceed 255.
+
 The --getfile command can read the MF, a DF or an EF, if the SIM allows it.
 A path name must start with 'B:' and the slash '/' or the backslash '\\'
 can be used as separators (in some shells the backslash must be doubled).
@@ -96,7 +101,9 @@ last cell visited by the phone containing the SIM:
   Always 0 because it isn't stored together with the other information
 PIN code is needed to execute this command.
 
-
+The --showsmsfolderstatus command can only show SM memory.
+ 
+ 
 * Bugs *
 
 - GN_OP_GetMemoryStatus and GN_OP_GetSMSStatus always return total space
