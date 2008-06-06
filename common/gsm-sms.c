@@ -815,6 +815,7 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 	rawsms->report              = 0;
 
 	/* NOTE: offsets are taken from subclause 9.2.3 "Definition of the TPDU parameters"
+	   of 3GPP TS 23.040 version 7.0.1 Release 7 == ETSI TS 123 040 V7.0.1 (2007-03)
 	   *not* from the tables in subclause 9.2.2 "PDU Type repertoire at SM-TL" which ignore unused bits
 	*/
 
