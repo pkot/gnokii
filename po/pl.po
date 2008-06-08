@@ -2125,7 +2125,7 @@ msgstr "Nieudana próba pobrania pliku %s: %s\n"
 #: ../gnokii/gnokii-file.c:277
 #, c-format
 msgid "Got file %s.  Save to [%s]: "
-msgstr "Pobrano plik %s.  Zapisano do [%s]: "
+msgstr "Pobrano plik %s. Zapisz jako [%s]: "
 
 #: ../gnokii/gnokii-file.c:292 ../gnokii/gnokii-file.c:347
 #: ../gnokii/gnokii-file.c:398 ../gnokii/gnokii-logo.c:189
