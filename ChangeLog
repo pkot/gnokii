@@ -34,6 +34,7 @@
     o fix segfault on empty addressbook entry last name on Samsung
                                                         (Paweł Kot)
     o fix detecting current charset with AT+CSCS?   (Daniele Forsi)
+    o fix encoding issues (again)                       (Paweł Kot)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
 

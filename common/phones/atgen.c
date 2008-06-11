@@ -358,7 +358,13 @@ static gn_error at_set_charset(gn_data *data, struct gn_statemachine *state, at_
 		char req[32];
 
 		charset_s = at_charset2str(charset);
-		snprintf(req, sizeof(req), "AT+CSCS=\"%s\"\r", charset_s);
+		if (drvinst->encode_memory_type) {
+			char charset_enc[16];
+
+			at_encode(drvinst->charset, charset_enc, sizeof(charset_enc), charset_s, strlen(charset_s));
+			snprintf(req, sizeof(req), "AT+CSCS=\"%s\"\r", charset_enc);
+		} else
+			snprintf(req, sizeof(req), "AT+CSCS=\"%s\"\r", charset_s);
 		error = sm_message_send(strlen(req), GN_OP_Init, req, state);
 		if (error)
 			return error;
@@ -1105,7 +1111,8 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	unsigned int length, tmp, offset = 0;
 	at_driver_instance *drvinst = AT_DRVINST(state);
 
-	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
+	if (!data->raw_sms)
+		return GN_ERR_INTERNALERROR;
 
 	/* Select PDU mode */
 	error = state->driver.functions(GN_OP_AT_SetPDUMode, data, state);
@@ -1116,7 +1123,7 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	dprintf("PDU mode set\n");
 
 	/* Prepare the message and count the size */
-	if(drvinst->no_smsc) {
+	if (drvinst->no_smsc) {
 		/* not even a length byte included */
 		offset--;
 	} else {
@@ -1126,14 +1133,19 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	}
 	/* Validity period in relative format */
 	req2[offset + 1] = 0x01 | 0x10;
-	if (data->raw_sms->reject_duplicates) req2[offset + 1] |= 0x04;
-	if (data->raw_sms->report) req2[offset + 1] |= 0x20;
-	if (data->raw_sms->udh_indicator) req2[offset + 1] |= 0x40;
-	if (data->raw_sms->reply_via_same_smsc) req2[offset + 1] |= 0x80;
+	if (data->raw_sms->reject_duplicates)
+		req2[offset + 1] |= 0x04;
+	if (data->raw_sms->report)
+		req2[offset + 1] |= 0x20;
+	if (data->raw_sms->udh_indicator)
+		req2[offset + 1] |= 0x40;
+	if (data->raw_sms->reply_via_same_smsc)
+		req2[offset + 1] |= 0x80;
 	req2[offset + 2] = 0x00; /* Message Reference */
 
 	tmp = data->raw_sms->remote_number[0];
-	if (tmp % 2) tmp++;
+	if (tmp % 2)
+		tmp++;
 	tmp /= 2;
 	memcpy(req2 + offset + 3, data->raw_sms->remote_number, tmp + 2);
 	offset += tmp + 1;
@@ -1149,7 +1161,7 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 
 	/* Length in AT mode is the length of the full message minus
 	 * SMSC field length */
-	if(drvinst->no_smsc) {
+	if (drvinst->no_smsc) {
 		snprintf(req, sizeof(req), "AT+%s=%d\r", cmd, length);
 	} else {
 		snprintf(req, sizeof(req), "AT+%s=%d\r", cmd, length - data->raw_sms->message_center[0] - 1);
@@ -1227,6 +1239,7 @@ static gn_error AT_GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 	/* AT protocol supports only one SMS Center */
 	if (data->message_center && data->message_center->id != 1)
 		return GN_ERR_INVALIDLOCATION;
+	at_set_charset(data, state, AT_CHAR_GSM);
  	if (sm_message_send(9, GN_OP_GetSMSCenter, "AT+CSCA?\r", state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_GetSMSCenter, data, state);
@@ -1619,7 +1632,7 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 
 	splitlines(&buf);
 	
-	if (data->message_center && strstr(buf.line2,"+CSCA")) {
+	if (data->message_center && strstr(buf.line2, "+CSCA")) {
 		pos = strchr(buf.line2 + 8, '\"');
 		if (pos) {
 			*pos++ = '\0';
