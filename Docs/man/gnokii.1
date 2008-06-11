@@ -1,4 +1,4 @@
-.TH "gnokii" "1" "Mar 20, 2008" "Dag Wieers, Pawel Kot" "gnokii"
+.TH "gnokii" "1" "Jun 11, 2008" "Dag Wieers, Pawel Kot" "gnokii"
 .SH "NAME"
 gnokii \- modem/fax driver for the mobile phones
 .SH "SYNOPSIS"
@@ -290,12 +290,11 @@ Missed calls
 .B LD
 Last dialed numbers 
 .PP
-You can use \fI\-v\fR or \fI\-\-vcard\fR switch to get output in vCard format or \fI\-l\fR or \fI\-\-ldif\fR switch to get output in ldif format.
-.PP
-You can use also \fI\-r\fR or \fI\-\-raw\fR switch to get the raw output.
-You can use it then with \fI\-\-writephonebook\fR. Normally you got verbose output.
+Normally you get verbose output. 
+You can use \fI\-v\fR or \fI\-\-vcard\fR switch to get output in vCard format or \fI\-l\fR or \fI\-\-ldif\fR switch to get output in ldif format or \fI\-r\fR or \fI\-\-raw\fR switch to get the raw output which is explained below.
+You can use it then with \fI\-\-writephonebook\fR.
 .TP 
-.BR "\-\-writephonebook [\-o|\-\-overwrite] [\-f|\-\-find\-free]"
+.BR "\-\-writephonebook [\fI\-o|\-\-overwrite] [\-f|\-\-find\-free] [\-m|\-\-memory-type|\-\-memory memory_type] [\-n|\-\-memory-location|\-\-location number] [[\-v|\-\-vcard]|[\-l|\-\-ldif]\fP]"
 reads data from stdin and writes to phonebook.
 When \-i option is used, refuses to overwrite existing entries.
 Uses the same format as provided by the output of the getphonebook command.
@@ -309,7 +308,7 @@ When the \-f or \-\-find\-free option is given,
 tries to find a free location.  In this case, you can omit the location field
 in the input data.
 .PP
-The phonebook format is very simple.  Each line represents one entry.  Fields
+The raw phonebook format is very simple.  Each line represents one entry.  Fields
 are separated by semicolons.  Semicolons aren't allowed inside a field.  The
 fields have to be in this order (the subentries are optional, ie. you can
 repeat all subentry field multiple times, but they have to be alltogether in
