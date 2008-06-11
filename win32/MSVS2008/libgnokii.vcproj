@@ -4,6 +4,7 @@
 	Version="9,00"
 	Name="libgnokii"
 	ProjectGUID="{93B245DE-6DCE-46E2-BFF1-171383B0643C}"
+	RootNamespace="libgnokii"
 	TargetFrameworkVersion="131072"
 	>
 	<Platforms>
@@ -303,6 +304,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\common\phones\atlg.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\phones\atmot.c"
 				>
 			</File>
@@ -327,6 +332,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\common\phones\atsag.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\common\phones\atsam.c"
@@ -951,6 +960,10 @@
 						PreprocessorDefinitions=""
 					/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\..\common\map.c"
+				>
 			</File>
 			<File
 				RelativePath="..\..\common\misc.c"
