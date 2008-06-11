@@ -164,7 +164,10 @@ xdebug = off
 
 # Fake-phone can be used for testing Gnokii functionality without
 # having a physical phone connected.
+# Example usage:
+# gnokii.exe --config gnokiirc --phone fake --identify
 [phone_fake]
 port = foobar
 model = fake
 connection = serial
+
