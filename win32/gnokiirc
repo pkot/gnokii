@@ -161,3 +161,10 @@ rlpdebug = off
 
 # where to log X debug output (on: stderr, off: /dev/null)
 xdebug = off
+
+# Fake-phone can be used for testing Gnokii functionality without
+# having a physical phone connected.
+[phone_fake]
+port = foobar
+model = fake
+connection = serial
