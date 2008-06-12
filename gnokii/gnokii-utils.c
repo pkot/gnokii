@@ -112,8 +112,8 @@ gn_error readtext(gn_sms_user_data *udata, int input_len)
 	}
 	if (udata->type != GN_SMS_DATA_iMelody && chars_read > 0 && message_buffer[chars_read - 1] == '\n')
 		message_buffer[--chars_read] = 0;
-	if (chars_read > input_len || chars_read > sizeof(udata->u.text) - 1) {
-		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, input_len);
+	if (chars_read > GNOKII_MIN(input_len, sizeof(udata->u.text) - 1)) {
+		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, GNOKII_MIN(input_len, sizeof(udata->u.text) - 1));
 		return GN_ERR_INTERNALERROR;
 	}
 

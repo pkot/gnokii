@@ -25,9 +25,11 @@
       when user answers "no" to overwrite prompt    (Daniele Forsi)
     o make --sendsms, --savesms, --getsms and --deletesmsfolder 
       return with more specific error codes GN_ERR_WRONGDATAFORMAT,
-      GN_ERR_INVALIDMEMORYTYPE and GN_ERR_INVALIDLOCATION were
+      GN_ERR_INVALIDMEMORYTYPE and GN_ERR_INVALIDLOCATION where
       appropriate, instead of -1 or GN_ERR_FAILED   (Daniele Forsi)
     o add country name to --listnetworks output     (Daniele Forsi)
+    o error message for too long text provided to --sendsms --long
+      would sometimes print wrong max size          (Daniele Forsi)
  * at driver updates
     o fix Sagem myW-8 returning the wrong answer to GN_OP_GetModel
                                                     (Daniele Forsi)
