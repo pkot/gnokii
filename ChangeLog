@@ -35,6 +35,8 @@
                                                         (Paweł Kot)
     o fix detecting current charset with AT+CSCS?   (Daniele Forsi)
     o fix encoding issues (again)                       (Paweł Kot)
+    o fix GetMemoryStatus timing out on some Sony Ericsson phones
+                                                   (Bastien Nocera)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
 

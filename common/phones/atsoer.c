@@ -101,10 +101,9 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 			(!strncmp(buf, "+CPBR:", 6) || !strncmp(buf + 1, "+CPBR:", 6)))
 			counter++;
 	}
-	data->memory_status->used = counter;
-	data->memory_status->free = drvinst->memorysize - counter;
+	data->memory_status->used += counter;
+	data->memory_status->free = drvinst->memorysize - data->memory_status->used;
 
-	dprintf("Got %d entries\n", counter);
 	return error;
 }
 
@@ -113,11 +112,13 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
  * with memory stats to AT+CPBS. Calculate by reading and counting all
  * entries (which is fast -- just one command).
  */
+#define PHONEBOOKREAD_CHUNK_SIZE 200
 static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_error ret = GN_ERR_NONE;
 	char req[32];
+	int top, bottom, old_used;
 
 	ret = se_at_memory_type_set(data->memory_status->memory_type,  state);
 	if (ret)
@@ -125,12 +126,35 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	ret = state->driver.functions(GN_OP_AT_GetMemoryRange, data, state);
 	if (ret)
 		return ret;
-	memset(req, 0, 32);
-	snprintf(req, 31, "AT+CPBR=%d,%d\r", drvinst->memoryoffset + 1, drvinst->memorysize + drvinst->memoryoffset);
-	ret = sm_message_send(strlen(req), GN_OP_GetMemoryStatus, req, state);
-	if (ret)
-		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
+	data->memory_status->used = 0;
+	bottom = 0;
+	old_used = 0;
+	top = (bottom + PHONEBOOKREAD_CHUNK_SIZE > drvinst->memorysize) ? drvinst->memorysize : bottom + PHONEBOOKREAD_CHUNK_SIZE;
+	while (top <= drvinst->memorysize) {
+		memset(req, 0, sizeof(req));
+		snprintf(req, sizeof(req) - 1, "AT+CPBR=%d,%d\r", drvinst->memoryoffset + 1 + bottom, top + drvinst->memoryoffset);
+		ret = sm_message_send(strlen(req), GN_OP_GetMemoryStatus, req, state);
+		if (ret)
+			return GN_ERR_NOTREADY;
+		ret = sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
+		if (ret)
+			return GN_ERR_NOTREADY;
+
+		/* If we didn't get any more entries in this read, we're done */
+		if (data->memory_status->used == old_used)
+			break;
+		old_used = data->memory_status->used;
+
+		bottom = top;
+		top = bottom + PHONEBOOKREAD_CHUNK_SIZE;
+		if (bottom >= drvinst->memorysize)
+			break;
+		if (top > drvinst->memorysize)
+			top = drvinst->memorysize;
+	}
+	dprintf("Got %d entries\n", data->memory_status->used);
+
+	return ret;
 }
 
 void at_sonyericsson_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
