@@ -37,6 +37,8 @@
 #include "gnokii.h"
 #include "gnokii-internal.h"
 
+typedef int (*print_func) (void *data, const char *fmt, ...);
+
 /* Write a string to a file doing folding when needed (see RFC 2425) */
 static int gn_vcard_fprintf(FILE *f, const char *fmt, ...)
 {
@@ -61,34 +63,34 @@ static int gn_vcard_fprintf(FILE *f, const char *fmt, ...)
 	return current - buf;
 }
 
-GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location)
+static int gn_phonebook2vcard_real(void *data, print_func func, gn_phonebook_entry *entry)
 {
 	int i;
 	char name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
 
-	gn_vcard_fprintf(f, "BEGIN:VCARD");
-	gn_vcard_fprintf(f, "VERSION:3.0");
+	func(data, "BEGIN:VCARD");
+	func(data, "VERSION:3.0");
 	add_slashes(name, entry->name, sizeof(name), strlen(entry->name));
-	gn_vcard_fprintf(f, "FN:%s", name);
+	func(data, "FN:%s", name);
 
 	if (entry->person.has_person)
-		gn_vcard_fprintf(f, "N:%s;%s;%s;%s;%s",
+		func(data, "N:%s;%s;%s;%s;%s",
 			entry->person.family_name[0]        ? entry->person.family_name        : "",
 			entry->person.given_name[0]         ? entry->person.given_name         : "",
 			entry->person.additional_names[0]   ? entry->person.additional_names   : "",
 			entry->person.honorific_prefixes[0] ? entry->person.honorific_prefixes : "",
 			entry->person.honorific_suffixes[0] ? entry->person.honorific_suffixes : "");
 	else
-		gn_vcard_fprintf(f, "N:%s", name);
+		func(data, "N:%s", name);
 
-	gn_vcard_fprintf(f, "TEL;TYPE=PREF,VOICE:%s", entry->number);
-	gn_vcard_fprintf(f, "X-GSM-MEMORY:%s", gn_memory_type2str(entry->memory_type));
-	gn_vcard_fprintf(f, "X-GSM-LOCATION:%d", entry->location);
-	gn_vcard_fprintf(f, "X-GSM-CALLERGROUP:%d", entry->caller_group);
-	gn_vcard_fprintf(f, "CATEGORIES:%s", gn_phonebook_group_type2str(entry->caller_group));
+	func(data, "TEL;TYPE=PREF,VOICE:%s", entry->number);
+	func(data, "X-GSM-MEMORY:%s", gn_memory_type2str(entry->memory_type));
+	func(data, "X-GSM-LOCATION:%d", entry->location);
+	func(data, "X-GSM-CALLERGROUP:%d", entry->caller_group);
+	func(data, "CATEGORIES:%s", gn_phonebook_group_type2str(entry->caller_group));
 
 	if (entry->address.has_address)
-		gn_vcard_fprintf(f, "ADR;TYPE=HOME,PREF:%s;%s;%s;%s;%s;%s;%s",
+		func(data, "ADR;TYPE=HOME,PREF:%s;%s;%s;%s;%s;%s;%s",
 			entry->address.post_office_box[0]  ? entry->address.post_office_box  : "",
 			entry->address.extended_address[0] ? entry->address.extended_address : "",
 			entry->address.street[0]           ? entry->address.street           : "",
@@ -102,57 +104,57 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 		switch (entry->subentries[i].entry_type) {
 		case GN_PHONEBOOK_ENTRY_Email:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			gn_vcard_fprintf(f, "EMAIL;TYPE=INTERNET:%s", name);
+			func(data, "EMAIL;TYPE=INTERNET:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Postal:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			gn_vcard_fprintf(f, "ADR;TYPE=HOME:%s", name);
+			func(data, "ADR;TYPE=HOME:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Note:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			gn_vcard_fprintf(f, "NOTE:%s", name);
+			func(data, "NOTE:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Number:
 			switch (entry->subentries[i].number_type) {
 			case GN_PHONEBOOK_NUMBER_Home:
-				gn_vcard_fprintf(f, "TEL;TYPE=HOME:%s", entry->subentries[i].data.number);
+				func(data, "TEL;TYPE=HOME:%s", entry->subentries[i].data.number);
 				break;
 			case GN_PHONEBOOK_NUMBER_Mobile:
-				gn_vcard_fprintf(f, "TEL;TYPE=CELL:%s", entry->subentries[i].data.number);
+				func(data, "TEL;TYPE=CELL:%s", entry->subentries[i].data.number);
 				break;
 			case GN_PHONEBOOK_NUMBER_Fax:
-				gn_vcard_fprintf(f, "TEL;TYPE=FAX:%s", entry->subentries[i].data.number);
+				func(data, "TEL;TYPE=FAX:%s", entry->subentries[i].data.number);
 				break;
 			case GN_PHONEBOOK_NUMBER_Work:
-				gn_vcard_fprintf(f, "TEL;TYPE=WORK:%s", entry->subentries[i].data.number);
+				func(data, "TEL;TYPE=WORK:%s", entry->subentries[i].data.number);
 				break;
 			case GN_PHONEBOOK_NUMBER_None:
 			case GN_PHONEBOOK_NUMBER_Common:
 			case GN_PHONEBOOK_NUMBER_General:
-				gn_vcard_fprintf(f, "TEL;TYPE=VOICE:%s", entry->subentries[i].data.number);
+				func(data, "TEL;TYPE=VOICE:%s", entry->subentries[i].data.number);
 				break;
 			default:
-				gn_vcard_fprintf(f, "TEL;TYPE=X-UNKNOWN-%d: %s", entry->subentries[i].number_type, entry->subentries[i].data.number);
+				func(data, "TEL;TYPE=X-UNKNOWN-%d: %s", entry->subentries[i].number_type, entry->subentries[i].data.number);
 				break;
 			}
 			break;
 		case GN_PHONEBOOK_ENTRY_URL:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			gn_vcard_fprintf(f, "URL:%s", name);
+			func(data, "URL:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_JobTitle:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			gn_vcard_fprintf(f, "TITLE:%s", name);
+			func(data, "TITLE:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Company:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			gn_vcard_fprintf(f, "ORG:%s", name);
+			func(data, "ORG:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Nickname:
-			gn_vcard_fprintf(f, "NICKNAME:%s", entry->subentries[i].data.number);
+			func(data, "NICKNAME:%s", entry->subentries[i].data.number);
 			break;
 		case GN_PHONEBOOK_ENTRY_Birthday:
-			gn_vcard_fprintf(f, "BDAY:%s", entry->subentries[i].data.number);
+			func(data, "BDAY:%s", entry->subentries[i].data.number);
 			break;
 		case GN_PHONEBOOK_ENTRY_Ringtone:
 		case GN_PHONEBOOK_ENTRY_Pointer:
@@ -166,17 +168,23 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 			break;
 		default:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			gn_vcard_fprintf(f, "X-GNOKII-%d: %s", entry->subentries[i].entry_type, name);
+			func(data, "X-GNOKII-%d: %s", entry->subentries[i].entry_type, name);
 			break;
 		}
 	}
 
-	gn_vcard_fprintf(f, "END:VCARD");
+	func(data, "END:VCARD");
 	/* output an empty line */
-	gn_vcard_fprintf(f, "");
+	func(data, "");
 
 	return 0;
 }
+
+GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location)
+{
+	return gn_phonebook2vcard_real((void *) f, (print_func) gn_vcard_fprintf, entry);
+}
+
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
 #define STRIP(a, b) strip_slashes(b, buf+strlen(a), line_len - strlen(a), GN_PHONEBOOK_NAME_MAX_LENGTH)
