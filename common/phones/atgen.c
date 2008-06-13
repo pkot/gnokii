@@ -1599,21 +1599,31 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 		/* store date/time (usually sent with DC, MC, RC entries) */
 		pos = part[4];
 		if (pos) {
+			char *date_buf = NULL;
+
 			dprintf("DATE: %s\n", pos);
-			data->phonebook_entry->date.year = 0;
-			data->phonebook_entry->date.month = 0;
-			data->phonebook_entry->date.day = 0;
-			data->phonebook_entry->date.hour = 0;
-			data->phonebook_entry->date.minute = 0;
-			data->phonebook_entry->date.second = 0;
+			if (*pos == '"')
+				pos++;
+			if (drvinst->encode_number) {
+				date_buf = calloc(1, strlen(pos) + 1);
+				at_decode(drvinst->charset, date_buf, pos, strlen(pos));
+				pos = date_buf;
+				dprintf("DATE: %s\n", pos);
+			}
 			/* seconds may not be present */
-			sscanf(pos, "\"%d/%d/%d,%d:%d:%d\"",
+			data->phonebook_entry->date.second = 0;
+			if (sscanf(pos, "%d/%d/%d,%d:%d:%d",
 				&data->phonebook_entry->date.year,
 				&data->phonebook_entry->date.month,
 				&data->phonebook_entry->date.day,
 				&data->phonebook_entry->date.hour,
 				&data->phonebook_entry->date.minute,
-				&data->phonebook_entry->date.second);
+				&data->phonebook_entry->date.second) < 5) {
+				/* not a fatal error */
+				data->phonebook_entry->date.year = 0;
+			}
+			if (date_buf)
+				free(date_buf);
 		}
 	}
 	return GN_ERR_NONE;

@@ -39,6 +39,8 @@
     o fix encoding issues (again)                       (Paweł Kot)
     o fix GetMemoryStatus timing out on some Sony Ericsson phones
                                                    (Bastien Nocera)
+    o decode date/time for --getphonebook DC MC RC on phones that
+      also encode number, eg Sony Ericsson          (Daniele Forsi)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
 
