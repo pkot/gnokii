@@ -26,3 +26,4 @@
      for time setting with DST support
    o Support AT*EBCA unsolicited messages to avoid having to poll for
      battery status
+   o Implement alarm support using AT+CALA and AT+CALD (Sony Ericsson)
