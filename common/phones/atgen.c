@@ -1605,7 +1605,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 			if (*pos == '"')
 				pos++;
 			if (drvinst->encode_number) {
-				date_buf = calloc(1, strlen(pos) + 1);
+				date_buf = calloc(strlen(pos) + 1, sizeof(char));
 				at_decode(drvinst->charset, date_buf, pos, strlen(pos));
 				pos = date_buf;
 				dprintf("DATE: %s\n", pos);
