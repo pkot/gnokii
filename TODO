@@ -1,5 +1,6 @@
  * gnokii changes:
     o readline support
+    o easy backup/restore commands
 
  * libgnokii changes
     o make modules dynamically loadable (phone drivers, connection drivers)
@@ -12,7 +13,7 @@
  * driver changes
     o obex support
     o syncml support
-    o support new phones with filesystems, cameras and other bell'n'whistles
+    o support new phones with filesystems, cameras and other bells'n'whistles
     o Nokia 9210 and family
     o bluetooth support for win32
 
