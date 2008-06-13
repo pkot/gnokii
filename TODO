@@ -20,3 +20,9 @@
     o external apps
 
  * Full Smart Messaging Specification 3.0, EMS, etc.
+
+ * at driver
+   o Support AT+CCLK and AT*EDST on Sony Ericsson (Ericsson?) phones,
+     for time setting with DST support
+   o Support AT*EBCA unsolicited messages to avoid having to poll for
+     battery status
