@@ -40,7 +40,7 @@
 typedef int (*print_func) (void *data, const char *fmt, ...);
 
 /* Write a string to a file doing folding when needed (see RFC 2425) */
-static int gn_vcard_fprintf(FILE *f, const char *fmt, ...)
+static int vcard_fprintf(FILE *f, const char *fmt, ...)
 {
 	char buf[1024], *current;
 	size_t pos;
@@ -63,7 +63,63 @@ static int gn_vcard_fprintf(FILE *f, const char *fmt, ...)
 	return current - buf;
 }
 
-static int gn_phonebook2vcard_real(void *data, print_func func, gn_phonebook_entry *entry)
+typedef struct {
+	char *str;
+	char *end;
+	unsigned int len;
+} vcard_string;
+
+static void vcard_append_printf(vcard_string *str, const char *fmt, ...)
+{
+	char buf[1024];
+	va_list ap;
+	int len, lines, l;
+
+	va_start(ap, fmt);
+	vsnprintf(buf, sizeof(buf), fmt, ap);
+	va_end(ap);
+
+	/* Number of lines needed */
+	lines = strlen(buf) / 76 + 1;
+	/* 3 characters for each line beyond the first one,
+	 * plus the length of the buffer
+	 * plus the line feed and the nul byte to finish it off */
+	len = (lines - 1) * 3 + strlen (buf) + 3;
+
+	/* The first malloc must have a nul byte at the end */
+	if (str->str)
+		str->str = realloc(str->str, len + str->len);
+	else
+		str->str = realloc(str->str, len + 1);
+	if (str->end == NULL)
+		str->end = str->str;
+	else
+		str->end = str->str + str->len;
+
+	for (l = 0; l < lines; l++) {
+		int to_copy;
+
+		to_copy = GNOKII_MIN(76, strlen (buf) - 76 * l);
+		memcpy (str->end,  buf + 76 * l, to_copy);
+		str->end = str->end + to_copy;
+		if (l != lines - 1) {
+			char *s = "\r\n ";
+			memcpy (str->end, s, 3);
+			str->end += 3;
+		}
+	}
+
+	{
+		char *s = "\r\n";
+		memcpy (str->end, s, 2);
+		str->end += 2;
+		str->end[0] = '\0';
+	}
+
+	str->len = str->end - str->str;
+}
+
+static int phonebook2vcard_real(void *data, print_func func, gn_phonebook_entry *entry)
 {
 	int i;
 	char name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
@@ -182,9 +238,19 @@ static int gn_phonebook2vcard_real(void *data, print_func func, gn_phonebook_ent
 
 GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location)
 {
-	return gn_phonebook2vcard_real((void *) f, (print_func) gn_vcard_fprintf, entry);
+	return gn_phonebook2vcard_real((void *) f, (print_func) vcard_fprintf, entry);
 }
 
+GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
+{
+	vcard_string str;
+
+	str.str = NULL;
+	str.end = NULL;
+	str.len = 0;
+	gn_phonebook2vcard_real(&str, (print_func) vcard_append_printf, entry);
+	return str.str;
+}
 
 #define BEGINS(a) ( !strncmp(buf, a, strlen(a)) )
 #define STRIP(a, b) strip_slashes(b, buf+strlen(a), line_len - strlen(a), GN_PHONEBOOK_NAME_MAX_LENGTH)
@@ -212,8 +278,8 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	char memloc[10];
 	char memory_name[10];
 
-	memset(memloc, 0, 10);
-	memset(memory_name, 0, 10);
+	memset(memloc, 0, sizeof(memloc));
+	memset(memory_name, 0, sizeof(memory_name));
 	while (1) {
 		if (!fgets(buf, 1024, f))
 			return -1;
@@ -297,3 +363,93 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	}
 	return 0;
 }
+
+/* We assume gn_phonebook_entry is ready for writing in, ie. no rubbish inside */
+GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entry)
+{
+	char memloc[10];
+	char memory_name[10];
+	char *v, *fold, *s, **lines;
+	int num_lines, i;
+
+	if (vcard == NULL)
+		return -1;
+
+	memset(memloc, 0, sizeof(memloc));
+	memset(memory_name, 0, sizeof(memory_name));
+
+	/* Remove folding */
+	v = strdup (vcard);
+	fold = strstr (v, "\r\n");
+	while (fold == NULL) {
+		memmove (fold, fold + 2, strlen (fold) - 2);
+		fold = strstr (v, "\r\n");
+	}
+
+	/* Count the number of lines */
+	s = strchr (v, '\n');
+	for (num_lines = 0; s != NULL; num_lines++) {
+		num_lines++;
+	}
+
+	lines = gnokii_strsplit (v, "\n", num_lines);
+
+	for (i = 0; i < num_lines; i++) {
+		const char *buf;
+		int line_len;
+
+		if (lines[i] == NULL || *lines[i] == '\0')
+			continue;
+
+		buf = lines[i];
+		line_len = strlen (buf);
+
+		if (BEGINS("N:")) {
+			if (0 < sscanf(buf +2 , "%64[^;];%64[^;];%64[^;];%64[^;];%64[^;]\n",
+				entry->person.family_name,
+				entry->person.given_name,
+				entry->person.additional_names,
+				entry->person.honorific_prefixes,
+				entry->person.honorific_suffixes
+			)) {
+				entry->person.has_person = 1;
+			}
+		}
+		STORE("FN:", entry->name);
+		STORE("TEL;TYPE=PREF,VOICE:", entry->number);
+		STORE("TEL;TYPE=PREF:", entry->number);
+
+		STORESUB("URL:", GN_PHONEBOOK_ENTRY_URL);
+		STORESUB("EMAIL;TYPE=INTERNET:", GN_PHONEBOOK_ENTRY_Email);
+		STORESUB("ADR;TYPE=HOME:", GN_PHONEBOOK_ENTRY_Postal);
+		STORESUB("NOTE:", GN_PHONEBOOK_ENTRY_Note);
+
+#if 1
+		/* libgnokii 0.6.25 deprecates X_GSM_STORE_AT in favour of X-GSM-MEMORY and X-GSM-LOCATION and X_GSM_CALLERGROUP in favour of X-GSM-CALLERGROUP */
+		STORE3("X_GSM_STORE_AT:", memloc);
+		/* if the field is present and correctly formed */
+		if (strlen(memloc) > 2) {
+			entry->location = atoi(memloc + 2);
+			memloc[2] = 0;
+			entry->memory_type = gn_str2memory_type(memloc);
+			continue;
+		}
+		STOREINT("X_GSM_CALLERGROUP:", entry->caller_group);
+#endif
+		STOREMEMTYPE("X-GSM-MEMORY:", entry->memory_type);
+		STOREINT("X-GSM-LOCATION:", entry->location);
+		STOREINT("X-GSM-CALLERGROUP:", entry->caller_group);
+
+		STORENUM("TEL;TYPE=HOME:", GN_PHONEBOOK_NUMBER_Home);
+		STORENUM("TEL;TYPE=CELL:", GN_PHONEBOOK_NUMBER_Mobile);
+		STORENUM("TEL;TYPE=FAX:", GN_PHONEBOOK_NUMBER_Fax);
+		STORENUM("TEL;TYPE=WORK:", GN_PHONEBOOK_NUMBER_Work);
+		STORENUM("TEL;TYPE=PREF:", GN_PHONEBOOK_NUMBER_General);
+		STORENUM("TEL;TYPE=VOICE:", GN_PHONEBOOK_NUMBER_Common);
+
+		if (BEGINS("END:VCARD"))
+			break;
+	}
+	return 0;
+}
+

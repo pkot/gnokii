@@ -13,6 +13,10 @@
     o edit MCC list to be closer to
       http://en.wikipedia.org/wiki/Mobile_network_code and edit
       country list to be closer to iso-codes        (Daniele Forsi)
+    o Add the new gn_phonebook2vcardstr() and
+      gn_vcardstr2phonebook() functions, to manipulate strings
+      rather than filedescriptors when parsing phonebook entries
+                                                   (Bastien Nocera)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)
@@ -30,6 +34,7 @@
     o add country name to --listnetworks output     (Daniele Forsi)
     o error message for too long text provided to --sendsms --long
       would sometimes print wrong max size          (Daniele Forsi)
+    o Use the new gn_phonebook2vcardstr() function (Bastien Nocera)
  * at driver updates
     o fix Sagem myW-8 returning the wrong answer to GN_OP_GetModel
                                                     (Daniele Forsi)

@@ -38,3 +38,8 @@ EXTRA_DIST = 			\
 check: $(EXTRA_DIST)
 	$(srcdir)/testit $(srcdir)/ $(top_builddir)/gnokii/gnokii
 
+noinst_PROGRAMS = dump-vcard
+dump_vcard_LDADD = $(top_builddir)/common/libgnokii.la
+dump_vcard_SOURCES = dump-vcard.c
+
+

@@ -173,9 +173,13 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 			case 1:
 				gn_file_phonebook_raw_write(stdout, &entry, memory_type_string);
 				break;
-			case 2:
-				snprintf(location, sizeof(location), "%s%d", memory_type_string, entry.location);
-				gn_phonebook2vcard(stdout, &entry, location);
+			case 2: {
+					char *s;
+
+					s = gn_phonebook2vcardstr (&entry);
+					fprintf (stdout, "%s", s);
+					free (s);
+				}
 				break;
 			case 3:
 				gn_phonebook2ldif(stdout, &entry);
