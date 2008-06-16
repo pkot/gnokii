@@ -980,7 +980,7 @@ int add_slashes(char *dest, char *src, int maxlen, int len)
 	return j;
 }
 
-int strip_slashes(char *dest, char *src, int maxlen, int len)
+int strip_slashes(char *dest, const char *src, int maxlen, int len)
 {
 	int i, j, slash_state = 0;
 
