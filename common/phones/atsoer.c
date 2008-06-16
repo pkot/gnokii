@@ -137,7 +137,7 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 			return GN_ERR_NOTREADY;
 		ret = sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 		if (ret)
-			return GN_ERR_NOTREADY;
+			return ret;
 
 		bottom = top;
 		top = bottom + PHONEBOOKREAD_CHUNK_SIZE;
