@@ -110,7 +110,7 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 /*
  * Calculate phonebook size for SonyEricsson phones: they don't respond
  * with memory stats to AT+CPBS. Calculate by reading and counting all
- * entries (which is fast -- just one command).
+ * entries (which is pretty fast).
  */
 #define PHONEBOOKREAD_CHUNK_SIZE 200
 static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
