@@ -238,7 +238,7 @@ static int phonebook2vcard_real(void *data, print_func func, gn_phonebook_entry 
 
 GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location)
 {
-	return gn_phonebook2vcard_real((void *) f, (print_func) vcard_fprintf, entry);
+	return phonebook2vcard_real((void *) f, (print_func) vcard_fprintf, entry);
 }
 
 GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
@@ -248,7 +248,7 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 	str.str = NULL;
 	str.end = NULL;
 	str.len = 0;
-	gn_phonebook2vcard_real(&str, (print_func) vcard_append_printf, entry);
+	phonebook2vcard_real(&str, (print_func) vcard_append_printf, entry);
 	return str.str;
 }
 
