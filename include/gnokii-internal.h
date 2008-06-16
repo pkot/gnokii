@@ -171,6 +171,6 @@ int utf8_base64_decode(char *dest, int destlen, const char *src, int inlen);
 int utf8_base64_encode(char *dest, int destlen, const char *src, int inlen);
 
 int add_slashes(char *dest, char *src, int maxlen, int len);
-int strip_slashes(char *dest, char *src, int maxlen, int len);
+int strip_slashes(char *dest, const char *src, int maxlen, int len);
 
 #endif /* _gnokii_internal_h */
