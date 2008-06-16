@@ -118,7 +118,7 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_error ret = GN_ERR_NONE;
 	char req[32];
-	int top, bottom, old_used;
+	int top, bottom;
 
 	ret = se_at_memory_type_set(data->memory_status->memory_type,  state);
 	if (ret)
@@ -128,7 +128,6 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 		return ret;
 	data->memory_status->used = 0;
 	bottom = 0;
-	old_used = 0;
 	top = (bottom + PHONEBOOKREAD_CHUNK_SIZE > drvinst->memorysize) ? drvinst->memorysize : bottom + PHONEBOOKREAD_CHUNK_SIZE;
 	while (top <= drvinst->memorysize) {
 		memset(req, 0, sizeof(req));
@@ -139,11 +138,6 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 		ret = sm_block_no_retry(GN_OP_GetMemoryStatus, data, state);
 		if (ret)
 			return GN_ERR_NOTREADY;
-
-		/* If we didn't get any more entries in this read, we're done */
-		if (data->memory_status->used == old_used)
-			break;
-		old_used = data->memory_status->used;
 
 		bottom = top;
 		top = bottom + PHONEBOOKREAD_CHUNK_SIZE;
