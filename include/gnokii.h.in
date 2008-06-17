@@ -270,7 +270,7 @@ GNOKII_API gn_error gn_cfg_phone_load(const char *iname, struct gn_statemachine 
 GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location);
 GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry);
 GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry);
-int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entry);
+GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entry);
 
 GNOKII_API int gn_phonebook2ldif(FILE *f, gn_phonebook_entry *entry);
 GNOKII_API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry);
