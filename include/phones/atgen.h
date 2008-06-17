@@ -168,6 +168,7 @@ typedef struct {
 
 gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state);
 gn_error at_error_get(unsigned char *buffer, struct gn_statemachine *state);
+gn_error at_set_charset(gn_data *data, struct gn_statemachine *state, at_charset charset);
 
 /* There are shared between various AT drivers */
 void splitlines(at_line_buffer *buf);

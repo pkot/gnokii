@@ -61,6 +61,7 @@ static gn_error se_at_memory_type_set(gn_memory_type mt, struct gn_statemachine 
 		/* BC is "Own Business Card" as per the Sony Ericsson documentation */
 		if (strcmp(memory_name, "ON") == 0)
 			memory_name = "BC";
+		at_set_charset(&data, state, AT_CHAR_GSM);
 		len = snprintf(req, sizeof(req), "AT+CPBS=\"%s\"\r", memory_name);
 		ret = sm_message_send(len, GN_OP_Init, req, state);
 		if (ret != GN_ERR_NONE)
@@ -128,6 +129,7 @@ static gn_error AT_GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 		return ret;
 	data->memory_status->used = 0;
 	bottom = 0;
+	at_set_charset(data, state, AT_CHAR_UCS2);
 	top = (bottom + PHONEBOOKREAD_CHUNK_SIZE > drvinst->memorysize) ? drvinst->memorysize : bottom + PHONEBOOKREAD_CHUNK_SIZE;
 	while (top <= drvinst->memorysize) {
 		memset(req, 0, sizeof(req));

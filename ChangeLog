@@ -44,6 +44,10 @@
     o fix encoding issues (again)                       (Paweł Kot)
     o fix GetMemoryStatus timing out on some Sony Ericsson phones
                                                    (Bastien Nocera)
+    o fix changing folders in some cases on Sony Ericsson phones
+                                                   (Bastien Nocera)
+    o fix GetMemoryStatus being wrong when some phonebook entries
+      contained non-ASCII characters               (Bastien Nocera)
     o decode date/time for --getphonebook DC MC RC on phones that
       also encode number, eg Sony Ericsson          (Daniele Forsi)
  * xgnokii updates
