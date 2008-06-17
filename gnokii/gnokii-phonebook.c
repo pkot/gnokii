@@ -91,7 +91,6 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 	int i, count, start_entry, end_entry, num_entries = INT_MAX, explicit_end = true;
 	gn_error error = GN_ERR_NONE;
 	char *memory_type_string;
-	char location[32];
 	int type = 0; /* Output type:
 				0 - not formatted
 				1 - CSV
