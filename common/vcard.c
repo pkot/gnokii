@@ -74,6 +74,7 @@ static void vcard_append_printf(vcard_string *str, const char *fmt, ...)
 	char buf[1024];
 	va_list ap;
 	int len, lines, l;
+	char *s = "\r\n";
 
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, ap);
@@ -109,12 +110,9 @@ static void vcard_append_printf(vcard_string *str, const char *fmt, ...)
 		}
 	}
 
-	{
-		char *s = "\r\n";
-		memcpy (str->end, s, 2);
-		str->end += 2;
-		str->end[0] = '\0';
-	}
+	memcpy (str->end, s, 2);
+	str->end += 2;
+	str->end[0] = '\0';
 
 	str->len = str->end - str->str;
 }
@@ -245,9 +243,7 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 {
 	vcard_string str;
 
-	str.str = NULL;
-	str.end = NULL;
-	str.len = 0;
+	memset(&str, 0, sizeof (str));
 	phonebook2vcard_real(&str, (print_func) vcard_append_printf, entry);
 	return str.str;
 }
