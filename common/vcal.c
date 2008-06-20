@@ -77,18 +77,6 @@ typedef struct {
 	unsigned int len;
 } ical_string;
 
-static void ical_fprintf(FILE *f, const char *fmt, ...)
-{
-	char buf[1024];
-	va_list ap;
-
-	va_start(ap, fmt);
-	vsnprintf(buf, sizeof(buf), fmt, ap);
-	va_end(ap);
-
-	fprintf(f, "%s", buf);
-}
-
 static void ical_append_printf(ical_string *str, const char *fmt, ...)
 {
 	char buf[1024];
@@ -119,8 +107,10 @@ static void ical_append_printf(ical_string *str, const char *fmt, ...)
 /*
 	ICALENDAR Reading functions
  */
-static int calnote2ical_real(void *data, print_func func, gn_calnote *calnote)
+GNOKII_API char * gn_calnote2icalstr (gn_calnote *calnote)
 {
+	ical_string str;
+
 #ifdef HAVE_LIBICAL
 #  define MAX_PROP_INDEX 5
 	icalcomponent *pIcal = NULL;
@@ -128,6 +118,8 @@ static int calnote2ical_real(void *data, print_func func, gn_calnote *calnote)
 	icalproperty *properties[MAX_PROP_INDEX+1] = {0}; /* order and number of properties vary */
 	int iprop = 0;
 	char compuid[64];
+
+	memset(&str, 0, sizeof (str));
 
 	/* In at least some Nokia phones it is possible to skip the year of
 	   birth, in this case year == 0xffff, so we set it to the arbitrary
@@ -235,7 +227,7 @@ static int calnote2ical_real(void *data, print_func func, gn_calnote *calnote)
 
 			icalstr = icalstrbuf;
 		}
-		func(data, "%s\n", icalstr);
+		ical_append_printf(&str, "%s\n", icalstr);
 		dprintf("%s\n", icalstr);
 		if (icalstrbuf)
 			free(icalstrbuf);
@@ -245,48 +237,50 @@ static int calnote2ical_real(void *data, print_func func, gn_calnote *calnote)
 	} else {
 		dprintf("ERROR in icalcomponent_vanew()\n");
 	}
-	return GN_ERR_NONE;
+	return str.str;
 #else
-	func(data, "BEGIN:VCALENDAR\r\n");
-	func(data, "VERSION:1.0\r\n");
-	func(data, "BEGIN:VEVENT\r\n");
-	func(data, "CATEGORIES:");
+	memset(&str, 0, sizeof (str));
+
+	ical_append_printf(&str, "BEGIN:VCALENDAR\r\n");
+	ical_append_printf(&str, "VERSION:1.0\r\n");
+	ical_append_printf(&str, "BEGIN:VEVENT\r\n");
+	ical_append_printf(&str, "CATEGORIES:");
 	switch (calnote->type) {
 	case GN_CALNOTE_MEMO:
-		func(data, "MISCELLANEOUS\r\n");
+		ical_append_printf(&str, "MISCELLANEOUS\r\n");
 		break;
 	case GN_CALNOTE_REMINDER:
-		func(data, "REMINDER\r\n");
+		ical_append_printf(&str, "REMINDER\r\n");
 		break;
 	case GN_CALNOTE_CALL: 
-		func(data, "PHONE CALL\r\n");
-		func(data, "SUMMARY:%s\r\n", calnote->phone_number);
-		func(data, "DESCRIPTION:%s\r\n", calnote->text);
+		ical_append_printf(&str, "PHONE CALL\r\n");
+		ical_append_printf(&str, "SUMMARY:%s\r\n", calnote->phone_number);
+		ical_append_printf(&str, "DESCRIPTION:%s\r\n", calnote->text);
 		break; 
 	case GN_CALNOTE_MEETING: 
-		func(data, "MEETING\r\n"); 
+		ical_append_printf(&str, "MEETING\r\n"); 
 		if (calnote->mlocation[0])
-			func(data, "LOCATION:%s\r\n", calnote->mlocation);
+			ical_append_printf(&str, "LOCATION:%s\r\n", calnote->mlocation);
 		break; 
 	case GN_CALNOTE_BIRTHDAY: 
-		func(data, "SPECIAL OCCASION\r\n"); 
+		ical_append_printf(&str, "SPECIAL OCCASION\r\n"); 
 		break; 
 	default: 
-		func(data, "UNKNOWN\r\n"); 
+		ical_append_printf(&str, "UNKNOWN\r\n"); 
 		break; 
 	} 
 	if (calnote->type != GN_CALNOTE_CALL)
-		func(data, "SUMMARY:%s\r\n", calnote->text);
-	func(data, "DTSTART:%04d%02d%02dT%02d%02d%02d\r\n", calnote->time.year,
+		ical_append_printf(&str, "SUMMARY:%s\r\n", calnote->text);
+	ical_append_printf(&str, "DTSTART:%04d%02d%02dT%02d%02d%02d\r\n", calnote->time.year,
 		calnote->time.month, calnote->time.day, calnote->time.hour, 
 		calnote->time.minute, calnote->time.second); 
 	if (calnote->end_time.year) {
-		func(data, "DTEND:%04d%02d%02dT%02d%02d%02d\r\n", calnote->end_time.year, 
+		ical_append_printf(&str, "DTEND:%04d%02d%02dT%02d%02d%02d\r\n", calnote->end_time.year, 
 			calnote->end_time.month, calnote->end_time.day, calnote->end_time.hour, 
 			calnote->end_time.minute, calnote->end_time.second); 
 	}
 	if (calnote->alarm.enabled) {
-		func(data, "%sALARM:%04d%02d%02dT%02d%02d%02d\r\n",
+		ical_append_printf(&str, "%sALARM:%04d%02d%02dT%02d%02d%02d\r\n",
 		(calnote->alarm.tone ? "A" : "D"),
 		calnote->alarm.timestamp.year, 
 		calnote->alarm.timestamp.month, calnote->alarm.timestamp.day, calnote->alarm.timestamp.hour, 
@@ -297,53 +291,52 @@ static int calnote2ical_real(void *data, print_func func, gn_calnote *calnote)
 		break; 
 	case GN_CALNOTE_DAILY: 
 		calnote->occurrences ?
-			func(data, "RRULE:FREQ=DAILY\r\n") :
-			func(data, "RRULE:FREQ=DAILY;COUNT=%d\r\n", calnote->occurrences);
+			ical_append_printf(&str, "RRULE:FREQ=DAILY\r\n") :
+			ical_append_printf(&str, "RRULE:FREQ=DAILY;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	case GN_CALNOTE_WEEKLY: 
 		calnote->occurrences ?
-			func(data, "RRULE:FREQ=WEEKLY\r\n") :
-			func(data, "RRULE:FREQ=WEEKLY;COUNT=%d\r\n", calnote->occurrences);
+			ical_append_printf(&str, "RRULE:FREQ=WEEKLY\r\n") :
+			ical_append_printf(&str, "RRULE:FREQ=WEEKLY;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	case GN_CALNOTE_2WEEKLY: 
 		calnote->occurrences ?
-			func(data, "RRULE:FREQ=WEEKLY;INTERVAL=2\r\n") :
-			func(data, "RRULE:FREQ=WEEKLY;INTERVAL=2;COUNT=%d\r\n", calnote->occurrences);
+			ical_append_printf(&str, "RRULE:FREQ=WEEKLY;INTERVAL=2\r\n") :
+			ical_append_printf(&str, "RRULE:FREQ=WEEKLY;INTERVAL=2;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	case GN_CALNOTE_MONTHLY: 
 		calnote->occurrences ?
-			func(data, "RRULE:FREQ=MONTHLY\r\n") :
-			func(data, "RRULE:FREQ=MONTHLY;COUNT=%d\r\n", calnote->occurrences);
+			ical_append_printf(&str, "RRULE:FREQ=MONTHLY\r\n") :
+			ical_append_printf(&str, "RRULE:FREQ=MONTHLY;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	case GN_CALNOTE_YEARLY: 
 		calnote->occurrences ?
-			func(data, "RRULE:FREQ=YEARLY\r\n") :
-			func(data, "RRULE:FREQ=YEARLY;COUNT=%d\r\n", calnote->occurrences);
+			ical_append_printf(&str, "RRULE:FREQ=YEARLY\r\n") :
+			ical_append_printf(&str, "RRULE:FREQ=YEARLY;COUNT=%d\r\n", calnote->occurrences);
 		break; 
 	default: 
 		calnote->occurrences ?
-			func(data, "RRULE:FREQ=HOURLY;INTERVAL=%d\r\n", calnote->recurrence) :
-			func(data, "RRULE:FREQ=HOURLY;INTERVAL=%d;COUNT=%d\r\n", calnote->recurrence, calnote->occurrences);
+			ical_append_printf(&str, "RRULE:FREQ=HOURLY;INTERVAL=%d\r\n", calnote->recurrence) :
+			ical_append_printf(&str, "RRULE:FREQ=HOURLY;INTERVAL=%d;COUNT=%d\r\n", calnote->recurrence, calnote->occurrences);
 		break; 
 	} 
-	func(data, "END:VEVENT\r\n"); 
-	func(data, "END:VCALENDAR\r\n");
-	return GN_ERR_NONE;
+	ical_append_printf(&str, "END:VEVENT\r\n"); 
+	ical_append_printf(&str, "END:VCALENDAR\r\n");
+	return str.str;
 #endif /* HAVE_LIBICAL */
 }
 
 GNOKII_API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 {
-	return calnote2ical_real((void *) f, (print_func) ical_fprintf, calnote);
-}
+	char *vcal;
+	int retval;
 
-GNOKII_API char * gn_calnote2icalstr (gn_calnote *calnote)
-{
-	ical_string str;
-
-	memset(&str, 0, sizeof (str));
-	calnote2ical_real(&str, (print_func) ical_append_printf, calnote);
-	return str.str;
+	vcal = gn_calnote2icalstr(calnote);
+	if (vcal == NULL)
+		return -1;
+	retval = fputs(vcal, f);
+	free (vcal);
+	return retval;
 }
 
 static inline gn_calnote_type str2calnote_type(const char *str)
@@ -362,27 +355,12 @@ static inline gn_calnote_type str2calnote_type(const char *str)
 	return GN_CALNOTE_REMINDER;
 }
 
-/* read a vcalendar event given by id from file f and store the data in calnote */
-GNOKII_API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
+#ifdef HAVE_LIBICAL
+static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id)
 {
 	int retval = GN_ERR_FAILED;
-#ifdef HAVE_LIBICAL
-	icalparser *parser = NULL;
-	icalcomponent *comp = NULL, *compresult = NULL;
 	struct icaltimetype dtstart = {0}, dtend = {0};
-
-	parser = icalparser_new();
-	if (!parser) {
-		return GN_ERR_FAILED;
-	}
-
-	icalparser_set_gen_data(parser, f);
-
-	comp = icalparser_parse(parser, ical_fgets);
-	if (!comp) {
-		icalparser_free(parser);
-		return GN_ERR_FAILED;
-	}
+	icalcomponent *compresult = NULL;
 
 	if (id < 1)
 		id = 1;
@@ -493,14 +471,71 @@ GNOKII_API int gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 	}
 	if (compresult)
 		icalcomponent_free(compresult);
-	if (comp)
-		icalcomponent_free(comp);
-	if (parser)
-		icalparser_free(parser);
-#else
-	retval = GN_ERR_NOTIMPLEMENTED;
-#endif /* HAVE_LIBICAL */
+
 	return retval;
+}
+#endif /* HAVE_LIBICAL */
+
+/* read a vcalendar event given by id from file f and store the data in calnote */
+GNOKII_API gn_error gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
+{
+#ifdef HAVE_LIBICAL
+	icalparser *parser = NULL;
+	icalcomponent *comp = NULL;
+	gn_error retval;
+
+	parser = icalparser_new();
+	if (!parser) {
+		return GN_ERR_FAILED;
+	}
+
+	icalparser_set_gen_data(parser, f);
+
+	comp = icalparser_parse(parser, ical_fgets);
+	if (!comp) {
+		icalparser_free(parser);
+		return GN_ERR_FAILED;
+	}
+
+	retval = gn_ical2calnote_real(comp, calnote, id);
+
+	icalcomponent_free(comp);
+	icalparser_free(parser);
+
+	return retval;
+#else
+	return GN_ERR_NOTIMPLEMENTED;
+#endif /* HAVE_LIBICAL */
+}
+
+/* read a vcalendar event given by id from file f and store the data in calnote */
+GNOKII_API gn_error gn_icalstr2calnote(const char * ical, gn_calnote *calnote, int id)
+{
+#ifdef HAVE_LIBICAL
+	icalparser *parser = NULL;
+	icalcomponent *comp = NULL;
+	gn_error retval;
+
+	parser = icalparser_new();
+	if (!parser) {
+		return GN_ERR_FAILED;
+	}
+
+	comp = icalparser_parse_string (ical);
+	if (!comp) {
+		icalparser_free(parser);
+		return GN_ERR_FAILED;
+	}
+
+	retval = gn_ical2calnote_real(comp, calnote, id);
+
+	icalcomponent_free(comp);
+	icalparser_free(parser);
+
+	return retval;
+#else
+	return GN_ERR_NOTIMPLEMENTED;
+#endif /* HAVE_LIBICAL */
 }
 
 GNOKII_API int gn_todo2ical(FILE *f, gn_todo *ctodo)

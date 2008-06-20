@@ -17,8 +17,8 @@
       gn_vcardstr2phonebook() functions, to manipulate strings
       rather than filedescriptors when parsing phonebook entries
                                                    (Bastien Nocera)
-    o Add a similar gn_calnote2icalstr() function to manipulate
-      calendar entries                             (Bastien Nocera)
+    o Add a similar gn_calnote2icalstr() and gn_icalstr2calnote()
+      function to manipulate calendar entries      (Bastien Nocera)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)
