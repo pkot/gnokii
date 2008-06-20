@@ -92,7 +92,7 @@ static void vcard_append_printf(vcard_string *str, const char *fmt, ...)
 	str->len = str->end - str->str;
 }
 
-GNOKII_API char * phonebook2vcardstr(gn_phonebook_entry *entry)
+GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 {
 	vcard_string str;
 	int i;
@@ -217,7 +217,7 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 	char *vcard;
 	int retval;
 
-	vcard = phonebook2vcardstr (entry);
+	vcard = gn_phonebook2vcardstr (entry);
 	if (vcard == NULL)
 		return -1;
 	retval = fputs (vcard, f);
