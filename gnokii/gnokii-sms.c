@@ -282,7 +282,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			gn_wap_push_init(&wp);
 
 			memset(message_buffer, 0, sizeof(message_buffer));
-			fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:"));
+			fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:\n"));
 			chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
 			
 			wp.url = optarg;
