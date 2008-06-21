@@ -19,6 +19,8 @@
                                                    (Bastien Nocera)
     o Add a similar gn_calnote2icalstr() and gn_icalstr2calnote()
       function to manipulate calendar entries      (Bastien Nocera)
+    o steal rfcomm channel autodetection code from
+      gnome-phone-manager                               (Paweł Kot)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)

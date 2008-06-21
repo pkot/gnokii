@@ -26,6 +26,10 @@
   Copyright (C) 2002       Ladis Michl, Marcel Holtmann <marcel@holtmann.org>
   Copyright (C) 2003       BORBELY Zoltan, Pawel Kot
 
+  PhoneManager Utilities: rfcomm channel autodetection
+  Copyright (C) 2003-2004 Edd Dumbill <edd@usefulinc.com>
+  Copyright (C) 2005-2007 Bastien Nocera <hadess@hadess.net>
+
 */
 
 #include "config.h"
@@ -91,8 +95,129 @@ static int str2ba(const char *str, bdaddr_t *ba)
 
 #include <bluetooth/bluetooth.h>
 #include <bluetooth/rfcomm.h>
+#include <bluetooth/sdp.h>
+#include <bluetooth/sdp_lib.h>
 
 #endif
+
+/*
+ * Taken from gnome-phone-manager
+ */
+static int get_rfcomm_channel(sdp_record_t *rec, int only_gnapplet)
+{
+	int channel = -1;
+	sdp_list_t *protos = NULL;
+	sdp_data_t *data;
+	char name[64];
+
+	if (sdp_get_access_protos(rec, &protos) != 0)
+		goto end;
+
+	data = sdp_data_get(rec, SDP_ATTR_SVCNAME_PRIMARY);
+	if (data)
+		snprintf(name, sizeof(name), "%.*s", data->unitSize, data->val.str);
+
+	if (name == NULL)
+		goto end;
+
+	/*
+	 * If we're only supposed to check for gnapplet, do it here
+	 * We ignore it if we're not supposed to check for it.
+	 */
+	if (strcmp(name, "gnapplet") == 0) {
+		if (only_gnapplet != 0)
+			channel = sdp_get_proto_port(protos, RFCOMM_UUID);
+		goto end;
+	}
+
+	/*
+	 * We can't seem to connect to the PC Suite channel.
+	 */
+	if (strstr(name, "Nokia PC Suite") != NULL)
+		goto end;
+	/*
+	 * And that type of channel on Nokia Symbian phones doesn't
+	 * work either.
+	 */
+	if (strstr(name, "Bluetooth Serial Port") != NULL)
+		goto end;
+	/*
+	 * Avoid the m-Router channel, same as the PC Suite on Sony Ericsson
+	 * phones.
+	 */
+	if (strstr(name, "m-Router Connectivity") != NULL)
+		goto end;
+
+	channel = sdp_get_proto_port(protos, RFCOMM_UUID);
+end:
+	sdp_list_foreach(protos, (sdp_list_func_t)sdp_list_free, 0);
+	sdp_list_free(protos, 0);
+	return channel;
+}
+
+/*
+ * Determine whether the given device supports Serial or Dial-Up Networking,
+ * and if so what the RFCOMM channel number for the service is.
+ */
+static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gnapplet, uint16_t svclass_id)
+{
+	sdp_session_t *sdp = NULL;
+	sdp_list_t *search = NULL, *attrs = NULL, *recs = NULL, *tmp;
+	uuid_t browse_uuid, service_id;
+	uint32_t range = 0x0000ffff;
+	int channel = -1;
+
+	sdp = sdp_connect(adapter, device, SDP_RETRY_IF_BUSY);
+	if (!sdp)
+		goto end;
+
+	sdp_uuid16_create(&browse_uuid, PUBLIC_BROWSE_GROUP);
+	sdp_uuid16_create(&service_id, svclass_id);
+	search = sdp_list_append(NULL, &browse_uuid);
+	search = sdp_list_append(search, &service_id);
+
+	attrs = sdp_list_append(NULL, &range);
+
+	if (sdp_service_search_attr_req(sdp, search,
+					 SDP_ATTR_REQ_RANGE, attrs,
+					 &recs))
+		goto end;
+
+	for (tmp = recs; tmp != NULL; tmp = tmp->next) {
+		sdp_record_t *rec = tmp->data;
+
+		/*
+		 * If this service is better than what we've
+		 * previously seen, try and get the channel number.
+		 */
+		channel = get_rfcomm_channel(rec, only_gnapplet);
+		if (channel > 0)
+			goto end;
+	}
+
+end:
+	sdp_list_free(recs, (sdp_free_func_t)sdp_record_free);
+	sdp_list_free(search, NULL);
+	sdp_list_free(attrs, NULL);
+	sdp_close(sdp);
+
+	return channel;
+}
+
+static int get_serial_channel(bdaddr_t *device)
+{
+	bdaddr_t src;
+	int channel;
+
+	bacpy(&src, BDADDR_ANY);
+
+	channel = find_service_channel(&src, device, 0, SERIAL_PORT_SVCLASS_ID);
+	if (channel < 0)
+		channel = find_service_channel(&src, device, 0, DIALUP_NET_SVCLASS_ID);
+
+	return channel;
+}
+
 
 /* From: http://www.kegel.com/dkftpbench/nonblocking.html */
 static int setNonblocking(int fd)
@@ -130,7 +255,16 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	memset(&raddr, 0, sizeof(raddr));
 	raddr.rc_family = AF_BLUETOOTH;
 	bacpy(&raddr.rc_bdaddr, &bdaddr);
+	dprintf("Channel: %d\n", channel);
+	if (channel < 1)
+		channel = get_serial_channel(&bdaddr);
+	dprintf("Channel: %d\n", channel);
+	/* Let's fallback to default channel */
+	if (channel < 1)
+		channel = 1;
+	dprintf("Using channel: %d\n", channel);
 	raddr.rc_channel = channel;
+	
 	if (connect(fd, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
 		perror(_("Can't connect"));
 		close(fd);

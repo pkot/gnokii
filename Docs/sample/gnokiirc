@@ -133,7 +133,9 @@ serial_baudrate = 19200
 #require_dcd = 1
 
 # If you are using a bluetooth connection, you can specify the rfcomm
-# channel number here. Default value is 1.
+# channel number here. If you don't specify the value, it is autodetected
+# on connection (it may take an additional second). If none is detected,
+# we assume default value: 1.
 #rfcomm_channel = 1
 
 # There may happen various timeouts during the communication with the phone.
