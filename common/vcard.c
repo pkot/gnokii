@@ -281,7 +281,7 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 			break;
 	}
 
-	str_append_printf (&str, "BEGIN:VCARD");
+	str_append_printf (&str, "BEGIN:VCARD\r\n");
 	while (fgets(buf, 1024, f)) {
 		str_append_printf (&str, buf);
 		if (BEGINS("END:VCARD"))
@@ -310,16 +310,16 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 
 	/* Remove folding */
 	v = strdup (vcard);
-	fold = strstr (v, "\r\n");
+	fold = strstr (v, "\n ");
 	while (fold != NULL) {
 		memmove (fold, fold + 2, strlen (fold) - 2);
-		fold = strstr (fold, "\r\n");
+		fold = strstr (fold, "\n ");
 	}
 
 	/* Count the number of lines */
-	s = strchr (v, '\n');
+	s = strstr (v, "\n");
 	for (num_lines = 0; s != NULL; num_lines++) {
-		num_lines++;
+		s = strstr (s + 1, "\n");
 	}
 
 	lines = gnokii_strsplit (v, "\n", num_lines);
