@@ -540,6 +540,20 @@ GNOKII_API gn_error gn_icalstr2calnote(const char * ical, gn_calnote *calnote, i
 
 GNOKII_API int gn_todo2ical(FILE *f, gn_todo *ctodo)
 {
+	char *icalstr;
+
+	icalstr = gn_todo2icalstr(ctodo);
+	if (icalstr) {
+		fprintf(f, "%s\n", icalstr);
+		dprintf("%s\n", icalstr);
+		free(icalstr);
+	}
+
+	return GN_ERR_NONE;
+}
+
+GNOKII_API char * gn_todo2icalstr(gn_todo *ctodo)
+{
 #ifdef HAVE_LIBICAL
 	icalcomponent *pIcal = NULL;
 	char compuid[64];
@@ -564,26 +578,26 @@ GNOKII_API int gn_todo2ical(FILE *f, gn_todo *ctodo)
 			int icalstrlen = strlen(icalstr);
 			icalstrbuf = malloc(icalstrlen * 2 + 1);
 			utf8_encode(icalstrbuf, icalstrlen * 2, icalstr, icalstrlen);
-			icalstr = icalstrbuf;
+		} else {
+			icalstrbuf = strdup (icalstr);
 		}
-		fprintf(f, "%s\n", icalstr);
-		dprintf("%s\n", icalstr);
-		if (icalstrbuf)
-			free(icalstrbuf);
-
 		icalcomponent_free(pIcal);
-		pIcal = NULL;
+		return icalstrbuf;
 	}
-	return GN_ERR_NONE;
+	return NULL;
 #else
-	fprintf(f, "BEGIN:VCALENDAR\r\n");
-	fprintf(f, "VERSION:1.0\r\n"); 
-	fprintf(f, "BEGIN:VTODO\r\n"); 
-	fprintf(f, "PRIORITY:%i\r\n", ctodo->priority); 
-	fprintf(f, "SUMMARY:%s\r\n", ctodo->text); 
-	fprintf(f, "END:VTODO\r\n"); 
-	fprintf(f, "END:VCALENDAR\r\n");
-	return GN_ERR_NONE;
+	ical_string str;
+
+	memset(&str, 0, sizeof(str));
+	ical_append_printf(str, "BEGIN:VCALENDAR\r\n");
+	ical_append_printf(str, "VERSION:1.0\r\n"); 
+	ical_append_printf(str, "BEGIN:VTODO\r\n"); 
+	ical_append_printf(str, "PRIORITY:%i\r\n", ctodo->priority); 
+	ical_append_printf(str, "SUMMARY:%s\r\n", ctodo->text); 
+	ical_append_printf(str, "END:VTODO\r\n"); 
+	ical_append_printf(str, "END:VCALENDAR\r\n");
+
+	return str.str;
 #endif /* HAVE_LIBICAL */
 }
 
