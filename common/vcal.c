@@ -601,25 +601,11 @@ GNOKII_API char * gn_todo2icalstr(gn_todo *ctodo)
 #endif /* HAVE_LIBICAL */
 }
 
-/* read the entry identified by id from the vcal file f and write it to the phone */
-GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
-{
 #ifdef HAVE_LIBICAL
-	icalparser *parser = NULL;
-	icalcomponent *comp = NULL, *compresult = NULL;
-
-	parser = icalparser_new();
-	if (!parser) {
-		return GN_ERR_FAILED;
-	}
-
-	icalparser_set_gen_data(parser, f);
-
-	comp = icalparser_parse(parser, ical_fgets);
-	if (!comp) {
-		icalparser_free(parser);
-		return GN_ERR_FAILED;
-	}
+/* read the entry identified by id from the vcal file f and write it to the phone */
+static int gn_ical2todo_real(icalcomponent *comp, gn_todo *ctodo, int id)
+{
+	icalcomponent *compresult = NULL;
 
 	if (id < 1)
 		id = 1;
@@ -643,10 +629,66 @@ GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
 		dprintf("Component found\n%s\n", icalcomponent_as_ical_string(compresult));
 	}
 	icalcomponent_free(compresult);
+
+	return GN_ERR_NONE;
+}
+#endif /* HAVE_LIBICAL */
+
+GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id)
+{
+#ifdef HAVE_LIBICAL
+	icalparser *parser = NULL;
+	icalcomponent *comp = NULL;
+	gn_error error;
+
+	parser = icalparser_new();
+	if (!parser) {
+		return GN_ERR_FAILED;
+	}
+
+	icalparser_set_gen_data(parser, f);
+
+	comp = icalparser_parse(parser, ical_fgets);
+	if (!comp) {
+		icalparser_free(parser);
+		return GN_ERR_FAILED;
+	}
+
+	error = gn_ical2todo_real(comp, ctodo, id);
+
 	icalcomponent_free(comp);
 	icalparser_free(parser);
 
-	return GN_ERR_NONE;
+	return error;
+#else
+	return GN_ERR_NOTIMPLEMENTED;
+#endif /* HAVE_LIBICAL */
+}
+
+GNOKII_API int gn_icalstr2todo(const char * ical, gn_todo *ctodo, int id)
+{
+#ifdef HAVE_LIBICAL
+	icalparser *parser = NULL;
+	icalcomponent *comp = NULL;
+	gn_error error;
+
+	parser = icalparser_new();
+	if (!parser) {
+		return GN_ERR_FAILED;
+	}
+
+	comp = icalparser_parse_string (ical);
+	if (!comp) {
+		icalparser_free(parser);
+		return GN_ERR_FAILED;
+	}
+
+	error = gn_ical2todo_real(comp, ctodo, id);
+
+	icalcomponent_free(comp);
+	icalparser_free(parser);
+
+	return error;
 #else
 	return GN_ERR_NOTIMPLEMENTED;
 #endif /* HAVE_LIBICAL */

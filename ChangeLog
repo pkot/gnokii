@@ -17,9 +17,9 @@
       gn_vcardstr2phonebook() functions, to manipulate strings
       rather than filedescriptors when parsing phonebook entries
                                                    (Bastien Nocera)
-    o Add a similar gn_calnote2icalstr(), gn_icalstr2calnote(),
-      and gn_todo2icalstr() function to manipulate calendar
-      entries                                      (Bastien Nocera)
+    o Add similar gn_calnote2icalstr(), gn_icalstr2calnote(),
+      gn_todo2icalstr(), and gn_icalstr2todo() functions
+      to manipulate calendar entries               (Bastien Nocera)
     o steal rfcomm channel autodetection code from
       gnome-phone-manager                               (Paweł Kot)
  * documentation updates
