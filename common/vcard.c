@@ -315,6 +315,11 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		memmove (fold, fold + 2, strlen (fold) - 2);
 		fold = strstr (fold, "\n ");
 	}
+	fold = strstr (v, "\n\t");
+	while (fold != NULL) {
+		memmove (fold, fold + 2, strlen (fold) - 2);
+		fold = strstr (v, "\n\t");
+	}
 
 	/* Count the number of lines */
 	s = strstr (v, "\n");
