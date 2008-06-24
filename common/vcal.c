@@ -589,13 +589,13 @@ GNOKII_API char * gn_todo2icalstr(gn_todo *ctodo)
 	ical_string str;
 
 	memset(&str, 0, sizeof(str));
-	ical_append_printf(str, "BEGIN:VCALENDAR\r\n");
-	ical_append_printf(str, "VERSION:1.0\r\n"); 
-	ical_append_printf(str, "BEGIN:VTODO\r\n"); 
-	ical_append_printf(str, "PRIORITY:%i\r\n", ctodo->priority); 
-	ical_append_printf(str, "SUMMARY:%s\r\n", ctodo->text); 
-	ical_append_printf(str, "END:VTODO\r\n"); 
-	ical_append_printf(str, "END:VCALENDAR\r\n");
+	ical_append_printf(&str, "BEGIN:VCALENDAR\r\n");
+	ical_append_printf(&str, "VERSION:1.0\r\n"); 
+	ical_append_printf(&str, "BEGIN:VTODO\r\n"); 
+	ical_append_printf(&str, "PRIORITY:%i\r\n", ctodo->priority); 
+	ical_append_printf(&str, "SUMMARY:%s\r\n", ctodo->text); 
+	ical_append_printf(&str, "END:VTODO\r\n"); 
+	ical_append_printf(&str, "END:VCALENDAR\r\n");
 
 	return str.str;
 #endif /* HAVE_LIBICAL */
