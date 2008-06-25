@@ -40,6 +40,9 @@
     o error message for too long text provided to --sendsms --long
       would sometimes print wrong max size          (Daniele Forsi)
     o Use the new gn_phonebook2vcardstr() function (Bastien Nocera)
+    o fix handling of arguments in --savesms: make it actually
+      accept -l|--location and at most 12 parameters, not 10
+                                                    (Daniele Forsi) 
  * at driver updates
     o fix Sagem myW-8 returning the wrong answer to GN_OP_GetModel
                                                     (Daniele Forsi)

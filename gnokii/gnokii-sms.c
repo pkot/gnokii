@@ -464,7 +464,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				sms.remote.type = GN_GSM_NUMBER_Unknown;
 			snprintf(sms.remote.number, GN_BCD_STRING_MAX_LENGTH, "%s", optarg);
 			break;
-		case '3': /* location to write to */
+		case 'l': /* location to write to */
 			sms.number = gnokii_atoi(optarg);
 			if (errno || sms.number < 0)
 				savesms_usage(stderr, -1);
