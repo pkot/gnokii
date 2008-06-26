@@ -414,6 +414,9 @@ typedef struct {
 	/* Date fields */
 	gn_timestamp smsc_time;             /* SMSC Timestamp. Only for reading. */
 	gn_timestamp time;                  /* Delivery timestamp. Only for reading. */
+
+	/* Additional fields */
+	unsigned int reference;             /* Reference number of the message sent. */
 } gn_sms;
 
 /* Define datatype for SMS messages, describes precisely GSM Spec 03.40 */

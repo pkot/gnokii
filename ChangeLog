@@ -23,6 +23,8 @@
       to manipulate calendar entries               (Bastien Nocera)
     o steal rfcomm channel autodetection code from
       gnome-phone-manager                               (Paweł Kot)
+    o make gn_sms_send() propagate the reference number from its
+      local data->raw_sms to caller's data->sms     (Daniele Forsi)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)
@@ -43,7 +45,9 @@
     o Use the new gn_phonebook2vcardstr() function (Bastien Nocera)
     o fix handling of arguments in --savesms: make it actually
       accept -l|--location and at most 12 parameters, not 10
-                                                    (Daniele Forsi) 
+                                                    (Daniele Forsi)
+    o make --sendsms print the reference number of sent SMS
+                                                    (Daniele Forsi)
  * at driver updates
     o fix Sagem myW-8 returning the wrong answer to GN_OP_GetModel
                                                     (Daniele Forsi)

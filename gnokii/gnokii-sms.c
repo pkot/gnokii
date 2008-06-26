@@ -346,7 +346,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	error = gn_sms_send(data, state);
 
 	if (error == GN_ERR_NONE)
-		fprintf(stderr, _("Send succeeded!\n"));
+		fprintf(stderr, _("Send succeeded with reference %d!\n"), sms.reference);
 	else
 		fprintf(stderr, _("SMS Send failed (%s)\n"), gn_error_print(error));
 
