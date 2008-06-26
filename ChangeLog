@@ -5,6 +5,7 @@
  * nk6510 driver updates
     o advance progress indicator for file download in place
                                                       (Yoni Rabkin)
+    o detect empty/invalid SMS locations                (Paweł Kot)
  * libgnokii updates
     o add callback function for advance progress indicator
                                                         (Paweł Kot)

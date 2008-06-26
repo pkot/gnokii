@@ -823,6 +823,13 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Trying to get message #%i in folder #%i\n", message[9], message[7]);
 		if (!data->raw_sms)
 			return GN_ERR_INTERNALERROR;
+		/*
+		 * When we're reading from 0 location we usually get response in the form:
+		 *   01 56 00 03 02 00 00 00 00 00 00 00 00 00
+		 * Treat is as the invalid location. Frame cannot be that short anyway.
+		 */
+		if (length < 15)
+			return GN_ERR_INVALIDLOCATION;
 		status = data->raw_sms->status;
 		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
 		data->raw_sms->status = status;
