@@ -957,31 +957,11 @@ static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 {
 	char req[64];
-	int ctype, type;
+	int ctype;
 
 	if (!data->call_divert)
 		return GN_ERR_UNKNOWN;
 
-	switch (data->call_divert->type) {
-	case GN_CDV_AllTypes:
-		type = 4;
-		break;
-	case GN_CDV_Busy:
-		type = 1;
-		break;
-	case GN_CDV_NoAnswer:
-		type = 2;
-		break;
-	case GN_CDV_OutOfReach:
-		type = 3;
-		break;
-	case GN_CDV_Unconditional:
-		type = 0;
-		break;
-	default:
-		dprintf("Unsupported divert reason: %d\n", data->call_divert->type);
-		return GN_ERR_NOTIMPLEMENTED;
-	}
 	switch (data->call_divert->ctype) {
 	case GN_CDV_VoiceCalls:
 		ctype = 1;
@@ -1012,18 +992,22 @@ static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 		 */
 		if (data->call_divert->timeout)
 			snprintf(req, sizeof(req), "AT+CCFC=%d,%d,\"%s\",%d,%d,,,%d\r",
-				 type, data->call_divert->operation,
+				 data->call_divert->type,
+				 data->call_divert->operation,
 				 data->call_divert->number.number,
 				 data->call_divert->number.type,
 				 ctype, data->call_divert->timeout);
 		else
 			snprintf(req, sizeof(req), "AT+CCFC=%d,%d,\"%s\",%d,%d\r",
-				 type, data->call_divert->operation,
+				 data->call_divert->type,
+				 data->call_divert->operation,
 				 data->call_divert->number.number,
 				 data->call_divert->number.type,
 				 ctype);
 	} else {
-		snprintf(req, sizeof(req), "AT+CCFC=%d,%d\r", type, data->call_divert->operation);
+		snprintf(req, sizeof(req), "AT+CCFC=%d,%d\r",
+				data->call_divert->type,
+				data->call_divert->operation);
 	}
 
 	if (sm_message_send(strlen(req), GN_OP_CallDivert, req, state))
