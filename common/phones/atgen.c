@@ -956,55 +956,80 @@ static gn_error AT_DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 {
-	char req[64], req2[64];
+	char req[64];
+	int ctype, type;
 
 	if (!data->call_divert)
 		return GN_ERR_UNKNOWN;
 
-	snprintf(req, sizeof(req), "%s", "AT+CCFC=");
-
 	switch (data->call_divert->type) {
 	case GN_CDV_AllTypes:
-		strncat(req, "4", sizeof(req) - strlen(req));
+		type = 4;
 		break;
 	case GN_CDV_Busy:
-		strncat(req, "1", sizeof(req) - strlen(req));
+		type = 1;
 		break;
 	case GN_CDV_NoAnswer:
-		strncat(req, "2", sizeof(req) - strlen(req));
+		type = 2;
 		break;
 	case GN_CDV_OutOfReach:
-		strncat(req, "3", sizeof(req) - strlen(req));
+		type = 3;
+		break;
+	case GN_CDV_Unconditional:
+		type = 0;
 		break;
 	default:
-		dprintf("3. %d\n", data->call_divert->type);
+		dprintf("Unsupported divert reason: %d\n", data->call_divert->type);
 		return GN_ERR_NOTIMPLEMENTED;
 	}
-	if (data->call_divert->operation == GN_CDV_Register) {
-		snprintf(req2, sizeof(req2), ",%d,\"%s\",%d,,,%d",
-			 data->call_divert->operation,
-			 data->call_divert->number.number,
-			 data->call_divert->number.type,
-			 data->call_divert->timeout);
-		if (strlen(req2) + strlen (req) + 1 > sizeof(req))
-			return GN_ERR_FAILED;
-		strncat(req, req2, strlen(req2));
-	} else {
-		snprintf(req2, sizeof(req2), ",%d", data->call_divert->operation);
-		if (strlen(req2) + strlen (req) + 1 > sizeof(req))
-			return GN_ERR_FAILED;
-		strncat(req, req2, strlen(req2));
+	switch (data->call_divert->ctype) {
+	case GN_CDV_VoiceCalls:
+		ctype = 1;
+		break;
+	case GN_CDV_FaxCalls:
+		ctype = 2;
+		break;
+	case GN_CDV_DataCalls:
+		ctype = 4;
+		break;
+	default:
+		ctype = 7;
+		break;
 	}
 
-	if (strlen(req) + 2 > sizeof(req))
-		return GN_ERR_FAILED;
+	if (data->call_divert->operation == GN_CDV_Register) {
+		/*
+		 * Nokias do not like zero timeout:
+		 *
+		 * AT+CCFC=0,3,"123456789",129,7,,,0
+		 * ERROR
+		 *
+		 * AT+CCFC=0,3,"123456789",129,7,,,10
+		 * OK
+		 *
+		 * AT+CCFC=0,3,"123456789",129,7
+		 * OK
+		 */
+		if (data->call_divert->timeout)
+			snprintf(req, sizeof(req), "AT+CCFC=%d,%d,\"%s\",%d,%d,,,%d\r",
+				 type, data->call_divert->operation,
+				 data->call_divert->number.number,
+				 data->call_divert->number.type,
+				 ctype, data->call_divert->timeout);
+		else
+			snprintf(req, sizeof(req), "AT+CCFC=%d,%d,\"%s\",%d,%d\r",
+				 type, data->call_divert->operation,
+				 data->call_divert->number.number,
+				 data->call_divert->number.type,
+				 ctype);
+	} else {
+		snprintf(req, sizeof(req), "AT+CCFC=%d,%d\r", type, data->call_divert->operation);
+	}
 
-	strncat(req, "\r", strlen("\r"));
-
-	dprintf("%s", req);
 	if (sm_message_send(strlen(req), GN_OP_CallDivert, req, state))
 		return GN_ERR_NOTREADY;
-	return sm_wait_for(GN_OP_CallDivert, data, state);
+	/* Divert commands are slow */
+	return sm_block_no_retry_timeout(GN_OP_CallDivert, 2000, data, state);
 }
 
 static gn_error AT_SetPDUMode(gn_data *data, struct gn_statemachine *state)
@@ -1861,12 +1886,8 @@ static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length
 
 static gn_error ReplyCallDivert(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
-	int i;
-	for (i = 0; i < length; i++) {
-		dprintf("%02x ", buffer[i + 1]);
-	}
-	dprintf("\n");
-	return GN_ERR_NONE;
+	/* FIXME: handle query responses */
+	return at_error_get(buffer, state);
 }
 
 static gn_error ReplyGetPrompt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
