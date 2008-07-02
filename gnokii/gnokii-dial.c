@@ -266,11 +266,11 @@ void divert_usage(FILE *f, int exitval)
 			"        -t type\n"
 			"        --type type          type of the operation, needs to be one of\n"
 			"                             the following: all, busy, noans, outofreach,\n"
-			"                             notavail; this is required option\n"
+			"                             notavail, unconditional; this is required option\n"
 			"        -c calltype\n"
 			"        --call calltype      type of call for the operation, needs to be\n"
 			"                             one of the following: all, voice, fax, data;\n"
-			"                             this is required option\n"
+			"                             this is optional\n"
 			"        -m sec\n"
 			"        --timeout sec        timeout to be set; the value is in seconds\n"
 			"        -n msisdn\n"
@@ -331,6 +331,8 @@ gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 				cd.type = GN_CDV_OutOfReach;
 			} else if (!strcmp("notavail", optarg)) {
 				cd.type = GN_CDV_NotAvailable;
+			} else if (!strcmp("unconditional", optarg)) {
+				cd.type = GN_CDV_Unconditional;
 			} else {
 				divert_usage(stderr, -1);
 			}
