@@ -1659,7 +1659,10 @@ static gn_error GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 	gn_sms_status smsstatus = {0, 0, 0, 0}, *save_smsstatus;
 
-	if (!data || !data->sms_folder || data->sms_folder->folder_id != NK6100_MEMORY_SM) return GN_ERR_INTERNALERROR;
+	if (!data || !data->sms_folder)
+		return GN_ERR_INTERNALERROR;
+	if (data->sms_folder->folder_id != NK6100_MEMORY_SM)
+		return GN_ERR_INVALIDMEMORYTYPE;
 
 	error = GetSMSFolders(data, state);
 	if (error != GN_ERR_NONE) return error;
