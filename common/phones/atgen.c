@@ -1416,7 +1416,6 @@ static gn_error AT_SetDateTime(gn_data *data, struct gn_statemachine *state)
 	AT_PrepareDateTime(data, state);
 
 	data->datetime = dt;
-	memset(req, 0, 64);
 	if (drvinst->timezone)
 		snprintf(req, sizeof(req), "AT+CCLK=\"%02d/%02d/%02d,%02d:%02d:%02d%s\"\r",
 			 dt->year % 100, dt->month, dt->day,
