@@ -173,6 +173,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
   while ((dirent = readdir (dir)))
   {
     gn_sms sms;
+    gint slen;
     
     if (strcmp (dirent->d_name, ".") == 0 || strcmp (dirent->d_name, "..") == 0 ||
         strncmp (dirent->d_name, "ERR.", 4) == 0)
@@ -190,12 +191,25 @@ GNOKII_API void DB_Look (const gchar * const phone)
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
 
     fgets (sms.remote.number, sizeof (sms.remote.number), smsFile);
-    if (sms.remote.number[strlen (sms.remote.number) - 1] == '\n')
-      sms.remote.number[strlen (sms.remote.number) - 1] = '\0';
+    slen = strlen (sms.remote.number);
+    if (slen < 1)
+    {
+      error = -1;
+      fclose (smsFile);
+      g_print (_("Remote number is empty in %s!\n"), buf->str);
+      goto handle_file;
+    }
+    
+    if (sms.remote.number[slen - 1] == '\n')
+      sms.remote.number[slen - 1] = '\0';
+    
+    /* Initialize SMS text */
+    memset (&sms.user_data[0].u.text, 0, sizeof (sms.user_data[0].u.text));
     
     fgets ((gchar *) sms.user_data[0].u.text, GN_SMS_MAX_LENGTH + 1, smsFile);
-    if (sms.user_data[0].u.text[strlen ((gchar *) sms.user_data[0].u.text) - 1] == '\n')
-      sms.user_data[0].u.text[strlen ((gchar *) sms.user_data[0].u.text) - 1] = '\0';
+    slen = strlen ((gchar *) sms.user_data[0].u.text);
+    if (slen > 0 && sms.user_data[0].u.text[slen - 1] == '\n')
+      sms.user_data[0].u.text[slen - 1] = '\0';
      
     fclose (smsFile);
     
@@ -223,6 +237,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
     }
     while ((error == GN_ERR_TIMEOUT || error == GN_ERR_FAILED) && numError++ < 3);
 
+ handle_file:
     if (error == GN_ERR_NONE)
     {
       if (unlink (buf->str))

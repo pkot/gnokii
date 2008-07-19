@@ -1,6 +1,12 @@
+* Sat Jul 29 2008 Jan Derfinak
+- Fixed potential SEGFAULT in file module when input file contains empty SMS
+  text.
+
+
 * Sun May 25 2008 Paweł Kot
 - Avoid "duplicated message" error with concatenated messages on MySQL.
 - More verbose debug information.
+
 
 * Sun Jan 27 2007 Jan Derfinak
 - Added detection of first sms position.
