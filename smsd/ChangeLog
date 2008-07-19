@@ -13,6 +13,11 @@
 - More verbose debug information.
 
 
+* Thu May  8 2008 Daniele Forsi
+- always search the translations in $localedir, which can be choosen by 
+  the user at configure time, not in system default directory
+
+
 * Sun Jan 27 2007 Jan Derfinak
 - Added detection of first sms position.
 - Simplified locking of smsMutex.
