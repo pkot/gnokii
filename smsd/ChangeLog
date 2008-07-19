@@ -1,4 +1,9 @@
 * Sat Jul 29 2008 Jan Derfinak
+- Added possibility to use multiline SMS text in file module (idea from
+  Joan).
+
+
+* Sat Jul 29 2008 Jan Derfinak
 - Fixed potential SEGFAULT in file module when input file contains empty SMS
   text.
 
