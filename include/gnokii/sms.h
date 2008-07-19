@@ -466,7 +466,7 @@ typedef struct {
 	unsigned int locations[GN_SMS_MESSAGE_MAX_NUMBER];
 	/* number of SMS messages in that folder*/
 	unsigned int number;
-	/* ID od fthe current folder */
+	/* ID of the current folder */
 	unsigned int folder_id;
 } gn_sms_folder;
 
