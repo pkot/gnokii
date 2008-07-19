@@ -1603,6 +1603,7 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 	dprintf("Sending\n");
 	error = gn_sm_functions(GN_OP_SendSMS, data, state);
 cleanup:
+	data->sms->reference = data->raw_sms->reference;
 	free(data->raw_sms);
 	data->raw_sms = NULL;
 	return error;
