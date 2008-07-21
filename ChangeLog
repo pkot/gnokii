@@ -67,6 +67,11 @@
     o fix divert call commands invocation               (Paweł Kot)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
+ * smsd updates
+    o fix potential segfault with file module on empty input SMS
+                                                     (Jan Derfinak)
+    o allow to send multiline SMS with file module   (Jan Derfinak,
+                                                              Joan)
 
 0.6.26
 ======
