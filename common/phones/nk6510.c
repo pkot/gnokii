@@ -820,7 +820,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/* getsms */
 	case 0x03:
-		dprintf("Trying to get message #%i in folder #%i\n", message[9], message[7]);
+		dprintf("Trying to get message #%i in folder #%i\n", message[8] * 256 + message[9], message[7]);
 		if (!data->raw_sms)
 			return GN_ERR_INTERNALERROR;
 		/*
@@ -1156,22 +1156,23 @@ static gn_error NK6510_GetSMSMessageStatus(gn_data *data, struct gn_statemachine
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0E,
 			       0x02, /* 0x01 SIM, 0x02 phone*/
 			       0x00, /* Folder ID */
-			       0x00,
-			       0x00, /* Location */
+			       0x00, /* Location Hi */
+			       0x00, /* Location Lo */
 			       0x55, 0x55};
 
 	if ((data->raw_sms->memory_type == GN_MT_IN) || (data->raw_sms->memory_type == GN_MT_OU)) {
 		if (data->raw_sms->number > 1024) {
-			req[7] = data->raw_sms->number - 1024;
+			/* Do nothing */
 		} else {
 			req[4] = 0x01;
-			req[7] = data->raw_sms->number;
 		}
 	}
 
-	dprintf("Getting SMS message (%i in folder %i) status...\n", req[7], data->raw_sms->memory_type);
+	dprintf("Getting SMS message (%i in folder %i) status...\n", data->raw_sms->number, data->raw_sms->memory_type);
 
        	req[5] = get_memory_type(data->raw_sms->memory_type);
+	req[6] = data->raw_sms->number / 256;
+	req[7] = data->raw_sms->number % 256;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 10);
 }
 
@@ -1180,8 +1181,8 @@ static gn_error NK6510_GetSMSnoValidate(gn_data *data, struct gn_statemachine *s
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02,
 				   0x02, /* 0x01 for INBOX, 0x02 for others */
 				   0x00, /* folder_id */
-				   0x00,
-				   0x02, /* Location */
+				   0x00, /* Location Hi */
+				   0x02, /* Location Lo */
 				   0x01, 0x00};
 	gn_error error;
 
@@ -1198,7 +1199,8 @@ static gn_error NK6510_GetSMSnoValidate(gn_data *data, struct gn_statemachine *s
 	}
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
-	req[7] = data->raw_sms->number;
+	req[6] = data->raw_sms->number / 256;
+	req[7] = data->raw_sms->number % 256;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 10);
 }
 
@@ -1242,8 +1244,8 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x04,
 				   0x02, /* 0x01 for SM, 0x02 for ME */
 				   0x00, /* folder_id */
-				   0x00,
-				   0x02, /* Location */
+				   0x00, /* Location Hi */
+				   0x00, /* Location Lo */
 				   0x0F, 0x55};
 	gn_error error;
 
@@ -1266,7 +1268,8 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 	}
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
-	req[7] = data->raw_sms->number;
+	req[6] = data->raw_sms->number / 256;
+	req[7] = data->raw_sms->number % 256;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 10);
 }
 
@@ -1275,8 +1278,8 @@ static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x04,
 				   0x02, /* 0x01 for SM, 0x02 for ME */
 				   0x00, /* folder_id */
-				   0x00,
-				   0x02, /* Location */
+				   0x00, /* Location Hi */
+				   0x00, /* Location Lo */
 				   0x0F, 0x55};
 
 	dprintf("Deleting SMS (noValidate)...\n");
@@ -1290,7 +1293,8 @@ static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine
 	}
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
-	req[7] = data->raw_sms->number;
+	req[6] = data->raw_sms->number / 256;
+	req[7] = data->raw_sms->number % 256;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 10);
 }
 
@@ -1299,8 +1303,8 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02,
 				   0x02, /* 0x01 for SM, 0x02 for ME */
 				   0x00, /* folder_id */
-				   0x00,
-				   0x02, /* Location */
+				   0x00, /* Location Hi */
+				   0x00, /* Location Lo */
 				   0x01, 0x00};
 	gn_error error;
 
@@ -1319,7 +1323,7 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 
 	if ((data->raw_sms->memory_type == GN_MT_IN) || (data->raw_sms->memory_type == GN_MT_OU)) {
 		if (data->raw_sms->number > 1024) {
-			dprintf("Substracting 1024 from memory location number\n");
+			dprintf("Subtracting 1024 from memory location number\n");
 			data->raw_sms->number -= 1024;
 		} else {
 			req[4] = 0x01;
@@ -1328,7 +1332,8 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 	dprintf("Getting SMS from location %d\n", data->raw_sms->number);
 
 	req[5] = get_memory_type(data->raw_sms->memory_type);
-	req[7] = data->raw_sms->number;
+	req[6] = data->raw_sms->number / 256;
+	req[7] = data->raw_sms->number % 256;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 10);
 }
 
@@ -5906,3 +5911,4 @@ static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned cha
 	req[2] = pos - 1;
 	return pos;
 }
+
