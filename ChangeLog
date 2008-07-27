@@ -30,6 +30,8 @@
     o make gn_sms_send() propagate the reference number from its
       local data->raw_sms to caller's data->sms     (Daniele Forsi)
     o add unconditional divert type (reason)            (Paweł Kot)
+    o fix potential stack corruption with long phone names; fixes
+      #23941 (https://savannah.nongnu.org/bugs/?23941)  (Paweł Kot)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)

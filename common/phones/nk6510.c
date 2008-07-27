@@ -433,12 +433,12 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 static gn_error NK6510_Initialise(struct gn_statemachine *state)
 {
 	gn_data data;
-	char model[10];
+	char model[GN_MODEL_MAX_LENGTH+1];
 	gn_error err = GN_ERR_NONE;
 	bool connected = false;
 	unsigned int attempt = 0;
 
-	memset(model, 0, 10);
+	memset(model, 0, GN_MODEL_MAX_LENGTH+1);
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_nokia_6510, sizeof(gn_driver));
 

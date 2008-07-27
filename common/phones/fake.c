@@ -72,7 +72,7 @@ gn_driver driver_fake = {
 static gn_error fake_initialise(struct gn_statemachine *state)
 {
 	gn_data data;
-	char model[10];
+	char model[GN_MODEL_MAX_LENGTH+1];
 
 	dprintf("Initializing...\n");
 

@@ -338,7 +338,7 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 static gn_error NK7110_Initialise(struct gn_statemachine *state)
 {
 	gn_data data;
-	char model[10];
+	char model[GN_MODEL_MAX_LENGTH+1];
 	gn_error err = GN_ERR_NONE;
 	bool connected = false;
 	unsigned int attempt = 0;
