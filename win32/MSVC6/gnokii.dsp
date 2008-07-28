@@ -39,9 +39,10 @@ RSC=rc.exe
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /W3 /GX /MT /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /W3 /GX /MT /O2 /I "." /I "../../include" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "GNOKIIDLL_IMPORTS" /YX /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "../../include" /I "../../getopt" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "GNOKIIDLL_IMPORTS" /YX /FD /c
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -49,7 +50,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /machine:I386
+# ADD LINK32 /nologo /subsystem:console /machine:I386
+# SUBTRACT LINK32 /verbose /debug /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "gnokii - Win32 Debug"
 
@@ -65,7 +67,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "." /I "../../include" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "GNOKIIDLL_IMPORTS" /FR /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "." /I "../../include" /I "../../getopt" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "GNOKIIDLL_IMPORTS" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
 # ADD RSC /l 0x407 /d "_DEBUG"
@@ -74,7 +76,7 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 gnokiid.lib /nologo /subsystem:console /incremental:no /debug /machine:I386
+# ADD LINK32 Debug\gnokiid.lib msvcrtd.lib /nologo /subsystem:console /incremental:no /debug /machine:I386
 # SUBTRACT LINK32 /verbose
 
 !ENDIF 
@@ -88,19 +90,80 @@ LINK32=link.exe
 # PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
 # Begin Source File
 
-SOURCE=..\..\common\compat.c
+SOURCE=..\..\getopt\getopt.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\getopt\win32\getopt.c
+SOURCE=..\..\getopt\getopt1.c
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-app.h"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-calendar.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-dial.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-file.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-logo.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-monitor.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-other.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-phonebook.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-profile.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-ringtone.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-security.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-settings.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-sms.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-todo.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-utils.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\gnokii\gnokii-wap.c"
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\gnokii\gnokii.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\snprintf.c
+# ADD CPP /I "../../getopt"
 # End Source File
 # End Group
 # End Target

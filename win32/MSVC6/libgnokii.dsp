@@ -40,9 +40,10 @@ RSC=rc.exe
 # PROP Use_Debug_Libraries 0
 # PROP Output_Dir "Release"
 # PROP Intermediate_Dir "Release"
+# PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MT /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /c
-# ADD CPP /nologo /MT /W3 /GX /O2 /I "." /I "../../include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /c
+# ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "../../include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /c
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -52,7 +53,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ws2_32.lib /nologo /dll /machine:I386
-# ADD LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ws2_32.lib /nologo /dll /machine:I386
+# ADD LINK32 /nologo /dll /machine:I386
+# SUBTRACT LINK32 /verbose /nodefaultlib
 
 !ELSEIF  "$(CFG)" == "libgnokii - Win32 Debug"
 
@@ -67,7 +69,7 @@ LINK32=link.exe
 # PROP Intermediate_Dir "Debug"
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
-# ADD BASE CPP /nologo /MTd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /GZ /c
+# ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /GZ /c
 # ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "." /I "../../include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -79,24 +81,18 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ws2_32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 winmm.lib ws2_32.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"Debug/gnokiid.dll"
+# ADD LINK32 msvcrtd.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"Debug/gnokiid.dll"
 # Begin Custom Build - Copying GNOKII DLL & LIB ...
 OutDir=.\Debug
 ProjDir=.
 InputPath=.\Debug\gnokiid.dll
 SOURCE="$(InputPath)"
 
-BuildCmds= \
-	echo on \
-	copy $(OutDir)\gnokiid.lib $(ProjDir)\gnokiid.lib \
-	copy $(OutDir)\gnokiid.dll $(ProjDir)\gnokiid.dll \
-	
-
 "$(ProjDir)\gnokiid.dll" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
-
-"$(ProjDir)\gnokiid.lib" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-   $(BuildCmds)
+	echo on 
+	copy $(OutDir)\gnokiid.lib $(ProjDir)\gnokiid.lib 
+	copy $(OutDir)\gnokiid.dll $(ProjDir)\gnokiid.dll 
+	
 # End Custom Build
 
 !ENDIF 
@@ -118,10 +114,6 @@ SOURCE=..\..\common\links\atbus.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\links\gnbus.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\common\phones\ateric.c
 # End Source File
 # Begin Source File
@@ -130,7 +122,23 @@ SOURCE=..\..\common\phones\atgen.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\common\phones\atlg.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\atmot.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\common\phones\atnok.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\atsag.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\atsam.c
 # End Source File
 # Begin Source File
 
@@ -142,11 +150,7 @@ SOURCE=..\..\common\phones\atsoer.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\phones\gnapplet.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\pkt.c
+SOURCE=..\..\common\devices\bluetooth.c
 # End Source File
 # Begin Source File
 
@@ -162,7 +166,7 @@ SOURCE=..\..\common\device.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\vcal.c
+SOURCE=..\..\common\devices\dku2libusb.c
 # End Source File
 # Begin Source File
 
@@ -183,6 +187,14 @@ SOURCE=..\..\common\links\fbus.c
 # Begin Source File
 
 SOURCE=..\..\common\phones\generic.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\gnapplet.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\links\gnbus.c
 # End Source File
 # Begin Source File
 
@@ -230,7 +242,28 @@ SOURCE="..\..\common\gsm-statemachine.c"
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\common\devices\irda.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\ldif.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\libfunctions.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\intl\localcharset.c
+# PROP Exclude_From_Build 1
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\common\links\m2bus.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\map.c
 # End Source File
 # Begin Source File
 
@@ -266,6 +299,18 @@ SOURCE=..\..\common\phones\nokia.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\common\devices\osxbluetooth.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\pkt.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\readmidi.c
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\common\sms-nokia.c"
 # End Source File
 # Begin Source File
@@ -274,11 +319,11 @@ SOURCE=..\..\common\snprintf.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\devices\tekram.c
+SOURCE=..\..\common\devices\tcp.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\devices\bluetooth.c
+SOURCE=..\..\common\devices\tekram.c
 # End Source File
 # Begin Source File
 
@@ -286,19 +331,11 @@ SOURCE=..\..\common\devices\unixbluetooth.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\devices\osxbluetooth.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\devices\irda.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\devices\winirda.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\common\links\utils.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\vcal.c
 # End Source File
 # Begin Source File
 
@@ -306,19 +343,11 @@ SOURCE=..\..\common\vcard.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\ldif.c
+SOURCE=..\..\common\devices\winirda.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\common\devices\winserial.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\readmidi.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\intl\localcharset.c
 # End Source File
 # End Group
 # End Target
