@@ -55,6 +55,8 @@
                                                     (Daniele Forsi)
     o make --sendsms print the reference number of sent SMS
                                                     (Daniele Forsi)
+    o align --showsmsfolderstatus output -- folder abbreviation can
+      have up to 3 chars                                (Paweł Kot)
  * at driver updates
     o fix Sagem myW-8 returning the wrong answer to GN_OP_GetModel
                                                     (Daniele Forsi)
