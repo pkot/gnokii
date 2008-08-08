@@ -73,6 +73,8 @@
     o decode date/time for --getphonebook DC MC RC on phones that
       also encode number, eg Sony Ericsson          (Daniele Forsi)
     o fix divert call commands invocation               (Paweł Kot)
+    o be more verbose when the phone doesn't support PDU SMS mode
+                                             (Carles Pina i Estany)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
  * smsd updates
