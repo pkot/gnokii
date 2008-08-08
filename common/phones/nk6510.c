@@ -1,3 +1,4 @@
+
 /*
 
   $Id$
@@ -64,6 +65,66 @@ do { \
 	return sm_wait_for(type, data, state); \
 } while (0)
 
+/* This is for Series40 3rd Edition and later */
+
+/* Mapping from path to memory type */
+typedef struct {
+	gn_memory_type type;
+	char *path;
+} path2mt_t;
+
+static path2mt_t s40_30_mt_mappings[] = {
+	{ GN_MT_IN, "C:\\predefmessages\\1\\" },
+	{ GN_MT_OU, "C:\\predefmessages\\3\\" },
+	{ GN_MT_AR, "C:\\predefmessages\\4\\" },
+	{ GN_MT_TE, "C:\\predefmessages\\5\\" },
+	{ GN_MT_F1, "C:\\predefmessages\\20\\" },
+	{ GN_MT_F2, "C:\\predefmessages\\21\\" },
+	{ GN_MT_F3, "C:\\predefmessages\\22\\" },
+	{ GN_MT_F4, "C:\\predefmessages\\23\\" },
+	{ GN_MT_F5, "C:\\predefmessages\\24\\" },
+	{ GN_MT_F6, "C:\\predefmessages\\25\\" },
+	{ GN_MT_F7, "C:\\predefmessages\\26\\" },
+	{ GN_MT_F8, "C:\\predefmessages\\27\\" },
+	{ GN_MT_F9, "C:\\predefmessages\\28\\" },
+	{ GN_MT_F10, "C:\\predefmessages\\29\\" },
+	{ GN_MT_F11, "C:\\predefmessages\\2A\\" },
+	{ GN_MT_F12, "C:\\predefmessages\\2B\\" },
+	{ GN_MT_F13, "C:\\predefmessages\\2C\\" },
+	{ GN_MT_F14, "C:\\predefmessages\\2D\\" },
+	{ GN_MT_F15, "C:\\predefmessages\\2E\\" },
+	{ GN_MT_F16, "C:\\predefmessages\\2F\\" },
+	{ GN_MT_F17, "C:\\predefmessages\\30\\" },
+	{ GN_MT_F18, "C:\\predefmessages\\31\\" },
+	{ GN_MT_F19, "C:\\predefmessages\\32\\" },
+	{ GN_MT_F20, "C:\\predefmessages\\33\\" },
+	{ -1, NULL }
+};
+
+static int match_sms_folder_mt(gn_memory_type mt)
+{
+	int i;
+	for (i = 0; (s40_30_mt_mappings[i].type != mt) && (s40_30_mt_mappings[i].path != NULL); i++);
+	if (s40_30_mt_mappings[i].path == NULL)
+		return -1;
+	else
+		return i;
+}
+
+static int match_sms_folder_str(const char *str)
+{
+	int i;
+	char path[128];
+
+	sprintf(path, "C:\\predefmessages\\%s\\", str);
+	for (i = 0; (s40_30_mt_mappings[i].path != NULL) && strcmp(path, s40_30_mt_mappings[i].path); i++)
+		dprintf("comparing %s and %s\n", path, s40_30_mt_mappings[i].path);
+	if (s40_30_mt_mappings[i].path == NULL)
+		return -1;
+	else
+		return i;
+}
+
 /* Functions prototypes */
 static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_Initialise(struct gn_statemachine *state);
@@ -113,6 +174,7 @@ static gn_error NK6510_GetPicture(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetSMSnoValidate(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteSMSFolder(gn_data *data, struct gn_statemachine *state);
@@ -120,6 +182,7 @@ static gn_error NK6510_GetSMSFolders(gn_data *data, struct gn_statemachine *stat
 static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetSMSStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine *state);
 /*
 static gn_error NK6510_CallDivert(gn_data *data, struct gn_statemachine *state);
@@ -520,6 +583,9 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 		FREE(DRVINSTANCE(state));
 		return err;
 	}
+
+	/* Assign phone capabilities config */
+	DRVINSTANCE(state)->pm = gn_phone_model_get(data.model);
 
 	/* Change the defaults for Nokia 8310 */
 	if (!strncmp(data.model, "NHM-7", 5)) {
@@ -1017,15 +1083,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 	case 0xf0:
 		if (!data->sms_folder_list)
 			return GN_ERR_INTERNALERROR;
-		/* Hardcode two folders: Inbox and outbox */
-		data->sms_folder_list->number = 2;
-		data->sms_folder_list->folder_id[0] = GN_MT_IN;
-		data->sms_folder_list->folder[0].folder_id = GN_MT_IN;
-		strcpy(data->sms_folder_list->folder[0].name, "Inbox");
-		data->sms_folder_list->folder_id[1] = GN_MT_OU;
-		data->sms_folder_list->folder[1].folder_id = GN_MT_OU;
-		strcpy(data->sms_folder_list->folder[1].name, "Outbox");
-		break;
+		return GN_ERR_FAILED;
 
 	default:
 		dprintf("Message: Unknown message of type 14 : %02x  length: %d\n", message[3], length);
@@ -1067,12 +1125,56 @@ static gn_error NK6510_GetSMSStatus(gn_data *data, struct gn_statemachine *state
 	return error;
 }
 
+static gn_error NK6510_GetSMSFolders_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+    	gn_file_list fl, fl2;
+    	gn_file fi;
+	gn_error error;
+	int j, i, cont_len, tota_len, offset, tmp;
+	unsigned char *bin;
+
+	if (!data->sms_folder_list)
+		return GN_ERR_INTERNALERROR;
+
+	memset(&fl, 0, sizeof(fl));
+	snprintf(fl.path, sizeof(fl.path), "c:\\predefmessages\\*.*");
+	data->file_list = &fl;
+	error = NK6510_GetFileList(data, state);
+	if (error)
+		return error;
+	for (i = 0, j = 0; i < fl.file_count; i++) {
+		int k = match_sms_folder_str(fl.files[i]->name);
+		if (k >= 0) {
+			dprintf("%s %d\n", s40_30_mt_mappings[k].path, s40_30_mt_mappings[k].type);
+			data->sms_folder_list->folder_id[j] = s40_30_mt_mappings[k].type;
+			data->sms_folder_list->folder[j].folder_id = s40_30_mt_mappings[k].type;
+			sprintf(data->sms_folder_list->folder[j].name, "%s", gn_memory_type_print(s40_30_mt_mappings[k].type));
+			j++;
+		}
+	}
+	data->sms_folder_list->number = j;
+
+	DRVINSTANCE(state)->pm->flags |= PM_SMSFILE;
+	return error;
+}
+
 static gn_error NK6510_GetSMSFolders(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error error;
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x12, 0x00, 0x00};
 
 	dprintf("Getting SMS Folders...\n");
-	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 6);
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
+		return NK6510_GetSMSFolders_S40_30(data, state);
+
+	if (sm_message_send(6, NK6510_MSG_FOLDER, req, state))
+		return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_FOLDER, data, state);
+	if (error) {
+		/* Try file approach */
+		error = NK6510_GetSMSFolders_S40_30(data, state);
+	}
+	return error;
 }
 
 static gn_error NK6510_DeleteSMSFolder(gn_data *data, struct gn_statemachine *state)
@@ -1102,6 +1204,41 @@ static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *st
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, req[7] + 6);
 }
 
+static gn_error NK6510_GetSMSFolderStatus_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+    	gn_file_list fl, fl2;
+    	gn_file fi;
+	gn_error error;
+	int j, i, cont_len, tota_len, offset, tmp;
+	unsigned char *bin;
+	int k;
+
+	if (!data->sms_folder)
+		return GN_ERR_INTERNALERROR;
+
+	k = match_sms_folder_mt(data->sms_folder->folder_id);
+	if (k < 0)
+		return GN_ERR_INVALIDMEMORYTYPE;
+
+	memset(&fl, 0, sizeof(fl));
+	snprintf(fl.path, sizeof(fl.path), "%s*.*", s40_30_mt_mappings[k].path);
+
+	/* Get file list */
+	data->file_list = &fl;
+	error = NK6510_GetFileList(data, state);
+	if (error)
+		return error;
+
+	data->sms_folder->number = 0;
+	/* Extract just SMS */
+	for (j = 0; j < fl.file_count; j++) {
+		if (!strncmp("01", fl.files[j]->name+21, 2))
+			data->sms_folder->number++;
+	}
+	dprintf("%d out of %d are SMS\n", data->sms_folder->number, fl.file_count);
+	return error;
+}
+
 static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0C,
@@ -1111,6 +1248,9 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 	gn_error error;
 	int i;
 	gn_sms_folder phone;
+
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
+		return NK6510_GetSMSFolderStatus_S40_30(data, state);
 
 	req[5] = get_memory_type(data->sms_folder->folder_id);
 
@@ -1251,9 +1391,21 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Deleting SMS...\n");
 
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
+		return NK6510_DeleteSMS_S40_30(data, state);
+
 	error = ValidateSMS(data, state);
-	if (error != GN_ERR_NONE)
+	if (error != GN_ERR_NONE) {
+		dprintf("%s\n", gn_error_print(error));
+		/* Try file method */
+		error = NK6510_DeleteSMS_S40_30(data, state);
+		if (error)
+			dprintf("%s\n", gn_error_print(error));
+		else
+			DRVINSTANCE(state)->pm->flags |= PM_SMSFILE;
 		return error;
+	}
+
 	if (data->raw_sms->number < 1)
 		return GN_ERR_EMPTYLOCATION;
 
@@ -1310,9 +1462,18 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Getting SMS #%d...\n", data->raw_sms->number);
 
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
+		return NK6510_GetSMS_S40_30(data, state);
+
 	error = ValidateSMS(data, state);
 	if (error != GN_ERR_NONE) {
 		dprintf("%s\n", gn_error_print(error));
+		/* Try file method */
+		error = NK6510_GetSMS_S40_30(data, state);
+		if (error)
+			dprintf("%s\n", gn_error_print(error));
+		else
+			DRVINSTANCE(state)->pm->flags |= PM_SMSFILE;
 		return error;
 	}
 
@@ -1335,6 +1496,156 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 	req[6] = data->raw_sms->number / 256;
 	req[7] = data->raw_sms->number % 256;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 10);
+}
+
+static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+    	gn_file_list fl, fl2;
+    	gn_file fi;
+	gn_error error;
+	int j, i, cont_len, tota_len, offset, tmp;
+	unsigned char *bin;
+
+	if (!data->raw_sms)
+		return GN_ERR_INTERNALERROR;
+
+	if (data->raw_sms->number < 1) {
+		dprintf("Getting SMS %d\n", data->raw_sms->number);
+		return GN_ERR_INVALIDLOCATION;
+	}
+
+	/* Find path */
+	for (i = 0; (s40_30_mt_mappings[i].type != data->raw_sms->memory_type) && (s40_30_mt_mappings[i].path != NULL); i++);
+	if (s40_30_mt_mappings[i].path != NULL) {
+		memset(&fl, 0, sizeof(fl));
+		snprintf(fl.path, sizeof(fl.path), "%s*.*", s40_30_mt_mappings[i].path);
+	} else
+		return GN_ERR_INVALIDMEMORYTYPE;
+
+	/* Get file list */
+	data->file_list = &fl;
+	data->file = NULL;
+	error = NK6510_GetFileList(data, state);
+	if (error)
+		return error;
+
+	/* Extract just SMS */
+	memset(&fl2, 0, sizeof(fl2));
+	for (j = 0; j < fl.file_count; j++) {
+		if (!strncmp("01", fl.files[j]->name+21, 2)) {
+			strcpy(fl2.path, fl.path);
+			fl2.files[fl2.file_count++] = fl.files[j];
+		}
+	}
+
+	dprintf("%d out of %d are SMS\n", fl2.file_count, fl.file_count);
+
+	/* Assign filename */
+	dprintf("Getting #%d out of %d messages\n", data->raw_sms->number, fl2.file_count);
+	if (fl2.file_count >= data->raw_sms->number) {
+		memset(&fi, 0, sizeof(fi));
+		dprintf("Getting SMS #%d (path: %s, file: %s)\n", data->raw_sms->number, s40_30_mt_mappings[i].path, fl2.files[data->raw_sms->number-1]->name);
+		snprintf(fi.name, sizeof(fi.name), "%s%s", s40_30_mt_mappings[i].path, fl2.files[data->raw_sms->number - 1]->name);
+	} else
+		/* Needs to be INVALID not EMPTY for --getsms IN 1 end to work */
+		return GN_ERR_INVALIDLOCATION;
+
+	data->file = &fi;
+	/* Get file */
+	error = NK6510_GetFile(data, state);
+	if (error)
+		return error;
+
+#define HEADER_LEN	0xb0	/* 176 */
+
+	bin = fi.file;
+
+	offset = HEADER_LEN;
+	/* content length */
+	cont_len = (bin[4] << 24) + (bin[5] << 16) + (bin[6] << 8) + bin[7];
+	/* total length */
+	tota_len = (bin[8] << 24) + (bin[9] << 16) + (bin[10] << 8) + bin[11];
+	data->raw_sms->type = GN_SMS_MT_Deliver;
+	data->raw_sms->udh_indicator = bin[offset];
+	data->raw_sms->status = bin[offset];
+//	data->raw_sms->dcs = message[5];
+//	data->raw_sms->reference = message[4];
+	offset++;
+	memcpy(data->raw_sms->remote_number, bin + offset, bin[offset] + 1);
+	dprintf("RN: %02x\n", data->raw_sms->remote_number[2]);
+	tmp = bin[offset];
+	if (tmp % 2)
+		tmp++;
+	offset += (tmp / 2 + 4);
+	memcpy(data->raw_sms->smsc_time, bin + offset, 7);
+	offset += 7;
+//	memcpy(data->raw_sms->message_center,  block + 4, block[3]);
+	data->raw_sms->length = bin[offset];
+	data->raw_sms->user_data_length = bin[offset];
+	dprintf("Length: %d\n", data->raw_sms->length);
+	dprintf("Length: %d\n", data->raw_sms->user_data_length);
+	memcpy(data->raw_sms->user_data, bin + offset + 1, bin[offset]);
+
+	offset += data->raw_sms->length;
+	return error;
+}
+
+static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+    	gn_file_list fl, fl2;
+    	gn_file fi;
+	gn_error error;
+	int j, i, cont_len, tota_len, offset, tmp;
+	unsigned char *bin;
+
+	if (!data->raw_sms)
+		return GN_ERR_INTERNALERROR;
+
+	if (data->raw_sms->number < 1) {
+		dprintf("Deleting SMS %d\n", data->raw_sms->number);
+		return GN_ERR_INVALIDLOCATION;
+	}
+
+	/* Find path */
+	for (i = 0; (s40_30_mt_mappings[i].type != data->raw_sms->memory_type) && (s40_30_mt_mappings[i].path != NULL); i++);
+	if (s40_30_mt_mappings[i].path != NULL) {
+		memset(&fl, 0, sizeof(fl));
+		snprintf(fl.path, sizeof(fl.path), "%s*.*", s40_30_mt_mappings[i].path);
+	} else
+		return GN_ERR_INVALIDMEMORYTYPE;
+
+	/* Get file list */
+	data->file_list = &fl;
+	data->file = NULL;
+	error = NK6510_GetFileList(data, state);
+	if (error)
+		return error;
+
+	/* Extract just SMS */
+	memset(&fl2, 0, sizeof(fl2));
+	for (j = 0; j < fl.file_count; j++) {
+		if (!strncmp("01", fl.files[j]->name+21, 2)) {
+			strcpy(fl2.path, fl.path);
+			fl2.files[fl2.file_count++] = fl.files[j];
+		}
+	}
+
+	dprintf("%d out of %d are SMS\n", fl2.file_count, fl.file_count);
+
+	/* Assign filename */
+	dprintf("Deleting #%d out of %d messages\n", data->raw_sms->number, fl2.file_count);
+	if (fl2.file_count >= data->raw_sms->number) {
+		memset(&fi, 0, sizeof(fi));
+		dprintf("Deleting SMS #%d (path: %s, file: %s)\n", data->raw_sms->number, s40_30_mt_mappings[i].path, fl2.files[data->raw_sms->number-1]->name);
+		snprintf(fi.name, sizeof(fi.name), "%s%s", s40_30_mt_mappings[i].path, fl2.files[data->raw_sms->number - 1]->name);
+	} else
+		/* Needs to be INVALID not EMPTY for --getsms IN 1 end to work */
+		return GN_ERR_INVALIDLOCATION;
+
+	data->file = &fi;
+	/* Delete file */
+	error = NK6510_DeleteFile(data, state);
+	return error;
 }
 
 static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)

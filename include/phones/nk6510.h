@@ -206,6 +206,9 @@ typedef struct {
 	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
 	void (*progress_indication)(int progress, void *callback_data);
 
+	/* phone model capabilities */
+	gn_phone_model *pm;
+
 	/* callback local data */
 	void *cb_callback_data;		/* to be passed as callback_data to on_cell_broadcast */
 	void *call_callback_data;	/* to be passed as callback_data to call_notification */
