@@ -60,8 +60,9 @@
     o align --showsmsfolderstatus output -- folder abbreviation can
       have up to 3 chars                                (Paweł Kot)
  * at driver updates
-    o workaround for Sagem myW-8 returning the wrong answer to
-      GN_OP_GetModel                                (Daniele Forsi)
+    o workaround for Sagem myW-8 (in atsag.c) and other phones (in
+      atgen.c) returning the wrong answer to GN_OP_GetModel
+                                                    (Daniele Forsi)
     o fix segfault on empty addressbook entry last name on Samsung
                                                         (Paweł Kot)
     o fix detecting current charset with AT+CSCS?   (Daniele Forsi)
