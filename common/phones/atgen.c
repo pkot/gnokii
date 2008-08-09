@@ -212,9 +212,10 @@ static char *strip_brackets(char *s)
 }
 
 /*
- * Compare the string passed in @c with the echoed command passed in @l1 and
- * the response passed in @l2 and copy the response from @l1 to @t if one of
- * the comparisons is successful, stripping the command prefix if present.
+ * Compare the string passed in @c with the echoed command passed in @l1
+ * without the leading "AT" chars and the response passed in @l2 and copy
+ * the response from @l1 to @t if one of the comparisons is successful,
+ * stripping the command prefix if present.
  *
  * Comparing both strings is needed to workaround some firmwares that reply
  * to AT+GMM with +CGMM: or to AT+CGMM with +GMM:
