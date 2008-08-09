@@ -78,6 +78,8 @@
     o fix divert call commands invocation               (Paweł Kot)
     o be more verbose when the phone doesn't support PDU SMS mode
                                              (Carles Pina i Estany)
+    o fix phonebook reading for phones that add spaces after commas
+      in +CPBR: response                            (Daniele Forsi)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
  * smsd updates

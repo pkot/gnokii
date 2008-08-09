@@ -1594,6 +1594,8 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 				if (!quoted) {
 					*pos = '\0';
 					part[parts] = pos + 1;
+					while (*part[parts] == ' ')
+						part[parts]++;
 					parts++;
 				}
 				break;
