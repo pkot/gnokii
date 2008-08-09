@@ -1077,10 +1077,10 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/*
 	 * The phone doesn't support folder list messages.
-	 * We use hardcoded list in that case.
-	 * Note, that it isn't perfect: hardcoded folders don't really equal Inbox or outbox
+	 * Let's fallback to the 'file' mode.
 	 */
 	case 0xf0:
+		dprintf("Falling back to file mode.\n");
 		if (!data->sms_folder_list)
 			return GN_ERR_INTERNALERROR;
 		return GN_ERR_FAILED;
@@ -1466,7 +1466,7 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 		return NK6510_GetSMS_S40_30(data, state);
 
 	error = ValidateSMS(data, state);
-	if (error != GN_ERR_NONE) {
+	if ((error != GN_ERR_NONE) || (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)) {
 		dprintf("%s\n", gn_error_print(error));
 		/* Try file method */
 		error = NK6510_GetSMS_S40_30(data, state);
