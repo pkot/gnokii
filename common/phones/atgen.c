@@ -212,33 +212,37 @@ static char *strip_brackets(char *s)
 }
 
 /*
- * Compare the string passed in @c with the echoed command passed in @l1
- * without the leading "AT" chars and the response passed in @l2 and copy
- * the response from @l1 to @t if one of the comparisons is successful,
+ * Compare the string passed in @tmpl with the echoed command passed in @req
+ * without the leading "AT" chars and the response passed in @resp and copy
+ * the response from @resp to @dest if one of the comparisons is successful,
  * stripping the command prefix if present.
  *
  * Comparing both strings is needed to workaround some firmwares that reply
  * to AT+GMM with +CGMM: or to AT+CGMM with +GMM:
+ *
+ * 1 is returned when tmpl matches req or resp. 0 is returned otherwise.
  */
-static void reply_simpletext(char *l1, char *l2, char *c, char *t, size_t maxlength)
+static int reply_simpletext(char *req, char *resp, const char *tmpl, char *dest, size_t maxlength)
 {
 	int i, n;
 
-	if (t == NULL)
-		return;
-	n = strlen(c);
+	if (dest == NULL)
+		return 0;
+	n = strlen(tmpl);
 	/* Subtract 2 to skip the trailing ": " (eg to match "+GMM" and "+GMM: ") */
-	if ((strncmp(l1, c, n - 2) == 0) || (strncmp(l2, c, n) == 0)) {
+	if ((strncmp(req, tmpl, n - 2) == 0) || (strncmp(resp, tmpl, n) == 0)) {
 		/* Skip the prefix indicating to which command this response is responding, if present */
 		i = 0;
-		if (l2[i] == '+') {
-			while (l2[i] && l2[i++] != ':')
+		if (resp[i] == '+') {
+			while (resp[i] && resp[i++] != ':')
 				;
 		}
-		while (isspace(l2[i]))
+		while (isspace(resp[i]))
 			i++;
-		snprintf(t, maxlength, "%s", strip_quotes(l2 + i));
+		snprintf(dest, maxlength, "%s", strip_quotes(resp + i));
+		return 1;
 	}
+	return 0;
 }
 
 gn_driver driver_at = {
