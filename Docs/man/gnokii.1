@@ -17,7 +17,7 @@ You can assume that your phone is supported, however there are rare cases
 that you will get very limited functionality with gnokii. If you have a
 fairly modern phone you should use the following model setting in your
 config file:
- - model = series40, if you have Nokia non-Symbian Series60 phone
+ - model = series40, if you have Nokia non-Symbian phone
  - model = gnapplet, if you have Nokia Symbian Series60 prior to 3rd Edition phone
  - model = AT, for all other
  - if you have some older Nokia phone you may try using its brand name, eg. for Nokia 6210 use model = 6210.
@@ -28,13 +28,17 @@ Symbian series60 3rd edition (most Nokia n and e series) are not
 supported by gnapplet driver due to changes in Symbian API. For now you
 can get some functionality using AT driver.
 
+Please note that currently there are Nokia models with almost the same names
+as the old ones, like 6110c vs 6110 or 3110c vs 3110. They are completly
+incompatible. DO NOT use \fImodel = 6110\fP or \fImodel = 3110\fP setting for them.
+
 .SH "CONFIG OPTIONS"
 .TP 
 .BR "\-\-config \fIfilename\fP"
-read configuration from \fIfilename\fR instead of trying \fI$HOME/.gnokiirc\fR first and \fI/etc/gnokiirc\fR last.
+reads configuration from \fIfilename\fR instead of trying \fI$HOME/.gnokiirc\fR first and \fI/etc/gnokiirc\fR last.
 .TP 
 .BR "\-\-phone \fIname\fP"
-use parameters from the given phone section of your config file. A phone section named 'foo' starts with [phone_foo] and is used as \-\-phone foo
+usees parameters from the given phone section of your config file. A phone section named 'foo' starts with [phone_foo] and is used as \-\-phone foo
 
 .SH "OPTIONS"
 The options that are recognized by
@@ -44,7 +48,7 @@ can be divided into several different groups.
 .SS GENERAL
 .TP 
 .BR "\-\-help"
-display usage information.
+displays usage information.
 .TP 
 .BR "\-\-version"
 displays version and copyright information.
@@ -52,6 +56,10 @@ displays version and copyright information.
 .BR "\-\-monitor [\fIdelay\fR|\fIonce\fP]"
 continually updates phone status to stderr. Optional \fIdelay\fR parameter sets the refresh interval to \fIdelay\fR seconds. Default is 1.
 \fIonce\fP means the output will be printed only once.
+.TP 
+.BR "\-\-shell"
+runs interactive session that will allow to run sequent gnokii commands
+without a need to reconnect for the sequent commands.
 
 .SS DIALING
 .TP 

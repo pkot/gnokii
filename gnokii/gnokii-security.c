@@ -154,10 +154,10 @@ static int get_password(const char *prompt, char *pass, int length)
 	return 0;
 }
 
-void entersecuritycode_usage(FILE *f, int exitval)
+int entersecuritycode_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --entersecuritycode PIN|PIN2|PUK|PUK2\n"));
-	exit(exitval);
+	return exitval;
 }
 
 /* In this mode we get the code from the keyboard and send it to the mobile
@@ -180,7 +180,7 @@ gn_error entersecuritycode(char *type, gn_data *data, struct gn_statemachine *st
 		security_code.type = GN_SCT_security_code;
 	*/
 	else
-		entersecuritycode_usage(stderr, -1);
+		return entersecuritycode_usage(stderr, -1);
 
 	memset(&security_code.code, 0, sizeof(security_code.code));
 	get_password(_("Enter your code: "), security_code.code, sizeof(security_code.code));
@@ -242,10 +242,10 @@ gn_error getsecuritycodestatus(gn_data *data, struct gn_statemachine *state)
 	return err;
 }
 
-void changesecuritycode_usage(FILE *f, int exitval)
+int changesecuritycode_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --changesecuritycode PIN|PIN2|PUK|PUK2\n"));
-	exit(exitval);
+	return exitval;
 }
 
 gn_error changesecuritycode(char *type, gn_data *data, struct gn_statemachine *state)
@@ -269,7 +269,7 @@ gn_error changesecuritycode(char *type, gn_data *data, struct gn_statemachine *s
 		security_code.type = GN_SCT_security_code;
 	*/
 	else
-		changesecuritycode_usage(stderr, -1);
+		return changesecuritycode_usage(stderr, -1);
 
 	get_password(_("Enter your code: "), security_code.code, sizeof(security_code.code));
 	get_password(_("Enter new code: "), security_code.new_code, sizeof(security_code.new_code));

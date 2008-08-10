@@ -63,7 +63,7 @@ void phonebook_usage(FILE *f)
 }
 
 /* Displays usage of --getphonebook command */
-void getphonebook_usage(FILE *f, int exitval)
+int getphonebook_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --getphonebook memory start [end]  reads phonebook entries from memory type\n"
 			"                                         (SM, ME, IN, OU, ...) messages starting\n"
@@ -79,7 +79,7 @@ void getphonebook_usage(FILE *f, int exitval)
 			"       --ldif                            output in ldif format\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Get requested range of memory storage entries and output to stdout in
@@ -114,10 +114,10 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 
 	start_entry = gnokii_atoi(argv[optind]);
 	if (errno || start_entry < 0)
-		getphonebook_usage(stderr, -1);
+		return getphonebook_usage(stderr, -1);
 	end_entry = parse_end_value_option(argc, argv, optind + 1, start_entry);
 	if (errno || end_entry < 0)
-		getphonebook_usage(stderr, -1);
+		return getphonebook_usage(stderr, -1);
 
 	i = getopt_long(argc, argv, "rvl", options, NULL);
 	switch (i) {
@@ -134,11 +134,11 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 		/* default */
 		break;
 	default:
-		getphonebook_usage(stderr, -1);
+		return getphonebook_usage(stderr, -1);
 	}
 	if (argc - optind > 2) {
 		/* There are too many arguments that don't start with '-' */
-		getphonebook_usage(stderr, -1);
+		return getphonebook_usage(stderr, -1);
 	}
 
 	if (end_entry == INT_MAX) {
@@ -264,7 +264,7 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 }
 
 /* Displays usage of --getphonebook command */
-void writephonebook_usage(FILE *f, int exitval)
+int writephonebook_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage:  --writephonebook [[-o|--overwrite]|[-f|--find-free]]\n"
 		     "                 [-m|--memory-type|--memory memory_type]\n"
@@ -272,7 +272,7 @@ void writephonebook_usage(FILE *f, int exitval)
 		     "                 [[-v|--vcard]|[-l|--ldif]]\n"
 		     "\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Read data from stdin, parse and write to phone.  The parsing is relatively
@@ -314,12 +314,12 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 			break;
 		case 'v':
 			if (type)
-				writephonebook_usage(stderr, -1);
+				return writephonebook_usage(stderr, -1);
 			type = 1;
 			break;
 		case 'l':
 			if (type)
-				writephonebook_usage(stderr, -1);
+				return writephonebook_usage(stderr, -1);
 			type = 2;
 			break;
 		case 'f':
@@ -331,16 +331,15 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 		case 'n':
 			default_location = gnokii_atoi(optarg);
 			if (errno || default_location < 0)
-				writephonebook_usage(stderr, -1);
+				return writephonebook_usage(stderr, -1);
 			break;
 		default:
-			writephonebook_usage(stderr, -1);
-			break;
+			return writephonebook_usage(stderr, -1);
 		}
 	}
 	if (argc > optind) {
 		/* There are too many arguments that don't start with '-' */
-		writephonebook_usage(stderr, -1);
+		return writephonebook_usage(stderr, -1);
 	}
 
 	line = oline;
@@ -459,12 +458,12 @@ out:
 }
 
 /* Displays usage of --deletephonebook command */
-void deletephonebook_usage(FILE *f, int exitval)
+int deletephonebook_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --deletephonebook memory_type start_number [end_number|end]\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Delete phonebook entry */
@@ -476,7 +475,7 @@ gn_error deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statem
 	int i, first_location, last_location;
 
 	if (argc < 3)
-		deletephonebook_usage(stderr, -1);
+		return deletephonebook_usage(stderr, -1);
 
 	/* Handle command line args that set memory type and location. */
 	memory_type_string = optarg;
@@ -488,10 +487,10 @@ gn_error deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statem
 
 	first_location = gnokii_atoi(argv[optind]);
 	if (errno || first_location < 0)
-		deletephonebook_usage(stderr, -1);
+		return deletephonebook_usage(stderr, -1);
 	last_location = parse_end_value_option(argc, argv, optind + 1, first_location);
 	if (errno || last_location < 0)
-		deletephonebook_usage(stderr, -1);
+		return deletephonebook_usage(stderr, -1);
 
 	for (i = first_location; i <= last_location; i++) {
 		entry.location = i;

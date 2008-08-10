@@ -60,10 +60,10 @@ void profile_usage(FILE *f)
 		));
 }
 
-void getprofile_usage(FILE *f, int exitval)
+int getprofile_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --getprofile [start_number [end_number]] [-r|--raw]\n"));
-	exit(exitval);
+	return exitval;
 }
 
 /* Reads profile from phone and displays its' settings */
@@ -89,8 +89,7 @@ gn_error getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachin
 			raw = true;
 			break;
 		default:
-			getprofile_usage(stderr, -1); /* FIXME */
-			return GN_ERR_FAILED;
+			return getprofile_usage(stderr, -1); /* FIXME */
 		}
 	}
 
@@ -125,10 +124,10 @@ gn_error getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachin
 	if (argc > optind) {
 		start = gnokii_atoi(argv[optind]);
 		if (errno || start < 0)
-			getprofile_usage(stderr, -1);
+			return getprofile_usage(stderr, -1);
 		stop = (argc > optind + 1) ? gnokii_atoi(argv[optind + 1]) : start;
 		if (errno || stop < 0)
-			getprofile_usage(stderr, -1);
+			return getprofile_usage(stderr, -1);
 
 		if (start > stop) {
 			fprintf(stderr, _("Starting profile number is greater than stop\n"));
@@ -258,10 +257,10 @@ gn_error getactiveprofile(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-void setactiveprofile_usage(FILE *f, int exitval)
+int setactiveprofile_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --setactiveprofile profile_number\n"));
-	exit(exitval);
+	return exitval;
 }
 
 /* Select the specified profile */
@@ -274,7 +273,7 @@ gn_error setactiveprofile(int argc, char *argv[], gn_data *data, struct gn_state
 	data->profile = &p;
 	p.number = gnokii_atoi(optarg);
 	if (errno || p.number < 0)
-		setactiveprofile_usage(stderr, -1);
+		return setactiveprofile_usage(stderr, -1);
 
 	error = gn_sm_functions(GN_OP_SetActiveProfile, data, state);
 	if (error != GN_ERR_NONE)

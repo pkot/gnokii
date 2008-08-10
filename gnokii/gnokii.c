@@ -84,9 +84,13 @@
 
 #endif
 
-
 #ifdef ENABLE_NLS
 #  include <locale.h>
+#endif
+
+#ifdef HAVE_READLINE
+#  include <readline/readline.h>
+#  include <readline/history.h>
 #endif
 
 #include "gnokii-app.h"
@@ -188,7 +192,8 @@ typedef enum {
 	OPT_DELETEFILE,
 	OPT_DELETEFILEBYID,
 	OPT_CONFIGFILE,
-	OPT_CONFIGMODEL
+	OPT_CONFIGMODEL,
+	OPT_SHELL
 } opt_index;
 
 static FILE *logfile = NULL;
@@ -228,7 +233,8 @@ static int usage(FILE *f, int retval)
 		     "Use just one option at a time.\n"
 		     "General options:\n"
 		     "          --help\n"
-		     "          --version\n"));
+		     "          --version\n"
+		     "          --shell\n"));
 	monitor_usage(f);
 	sms_usage(f);
 	phonebook_usage(f);
@@ -243,7 +249,7 @@ static int usage(FILE *f, int retval)
 	security_usage(f);
 	file_usage(f);
 	other_usage(f);
-	exit(retval);
+	return retval;
 }
 
 static void gnokii_error_logger(const char *fmt, va_list ap)
@@ -299,7 +305,7 @@ static void busterminate(void)
 	gn_lib_library_free();
 }
 
-static void businit(void)
+static int businit(void)
 {
 	gn_error err;
 	if ((err = gn_lib_phoneprofile_load_from_file(configfile, configmodel, &state)) != GN_ERR_NONE) {
@@ -308,7 +314,7 @@ static void businit(void)
 			fprintf(stderr, _("File: %s\n"), configfile);
 		if (configmodel)
 			fprintf(stderr, _("Phone section: [phone_%s]\n"), configmodel);
-		exit(2);
+		return 2;
 	}
 
 	/* register cleanup function */
@@ -321,9 +327,10 @@ static void businit(void)
 
 	if ((err = gn_lib_phone_open(state)) != GN_ERR_NONE) {
 		fprintf(stderr, "%s\n", gn_error_print(err));
-		exit(2);
+		return 2;
 	}
 	data = &state->sm_data;
+	return 0;
 }
 
 /* This function checks that the argument count for a given options is within
@@ -632,6 +639,9 @@ static int parse_options(int argc, char *argv[])
 		/* Delete a file by id */
 		{ "deletefilebyid",     required_argument, NULL, OPT_DELETEFILEBYID },
 
+		/* shell like interface */
+		{ "shell",              no_argument, NULL, OPT_SHELL },
+
 		{ 0, 0, 0, 0 },
 	};
 
@@ -699,6 +709,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_PUTFILE,           2, 2, 0 },
 		{ OPT_DELETEFILE,        1, 1, 0 },
 		{ OPT_DELETEFILEBYID,    1, 1, 0 },
+		{ OPT_SHELL,             0, 0, 0 },
 		{ 0, 0, 0, 0 },
 	};
 
@@ -711,18 +722,18 @@ static int parse_options(int argc, char *argv[])
 	switch (c) {
 	/* No argument given - we should display usage. */
 	case -1:
-		usage(stderr, -1);
+		return usage(stderr, -1);
 	/* First, error conditions */
 	case '?':
 	case ':':
 		fprintf(stderr, _("Use '%s --help' for usage information.\n"), argv[0]);
-		exit(1);
+		return 1;
 	/* Then, options with no arguments */
 	case OPT_HELP:
-		usage(stdout, -1);
+		return usage(stdout, 0);
 	case OPT_VERSION:
 		version();
-		exit(0);
+		return 0;
 	/* That's a bit ugly... */
 	case 'c':
 		c = OPT_CONFIGFILE;
@@ -740,19 +751,19 @@ static int parse_options(int argc, char *argv[])
 	   not work as expected; instead args --cmd2 args is passed as a
 	   parameter. */
 	if (checkargs(c, gals, argc, long_options[opt_index].has_arg)) {
-		usage(stderr, -1);
+		return usage(stderr, -1);
 	}
 
 	/* Other options that do not need initialization */
 	switch (c) {
 	case OPT_CONFIGFILE:
 		if (configfile)
-			usage(stderr, -1);
+			return usage(stderr, -1);
 		configfile = optarg;
 		return parse_options(argc, argv);
 	case OPT_CONFIGMODEL:
 		if (configmodel)
-			usage(stderr, -1);
+			return usage(stderr, -1);
 		configmodel = optarg;
 		return parse_options(argc, argv);
 	case OPT_VIEWLOGO:
@@ -1019,6 +1030,9 @@ static int parse_options(int argc, char *argv[])
 	case OPT_GETNETWORKINFO:
 		rc = getnetworkinfo(data, state);
 		break;
+	case OPT_SHELL:
+		rc = shell(data, state);
+		break;
 #ifndef WIN32
 	case OPT_FOOGLE:
 		rc = foogle(argc, argv);
@@ -1030,6 +1044,55 @@ static int parse_options(int argc, char *argv[])
 		break;
 	}
 	return rc;
+}
+
+#define ARGV_CHUNK 10
+
+int shell(gn_data *data, struct gn_statemachine *state)
+{
+#ifdef HAVE_READLINE
+	char *input = NULL, *tmp, *old;
+	int len, i, argc = 1;
+	char **argv = NULL;
+	int size = ARGV_CHUNK;
+
+	argv = calloc(size, sizeof(char *));
+	while (1) {
+		argc = 1;
+		optind = opterr = optopt = 0;
+		optarg = NULL;
+		input = readline("> ");
+		old = input;
+		if (!input)
+			break;
+		do {
+			if (argc >= size) {
+				size += ARGV_CHUNK;
+				argv = realloc(argv, size * sizeof(char *));
+			}
+			while (*input == ' ')
+				input++;
+			tmp = strstr(input, " ");
+			if (tmp)
+				len = tmp - input;
+			else
+				len = strlen(input);
+			if (len > 0)
+				argv[argc++] = strndup(input, len);
+			input = tmp;
+		} while (input);
+		argv[argc] = NULL;
+		parse_options(argc, argv);
+		for (i = 1; i < argc; i++)
+			free(argv[i]);
+		free(old);
+	}
+	free(argv);
+	return 0;
+#else
+	fprintf(stderr, "gnokii needs to be compiled with getline support to enable this option.\n");
+	return -1;
+#endif
 }
 
 /* Main function - handles command line arguments, passes them to separate

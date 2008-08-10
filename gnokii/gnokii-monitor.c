@@ -481,11 +481,11 @@ gn_error getdisplaystatus(gn_data *data, struct gn_statemachine *state)
 }
 
 /* Displays usage of --netmonitor command */
-void netmonitor_usage(FILE *f, int exitval)
+int netmonitor_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --netmonitor {reset|off|field|devel|next|nr}\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 gn_error netmonitor(char *m, gn_data *data, struct gn_statemachine *state)
@@ -507,7 +507,7 @@ gn_error netmonitor(char *m, gn_data *data, struct gn_statemachine *state)
 	else {
 		mode = gnokii_atoi(m);
 		if (errno || mode < 1 || mode >= 0xf0)
-			netmonitor_usage(stderr, -1);
+			return netmonitor_usage(stderr, -1);
 	}
 
 	nm.field = mode;

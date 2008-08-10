@@ -67,12 +67,12 @@ void dial_usage(FILE *f)
 		     ));
 }
 
-void getspeeddial_usage(FILE *f, int exitval)
+int getspeeddial_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --getspeeddial location\n"
 			"                        location - location in the speed dial memory\n"
 	));
-	exit(exitval);
+	return exitval;
 }
 
 /* Getting speed dials. */
@@ -83,7 +83,7 @@ gn_error getspeeddial(char *number, gn_data *data, struct gn_statemachine *state
 
 	speeddial.number = gnokii_atoi(number);
 	if (errno || speeddial.number < 0)
-		getspeeddial_usage(stderr, -1);
+		return getspeeddial_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->speed_dial = &speeddial;
@@ -102,14 +102,14 @@ gn_error getspeeddial(char *number, gn_data *data, struct gn_statemachine *state
 	return error;
 }
 
-void setspeeddial_usage(FILE *f, int exitval)
+int setspeeddial_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --setspeeddial number memory_type location\n"
 			"                        number      - phone number to be stored\n"
 			"                        memory_type - memory type for the speed dial\n"
 			"                        location    - location in the speed dial memory\n"
 	));
-	exit(exitval);
+	return exitval;
 }
 
 /* Setting speed dials. */
@@ -136,10 +136,10 @@ gn_error setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state
 
 	entry.number = gnokii_atoi(optarg);
 	if (errno || entry.number < 0)
-		setspeeddial_usage(stderr, -1);
+		return setspeeddial_usage(stderr, -1);
 	entry.location = gnokii_atoi(argv[optind+1]);
 	if (errno || entry.location < 0)
-		setspeeddial_usage(stderr, -1);
+		return setspeeddial_usage(stderr, -1);
 
 	error = gn_sm_functions(GN_OP_SetSpeedDial, data, state);
 
@@ -194,12 +194,12 @@ gn_error senddtmf(char *string, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-void answercall_usage(FILE *f, int exitval)
+int answercall_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --answercall callid\n"
 			"                        callid - call identifier\n"
 	));
-	exit(exitval);
+	return exitval;
 }
 
 /* Answering incoming call */
@@ -211,7 +211,7 @@ gn_error answercall(char *callid, gn_data *data, struct gn_statemachine *state)
 	memset(&callinfo, 0, sizeof(callinfo));
 	callinfo.call_id = gnokii_atoi(callid);
 	if (errno || callinfo.call_id < 0)
-		answercall_usage(stderr, -1);
+		return answercall_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->call_info = &callinfo;
@@ -225,12 +225,12 @@ gn_error answercall(char *callid, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-void hangup_usage(FILE *f, int exitval)
+int hangup_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --hangup callid\n"
 			"                        callid - call identifier\n"
 	));
-	exit(exitval);
+	return exitval;
 }
 
 /* Hangup the call */
@@ -242,7 +242,7 @@ gn_error hangup(char *callid, gn_data *data, struct gn_statemachine *state)
 	memset(&callinfo, 0, sizeof(callinfo));
 	callinfo.call_id = gnokii_atoi(callid);
 	if (errno || callinfo.call_id < 0)
-		hangup_usage(stderr, -1);
+		return hangup_usage(stderr, -1);
 
 	gn_data_clear(data);
 	data->call_info = &callinfo;
@@ -256,7 +256,7 @@ gn_error hangup(char *callid, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-void divert_usage(FILE *f, int exitval)
+int divert_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --divert\n"
 			"        -o operation\n"
@@ -277,7 +277,7 @@ void divert_usage(FILE *f, int exitval)
 			"        --number msisdn      number for redirection\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Options for --divert:
@@ -317,7 +317,7 @@ gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			} else if (!strcmp("query", optarg)) {
 				cd.operation = GN_CDV_Query;
 			} else {
-				divert_usage(stderr, -1);
+				return divert_usage(stderr, -1);
 			}
 			break;
 		case 't':
@@ -334,7 +334,7 @@ gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			} else if (!strcmp("unconditional", optarg)) {
 				cd.type = GN_CDV_Unconditional;
 			} else {
-				divert_usage(stderr, -1);
+				return divert_usage(stderr, -1);
 			}
 			break;
 		case 'c':
@@ -347,13 +347,13 @@ gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			} else if (!strcmp("data", optarg)) {
 				cd.ctype = GN_CDV_DataCalls;
 			} else {
-				divert_usage(stderr, -1);
+				return divert_usage(stderr, -1);
 			}
 			break;
 		case 'm':
 			cd.timeout = gnokii_atoi(optarg);
 			if (errno || cd.timeout < 0)
-				divert_usage(stderr, -1);
+				return divert_usage(stderr, -1);
 			break;
 		case 'n':
 			snprintf(cd.number.number, sizeof(cd.number.number), "%s", optarg);
@@ -363,12 +363,12 @@ gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 				cd.number.type = GN_GSM_NUMBER_Unknown;
 			break;
 		default:
-			divert_usage(stderr, -1);
+			return divert_usage(stderr, -1);
 		}
 	}
 	if (argc > optind) {
 		/* There are too many arguments that don't start with '-' */
-		divert_usage(stderr, -1);
+		return divert_usage(stderr, -1);
 	}
 
 	data->call_divert = &cd;

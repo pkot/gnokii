@@ -60,7 +60,7 @@ void todo_usage(FILE *f)
 		     ));
 }
 
-void gettodo_usage(FILE *f, int exitval)
+int gettodo_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --gettodo start_number [end_number | end] [-v|--vCal]\n"
 			 "       start_number - entry number in the phone todo (numeric)\n"
@@ -69,7 +69,7 @@ void gettodo_usage(FILE *f, int exitval)
 			 "       -v           - output in iCalendar format\n"
 			 "  NOTE: if no end is given, only the start entry is written\n"
 	));
-	exit(exitval);
+	return exitval;
 }
 
 /* ToDo notes receiving. */
@@ -88,10 +88,10 @@ gn_error gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 	first_location = gnokii_atoi(optarg);
 	if (errno || first_location < 0)
-		gettodo_usage(stderr, -1);
+		return gettodo_usage(stderr, -1);
 	last_location = parse_end_value_option(argc, argv, optind, first_location);
 	if (errno || last_location < 0)
-		gettodo_usage(stderr, -1);
+		return gettodo_usage(stderr, -1);
 
 	while ((i = getopt_long(argc, argv, "v", options, NULL)) != -1) {
 		switch (i) {
@@ -99,7 +99,7 @@ gn_error gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			vcal = true;
 			break;
 		default:
-			gettodo_usage(stderr, -1);
+			return gettodo_usage(stderr, -1);
 		}
 	}
 
@@ -137,7 +137,7 @@ gn_error gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	return error;
 }
 
-void writetodo_usage(FILE *f, int exitval)
+int writetodo_usage(FILE *f, int exitval)
 {
 	fprintf(f, _("usage: --writetodo vcalendarfile start_number [end_number|end]\n"
 			"                vcalendarfile - file containing todo notes in vCal format\n"
@@ -146,7 +146,7 @@ void writetodo_usage(FILE *f, int exitval)
 			"                end           - read all notes from file from start_number\n"
 			"  NOTE: it stores the note at the first empty location.\n"
 	));
-	exit(exitval);
+	return exitval;
 }
 
 /* ToDo notes writing */
@@ -166,12 +166,12 @@ gn_error writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine
 	first_location = gnokii_atoi(argv[optind]);
 	if (errno || first_location < 0) {
 		fclose(f);
-		writetodo_usage(stderr, -1);
+		return writetodo_usage(stderr, -1);
 	}
 	last_location = parse_end_value_option(argc, argv, optind + 1, first_location);
 	if (errno || last_location < 0) {
 		fclose(f);
-		writetodo_usage(stderr, -1);
+		return writetodo_usage(stderr, -1);
 	}
 
 	for (i = first_location; i <= last_location; i++) {

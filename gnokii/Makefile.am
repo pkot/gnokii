@@ -5,7 +5,7 @@ gnokii_SOURCES = gnokii.c gnokii-calendar.c gnokii-dial.c gnokii-file.c gnokii-l
 	gnokii-other.c gnokii-phonebook.c gnokii-profile.c gnokii-ringtone.c gnokii-security.c \
 	gnokii-settings.c gnokii-sms.c gnokii-todo.c gnokii-utils.c gnokii-wap.c gnokii-app.h
 
-gnokii_LDADD = $(top_builddir)/common/libgnokii.la $(INTLLIBS)
+gnokii_LDADD = $(top_builddir)/common/libgnokii.la $(INTLLIBS) $(TERMLDFLAGS) $(TERMLIBS)
 gnokii_CFLAGS = -I$(top_srcdir)/include
 
 #if OWN_GETOPT

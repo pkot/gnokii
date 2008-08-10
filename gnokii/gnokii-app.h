@@ -42,6 +42,8 @@
 /* shared globals */
 extern volatile bool bshutdown;
 
+extern int shell(gn_data *data, struct gn_statemachine *state);
+
 /* Utils functions */
 int writefile(char *filename, char *text, int mode);
 extern gn_error readtext(gn_sms_user_data *udata, int input_len); 
@@ -61,25 +63,25 @@ extern gn_error netmonitor(char *m, gn_data *data, struct gn_statemachine *state
 /* SMS functions */
 extern void sms_usage(FILE *f);
 
-extern void sendsms_usage(FILE *f, int exitval);
+extern int sendsms_usage(FILE *f, int exitval);
 extern gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void savesms_usage(FILE *f, int exitval);
+extern int savesms_usage(FILE *f, int exitval);
 extern gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void getsms_usage(FILE *f, int exitval);
+extern int getsms_usage(FILE *f, int exitval);
 extern gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void deletesms_usage(FILE *f, int exitval);
+extern int deletesms_usage(FILE *f, int exitval);
 extern gn_error deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
-extern void getsmsc_usage(FILE *f, int exitval);
+extern int getsmsc_usage(FILE *f, int exitval);
 extern gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void setsmsc_usage(FILE *f, int exitval);
+extern int setsmsc_usage(FILE *f, int exitval);
 extern gn_error setsmsc(gn_data *data, struct gn_statemachine *state);
 
-extern void createsmsfolder_usage(FILE *f, int exitval);
+extern int createsmsfolder_usage(FILE *f, int exitval);
 extern gn_error createsmsfolder(char *name, gn_data *data, struct gn_statemachine *state);
-extern void deletesmsfolder_usage(FILE *f, int exitval);
+extern int deletesmsfolder_usage(FILE *f, int exitval);
 extern gn_error deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *state);
-extern void showsmsfolderstatus_usage(FILE *f, int exitval);
+extern int showsmsfolderstatus_usage(FILE *f, int exitval);
 extern gn_error showsmsfolderstatus(gn_data *data, struct gn_statemachine *state);
 
 gn_error smsreader(gn_data *data, struct gn_statemachine *state);
@@ -87,17 +89,17 @@ gn_error smsreader(gn_data *data, struct gn_statemachine *state);
 /* Phonebook functions */
 extern void phonebook_usage(FILE *f);
 
-extern void getphonebook_usage(FILE *f, int exitval);
+extern int getphonebook_usage(FILE *f, int exitval);
 extern gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void writephonebook_usage(FILE *f, int exitval);
+extern int writephonebook_usage(FILE *f, int exitval);
 extern gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void deletephonebook_usage(FILE *f, int exitval);
+extern int deletephonebook_usage(FILE *f, int exitval);
 extern gn_error deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Calendar functions */
 extern void calendar_usage(FILE *f);
 
-extern void getcalendarnote_usage(FILE *f, int exitval);
+extern int getcalendarnote_usage(FILE *f, int exitval);
 extern gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
@@ -105,7 +107,7 @@ extern gn_error deletecalendarnote(int argc, char *argv[], gn_data *data, struct
 /* ToDo functions */
 extern void todo_usage(FILE *f);
 
-extern void gettodo_usage(FILE *f, int exitval);
+extern int gettodo_usage(FILE *f, int exitval);
 extern gn_error gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error deletealltodos(gn_data *data, struct gn_statemachine *state);
@@ -119,13 +121,13 @@ extern gn_error dialvoice(char *number, gn_data *data, struct gn_statemachine *s
 extern gn_error senddtmf(char *string, gn_data *data, struct gn_statemachine *state);
 extern gn_error answercall(char *callid, gn_data *data, struct gn_statemachine *state);
 extern gn_error hangup(char *callid, gn_data *data, struct gn_statemachine *state);
-extern void divert_usage(FILE *f, int exitval);
+extern int divert_usage(FILE *f, int exitval);
 extern gn_error divert(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Profile options */
 extern void profile_usage(FILE *f);
 
-extern void getprofile_usage(FILE *f, int exitval);
+extern int getprofile_usage(FILE *f, int exitval);
 extern gn_error getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error setprofile(gn_data *data, struct gn_statemachine *state);
 extern gn_error getactiveprofile(gn_data *data, struct gn_statemachine *state);
@@ -144,10 +146,10 @@ extern gn_error reset(char *type, gn_data *data, struct gn_statemachine *state);
 extern void wap_usage(FILE *f);
 
 extern gn_error getwapbookmark(char *number, gn_data *data, struct gn_statemachine *state);
-extern void writewapbookmark_usage(FILE *f, int exitval);
+extern int writewapbookmark_usage(FILE *f, int exitval);
 extern gn_error writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error deletewapbookmark(char *number, gn_data *data, struct gn_statemachine *state);
-extern void getwapsetting_usage(FILE *f, int exitval);
+extern int getwapsetting_usage(FILE *f, int exitval);
 extern gn_error getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error writewapsetting(gn_data *data, struct gn_statemachine *state);
 extern gn_error activatewapsetting(char *number, gn_data *data, struct gn_statemachine *state);
@@ -164,17 +166,17 @@ extern gn_error viewlogo(char *filename);
 extern void ringtone_usage(FILE *f);
 
 extern char *get_ringtone_name(int id, gn_data *data, struct gn_statemachine *state);
-extern void getringtone_usage(FILE *f, int exitval);
+extern int getringtone_usage(FILE *f, int exitval);
 extern gn_error sendringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void setringtone_usage(FILE *f, int exitval);
+extern int setringtone_usage(FILE *f, int exitval);
 extern gn_error setringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void playringtone_usage(FILE *f, int exitval);
+extern int playringtone_usage(FILE *f, int exitval);
 extern gn_error playringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void ringtoneconvert_usage(FILE *f, int exitval);
+extern int ringtoneconvert_usage(FILE *f, int exitval);
 extern gn_error ringtoneconvert(int argc, char *argv[]);
 extern gn_error getringtonelist(gn_data *data, struct gn_statemachine *state);
-extern void deleteringtone_usage(FILE *f, int exitval);
+extern int deleteringtone_usage(FILE *f, int exitval);
 extern gn_error deleteringtone(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Security options */
@@ -184,10 +186,10 @@ extern gn_error identify(struct gn_statemachine *state);
 extern gn_error getlocksinfo(gn_data *data, struct gn_statemachine *state);
 extern gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state);
 #ifdef SECURITY
-extern void entersecuritycode_usage(FILE *f, int exitval);
+extern int entersecuritycode_usage(FILE *f, int exitval);
 extern gn_error entersecuritycode(char *type, gn_data *data, struct gn_statemachine *state);
 extern gn_error getsecuritycodestatus(gn_data *data, struct gn_statemachine *state);
-extern void changesecuritycode_usage(FILE *f, int exitval);
+extern int changesecuritycode_usage(FILE *f, int exitval);
 extern gn_error changesecuritycode(char *type, gn_data *data, struct gn_statemachine *state);
 #endif
 
@@ -199,12 +201,12 @@ extern gn_error getfiledetailsbyid(int argc, char *argv[], gn_data *data, struct
 extern gn_error getfileid(char *filename, gn_data *data, struct gn_statemachine *state);
 extern gn_error deletefile(char *filename, gn_data *data, struct gn_statemachine *state);
 extern gn_error deletefilebyid(char *id, gn_data *data, struct gn_statemachine *state);
-extern void getfile_usage(FILE *f, int exitval);
+extern int getfile_usage(FILE *f, int exitval);
 extern gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
-extern void getfilebyid_usage(FILE *f, int exitval);
+extern int getfilebyid_usage(FILE *f, int exitval);
 extern gn_error getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error getallfiles(char *path, gn_data *data, struct gn_statemachine *state);
-extern void putfile_usage(FILE *f, int exitval);
+extern int putfile_usage(FILE *f, int exitval);
 extern gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Misc options */

@@ -238,10 +238,10 @@ gn_error deletefilebyid(char *id, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-void getfile_usage(FILE *f, int exitval)
+int getfile_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --getfile remote_filename [localfilename]\n"));
-	exit(exitval);
+	return exitval;
 }
 
 /* Get file */
@@ -253,7 +253,7 @@ gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	char filename2[512];
 
 	if (argc < optind)
-		getfile_usage(stderr, -1);
+		return getfile_usage(stderr, -1);
 
 	memset(filename2, 0, 512);
 	memset(&fi, 0, sizeof(fi));
@@ -302,10 +302,10 @@ gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	return error;
 }
 
-void getfilebyid_usage(FILE *f, int exitval)
+int getfilebyid_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --getfilebyid id [localfilename]\n"));
-	exit(exitval);
+	return exitval;
 }
 
 /* Get file */
@@ -318,7 +318,7 @@ gn_error getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	char filename2[512];
 
 	if (argc < optind)
-		getfilebyid_usage(stderr, -1);
+		return getfilebyid_usage(stderr, -1);
 
 	memset(filename2, 0, 512);
 	memset(&fi, 0, sizeof(fi));
@@ -412,10 +412,10 @@ gn_error getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-void putfile_usage(FILE *f, int exitval)
+int putfile_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --putfile local_filename remote_filename\n"));
-	exit(exitval);
+	return exitval;
 }
 
 /* Put file */
@@ -426,7 +426,7 @@ gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	FILE *f;
 
 	if (argc != optind + 1)
-		putfile_usage(stderr, -1);
+		return putfile_usage(stderr, -1);
 
 	memset(&fi, 0, sizeof(fi));
 	snprintf(fi.name, 512, "%s", argv[optind]);

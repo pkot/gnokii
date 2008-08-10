@@ -85,7 +85,7 @@ void sms_usage(FILE *f)
 }
 
 /* Displays usage of --sendsms command */
-void sendsms_usage(FILE *f, int exitval)
+int sendsms_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --sendsms destination              recipient number (msisdn)\n"
 			"        --smsc message_center_number       number (msisdn) of the message\n"
@@ -117,7 +117,7 @@ void sendsms_usage(FILE *f, int exitval)
 			"Message text is read from standard input.\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Send SMS messages. */
@@ -171,7 +171,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			data->message_center->id = gnokii_atoi(optarg);
 			if (errno || data->message_center->id < 1 || data->message_center->id > 5) {
 				free(data->message_center);
-				sendsms_usage(stderr, -1);
+				return sendsms_usage(stderr, -1);
 			}
 			if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
 				snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", data->message_center->smsc.number);
@@ -183,7 +183,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		case 'l': /* we send long message */
 			input_len = gnokii_atoi(optarg);
 			if (errno || input_len < 0)
-				sendsms_usage(stderr, -1);
+				return sendsms_usage(stderr, -1);
 			if (input_len > 255 * GN_SMS_MAX_LENGTH) {
 				fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), input_len, 255 * GN_SMS_MAX_LENGTH);
 				return GN_ERR_INVALIDSIZE;
@@ -239,14 +239,14 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				sms.dcs.u.general.m_class = 4;
 				break;
 			default:
-				sendsms_usage(stderr, -1);
+				return sendsms_usage(stderr, -1);
 			}
 			break;
 
 		case 'v':
 			sms.validity = gnokii_atoi(optarg);
 			if (errno || sms.validity < 0)
-				sendsms_usage(stderr, -1);
+				return sendsms_usage(stderr, -1);
 			break;
 
 		case '8':
@@ -305,12 +305,12 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			break;
 		}
 		default:
-			sendsms_usage(stderr, -1);
+			return sendsms_usage(stderr, -1);
 		}
 	}
 	if (argc > optind) {
 		/* There are too many arguments that don't start with '-' */
-		sendsms_usage(stderr, -1);
+		return sendsms_usage(stderr, -1);
 	}
 
 	if (!sms.smsc.number[0]) {
@@ -354,7 +354,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 }
 
 /* Displays usage of --savesms command */
-void savesms_usage(FILE *f, int exitval)
+int savesms_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --savesms\n"
 			"        --smsc message_center_number    number (msisdn) of the message\n"
@@ -379,7 +379,7 @@ void savesms_usage(FILE *f, int exitval)
 			"Message text is read from standard input.\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
@@ -449,7 +449,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			data->message_center->id = gnokii_atoi(optarg);
 			if (errno || data->message_center->id < 1 || data->message_center->id > 5) {
 				free(data->message_center);
-				savesms_usage(stderr, -1);
+				return savesms_usage(stderr, -1);
 			}
 			if (gn_sm_functions(GN_OP_GetSMSCenter, data, state) == GN_ERR_NONE) {
 				snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", data->message_center->smsc.number);
@@ -467,7 +467,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		case 'l': /* location to write to */
 			sms.number = gnokii_atoi(optarg);
 			if (errno || sms.number < 0)
-				savesms_usage(stderr, -1);
+				return savesms_usage(stderr, -1);
 			break;
 		case 's': /* mark the message as sent */
 		case 'r': /* mark the message as read */
@@ -516,12 +516,12 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			}
 			break;
 		default:
-			savesms_usage(stderr, -1);
+			return savesms_usage(stderr, -1);
 		}
 	}
 	if (argc > optind) {
 		/* There are too many arguments that don't start with '-' */
-		savesms_usage(stderr, -1);
+		return savesms_usage(stderr, -1);
 	}
 #if 0
 	if (interactive) {
@@ -593,7 +593,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 }
 
 /* Displays usage of --getsms command */
-void getsms_usage(FILE *f, int exitval)
+int getsms_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --getsms memory start [end]  retrieves messages from memory type (SM, ME,\n"
 			"                                    IN, OU, ...) starting from\n"
@@ -617,7 +617,7 @@ void getsms_usage(FILE *f, int exitval)
 			"        -d                          delete message after reading\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Get SMS messages. */
@@ -655,10 +655,10 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 
 	start_message = gnokii_atoi(argv[optind]);
 	if (errno || start_message < 0)
-		getsms_usage(stderr, -1);
+		return getsms_usage(stderr, -1);
 	end_message = parse_end_value_option(argc, argv, optind + 1, start_message);
 	if (errno || end_message < 0)
-		getsms_usage(stderr, -1);
+		return getsms_usage(stderr, -1);
 
 	*filename = '\0';
 	/* parse all options (beginning with '-') */
@@ -681,15 +681,15 @@ parsefile:
 				snprintf(filename, sizeof(filename), "%s", optarg);
 				fprintf(stderr, _("Saving into %s\n"), filename);
 			} else
-				getsms_usage(stderr, -1);
+				return getsms_usage(stderr, -1);
 			break;
 		default:
-			getsms_usage(stderr, -1);
+			return getsms_usage(stderr, -1);
 		}
 	}
 	if (argc - optind > 3) {
 		/* There are too many arguments that don't start with '-' */
-		getsms_usage(stderr, -1);
+		return getsms_usage(stderr, -1);
 	}
 
 	folder.folder_id = 0;
@@ -869,7 +869,7 @@ parsefile:
 }
 
 /* Displays usage of --deletesms command */
-void deletesms_usage(FILE *f, int exitval)
+int deletesms_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --deletesms memory start [end]  deletes messages from memory type\n"
 			"                                       (SM, ME, IN, OU, ...) starting\n"
@@ -880,7 +880,7 @@ void deletesms_usage(FILE *f, int exitval)
 			"                                       until empty location\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Delete SMS messages. */
@@ -903,10 +903,10 @@ gn_error deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine
 
 	start_message = gnokii_atoi(argv[optind]);
 	if (errno || start_message < 0)
-		deletesms_usage(stderr, -1);
+		return deletesms_usage(stderr, -1);
 	end_message = parse_end_value_option(argc, argv, optind + 1, start_message);
 	if (errno || end_message < 0)
-		deletesms_usage(stderr, -1);
+		return deletesms_usage(stderr, -1);
 
 	/* Now delete the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
@@ -932,7 +932,7 @@ gn_error deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine
 }
 
 /* Displays usage of --getsmsc command */
-void getsmsc_usage(FILE *f, int exitval)
+int getsmsc_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --getsmsc [start [end]]       reads message center details from\n"
 			"                                     the phone starting with start location\n"
@@ -946,7 +946,7 @@ void getsmsc_usage(FILE *f, int exitval)
 			"                                     default is human readable form\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Get SMSC number */
@@ -967,22 +967,22 @@ gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			raw = true;
 			break;
 		default:
-			getsmsc_usage(stderr, -1);
+			return getsmsc_usage(stderr, -1);
 		}
 	}
 
 	if (argc > optind + 2) {
 		/* There are too many arguments that don't start with '-' */
-		getsmsc_usage(stderr, -1);
+		return getsmsc_usage(stderr, -1);
 	}
 
 	if (argc > optind) {
 		start = gnokii_atoi(argv[optind]);
 		if (errno || start < 0)
-			getsmsc_usage(stderr, -1);
+			return getsmsc_usage(stderr, -1);
 		stop = parse_end_value_option(argc, argv, optind + 1, start);
 		if (errno || stop < 0)
-			getsmsc_usage(stderr, -1);
+			return getsmsc_usage(stderr, -1);
 
 		if (start > stop) {
 			fprintf(stderr, _("Starting SMS center number is greater than stop\n"));
@@ -1043,13 +1043,13 @@ gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 }
 
 /* Displays usage of --setsmsc command */
-void setsmsc_usage(FILE *f, int exitval)
+int setsmsc_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --setsmsc\n"
 			"SMSC details are read from standard input.\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Set SMSC number */
@@ -1100,12 +1100,12 @@ gn_error setsmsc(gn_data *data, struct gn_statemachine *state)
 }
 
 /* Displays usage of --createsmsfolder command */
-void createsmsfolder_usage(FILE *f, int exitval)
+int createsmsfolder_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --createsmsfolder name     creates SMS folder with given name\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Creating SMS folder. */
@@ -1128,12 +1128,12 @@ gn_error createsmsfolder(char *name, gn_data *data, struct gn_statemachine *stat
 }
 
 /* Displays usage of --deletesmsfolder command */
-void deletesmsfolder_usage(FILE *f, int exitval)
+int deletesmsfolder_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --deletesmsfolder folderid    removes SMS folder with given id\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 /* Deleting SMS folder. */
@@ -1161,12 +1161,12 @@ gn_error deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *st
 }
 
 /* Displays usage of --showsmsfolderstatus command */
-void showsmsfolderstatus_usage(FILE *f, int exitval)
+int showsmsfolderstatus_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --showsmsfolderstatus     shows summary of SMS folders\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 gn_error showsmsfolderstatus(gn_data *data, struct gn_statemachine *state)
@@ -1259,13 +1259,13 @@ static gn_error smsslave(gn_sms *message, struct gn_statemachine *state, void *c
 }
 
 /* Displays usage of --smsreader command */
-void smsreader_usage(FILE *f, int exitval)
+int smsreader_usage(FILE *f, int exitval)
 {
 	fprintf(f, _(" usage: --smsreader     periodically check sms on the phone and stores them\n"
 			"                       in mbox format\n"
 			"\n"
 		));
-	exit(exitval);
+	return exitval;
 }
 
 gn_error smsreader(gn_data *data, struct gn_statemachine *state)
