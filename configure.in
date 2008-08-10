@@ -311,6 +311,8 @@ dnl ======================== readline support
 # Readline included by default unless explicitly asked not to
 test "${with_readline+set}" != "set" && with_readline=yes
 
+USE_READLINE="no"
+
 AC_MSG_CHECKING(whether to use readline)
 AC_ARG_WITH(readline,
 [  --with-readline[=DIR]   Look for readline include/libs in DIR
