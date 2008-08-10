@@ -307,6 +307,70 @@ AC_CHECK_FUNC(getopt_long, , [
             OWN_GETOPT="1")
         LIBS=$SAVE_LIBS])
 
+dnl ======================== readline support
+# Readline included by default unless explicitly asked not to
+test "${with_readline+set}" != "set" && with_readline=yes
+
+AC_MSG_CHECKING(whether to use readline)
+AC_ARG_WITH(readline,
+[  --with-readline[=DIR]   Look for readline include/libs in DIR
+  --without-readline      Don't include readline support],
+[  case "$with_readline" in
+  yes)
+    AC_MSG_RESULT(yes)
+
+    AC_CHECK_HEADERS(readline.h history.h readline/readline.h)
+    AC_CHECK_HEADERS(readline/history.h)
+
+    AC_CHECK_HEADERS(readline.h readline/readline.h,[
+      for termlib in ncurses curses termcap terminfo termlib; do
+	AC_CHECK_LIB(${termlib}, tgetent, [TERMLIBS="-l${termlib}"; break])
+      done
+      AC_CHECK_LIB(readline, readline,
+        [TERMLIBS="-lreadline $TERMLIBS"
+        AC_DEFINE([HAVE_READLINE], [1], [Use readline])
+	USE_READLINE="yes"
+        break], [TERMLIBS=], $TERMLIBS)])
+    ;;
+  no)
+    AC_MSG_RESULT(no)
+    ;;
+  *)
+    AC_MSG_RESULT(yes)
+
+    # Needed for AC_CHECK_HEADERS and AC_CHECK_LIB to look at
+    # alternate readline path
+    _ldflags=${LDFLAGS}
+    _cppflags=${CPPFLAGS}
+
+    # Add additional search path
+    LDFLAGS="-L$with_readline/lib $LDFLAGS"
+    CPPFLAGS="-I$with_readline/include $CPPFLAGS"
+
+    AC_CHECK_HEADERS(readline.h history.h readline/readline.h)
+    AC_CHECK_HEADERS(readline/history.h)
+
+    AC_CHECK_HEADERS(readline.h readline/readline.h,[
+      for termlib in ncurses curses termcap terminfo termlib; do
+	AC_CHECK_LIB(${termlib}, tgetent, [TERMLIBS="-l${termlib}"; break])
+      done
+      AC_CHECK_LIB(readline, readline,
+        [TERMLDFLAGS="-L$with_readline/lib"
+        TERMCPPFLAGS="-I$with_readline/include"
+        CPPFLAGS="-I$with_readline/include $CPPFLAGS"
+        TERMLIBS="-lreadline $TERMLIBS"
+        AC_DEFINE([HAVE_READLINE], [1], [Use readline])
+	USE_READLINE="yes"
+        break], [TERMLIBS= CPPFLAGS=$_cppflags], $TERMLIBS)])
+
+    LDFLAGS=$_ldflags
+    ;;
+  esac],
+  AC_MSG_RESULT(no)
+)
+AC_SUBST(TERMLIBS)
+AC_SUBST(TERMLDFLAGS)
+
 dnl ======================== Check for libical
 AC_ARG_WITH(libical,
    [  --with-libical=DIR      specifies the base libical],
@@ -961,6 +1025,7 @@ echo "
     Bluetooth:          $USE_BLUETOOTH
     libusb support:     $USE_LIBUSB
     libpcsclite support:$USE_LIBPCSCLITE
+    readline support:   $USE_READLINE
     Security:           $security
     Build Shared Lib:   $enable_shared
     Build Static Lib:   $enable_static
