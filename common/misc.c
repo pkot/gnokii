@@ -569,6 +569,11 @@ char **gnokii_strsplit(const char *string, const char *delimiter, int tokens)
 	if (!string || !delimiter || !tokens)
 		return NULL;
 
+	/*
+	 * Last two elements are:
+	 *  - leftover from the input line
+	 *  - NULL (required by gnokii_strfreev())
+	 */
 	strings = calloc(tokens + 2, sizeof(char *));
 
 	while ((tmp = strstr(left, delimiter)) != NULL && (count < tokens)) {
@@ -581,6 +586,10 @@ char **gnokii_strsplit(const char *string, const char *delimiter, int tokens)
 	}
 
 	strings[count] = strdup(left);
+	/*
+	 * Make NULL termination explicit even if it is done via calloc().
+	 * gnokii_strfreev() requires it to be NULL-terminated.
+	 */
 	strings[count + 1] = NULL;
 
 	for (count = 0; count < tokens; count++) {
