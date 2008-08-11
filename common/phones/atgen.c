@@ -1594,6 +1594,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 				if (!quoted) {
 					*pos = '\0';
 					part[parts] = pos + 1;
+					/* Some phones add a space after a comma */
 					while (*part[parts] == ' ')
 						part[parts]++;
 					parts++;
