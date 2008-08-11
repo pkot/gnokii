@@ -2460,7 +2460,7 @@ static gn_error creg_parse(char **strings, int i, gn_network_info *ninfo, int la
 	ninfo->cell_id[1] = strtol(tmp, NULL, 16);
 
 	/* Ugly, ugly... */
-	if (strlen(pos) > 4) {
+	if (strlen(pos) >= 8) {
 		tmp[0] = pos[4];
 		tmp[1] = pos[5];
 
