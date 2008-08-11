@@ -726,7 +726,11 @@ static int parse_options(int argc, char *argv[])
 	/* First, error conditions */
 	case '?':
 	case ':':
-		fprintf(stderr, _("Use '%s --help' for usage information.\n"), argv[0]);
+		/* --shell command does not set argv[0] */
+		if (argv[0])
+			fprintf(stderr, _("Use '%s --help' for usage information.\n"), argv[0]);
+		else
+			fprintf(stderr, _("Use '--help' for usage information.\n"));
 		return 1;
 	/* Then, options with no arguments */
 	case OPT_HELP:
