@@ -776,8 +776,8 @@ static int parse_options(int argc, char *argv[])
 	}
 
 	/* Initialise the code for the GSM interface. */
-	if (c != OPT_FOOGLE && state == NULL)
-		businit();
+	if (c != OPT_FOOGLE && state == NULL && businit())
+		return -1;
 
 	switch (c) {
 	/* Monitoring options */
