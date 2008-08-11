@@ -1061,7 +1061,7 @@ int shell(gn_data *data, struct gn_statemachine *state)
 		argc = 1;
 		optind = opterr = optopt = 0;
 		optarg = NULL;
-		input = readline("> ");
+		input = readline("gnokii> ");
 		old = input;
 		if (!input)
 			break;
