@@ -271,6 +271,7 @@ static gn_phone_model models[] = {
 	{"7260",  "RM-17",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"7270",  "RM-8",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"7280",  "RM-14",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
+	{"7373",  "RM-209",	PM_DEFAULT },
 	{"7600",  "NMM-3",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"7650",  "NHL-2NA",	PM_DEFAULT },
 	{"8110",  "0423" ,	PM_OLD_DEFAULT | PM_DATA }, /* NHE-6BX */
@@ -308,6 +309,7 @@ static gn_phone_model models[] = {
 	{"9210i", "RAE-5N",	PM_OLD_DEFAULT },
 	{"9290",  "RAE-3N",	PM_OLD_DEFAULT },
 	{"N70",   "RM-84",      PM_DEFAULT },
+	{"N73",   "RM-133",	PM_DEFAULT },
 	{"RPM-1", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"Card Phone 1.0", "RPE-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"Card Phone 2.0", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
