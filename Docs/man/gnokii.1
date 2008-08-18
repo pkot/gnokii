@@ -88,6 +88,26 @@ hangup an incoming call or an already established call.
 \fIcallid\fP is a small integer number used to identify one of the incoming calls.
 If you initiated the call with \-\-dialvoice this is the number printed by that command.
 The \-\-monitor command can be used to show the \fIcallid\fP.
+.TP 
+.BR "\-\-divert {\-\-op|-o} {register|enable|query|disable|erasure} {\-\-type|-t} {all|busy|noans|outofreach|notavail} {\-\-call|-c} {all|voice|fax|data} [{\-\-timeout|-m} \fItime_in_seconds\fP] [{\-\-number|-n} \fInumber\fP]"
+Manage call diverting/forwarding.
+
+.B \-\-op
+specifies one of the operations:
+.B register enable query disable erasure 
+
+.B \-\-type
+specifies one of the event types:
+.B busy noans outofreach notavail unconditional all
+
+\-\-call specifies one of the call types:
+.B voice fax data all
+
+.B \-\-timeout
+is the number of seconds an incoming call will ring before being forwarded to the registered number (use with \-\-type noans)
+
+.B \-\-number
+is the phone number to which calls are to be forwarded
 
 .SS PHONE SETTINGS
 .TP 
