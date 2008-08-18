@@ -71,9 +71,22 @@ specify speed dial.
 .TP 
 .BR "\-\-dialvoice \fInumber\fP"
 initiate voice call.
+On success print the \fIcallid\fP identifier to be used with the \-\-hangup command.
+The \-\-monitor command can be used to show the \fIcallid\fP.
 .TP 
 .BR "\-\-senddtmf \fIstring\fP"
 send DTMF sequence.
+.TP 
+.BR "\-\-answercall\fP \fIcallid\fP"
+answer an incoming call.
+\fIcallid\fP is a small integer number used to identify one of the incoming calls.
+The \-\-monitor command can be used to show the \fIcallid\fP.
+.TP 
+.BR "\-\-hangup\fP \fIcallid\fP"
+hangup an incoming call or an already established call.
+\fIcallid\fP is a small integer number used to identify one of the incoming calls.
+If you initiated the call with \-\-dialvoice this is the number printed by that command.
+The \-\-monitor command can be used to show the \fIcallid\fP.
 
 .SS PHONE SETTINGS
 .TP 
