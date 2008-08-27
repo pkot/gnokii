@@ -41,6 +41,9 @@
     o updated Italian translation                   (Daniele Forsi)
     o update Nokia DKU2 rules sample file for udev  (Daniele Forsi,
                                                          Paweł Kot)
+    o update gnokii man page with --answercall --hangup and 
+      --divert that were missing and add details to --dialvoice and
+      --setspeeddial                                (Daniele Forsi)
  * gnokii updates
     o make --getsms accept at most 6 arguments, not 5 so that
       gnokii --getsms SM 1 2 -d -f myfile actually works; exit
