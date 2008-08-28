@@ -73,6 +73,7 @@ GETTEXT_PACKAGE=gnokii
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [Define to the Gettext package name])
 AC_SUBST(GETTEXT_PACKAGE)
 AM_GLIB_GNU_GETTEXT
+AM_ICONV
 
 dnl -----------------------------
 dnl Checks for FreeBSD Build
