@@ -1909,7 +1909,7 @@ static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int l
 	gn_error error;
 	char *pos, *memory_name;
 	char **items;
-	int i;
+	int i, n;
 	gn_memory_type memory_type;
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
@@ -1930,16 +1930,23 @@ static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int l
 	while (*pos && *pos != ')')
 		pos++;
 	*pos = '\0';
-	items = gnokii_strsplit(buf.line2 + 8, ",", 4);
+	pos = buf.line2 + 6;
+	while (*pos == ' ' || *pos == '(')
+		pos++;
+	items = gnokii_strsplit(pos, ",", 4);
+	n = 0;
 	for (i = 0; items[i]; i++) {
 		memory_name = strip_quotes(items[i]);
-		memory_type = gn_str2memory_type(memory_name);
-
-		data->sms_folder_list->folder_id[i] = memory_type;
-		data->sms_folder_list->folder[i].folder_id = memory_type;
-		snprintf(data->sms_folder_list->folder[i].name, sizeof(data->sms_folder_list->folder[0].name), "%s", gn_memory_type_print(memory_type));
+		if ((memory_type = gn_str2memory_type(memory_name)) != GN_MT_XX) {
+			data->sms_folder_list->folder_id[n] = memory_type;
+			data->sms_folder_list->folder[n].folder_id = memory_type;
+			snprintf(data->sms_folder_list->folder[n].name, sizeof(data->sms_folder_list->folder[0].name), "%s", gn_memory_type_print(memory_type));
+			n++;
+		} else {
+			dprintf("Ignoring unknown memory type \"%s\".\n", memory_name);
+		}
 	}
-	data->sms_folder_list->number = i;
+	data->sms_folder_list->number = n;
 	gnokii_strfreev(items);
 
 	return GN_ERR_NONE;

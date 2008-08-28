@@ -89,6 +89,7 @@
                                              (Carles Pina i Estany)
     o fix phonebook reading for phones that add spaces after commas
       in +CPBR: response                            (Daniele Forsi)
+    o fix folder list parsing for wavecom modems   (BORBELY Zoltan)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
  * smsd updates
