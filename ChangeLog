@@ -1,5 +1,7 @@
 0.6.27 (not released yet)
 =========================
+ * build system updates
+    o move config.rpath from config/ to toplevel        (Paweł Kot)
  * win32 updates
     o make it build again                             (Jari Turkia)
  * nk6510 driver updates
@@ -92,7 +94,7 @@
     o fix folder list parsing for wavecom modems   (BORBELY Zoltan)
     o make phonebook work on all Samsung phones; make extended
       phonebook configurable; FIXME: detect which phones support
-      extended phonebook                                (Pawel Kot)
+      extended phonebook                                (Paweł Kot)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
  * smsd updates
