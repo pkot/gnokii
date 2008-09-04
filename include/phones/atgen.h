@@ -154,6 +154,13 @@ typedef struct {
 	 * the bytes swapped. Default is the natural order.
 	 */
 	int lac_swapped;
+
+	/*
+	 * Some phones support extended phonebook commands:
+	 * AT+SPBR/AT+SPBW
+	 */
+	int extended_phonebook;
+
 } at_driver_instance;
 
 #define AT_DRVINST(s) (*((at_driver_instance **)(&(s)->driver.driver_instance)))

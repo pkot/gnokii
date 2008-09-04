@@ -90,6 +90,9 @@
     o fix phonebook reading for phones that add spaces after commas
       in +CPBR: response                            (Daniele Forsi)
     o fix folder list parsing for wavecom modems   (BORBELY Zoltan)
+    o make phonebook work on all Samsung phones; make extended
+      phonebook configurable; FIXME: detect which phones support
+      extended phonebook                                (Pawel Kot)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
  * smsd updates
