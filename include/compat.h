@@ -257,7 +257,7 @@ time_t timegm(struct tm *tm);
 #else
 #  define _(x) (x)
 #  define N_(x) (x)
-#  define dgettext(x) (x)
+#  define dgettext(y, x) (x)
 #endif /* ENABLE_NLS */
 
 /* Definitions for u8, u16 and u32, borrowed from
