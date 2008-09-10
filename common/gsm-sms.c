@@ -57,21 +57,6 @@ struct sms_udh_data {
 
 #define MAX_SMS_PART 140
 
-/* These are positions in the following (headers[]) table. */
-#define SMS_UDH_CONCATENATED_MESSAGES  1
-#define SMS_UDH_RINGTONES              2
-#define SMS_UDH_OPERATOR_LOGOS         3
-#define SMS_UDH_CALLER_LOGOS           4
-#define SMS_UDH_MULTIPART_MESSAGES     5
-#define SMS_UDH_WAP_VCARD              6
-#define SMS_UDH_WAP_CALENDAR           7
-#define SMS_UDH_WAP_VCARDSECURE        8
-#define SMS_UDH_WAP_VCALENDARSECURE    9
-#define SMS_UDH_VOICE_MESSAGES        10
-#define SMS_UDH_FAX_MESSAGES          11
-#define SMS_UDH_EMAIL_MESSAGES        12
-#define SMS_UDH_WAP_PUSH              13
-
 /* User data headers */
 static struct sms_udh_data headers[] = {
 	{ 0x00, "" },
