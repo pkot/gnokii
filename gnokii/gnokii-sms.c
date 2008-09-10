@@ -108,7 +108,7 @@ int sendsms_usage(FILE *f, int exitval)
 			"        --imelody                          send imelody message, text is read\n"
 			"                                           from stdin\n"
 			"        -a file;file;file;file\n"
-			"        --animation file;file;file;file    send animation message\n" 
+			"        --animation file;file;file;file    send animation message\n"
 			"        -o this;total;serial\n"
 			"        --concat this;total;serial         send 'this' part of all 'total' parts\n"
 			"                                           identified by 'serial'\n"
@@ -151,16 +151,16 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 	memset(&sms.remote.number, 0, sizeof(sms.remote.number));
 	snprintf(sms.remote.number, sizeof(sms.remote.number), "%s", optarg);
-	if (sms.remote.number[0] == '+') 
+	if (sms.remote.number[0] == '+')
 		sms.remote.type = GN_GSM_NUMBER_International;
-	else 
+	else
 		sms.remote.type = GN_GSM_NUMBER_Unknown;
 
 	while ((i = getopt_long(argc, argv, "l:rv:C:8ia:o:w:", options, NULL)) != -1) {
 		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
 			snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", optarg);
-			if (sms.smsc.number[0] == '+') 
+			if (sms.smsc.number[0] == '+')
 				sms.smsc.type = GN_GSM_NUMBER_International;
 			else
 				sms.smsc.type = GN_GSM_NUMBER_Unknown;
@@ -210,8 +210,8 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		case 'o': /* Concat header */ {
 			dprintf("Adding concat header\n");
 			sms.user_data[curpos].type = GN_SMS_DATA_Concat;
-			if (3 != sscanf(optarg, "%d;%d;%d", &sms.user_data[curpos].u.concat.curr, 
-					&sms.user_data[curpos].u.concat.total, 
+			if (3 != sscanf(optarg, "%d;%d;%d", &sms.user_data[curpos].u.concat.curr,
+					&sms.user_data[curpos].u.concat.total,
 					&sms.user_data[curpos].u.concat.serial)) {
 				fprintf(stderr, _("Incorrect --concat option\n"));
 				break;
@@ -270,37 +270,36 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			gn_wap_push wp;
 			int chars_read;
 			char message_buffer[GN_SMS_MAX_LENGTH];
-			
-			
+
 			if (!optarg || strlen(optarg) > 255) {
 				fprintf(stderr, _("URL is too long (max 255 chars). Quitting.\n"));
 			        return GN_ERR_INVALIDSIZE;
 			}
-			
+
 			sms.user_data[curpos].type = GN_SMS_DATA_WAPPush;
-			
+
 			gn_wap_push_init(&wp);
 
 			memset(message_buffer, 0, sizeof(message_buffer));
 			fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:\n"));
 			chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
-			
+
 			wp.url = optarg;
 			wp.text = message_buffer;
-			
+
 			if (gn_wap_push_encode(&wp) != GN_ERR_NONE) {
 			    fprintf(stderr, _("WAP Push encoding failed!\n"));
 			    return GN_ERR_FAILED;
 			}
 
 			memcpy(sms.user_data[curpos].u.text, wp.data, wp.data_len);
-			
+
 			sms.user_data[curpos].length = wp.data_len;
-			
+
 			free(wp.data);
 
 			sms.user_data[++curpos].type = GN_SMS_DATA_None;
-			
+
 			curpos = -1;
 			break;
 		}
@@ -373,7 +372,7 @@ int savesms_usage(FILE *f, int exitval)
 			"                                        is of type IN, OU...\n"
 			"        -d\n"
 			"        --deliver                       set message type as sms deliver\n"
-			"                                        (to be sent)\n" 
+			"                                        (to be sent)\n"
 			"        -t YYMMDDHHMISS\n"
 			"        --datetime YYMMDDHHMISS         set date and time of message delivery\n"
 			"Message text is read from standard input.\n"
@@ -439,7 +438,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		switch (i) {
 		case '0': /* SMSC number */
 			snprintf(sms.smsc.number, sizeof(sms.smsc.number) - 1, "%s", optarg);
-			if (sms.smsc.number[0] == '+') 
+			if (sms.smsc.number[0] == '+')
 				sms.smsc.type = GN_GSM_NUMBER_International;
 			else
 				sms.smsc.type = GN_GSM_NUMBER_Unknown;
@@ -644,7 +643,6 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		{ "append-file",required_argument, NULL, 'a' },
 		{ NULL,         0,                 NULL, 0 }
 	};
-
 
 	/* Handle command line args that set type, start and end locations. */
 	memory_type_string = optarg;
@@ -1122,7 +1120,7 @@ gn_error createsmsfolder(char *name, gn_data *data, struct gn_statemachine *stat
 	error = gn_sm_functions(GN_OP_CreateSMSFolder, data, state);
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
-	else 
+	else
 		fprintf(stderr, _("Folder with name: %s successfully created!\n"), folder.name);
 	return error;
 }
@@ -1155,7 +1153,7 @@ gn_error deletesmsfolder(char *number, gn_data *data, struct gn_statemachine *st
 	error = gn_sm_functions(GN_OP_DeleteSMSFolder, data, state);
 	if (error != GN_ERR_NONE)
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
-	else 
+	else
 		fprintf(stderr, _("Number %i of 'My Folders' successfully deleted!\n"), folder.folder_id);
 	return error;
 }
