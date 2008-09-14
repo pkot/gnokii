@@ -854,12 +854,11 @@ typedef struct {
 	unsigned char *file;	/* file contents */
 } gn_file;
 
-#define GN_FILES_MAX_COUNT 1024
-
 typedef struct {
 	char path[512];
-	gn_file *files[GN_FILES_MAX_COUNT];
+	gn_file **files;
 	int file_count;
+	int size;
 } gn_file_list;
 
 #endif	/* _gnokii_common_h */

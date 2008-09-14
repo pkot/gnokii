@@ -49,6 +49,7 @@
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
 #include "phones/nokia.h"
+#include "map.h"
 
 #define DRVINSTANCE(s) (*((nk6510_driver_instance **)(&(s)->driver.driver_instance)))
 #define FREE(p) do { free(p); (p) = NULL; } while (0)
@@ -117,13 +118,49 @@ static int match_sms_folder_str(const char *str)
 	char path[128];
 
 	sprintf(path, "C:\\predefmessages\\%s\\", str);
-	for (i = 0; (s40_30_mt_mappings[i].path != NULL) && strcmp(path, s40_30_mt_mappings[i].path); i++)
+	for (i = 0; (s40_30_mt_mappings[i].path != NULL) && strcmp(path, s40_30_mt_mappings[i].path); i++) {
+#if 0
 		dprintf("comparing %s and %s\n", path, s40_30_mt_mappings[i].path);
+#endif
+	}
 	if (s40_30_mt_mappings[i].path == NULL)
 		return -1;
 	else
 		return i;
 }
+
+#define ALLOC_CHUNK	128
+/*
+ * Helper function for file list operations.
+ * When adding a new file to a file list, we need to allocate additional
+ * memory for the file structure. Not to waste too much time for that,
+ * initially allocate space for 128 files, if it is not enough increase
+ * to 256 files, if it is not enough -- 512 files, ...
+ * FIXME: add a name of this algorithm.
+ */
+static void inc_filecount(gn_file_list *fl)
+{
+	fl->file_count++;
+	/* First initialization */
+	if (!fl->files) {
+		fl->size = ALLOC_CHUNK;
+		fl->files = calloc(fl->size, sizeof(char *));
+		return;
+	}
+
+	/*
+	 * If we're out of space, allocate twice as much memory as we have
+	 * right now.
+	 */
+	if (fl->file_count >= fl->size) {
+		fl->size *= 2;
+		fl->files = realloc(fl->files, fl->size * sizeof(char *));
+		return;
+	}
+	return;
+}
+
+
 
 /* Functions prototypes */
 static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
@@ -207,6 +244,7 @@ static gn_error NK6510_AnswerCall(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK6510_Reset(gn_data *data, struct gn_statemachine *state);
 
+static gn_error NK6510_GetFileListCache(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetFileId(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state);
@@ -1136,16 +1174,20 @@ static gn_error NK6510_GetSMSFolders_S40_30(gn_data *data, struct gn_statemachin
 	if (!data->sms_folder_list)
 		return GN_ERR_INTERNALERROR;
 
+	dprintf("Using GetSMSFolders for Series40 3rd Ed\n");
+
 	memset(&fl, 0, sizeof(fl));
 	snprintf(fl.path, sizeof(fl.path), "c:\\predefmessages\\*.*");
 	data->file_list = &fl;
-	error = NK6510_GetFileList(data, state);
+	error = NK6510_GetFileListCache(data, state);
 	if (error)
 		return error;
 	for (i = 0, j = 0; i < fl.file_count; i++) {
 		int k = match_sms_folder_str(fl.files[i]->name);
 		if (k >= 0) {
+#if 0
 			dprintf("%s %d\n", s40_30_mt_mappings[k].path, s40_30_mt_mappings[k].type);
+#endif
 			data->sms_folder_list->folder_id[j] = s40_30_mt_mappings[k].type;
 			data->sms_folder_list->folder[j].folder_id = s40_30_mt_mappings[k].type;
 			sprintf(data->sms_folder_list->folder[j].name, "%s", gn_memory_type_print(s40_30_mt_mappings[k].type));
@@ -1216,6 +1258,8 @@ static gn_error NK6510_GetSMSFolderStatus_S40_30(gn_data *data, struct gn_statem
 	if (!data->sms_folder)
 		return GN_ERR_INTERNALERROR;
 
+	dprintf("Using GetSMSFolderStatus for Series40 3rd Ed\n");
+
 	k = match_sms_folder_mt(data->sms_folder->folder_id);
 	if (k < 0)
 		return GN_ERR_INVALIDMEMORYTYPE;
@@ -1225,7 +1269,7 @@ static gn_error NK6510_GetSMSFolderStatus_S40_30(gn_data *data, struct gn_statem
 
 	/* Get file list */
 	data->file_list = &fl;
-	error = NK6510_GetFileList(data, state);
+	error = NK6510_GetFileListCache(data, state);
 	if (error)
 		return error;
 
@@ -1514,6 +1558,8 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 		return GN_ERR_INVALIDLOCATION;
 	}
 
+	dprintf("Using GetSMS for Series40 3rd Ed\n");
+
 	/* Find path */
 	for (i = 0; (s40_30_mt_mappings[i].type != data->raw_sms->memory_type) && (s40_30_mt_mappings[i].path != NULL); i++);
 	if (s40_30_mt_mappings[i].path != NULL) {
@@ -1525,7 +1571,7 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	/* Get file list */
 	data->file_list = &fl;
 	data->file = NULL;
-	error = NK6510_GetFileList(data, state);
+	error = NK6510_GetFileListCache(data, state);
 	if (error)
 		return error;
 
@@ -1534,7 +1580,8 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	for (j = 0; j < fl.file_count; j++) {
 		if (!strncmp("01", fl.files[j]->name+21, 2)) {
 			strcpy(fl2.path, fl.path);
-			fl2.files[fl2.file_count++] = fl.files[j];
+			inc_filecount(&fl2);
+			fl2.files[fl2.file_count-1] = fl.files[j];
 		}
 	}
 
@@ -1606,6 +1653,8 @@ static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *s
 		return GN_ERR_INVALIDLOCATION;
 	}
 
+	dprintf("Using DeleteSMS for Series40 3rd Ed\n");
+
 	/* Find path */
 	for (i = 0; (s40_30_mt_mappings[i].type != data->raw_sms->memory_type) && (s40_30_mt_mappings[i].path != NULL); i++);
 	if (s40_30_mt_mappings[i].path != NULL) {
@@ -1617,7 +1666,7 @@ static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *s
 	/* Get file list */
 	data->file_list = &fl;
 	data->file = NULL;
-	error = NK6510_GetFileList(data, state);
+	error = NK6510_GetFileListCache(data, state);
 	if (error)
 		return error;
 
@@ -1933,6 +1982,37 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 /* FILE HANDLING */
 /*****************/
 
+/*
+ * This is a wrapper function over NK6510_GetFileList. Intended usage is
+ * just internal. Quite a few functions use filesystem operations and when
+ * folder contains many files (>1000) operation is pretty slow. Let's cache
+ * it so the subsequent operations don't take that much time.
+ * Especially useful for GetSMS in Nokia Series40 3rd Ed and later (*S40_30 functions)
+ */
+static gn_error NK6510_GetFileListCache(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error = GN_ERR_NONE;
+	gn_file_list *fl;
+	static struct map *map = NULL;
+
+	dprintf("Trying to retrieve filelist of %s from cache\n", data->file_list->path);
+
+	fl = map_get(&map, data->file_list->path, NK6510_FILE_CACHE_TIMEOUT);
+	if (!fl) {
+		dprintf("Cache empty or expired\n");
+		error = NK6510_GetFileList(data, state);
+		if (error == GN_ERR_NONE) {
+			char *path = strdup(data->file_list->path);
+			fl = calloc(1, sizeof(gn_file_list));
+			memcpy(fl, data->file_list, sizeof(gn_file_list));
+			map_add(&map, path, fl);
+		}
+	} else {
+		memcpy(data->file_list, fl, sizeof(gn_file_list));
+	}
+	return error;
+}
+
 static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x68, 0x00};
@@ -1945,7 +2025,7 @@ static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state)
 	req[5] = char_unicode_encode(req+6, data->file_list->path, i);
 
 	if (sm_message_send(req[5]+9, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY;
-	return sm_block(NK6510_MSG_FILE, data, state);
+	return sm_block_no_retry_timeout(NK6510_MSG_FILE, NK6510_GETFILELIST_TIMEOUT, data, state);
 }
 
 static gn_error NK6510_GetFileDetailsById(gn_data *data, struct gn_statemachine *state)
@@ -2303,7 +2383,7 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			/* then pairs (len, location) */
 			for (i = 250; i + 4 < length ;) {
 				int k, len = 2 * (message[i] * 256 + message[i+1]);
-				data->file_list->file_count++;
+				inc_filecount(data->file_list);
 				data->file_list->files[j] = calloc(1, sizeof(gn_file));
 				data->file_list->files[j]->id = calloc(len + 1, sizeof(char));
 				data->file_list->files[j]->id[0] = len;
@@ -2357,9 +2437,9 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		if (data->file) {
 			file = data->file;
 		} else if (data->file_list) {
-			data->file_list->files[data->file_list->file_count] = calloc(1, sizeof(gn_file));
-			file = data->file_list->files[data->file_list->file_count];
-			data->file_list->file_count++;
+			inc_filecount(data->file_list);
+			data->file_list->files[data->file_list->file_count - 1] = calloc(1, sizeof(gn_file));
+			file = data->file_list->files[data->file_list->file_count - 1];
 			i = message[31] * 2;
 			char_unicode_decode(file->name, message + 32, i);
 		}

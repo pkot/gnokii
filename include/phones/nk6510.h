@@ -199,6 +199,21 @@ typedef enum {
 
 #define NK6510_FILE_ID_LENGTH 6
 
+/* 5 seconds before GetFileList timeouts -- useful for large dirs */
+#define NK6510_FILE_LIST_TIMEOUT	5000
+/*
+ * For Nokia Series40 3rd edition, we implement GetSMS with files commands.
+ * Algorithm is:
+ *   - get file list
+ *   - filter sms files by name
+ *   - get file
+ * It is repeated for every SMS. As 'get file list' is the longest opration
+ * it makes sense to cache the results. Define here for how long (seconds)
+ * data is cached.
+ */
+#define NK6510_FILE_CACHE_TIMEOUT	10	/* seconds */
+#define NK6510_GETFILELIST_TIMEOUT	10000	/* miliseconds */
+
 typedef struct {
 	/* callbacks */
 	void (*on_cell_broadcast)(gn_cb_message *msg, struct gn_statemachine *state, void *callback_data);

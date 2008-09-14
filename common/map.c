@@ -73,6 +73,8 @@ int map_add(struct map **map, char *key, void *data)
 		goto out;
 	}
 
+	dprintf("Adding key %s to map %p.\n", key, *map);
+
 	/* Don't allow duplicated keys */
 	tmp = *map;
 	while (tmp) {
@@ -92,12 +94,15 @@ int map_add(struct map **map, char *key, void *data)
 	}
 	tmp->key = key;
 	tmp->data = data;
+	tmp->timestamp = time(NULL);
 	tmp->next = *map;
 	tmp->prev = NULL;
 
 	/* Prepend current list with newly allocated entry... */
 	if (*map)
 		(*map)->prev = tmp;
+	else
+		dprintf("New map %p.\n", *map);
 	/* ... and make tmp first element */
 	*map = tmp;
 out:
@@ -107,20 +112,36 @@ out:
 /*
  * @map_get
  * Reads value associated with the key in map data structure pointed by map.
+ * Retrievs just values not older than given timeout (in seconds). timeout = 0
+ * means no timeout.
  * retval: pointer to the data associated with the key
  *	if NULL, no key was found or other error occurred
  *	space for the returned value is freshly allocated
  */
-void *map_get(struct map *map, char *key)
+void *map_get(struct map **map, char *key, time_t timeout)
 {
-	struct map *tmp = map;
+	struct map *tmp = *map;
 	void *value = NULL;
+	time_t now = time(NULL);
 
-	if (!map || !key)
+	if (!*map || !key)
 		goto out;
+
+	dprintf("Getting key %s from map %p.\n", key, *map);
+
 	while (tmp) {
 		if (!strcmp(key, tmp->key)) {
-			value = tmp->data;
+			if (timeout > 0 && now - tmp->timestamp > timeout) {
+				/*
+				 * We invalidate the key, but someone
+				 * could try it with different timeout.
+				 * We don't bother, he'll wait.
+				 */
+				dprintf("Cache expired for key %s in map %p.\n", key, *map);
+				map_del(map, key);
+				goto out;
+			} else
+				value = tmp->data;
 			break;
 		}
 		tmp = tmp->next;
@@ -146,6 +167,9 @@ int map_del(struct map **map, char *key)
 		retval = -1;
 		goto out;
 	}
+
+	dprintf("Deleting key %s from map %p.\n", key, *map);
+
 	while (tmp) {
 		if (!strcmp(key, tmp->key)) {
 			/* Free allocated space */

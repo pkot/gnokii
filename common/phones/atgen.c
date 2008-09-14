@@ -958,7 +958,7 @@ static gn_error AT_GetMemoryRange(gn_data *data, struct gn_statemachine *state)
 	char key[7];
 
 	snprintf(key, 7, "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
-	if (map_get(drvinst->cached_capabilities, key)) {
+	if (map_get(&drvinst->cached_capabilities, key, 0)) {
 		ret = Parse_ReplyMemoryRange(data, state);
 	} else {
 		ret = sm_message_send(10, GN_OP_AT_GetMemoryRange, "AT+CPBR=?\r", state);
@@ -2056,7 +2056,7 @@ static gn_error Parse_ReplyMemoryRange(gn_data *data, struct gn_statemachine *st
 	char key[7];
 
 	snprintf(key, 7, "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
-	r = strdup(map_get(drvinst->cached_capabilities, key));
+	r = strdup(map_get(&drvinst->cached_capabilities, key, 0));
 	s = r + 7;
 	pos = strchr(s, ',');
 	if (pos) {
