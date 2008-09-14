@@ -42,6 +42,7 @@
       #23941 (https://savannah.nongnu.org/bugs/?23941)  (Paweł Kot)
     o add ids for Nokia N73 (model=at), Nokia 7373 and Nokia 3500
       Classic (model=series40) to misc.c only       (Daniele Forsi)
+    o print out an overrun frame when detected          (Paweł Kot)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)

@@ -175,7 +175,15 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->buffer_count++;
 
 		if (i->buffer_count > PHONET_FRAME_MAX_LENGTH) {
-			dprintf("PHONET: Message buffer overun - resetting\n");
+			dprintf("PHONET: Message buffer overun - resetting (buffer count: %d, max: %d)\n", i->buffer_count, PHONET_FRAME_MAX_LENGTH);
+{
+	int j;
+	for (j = 0; j < i->buffer_count; j++) {
+		if (j % 16 == 0)
+			dprintf("\n");
+		dprintf("%02x ", i->message_buffer[j]);
+	}
+}
 			i->state = FBUS_RX_Sync;
 			break;
 		}
