@@ -160,8 +160,6 @@ static void inc_filecount(gn_file_list *fl)
 	return;
 }
 
-
-
 /* Functions prototypes */
 static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_Initialise(struct gn_statemachine *state);
@@ -262,7 +260,6 @@ static gn_error NK6510_EnterSecurityCode(gn_data *data, struct gn_statemachine *
 static gn_error NK6510_GetToDo(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteAllToDoLocations(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state);
-
 
 static gn_error NK6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -646,7 +643,6 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
-
 /**********************/
 /* IDENTIFY FUNCTIONS */
 /**********************/
@@ -868,7 +864,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			}
 			break;
 		case 0x80: /* User Data */
-			if ((data->raw_sms->type != GN_SMS_MT_Picture) && (data->raw_sms->type != GN_SMS_MT_PictureTemplate)) { 
+			if ((data->raw_sms->type != GN_SMS_MT_Picture) && (data->raw_sms->type != GN_SMS_MT_PictureTemplate)) {
 				/* Ignore the found user_data block for pictures */
 				data->raw_sms->length = block[3];
 				data->raw_sms->user_data_length = block[2];
@@ -1103,7 +1099,6 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Getting list of SMS pictures...\n");
 		break;
 
-
 	/* Some errors */
 	case 0xc9:
 		dprintf("Unknown command???\n");
@@ -1165,11 +1160,9 @@ static gn_error NK6510_GetSMSStatus(gn_data *data, struct gn_statemachine *state
 
 static gn_error NK6510_GetSMSFolders_S40_30(gn_data *data, struct gn_statemachine *state)
 {
-    	gn_file_list fl, fl2;
-    	gn_file fi;
+    	gn_file_list fl;
 	gn_error error;
-	int j, i, cont_len, tota_len, offset, tmp;
-	unsigned char *bin;
+	int j, i;
 
 	if (!data->sms_folder_list)
 		return GN_ERR_INTERNALERROR;
@@ -1240,7 +1233,7 @@ static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *st
 	int len;
 
 	dprintf("Creating SMS Folder...\n");
-	
+
 	len = char_unicode_encode(req + 10, data->sms_folder->name, strlen(data->sms_folder->name));
 	req[7] = len + 6;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, req[7] + 6);
@@ -1248,12 +1241,9 @@ static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *st
 
 static gn_error NK6510_GetSMSFolderStatus_S40_30(gn_data *data, struct gn_statemachine *state)
 {
-    	gn_file_list fl, fl2;
-    	gn_file fi;
+    	gn_file_list fl;
 	gn_error error;
-	int j, i, cont_len, tota_len, offset, tmp;
-	unsigned char *bin;
-	int k;
+	int j, k;
 
 	if (!data->sms_folder)
 		return GN_ERR_INTERNALERROR;
@@ -1642,8 +1632,7 @@ static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *s
     	gn_file_list fl, fl2;
     	gn_file fi;
 	gn_error error;
-	int j, i, cont_len, tota_len, offset, tmp;
-	unsigned char *bin;
+	int j, i;
 
 	if (!data->raw_sms)
 		return GN_ERR_INTERNALERROR;
@@ -1771,7 +1760,6 @@ static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
 #endif
 	return error;
 }
-
 
 /****************/
 /* SMS HANDLING */
@@ -2017,7 +2005,7 @@ static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x68, 0x00};
 	int i;
-	
+
   	if (!data->file_list) return GN_ERR_INTERNALERROR;
 	data->file_list->file_count = 0;
 
@@ -2034,7 +2022,7 @@ static gn_error NK6510_GetFileDetailsById(gn_data *data, struct gn_statemachine 
 					0x00, 0x01,
 					0x00, 0x00 }; /* Location */
 	int length, i;
-	
+
   	if (!data->file)
   		return GN_ERR_INTERNALERROR;
 
@@ -2054,7 +2042,7 @@ static gn_error NK6510_GetFileId(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x82, 0x00};
 	int i;
-	
+
   	if (!data->file) return GN_ERR_INTERNALERROR;
 
 	i = strlen(data->file->name);
@@ -2201,7 +2189,7 @@ static gn_error NK6510_GetFileById(gn_data *data, struct gn_statemachine *state)
 	if (!DRVINSTANCE(state)->progress_indication)
 		fprintf(stderr, "\n");
 
-	return err;	
+	return err;
 }
 
 static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
@@ -2212,7 +2200,7 @@ static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
 	unsigned char req3[] = {FBUS_FRAME_HEADER, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
 	gn_error err;
 	int i;
-	
+
   	if (!data->file)
   		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
@@ -2261,7 +2249,7 @@ static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x62, 0x00};
 	int i;
-	
+
   	if (!data->file)
   		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
@@ -2291,7 +2279,6 @@ static gn_error NK6510_DeleteFileById(gn_data *data, struct gn_statemachine *sta
 	if (sm_message_send(8 + length / 2, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(NK6510_MSG_FILE, data, state);
 }
-
 
 static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
@@ -2471,7 +2458,7 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			} else if (message[4] == 0x00) {
 				data->file->togo = data->file->file_length;
 			}
-                         
+
 			data->file->id = calloc(NK6510_FILE_ID_LENGTH+1, sizeof(char));
 			for (i = 0; i < NK6510_FILE_ID_LENGTH; i++) {
 			        data->file->id[i] = message[4 + i];
@@ -2498,8 +2485,6 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 out:
 	return error;
 }
-
-
 
 /**********************/
 /* PHONEBOOK HANDLING */
@@ -2995,7 +2980,6 @@ printf("***** GN_PHONEBOOK_ENTRY_MAX_LENGTH - count %d count %d\n", GN_PHONEBOOK
 	SEND_MESSAGE_BLOCK(NK6510_MSG_PHONEBOOK, count);
 }
 
-
 /******************/
 /* CLOCK HANDLING */
 /******************/
@@ -3007,7 +2991,7 @@ static gn_error NK6510_IncomingClock(int messagetype, unsigned char *message, in
 Unknown subtype of type 0x19 (clock handling): 0x1c
 UNHANDLED FRAME RECEIVED
 request: 0x19 / 0x0004
-00 01 00 1b                                     |                
+00 01 00 1b                                     |
 reply: 0x19 / 0x0012
 01 23 00 1c 06 01 ff ff ff ff 00 00 49 4c 01 3e |
 01 56
@@ -3079,7 +3063,6 @@ static gn_error NK6510_SetDateTime(gn_data *data, struct gn_statemachine *state)
 			       0x00,		/* Seconds */
 			       0x00};
 
-	
 	req[10] = data->datetime->year / 256;
 	req[11] = data->datetime->year % 256;
 	req[12] = data->datetime->month;
@@ -3128,7 +3111,6 @@ static gn_error NK6510_SetAlarm(gn_data *data, struct gn_statemachine *state)
 
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CLOCK, 19);
 }
-
 
 /*********************/
 /* CALENDAR HANDLING */
@@ -3286,7 +3268,7 @@ out:
 	return e;
 }
 
-#define NEXT_CALNOTE data->calnote_list->location[data->calnote_list->last+i] 
+#define NEXT_CALNOTE data->calnote_list->location[data->calnote_list->last+i]
 
 static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
@@ -3376,7 +3358,6 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 	}
 	return e;
 }
-
 
 #define LAST_INDEX (data->calnote_list->last > 0 ? data->calnote_list->last - 1 : 0)
 static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state)
@@ -3493,7 +3474,6 @@ static gn_error NK6510_FirstCalendarFreePos(gn_data *data, struct gn_statemachin
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x31 };
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 4);
 }
-
 
 static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine *state)
 {
@@ -3780,7 +3760,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 				req[count++] = (seconds >> 8) & 0xff;      /* Field 16 */
 				req[count++] = seconds & 0xff;             /* Field 17 */
 			}
-		}	
+		}
 
 		req[count++] = 0x00; /* FIXME: calnote->AlarmType; 0x00 tone, 0x01 silent 18 */
 
@@ -4075,7 +4055,6 @@ static gn_error NK6510_GetBatteryLevel(gn_data *data, struct gn_statemachine *st
 	SEND_MESSAGE_BLOCK(NK6510_MSG_BATTERY, 6);
 }
 
-
 /*************/
 /* RINGTONES */
 /*************/
@@ -4107,7 +4086,7 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 			i += 256 * message[i] + message[i + 1];
 
 			dprintf("Ringtone (#%03i) name: %s\n", rl->ringtone[j].location, rl->ringtone[j].name);
-		}		
+		}
 		break;
 
 	/* set raw ringtone result */
@@ -4281,7 +4260,6 @@ static gn_error NK6510_DeleteRingtone(gn_data *data, struct gn_statemachine *sta
 	SEND_MESSAGE_BLOCK(NK6510_MSG_RINGTONE, 6);
 }
 
-
 /*************/
 /* START UP  */
 /*************/
@@ -4291,12 +4269,12 @@ static gn_error NK6510_IncomingStartup(int messagetype, unsigned char *message, 
 	/*
 UNHANDLED FRAME RECEIVED
 request: 0x7a / 0x0005
-00 01 00 02 0b                                  |                
+00 01 00 02 0b                                  |
 reply: 0x7a / 0x0036
-01 44 00 03 0b 00 00 00 01 38 00 00 00 00 00 00 |  D       8     
-35 5f 00 00 00 00 00 00 00 3e 00 00 00 00 00 00 | 5_       >     
+01 44 00 03 0b 00 00 00 01 38 00 00 00 00 00 00 |  D       8
+35 5f 00 00 00 00 00 00 00 3e 00 00 00 00 00 00 | 5_       >
 36 97 00 00 00 00 01 55 55 55 55 55 55 55 55 55 | 6      UUUUUUUUU
-55 55 55 55 55 55                               | UUUUUU         
+55 55 55 55 55 55                               | UUUUUU
 	*/
 	switch (message[3]) {
 	case 0x03:
@@ -4325,7 +4303,7 @@ reply: 0x7a / 0x0036
 			data->bitmap->height = message[13];
 			data->bitmap->width = message[17];
 			data->bitmap->size = message[20] * 256 + message[21];
-				
+
 			memcpy(data->bitmap->bitmap, message + 22, data->bitmap->size);
 			dprintf("Startup logo got ok - height(%d) width(%d)\n", data->bitmap->height, data->bitmap->width);
 			return GN_ERR_NONE;
@@ -4350,7 +4328,7 @@ reply: 0x7a / 0x0036
 			break;
 		}
 
-	default:	
+	default:
 		dprintf("Unknown subtype of type 0x7a (%d)\n", message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 		break;
@@ -4364,7 +4342,6 @@ static gn_error SetStartupBitmap(gn_data *data, struct gn_statemachine *state)
 				   0xc0, 0x03, 0x00, 0x00,           /* Width */
 				   0xc0, 0x04, 0x03, 0x60 };         /* size */
 	int count = 21;
-
 
 	if ((data->bitmap->width != state->driver.phone.startup_logo_width) ||
 	    (data->bitmap->height != state->driver.phone.startup_logo_height)) {
@@ -4403,11 +4380,10 @@ static gn_error NK6510_GetAnykeyAnswer(gn_data *data, struct gn_statemachine *st
 static gn_error GetStartupBitmap(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x0f};
-	
+
 	dprintf("Getting startup logo...\n");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_STLOGO, 5);
 }
-
 
 /***************/
 /*   PROFILES **/
@@ -4697,7 +4673,6 @@ static gn_error NK6510_SetProfile(gn_data *data, struct gn_statemachine *state)
 	SEND_MESSAGE_BLOCK(NK6510_MSG_PROFILE, length + 1);
 }
 
-
 /*************/
 /*** RADIO  **/
 /*************/
@@ -4858,7 +4833,7 @@ static gn_error NK6510_EnterSecurityCode(gn_data *data, struct gn_statemachine *
 	unsigned char req[35] = {FBUS_FRAME_HEADER, 0x07,
 				 0x02 }; /* 0x02 PIN, 0x03 PUK */
 	int len ;
-	
+
 	/* Only PIN for the moment */
 
 	if (!data->security_code) return GN_ERR_INTERNALERROR;
@@ -4944,7 +4919,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 
 	/* Please note that most of the meaning is wild guess */
 	switch (message[3]) {
-	case 0x02: /* Call estabilished */  
+	case 0x02: /* Call estabilished */
 		dprintf("Call estabilished\n");
 		break;
 
@@ -4972,7 +4947,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		break;
 
 	case 0x0a: /* Hanguping */
-		dprintf("Hanguping call (locally)\n");  
+		dprintf("Hanguping call (locally)\n");
 		break;
 
 	case 0x0c: /* Dialling */
@@ -4985,7 +4960,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 			dprintf("Make call succeeded.\n");
 			break;
 		/* Some of dct4 phones respond with this to NK6510_MakeCall()
-		 * frames. Let's repond with the error code to retry with 
+		 * frames. Let's repond with the error code to retry with
 		 * NK6510_MakeCall2(). The exact meaning is not known.
 		 */
 		case 0x01:
@@ -5064,7 +5039,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 				ca[i].prev_state = GN_CALL_RemoteHangup;
 				break;
 			default:
-				dprintf("Unknown previous call state in frame: %d\n", pos[5]);				
+				dprintf("Unknown previous call state in frame: %d\n", pos[5]);
 				error = GN_ERR_UNHANDLEDFRAME;
 				goto out;
 			}
@@ -5162,7 +5137,7 @@ static gn_error NK6510_MakeCall2(gn_data *data, struct gn_statemachine *state)
 out:
 	return error;
 }
- 
+
 static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
@@ -5208,7 +5183,7 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 	req[pos++] = len / 2;
 	pos += len;
 
-	switch (data->call_info->send_number) {	
+	switch (data->call_info->send_number) {
 	case GN_CALL_Never:
 		voice_end[5] = 0x01;
 		break;
@@ -5250,7 +5225,7 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 	error = NK6510_GetActiveCalls(&d, state);
 	if (error != GN_ERR_NONE)
 		goto out;
-		
+
 	data->call_info->call_id = active[0].call_id;
 
 out:
@@ -5365,14 +5340,14 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 			pad = 2;
 		else
 			pad = 0;
-		
+
 		data->wap_setting->session = message[pos++];
-		if (message[pos++] == 0x01) 	
+		if (message[pos++] == 0x01)
 			data->wap_setting->security = true;
 		else
 			data->wap_setting->security = false;
 		data->wap_setting->bearer = message[pos++];
-		
+
 		while ((message[pos] != 0x01) || (message[pos + 1] != 0x00)) pos++;
 		pos += 4;
 
@@ -5490,7 +5465,7 @@ static gn_error FinishWAP(gn_data *data, struct gn_statemachine *state)
 static int PackWAPString(unsigned char *dest, unsigned char *string, int length_size)
 {
 	int length;
-	
+
 	length = strlen(string);
 	if (length_size == 2) {
 		dest[0] = length / 256;
@@ -5554,7 +5529,7 @@ static gn_error NK6510_WriteWAPSetting(gn_data *data, struct gn_statemachine *st
 	pos++;
 	req[pos++] = data->wap_setting->call_speed;
 	req[pos++] = data->wap_setting->gsm_data_login;
-	
+
 	/* IP */
 	pos += PackWAPString(req + pos, data->wap_setting->gsm_data_ip, 1);
 	/* Number */
@@ -5683,7 +5658,6 @@ static gn_error NK6510_GetWAPSetting(gn_data *data, struct gn_statemachine *stat
 		if ((error = PrepareWAP(data, state))) return error;
 	}
 
-
 	if (sm_message_send(5, NK6510_MSG_WAP, req, state)) return GN_ERR_NOTREADY;
 	error = sm_block(NK6510_MSG_WAP, data, state);
 	if (error) return error;
@@ -5803,7 +5777,6 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 	}
 	return error;
 }
-
 
 static gn_error NK6510_GetToDoLocations(gn_data *data, struct gn_statemachine *state)
 {
@@ -5982,7 +5955,6 @@ static gn_error NK6510_SetBitmap(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_NOTIMPLEMENTED;
 	}
 }
-
 
 static int get_memory_type(gn_memory_type memory_type)
 {
@@ -6200,13 +6172,12 @@ static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned cha
 {
 	int pos = 0, udh_length_pos, len;
 
-
 	req[pos++] = 0x01; /* one big block */
 	if (data->raw_sms->type == GN_SMS_MT_Deliver)
 		req[pos++] = 0x00; /* message type: deliver */
 	else
 		req[pos++] = 0x02; /* message type: submit */
-	
+
 	req[pos++] = 0x00; /* will be set at the end */
 	/*        is supposed to be the length of the whole message
 		  starting from req[10], which is the message type */
@@ -6228,7 +6199,7 @@ static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned cha
 
 	req[pos++] = data->raw_sms->dcs;
 	req[pos++] = 0x00;
-	
+
 	/* FIXME: real date/time */
 	if (data->raw_sms->type == GN_SMS_MT_Deliver) {
 		memcpy(req + pos, data->raw_sms->smsc_time, 7);
@@ -6291,7 +6262,6 @@ static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned cha
 		req[udh_length_pos] += 8 - req[udh_length_pos] % 8;
 	}
 
-	
 	if (data->raw_sms->type == GN_SMS_MT_Submit) {
 		/* Block 4. Validity Period */
 		req[pos++] = 0x08; /* type: validity */

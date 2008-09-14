@@ -31,6 +31,9 @@
 #include "config.h"
 #include "compat.h"
 #include "map.h"
+#include "misc.h"
+#include "gnokii.h"
+
 #include <string.h>
 #include <stdlib.h>
 
