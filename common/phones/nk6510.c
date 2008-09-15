@@ -76,9 +76,11 @@ typedef struct {
 
 static path2mt_t s40_30_mt_mappings[] = {
 	{ GN_MT_IN, "C:\\predefmessages\\1\\" },
+	{ GN_MT_OUS, "C:\\predefmessages\\2\\" },
 	{ GN_MT_OU, "C:\\predefmessages\\3\\" },
 	{ GN_MT_AR, "C:\\predefmessages\\4\\" },
-	{ GN_MT_TE, "C:\\predefmessages\\5\\" },
+	{ GN_MT_DR, "C:\\predefmessages\\5\\" },
+	{ GN_MT_TE, "C:\\predefmessages\\6\\" },
 	{ GN_MT_F1, "C:\\predefmessages\\20\\" },
 	{ GN_MT_F2, "C:\\predefmessages\\21\\" },
 	{ GN_MT_F3, "C:\\predefmessages\\22\\" },

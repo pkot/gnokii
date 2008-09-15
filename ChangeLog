@@ -16,6 +16,8 @@
       phones and other newer and older phones       (Daniele Forsi)
     o replace SMS reading implementation for Series40 3rd Edition
       and later phones                                  (Paweł Kot)
+    o support new memory types for SMS on series40: DR (Drafts) and
+      OUS (Outbox, items to be sent)                    (Paweł Kot)
  * libgnokii updates
     o re-add iconv detection, fixes problem with non-ASCII messages
       and data, spotted by Daniele Forsi           (Bastien Nocera)
