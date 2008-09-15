@@ -1,4 +1,4 @@
-.TH "gnokii" "1" "Aug 18, 2008" "Dag Wieers, Pawel Kot" "gnokii"
+.TH "gnokii" "1" "Sep 15, 2008" "Dag Wieers, Pawel Kot" "gnokii"
 .SH "NAME"
 gnokii \- modem/fax driver for the mobile phones
 .SH "SYNOPSIS"
@@ -549,6 +549,72 @@ removes the file from the phone.
 .TP
 .BR "\-\-deletefilebyid \fIid\fP"
 removes the file from the phone.
+
+.SS MISC
+.TP 
+.BR "\-\-keysequence" 
+emulates pressing keys on phone keyboard.
+Input is read from stdin.
+.IP
+Supported keys (any other char is ignored):
+.RS 5
+.IP
+.B M
+menu
+.IP
+.B N
+names
+.IP
+.B P
+power
+.IP
+.B G
+green phone
+.IP
+.B R
+red phone
+.IP
+.B U
+up
+.IP
+.B D
+down
+.IP
+.B +
+increase volume
+.IP
+.B -
+decrease volume
+.IP
+.B 0123456789#*
+as is
+.RS -5
+.IP
+Example: to increase volume
+.IP
+  echo "+" | gnokii --keysequence
+.IP
+Note: this command isn't supported by all phones/drivers.
+
+.TP 
+.BR "\-\-enterchar"
+emulates typing a character on phone keyboard.
+By emulating multiple pressions of keys, it can input all characters supported by the phone in use,
+but to input an SMS predictive text should be disabled.
+Input is read from stdin,
+with newline interpreted as the "Menu" key and escape interpreted as the "Names" key.
+.IP
+Note: this command isn't supported by all phones/drivers.
+
+.TP 
+.BR "\-\-listnetworks"
+prints a list of cellular network operators with their 3-digits MCC (Mobile country code) and 2-digits MNC (Mobile Network Code).
+.IP
+Note: this command doesn't need a valid .gnokiirc or a phone to work.
+
+.TP 
+.BR "\-\-getnetworkinfo"
+prints information about the network currently in use.
 
 .SH "DIAGNOSTICS"
 Various error messages are printed to standard error.  The exit code
