@@ -54,7 +54,7 @@
 #define GN_SMS_UDH_MAX_NUMBER          10
 
 /* Maximal number of SMS folders */
-#define GN_SMS_FOLDER_MAX_NUMBER       24
+#define GN_SMS_FOLDER_MAX_NUMBER       64
 #define GN_SMS_MESSAGE_MAX_NUMBER     190
 
 #define GN_SMS_DATETIME_MAX_LENGTH      7

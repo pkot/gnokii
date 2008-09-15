@@ -49,6 +49,10 @@
       the directory                                     (Paweł Kot)
     o add new memory types for SMS: SR (Status Reports), DR
       (Drafts) and OUS (Outbox, items to be sent)       (Paweł Kot)
+    o increase max number of SMS folders supported from 24 to 64
+      (many phones handled by the nk6510 driver support 20 folders
+      created by the user and more than 4 folders created by the
+      phone)                                            (Paweł Kot)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)
