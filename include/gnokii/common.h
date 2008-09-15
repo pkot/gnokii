@@ -84,9 +84,12 @@ typedef enum {
 	GN_MT_TA, /* for compatibility only: TA=computer memory */
 	GN_MT_CB, /* Currently selected memory */
 	GN_MT_IN, /* Inbox for folder aware phones */
-	GN_MT_OU, /* Outbox  */
+	GN_MT_OU, /* Outbox, sent items */
 	GN_MT_AR, /* Archive */
 	GN_MT_TE, /* Templates */
+	GN_MT_SR, /* Status reports */
+	GN_MT_DR, /* Drafts */
+	GN_MT_OUS, /* Outbox, items to be sent */
 	GN_MT_F1, /* 1st CUSTOM FOLDER */
 	GN_MT_F2,
 	GN_MT_F3,

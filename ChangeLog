@@ -45,6 +45,8 @@
     o print out an overrun frame when detected          (Paweł Kot)
     o gn_file_list struct supports an arbitrary number of files in
       the directory                                     (Paweł Kot)
+    o add new memory types for SMS: SR (Status Reports), DR
+      (Drafts) and OUS (Outbox, items to be sent)       (Paweł Kot)
  * documentation updates
     o updated Polish translation                        (Paweł Kot)
     o updated Italian translation                   (Daniele Forsi)

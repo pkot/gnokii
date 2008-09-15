@@ -59,6 +59,9 @@ GNOKII_API gn_memory_type gn_str2memory_type(const char *s)
 	X(OU);
 	X(AR);
 	X(TE);
+	X(SR);
+	X(DR);
+	X(OUS);
 	X(F1);
 	X(F2);
 	X(F3);
@@ -105,6 +108,9 @@ GNOKII_API const char *gn_memory_type2str(gn_memory_type mt)
 	X(OU);
 	X(AR);
 	X(TE);
+	X(SR);
+	X(DR);
+	X(OUS);
 	X(F1);
 	X(F2);
 	X(F3);
@@ -148,9 +154,12 @@ GNOKII_API const char *gn_memory_type_print(gn_memory_type mt)
 	case GN_MT_TA: return _("Computer memory");
 	case GN_MT_CB: return _("Currently selected memory");
 	case GN_MT_IN: return _("SMS Inbox");
-	case GN_MT_OU: return _("SMS Outbox");
+	case GN_MT_OU: return _("SMS Outbox, sent items");
 	case GN_MT_AR: return _("SMS Archive");
 	case GN_MT_TE: return _("SMS Templates");
+	case GN_MT_SR: return _("SMS Status Reports");
+	case GN_MT_DR: return _("SMS Drafts");
+	case GN_MT_OUS: return _("SMS Outbox, items to be sent");
 	case GN_MT_F1: return _("SMS Folder 1");
 	case GN_MT_F2: return _("SMS Folder 2");
 	case GN_MT_F3: return _("SMS Folder 3");
