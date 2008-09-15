@@ -110,6 +110,7 @@
       phonebook configurable; FIXME: detect which phones support
       extended phonebook                                (Paweł Kot)
     o support SMS memory names longer than 2 chars  (Daniele Forsi)
+    o Sagem was reported to encode numbers (bug #24116) (Paweł Kot)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
  * smsd updates

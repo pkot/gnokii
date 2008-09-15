@@ -57,6 +57,7 @@ static gn_error AT_GetModel(gn_data *data, struct gn_statemachine *state)
 void at_sagem_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
 	AT_DRVINST(state)->lac_swapped = 1;
+	AT_DRVINST(state)->encode_number = 1;
 
 	/* fix for Sagem myW-8 returning the wrong answer to GN_OP_GetModel */
 	at_insert_send_function(GN_OP_GetModel, AT_GetModel, state);
