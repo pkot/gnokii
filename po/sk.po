@@ -1,3 +1,4 @@
+# This is the Slovak locale definition for Gnokii.
 msgid ""
 msgstr ""
 "Project-Id-Version: gnokii 0.3.2_pre23\n"
