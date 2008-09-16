@@ -1,4 +1,4 @@
-# SOME DESCRIPTIVE TITLE.
+# This is the Simplified Chinese locale definition for Gnokii.
 # Copyright (C) 2004 THE PACKAGE'S COPYRIGHT HOLDER
 # This file is distributed under the same license as the PACKAGE package.
 # Funda Wang <fundawang@linux.net.cn>, 2004.
