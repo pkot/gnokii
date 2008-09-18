@@ -2,8 +2,7 @@
 =========================
  * build system updates
     o move config.rpath from config/ to toplevel        (Paweł Kot)
-    o add iconv.m4 and codeset.m4 for older distros to be able to
-      build CVS version                                 (Paweł Kot)
+    o remove all m4 macros except ac_expand_dir.m4      (Paweł Kot)
     o use -N instead of -r in addition to -O option to make new
       wget happy                                        (Paweł Kot)
     o be compatible with systems where iconv() is not in glibc
