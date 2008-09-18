@@ -53,7 +53,8 @@ libgnokii_la_LIBADD = \
 	$(top_builddir)/common/phones/libPHONES.la \
 	$(top_builddir)/common/links/libLINKS.la \
 	$(top_builddir)/common/devices/libDEVICES.la \
-	$(XPM_LIBS)
+	$(XPM_LIBS) \
+	$(LTLIBICONV)
 
 libgnokii_la_LDFLAGS = 				\
 	-version-info $(GNOKII_LT_VERSION)	\

@@ -6,6 +6,8 @@
       build CVS version                                 (Paweł Kot)
     o use -N instead of -r in addition to -O option to make new
       wget happy                                        (Paweł Kot)
+    o be compatible with systems where iconv() is not in glibc
+                                                    (Daniele Forsi)
  * win32 updates
     o make it build again                             (Jari Turkia)
  * nk6510 driver updates
