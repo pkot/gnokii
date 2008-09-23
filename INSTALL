@@ -8,6 +8,7 @@ Quickstart
 ==========
 
     $ libtoolize -c -f				# only for CVS copies
+    [ under Mac OS X use glibtoolize instead of libtoolize]
     $ glib-gettextize -f			# only for CVS copies
     $ aclocal -I m4				# only for CVS copies
     $ autoheader -I m4				# only for CVS copies

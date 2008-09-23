@@ -1,6 +1,10 @@
 #!/bin/sh -e
 
-libtoolize -c -f
+if [ "`uname -s`"x = "Darwin"x ]; then
+	glibtoolize -c -f
+else
+	libtoolize -c -f
+fi
 glib-gettextize -f -c
 intltoolize --force --copy --automake
 AC_LOCAL_FLAGS="-I m4/"

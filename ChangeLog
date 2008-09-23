@@ -7,6 +7,8 @@
       wget happy                                        (Paweł Kot)
     o be compatible with systems where iconv() is not in glibc
                                                     (Daniele Forsi)
+    o make Mac OS X use glibtoolize instead of libtoolize in
+      ./autogen.sh                                  (Daniele Forsi)
  * win32 updates
     o make it build again                             (Jari Turkia)
  * nk6510 driver updates
