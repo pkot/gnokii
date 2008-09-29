@@ -451,6 +451,7 @@ gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		fprintf(stderr, _("Failed to put file to %s: %s\n"), argv[optind], gn_error_print(error));
 
 	free(fi.file);
+//fclose(f);
 
 	return error;
 }
