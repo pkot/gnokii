@@ -116,6 +116,8 @@
       extended phonebook                                (Paweł Kot)
     o support SMS memory names longer than 2 chars  (Daniele Forsi)
     o Sagem was reported to encode numbers (bug #24116) (Paweł Kot)
+    o let it use also connection = tcp to use an Ethernet to serial
+      adapter or a phone connected to a remote PC   (Daniele Forsi)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
  * smsd updates

@@ -79,9 +79,9 @@ static int xwrite(unsigned char *d, size_t len, struct gn_statemachine *sm)
 	return 0;
 }
 
-static bool atbus_serial_open(int mode, char *device, struct gn_statemachine *sm)
+static bool atbus_open(int mode, char *device, struct gn_statemachine *sm)
 {
-	int result = device_open(device, false, false, mode, GN_CT_Serial, sm);
+	int result = device_open(device, false, false, mode, sm->config.connection_type, sm);
 
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
@@ -315,7 +315,7 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 		/* FALLTHROUGH */
 	case GN_CT_Serial:
 	case GN_CT_TCP:
-		if (!atbus_serial_open(mode, state->config.port_device, state)) {
+		if (!atbus_open(mode, state->config.port_device, state)) {
 			error = GN_ERR_FAILED;
 			goto err;
 		}
