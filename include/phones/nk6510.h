@@ -212,7 +212,7 @@ typedef enum {
  * data is cached.
  */
 #define NK6510_FILE_CACHE_TIMEOUT	10	/* seconds */
-#define NK6510_GETFILELIST_TIMEOUT	10000	/* miliseconds */
+#define NK6510_GETFILELIST_TIMEOUT	500	/* miliseconds */
 
 typedef struct {
 	/* callbacks */
