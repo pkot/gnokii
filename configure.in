@@ -10,7 +10,7 @@ dnl
 
 
 AC_INIT([gnokii],
-	 [0.6.27cvs],
+	 [0.6.27],
 	 [http://www.gnokii.org/])
 
 # Before making a release, the GNOKII_LT_VERSION string should be modified.
@@ -18,11 +18,11 @@ AC_INIT([gnokii],
 # - If interfaces have been changed or added, but binary compatibility has
 #   been preserved, change to C+1:0:A+1
 # - If binary compatibility has been broken (eg removed or changed interfaces)
-#   change to C+1:0:0
+#   change to C-A+1:0:0
 # - If the interface is the same as the previous version, change to C:R+1:A
-GNOKII_LT_VERSION_CURRENT=12
+GNOKII_LT_VERSION_CURRENT=4
 GNOKII_LT_VERSION_REVISION=0
-GNOKII_LT_VERSION_AGE=9
+GNOKII_LT_VERSION_AGE=0
 AC_SUBST(GNOKII_LT_VERSION_CURRENT)
 AC_SUBST(GNOKII_LT_VERSION_REVISION)
 AC_SUBST(GNOKII_LT_VERSION_AGE)
@@ -31,7 +31,7 @@ dnl xgnokii version
 XVERSION=1.0
 
 dnl smsd version
-SVERSION=1.4.2
+SVERSION=1.4.3
 
 AC_CANONICAL_SYSTEM
 AC_GNU_SOURCE
@@ -40,7 +40,7 @@ AC_CONFIG_SRCDIR([gnokii/gnokii.c])
 dnl gettext doesn't like the config.status being somewhere else :(
 dnl AC_CONFIG_AUX_DIR(config)
 
-AM_INIT_AUTOMAKE([1.8 dist-bzip2 no-dist-gzip])
+AM_INIT_AUTOMAKE([1.8 dist-bzip2])
 
 AC_PREFIX_DEFAULT("/usr/local")
 

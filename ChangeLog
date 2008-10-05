@@ -1,8 +1,9 @@
-0.6.27 (not released yet)
-=========================
+0.6.27
+======
  * build system updates
     o move config.rpath from config/ to toplevel        (Paweł Kot)
-    o remove all m4 macros except ac_expand_dir.m4      (Paweł Kot)
+    o remove all m4 macros except ac_expand_dir.m4 and
+      acx_pthread.m4                                    (Paweł Kot)
     o use -N instead of -r in addition to -O option to make new
       wget happy                                        (Paweł Kot)
     o be compatible with systems where iconv() is not in glibc
