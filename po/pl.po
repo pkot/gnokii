@@ -3967,14 +3967,14 @@ msgid "Cannot list available folders: %s\n"
 msgstr "Nie można pokazać dostępnych folderów: %s\n"
 
 #: ../gnokii/gnokii-sms.c:1185
-#, fuzzy, c-format
+#, c-format
 msgid "No. Name                               Id #Msg\n"
-msgstr "Nr  Nazwa                             Id #Msg\n"
+msgstr "Nr  Nazwa                              Id #Msg\n"
 
 #: ../gnokii/gnokii-sms.c:1186
-#, fuzzy, c-format
+#, c-format
 msgid "==============================================\n"
-msgstr "=============================================\n"
+msgstr "==============================================\n"
 
 #: ../gnokii/gnokii-sms.c:1190
 #, c-format
@@ -3982,9 +3982,9 @@ msgid "Cannot stat folder \"%s\": %s\n"
 msgstr "Nie można sprawdzić statusu folderu \"%s\": %s\n"
 
 #: ../gnokii/gnokii-sms.c:1193
-#, fuzzy, c-format
+#, c-format
 msgid "%3d %-32s %4s %4u\n"
-msgstr "%3d %-32s %3s %4u\n"
+msgstr "%3d %-32s %4s %4u\n"
 
 #: ../gnokii/gnokii-sms.c:1216
 #, c-format
