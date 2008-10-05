@@ -75,7 +75,7 @@ static void GetDefaultValues()
 	xgnokiiConfig.user.fax = g_strdup("");
 	xgnokiiConfig.user.email = g_strdup("");
 	xgnokiiConfig.user.address = g_strdup("");
-	xgnokiiConfig.helpviewer = g_strdup("mozilla");
+	xgnokiiConfig.helpviewer = g_strdup("firefox");
 	if ((homedir = g_get_home_dir()) == NULL)
 		homedir = "";
 	xgnokiiConfig.mailbox = g_strdup_printf("%s/Mail/smsbox", homedir);
