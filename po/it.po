@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2008-10-05 13:35+0200\n"
+"POT-Creation-Date: 2008-10-05 20:41+0200\n"
 "PO-Revision-Date: 2008-09-01 12:18+0200\n"
 "Last-Translator: Daniele Forsi <daniele@forsi.it>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
@@ -3997,14 +3997,14 @@ msgid "Cannot list available folders: %s\n"
 msgstr "Impossibile elencare le cartelle disponibili: %s\n"
 
 #: ../gnokii/gnokii-sms.c:1185
-#, fuzzy, c-format
+#, c-format
 msgid "No. Name                               Id #Msg\n"
-msgstr "N°  Nome                              Id #Msg\n"
+msgstr "N°  Nome                               Id #Msg\n"
 
 #: ../gnokii/gnokii-sms.c:1186
-#, fuzzy, c-format
+#, c-format
 msgid "==============================================\n"
-msgstr "=============================================\n"
+msgstr "==============================================\n"
 
 #: ../gnokii/gnokii-sms.c:1190
 #, c-format
@@ -4012,9 +4012,9 @@ msgid "Cannot stat folder \"%s\": %s\n"
 msgstr "Impossibile ottenere informazioni sulla cartella «%s»: %s\n"
 
 #: ../gnokii/gnokii-sms.c:1193
-#, fuzzy, c-format
+#, c-format
 msgid "%3d %-32s %4s %4u\n"
-msgstr "%3d %-32s %3s %4u\n"
+msgstr "%3d %-32s %4s %4u\n"
 
 #: ../gnokii/gnokii-sms.c:1216
 #, c-format
