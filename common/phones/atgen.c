@@ -354,7 +354,6 @@ static char *extpb_find_number_subentry(gn_phonebook_entry *entry, gn_phonebook_
 	return NULL;
 }
 
-
 static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -384,7 +383,7 @@ size_t at_encode(at_charset charset, char *dst, size_t dst_len, const char *src,
 		break;
 	case AT_CHAR_UCS2:
 		ret = char_ucs2_encode(dst, dst_len, src, len);
-		break; 
+		break;
 	default:
 		memcpy(dst, src, dst_len >= len ? len : dst_len);
 		ret = len;
@@ -576,7 +575,7 @@ gn_error at_error_get(unsigned char *buffer, struct gn_statemachine *state)
 		case 320: return GN_ERR_FAILED;		/* memory failure */
 		case 321: return GN_ERR_INVALIDLOCATION;/* invalid memory index */
 		case 322: return GN_ERR_MEMORYFULL;	/* memory full */
-		
+
 		case 330: return GN_ERR_FAILED;		/* SMSC address unknown */
 		case 331: return GN_ERR_NOCARRIER;	/* no network service */
 		case 332: return GN_ERR_TIMEOUT;	/* network timeout */
@@ -626,7 +625,7 @@ gn_error at_error_get(unsigned char *buffer, struct gn_statemachine *state)
 		case  30: return GN_ERR_NOCARRIER;	/* no network service */
 		case  31: return GN_ERR_TIMEOUT;	/* network timeout */
 		case  32: return GN_ERR_FAILED;		/* network not allowed - emergency calls only */
-		
+
 		case  40: return GN_ERR_CODEREQUIRED;	/* network personalisation PIN required */
 		case  41: return GN_ERR_CODEREQUIRED;	/* network personalisation PUK required */
 		case  42: return GN_ERR_CODEREQUIRED;	/* network subset personalisation PIN required */
@@ -818,7 +817,7 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
 
-	/* no support for HEXGSM, be happy with GSM */ 
+	/* no support for HEXGSM, be happy with GSM */
 	if ((drvinst->availcharsets & AT_CHAR_GSM) && (drvinst->charset != AT_CHAR_HEXGSM)) {
 		error = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"GSM\"\r", state);
 		if (error)
@@ -1206,7 +1205,6 @@ static gn_error AT_WritePhonebookExt(gn_data *data, struct gn_statemachine *stat
 }
 #undef MAX_REQ
 
-
 static gn_error AT_CallDivert(gn_data *data, struct gn_statemachine *state)
 {
 	char req[64];
@@ -1357,7 +1355,7 @@ static gn_error AT_SendSMS(gn_data *data, struct gn_statemachine *state)
 static gn_error AT_SaveSMS(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error ret;
-	
+
 	at_set_charset(data, state, AT_CHAR_GSM);
 	ret = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 	if (ret)
@@ -1477,7 +1475,7 @@ static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[32];
 	gn_error err;
-	
+
 	at_set_charset(data, state, AT_CHAR_GSM);
 	err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 	if (err)
@@ -1489,12 +1487,12 @@ static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_DeleteSMS, data, state);
 }
 
-/* 
+/*
  * Hey nokia users. don't expect this to return anything useful.
  * You can't read the number set by the phone menu with this command,
  * nor can you change this number by AT commands. Worse, an ATZ will
  * clear a SMS Center Number set by AT commands. This doesn't affect
- * the number set by the phone menu 
+ * the number set by the phone menu.
  */
 static gn_error AT_GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
@@ -1697,7 +1695,6 @@ static gn_error AT_PrepareDateTime(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_AT_PrepareDateTime, data, state);
 }
 
-
 /*
  * This command allows to send DTMF tones and arbitrary tones.
  * DTMF is a single ASCII character in the set 0-9, *, #, A-D
@@ -1720,7 +1717,7 @@ static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state)
 	len = snprintf(req, sizeof(req), "AT+VTS=?\r");
 	if (sm_message_send(len, GN_OP_SendDTMF, req, state))
 		return GN_ERR_NOTREADY;
-	if (sm_block_no_retry(GN_OP_SendDTMF, data, state) != GN_ERR_NONE)	
+	if (sm_block_no_retry(GN_OP_SendDTMF, data, state) != GN_ERR_NONE)
 		return GN_ERR_NOTSUPPORTED;
 
 	/* Send it char by char */
@@ -1987,7 +1984,7 @@ static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int le
 	buf.length= length;
 
 	splitlines(&buf);
-	
+
 	if (data->message_center && strstr(buf.line2, "+CSCA")) {
 		pos = strchr(buf.line2 + 8, '\"');
 		if (pos) {
@@ -2123,7 +2120,7 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
-	
+
 	splitlines(&buf);
 
 	if (!strncmp(buf.line1, "AT+CBC", 6) && !strncmp(buf.line2, "+CBC: ", 6)) {
@@ -2160,7 +2157,7 @@ static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int leng
 
 	buf.line1 = buffer + 1;
 	buf.length= length;
-	
+
 	splitlines(&buf);
 
 	if (data->rf_unit && !strncmp(buf.line1, "AT+CSQ", 6)) { /* FIXME realy needed? */
@@ -2343,7 +2340,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
 		return error;
-	
+
 	buf.line1 = buffer + 1;
 	buf.length = length;
 
@@ -2410,7 +2407,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	sms_len = atoi(tmp+1);
 	if (sms_len == 0)
 		return GN_ERR_EMPTYLOCATION;
-	
+
 	sms_len = strlen(buf.line3) / 2;
 	tmp = calloc(sms_len, 1);
 	if (!tmp) {
@@ -2875,7 +2872,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		error = creg_parse(strings, i, data->network_info, drvinst->lac_swapped);
 
 		gnokii_strfreev(strings);
-		
+
 		if (error != GN_ERR_NONE)
 			return error;
 	} else if (!strncmp(buf.line1, "CREG:", 5)) {
@@ -2933,7 +2930,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), gn_network_code_get(tmp));
 			break;
 		case 2: /* network operator code given */
-			if (strlen(strings[2]) == 5) { 
+			if (strlen(strings[2]) == 5) {
 				data->network_info->network_code[0] = strings[2][0];
 				data->network_info->network_code[1] = strings[2][1];
 				data->network_info->network_code[2] = strings[2][2];
@@ -2941,7 +2938,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 				data->network_info->network_code[4] = strings[2][3];
 				data->network_info->network_code[5] = strings[2][4];
 				data->network_info->network_code[6] = 0;
-			} else if (strlen(strings[2]) >= 6) { 
+			} else if (strlen(strings[2]) >= 6) {
 				data->network_info->network_code[0] = strings[2][1];
 				data->network_info->network_code[1] = strings[2][2];
 				data->network_info->network_code[2] = strings[2][3];
@@ -3095,7 +3092,7 @@ static gn_error ReplyGetSMSMemorySize(int messagetype, unsigned char *buffer, in
 }
 
 /* General reply function for phone responses. buffer[0] holds the compiled
- * success of the result (OK, ERROR, ... ). see links/atbus.h and links/atbus.c 
+ * success of the result (OK, ERROR, ... ). see links/atbus.h and links/atbus.c
  * for reference */
 static gn_error Reply(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
@@ -3184,7 +3181,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 		ret = GN_ERR_NOTSUPPORTED;
 		break;
 	}
-	if (ret) 
+	if (ret)
 		goto out;
 
 	sm_initialise(state);
@@ -3199,7 +3196,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	gn_data_clear(&data);
 	data.model = model;
 	ret = state->driver.functions(GN_OP_GetModel, &data, state);
-	if (ret) 
+	if (ret)
 		goto out;
 	data.manufacturer = manufacturer;
 	ret = state->driver.functions(GN_OP_GetManufacturer, &data, state);
@@ -3224,7 +3221,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 		at_sagem_init(model, setupdata->model, state);
 	else if (!at_manufacturer_compare("lg"))
 		at_lg_init(model, setupdata->model, state);
-	
+
 	StoreDefaultCharset(state);
 
 	/*
