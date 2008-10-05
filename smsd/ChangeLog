@@ -2,6 +2,10 @@
 - Marked as 1.4.3
 
 
+* Mon Oct  5 2008 Paweł Kot
+- Default module is file module.
+
+
 * Sat Jul 29 2008 Jan Derfinak
 - Added possibility to use multiline SMS text in file module (idea from
   Joan).

@@ -124,7 +124,8 @@ Options:
 -m, --module db_module
 	Specify which module to use for connection to DB server.
 	Currently supported are pq for PostgreSQL, mysql for MySQL and file
-	for the text file (see THE FILE MODULE section).
+	for the text file (see THE FILE MODULE section). Default is file
+	module.
 
 -l, --libdir path_to_db_module
 	Specify path to DB modules. If you specify pq module, smsd searches

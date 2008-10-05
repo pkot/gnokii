@@ -203,7 +203,7 @@ static void ReadConfig (gint argc, gchar *argv[])
   connection.db = g_strdup ("sms");
   connection.host = g_strdup ("");
   connection.schema = g_strdup ("public");
-  smsdConfig.dbMod = g_strdup ("pq");
+  smsdConfig.dbMod = g_strdup ("file");
   smsdConfig.libDir = g_strdup (MODULES_DIR);
   smsdConfig.logFile = NULL;
   smsdConfig.phone = g_strdup ("");
