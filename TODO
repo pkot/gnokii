@@ -1,5 +1,10 @@
+SHORT TERM
+ * fix MacOS X support
+ * reading outbox SM for Series40 3rd+ Edition
+
+LONG TERM
  * gnokii changes:
-    o readline support
+    o readline support (partially done: gnokii --shell)
     o easy backup/restore commands
 
  * libgnokii changes
@@ -8,14 +13,14 @@
        + encoding/decoding functions require output length
        + move information hardcoded in the drivers into gn_phone_model
          structure
-    o change structures to be dynamically allocatable
+    o change structures to be dynamically allocatable (in progress)
 
  * driver changes
     o obex support
     o syncml support
     o support new phones with filesystems, cameras and other bells'n'whistles
     o Nokia 9210 and family
-    o bluetooth support for win32
+    o bluetooth support for win32 (coded, but doesn't work)
 
  * GNOME/KDE support
     o external apps
