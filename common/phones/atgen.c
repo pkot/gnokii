@@ -2224,7 +2224,7 @@ static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int l
 {
 	at_line_buffer buf;
 	gn_error error;
-	char *pos, *memory_name;
+	char *pos, *memory_name, *line = NULL;
 	char **items;
 	int i, n;
 	gn_memory_type memory_type;
@@ -2235,7 +2235,24 @@ static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int l
 	buf.length = length;
 	splitlines(&buf);
 
-	if (strncmp("+CPMS:", buf.line2, 6))
+	/*
+	 * Samsung SHG-L760 answers with (no command echo):
+	 * >+CPMS: ("ME","MT","SM","SR"),("ME","MT","SM","SR"),("ME","MT","SM","SR")
+	 * >
+	 * >OK
+	 */
+	if (!strncmp("+CPMS:", buf.line1, 6))
+		line = buf.line1;
+	/*
+	 * Nokia 6230i (and most of the phones) answer with (command echo):
+	 * >AT+CPMS=?
+	 * >+CPMS: ("ME","SM"),("ME","SM"),("MT")
+	 * >
+	 * >OK
+	 */
+	if (!strncmp("+CPMS:", buf.line2, 6))
+		line = buf.line2;
+	if (!line)
 		return GN_ERR_INTERNALERROR;
 
 	/*
@@ -2243,7 +2260,7 @@ static gn_error ReplyGetSMSFolders(int messagetype, unsigned char *buffer, int l
 	 * can't use strip_brackets() because it will strip the last ')',
 	 * not the first.
 	 */
-	pos = buf.line2 + 6;
+	pos = line + 6;
 	while (*pos && *pos != ')')
 		pos++;
 	*pos = '\0';

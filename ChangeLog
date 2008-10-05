@@ -118,6 +118,8 @@
     o Sagem was reported to encode numbers (bug #24116) (Paweł Kot)
     o let it use also connection = tcp to use an Ethernet to serial
       adapter or a phone connected to a remote PC   (Daniele Forsi)
+    o Samsung SHG-L760 was reported to respond to some commands
+      without echoing the original request              (Paweł Kot)
  * xgnokii updates
     o display longer model names in Options dialog  (Daniele Forsi)
  * smsd updates
