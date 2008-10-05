@@ -89,6 +89,7 @@
       have up to 3 chars                                (Paweł Kot)
     o implement --shell option that will allow run more than one
       gnokii command inside one session                 (Paweł Kot)
+    o sms folder abbreviation may be 3-char             (Paweł Kot)
  * at driver updates
     o workaround for Sagem myW-8 (in atsag.c) and other phones (in
       atgen.c) returning the wrong answer to GN_OP_GetModel
