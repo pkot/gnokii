@@ -173,7 +173,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
   while ((dirent = readdir (dir)))
   {
     gn_sms sms;
-    gint slen;
+    gint slen = 0;
     
     if (strcmp (dirent->d_name, ".") == 0 || strcmp (dirent->d_name, "..") == 0 ||
         strncmp (dirent->d_name, "ERR.", 4) == 0)
@@ -190,8 +190,8 @@ GNOKII_API void DB_Look (const gchar * const phone)
     gn_sms_default_submit (&sms);
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
 
-    fgets (sms.remote.number, sizeof (sms.remote.number), smsFile);
-    slen = strlen (sms.remote.number);
+    if (fgets (sms.remote.number, sizeof (sms.remote.number), smsFile))
+      slen = strlen (sms.remote.number);
     if (slen < 1)
     {
       error = -1;
