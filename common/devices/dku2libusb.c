@@ -360,21 +360,20 @@ static int usbfbus_connect_request(struct gn_statemachine *state)
 {
 	int ret;
 
-	DEVINSTANCE(state)->interface->dev_control = usb_open(DEVINSTANCE(state)->interface->device);
 	DEVINSTANCE(state)->interface->dev_data = usb_open(DEVINSTANCE(state)->interface->device);
 
-	ret = usb_set_configuration(DEVINSTANCE(state)->interface->dev_control, DEVINSTANCE(state)->interface->configuration);
+	ret = usb_set_configuration(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->configuration);
 	if (ret < 0) {
 		dprintf("Can't set configuration: %d\n", ret);
 	}
 
-	ret = usb_claim_interface(DEVINSTANCE(state)->interface->dev_control, DEVINSTANCE(state)->interface->control_interface);
+	ret = usb_claim_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->control_interface);
 	if (ret < 0) {
 		dprintf("Can't claim control interface: %d\n", ret);
 		goto err1;
 	}
 
-	ret = usb_set_altinterface(DEVINSTANCE(state)->interface->dev_control, DEVINSTANCE(state)->interface->control_setting);
+	ret = usb_set_altinterface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->control_setting);
 	if (ret < 0) {
 		dprintf("Can't set control setting: %d\n", ret);
 		goto err2;
@@ -396,10 +395,9 @@ static int usbfbus_connect_request(struct gn_statemachine *state)
 err3:
 	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);	
 err2:
-	usb_release_interface(DEVINSTANCE(state)->interface->dev_control, DEVINSTANCE(state)->interface->control_interface);
+	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->control_interface);
 err1:
 	usb_close(DEVINSTANCE(state)->interface->dev_data);
-	usb_close(DEVINSTANCE(state)->interface->dev_control);
 	return 0;
 }
 
@@ -421,15 +419,12 @@ static int usbfbus_disconnect_request(struct gn_statemachine *state)
 	ret = usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);
 	if (ret < 0) 
 		dprintf("Can't release data interface %d\n", ret);
-	ret = usb_release_interface(DEVINSTANCE(state)->interface->dev_control, DEVINSTANCE(state)->interface->control_interface);
+	ret = usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->control_interface);
 	if (ret < 0) 
 		dprintf("Can't release control interface %d\n", ret);
 	ret = usb_close(DEVINSTANCE(state)->interface->dev_data);
 	if (ret < 0)
 		dprintf("Can't close data interface %d\n", ret);
-	ret = usb_close(DEVINSTANCE(state)->interface->dev_control);
-	if (ret < 0)
-		dprintf("Can't close control interface %d\n", ret);
 	return ret;	
 }
 

@@ -126,6 +126,9 @@
     o allow to send multiline SMS with file module   (Jan Derfinak,
                                                               Joan)
     o don't use variable after it is freed              (Paweł Kot)
+ * link layer updates
+    o usb_open() on DKU2 device just once -- otherwise it doesn't
+      work on FreeBSD                                   (Paweł Kot)
 
 0.6.26
 ======
