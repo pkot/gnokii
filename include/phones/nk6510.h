@@ -199,8 +199,6 @@ typedef enum {
 
 #define NK6510_FILE_ID_LENGTH 6
 
-/* 5 seconds before GetFileList timeouts -- useful for large dirs */
-#define NK6510_FILE_LIST_TIMEOUT	5000
 /*
  * For Nokia Series40 3rd edition, we implement GetSMS with files commands.
  * Algorithm is:

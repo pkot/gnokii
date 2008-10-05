@@ -1988,6 +1988,11 @@ static gn_error NK6510_GetFileListCache(gn_data *data, struct gn_statemachine *s
 
 	dprintf("Trying to retrieve filelist of %s from cache\n", data->file_list->path);
 
+	/*
+	 * We call here map_get() twice. First time it is to ensure that we
+	 * use proper timeout: the more files are in the folder the longer
+	 * it takes to get the file list.
+	 */
 	fl = map_get(&map, data->file_list->path, 0);
 	if (fl)
 		count *= fl->file_count;
