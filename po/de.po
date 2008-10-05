@@ -6,7 +6,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gnokii 0.4.3\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2008-09-15 14:31+0200\n"
+"POT-Creation-Date: 2008-10-05 13:35+0200\n"
 "PO-Revision-Date: 2002-07-25 19:30+0200\n"
 "Last-Translator: Markus Plail <plail@web.de>\n"
 "Language-Team: German\n"
@@ -460,8 +460,8 @@ msgstr ""
 #: ../common/gsm-common.c:597 ../common/gsm-common.c:611
 #: ../common/gsm-common.c:622 ../common/gsm-common.c:634
 #: ../common/gsm-sms.c:409 ../common/libfunctions.c:168
-#: ../common/phones/atgen.c:2577 ../common/phones/atgen.c:2584
-#: ../common/phones/atgen.c:3054 ../common/phones/nk6100.c:4047
+#: ../common/phones/atgen.c:2591 ../common/phones/atgen.c:2598
+#: ../common/phones/atgen.c:3068 ../common/phones/nk6100.c:4047
 #: ../gnokii/gnokii-ringtone.c:90 ../xgnokii/xgnokii_calendar.c:194
 #: ../xgnokii/xgnokii_contacts.c:773 ../xgnokii/xgnokii_contacts.c:829
 #: ../xgnokii/xgnokii_contacts.c:956 ../xgnokii/xgnokii_contacts.c:998
@@ -1632,14 +1632,14 @@ msgid "Other"
 msgstr "Andere"
 
 #. Set a default SMSC name because +CSCA doesn't provide one
-#: ../common/phones/atgen.c:2010 ../common/phones/nk6100.c:1531
-#: ../common/phones/nk6510.c:1871 ../common/phones/nk7110.c:1481
+#: ../common/phones/atgen.c:2007 ../common/phones/nk6100.c:1531
+#: ../common/phones/nk6510.c:1870 ../common/phones/nk7110.c:1481
 #: ../xgnokii/xgnokii.c:532 ../xgnokii/xgnokii_sms.c:858
 #, c-format
 msgid "Set %d"
 msgstr "Setze %d"
 
-#: ../common/phones/atgen.c:2574
+#: ../common/phones/atgen.c:2588
 #, c-format
 msgid "Withheld"
 msgstr ""
@@ -1700,7 +1700,7 @@ msgstr "Muster:"
 #. for (i = 0; i < len; i++) dprintf("%02x ", req[i]);
 #. dprintf("\n");
 #.
-#: ../common/phones/nk6510.c:1737
+#: ../common/phones/nk6510.c:1736
 #, c-format
 msgid ""
 "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
@@ -1708,19 +1708,19 @@ msgid ""
 "Do you really want to continue? "
 msgstr ""
 
-#: ../common/phones/nk6510.c:1740
+#: ../common/phones/nk6510.c:1739
 #, fuzzy, c-format
 msgid "(yes/no) "
 msgstr "Datei überschreiben?"
 
-#: ../common/phones/nk6510.c:1742 ../gnokii/gnokii-phonebook.c:418
+#: ../common/phones/nk6510.c:1741 ../gnokii/gnokii-phonebook.c:418
 #: ../gnokii/gnokii-sms.c:538 ../gnokii/gnokii-sms.c:802
 #: ../gnokii/gnokii-utils.c:68 ../gnokii/gnokii-wap.c:223
 #, fuzzy
 msgid "yes"
 msgstr "Ja"
 
-#: ../common/phones/nk6510.c:2124 ../common/phones/nk6510.c:2187
+#: ../common/phones/nk6510.c:2132 ../common/phones/nk6510.c:2195
 #, c-format
 msgid "Progress: %3d%% completed\r"
 msgstr ""
@@ -3765,12 +3765,12 @@ msgstr "Fehler beim Schreiben von Datei: %s\n"
 
 #: ../gnokii/gnokii-sms.c:1185
 #, c-format
-msgid "No. Name                              Id #Msg\n"
+msgid "No. Name                               Id #Msg\n"
 msgstr ""
 
 #: ../gnokii/gnokii-sms.c:1186
 #, c-format
-msgid "=============================================\n"
+msgid "==============================================\n"
 msgstr ""
 
 #: ../gnokii/gnokii-sms.c:1190
@@ -3780,7 +3780,7 @@ msgstr "Fehler beim Schreiben von Datei: %s\n"
 
 #: ../gnokii/gnokii-sms.c:1193
 #, fuzzy, c-format
-msgid "%3d %-32s %3s %4u\n"
+msgid "%3d %-32s %4s %4u\n"
 msgstr "Nummer: %d\n"
 
 #: ../gnokii/gnokii-sms.c:1216

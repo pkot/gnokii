@@ -5,7 +5,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: fi\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2008-09-15 14:31+0200\n"
+"POT-Creation-Date: 2008-10-05 13:35+0200\n"
 "PO-Revision-Date: 2008-09-16 21:44+0300\n"
 "Last-Translator: Jari Turkia <jmjt@lut.fi>\n"
 "Language-Team: Finnish <en@li.org>\n"
@@ -13,7 +13,8 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Xgettext-Options: -a -k_ -s -v -d gnokii\n"
-"Files: fbus-3810.h fbus-6110.h gsm-api.h gsm-common.h misc.h fbus-3810.c fbus-6110.c gnokii.c gsm-api.c\n"
+"Files: fbus-3810.h fbus-6110.h gsm-api.h gsm-common.h misc.h fbus-3810.c "
+"fbus-6110.c gnokii.c gsm-api.c\n"
 "X-Generator: KBabel 1.11.4\n"
 
 #. Line not part of any heading
@@ -124,7 +125,8 @@ msgstr "Pseudoterminaalia ei voitu avata!\n"
 #: ../smsd/lowlevel.c:148 ../xgnokii/xgnokii_lowlevel.c:202
 #, c-format
 msgid "GSM/FBUS init failed! (Unknown model?). Quitting.\n"
-msgstr "GSM/FBUS alustus epäonnistui! (Tuntematon puhelimen malli?). Lopetetaan.\n"
+msgstr ""
+"GSM/FBUS alustus epäonnistui! (Tuntematon puhelimen malli?). Lopetetaan.\n"
 
 #: ../common/devices/tcp.c:80
 msgid "Gnokii tcp_open: socket()"
@@ -133,7 +135,8 @@ msgstr ""
 #: ../common/devices/tcp.c:89
 #, c-format
 msgid "Gnokii tcp_open: colon (':') not found in connect strings \"%s\"!\n"
-msgstr "Gnokii tcp_open: kaksoispiste (':') puuttuu yhteyden merkkijonosta \"%s\"!\n"
+msgstr ""
+"Gnokii tcp_open: kaksoispiste (':') puuttuu yhteyden merkkijonosta \"%s\"!\n"
 
 #: ../common/devices/tcp.c:97
 #, c-format
@@ -207,7 +210,8 @@ msgstr ""
 
 #: ../common/devices/unixserial.c:146
 #, c-format
-msgid "device_script(\"%s\"): child script execution failure: %s, exit code=%d\n"
+msgid ""
+"device_script(\"%s\"): child script execution failure: %s, exit code=%d\n"
 msgstr ""
 
 #: ../common/devices/unixserial.c:147
@@ -226,12 +230,16 @@ msgstr "Sarjaportin nopeus %d ei ole tuettu!\n"
 #: ../common/devices/unixserial.c:431
 #, c-format
 msgid "ERROR: Modem DCD is down and global/require_dcd parameter is set!\n"
-msgstr "VIRHE: Modeemin DCD-linja on alhaalla ja global/require_dcd parametri on päällä!\n"
+msgstr ""
+"VIRHE: Modeemin DCD-linja on alhaalla ja global/require_dcd parametri on "
+"päällä!\n"
 
 #: ../common/devices/winbluetooth.c:70 ../common/devices/winirda.c:113
 #, c-format
 msgid "Failed to initialize socket subsystem: need WINSOCK2. Please upgrade.\n"
-msgstr "TCP/IP-alijärjestelmän alustus epäonnistui: tarvitaan WINSOCK2. Päivitä käyttöjärjestelmä.\n"
+msgstr ""
+"TCP/IP-alijärjestelmän alustus epäonnistui: tarvitaan WINSOCK2. Päivitä "
+"käyttöjärjestelmä.\n"
 
 #: vcal.lx:161 ../common/vcal.lx:161
 #, c-format
@@ -445,8 +453,8 @@ msgstr ""
 #: ../common/gsm-common.c:597 ../common/gsm-common.c:611
 #: ../common/gsm-common.c:622 ../common/gsm-common.c:634
 #: ../common/gsm-sms.c:409 ../common/libfunctions.c:168
-#: ../common/phones/atgen.c:2577 ../common/phones/atgen.c:2584
-#: ../common/phones/atgen.c:3054 ../common/phones/nk6100.c:4047
+#: ../common/phones/atgen.c:2591 ../common/phones/atgen.c:2598
+#: ../common/phones/atgen.c:3068 ../common/phones/nk6100.c:4047
 #: ../gnokii/gnokii-ringtone.c:90 ../xgnokii/xgnokii_calendar.c:194
 #: ../xgnokii/xgnokii_contacts.c:773 ../xgnokii/xgnokii_contacts.c:829
 #: ../xgnokii/xgnokii_contacts.c:956 ../xgnokii/xgnokii_contacts.c:998
@@ -1254,7 +1262,8 @@ msgstr "Konfigurointitiedoston luku epäonnistui."
 
 #: ../common/gsm-error.c:73
 msgid "Either global or given phone section cannot be found."
-msgstr "Konfigurointitiedostossa ei ole globaalia osiota tai annettua puhelinta."
+msgstr ""
+"Konfigurointitiedostossa ei ole globaalia osiota tai annettua puhelinta."
 
 #: ../common/gsm-error.c:74
 msgid "Incorrect logging section configuration."
@@ -1313,7 +1322,8 @@ msgstr "Formatointivirhe: alakohdassa on ainoastaan syöte-kenttä\n"
 #: ../common/gsm-filetypes.c:1538
 #, c-format
 msgid "Formatting error: unknown error while reading subentry number type\n"
-msgstr "Formatointivirhe: tuntematon virhe luettaessa alakohdan numeerista tietoa\n"
+msgstr ""
+"Formatointivirhe: tuntematon virhe luettaessa alakohdan numeerista tietoa\n"
 
 #: ../common/gsm-filetypes.c:1542
 #, c-format
@@ -1323,12 +1333,16 @@ msgstr "Formatointivirhe: tyhjä numero\n"
 #: ../common/gsm-filetypes.c:1557 ../common/gsm-filetypes.c:1580
 #, c-format
 msgid "Formatting error: subentry has only entry and number type fields\n"
-msgstr "Formatointivirhe: alakohdassa on ainoastaan syöte ja numero -tyyppisiä kenttiä\n"
+msgstr ""
+"Formatointivirhe: alakohdassa on ainoastaan syöte ja numero -tyyppisiä "
+"kenttiä\n"
 
 #: ../common/gsm-filetypes.c:1566
 #, c-format
 msgid "Formatting error: unknown error while reading subentry id\n"
-msgstr "Formatointivirhe: tuntematon virhe luettaessa alakohdan syötteen tunnistetta\n"
+msgstr ""
+"Formatointivirhe: tuntematon virhe luettaessa alakohdan syötteen "
+"tunnistetta\n"
 
 #: ../common/gsm-filetypes.c:1570
 #, c-format
@@ -1492,7 +1506,9 @@ msgstr "Tarkista lukitushakemiston oikeudet.\n"
 #: ../common/misc.c:524
 #, c-format
 msgid "Cannot create lockfile %s. Please check for existence of the path."
-msgstr "Lukitustiedostoa %s ei voida luoda. Tarkista onko antamasi tiedostopolku olemassa."
+msgstr ""
+"Lukitustiedostoa %s ei voida luoda. Tarkista onko antamasi tiedostopolku "
+"olemassa."
 
 #: ../common/misc.c:529
 #, c-format
@@ -1520,14 +1536,14 @@ msgid "Other"
 msgstr ""
 
 #. Set a default SMSC name because +CSCA doesn't provide one
-#: ../common/phones/atgen.c:2010 ../common/phones/nk6100.c:1531
-#: ../common/phones/nk6510.c:1871 ../common/phones/nk7110.c:1481
+#: ../common/phones/atgen.c:2007 ../common/phones/nk6100.c:1531
+#: ../common/phones/nk6510.c:1870 ../common/phones/nk7110.c:1481
 #: ../xgnokii/xgnokii.c:532 ../xgnokii/xgnokii_sms.c:858
 #, c-format
 msgid "Set %d"
 msgstr ""
 
-#: ../common/phones/atgen.c:2574
+#: ../common/phones/atgen.c:2588
 #, c-format
 msgid "Withheld"
 msgstr "Vedetty takaisin"
@@ -1587,29 +1603,31 @@ msgstr ""
 #. for (i = 0; i < len; i++) dprintf("%02x ", req[i]);
 #. dprintf("\n");
 #.
-#: ../common/phones/nk6510.c:1737
+#: ../common/phones/nk6510.c:1736
 #, c-format
 msgid ""
 "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
 "It may have to be sent to Nokia Service if something fails!\n"
 "Do you really want to continue? "
 msgstr ""
-"6510-sarjan puhelimet tuntuvat olevan herkkiä väärinmuotoilluille SMS-viesteille\n"
-"Jos joku epäonnistuu, saattaa olla että puhelimesi on lähetettävä Nokia-huoltoon!\n"
+"6510-sarjan puhelimet tuntuvat olevan herkkiä väärinmuotoilluille SMS-"
+"viesteille\n"
+"Jos joku epäonnistuu, saattaa olla että puhelimesi on lähetettävä Nokia-"
+"huoltoon!\n"
 "Oletko varma, että haluat jatkaa? "
 
-#: ../common/phones/nk6510.c:1740
+#: ../common/phones/nk6510.c:1739
 #, c-format
 msgid "(yes/no) "
 msgstr ""
 
-#: ../common/phones/nk6510.c:1742 ../gnokii/gnokii-phonebook.c:418
+#: ../common/phones/nk6510.c:1741 ../gnokii/gnokii-phonebook.c:418
 #: ../gnokii/gnokii-sms.c:538 ../gnokii/gnokii-sms.c:802
 #: ../gnokii/gnokii-utils.c:68 ../gnokii/gnokii-wap.c:223
 msgid "yes"
 msgstr ""
 
-#: ../common/phones/nk6510.c:2124 ../common/phones/nk6510.c:2187
+#: ../common/phones/nk6510.c:2132 ../common/phones/nk6510.c:2195
 #, c-format
 msgid "Progress: %3d%% completed\r"
 msgstr ""
@@ -2141,7 +2159,8 @@ msgstr "Lähetettävän logon tyyppi on määriteltävä!\n"
 #: ../gnokii/gnokii-logo.c:118
 #, c-format
 msgid "Cannot send logo: specified and loaded bitmap type differ!\n"
-msgstr "Logon lähetys epäonnistui: määritelty ja ladattu kuva ovat eri tyyppiä!\n"
+msgstr ""
+"Logon lähetys epäonnistui: määritelty ja ladattu kuva ovat eri tyyppiä!\n"
 
 #: ../gnokii/gnokii-logo.c:153 ../gnokii/gnokii-ringtone.c:146
 #: ../gnokii/gnokii-ringtone.c:326
@@ -3320,7 +3339,9 @@ msgstr ""
 #: ../gnokii/gnokii-sms.c:492 ../gnokii/gnokii-sms.c:497
 #, c-format
 msgid "Invalid datetime format: %s (should be YYMMDDHHMISS, all digits)!\n"
-msgstr "Väärä päivämäärä/kellonajan formaatti: %s (pitäisi olla VVKKPPTTMMSS, kaikki merkit)!\n"
+msgstr ""
+"Väärä päivämäärä/kellonajan formaatti: %s (pitäisi olla VVKKPPTTMMSS, kaikki "
+"merkit)!\n"
 
 #: ../gnokii/gnokii-sms.c:513
 #, c-format
@@ -3638,12 +3659,12 @@ msgstr "Olemassa olevien hakemistojen listaa ei saada: %s\n"
 
 #: ../gnokii/gnokii-sms.c:1185
 #, c-format
-msgid "No. Name                              Id #Msg\n"
+msgid "No. Name                               Id #Msg\n"
 msgstr ""
 
 #: ../gnokii/gnokii-sms.c:1186
 #, c-format
-msgid "=============================================\n"
+msgid "==============================================\n"
 msgstr ""
 
 #: ../gnokii/gnokii-sms.c:1190
@@ -3652,9 +3673,9 @@ msgid "Cannot stat folder \"%s\": %s\n"
 msgstr "Hakemistosta \"%s\" ei saada tietoja: %s\n"
 
 #: ../gnokii/gnokii-sms.c:1193
-#, c-format
-msgid "%3d %-32s %3s %4u\n"
-msgstr ""
+#, fuzzy, c-format
+msgid "%3d %-32s %4s %4u\n"
+msgstr "%d. %s: %s\n"
 
 #: ../gnokii/gnokii-sms.c:1216
 #, c-format
@@ -3780,7 +3801,9 @@ msgstr "Kuvaa ei voitu ladata %s: %s\n"
 msgid ""
 "Warning: end value (%d) is less than start value (%d). Setting it to the "
 "start value (%d)\n"
-msgstr "Varoitus: lopetusarvo (%d) on pienempi kuin aloitusarvo (%d). Asetetaan samaksi kuin aloitusarvo (%d)\n"
+msgstr ""
+"Varoitus: lopetusarvo (%d) on pienempi kuin aloitusarvo (%d). Asetetaan "
+"samaksi kuin aloitusarvo (%d)\n"
 
 #: ../gnokii/gnokii-wap.c:55
 #, c-format
@@ -3974,7 +3997,8 @@ msgstr "Phone-osio: [phone_%s]\n"
 #: ../gnokii/gnokii.c:325
 #, c-format
 msgid "WARNING: cannot open logfile, logs will be directed to stderr\n"
-msgstr "VAROITUS: lokitiedoston avaus epäonnistui, loki kirjoitetaan stderr:iin\n"
+msgstr ""
+"VAROITUS: lokitiedoston avaus epäonnistui, loki kirjoitetaan stderr:iin\n"
 
 #: ../gnokii/gnokii.c:731
 #, c-format
@@ -4037,7 +4061,8 @@ msgstr ""
 #: ../smsd/file.c:87
 #, c-format
 msgid "You have not set spool directory, sms sending is disabled!\n"
-msgstr "Et ole asettanut spool-hakemistoa, SMSn lähetys ei ole käytettävissä!\n"
+msgstr ""
+"Et ole asettanut spool-hakemistoa, SMSn lähetys ei ole käytettävissä!\n"
 
 #: ../smsd/file.c:101
 #, c-format
@@ -4185,7 +4210,8 @@ msgstr "%s lähettämä viesti on kopioitu.\n"
 #: ../smsd/smsd.c:461
 #, c-format
 msgid "Multipart sms from %s. Waiting for the next parts.\n"
-msgstr "Moniosainen viesti lähettäjältä %s. Odottelee seuraavia viestin osia.\n"
+msgstr ""
+"Moniosainen viesti lähettäjältä %s. Odottelee seuraavia viestin osia.\n"
 
 #: ../smsd/smsd.c:477
 #, c-format
@@ -4949,7 +4975,8 @@ msgstr "VAROITUS: Muistia ei voitu varata asetusten lukemista varten!\n"
 #: ../xgnokii/xgnokii_cfg.c:215 ../xgnokii/xgnokii_cfg.c:231
 #, c-format
 msgid "ERROR: Can't allocate memory for config writing!\n"
-msgstr "VIRHE: Muistia ei voida varata asetustiedoston kirjoittamista varten!\n"
+msgstr ""
+"VIRHE: Muistia ei voida varata asetustiedoston kirjoittamista varten!\n"
 
 #: ../xgnokii/xgnokii_cfg.c:221
 #, c-format
@@ -5123,7 +5150,8 @@ msgstr ""
 #: ../xgnokii/xgnokii_contacts.c:2158 ../xgnokii/xgnokii_contacts.c:2178
 #, c-format
 msgid "%s: line %d: Can't write %s memory entry number %d! Error: %s\n"
-msgstr "%s: rivillä %d: %s kirjoittaminen muistipaikkaan %d epäonnistui! Virhe: %s\n"
+msgstr ""
+"%s: rivillä %d: %s kirjoittaminen muistipaikkaan %d epäonnistui! Virhe: %s\n"
 
 #: ../xgnokii/xgnokii_contacts.c:2200
 msgid "Save changes?"
@@ -5420,7 +5448,8 @@ msgstr ""
 
 #: ../xgnokii/xgnokii_logos.c:1835
 msgid "Load preview pixmap error, feature disabled."
-msgstr "Esikatselutiedoston lataaminen epäonnistui, toiminto ei ole käytettävissä."
+msgstr ""
+"Esikatselutiedoston lataaminen epäonnistui, toiminto ei ole käytettävissä."
 
 #: ../xgnokii/xgnokii_lowlevel.c:212
 #, c-format
@@ -5435,13 +5464,15 @@ msgid ""
 "Misconfiguration detected: phone handles neither folders nor sim.\n"
 "Contact gnokii developers to fix the issue.\n"
 msgstr ""
-"Väärä konfigurointi havaittu: puhelin ei osaa käsitellä hakemistoja eikä SIM-korttia.\n"
+"Väärä konfigurointi havaittu: puhelin ei osaa käsitellä hakemistoja eikä SIM-"
+"korttia.\n"
 "Ota yhteyttä Gnokiin kehittäjiin asian korjaamiseksi.\n"
 
 #: ../xgnokii/xgnokii_lowlevel.c:483
 #, c-format
 msgid "%s: line %d: Can't get memory entry number %d from memory %d! %d\n"
-msgstr "%s: rivillä %d: Muistipaikan numero %d haku muistista epäonnistui %d! %d\n"
+msgstr ""
+"%s: rivillä %d: Muistipaikan numero %d haku muistista epäonnistui %d! %d\n"
 
 #: ../xgnokii/xgnokii_lowlevel.c:1250
 msgid "Connecting..."
@@ -5459,13 +5490,15 @@ msgid ""
 "See http://thread.gmane.org/gmane.linux.drivers.gnokii/3195 for details.\n"
 msgstr ""
 "xgnokiin on todettu joidenkin raporttien mukaan rikkovan puhelimesi.\n"
-"Poistitaan sovelluksesta rikkoutumisen välttämiseksi. Jos haluat riskeerata puhelimesi ja\n"
+"Poistitaan sovelluksesta rikkoutumisen välttämiseksi. Jos haluat riskeerata "
+"puhelimesi ja\n"
 "ajaa xgnokiita, aseta:\n"
 "\n"
 "\tallow_breakage = 1\n"
 "\n"
 "xgnokii-osioon konfigurointitiedostossa.\n"
-"Lue osoitteesta http://thread.gmane.org/gmane.linux.drivers.gnokii/3195 lisätietoja.\n"
+"Lue osoitteesta http://thread.gmane.org/gmane.linux.drivers.gnokii/3195 "
+"lisätietoja.\n"
 
 #: ../xgnokii/xgnokii_lowlevel.c:1398
 msgid "Refreshing SMSes..."
@@ -6084,4 +6117,3 @@ msgstr "   Vastapuolen numero: %s\n"
 #: ../xgnokii/xgnokii_xring.c:930
 msgid "Set tempo"
 msgstr ""
-
