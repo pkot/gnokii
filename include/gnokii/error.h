@@ -88,6 +88,7 @@ typedef enum {
 	GN_ERR_NOMODEL,			/* No phone model specified */
 	GN_ERR_NOPORT,			/* No port specified */
 	GN_ERR_NOCONNECTION,		/* No connection type specified */
+	GN_ERR_LOCKED,			/* Device is locked and cannot unlock */
 
 	GN_ERR_ASYNC			/* The actual response will be sent asynchronously */
 } gn_error;

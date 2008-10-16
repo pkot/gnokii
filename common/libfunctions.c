@@ -129,7 +129,7 @@ GNOKII_API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 		state->lockfile = gn_device_lock(state->config.port_device);
 		if (state->lockfile == NULL) {
 			fprintf(stderr, _("Lock file error. Exiting.\n"));
-			return LASTERROR(state, GN_ERR_BUSY);
+			return LASTERROR(state, GN_ERR_LOCKED);
 		}
 	}
 
