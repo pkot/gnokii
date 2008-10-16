@@ -354,7 +354,7 @@ gn_error sm_block_ack(struct gn_statemachine *state)
 GNOKII_API gn_error gn_sm_functions(gn_operation op, gn_data *data, struct gn_statemachine *sm)
 {
 	if (!sm->driver.functions) {
-		dprintf("Sorry, phone has not yet been converted to new style. Phone.Functions == NULL!\n");
+		dprintf("Sorry, gnokii internal structures were not correctly initialized (op == %d)\n", op);
 		return GN_ERR_INTERNALERROR;
 	}
 	return sm->driver.functions(op, data, sm);
