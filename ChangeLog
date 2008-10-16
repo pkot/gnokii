@@ -1,3 +1,9 @@
+0.6.28 (not released yet)
+=========================
+ * libgnokii changes
+    o print more verbose messages on device locking problems
+                                                        (Paweł Kot)
+
 0.6.27
 ======
  * build system updates

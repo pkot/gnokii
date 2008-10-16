@@ -446,7 +446,7 @@ GNOKII_API char *gn_device_lock(const char* port)
 	int fd, len;
 
 	if (!port) {
-		fprintf(stderr, _("Cannot lock NULL device.\n"));
+		fprintf(stderr, _("Cannot lock NULL device. Set port config parameter correctly.\n"));
 		return NULL;
 	}
 
@@ -464,7 +464,8 @@ GNOKII_API char *gn_device_lock(const char* port)
 		fprintf(stderr, _("Out of memory error while locking device.\n"));
 		return NULL;
 	}
-	/* I think we don't need to use strncpy, as we should have enough
+	/*
+	 * I think we don't need to use strncpy, as we should have enough
 	 * buffer due to strlen results, but it's safer to do so...
 	 */
 	strncpy(lock_file, lock_path, len);
@@ -489,15 +490,15 @@ GNOKII_API char *gn_device_lock(const char* port)
 				sscanf(buf, "%d", &pid);
 			}
 			if (pid > 0 && kill((pid_t)pid, 0) < 0 && errno == ESRCH) {
-				fprintf(stderr, _("Lockfile %s is stale. Overriding it..\n"), lock_file);
+				fprintf(stderr, _("Lockfile %s is stale. Overriding it...\n"), lock_file);
 				sleep(1);
 				if (unlink(lock_file) == -1) {
-					fprintf(stderr, _("Overriding failed, please check the permissions.\n"));
+					fprintf(stderr, _("Overriding file %s failed, please check the permissions.\n"), lock_file);
 					fprintf(stderr, _("Cannot lock device.\n"));
 					goto failed;
 				}
 			} else {
-				fprintf(stderr, _("Device already locked.\n"));
+				fprintf(stderr, _("Device already locked with %s.\n"), lock_file);
 				goto failed;
 			}
 		}
@@ -521,7 +522,7 @@ GNOKII_API char *gn_device_lock(const char* port)
 		else if (errno == EACCES)
 			fprintf(stderr, _("Please check permission on lock directory.\n"));
 		else if (errno == ENOENT)
-			fprintf(stderr, _("Cannot create lockfile %s. Please check for existence of the path."), lock_file);
+			fprintf(stderr, _("Cannot create lockfile %s. Please check for existence of the path.\n"), lock_file);
 		goto failed;
 	}
 	snprintf(buffer, sizeof(buffer), "%10ld gnokii\n", (long)getpid());
