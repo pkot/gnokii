@@ -8,8 +8,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: pl\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
-"POT-Creation-Date: 2008-10-05 13:35+0200\n"
-"PO-Revision-Date: 2008-09-16 18:29+0200\n"
+"POT-Creation-Date: 2008-10-18 20:50+0200\n"
+"PO-Revision-Date: 2008-10-18 20:59+0200\n"
 "Last-Translator: Paweł Kot <gnokii@gmail.com>\n"
 "Language-Team: Polish <pl@li.org>\n"
 "MIME-Version: 1.0\n"
@@ -25,7 +25,7 @@ msgstr "Osierocona linia: %s\n"
 #: ../common/cfgreader.c:728
 #, c-format
 msgid "No %s section in the config file.\n"
-msgstr "Brak sekcji %s w pliku konfiguracyjnym %s.\n"
+msgstr "Brak sekcji %s w pliku konfiguracyjnym.\n"
 
 #: ../common/cfgreader.c:734 ../common/cfgreader.c:740
 #: ../common/cfgreader.c:746
@@ -856,7 +856,7 @@ msgstr "Pager"
 
 #: ../common/gsm-common.c:408
 msgid "Email message in 8110i"
-msgstr ""
+msgstr "Wiadomość email w 8110i"
 
 #: ../common/gsm-common.c:410 ../xgnokii/xgnokii.c:561
 msgid "X.400"
@@ -1269,10 +1269,14 @@ msgid "No connection type specified in the config file."
 msgstr "W pliku konfiguracyjnym nie został podany typ połączenia."
 
 #: ../common/gsm-error.c:78
+msgid "Device is locked and cannot be unlocked."
+msgstr "Urządzenie jest zablokowane."
+
+#: ../common/gsm-error.c:79
 msgid "The actual response will be sent asynchronously."
 msgstr "Właściwa odpowiedź zostanie przesłana asynchronicznie."
 
-#: ../common/gsm-error.c:79
+#: ../common/gsm-error.c:80
 msgid "Unknown error."
 msgstr "Nieznany błąd."
 
@@ -1359,7 +1363,7 @@ msgstr "nieznany"
 
 #: ../common/gsm-networks.c:1304 ../common/gsm-networks.c:1318
 #: ../common/gsm-networks.c:1355 ../gnokii/gnokii-monitor.c:252
-#: ../gnokii/gnokii-other.c:205
+#: ../gnokii/gnokii-other.c:206
 msgid "undefined"
 msgstr "nieokreślone"
 
@@ -1441,67 +1445,68 @@ msgstr "Nieudane otwarcie urządzenia M2BUS"
 
 #: ../common/misc.c:449
 #, c-format
-msgid "Cannot lock NULL device.\n"
-msgstr "Zablokowanie urządzenia NULL jest niemożliwe.\n"
+msgid "Cannot lock NULL device. Set port config parameter correctly.\n"
+msgstr "Nie mogę zablokować pustego urządzenia. Ustaw odpowiednio parametr "
+"port w pliku konfiguracyjnym.\n"
 
 #: ../common/misc.c:464
 #, c-format
 msgid "Out of memory error while locking device.\n"
 msgstr "Podczas blokowania urządzenia zabrakło pamięci.\n"
 
-#: ../common/misc.c:492
+#: ../common/misc.c:493
 #, c-format
-msgid "Lockfile %s is stale. Overriding it..\n"
+msgid "Lockfile %s is stale. Overriding it...\n"
 msgstr "Plik blokowania %s jest nieaktualny. Nadpisuję go.\n"
 
-#: ../common/misc.c:495
+#: ../common/misc.c:496
 #, c-format
-msgid "Overriding failed, please check the permissions.\n"
-msgstr "Nadpisywanie nieudane, sprawdź prawa dostępu.\n"
+msgid "Overriding file %s failed, please check the permissions.\n"
+msgstr "Nadpisywanie pliku blokady %s nieudane, sprawdź prawa dostępu.\n"
 
-#: ../common/misc.c:496 ../common/misc.c:511
+#: ../common/misc.c:497 ../common/misc.c:512
 #, c-format
 msgid "Cannot lock device.\n"
 msgstr "Zablokowanie urządzenia niemożliwe.\n"
 
-#: ../common/misc.c:500
+#: ../common/misc.c:501
 #, c-format
-msgid "Device already locked.\n"
-msgstr "Urządzenie jest już zablokowane.\n"
+msgid "Device already locked with %s.\n"
+msgstr "Urządzenie jest już zablokowane plikiem blokady %s.\n"
 
-#: ../common/misc.c:509
+#: ../common/misc.c:510
 #, c-format
 msgid "Unable to read lockfile %s.\n"
 msgstr "Nieudany odczyt pliku blokowania %s.\n"
 
-#: ../common/misc.c:510
+#: ../common/misc.c:511
 #, c-format
 msgid "Please check for reason and remove the lockfile by hand.\n"
 msgstr "Sprawdź przyczynę i ręcznie usuń plik blokowania.\n"
 
-#: ../common/misc.c:520
+#: ../common/misc.c:521
 #, c-format
 msgid "Device seems to be locked by unknown process.\n"
 msgstr "Urządzenie wygląda na zablokowane przez nieznany proces.\n"
 
-#: ../common/misc.c:522
+#: ../common/misc.c:523
 #, c-format
 msgid "Please check permission on lock directory.\n"
 msgstr "Sprawdź prawa dostępu na katalogu z blokadami.\n"
 
-#: ../common/misc.c:524
+#: ../common/misc.c:525
 #, c-format
-msgid "Cannot create lockfile %s. Please check for existence of the path."
+msgid "Cannot create lockfile %s. Please check for existence of the path.\n"
 msgstr ""
 "Nie można utworzyć pliku blokowania %s. Sprawdź czy istnieje ścieżka dostępu "
-"do pliku."
+"do pliku.\n"
 
-#: ../common/misc.c:529
+#: ../common/misc.c:530
 #, c-format
 msgid "Failed to write to the lockfile %s.\n"
 msgstr "Nieudana próba stworzenia pliku blokady %s.\n"
 
-#: ../common/misc.c:551
+#: ../common/misc.c:552
 #, c-format
 msgid "Cannot unlock device.\n"
 msgstr "Nie można odblokować urządzenia\n"
@@ -1523,7 +1528,7 @@ msgstr "Inni"
 
 #. Set a default SMSC name because +CSCA doesn't provide one
 #: ../common/phones/atgen.c:2007 ../common/phones/nk6100.c:1531
-#: ../common/phones/nk6510.c:1870 ../common/phones/nk7110.c:1481
+#: ../common/phones/nk6510.c:1876 ../common/phones/nk7110.c:1481
 #: ../xgnokii/xgnokii.c:532 ../xgnokii/xgnokii_sms.c:858
 #, c-format
 msgid "Set %d"
@@ -1532,7 +1537,7 @@ msgstr "Zestaw %d"
 #: ../common/phones/atgen.c:2588
 #, c-format
 msgid "Withheld"
-msgstr ""
+msgstr "Ukryty"
 
 #: ../common/phones/nk2110.c:786
 msgid "Write error!\n"
@@ -1589,7 +1594,7 @@ msgstr "Pager"
 #. for (i = 0; i < len; i++) dprintf("%02x ", req[i]);
 #. dprintf("\n");
 #.
-#: ../common/phones/nk6510.c:1736
+#: ../common/phones/nk6510.c:1742
 #, c-format
 msgid ""
 "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
@@ -1600,18 +1605,18 @@ msgstr ""
 "coś się nie uda, możesz zostać odesłany do serwisu Nokii!\n"
 "Czy chcesz kontynuować? "
 
-#: ../common/phones/nk6510.c:1739
+#: ../common/phones/nk6510.c:1745
 #, c-format
 msgid "(yes/no) "
 msgstr "(tak/nie) "
 
-#: ../common/phones/nk6510.c:1741 ../gnokii/gnokii-phonebook.c:418
+#: ../common/phones/nk6510.c:1747 ../gnokii/gnokii-phonebook.c:418
 #: ../gnokii/gnokii-sms.c:538 ../gnokii/gnokii-sms.c:802
 #: ../gnokii/gnokii-utils.c:68 ../gnokii/gnokii-wap.c:223
 msgid "yes"
 msgstr "tak"
 
-#: ../common/phones/nk6510.c:2132 ../common/phones/nk6510.c:2195
+#: ../common/phones/nk6510.c:2138 ../common/phones/nk6510.c:2201
 #, c-format
 msgid "Progress: %3d%% completed\r"
 msgstr "Postęp: %3d%% ukończone\r"
@@ -2544,7 +2549,7 @@ msgstr "LD: zajęte %d, wolne %d\n"
 #: ../gnokii/gnokii-monitor.c:292
 #, c-format
 msgid "MC: Used %d, Free %d\n"
-msgstr "MC: zajęŧe %d, wolne %d\n"
+msgstr "MC: zajęte %d, wolne %d\n"
 
 #: ../gnokii/gnokii-monitor.c:296
 #, c-format
@@ -2554,7 +2559,7 @@ msgstr "ON: zajęte %d, wolne %d\n"
 #: ../gnokii/gnokii-monitor.c:300
 #, c-format
 msgid "RC: Used %d, Free %d\n"
-msgstr "RC: zajęŧe %d, wolne %d\n"
+msgstr "RC: zajęte %d, wolne %d\n"
 
 #: ../gnokii/gnokii-monitor.c:303
 #, c-format
@@ -2687,22 +2692,22 @@ msgstr "-----------------------------------------\n"
 msgid "%-7s  %s (%s)\n"
 msgstr "%-7s  %s (%s)\n"
 
-#: ../gnokii/gnokii-other.c:202
+#: ../gnokii/gnokii-other.c:203
 #, c-format
 msgid "Network      : %s (%s)\n"
 msgstr "Sieć         : %s (%s)\n"
 
-#: ../gnokii/gnokii-other.c:205
+#: ../gnokii/gnokii-other.c:206
 #, c-format
 msgid "Network code : %s\n"
 msgstr "Kod sieci    : %s\n"
 
-#: ../gnokii/gnokii-other.c:206
+#: ../gnokii/gnokii-other.c:207
 #, c-format
 msgid "LAC          : %04x (%d)\n"
 msgstr "LAC          : %04x (%d)\n"
 
-#: ../gnokii/gnokii-other.c:207
+#: ../gnokii/gnokii-other.c:208
 #, c-format
 msgid "Cell id      : %08x (%d)\n"
 msgstr "ID komórki   : %08x (%d)\n"
@@ -6533,6 +6538,9 @@ msgstr "Nazwa dzwonka"
 #: ../xgnokii/xgnokii_xring.c:930
 msgid "Set tempo"
 msgstr "Ustaw tempo"
+
+#~ msgid "Cannot lock NULL device.\n"
+#~ msgstr "Zablokowanie urządzenia NULL jest niemożliwe.\n"
 
 #~ msgid "Vcard began but not ended?"
 #~ msgstr "Niezakończona vCard"
