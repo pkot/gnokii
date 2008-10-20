@@ -2420,8 +2420,6 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		break;
 	case 0x6d:
 	case 0x69:
-		if (data->file)
-			dprintf("   Filesize: %x\n", data->file->file_length);
 		if (message[4] == 0x06) {
 			dprintf("Invalid path\n");
 			error =  GN_ERR_INVALIDLOCATION;
