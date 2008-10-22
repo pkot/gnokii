@@ -54,7 +54,11 @@ libgnokii_la_LIBADD = \
 	$(top_builddir)/common/links/libLINKS.la \
 	$(top_builddir)/common/devices/libDEVICES.la \
 	$(XPM_LIBS) \
-	$(LTLIBICONV)
+	$(LTLIBICONV) \
+	$(INTLLIBS) \
+	$(BLUETOOTH_LIBS) \
+	$(USB_LIBS) \
+	$(TCP_LIBS)
 
 libgnokii_la_LDFLAGS = 				\
 	-version-info $(GNOKII_LT_VERSION)	\
