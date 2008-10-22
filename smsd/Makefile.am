@@ -21,6 +21,7 @@ endif
 
 libsmsd_file_la_SOURCES = file.c db.h utils.h utils.c
 libsmsd_file_la_LDFLAGS = $(modules_flags)
+libsmsd_file_la_LIBADD = $(GLIB_LIBS)
 
 smsd_SOURCES = smsd.h smsd.c lowlevel.c lowlevel.h db.h
 smsd_LDADD = $(GLIB_LIBS) $(PTHREAD_LIBS) $(INTLLIBS) $(top_builddir)/common/libgnokii.la
