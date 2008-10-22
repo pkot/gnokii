@@ -1,5 +1,7 @@
 0.6.28 (not released yet)
 =========================
+ * build system updates
+    o fix Mac OS X build    (Paweł Kot, Daniele Forsi, Jeff Rafter)
  * libgnokii changes
     o print more verbose messages on device locking problems
                                                         (Paweł Kot)

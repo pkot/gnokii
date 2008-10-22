@@ -530,7 +530,7 @@ if test "$enable_bluetooth" == "yes"; then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 		AC_DEFINE(HAVE_BLUETOOTH_MACOSX,[],[Compile on Darwin / Mac OSX])
 		USE_BLUETOOTH="yes"
-		BLUETOOTH_LIBS="$PTHREAD_LIBS -framework CoreFoundation -framework IOBluetooth -framework Foundation"
+		BLUETOOTH_LIBS="$PTHREAD_LIBS -Wl,-framework CoreFoundation -Wl,-framework IOBluetooth -Wl,-framework Foundation"
 		AC_SUBST(BLUETOOTH_LIBS)
 	fi
 fi
