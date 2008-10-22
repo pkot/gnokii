@@ -3,7 +3,7 @@ bin_PROGRAMS = smsd
 plugindir = $(libdir)/smsd
 plugin_LTLIBRARIES = libsmsd_file.la
 
-modules_flags = -avoid-version -module -no-undefined
+modules_flags = -avoid-version -module
 
 if HAVE_POSTGRES
 plugin_LTLIBRARIES += libsmsd_pq.la
