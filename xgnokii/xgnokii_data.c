@@ -67,7 +67,7 @@ static void UpdateStatus(void)
 }
 
 
-inline void GUI_ShowData(void)
+void GUI_ShowData(void)
 {
 	if (!phoneMonitor.supported & PM_DATA)
 		return;
@@ -82,8 +82,7 @@ inline void GUI_ShowData(void)
 	gtk_window_present(GTK_WINDOW(GUI_DataWindow));
 }
 
-
-inline void GUI_HideData(void)
+static void GUI_HideData(void)
 {
 	gtk_widget_hide(GUI_DataWindow);
 }

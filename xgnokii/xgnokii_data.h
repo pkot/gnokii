@@ -30,8 +30,7 @@
 #ifndef XGNOKII_DATA_H
 #define XGNOKII_DATA_H
 
-void GUI_CreateDataWindow(void);
-inline void GUI_ShowData(void);
-inline void GUI_HideData(void);
+extern void GUI_CreateDataWindow(void);
+extern void GUI_ShowData(void);
 
 #endif
