@@ -702,7 +702,7 @@ AM_CONDITIONAL(HAVE_POSTGRES, test "x$have_postgres" = "xyes")
 have_mysql=no
 dnl Prefer mysql_config5 if it is installed
 AC_PATH_PROG(MYSQLCONFIG, mysql_config5, no)
-if test x$MYSQLCONFIG != xno ; then
+if test x$MYSQLCONFIG == xno ; then
 	AC_PATH_PROG(MYSQLCONFIG, mysql_config, no)
 fi
 if test x$MYSQLCONFIG != xno ; then
