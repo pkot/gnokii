@@ -2,6 +2,7 @@
 =========================
  * build system updates
     o fix Mac OS X build    (Paweł Kot, Daniele Forsi, Jeff Rafter)
+    o fix NetBSD build                              (Daniele Forsi)
  * libgnokii changes
     o print more verbose messages on device locking problems
                                                         (Paweł Kot)

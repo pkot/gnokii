@@ -88,6 +88,19 @@ else
 	AC_MSG_RESULT(no)
 fi
 
+dnl -----------------------------
+dnl Checks for NetBSD Build
+dnl -----------------------------
+AC_MSG_CHECKING(if building on NetBSD)
+
+if test `uname -s` = "NetBSD" ; then
+        AC_MSG_RESULT(yes)
+        CPPFLAGS="$CFLAGS -I/usr/pkg/include/"
+        LDFLAGS="$LDFLAGS -L/usr/pkg/lib/"
+else
+        AC_MSG_RESULT(no)
+fi
+
 dnl ======================== Libtool versioning
 AC_LIBTOOL_WIN32_DLL
 define([AC_PROVIDE_AC_LIBTOOL_WIN32_DLL])
