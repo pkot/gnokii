@@ -330,7 +330,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 	lines = gnokii_strsplit (v, "\n", num_lines);
 
 	for (i = 0; i < num_lines; i++) {
-		const char *buf;
+		char *buf;
 		int line_len;
 
 		if (lines[i] == NULL || *lines[i] == '\0')
@@ -338,6 +338,10 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 
 		buf = lines[i];
 		line_len = strlen (buf);
+
+		/* Strip traling '\r's */
+		while (line_len > 0 && buf[line_len-1] == '\r')
+			buf[--line_len] = '\0';
 
 		if (BEGINS("N:")) {
 			if (0 < sscanf(buf +2 , "%64[^;];%64[^;];%64[^;];%64[^;];%64[^;]\n",
@@ -385,6 +389,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		if (BEGINS("END:VCARD"))
 			break;
 	}
+	
 	return 0;
 }
 

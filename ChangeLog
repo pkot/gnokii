@@ -7,6 +7,7 @@
     o print more verbose messages on device locking problems
                                                         (Paweł Kot)
     o add GN_ERR_LOCKED error code                      (Paweł Kot)
+    o strip trailing '\r's when parsing vcard files     (Paweł Kot)
 
 0.6.27
 ======
