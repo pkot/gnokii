@@ -2927,7 +2927,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		case 0: /* network operator name given */
 			pos = strip_quotes(strings[2]);
 			at_decode(drvinst->charset, tmp, pos, strlen(pos));
-			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), gn_network_code_get(tmp));
+			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), "%s", gn_network_code_get(tmp));
 			break;
 		case 2: /* network operator code given */
 			if (strlen(strings[2]) == 5) {
@@ -2947,7 +2947,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 				data->network_info->network_code[5] = strings[2][5];
 				data->network_info->network_code[6] = 0;
 			} else { /* probably incorrect */
-				snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), strings[2]);
+				snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), "%s", strings[2]);
 			}
 			break;
 		default: /* defined formats are in range (0-2) */

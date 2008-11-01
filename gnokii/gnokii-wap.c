@@ -116,8 +116,8 @@ gn_error writewapbookmark(int argc, char *argv[], gn_data *data, struct gn_state
 	if (argc != optind + 1)
 		return writewapbookmark_usage(stderr, -1);
 
-	snprintf(&wapbookmark.name[0], WAP_NAME_MAX_LENGTH, optarg);
-	snprintf(&wapbookmark.URL[0], WAP_URL_MAX_LENGTH, argv[optind]);
+	snprintf(&wapbookmark.name[0], WAP_NAME_MAX_LENGTH, "%s", optarg);
+	snprintf(&wapbookmark.URL[0], WAP_URL_MAX_LENGTH, "%s", argv[optind]);
 
 	error = gn_sm_functions(GN_OP_WriteWAPBookmark, data, state);
 
