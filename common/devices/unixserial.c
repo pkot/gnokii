@@ -101,8 +101,8 @@ static void device_script_cfgfunc(const char *section, const char *key, const ch
 	setenv(key, value, 1 /* overwrite */); /* errors ignored */
 #  else
 	char *str;
-	asprintf(&str, "%s=%s", key, value);
-	putenv(str);
+	if (asprintf(&str, "%s=%s", key, value) > 0)
+		putenv(str);
 #  endif
 #endif
 }
