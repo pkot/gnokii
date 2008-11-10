@@ -50,46 +50,17 @@
 
 #ifdef HAVE_BLUETOOTH_NETGRAPH	/* FreeBSD / netgraph */
 
-#include <bitstring.h>
-#include <netgraph/bluetooth/include/ng_hci.h>
-#include <netgraph/bluetooth/include/ng_l2cap.h>
-#include <netgraph/bluetooth/include/ng_btsocket.h>
+#include <bluetooth.h>
+#include <sdp.h>
 
 #define BTPROTO_RFCOMM BLUETOOTH_PROTO_RFCOMM
 #define BDADDR_ANY NG_HCI_BDADDR_ANY
+#define GNOKII_SERIAL_PORT_CLASS	SDP_SERVICE_CLASS_SERIAL_PORT
+#define GNOKII_DIALUP_NETWORK_CLASS	SDP_SERVICE_CLASS_DIALUP_NETWORKING
 #define sockaddr_rc sockaddr_rfcomm
 #define rc_family rfcomm_family
 #define rc_bdaddr rfcomm_bdaddr
 #define rc_channel rfcomm_channel
-#define bacpy(dst, src) memcpy((dst), (src), sizeof(bdaddr_t))
-
-#ifndef HAVE_BT_ATON
-
-static int bt_aton(const char *str, bdaddr_t *ba)
-{
-	char ch;
-	unsigned int b[6];
-
-	memset(ba, 0, sizeof(*ba));
-	if (sscanf(str, "%x:%x:%x:%x:%x:%x%c", b + 0, b + 1, b + 2, b + 3, b + 4, b + 5, &ch) != 6) return 0;
-	if ((b[0] | b[1] | b[2] | b[3] | b[4] | b[5]) > 0xff) return 0;
-
-	ba->b[0] = b[0];
-	ba->b[1] = b[1];
-	ba->b[2] = b[2];
-	ba->b[3] = b[3];
-	ba->b[4] = b[4];
-	ba->b[5] = b[5];
-
-	return 1;
-}
-
-#endif	/* HAVE_BT_ATON */
-
-static int str2ba(const char *str, bdaddr_t *ba)
-{
-	return !bt_aton(str, ba);
-}
 
 #else	/* Linux / BlueZ support */
 
@@ -98,8 +69,265 @@ static int str2ba(const char *str, bdaddr_t *ba)
 #include <bluetooth/sdp.h>
 #include <bluetooth/sdp_lib.h>
 
+#define GNOKII_SERIAL_PORT_CLASS	SERIAL_PORT_SVCLASS_ID
+#define GNOKII_DIALUP_NETWORK_CLASS	DIALUP_NET_SVCLASS_ID
+
 #endif
 
+#ifdef HAVE_BLUETOOTH_NETGRAPH	/* FreeBSD / netgraph */
+
+/*
+** FreeBSD version of the find_service_channel function.
+** Written by Guido Falsi <mad@madpilot.net>.
+** Contains code taken from FreeBSD's sdpcontrol and rfcomm_sppd
+** programs, which are Copyright (c) 2001-2003 Maksim Yevmenkin
+** <m_evmenkin@yahoo.com>.
+**
+** Also thanks to Iain Hibbert for his suggestions.
+*/
+
+#define attrs_len	(sizeof(attrs)/sizeof(attrs[0]))
+#define NRECS   25      /* request this much records from the SDP server */
+#define BSIZE   256     /* one attribute buffer size */
+#define values_len      (sizeof(values)/sizeof(values[0]))
+
+static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gnapplet, uint16_t svclass_id)
+{
+	int i, channel = -1;
+	char name[64];
+	void *ss = NULL;
+	uint32_t attrs[] = {
+		SDP_ATTR_RANGE( SDP_ATTR_PROTOCOL_DESCRIPTOR_LIST,
+			SDP_ATTR_PROTOCOL_DESCRIPTOR_LIST),
+		SDP_ATTR_RANGE( SDP_ATTR_PRIMARY_LANGUAGE_BASE_ID + SDP_ATTR_SERVICE_NAME_OFFSET,
+			SDP_ATTR_PRIMARY_LANGUAGE_BASE_ID + SDP_ATTR_SERVICE_NAME_OFFSET),
+	};
+	/* Buffer for the attributes */
+	static uint8_t          buffer[NRECS * attrs_len][BSIZE];
+	/* SDP attributes */
+	static sdp_attr_t       values[NRECS * attrs_len];
+
+	/* Initialize attribute values array */
+	for (i = 0; i < values_len; i ++) {
+		values[i].flags = SDP_ATTR_INVALID;
+		values[i].attr = 0;
+		values[i].vlen = BSIZE; 
+		values[i].value = buffer[i];
+	}
+
+	if ((ss = sdp_open(adapter, device)) == NULL)
+		return -1;
+
+	if (sdp_error(ss) != 0)
+		goto end;
+
+	if (sdp_search(ss, 1, &svclass_id, attrs_len, attrs, values_len, values) != 0)
+		goto end;
+
+	for (i = 0; i < values_len; i++) {
+		union {
+			uint8_t		uint8;
+			uint16_t	uint16;
+			uint32_t	uint32;
+			uint64_t	uint64;
+			int128_t	int128;
+		} value;
+		uint8_t *start, *end;
+		uint32_t type, len;
+
+		if (values[i].flags != SDP_ATTR_OK)
+			break;
+
+		start = values[i].value;
+		end = values[i].value + values[i].vlen;
+
+		switch (values[i].attr) {
+		case SDP_ATTR_PROTOCOL_DESCRIPTOR_LIST:
+			SDP_GET8(type, start);
+			switch (type) {
+			case SDP_DATA_SEQ8:
+				SDP_GET8(len, start);
+				break;
+
+			case SDP_DATA_SEQ16:
+				SDP_GET16(len, start);
+				break;
+
+			case SDP_DATA_SEQ32:
+				SDP_GET32(len, start);
+				break;
+
+			default:
+				goto end;
+				break;
+			}
+
+			SDP_GET8(type, start);
+			switch (type) {
+			case SDP_DATA_SEQ8:
+				SDP_GET8(len, start);
+				break;
+
+			case SDP_DATA_SEQ16:
+				SDP_GET16(len, start);
+				break;
+
+			case SDP_DATA_SEQ32:
+				SDP_GET32(len, start);
+				break;
+
+			default:
+				goto end;
+			}
+
+			while (start < end) {
+				SDP_GET8(type, start);
+				switch (type) {
+				case SDP_DATA_UUID16:
+					SDP_GET16(value.uint16, start);
+					break;
+
+				case SDP_DATA_UUID32:
+					SDP_GET32(value.uint32, start);
+					break;
+
+				case SDP_DATA_UUID128:
+					SDP_GET_UUID128(&value.int128, start);
+					break;
+
+				default:
+					goto end;
+				}
+				if (value.uint16 == 3) {
+					SDP_GET8(type, start);
+					switch (type) {
+					case SDP_DATA_UINT8:
+					case SDP_DATA_INT8:
+						SDP_GET8(value.uint8, start);
+						channel = value.uint8;
+						break;
+
+					case SDP_DATA_UINT16:
+					case SDP_DATA_INT16:
+						SDP_GET16(value.uint16, start);
+						channel = value.uint16;
+						break;
+
+					case SDP_DATA_UINT32:
+					case SDP_DATA_INT32:
+						SDP_GET32(value.uint32, start);
+						channel = value.uint32;
+						break;
+
+					default:
+						goto end;
+					}
+				} else {
+					SDP_GET8(type, start);
+					switch (type) {
+					case SDP_DATA_SEQ8:
+					case SDP_DATA_UINT8:
+					case SDP_DATA_INT8:
+					case SDP_DATA_BOOL:
+						SDP_GET8(value.uint8, start);
+						break;
+
+					case SDP_DATA_SEQ16:
+					case SDP_DATA_UINT16:
+					case SDP_DATA_INT16:
+					case SDP_DATA_UUID16:
+						SDP_GET16(value.uint16, start);
+						break;
+
+					case SDP_DATA_SEQ32:
+					case SDP_DATA_UINT32:
+					case SDP_DATA_INT32:
+					case SDP_DATA_UUID32:
+						SDP_GET32(value.uint32, start);
+						break;
+
+					case SDP_DATA_UINT64:
+					case SDP_DATA_INT64:
+						SDP_GET64(value.uint64, start);
+						break;
+
+					case SDP_DATA_UINT128:
+					case SDP_DATA_INT128:
+						SDP_GET128(&value.int128, start);
+						break;
+
+					default:
+						goto end;
+					}
+				}
+			}
+			start += len;
+			break;
+
+		case SDP_ATTR_PRIMARY_LANGUAGE_BASE_ID + SDP_ATTR_SERVICE_NAME_OFFSET:
+			if (channel == -1)
+				break;
+			
+			SDP_GET8(type, start);
+			switch (type) {
+				case SDP_DATA_STR8:
+				case SDP_DATA_URL8:
+					SDP_GET8(len, start);
+					snprintf(name, sizeof(name), "%*.*s", len, len, (char *) start);
+					start += len;
+					break;
+
+				case SDP_DATA_STR16:
+				case SDP_DATA_URL16:
+					SDP_GET16(len, start);
+					snprintf(name, sizeof(name), "%*.*s", len, len, (char *) start);
+					start += len;
+					break;
+
+				case SDP_DATA_STR32:
+				case SDP_DATA_URL32:
+					SDP_GET32(len, start);
+					snprintf(name, sizeof(name), "%*.*s", len, len, (char *) start);
+					start += len;
+					break;
+
+				default:
+					goto end;
+			}
+			if (name == NULL)
+				break;
+
+			if (strcmp(name, "gnapplet") == 0) {
+				if (only_gnapplet != 0)
+					return channel;
+				break;
+			}
+
+			if (strstr(name, "Nokia PC Suite") != NULL) {
+				channel = -1;
+				break;
+			}
+
+			if (strstr(name, "Bluetooth Serial Port") != NULL) {
+				channel = -1;
+				break;
+			}
+
+			if (strstr(name, "m-Router Connectivity") != NULL) {
+				channel = -1;
+				break;
+			}
+
+			goto end;
+		}
+	}
+
+end:
+	sdp_close(ss);
+	return channel;
+}
+
+#else
 /*
  * Taken from gnome-phone-manager
  */
@@ -204,6 +432,8 @@ end:
 	return channel;
 }
 
+#endif
+
 static int get_serial_channel(bdaddr_t *device)
 {
 	bdaddr_t src;
@@ -211,9 +441,9 @@ static int get_serial_channel(bdaddr_t *device)
 
 	bacpy(&src, BDADDR_ANY);
 
-	channel = find_service_channel(&src, device, 0, SERIAL_PORT_SVCLASS_ID);
+	channel = find_service_channel(&src, device, 0, GNOKII_SERIAL_PORT_CLASS);
 	if (channel < 0)
-		channel = find_service_channel(&src, device, 0, DIALUP_NET_SVCLASS_ID);
+		channel = find_service_channel(&src, device, 0, GNOKII_DIALUP_NETWORK_CLASS);
 
 	return channel;
 }

@@ -551,23 +551,24 @@ fi
 dnl ======================== Checks for FreeBSD/netgraph Bluetooth support
 if test "$enable_bluetooth" = "yes"; then
 	AC_MSG_CHECKING([for the FreeBSD/netgraph bluetooth support])
-	AC_CACHE_CHECK(for the struct sockaddr_rfcomm in <netgraph/.../ng_btsocket.h>, ac_cv_have_sockaddr_rfcomm,
-		[AC_TRY_COMPILE([#include <sys/types.h>
-				#include <sys/socket.h>
-				#include <bitstring.h>
-				#include <netgraph/bluetooth/include/ng_hci.h>
-				#include <netgraph/bluetooth/include/ng_l2cap.h>
-				#include <netgraph/bluetooth/include/ng_btsocket.h>],
+	AC_CACHE_CHECK(for the struct sockaddr_rfcomm from <bluetooth.h>, ac_cv_have_sockaddr_rfcomm,
+		[AC_TRY_COMPILE([#include <bluetooth.h>],
 			[struct sockaddr_rfcomm rc;],
 			ac_cv_have_sockaddr_rfcomm=yes,
 			ac_cv_have_sockaddr_rfcomm=no)])
 
 	if test $ac_cv_have_sockaddr_rfcomm = yes; then
 		AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
-		AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH,[],[Compile on FreeBSD])
+		AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH, [], [Compile on FreeBSD])
 		USE_BLUETOOTH="yes"
 		AC_CHECK_LIB(bluetooth, bt_aton,
-			    [BLUETOOTH_LIBS="$LIBS -lbluetooth" AC_DEFINE(HAVE_BT_ATON,[],[Define to 1 if you have the 'bt_aton' function.]) AC_SUBST(BLUETOOTH_LIBS)])
+			[BLUETOOTH_LIBS="-lbluetooth" ac_cv_have_bt_lib=yes],
+			ac_cv_have_bt_lib=no)
+		if test $ac_cv_have_bt_lib = yes; then
+			AC_CHECK_LIB(sdp, sdp_open,
+				[BLUETOOTH_LIBS="$BLUETOOTH_LIBS -lsdp"])
+			AC_SUBST(BLUETOOTH_LIBS)
+		fi
 	fi
 fi
 
