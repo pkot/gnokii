@@ -132,19 +132,36 @@ gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state)
 static int get_password(const char *prompt, char *pass, int length)
 {
 #ifdef WIN32
+	int count = 0;
+
 	fprintf(stdout, "%s", prompt);
 	fgets(pass, length, stdin);
+
+	/* strip the trailing newline to be compatible with getpass() */
+	while (count < length && pass[count]) {
+		if (pass[count] == '\r' || pass[count] == '\n') {
+			pass[count] = '\0';
+			break;
+		}
+		count++;
+	}
 #else
 	/* FIXME: manual says: Do not use getpass */
 	char *s = NULL;
-	int err, fd = fileno(stdin);
+	int fd = fileno(stdin);
+	ssize_t count;
 	size_t s_len;
 
 	if (isatty(fd)) {
 		strncpy(pass, getpass(prompt), length - 1);
 	} else {
-		err = getline(&s, &s_len, stdin);
-		if (err > 0 && s) {
+		count = getline(&s, &s_len, stdin);
+		if (count > 0 && s) {
+			/* strip the trailing newline to be compatible with getpass() */
+			count--;
+			if (s[count] == '\n') {
+				s[count] = '\0';
+			}
 			strncpy(pass, s, length - 1);
 			free(s);
 		}

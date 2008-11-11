@@ -11,6 +11,9 @@
     o add GN_ERR_LOCKED error code                      (Paweł Kot)
     o strip trailing '\r's when parsing vcard files     (Paweł Kot)
     o enable Bluetooth support for FreeBSD            (Guido Falsi)
+ * gnokii updates
+    o strip the trailing newline when --entersecuritycode did not
+      read from a terminal                          (Daniele Forsi)
 
 0.6.27
 ======
