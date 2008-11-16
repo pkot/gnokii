@@ -1562,8 +1562,28 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state);
 GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
+	/*
+	 * This is for long sms handling. There we have sequence:
+	 * 1.		gn_sms_send()
+	 * 1.1			rawsms = malloc()
+	 * 1.2			sms_send_long()
+	 * 1.2.1			gn_sms_send()
+	 * 1.2.1.1				rawsms = malloc() // original rawsms from 1.1 is lost here
+	 * 1.2.1.2				free(rawsms)
+	 * 1.2.2			gn_sms_send()
+	 * 1.2.2.1				rawsms = malloc()
+	 * 1.2.2.2				free(rawsms)
+	 * ...
+	 * 1.2.N			gn_sms_send()
+	 * 1.2.N.1				rawsms = malloc()
+	 * 1.2.N.2				free(rawsms)
+	 * 1.3			free(rawsms) // rawsms was freed here just above
+	 * Therefore we store old rawsms value on the entrance and restore it on exit.
+	 */
+	gn_sms_raw *old = data->raw_sms;
 
-	if (!data->sms) return GN_ERR_INTERNALERROR;
+	if (!data->sms)
+		return GN_ERR_INTERNALERROR;
 
 	data->raw_sms = malloc(sizeof(*data->raw_sms));
 	memset(data->raw_sms, 0, sizeof(*data->raw_sms));
@@ -1576,7 +1596,8 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 		data->raw_sms->message_center[0] = data->raw_sms->message_center[0] / 2 + 1;
 
 	error = sms_prepare(data->sms, data->raw_sms);
-	if (error != GN_ERR_NONE) goto cleanup;
+	if (error != GN_ERR_NONE)
+		goto cleanup;
 
 	sms_dump_raw(data->raw_sms);
 	if (data->raw_sms->user_data_length > MAX_SMS_PART) {
@@ -1588,9 +1609,12 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 	dprintf("Sending\n");
 	error = gn_sm_functions(GN_OP_SendSMS, data, state);
 cleanup:
-	data->sms->reference = data->raw_sms->reference;
-	free(data->raw_sms);
-	data->raw_sms = NULL;
+	/* FIXME: how to pass reference for multipart messages? */
+	if (data->raw_sms) {
+		data->sms->reference = data->raw_sms->reference;
+		free(data->raw_sms);
+	}
+	data->raw_sms = old;
 	return error;
 }
 
