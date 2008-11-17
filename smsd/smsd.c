@@ -416,7 +416,7 @@ GNOKII_API gint WriteSMS (gn_sms *sms)
 }
 
 
-static void ReadSMS(gpointer d, gpointer userData)
+static void ReadSMS (gpointer d, gpointer userData)
 {
   gn_sms *data = (gn_sms *)d;
   PhoneEvent *e;

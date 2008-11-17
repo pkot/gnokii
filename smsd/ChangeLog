@@ -1,3 +1,10 @@
+* Sun Nov 16 2008 Jan Derfinak
+- ReadSMS() prepared gn_sms structure to remove in A_DeleteSMSMessage(). But
+  in some situation RefreshSMS() deallocated gn_sms structure before
+  A_DeleteSMSMessage() which resulted in double free bug (#23550, #23842).
+  Fixed by processing all events before RefreshSMS(). (Paul Praet)
+
+
 * Mon Oct  6 2008 Paweł Kot
 - Marked as 1.4.3
 

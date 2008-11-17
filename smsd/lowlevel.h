@@ -51,7 +51,6 @@ typedef struct {
 } D_SMSMessage;
 
 typedef struct {
-//  bool working;
   struct {
     gchar *model;
     gchar *revision;

@@ -118,7 +118,8 @@ static gn_error InitModelInf (void)
 
 static void busterminate (void)
 {
-  if (sm) {
+  if (sm)
+  {
     gn_lib_phone_close(sm);
     gn_lib_phoneprofile_free(&sm);
   }
@@ -348,14 +349,14 @@ static gint A_DeleteSMSMessage (gpointer data)
     error = gn_sms_delete (dt, sm);
 
     gn_log_xdebug("Error: %s\n", gn_error_print(error));
-    pthread_mutex_lock (&smsMutex);
+//    pthread_mutex_lock (&smsMutex);
     phoneMonitor.sms.messages = g_slist_remove (phoneMonitor.sms.messages, data);
     phoneMonitor.sms.number--;
     FreeElement (data, NULL);
-    pthread_mutex_unlock (&smsMutex);
-  } else {
+//    pthread_mutex_unlock (&smsMutex);
+  } 
+  else
     gn_log_xdebug("Internal error: dt->sms == NULL\n");
-  }
 
   free (dt);
   return (error);
@@ -405,10 +406,18 @@ static void RealConnect (void *phone)
 
   while (1)
   {
-//    phoneMonitor.working = FALSE;
-
     pthread_mutex_lock (&smsMutex);
     
+    /* The event queue must be processed before RefreshSMS ()! */
+    while ((event = RemoveEvent ()) != NULL)
+    {
+      gn_log_xdebug ("Processing Event: %d\n", event->event);
+      if (event->event <= Event_Exit)
+        if ((error = DoAction[event->event] (event->data)) != GN_ERR_NONE)
+          g_print (_("Event %d failed with return code %d!\n"), event->event, error);
+      g_free (event);
+    }
+  
     if (phoneMonitor.supported & PM_FOLDERS)
     {
       data->sms_folder = &SMSFolder;
@@ -421,9 +430,7 @@ static void RealConnect (void *phone)
                        phoneMonitor.sms.number);
         if (phoneMonitor.sms.number != SMSFolder.number)
         {
-//          phoneMonitor.working = TRUE;
           RefreshSMS (SMSFolder.number);
-//          phoneMonitor.working = FALSE;
         }
 //        phoneMonitor.sms.unRead = 0;
       }
@@ -443,9 +450,7 @@ static void RealConnect (void *phone)
         if (/* phoneMonitor.sms.unRead != SMSStatus.unread || */
             phoneMonitor.sms.number != SMSStatus.number)
         {
-//          phoneMonitor.working = TRUE;
           RefreshSMS (SMSStatus.number);
-//          phoneMonitor.working = FALSE;
         }
 //        phoneMonitor.sms.unRead = SMSStatus.unread;
       }
@@ -465,16 +470,6 @@ static void RealConnect (void *phone)
         g_print ("%s:%d error: %d, %s\n", __FILE__, __LINE__, error, gn_error_print(error));
     }
 
-    while ((event = RemoveEvent ()) != NULL)
-    {
-      gn_log_xdebug ("Processing Event: %d\n", event->event);
-//      phoneMonitor.working = TRUE;
-      if (event->event <= Event_Exit)
-        if ((error = DoAction[event->event] (event->data)) != GN_ERR_NONE)
-          g_print (_("Event %d failed with return code %d!\n"), event->event, error);
-      g_free (event);
-    }
-    
     sleep (smsdConfig.refreshInt);
   }
 
