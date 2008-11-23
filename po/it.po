@@ -3556,7 +3556,7 @@ msgstr ""
 #: ../gnokii/gnokii-sms.c:348
 #, c-format
 msgid "Send succeeded with reference %d!\n"
-msgstr "Invio riuscito con riferenza numero %d\n"
+msgstr "Invio riuscito con referenza numero %d\n"
 
 #: ../gnokii/gnokii-sms.c:358
 #, c-format
