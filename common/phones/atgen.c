@@ -1377,7 +1377,7 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	/* Select PDU mode */
 	error = state->driver.functions(GN_OP_AT_SetPDUMode, data, state);
 	if (error) {
-		dprintf("PDU mode is not supported by gnokii. This mobile supports only TEXT mode\n");
+		dprintf("PDU mode is not supported by the phone. This mobile supports only TEXT mode\nwhile gnokii supports only PDU mode.\n");
 		return error;
 	}
 	dprintf("PDU mode set\n");
