@@ -3138,6 +3138,8 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->cb_callback_data = NULL;
 	drvinst->on_sms = NULL;
 	drvinst->sms_callback_data = NULL;
+	drvinst->reg_notification = NULL;
+	drvinst->reg_callback_data = NULL;
 	drvinst->clip_supported = 0;
 	drvinst->last_call_type = GN_CALL_Voice;
 	drvinst->last_call_status = GN_CALL_Idle;

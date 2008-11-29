@@ -15,6 +15,8 @@
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
+ * at driver updates
+    o initialize reg_notification and reg_callback_date (Paweł Kot)
 
 0.6.27
 ======
