@@ -1,3 +1,7 @@
+* Mon Dec  1 2008 BORBELY Zoltan
+- Restart connection if there're too many consequetive errors.
+
+
 * Sun Nov 16 2008 Jan Derfinak
 - ReadSMS() prepared gn_sms structure to remove in A_DeleteSMSMessage(). But
   in some situation RefreshSMS() deallocated gn_sms structure before
