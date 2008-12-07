@@ -471,7 +471,7 @@ static void RealConnect (void *phone)
       {
         g_print ("%s:%d error: %d, %s\n", __FILE__, __LINE__, error, gn_error_print(error));
 	consequetive_errors++;
-	if (consequetive_errors > 5 )
+	if (consequetive_errors > MAX_CONSEQUETIVE_ERRORS)
 	{
 	  g_print (_("Too many consequetive errors, restarting connection.\n"),
 		 __FILE__, __LINE__);

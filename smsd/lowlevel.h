@@ -34,6 +34,8 @@
 #include <glib.h>
 #include "gnokii.h"
 
+#define	MAX_CONSEQUETIVE_ERRORS	5
+
 typedef enum {
   Event_SendSMSMessage,
   Event_DeleteSMSMessage,
