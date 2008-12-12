@@ -28,9 +28,3 @@ when generating Makefile.global and the defines needed to print debug
 messages when generating include/config.h then in your gnokiirc set debug=on
 to see messages about libgnokii or gnokii and xdebug=on to see messages
 about xgnokii or smsd.
-At configure time you may add --disable-shared to build statically linked
-versions that are easier to deal with.
-make clean; make and then you can make install or run the programs from their
-directory if they are statically linked: 
- gnokii/gnokii
- xgnokii/xgnokii
