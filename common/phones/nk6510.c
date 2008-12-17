@@ -1665,7 +1665,8 @@ static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *s
 	for (j = 0; j < fl.file_count; j++) {
 		if (!strncmp("01", fl.files[j]->name+21, 2)) {
 			strcpy(fl2.path, fl.path);
-			fl2.files[fl2.file_count++] = fl.files[j];
+			inc_filecount(&fl2);
+			fl2.files[fl2.file_count-1] = fl.files[j];
 		}
 	}
 

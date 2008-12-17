@@ -17,6 +17,8 @@
       read from a terminal                          (Daniele Forsi)
  * at driver updates
     o initialize reg_notification and reg_callback_date (Paweł Kot)
+ * nk6510 driver updates
+    o fix segfault on deletesms with S40_30             (Paweł Kot)
 
 0.6.27
 ======
