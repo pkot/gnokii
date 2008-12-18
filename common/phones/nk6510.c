@@ -997,6 +997,10 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 		data->sms_folder->number = message[6] * 256 + message[7];
 		dprintf("Message: Number of Entries: %i\n" , data->sms_folder->number);
+		if (data->sms_folder->number > GN_SMS_MESSAGE_MAX_NUMBER) {
+			dprintf("Shrinking to %d entries. File bug for gnokii.\n", GN_SMS_MESSAGE_MAX_NUMBER);
+			data->sms_folder->number = GN_SMS_MESSAGE_MAX_NUMBER;
+		}
 		if (data->sms_folder->number > 0) {
 			dprintf("Message: IDs of Entries : ");
 			for (i = 0; i < data->sms_folder->number; i++) {
@@ -1271,6 +1275,10 @@ static gn_error NK6510_GetSMSFolderStatus_S40_30(gn_data *data, struct gn_statem
 			data->sms_folder->number++;
 	}
 	dprintf("%d out of %d are SMS\n", data->sms_folder->number, fl.file_count);
+	if (data->sms_folder->number > GN_SMS_MESSAGE_MAX_NUMBER) {
+		dprintf("Shrinking to %d entries. File a bug for gnokii.\n", GN_SMS_MESSAGE_MAX_NUMBER);
+		data->sms_folder->number = GN_SMS_MESSAGE_MAX_NUMBER;
+	}
 	return error;
 }
 
@@ -1314,6 +1322,14 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
 		error = sm_block(NK6510_MSG_FOLDER, data, state);
 
+		/* FIXME: make it dynamic buffer */
+		if (phone.number + data->sms_folder->number > GN_SMS_MESSAGE_MAX_NUMBER) {
+			dprintf("Shrinking to %d entries. File a bug for gnokii.\n", GN_SMS_MESSAGE_MAX_NUMBER);
+			phone.number = GN_SMS_MESSAGE_MAX_NUMBER - data->sms_folder->number;
+			/* This shouldn't happen. But let's be safe. */
+			if (phone.number < 0)
+				phone.number = 0;
+		}
 		/* Append messages from ME to SM */
 		for (i = 0; i < phone.number; i++) {
 			data->sms_folder->locations[data->sms_folder->number] = phone.locations[i] + 1024;
