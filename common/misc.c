@@ -237,7 +237,7 @@ static gn_phone_model models[] = {
 	{"6233",  "RM123_145_-", PM_DEFAULT | PM_NETMONITOR },
 	{"6250",  "NHM-3",	PM_DEFAULT | PM_NETMONITOR },
 	{"6280",  "RH-78",	PM_DEFAULT | PM_NETMONITOR },
-	{"6300",  "RM-217",     PM_DEFAULT | PM_FULLPBK },
+	{"6300",  "RM-217",     PM_DEFAULT | PM_FULLPBK | PM_SMSFILE },
 	{"6310",  "NPE-4",	PM_DEFAULT },
 	{"6310i", "NPL-1",	PM_DEFAULT },
 	{"6340",  "NPM-2",	PM_OLD_DEFAULT },
