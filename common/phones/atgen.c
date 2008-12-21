@@ -2980,7 +2980,8 @@ static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int len
 
 	dt = data->datetime;
 	memset(timezone, 0, 6);
-	cnt = sscanf(buf.line2, "+CCLK: \"%d/%d/%d,%d:%d:%d%[+-1234567890]\"",
+	/* Use strip_quotes() since some phones do not use quotes. Add 7 to skip "+CCLK: " */
+	cnt = sscanf(strip_quotes(buf.line2 + 7), "%d/%d/%d,%d:%d:%d%[+-1234567890]",
 		     &dt->year, &dt->month, &dt->day,
 		     &dt->hour, &dt->minute, &dt->second, timezone);
 	switch (cnt) {
