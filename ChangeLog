@@ -12,6 +12,8 @@
     o strip trailing '\r's when parsing vcard files     (Paweł Kot)
     o enable Bluetooth support for FreeBSD            (Guido Falsi)
     o fix segfault on sending long sms                  (Paweł Kot)
+    o fix off by one bug in atbus_rx_statemachine() found with
+      valgrind                           (Daniele Forsi, Paweł Kot)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)

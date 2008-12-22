@@ -155,7 +155,7 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 	if (!bi)
 		return;
 
-	if (bi->rbuf_pos >= bi->rbuf_size) {
+	if (bi->rbuf_pos >= bi->rbuf_size - 1) {
 		bi->rbuf_size += RBUF_SEG;
 		bi->rbuf = realloc(bi->rbuf, bi->rbuf_size);
 	}
