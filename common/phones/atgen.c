@@ -2917,6 +2917,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 		} else {
 			format = -1;
 		}
+		dprintf("Format given: %d\n", format);
 		switch (format) {
 		case -1: /* neither operator name nor code given (eg. no SIM or not registered) */
 			error = GN_ERR_NOTAVAILABLE;
@@ -2928,7 +2929,20 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), "%s", gn_network_code_get(tmp));
 			break;
 		case 2: /* network operator code given */
-			if (strlen(strings[2]) == 5) {
+			/*
+			 * Siemens S55 follows own standards. With inactive SIM it returns:
+			 * AT+COPS?
+			 *  +COPS: 0,2
+			 *  OK
+			 * In contrary Nokia e50 gives:
+			 * AT+COPS?
+			 *  +COPS: 0
+			 *  OK
+			 */
+			if (!strings[2]) {
+				error = GN_ERR_NOTAVAILABLE;
+				data->network_info->network_code[0] = 0;
+			} else if (strlen(strings[2]) == 5) {
 				data->network_info->network_code[0] = strings[2][0];
 				data->network_info->network_code[1] = strings[2][1];
 				data->network_info->network_code[2] = strings[2][2];

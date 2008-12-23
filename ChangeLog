@@ -19,8 +19,12 @@
       read from a terminal                          (Daniele Forsi)
  * at driver updates
     o initialize reg_notification and reg_callback_date (Paweł Kot)
+    o fix --getnetworkinfo on some phones (Siemens S55) with
+      unregistered SIM                                  (Paweł Kot)
     o accept also +CCLK and +CREG responses without double quotes
                                                     (Daniele Forsi)
+    o fix --getnetworkinfo on some phones (Siemens S55) with
+      unregistered SIM                                  (Paweł Kot)
  * nk6510 driver updates
     o fix segfault on deletesms with S40_30             (Paweł Kot)
     o sanity checks for number of messages in folder; increase max
