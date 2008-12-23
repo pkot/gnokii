@@ -1769,7 +1769,7 @@ msgstr "Ogni %d ore"
 #: ../gnokii/gnokii-calendar.c:182
 #, c-format
 msgid "   The event will be repeated "
-msgstr "   L'evento si ripeterà"
+msgstr "   L'evento si ripeterà "
 
 #: ../gnokii/gnokii-calendar.c:185
 #, c-format
