@@ -1,3 +1,7 @@
+* Wed 24 Dec 2008 Daniele Forsi
+- Minor changes to man page.
+
+
 * Mon Dec  1 2008 BORBELY Zoltan
 - Restart connection if there're too many consequetive errors.
 

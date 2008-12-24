@@ -1,4 +1,4 @@
-.TH "smsd" "8" "April  26, 2005" "" "Gnokii"
+.TH "smsd" "8" "December 24, 2008" "" "Gnokii"
 .SH "NAME"
 smsd \- daemon for handling incoming and outgoing SMSes using libgnokii
 .SH "SYNOPSIS"
@@ -11,11 +11,11 @@ The
 (SMS daemon) program is intended for receiving and sending SMSes.
 
 .PP
-The program is designed to use modules (plugins) to work with an SQL server.
+The program is designed to use modules (plugins) to work with different backends.
 Currently are supported PostgreSQL, MySQL and a special module 'file' which is
 designed to work without an SQL database (see below for special instructions
-for the file module). See option \fI--module\fR. \fBSMSD\fR uses an SQL server as a
-repository for SMSes. You must create a database (default name is 'sms') with
+in the file module section). When \fBSMSD\fR uses an SQL server as a
+repository for SMSes you must create a database (default name is 'sms') with
 tables defined in sms.tables.{module}.sql files. Table 'inbox' is for
 received SMSes:
 .RS
@@ -168,7 +168,7 @@ Specify database schema.
 
 .TP
 .BR -m,\ --module\ db_module
-Specify which module to use for connection to DB server. Currently supported are pq for PostgreSQL and mysql for MySQL.
+Specify which module to use for connection to DB server. Currently supported values are 'pq' for PostgreSQL, 'mysql' for MySQL and 'file'.
 
 .TP
 .BR -l,\ --libdir\ path_to_db_module
@@ -294,4 +294,4 @@ See also Docs/CREDITS from the Gnokii sources.
 This program is distributed under the GNU Public License.
 
 .SH "SEE ALSO"
-gnokii
+gnokii(1)
