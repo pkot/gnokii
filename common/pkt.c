@@ -114,12 +114,24 @@ void pkt_put_string(pkt_buffer *buf, const char *x)
 {
 	uint16_t n = strlen(x);
 	uint8_t *b;
+	unsigned int len;
+	char *aux = malloc(n);
 
-	pkt_put_uint16(buf, n);
+	if (!aux)
+		return;
 
-	b = buffer_expand(buf, 2 * n);
-	/* FIXME: check the return code (size of the written buffer) */
-	char_unicode_encode(b, x, n);
+	len = char_unicode_encode(aux, x, n);
+
+	/*
+	 * gnapplet expects number of chars to be read.
+	 * char_unicode_encode() encodes every char on two bytes.
+	 * strlen() doesn't return correct values for utf8 strings.
+	 */
+	pkt_put_uint16(buf, len / 2);
+
+	b = buffer_expand(buf, len);
+	memcpy(b, aux, len);
+	free(aux);
 }
 
 void pkt_put_timestamp(pkt_buffer *buf, const gn_timestamp *x)

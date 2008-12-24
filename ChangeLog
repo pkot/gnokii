@@ -30,6 +30,9 @@
     o fix segfault on deletesms with S40_30             (Paweł Kot)
     o sanity checks for number of messages in folder; increase max
       sms number in folder to 1024                      (Paweł Kot)
+ * gnapplet driver updates
+    o fix string type argument length passed to the phone
+                                                        (Paweł Kot)
 
 0.6.27
 ======
