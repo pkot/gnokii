@@ -10,13 +10,13 @@ Symbian Series80 phones are not supported by this driver.
 Tested phones are:
  * Nokia 3650 (S60 1st)
  * Nokia 6600 (S60 2nd)
+ * Nokia 7650 (S60 1st)
  * Nokia N-Gage QD (S60 1st, need to set irda = 0 in gnapplet.ini)
  * Siemens SX1 (S60 1st)
 
 Untested phones, but they have to work:
  * S60 1st
    o Nokia 3660
-   o Nokia 7650
    o Nokia N-Gage
    o Sendo X
  * S60 2nd
