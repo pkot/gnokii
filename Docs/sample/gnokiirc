@@ -134,9 +134,8 @@ serial_baudrate = 19200
 
 # If you are using a bluetooth connection, you can specify the rfcomm
 # channel number here. If you don't specify the value, it is autodetected
-# on connection (it may take an additional second). If none is detected,
-# we assume default value: 1. FBUS connections always ignore this value and
-# use channel 14.
+# on connection (it may take an additional second). FBUS connections always
+# ignore this value and use channel 14.
 #rfcomm_channel = 1
 
 # There may happen various timeouts during the communication with the phone.

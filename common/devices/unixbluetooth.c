@@ -303,6 +303,11 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 				break;
 			}
 
+			if (only_gnapplet != 0) {
+				channel = -1;
+				break;
+			}
+			
 			if (strstr(name, "Nokia PC Suite") != NULL) {
 				channel = -1;
 				break;
@@ -357,6 +362,10 @@ static int get_rfcomm_channel(sdp_record_t *rec, int only_gnapplet)
 			channel = sdp_get_proto_port(protos, RFCOMM_UUID);
 		goto end;
 	}
+
+	/* We are not interested in other channels but gnapplet. */
+	if (only_gnapplet != 0)
+		goto end;
 
 	/*
 	 * We can't seem to connect to the PC Suite channel.
@@ -434,10 +443,11 @@ end:
 
 #endif
 
-static int get_serial_channel(bdaddr_t *device, int only_gnapplet)
+static uint8_t get_serial_channel(bdaddr_t *device, int only_gnapplet)
 {
 	bdaddr_t src;
 	int channel;
+	uint8_t retval;
 
 	bacpy(&src, BDADDR_ANY);
 
@@ -445,7 +455,11 @@ static int get_serial_channel(bdaddr_t *device, int only_gnapplet)
 	if (channel < 0)
 		channel = find_service_channel(&src, device, only_gnapplet, GNOKII_DIALUP_NETWORK_CLASS);
 
-	return channel;
+	if (channel < 0)
+		retval = 0;
+	else
+		retval = channel;
+	return retval;
 }
 
 /* From: http://www.kegel.com/dkftpbench/nonblocking.html */
@@ -485,16 +499,22 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	raddr.rc_family = AF_BLUETOOTH;
 	bacpy(&raddr.rc_bdaddr, &bdaddr);
 	dprintf("Channel: %d\n", channel);
-	if (channel < 1)
+	if (channel < 1) {
 		if (!strcmp(state->config.model, "gnapplet") ||
 		    !strcmp(state->config.model, "symbian"))
 			channel = get_serial_channel(&bdaddr, 1);
 		else
 			channel = get_serial_channel(&bdaddr, 0);
+	}
 	dprintf("Channel: %d\n", channel);
-	/* Let's fallback to default channel */
-	if (channel < 1)
-		channel = 1;
+
+	/* If none channel found, fail. */
+	if (channel < 1) {
+		fprintf(stderr, _("Cannot find any appropriate rfcomm channel and none was specified in the config.\n"));
+		close(fd);
+		return -1;
+	}
+
 	dprintf("Using channel: %d\n", channel);
 	raddr.rc_channel = channel;
 	
