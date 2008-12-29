@@ -18,6 +18,9 @@
     o autodetect bluetooth channel for gnapplet         (Paweł Kot)
     o don't use default rfcomm channel since we have autodetection
                                                         (Paweł Kot)
+    o add id for Nokia 1209 to misc.c only; use model=series40 in
+      gnokiirc for this and similar phones but phone supports a
+      very limited set of commands)                        (ncrfgs)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
