@@ -297,15 +297,13 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 			if (name == NULL)
 				break;
 
-			if (strcmp(name, "gnapplet") == 0) {
-				if (only_gnapplet != 0)
-					return channel;
-				break;
-			}
-
 			if (only_gnapplet != 0) {
-				channel = -1;
-				break;
+				if (strcmp(name, "gnapplet") == 0)
+					goto end;
+				else {
+					channel = -1;
+					break;
+				}
 			}
 			
 			if (strstr(name, "Nokia PC Suite") != NULL) {
@@ -357,15 +355,11 @@ static int get_rfcomm_channel(sdp_record_t *rec, int only_gnapplet)
 	 * If we're only supposed to check for gnapplet, do it here
 	 * We ignore it if we're not supposed to check for it.
 	 */
-	if (strcmp(name, "gnapplet") == 0) {
-		if (only_gnapplet != 0)
+	if (only_gnapplet != 0) {
+		if (strcmp(name, "gnapplet") == 0)
 			channel = sdp_get_proto_port(protos, RFCOMM_UUID);
 		goto end;
 	}
-
-	/* We are not interested in other channels but gnapplet. */
-	if (only_gnapplet != 0)
-		goto end;
 
 	/*
 	 * We can't seem to connect to the PC Suite channel.
