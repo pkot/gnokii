@@ -434,20 +434,19 @@ end:
 
 #endif
 
-static int get_serial_channel(bdaddr_t *device)
+static int get_serial_channel(bdaddr_t *device, int only_gnapplet)
 {
 	bdaddr_t src;
 	int channel;
 
 	bacpy(&src, BDADDR_ANY);
 
-	channel = find_service_channel(&src, device, 0, GNOKII_SERIAL_PORT_CLASS);
+	channel = find_service_channel(&src, device, only_gnapplet, GNOKII_SERIAL_PORT_CLASS);
 	if (channel < 0)
-		channel = find_service_channel(&src, device, 0, GNOKII_DIALUP_NETWORK_CLASS);
+		channel = find_service_channel(&src, device, only_gnapplet, GNOKII_DIALUP_NETWORK_CLASS);
 
 	return channel;
 }
-
 
 /* From: http://www.kegel.com/dkftpbench/nonblocking.html */
 static int setNonblocking(int fd)
@@ -487,7 +486,11 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	bacpy(&raddr.rc_bdaddr, &bdaddr);
 	dprintf("Channel: %d\n", channel);
 	if (channel < 1)
-		channel = get_serial_channel(&bdaddr);
+		if (!strcmp(state->config.model, "gnapplet") ||
+		    !strcmp(state->config.model, "symbian"))
+			channel = get_serial_channel(&bdaddr, 1);
+		else
+			channel = get_serial_channel(&bdaddr, 0);
 	dprintf("Channel: %d\n", channel);
 	/* Let's fallback to default channel */
 	if (channel < 1)

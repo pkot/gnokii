@@ -15,6 +15,7 @@
     o fix off by one bug in atbus_rx_statemachine() found with
       valgrind                           (Daniele Forsi, Paweł Kot)
     o fix retval of char_ucs2_encode()   (Daniele Forsi, Paweł Kot)
+    o autodetect bluetooth channel for gnapplet         (Paweł Kot)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
