@@ -2,7 +2,7 @@
 =========================
  * build system updates
     o fix Mac OS X build    (Paweł Kot, Daniele Forsi, Jeff Rafter)
-    o fix NetBSD build                              (Daniele Forsi)
+    o fix NetBSD build and enable Bluetooth support (Daniele Forsi)
     o use = instead of == in configure to be compliant with sh
       syntax                                          (Guido Falsi)
  * libgnokii changes

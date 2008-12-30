@@ -38,7 +38,7 @@
 #include "gnokii.h"
 #include "devices/unixbluetooth.h"
 
-#if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH)
+#if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH) || defined(HAVE_BLUETOOTH_NETBT)
 
 #include <stdlib.h>
 #include <stdio.h>
@@ -62,6 +62,19 @@
 #define rc_bdaddr rfcomm_bdaddr
 #define rc_channel rfcomm_channel
 
+#else
+#ifdef HAVE_BLUETOOTH_NETBT	/* FreeBSD / netbt */
+
+#include <bluetooth.h>
+#include <sdp.h> 
+
+#define GNOKII_SERIAL_PORT_CLASS	SDP_SERVICE_CLASS_SERIAL_PORT
+#define GNOKII_DIALUP_NETWORK_CLASS	SDP_SERVICE_CLASS_DIALUP_NETWORKING
+#define sockaddr_rc sockaddr_bt
+#define rc_family bt_family
+#define rc_bdaddr bt_bdaddr
+#define rc_channel bt_channel
+
 #else	/* Linux / BlueZ support */
 
 #include <bluetooth/bluetooth.h>
@@ -72,9 +85,10 @@
 #define GNOKII_SERIAL_PORT_CLASS	SERIAL_PORT_SVCLASS_ID
 #define GNOKII_DIALUP_NETWORK_CLASS	DIALUP_NET_SVCLASS_ID
 
-#endif
+#endif /* HAVE_BLUETOOTH_NETBT */
+#endif /* HAVE_BLUETOOTH_NETGRAPH */
 
-#ifdef HAVE_BLUETOOTH_NETGRAPH	/* FreeBSD / netgraph */
+#if defined(HAVE_BLUETOOTH_NETGRAPH) || defined(HAVE_BLUETOOTH_NETBT) /* FreeBSD / NetBSD */
 
 /*
 ** FreeBSD version of the find_service_channel function.
@@ -552,4 +566,4 @@ int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *st
 	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
 
-#endif	/* HAVE_BLUETOOTH_BLUEZ || HAVE_BLUETOOTH_NETGRAPH */
+#endif	/* HAVE_BLUETOOTH_BLUEZ || HAVE_BLUETOOTH_NETGRAPH || HAVE_BLUETOOTH_NETBT */
