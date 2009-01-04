@@ -151,7 +151,8 @@ Install the binaries into the system with the following line:
 most cases.
 
 Note that you will need to adjust /dev/ttyS* or /dev/ircomm* and /var/lock
-permissions and ownership before starting using gnokii.
+permissions and ownership before starting using gnokii. An udev rules file
+for use with libusb is provided in Docs/sample.
 
 If you wish to install gnokii stuff in some other directory root (eg. when
 creating a distribution package), you can take an advantage of the DESTDIR
