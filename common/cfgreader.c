@@ -459,7 +459,7 @@ struct gn_cfg_header *cfg_memory_read(const char **lines)
 		}
 
 		/* Line not part of any heading */
-		fprintf(stderr, _("Orphaned line: %s\n"), line);
+		fprintf(stderr, _("Orphaned line: %s\nIf in doubt place this line into [global] section.\n"), line);
 
 		free(buf);
 	}
