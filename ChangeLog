@@ -24,6 +24,8 @@
     o add a gn_lib_init() function to translate libgnokii messages
       also when the library is used by programs other than gnokii,
       xgnokii and smsd                              (Daniele Forsi)
+    o set To headers instead of From headers when saving to mbox
+      outbox messages                                    (analyzer)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)

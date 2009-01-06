@@ -2017,8 +2017,18 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 #ifdef ENABLE_NLS
 	loc = setlocale(LC_ALL, "C");
 #endif
-	CONCAT(buf, tmp, size, "From %s@%s %s", sms->remote.number, from, asctime(loctime));
-
+	switch (sms->status) {
+	case GN_SMS_Sent:
+	case GN_SMS_Unsent:
+		CONCAT(buf, tmp, size, "To %s@%s %s", sms->remote.number, from, asctime(loctime));
+		break;
+	case GN_SMS_Read:
+	case GN_SMS_Unread:
+	default:
+		CONCAT(buf, tmp, size, "From %s@%s %s", sms->remote.number, from, asctime(loctime));
+		break;
+	}
+	
 	tmp = calloc(MAX_DATE_LENGTH, sizeof(char));
 	if (!tmp)
 		goto error;
@@ -2028,7 +2038,18 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 #endif
 	APPEND(buf, tmp, size);
 
-	CONCAT(buf, tmp, size, "From: %s@%s\n", sms->remote.number, from);
+	switch (sms->status) {
+	case GN_SMS_Sent:
+	case GN_SMS_Unsent:
+		CONCAT(buf, tmp, size, "To: %s@%s\n", sms->remote.number, from);
+		break;
+	case GN_SMS_Read:
+	case GN_SMS_Unread:
+	default:
+		CONCAT(buf, tmp, size, "From: %s@%s\n", sms->remote.number, from);
+		break;
+	}
+
 	CONCAT(buf, tmp, size, "X-GSM-SMSC: %s\n", sms->smsc.number);
 	CONCAT(buf, tmp, size, "X-GSM-Status: %s\n", status2str(sms->status));
 	CONCAT(buf, tmp, size, "X-GSM-Memory: %s\n", gn_memory_type2str(sms->memory_type));
