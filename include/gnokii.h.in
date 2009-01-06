@@ -91,6 +91,10 @@ struct gn_statemachine;
 #include <gnokii/statemachine.h>
 
 /* Gnokii library functions - they all start with gn_lib_ */
+
+/* Initialize the library for use by programs. Call this function before any other */
+GNOKII_API gn_error gn_lib_init();
+
 /* Get the current runtime version (LIBGNOKII_VERSION) of libgnokii - see LIBGNOKII_MAKE_VERSION() */
 GNOKII_API unsigned int gn_lib_version();
 
