@@ -1,3 +1,5 @@
+DEFS = -DCOMPILYNG_LIBGNOKII
+
 noinst_LTLIBRARIES = libLINKS.la
 libLINKS_la_SOURCES = \
 	atbus.c \

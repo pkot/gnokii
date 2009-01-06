@@ -1,3 +1,4 @@
+DEFS = -DLOCALEDIR=\"$(localedir)\" -DCOMPILYNG_LIBGNOKII
 
 if WIN32
 DATA_DIR = 

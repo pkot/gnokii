@@ -21,6 +21,9 @@
     o add id for Nokia 1209 to misc.c only; use model=series40 but
       you will get limited functionality because this phone doesn't
       support the commands that other Series 40 do         (ncrfgs)
+    o add a gn_lib_init() function to translate libgnokii messages
+      also when the library is used by programs other than gnokii,
+      xgnokii and smsd                              (Daniele Forsi)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
