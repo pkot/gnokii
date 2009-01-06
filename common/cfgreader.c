@@ -930,6 +930,12 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	char *val;
 	gn_error error;
 
+	error = gn_lib_init();
+	if (error != GN_ERR_NONE) {
+		fprintf(stderr, _("Failed to initialize libgnokii.\n"));
+		return error;
+	}
+
 	if (file == NULL && lines == NULL) {
 		fprintf(stderr, _("Couldn't open a config file or memory.\n"));
 		return GN_ERR_NOCONFIG;
