@@ -47,6 +47,10 @@
 #include "gnokii.h"
 #include "device.h"
 
+#ifdef ENABLE_NLS
+#  include <locale.h>
+#endif
+
 /* this macro sets the "lasterror" code */
 #define LASTERROR(state,nr)	((state->lasterror = nr)) /* do not delete the double brackets! */
 
