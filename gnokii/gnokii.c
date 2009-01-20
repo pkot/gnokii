@@ -212,8 +212,9 @@ static void version(void)
 	fprintf(stderr, _("Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 			  "Copyright (C) Pavel Janik ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 			  "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
-			  "Copyright (C) Pawel Kot <pkot@linuxnews.pl>, 2001-2006\n"
+			  "Copyright (C) Pawel Kot <gnokii@gmail.com>, 2001-2009\n"
 			  "Copyright (C) BORBELY Zoltan <bozo@andrews.hu>, 2002\n"
+			  "Copyright (C) Daniele Forsi <daniele@forsi.it>, 2004-2009\n"
 			  "gnokii is free software, covered by the GNU General Public License, and you are\n"
 			  "welcome to change it and/or distribute copies of it under certain conditions.\n"
 			  "There is absolutely no warranty for gnokii.  See GPL for details.\n"
@@ -378,8 +379,13 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_ar
 #ifndef WIN32
 static int foogle(int argc, char *argv[])
 {
+	int len;
+	char dupa[32];
 	/* Fill in what you would like to test here... */
 	/* remember to call businit(); if you need to communicate with your phone */
+	printf("%d: %s\n", strlen(argv[2]), argv[2]);
+	len = char_unicode_encode(dupa, argv[2], strlen(argv[2]));
+	printf("%d: %s\n", len, dupa);
 	return 0;
 }
 #endif
@@ -583,7 +589,7 @@ static int parse_options(int argc, char *argv[])
 		{ "smsreader",          no_argument,       NULL, OPT_SMSREADER },
 
 		/* For development purposes: insert you function calls here */
-		{ "foogle",             no_argument,       NULL, OPT_FOOGLE },
+		{ "foogle",             optional_argument, NULL, OPT_FOOGLE },
 
 		/* Get WAP bookmark */
 		{ "getwapbookmark",     required_argument, NULL, OPT_GETWAPBOOKMARK },
@@ -710,6 +716,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_DELETEFILE,        1, 1, 0 },
 		{ OPT_DELETEFILEBYID,    1, 1, 0 },
 		{ OPT_SHELL,             0, 0, 0 },
+		{ OPT_FOOGLE,            0, 10, 0 },
 		{ 0, 0, 0, 0 },
 	};
 
