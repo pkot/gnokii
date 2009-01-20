@@ -5,6 +5,8 @@
     o fix NetBSD build and enable Bluetooth support (Daniele Forsi)
     o use = instead of == in configure to be compliant with sh
       syntax                                          (Guido Falsi)
+    o add options to disable mysql/postgres smsd plugins
+      compilation                                     (Alin Năstac)
  * libgnokii changes
     o print more verbose messages on device locking problems
                                                         (Paweł Kot)
