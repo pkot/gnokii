@@ -379,14 +379,6 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_ar
 #ifndef WIN32
 static int foogle(int argc, char *argv[])
 {
-	int len;
-	char dupa[32];
-	/* Fill in what you would like to test here... */
-	/* remember to call businit(); if you need to communicate with your phone */
-	printf("%d: %s\n", strlen(argv[2]), argv[2]);
-	len = char_unicode_encode(dupa, argv[2], strlen(argv[2]));
-	printf("%d: %s\n", len, dupa);
-	return 0;
 }
 #endif
 
@@ -589,7 +581,7 @@ static int parse_options(int argc, char *argv[])
 		{ "smsreader",          no_argument,       NULL, OPT_SMSREADER },
 
 		/* For development purposes: insert you function calls here */
-		{ "foogle",             optional_argument, NULL, OPT_FOOGLE },
+		{ "foogle",             no_argument,       NULL, OPT_FOOGLE },
 
 		/* Get WAP bookmark */
 		{ "getwapbookmark",     required_argument, NULL, OPT_GETWAPBOOKMARK },
@@ -716,7 +708,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_DELETEFILE,        1, 1, 0 },
 		{ OPT_DELETEFILEBYID,    1, 1, 0 },
 		{ OPT_SHELL,             0, 0, 0 },
-		{ OPT_FOOGLE,            0, 10, 0 },
+		{ OPT_FOOGLE,            0, 0, 0 },
 		{ 0, 0, 0, 0 },
 	};
 
