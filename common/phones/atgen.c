@@ -1836,7 +1836,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 			pos++;
 		}
 		/* DEBUG */
-		for (parts=0; part[parts]; parts++) {
+		for (parts = 0; parts < (sizeof(part) / sizeof(*part)) && part[parts]; parts++) {
 			dprintf("part[%d] = \"%s\"\n", parts, part[parts]);
 		}
 
