@@ -12,6 +12,7 @@
 #                              maintained (Pawel Kot)
 #         may  6, 2007         Give a choice between SIM and phone memory for
 #                              the phonebook (Pawel Kot)
+#         jan 23, 2009         Remove outdated notice about pre releases
 ###############################################################################
 # G N O K I I
 #
@@ -365,9 +366,6 @@ if [ $SW_SKIPGNOKITST = no ] ; then
 	echo
 	echo "www.gnokii.org located in California, USA"
 	echo "ftp.pl.gnokii.org located in Warsaw, Poland"
-	echo
-	echo "Pre release versions are kept here, maintained by Pawel Kot"
-	echo "urtica.linuxnews.pl located in Warsaw, Poland"
 	echo
 	exit 1
 	fi
