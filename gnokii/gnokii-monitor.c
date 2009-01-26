@@ -157,7 +157,7 @@ static void displaycall(int call_id)
 		break;
 	}
 
-	fprintf(stderr, _("CALL%d: %s %s(%s) (callid: %d, duration: %d sec)\n"),
+	fprintf(stdout, _("CALL%d: %s %s (%s) (callid: %d, duration: %d sec)\n"),
 		call_id, s, call->remote_number, call->remote_name,
 		call->call_id, (int)delta.tv_sec);
 #endif
