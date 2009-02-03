@@ -298,7 +298,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                                           0x01 - delivery report
                                           0x02 - MO
                                           0x80 - picture message
-                            where: status=0x01 - reveived/read
+                            where: status=0x01 - received/read
 					  0x03 - received/unread
 					  0x05 - stored/sent
 					  0x07 - stored/not sent

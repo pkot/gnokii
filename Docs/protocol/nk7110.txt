@@ -307,7 +307,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
                             where: folderID - see 0x14/0x017B
     r Get SMS from folder   { 0x0108, status, folderID, 0x00, location, type, sender number,...}
 
-                            where: status=0x01 - reveived/read
+                            where: status=0x01 - received/read
 					  0x03 - received/unread
 					  0x05 - stored/sent
 					  0x07 - stored/not sent
