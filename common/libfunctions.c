@@ -64,11 +64,18 @@
  */
 GNOKII_API gn_error gn_lib_init()
 {
+	static bool initialized = false;
+
+	if (initialized == true)
+		return GN_ERR_NONE;
+
 #ifdef ENABLE_NLS
 	setlocale (LC_ALL, "");
 	bindtextdomain (GETTEXT_PACKAGE, LOCALEDIR);
 	textdomain (GETTEXT_PACKAGE);
 #endif
+	initialized = true;
+
 	return GN_ERR_NONE;
 }
 
