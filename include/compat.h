@@ -252,7 +252,7 @@ time_t timegm(struct tm *tm);
 /* This one is for NLS. */
 #ifdef ENABLE_NLS
 #  include <libintl.h>
-#  ifdef COMPILYNG_LIBGNOKII
+#  ifdef COMPILING_LIBGNOKII
 #    define _(x) dgettext(GETTEXT_PACKAGE, x)
 #    define N_(x) dgettext_noop(GETTEXT_PACKAGE, x)
 #  else
