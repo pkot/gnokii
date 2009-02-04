@@ -1081,7 +1081,7 @@ int shell(gn_data *data, struct gn_statemachine *state)
 			else
 				len = strlen(input);
 			if (len > 0)
-				argv[argc++] = strndup(input, len);
+				argv[argc++] = strdup(input);
 			input = tmp;
 		} while (input);
 		argv[argc] = NULL;

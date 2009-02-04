@@ -7,6 +7,8 @@
       syntax                                          (Guido Falsi)
     o add options to disable mysql/postgres smsd plugins
       compilation                                     (Alin Năstac)
+    o use strdup instead of strndup - fixes FreeBSD < 8 compilation
+                                                      (Guido Falsi)
  * libgnokii changes
     o print more verbose messages on device locking problems
                                                         (Paweł Kot)
