@@ -473,8 +473,7 @@ static void RealConnect (void *phone)
 	consequetive_errors++;
 	if (consequetive_errors > MAX_CONSEQUETIVE_ERRORS)
 	{
-	  g_print (_("Too many consequetive errors, restarting connection.\n"),
-		 __FILE__, __LINE__);
+	  g_print (_("Too many consequetive errors, restarting connection.\n"));
 	  break;
 	}
       }
