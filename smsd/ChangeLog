@@ -1,3 +1,7 @@
+* Sun  Feb  8 2009 Daniele Forsi
+- Fix segfault when using the nk6100 driver.
+
+
 * Wed 24 Dec 2008 Daniele Forsi
 - Minor changes to man page.
 

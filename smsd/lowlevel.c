@@ -84,6 +84,7 @@ static gn_error InitModelInf (void)
   char model[GN_MODEL_MAX_LENGTH], rev[GN_REVISION_MAX_LENGTH], 
 	manufacturer[GN_MANUFACTURER_MAX_LENGTH];
 
+  gn_data_clear(&data);
   data.manufacturer = manufacturer;
   data.model = model;
   data.revision = rev;
