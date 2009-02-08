@@ -586,6 +586,7 @@ GNOKII_API gn_error gn_lib_search_one_connected_phone(struct gn_statemachine **s
 
 	/* not yet implemented */
 	free(*state);
-	return LASTERROR((*state), GN_ERR_UNKNOWNMODEL);
+	*state = NULL;
+	return GN_ERR_NOTIMPLEMENTED;
 }
 
