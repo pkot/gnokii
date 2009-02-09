@@ -55,6 +55,7 @@
       is ignored when using the FBUS protocol       (Daniele Forsi)
  * smsd updates
     o fix segfault when using the nk6100 driver     (Daniele Forsi)
+    o add examples directory with action files      (Daniele Forsi)
 
 0.6.27
 ======

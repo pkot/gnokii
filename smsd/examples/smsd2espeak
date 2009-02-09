@@ -1,0 +1,8 @@
+#!/bin/bash
+
+mylang=${LANG%_*}
+espeak -v $mylang "Phone number: $1"
+espeak -v $mylang "Date: $2"
+
+espeak -v $mylang
+

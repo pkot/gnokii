@@ -1,4 +1,8 @@
-* Sun  Feb  8 2009 Daniele Forsi
+* Mon Feb  9 2009 Daniele Forsi
+- Add examples directory with action files.
+
+
+* Sun Feb  8 2009 Daniele Forsi
 - Fix segfault when using the nk6100 driver.
 
 

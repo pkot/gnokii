@@ -1,0 +1,41 @@
+This is a collection of example "action" scripts for smsd. Some of them need
+more software in addition to a valid smsd install.
+See "THE FILE MODULE" section in "man smsd" for details on how to configure
+smsd to use such scripts.
+
+You can do your tests without paying for SMS by directly running action files
+passing the phone number as first argument, the date as second argument and
+passing SMS body as stdin:
+ $ cat file_with_sms_body | action +123456 "$(date +"%y-%m-%d %H:%M:%S")"
+
+
+=== smsd2espeak ===
+
+  Depends on: bash, espeak
+
+  Description: speak the sender number, the date and the SMS text using
+  espeak, trying to guess your language by using the LANG environment
+  variable. Note that in this example the SMS is lost after it is spoken
+  once. The espeak executable is called 3 times to follow the structure
+  of the default action file provided with smsd.
+
+
+=== smsd2notify ===
+
+  Depends on: python-notify
+
+  Description: show the SMS in a notification bubble using libnotify. Note
+  that in this example the SMS is lost after it is shown once.
+
+
+=== smsd2tomboy ===
+
+  Depends on: python, tomboy
+
+  Description: create a note in Tomboy when an SMS is received. Multiple
+  messages from the same sender are appended to the same note. Url in the
+  text are automatically hyperlinked by Tomboy. Note that in this example
+  every SMS is automatically saved.
+
+$Id$
+
