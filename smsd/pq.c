@@ -114,25 +114,25 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
   else
   {
     phnStr = g_string_sized_new (32);
-    g_string_sprintf (phnStr, "'%s',", phone);
+    g_string_printf (phnStr, "'%s',", phone);
   }
 
   text = strEscape ((gchar *) data->user_data[0].u.text);
   
   buf = g_string_sized_new (256);
-  g_string_sprintf (buf, "INSERT INTO %s.inbox (\"number\", \"smsdate\", \"insertdate\",\
-                    \"text\", %s \"processed\") VALUES ('%s', \
-                    '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', %s 'f')",
-                    schema,
-                    phone[0] != '\0' ? "\"phone\"," : "", data->remote.number,
-                    data->smsc_time.year, data->smsc_time.month,
-                    data->smsc_time.day, data->smsc_time.hour,
-                    data->smsc_time.minute, data->smsc_time.second, text, phnStr->str);
+  g_string_printf (buf, "INSERT INTO %s.inbox (\"number\", \"smsdate\", \"insertdate\",\
+                         \"text\", %s \"processed\") VALUES ('%s', \
+                         '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', %s 'f')",
+                   schema,
+                   phone[0] != '\0' ? "\"phone\"," : "", data->remote.number,
+                   data->smsc_time.year, data->smsc_time.month,
+                   data->smsc_time.day, data->smsc_time.hour,
+                   data->smsc_time.minute, data->smsc_time.second, text, phnStr->str);
   g_free (text);
-  g_string_free(phnStr, TRUE);
+  g_string_free (phnStr, TRUE);
   
-  res = PQexec(connIn, buf->str);
-  g_string_free(buf, TRUE);
+  res = PQexec (connIn, buf->str);
+  g_string_free (buf, TRUE);
   if (!res || PQresultStatus(res) != PGRES_COMMAND_OK)
   {
     g_print (_("%d: INSERT INTO %s.inbox failed.\n"), __LINE__, schema);
@@ -159,7 +159,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
   else
   {
     phnStr = g_string_sized_new (32);
-    g_string_sprintf (phnStr, "AND phone = '%s'", phone);
+    g_string_printf (phnStr, "AND phone = '%s'", phone);
   }
 
   buf = g_string_sized_new (128);
@@ -167,10 +167,10 @@ GNOKII_API void DB_Look (const gchar * const phone)
   res1 = PQexec (connOut, "BEGIN");
   PQclear (res1);
 
-  g_string_sprintf (buf, "SELECT id, number, text, dreport FROM %s.outbox \
-                          WHERE processed='f' AND localtime(0) >= not_before \
-                          AND localtime(0) <= not_after %s FOR UPDATE",
-                          schema, phnStr->str);
+  g_string_printf (buf, "SELECT id, number, text, dreport FROM %s.outbox \
+                         WHERE processed='f' AND localtime(0) >= not_before \
+                         AND localtime(0) <= not_after %s FOR UPDATE",
+                   schema, phnStr->str);
   g_string_free (phnStr, TRUE);
 
   res1 = PQexec (connOut, buf->str);
@@ -218,9 +218,9 @@ GNOKII_API void DB_Look (const gchar * const phone)
     }
     while ((error == GN_ERR_TIMEOUT || error == GN_ERR_FAILED) && numError++ < 3);
 
-    g_string_sprintf (buf, "UPDATE %s.outbox SET processed='t', error='%d', \
-                            processed_date='now' WHERE id='%s'",
-                      schema, error, PQgetvalue (res1, i, 0));
+    g_string_printf (buf, "UPDATE %s.outbox SET processed='t', error='%d', \
+                           processed_date='now' WHERE id='%s'",
+                     schema, error, PQgetvalue (res1, i, 0));
 
     res2 = PQexec (connOut, buf->str);
     if (!res2 || PQresultStatus (res2) != PGRES_COMMAND_OK)

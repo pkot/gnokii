@@ -89,12 +89,12 @@ gint LoadDB (void)
   gchar *full_name;
 
   full_name = g_strdup_printf ("smsd_%s", smsdConfig.dbMod);
-  buf = g_module_build_path(smsdConfig.libDir, full_name);
+  buf = g_module_build_path (smsdConfig.libDir, full_name);
   g_free (full_name);
   
-  gn_log_xdebug("Trying to load module %s\n", buf);
+  gn_log_xdebug ("Trying to load module %s\n", buf);
     
-  handle = g_module_open(buf, G_MODULE_BIND_LAZY);
+  handle = g_module_open (buf, G_MODULE_BIND_LAZY);
   g_free (buf);
   if (!handle)
   {
@@ -102,31 +102,31 @@ gint LoadDB (void)
     return (1);
   }
     
-  if (g_module_symbol(handle, "DB_Bye", (gpointer *)&DB_Bye) == FALSE)
+  if (g_module_symbol (handle, "DB_Bye", (gpointer *)&DB_Bye) == FALSE)
   {
     g_print ("Error getting symbol 'DB_Bye': %s\n", g_module_error ());
     return (2);
   }
 
-  if (g_module_symbol(handle, "DB_ConnectInbox", (gpointer *)&DB_ConnectInbox) == FALSE)
+  if (g_module_symbol (handle, "DB_ConnectInbox", (gpointer *)&DB_ConnectInbox) == FALSE)
   {
     g_print ("Error getting symbol 'DB_ConnectInbox':  %s\n", g_module_error ());
     return (2);
   }
 
-  if (g_module_symbol(handle, "DB_ConnectOutbox", (gpointer *)&DB_ConnectOutbox) == FALSE)
+  if (g_module_symbol (handle, "DB_ConnectOutbox", (gpointer *)&DB_ConnectOutbox) == FALSE)
   {
     g_print ("Error getting symbol 'DB_ConnectOutbox': %s\n", g_module_error ());
     return (2);
   }
 
-  if (g_module_symbol(handle, "DB_InsertSMS", (gpointer *)&DB_InsertSMS) == FALSE)
+  if (g_module_symbol (handle, "DB_InsertSMS", (gpointer *)&DB_InsertSMS) == FALSE)
   {
     g_print ("Error getting symbol 'DB_InsertSMS': %s\n", g_module_error ());
     return (2);
   }
 
-  if (g_module_symbol(handle, "DB_Look", (gpointer *)&DB_Look) == FALSE)
+  if (g_module_symbol (handle, "DB_Look", (gpointer *)&DB_Look) == FALSE)
   {
     g_print ("Error getting symbol 'DB_Look': %s\n", g_module_error ());
     return (2);
@@ -411,12 +411,12 @@ GNOKII_API gint WriteSMS (gn_sms *sms)
   {
     if (error)
     {
-      gn_log_xdebug("Sending to %s unsuccessful. Error: %s\n", sms->remote.number, gn_error_print(error));
+      gn_log_xdebug ("Sending to %s unsuccessful. Error: %s\n", sms->remote.number, gn_error_print(error));
       LogFile (_("Sending to %s unsuccessful. Error %s\n"), sms->remote.number, gn_error_print(error));
     }
      else
     {
-      gn_log_xdebug("Sending to %s successful.\n", sms->remote.number);
+      gn_log_xdebug ("Sending to %s successful.\n", sms->remote.number);
       LogFile (_("Sending to %s successful.\n"), sms->remote.number);
     }
   }
@@ -433,66 +433,66 @@ static void ReadSMS (gpointer d, gpointer userData)
 
   if (data->type == GN_SMS_MT_Deliver || data->type == GN_SMS_MT_DeliveryReport)
   {
-    gn_log_xdebug("%d. %s   ", data->number, data->remote.number);
-    gn_log_xdebug("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
-                   data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
-                   data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
-                   data->user_data[0].u.text);
-    error = (*DB_InsertSMS)(data, smsdConfig.phone);
+    gn_log_xdebug ("%d. %s   ", data->number, data->remote.number);
+    gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
+                    data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
+                    data->smsc_time.minute, data->smsc_time.second, data->smsc_time.timezone,
+                    data->user_data[0].u.text);
+    error = (*DB_InsertSMS) (data, smsdConfig.phone);
 
     switch (error) 
     {
       case SMSD_OK:
         if (smsdConfig.logFile)
         {
-          gn_log_xdebug("Inserting sms from %s successful.\n", data->remote.number);
-          LogFile(_("Inserting sms from %s successful.\n"), data->remote.number);
+          gn_log_xdebug ("Inserting sms from %s successful.\n", data->remote.number);
+          LogFile (_("Inserting sms from %s successful.\n"), data->remote.number);
         }
-        e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
+        e = (PhoneEvent *) g_malloc (sizeof(PhoneEvent));
         e->event = Event_DeleteSMSMessage;
         e->data = data;
-        InsertEvent(e);
+        InsertEvent (e);
         break;
         
       case SMSD_DUPLICATE:
         if (smsdConfig.logFile)
         {
-          gn_log_xdebug("Duplicated sms from %s.\n", data->remote.number);
-          LogFile(_("Duplicated sms from %s.\n"), data->remote.number);
+          gn_log_xdebug ("Duplicated sms from %s.\n", data->remote.number);
+          LogFile (_("Duplicated sms from %s.\n"), data->remote.number);
         }
         e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
         e->event = Event_DeleteSMSMessage;
         e->data = data;
-        InsertEvent(e);
+        InsertEvent (e);
         break;
 
       case SMSD_WAITING:
         if (smsdConfig.logFile)
         {
-          gn_log_xdebug("Multipart sms from %s. Waiting for the next parts.\n", data->remote.number);
-          LogFile(_("Multipart sms from %s. Waiting for the next parts.\n"), data->remote.number);
+          gn_log_xdebug ("Multipart sms from %s. Waiting for the next parts.\n", data->remote.number);
+          LogFile (_("Multipart sms from %s. Waiting for the next parts.\n"), data->remote.number);
         }
-        e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
+        e = (PhoneEvent *) g_malloc (sizeof(PhoneEvent));
         e->event = Event_DeleteSMSMessage;
         e->data = data;
-        InsertEvent(e);
+        InsertEvent (e);
         break;
         
       default:
         if (smsdConfig.logFile)
         {
-          gn_log_xdebug("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n",
-                  data->remote.number, data->smsc_time.year,
-                  data->smsc_time.month, data->smsc_time.day,
-                  data->smsc_time.hour, data->smsc_time.minute,
-                  data->smsc_time.second, data->smsc_time.timezone,
-                  data->user_data[0].u.text);
-          LogFile(_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n"),
-                  data->remote.number, data->smsc_time.year,
-                  data->smsc_time.month, data->smsc_time.day,
-                  data->smsc_time.hour, data->smsc_time.minute,
-                  data->smsc_time.second, data->smsc_time.timezone,
-                  data->user_data[0].u.text);
+          gn_log_xdebug ("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n",
+                         data->remote.number, data->smsc_time.year,
+                         data->smsc_time.month, data->smsc_time.day,
+                         data->smsc_time.hour, data->smsc_time.minute,
+                         data->smsc_time.second, data->smsc_time.timezone,
+                         data->user_data[0].u.text);
+          LogFile (_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n"),
+                   data->remote.number, data->smsc_time.year,
+                   data->smsc_time.month, data->smsc_time.day,
+                   data->smsc_time.hour, data->smsc_time.minute,
+                   data->smsc_time.second, data->smsc_time.timezone,
+                   data->user_data[0].u.text);
         }
         break;
     }

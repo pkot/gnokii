@@ -126,11 +126,11 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
   else
   {
     buf = g_string_sized_new (256);
-    g_string_sprintf (buf, "%s %s \"%02d-%02d-%02d %02d:%02d:%02d\"", \
-                      action, data->remote.number, data->smsc_time.year, \
-                      data->smsc_time.month, data->smsc_time.day, \
-                      data->smsc_time.hour, data->smsc_time.minute, \
-                      data->smsc_time.second);
+    g_string_printf (buf, "%s %s \"%02d-%02d-%02d %02d:%02d:%02d\"", \
+                     action, data->remote.number, data->smsc_time.year, \
+                     data->smsc_time.month, data->smsc_time.day, \
+                     data->smsc_time.hour, data->smsc_time.minute, \
+                     data->smsc_time.second);
     if ((p = popen (buf->str, "w")) == NULL)
     {
       g_free (text);
@@ -179,7 +179,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
         strncmp (dirent->d_name, "ERR.", 4) == 0)
       continue;
     
-    g_string_sprintf (buf, "%s/%s", spool, dirent->d_name);
+    g_string_printf (buf, "%s/%s", spool, dirent->d_name);
     
     if ((smsFile = fopen (buf->str, "r")) == NULL)
     {
@@ -247,7 +247,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
       GString *buf2;
       
       buf2 = g_string_sized_new (64);
-      g_string_sprintf (buf2, "%s/ERR.%s", spool, dirent->d_name);
+      g_string_printf (buf2, "%s/ERR.%s", spool, dirent->d_name);
       
       g_print (_("Cannot send sms from file %s\n"), buf->str);
       if (rename (buf->str, buf2->str))

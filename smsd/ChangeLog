@@ -1,3 +1,7 @@
+* Tue Feb 10 2009 Jan Derfinak
+- g_string_sprintf() replaced with g_string_printf()
+
+
 * Mon Feb  9 2009 Jan Derfinak
 - Rollback autodection of first sms position. First position now defaults
   to 1 and can be changed to 0 with -0, --firstpos0 command line argument.

@@ -232,7 +232,7 @@ This should not happen.\nSkiping.");
     msg->memory_type = smsdConfig.memoryType;
     msg->number = i++;
     data.sms = msg;
-    gn_log_xdebug("Reading SMS %d\n", i-1);
+    gn_log_xdebug ("Reading SMS %d\n", i - 1);
     if ((error = gn_sms_get (&data, sm)) == GN_ERR_NONE)
     {
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
@@ -250,7 +250,7 @@ This should not happen.\nSkiping.");
      */
     else if (error == GN_ERR_INVALIDLOCATION && i > 1)
     {
-      gn_log_xdebug("Invalid location\n");
+      gn_log_xdebug ("Invalid location\n");
       g_free (msg);
       pthread_cond_signal (&smsCond);
       break;
@@ -316,7 +316,7 @@ static gint A_DeleteSMSMessage (gpointer data)
 
   dt = calloc (1, sizeof (gn_data));
   if (!dt) {
-    gn_log_xdebug("Failed to allocate memory.\n");
+    gn_log_xdebug ("Failed to allocate memory.\n");
     return GN_ERR_FAILED;
   }
   dt->sms = (gn_sms *) data;
@@ -325,11 +325,11 @@ static gint A_DeleteSMSMessage (gpointer data)
   dt->sms_folder_list = &SMSFolderList;
   if (dt->sms)
   {
-    gn_log_xdebug("Deleting SMS %d\n", dt->sms->number);
+    gn_log_xdebug ("Deleting SMS %d\n", dt->sms->number);
     /* FIXME: error handling */
     error = gn_sms_delete (dt, sm);
 
-    gn_log_xdebug("Error: %s\n", gn_error_print(error));
+    gn_log_xdebug ("Error: %s\n", gn_error_print(error));
 //    pthread_mutex_lock (&smsMutex);
     phoneMonitor.sms.messages = g_slist_remove (phoneMonitor.sms.messages, data);
     phoneMonitor.sms.number--;
@@ -337,7 +337,7 @@ static gint A_DeleteSMSMessage (gpointer data)
 //    pthread_mutex_unlock (&smsMutex);
   } 
   else
-    gn_log_xdebug("Internal error: dt->sms == NULL\n");
+    gn_log_xdebug ("Internal error: dt->sms == NULL\n");
 
   free (dt);
   return (error);
