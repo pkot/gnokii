@@ -170,7 +170,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
     s Get RF Level          { 0x0b, 0x00, 0x02, 0x00, 0x00, 0x00 }
     r GET RF Level          { 0x0c, 0x00, 0x01, 0x04, 0x04, level, 0x5f }
 
-    s Get operater logo     { 0x23, 0x00, 0x00, 0x55, 0x55, 0x55 }
+    s Get operator logo     { 0x23, 0x00, 0x00, 0x55, 0x55, 0x55 }
     r Get operator logo     { 0x24, 0x00, 0x01, 0x00, 0x00, 0x00, 
                               0x02, 0x0c, 0x08, netcode (3 octets), 0x02, 0x00, 0x00, 
 			      0x1a, size, width, height, logo size (2 octets), logo size (2 octets), logo }
@@ -221,12 +221,12 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                                                   For meetings with "No alarm"=0xFFFF (-1).
                                                   For "On time"=0x0000
                                                   half an hour=0x001E, and so on.
-                                                Recurrence=in hours, between future occurances of this meeting.
+                                                Recurrence=in hours, between future occurrences of this meeting.
                                                   If there is no repeat, this value is 0x0000. The special value 0xffff 
                                                   means 1 Year!
-                                          for Call:{Hour,Minute,Alarm (as above),Recurrance (as above),namelen,numberlen,
+                                          for Call:{Hour,Minute,Alarm (as above),Recurrence (as above),namelen,numberlen,
                                                     name(unicode),number(unicode)}
-                                          for Reminder:{Recurrance (as above),len,0x00,string(unicode)}
+                                          for Reminder:{Recurrence (as above),len,0x00,string(unicode)}
                                           for Birthday:{byte1,byte2,alarm(4 bytes),yearofbirth,alarmtype,len,string(unicode)}
                                                     byte1 and byte2 may vary (???). Usually are 0x00 both (but not always)
                                                     In Birthday, the Year in the common part, usually contains a strange year.
@@ -263,7 +263,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                                 are messages manually moved from the other folders.
                                 Picture messages are saved here.
                               c - Number of unread messages in phone memory. Probably
-                                only smart messsages.
+                                only smart messages.
                               d - max. number of messages on SIM
                               e - Number of used messages in SIM memory. These are
                                 either received messages or saved into Outbox/Inbox.

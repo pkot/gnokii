@@ -830,7 +830,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                               0xff,0xff,0xff,0xff,0xff,0xff,0xff,0xf0,0x77,0x80,
                               0x77,0x80,0xf2,0x82,0x20,0x20,0x20,0x20,0x20,0x20,
                               0x20,0x20,0x20,0x20
-                            This block enables probably all possible monitorred parameters.
+                            This block enables probably all possible monitored parameters.
                             After it phone sends 0x00 message type values
     s Break monitoring      { 0x71 }
     r Break monitoring      { 0x71 }
@@ -885,7 +885,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                             where location=0,1,etc.
                                   error=0x0a, ringtone NOT available
                                         0x00, OK
-    s Set bin ringtone      { 0xa0, location, 0x00, contenst... }
+    s Set bin ringtone      { 0xa0, location, 0x00, contents... }
                             where: location=0,1,etc.
     r Set bin ringtone      { 0xa0, location, error }
                               where location=0,1,etc.
@@ -980,9 +980,9 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
     s Get EEPROM            { 0xd4, 0x02, 0x00, 0xa0, locationLo, locationHi, numofbytes }
                             where: numofbytes - how many bytes to read
                             Note: Works ONLY in MBUS
-    r Get EEPROM            { 0xd4, 0x02, 0x00, 0xa0, locationLo, locationHi, numofbytes, contest... }
+    r Get EEPROM            { 0xd4, 0x02, 0x00, 0xa0, locationLo, locationHi, numofbytes, contents... }
                             where numofbytes - how many bytes available
-                                  contest - bytes with contests (if numofbytes != 0)
+                                  contents - bytes with contents (if numofbytes != 0)
 0x41: Snake game ?
 0x47:
     s Get Picture Image     { 0x0001, location }
