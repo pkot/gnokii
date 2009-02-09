@@ -6,8 +6,7 @@ CREATE TABLE inbox (
   id int(10) unsigned NOT NULL auto_increment,
   number varchar(20) NOT NULL default '',
   smsdate datetime NOT NULL default '0000-00-00 00:00:00',
--- Warning (Code 1287): 'TIMESTAMP(14)' is deprecated; use 'TIMESTAMP' instead
-  insertdate timestamp(14) NOT NULL,
+  insertdate timestamp DEFAULT CURRENT_TIMESTAMP,
   text text,
   phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
@@ -17,10 +16,8 @@ CREATE TABLE inbox (
 CREATE TABLE outbox (
   id int(10) unsigned NOT NULL auto_increment,
   number varchar(20) NOT NULL default '',
--- Warning (Code 1287): 'TIMESTAMP(14)' is deprecated; use 'TIMESTAMP' instead
-  processed_date timestamp(14) NOT NULL,
--- Warning (Code 1287): 'TIMESTAMP(14)' is deprecated; use 'TIMESTAMP' instead
-  insertdate timestamp(14) NOT NULL,
+  processed_date timestamp DEFAULT 0,
+  insertdate timestamp DEFAULT CURRENT_TIMESTAMP,
   text varchar(160) default NULL,
   phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
@@ -35,8 +32,7 @@ CREATE TABLE multipartinbox (
   id int(10) unsigned NOT NULL auto_increment,
   number varchar(20) NOT NULL default '',
   smsdate datetime NOT NULL default '0000-00-00 00:00:00',
--- Warning (Code 1287): 'TIMESTAMP(14)' is deprecated; use 'TIMESTAMP' instead
-  insertdate timestamp(14) NOT NULL,
+  insertdate timestamp DEFAULT CURRENT_TIMESTAMP,
   text text,
   phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
