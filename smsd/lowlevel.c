@@ -224,26 +224,6 @@ This should not happen.\nSkiping.");
   folder.folder_id = 0;
   data.sms_folder = &folder;
 
-  if (smsdConfig.firstSMS < 0)
-  {
-    gn_log_xdebug ("Detecting first SMS position.\n");
-    
-    msg = g_malloc (sizeof (gn_sms));
-    memset (msg, 0, sizeof (gn_sms));
-    msg->memory_type = smsdConfig.memoryType;
-    msg->number = 0;
-    data.sms = msg;
-
-    if ((error = gn_sms_get (&data, sm)) == GN_ERR_INVALIDLOCATION)
-      smsdConfig.firstSMS = 1;
-    else
-      smsdConfig.firstSMS = 0;
-      
-    gn_log_xdebug ("First SMS position is %d\n", smsdConfig.firstSMS);
-    
-    g_free (msg);
-  }
-    
   i = smsdConfig.firstSMS;
   while (1)
   {

@@ -158,6 +158,7 @@ static void Usage (gchar *p)
              "            -i, --interval polling_interval_for_incoming_sms's_in_seconds\n"
              "            -S, --maxsms number_of_sms's (only in dumb mode)\n"
              "            -b, --inbox memoryType\n"
+             "            -0, --firstpos0\n"
              "            -v, --version\n"
              "            -h, --help\n"), p);
 }
@@ -209,8 +210,8 @@ static void ReadConfig (gint argc, gchar *argv[])
   smsdConfig.phone = g_strdup ("");
   smsdConfig.refreshInt = 1;     // Phone querying interval in seconds
   smsdConfig.maxSMS = 10;        // Smsd uses it if GetSMSStatus isn't implemented
-  smsdConfig.firstSMS = -1;
-  smsdConfig.smsSets = 0;
+  smsdConfig.firstSMS = 1;
+//  smsdConfig.smsSets = 0;
   smsdConfig.memoryType = GN_MT_XX;
 
   while (1)
@@ -232,11 +233,12 @@ static void ReadConfig (gint argc, gchar *argv[])
       {"interval", 1, 0, 'i'},
       {"maxsms", 1, 0, 'S'},
       {"inbox", 1, 0, 'b'},
+      {"firstpos0", 0, 0, '0'},
       {"help", 0, 0, 'h'},
       {0, 0, 0, 0}
     };
     
-    c = getopt_long (argc, argv, "u:p:d:c:s:m:l:f:t:vi:S:b:h", longOptions, &optionIndex);
+    c = getopt_long (argc, argv, "u:p:d:c:s:m:l:f:t:vi:S:b:0h", longOptions, &optionIndex);
     if (c == EOF)
       break;
     switch (c)
@@ -305,6 +307,10 @@ static void ReadConfig (gint argc, gchar *argv[])
         smsdConfig.memoryType = gn_str2memory_type (optarg);
         break;
 
+      case '0':
+        smsdConfig.firstSMS = 0;
+        break;
+        
       case 'v':
         Version ();
         exit (0);
@@ -403,10 +409,13 @@ GNOKII_API gint WriteSMS (gn_sms *sms)
 
   if (smsdConfig.logFile)
   {
-    if (error) {
+    if (error)
+    {
       gn_log_xdebug("Sending to %s unsuccessful. Error: %s\n", sms->remote.number, gn_error_print(error));
       LogFile (_("Sending to %s unsuccessful. Error %s\n"), sms->remote.number, gn_error_print(error));
-    } else {
+    }
+     else
+    {
       gn_log_xdebug("Sending to %s successful.\n", sms->remote.number);
       LogFile (_("Sending to %s successful.\n"), sms->remote.number);
     }
@@ -434,7 +443,8 @@ static void ReadSMS (gpointer d, gpointer userData)
     switch (error) 
     {
       case SMSD_OK:
-        if (smsdConfig.logFile) {
+        if (smsdConfig.logFile)
+        {
           gn_log_xdebug("Inserting sms from %s successful.\n", data->remote.number);
           LogFile(_("Inserting sms from %s successful.\n"), data->remote.number);
         }
@@ -445,7 +455,8 @@ static void ReadSMS (gpointer d, gpointer userData)
         break;
         
       case SMSD_DUPLICATE:
-        if (smsdConfig.logFile) {
+        if (smsdConfig.logFile)
+        {
           gn_log_xdebug("Duplicated sms from %s.\n", data->remote.number);
           LogFile(_("Duplicated sms from %s.\n"), data->remote.number);
         }
@@ -456,7 +467,8 @@ static void ReadSMS (gpointer d, gpointer userData)
         break;
 
       case SMSD_WAITING:
-        if (smsdConfig.logFile) {
+        if (smsdConfig.logFile)
+        {
           gn_log_xdebug("Multipart sms from %s. Waiting for the next parts.\n", data->remote.number);
           LogFile(_("Multipart sms from %s. Waiting for the next parts.\n"), data->remote.number);
         }
@@ -467,7 +479,8 @@ static void ReadSMS (gpointer d, gpointer userData)
         break;
         
       default:
-        if (smsdConfig.logFile) {
+        if (smsdConfig.logFile)
+        {
           gn_log_xdebug("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n",
                   data->remote.number, data->smsc_time.year,
                   data->smsc_time.month, data->smsc_time.day,

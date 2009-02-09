@@ -52,7 +52,7 @@ typedef struct {
   gint   refreshInt;
   gint   maxSMS;
   gint   firstSMS;
-  gint   smsSets:4;
+//  gint   smsSets:4;
   gn_memory_type memoryType;
 } SmsdConfig;
 

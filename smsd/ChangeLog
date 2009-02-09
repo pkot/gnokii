@@ -1,3 +1,8 @@
+* Mon Feb  9 2009 Jan Derfinak
+- Rollback autodection of first sms position. First position now defaults
+  to 1 and can be changed to 0 with -0, --firstpos0 command line argument.
+
+
 * Mon Feb  9 2009 Daniele Forsi
 - Add examples directory with action files.
 
