@@ -2,7 +2,7 @@
 _Name=Xgnokii
 _GenericName=Mobile Phone Suite
 _Comment=Manage your mobile phone
-Icon=cellphone
+Icon=phone
 Exec=xgnokii
 Terminal=false
 Type=Application

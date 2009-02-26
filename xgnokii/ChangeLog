@@ -1,3 +1,6 @@
+* Thu 26 Feb 2009 Daniele Forsi
+- In xgnokii.desktop.in use Icon=phone (patch by Ariszló)
+
 * Thu 14 Feb 2008 Daniele Forsi
 - In Calendar window connect menu items for "Add reminder", "Add call", "Add
   meeting", "Add birthday", "Delete note" to the same action as the toolbar
