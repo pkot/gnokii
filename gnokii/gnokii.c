@@ -379,6 +379,9 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_ar
 #ifndef WIN32
 static int foogle(int argc, char *argv[])
 {
+	/* Fill in what you would like to test here... */
+	 /* remember to call businit(); if you need to communicate with your phone */
+	return GN_ERR_NONE;
 }
 #endif
 
