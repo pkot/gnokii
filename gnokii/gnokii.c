@@ -193,7 +193,8 @@ typedef enum {
 	OPT_DELETEFILEBYID,
 	OPT_CONFIGFILE,
 	OPT_CONFIGMODEL,
-	OPT_SHELL
+	OPT_SHELL,
+	OPT_GETMMS			/* 340 */
 } opt_index;
 
 static FILE *logfile = NULL;
@@ -238,6 +239,7 @@ static int usage(FILE *f, int retval)
 		     "          --shell\n"));
 	monitor_usage(f);
 	sms_usage(f);
+	mms_usage(f);
 	phonebook_usage(f);
 	calendar_usage(f);
 	todo_usage(f);
@@ -380,7 +382,7 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_ar
 static int foogle(int argc, char *argv[])
 {
 	/* Fill in what you would like to test here... */
-	 /* remember to call businit(); if you need to communicate with your phone */
+	/* remember to call businit(); if you need to communicate with your phone */
 	return GN_ERR_NONE;
 }
 #endif
@@ -643,6 +645,9 @@ static int parse_options(int argc, char *argv[])
 		/* shell like interface */
 		{ "shell",              no_argument, NULL, OPT_SHELL },
 
+		/* Get MMS message mode */
+		{ "getmms",             required_argument, NULL, OPT_GETMMS },
+
 		{ 0, 0, 0, 0 },
 	};
 
@@ -711,6 +716,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_DELETEFILE,        1, 1, 0 },
 		{ OPT_DELETEFILEBYID,    1, 1, 0 },
 		{ OPT_SHELL,             0, 0, 0 },
+		{ OPT_GETMMS,            2, 6, 0 },
 		{ OPT_FOOGLE,            0, 0, 0 },
 		{ 0, 0, 0, 0 },
 	};
@@ -1044,6 +1050,10 @@ static int parse_options(int argc, char *argv[])
 		rc = foogle(argc, argv);
 		break;
 #endif
+	/* MMS options */
+	case OPT_GETMMS:
+		rc = getmms(argc, argv, data, state);
+		break;
 	default:
 		rc = GN_ERR_FAILED;
 		fprintf(stderr, _("Unknown option: %d\n"), c);

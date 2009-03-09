@@ -38,6 +38,7 @@ libgnokii_la_SOURCES = \
 	gsm-ringtones.c \
 	gsm-bitmaps.c \
 	gsm-sms.c \
+	gsm-mms.c \
 	gsm-call.c \
 	gsm-encoding.c \
 	gsm-common.c \

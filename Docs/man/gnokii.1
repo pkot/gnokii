@@ -264,6 +264,17 @@ list SMS folder names with \fImemory types\fR and total number of messages avail
 .BR "\-\-smsreader"
 keeps reading incoming SMS and saves them into the mailbox.
 
+.SS MMS
+.TP 
+.BR "\-\-getmms \fImemory_type\fR \fIstart\fP [\fIend\fP] [{\-\-pdu|\-\-raw} \fIfile\fR] [\-o|\-\-overwrite]"
+gets MMS messages from specified \fImemory type\fR starting at entry \fIstart\fR and ending at \fIend\fR.
+Default output format is human readable, alternative output formats are
+\-\-pdu which is the binary format of MMS as received by the phone from the network
+and \-\-raw which saves the data as read from the phone.
+.PP
+When the \-o or \-\-overwrite option is used, existing files are overwritten without asking.
+.PP
+
 .SS LOGOS
 .TP 
 .BR "\-\-sendlogo {caller|op|picture} \fIdestination\fP \fIlogofile\fP [\fInetwork_code\fP]"

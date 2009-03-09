@@ -80,6 +80,7 @@ struct gn_statemachine;
 #include <gnokii/data.h>
 #include <gnokii/encoding.h>
 #include <gnokii/sms.h>
+#include <gnokii/mms.h>
 #include <gnokii/call.h>
 #include <gnokii/networks.h>
 #include <gnokii/bitmaps.h>
@@ -333,6 +334,9 @@ GNOKII_API gn_error gn_sms_delete(gn_data *data, struct gn_statemachine *state);
 GNOKII_API gn_error gn_sms_delete_no_validate(gn_data *data, struct gn_statemachine *state);
 
 GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from);
+
+/* MMS */
+GNOKII_API gn_error gn_mms_get(gn_data *data, struct gn_statemachine *state);
 
 /* Call service */
 GNOKII_API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state);

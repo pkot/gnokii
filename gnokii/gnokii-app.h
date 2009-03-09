@@ -46,6 +46,7 @@ extern int shell(gn_data *data, struct gn_statemachine *state);
 
 /* Utils functions */
 int writefile(char *filename, char *text, int mode);
+int writebuffer(const char *filename, const char *buffer, size_t nitems, int mode);
 extern gn_error readtext(gn_sms_user_data *udata, int input_len); 
 extern gn_error loadbitmap(gn_bmp *bitmap, char *s, int type, struct gn_statemachine *state);
 extern int parse_end_value_option(int argc, char *argv[], int pos, int start_value);
@@ -85,6 +86,12 @@ extern int showsmsfolderstatus_usage(FILE *f, int exitval);
 extern gn_error showsmsfolderstatus(gn_data *data, struct gn_statemachine *state);
 
 gn_error smsreader(gn_data *data, struct gn_statemachine *state);
+
+/* MMS functions */
+extern void mms_usage(FILE *f);
+
+extern int getmms_usage(FILE *f, int exitval);
+extern gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Phonebook functions */
 extern void phonebook_usage(FILE *f);

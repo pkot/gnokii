@@ -220,6 +220,9 @@ static gn_error NK6510_GetSMSStatus(gn_data *data, struct gn_statemachine *state
 static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine *state);
+
+static gn_error NK6510_GetMMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *state);
 /*
 static gn_error NK6510_CallDivert(gn_data *data, struct gn_statemachine *state);
 */
@@ -522,6 +525,8 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_DeleteFileById(data, state);
 	case GN_OP_GetFileDetailsById:
 		return NK6510_GetFileDetailsById(data, state);
+	case GN_OP_GetMMS:
+		return NK6510_GetMMS(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -1986,6 +1991,76 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 }
 
 /*****************/
+/* MMS HANDLING */
+/*****************/
+
+static gn_error NK6510_GetMMS(gn_data *data, struct gn_statemachine *state)
+{
+	return NK6510_GetMMS_S40_30(data, state);
+}
+
+static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+	gn_file_list fl, fl2;
+	gn_file fi;
+	gn_error error;
+	int j, i;
+
+	if (!data->raw_mms)
+		return GN_ERR_INTERNALERROR;
+
+	if (data->raw_mms->number < 1) {
+		dprintf("Getting MMS %d\n", data->raw_mms->number);
+		return GN_ERR_INVALIDLOCATION;
+	}
+
+	dprintf("Using GetMMS for Series40 3rd Ed\n");
+
+	/* Find path */
+	for (i = 0; (s40_30_mt_mappings[i].type != data->raw_mms->memory_type) && (s40_30_mt_mappings[i].path != NULL); i++);
+	if (s40_30_mt_mappings[i].path != NULL) {
+		memset(&fl, 0, sizeof(fl));
+		snprintf(fl.path, sizeof(fl.path), "%s*.*", s40_30_mt_mappings[i].path);
+	} else
+		return GN_ERR_INVALIDMEMORYTYPE;
+
+	/* Get file list */
+	data->file_list = &fl;
+	data->file = NULL;
+	error = NK6510_GetFileListCache(data, state);
+	if (error)
+		return error;
+
+	/* Extract just MMS */
+	memset(&fl2, 0, sizeof(fl2));
+	for (j = 0; j < fl.file_count; j++) {
+		if (!strncmp("02", fl.files[j]->name+21, 2)) {
+			strcpy(fl2.path, fl.path);
+			inc_filecount(&fl2);
+			fl2.files[fl2.file_count-1] = fl.files[j];
+		}
+	}
+
+	dprintf("%d out of %d are MMS\n", fl2.file_count, fl.file_count);
+
+	/* Assign filename */
+	dprintf("Getting #%d out of %d messages\n", data->raw_mms->number, fl2.file_count);
+	if (fl2.file_count >= data->raw_mms->number) {
+		memset(&fi, 0, sizeof(fi));
+		dprintf("Getting MMS #%d (path: %s, file: %s)\n", data->raw_mms->number, s40_30_mt_mappings[i].path, fl2.files[data->raw_mms->number-1]->name);
+		snprintf(fi.name, sizeof(fi.name), "%s%s", s40_30_mt_mappings[i].path, fl2.files[data->raw_mms->number - 1]->name);
+	} else
+		/* Needs to be INVALID not EMPTY for --getsms IN 1 end to work */
+		return GN_ERR_INVALIDLOCATION;
+
+	data->file = &fi;
+	/* Get file */
+	error = NK6510_GetFile(data, state);
+
+	return error;
+}
+
+/*****************/
 /* FILE HANDLING */
 /*****************/
 
@@ -2938,13 +3013,10 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 					break;
 				default:
 					j = strlen(entry->subentries[i].data.number);
-printf("***** data.number \"%s\"\nstrlen %d\n", entry->subentries[i].data.number, j);
 					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 					string[j + 1] = 0;
 					string[0] = j;
-printf("***** j %d count %d\n", j, count);
 					count += PackBlock(entry->subentries[i].entry_type, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
-printf("***** GN_PHONEBOOK_ENTRY_MAX_LENGTH - count %d count %d\n", GN_PHONEBOOK_ENTRY_MAX_LENGTH - count, count);
 					break;
 				}
 			}

@@ -7,6 +7,7 @@ gnokiisub_HEADERS = \
 		data.h \
 		encoding.h \
 		error.h \
+		mms.h \
 		networks.h \
 		ringtones.h \
 		rlp-common.h \
