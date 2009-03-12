@@ -420,6 +420,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\common\gsm-mms.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\common\gsm-networks.c"
 			>
 		</File>

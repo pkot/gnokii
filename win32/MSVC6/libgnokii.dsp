@@ -226,6 +226,10 @@ SOURCE="..\..\common\gsm-filetypes.c"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\common\gsm-mms.c"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\common\gsm-networks.c"
 # End Source File
 # Begin Source File

@@ -209,6 +209,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\gnokii\gnokii-mms.c"
+			>
+		</File>
+		<File
 			RelativePath="..\..\gnokii\gnokii-monitor.c"
 			>
 		</File>
