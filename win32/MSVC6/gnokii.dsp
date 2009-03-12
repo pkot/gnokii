@@ -118,6 +118,10 @@ SOURCE="..\..\gnokii\gnokii-logo.c"
 # End Source File
 # Begin Source File
 
+SOURCE="..\..\gnokii\gnokii-mms.c"
+# End Source File
+# Begin Source File
+
 SOURCE="..\..\gnokii\gnokii-monitor.c"
 # End Source File
 # Begin Source File
