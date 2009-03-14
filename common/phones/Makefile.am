@@ -14,6 +14,7 @@ libPHONES_la_SOURCES = \
 	atgen.c \
 	atbosch.c \
 	ateric.c \
+	athuawei.c \
 	atmot.c \
 	atnok.c \
 	atsie.c \

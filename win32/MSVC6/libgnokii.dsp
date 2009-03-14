@@ -122,6 +122,10 @@ SOURCE=..\..\common\phones\atgen.c
 # End Source File
 # Begin Source File
 
+SOURCE=..\..\common\phones\athuawei.c
+# End Source File
+# Begin Source File
+
 SOURCE=..\..\common\phones\atlg.c
 # End Source File
 # Begin Source File

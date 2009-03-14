@@ -304,6 +304,10 @@
 				</FileConfiguration>
 			</File>
 			<File
+				RelativePath="..\..\common\phones\athuawei.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\phones\atlg.c"
 				>
 			</File>

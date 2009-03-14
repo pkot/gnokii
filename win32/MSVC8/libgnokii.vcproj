@@ -303,6 +303,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\common\phones\athuawei.c"
+				>
+			</File>
+			<File
 				RelativePath="..\..\common\phones\atmot.c"
 				>
 			</File>
