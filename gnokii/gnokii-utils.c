@@ -50,7 +50,7 @@
 #include "gnokii-app.h"
 #include "gnokii.h"
 
-int askoverwrite(char *filename, int mode)
+int askoverwrite(const char *filename, int mode)
 {
 	int confirm = -1;
 	char ans[5];
@@ -118,7 +118,8 @@ int writebuffer(const char *filename, const char *buffer, size_t nitems, int mod
 		fprintf(stderr, _("Can't open file %s for writing!\n"),  filename);
 		return -1;
 	}
-	fwrite(buffer, 1, nitems, file);
+	if (fwrite(buffer, 1, nitems, file) != nitems)
+		return -1;
 	fclose(file);
 	/* Return value is used as new mode. Set it to append mode */
 	return 2;
