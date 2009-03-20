@@ -69,8 +69,6 @@ int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state)
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
-#include <sys/time.h>
-#include <sys/socket.h>
 
 #define	DEVINSTANCE(s) (*((fbus_usb_interface **)(&(s)->device.device_instance)))
 

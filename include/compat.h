@@ -290,7 +290,7 @@ time_t timegm(struct tm *tm);
 #endif
 
 #ifndef HAVE_U_INT8_T
-	typedef u_int_8_t;
+	typedef unsigned char u_int8_t;
 #endif
 
 #ifdef HAVE_WCRTOMB
