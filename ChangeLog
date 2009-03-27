@@ -35,6 +35,8 @@
     o assign random reference ids to sent SMS (was always 0)
                                                         (Paweł Kot)
     o fix splitting unicode multipart messages          (Paweł Kot)
+    o with multipart message always send the smallest part as the
+      last one                                          (Paweł Kot)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)

@@ -1629,7 +1629,7 @@ GNOKII_API int gn_sms_udh_add(gn_sms *sms, gn_sms_udh_type type)
 static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 {
 	static int init = 0;
-	int i, j, size, count, start, copied, total, refnum, isConcat = -1, max_sms_len = MAX_SMS_PART;
+	int i, j, k, size, count, start, copied, total, refnum, isConcat = -1, max_sms_len = MAX_SMS_PART;
 	gn_sms sms;
 	gn_sms_user_data ud[GN_SMS_PART_MAX_NUMBER];
 	gn_error error = GN_ERR_NONE;
@@ -1668,6 +1668,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 
 	/* We need to attach user data header to each part */
 	max_sms_len -= (data->sms->udh.length + 1);
+	dprintf("max_sms_len: %d\n", max_sms_len);
 	/* Count number of SMS to be sent */
 	count = (total + max_sms_len - 1)/ max_sms_len;
 	dprintf("Will need %d sms-es\n", count);
@@ -1702,25 +1703,15 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 		case GN_SMS_DCS_UCS2:
 			/* We need to copy precisely not to cut character in the middle */
 			start += copied;
-			copied = (ud[0].length - start) % max_sms_len;
-			/* This is maximum size of what we can send */
-			if (copied == 0) {
-				copied = max_sms_len;
-			}
-			if (copied > max_sms_len / 2) {
-				copied = copied / 2;
-				if (copied < max_sms_len / 2)
-					copied = max_sms_len / 2;
-			}
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
 			data->sms->user_data[0].type = ud[0].type;
-			dprintf("DEBUG: copied: %d\n", copied);
 			/* We assume UTF8 input */
 			size = 1;
 #define C ud[0].u.text[start + j]
-			for (j = 0; j < copied; j++) {
+			for (j = 0, k = 0; start + j < ud[0].length && k < max_sms_len / 2; j++) {
 				size--;
 				if (!size) {
+					/* Let's detect size of UTF8 char */
 					if (C >= 0 && C < 128)
 						size = 1;
 					else if (C >= 192 && C < 224)
@@ -1736,18 +1727,17 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 					else
 						dprintf("CHARACTER ENCODING ERROR\n");
 					/* Avoid cutting the character */
-					if (j + size > copied) {
-						dprintf("DEBUG: break: %d %d %d\n", j, size, copied);
-						copied = j;
+					if (j + size > max_sms_len / 2) {
+						dprintf("DEBUG: break: %d %d %d\n", j, size, max_sms_len / 2);
 						break;
 					}
+					k++;
 				}
 				data->sms->user_data[0].u.text[j] = ud[0].u.text[start + j];
 			}
 #undef C
-			data->sms->user_data[0].length = copied;
-			dprintf("DEBUG: copied: %d\n", j);
-			dprintf("Text to be sent in this part: %s\n", data->sms->user_data[0].u.text);
+			data->sms->user_data[0].length = copied = j;
+			dprintf("DEBUG: copied: %d\n", copied);
 			break;
 		default:
 			switch (ud[0].type) {
@@ -1760,6 +1750,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 			}
 			break;
 		}
+		dprintf("Text to be sent in this part: %s\n", data->sms->user_data[0].u.text);
 		error = gn_sms_send(data, state);
 		ERROR();
 	}
