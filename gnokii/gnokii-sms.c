@@ -127,7 +127,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	gn_error error;
 	/* The maximum length of an uncompressed concatenated short message is
 	   255 * 153 = 39015 default alphabet characters */
-	int input_len, i, curpos = 0;
+	int i, curpos = 0;
 
 	struct option options[] = {
 		{ "smsc",      required_argument, NULL, '1' },
@@ -143,8 +143,6 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		{ "wappush",   required_argument, NULL, 'w' },
 		{ NULL,        0,                 NULL, 0 }
 	};
-
-	input_len = GN_SMS_MAX_LENGTH;
 
 	/* The memory is zeroed here */
 	gn_sms_default_submit(&sms);
@@ -181,13 +179,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			break;
 
 		case 'l': /* we send long message */
-			input_len = gnokii_atoi(optarg);
-			if (errno || input_len < 0)
-				return sendsms_usage(stderr, -1);
-			if (input_len > 255 * GN_SMS_MAX_LENGTH) {
-				fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), input_len, 255 * GN_SMS_MAX_LENGTH);
-				return GN_ERR_INVALIDSIZE;
-			}
+			/* ignored. Left for compatibility */
 			break;
 
 		case 'a': /* Animation */ {
@@ -251,13 +243,12 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 		case '8':
 			sms.dcs.u.general.alphabet = GN_SMS_DCS_8bit;
-			input_len = GN_SMS_8BIT_MAX_LENGTH ;
 			break;
 
 		case 'i':
 			sms.user_data[0].type = GN_SMS_DATA_iMelody;
 			sms.user_data[1].type = GN_SMS_DATA_None;
-			error = readtext(&sms.user_data[0], input_len);
+			error = readtext(&sms.user_data[0]);
 			if (error != GN_ERR_NONE)
 				return error;
 			if (sms.user_data[0].length < 1) {
@@ -327,7 +318,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
 
 	if (curpos != -1) {
-		error = readtext(&sms.user_data[curpos], input_len);
+		error = readtext(&sms.user_data[curpos]);
 		if (error != GN_ERR_NONE) return error;
 		if (sms.user_data[curpos].length < 1) {
 			fprintf(stderr, _("Empty message. Quitting.\n"));
@@ -385,7 +376,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 {
 	gn_sms sms;
 	gn_error error = GN_ERR_INTERNALERROR;
-	int input_len, i;
+	int i;
 	char tmp[3];
 #if 0
 	int confirm = -1;
@@ -431,7 +422,6 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	strcpy(sms.remote.number, "0");
 	sms.remote.type = GN_GSM_NUMBER_International;
 	sms.number = 0;
-	input_len = GN_SMS_MAX_LENGTH ;
 
 	/* Option parsing */
 	while ((i = getopt_long(argc, argv, "l:rsf:dt:", options, NULL)) != -1) {
@@ -563,7 +553,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
 
-	error = readtext(&sms.user_data[0], input_len);
+	error = readtext(&sms.user_data[0]);
 	if (error != GN_ERR_NONE)
 		return error;
 	if (sms.user_data[0].length < 1) {

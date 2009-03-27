@@ -39,6 +39,8 @@
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
     o implement basic --getmms command              (Daniele Forsi)
+    o deprecate -l option --sendsms; gnokii will now detect itself
+      long sms                                          (Paweł Kot)
  * at driver updates
     o initialize reg_notification and reg_callback_date (Paweł Kot)
     o fix --getnetworkinfo on some phones (Siemens S55) with
