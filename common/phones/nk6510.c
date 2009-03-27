@@ -1127,7 +1127,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		dprintf("Falling back to file mode.\n");
 		if (!data->sms_folder_list)
 			return GN_ERR_INTERNALERROR;
-		return GN_ERR_FAILED;
+		return GN_ERR_NOTSUPPORTED;
 
 	default:
 		dprintf("Message: Unknown message of type 14 : %02x  length: %d\n", message[3], length);
@@ -1216,7 +1216,8 @@ static gn_error NK6510_GetSMSFolders(gn_data *data, struct gn_statemachine *stat
 	if (sm_message_send(6, NK6510_MSG_FOLDER, req, state))
 		return GN_ERR_NOTREADY;
 	error = sm_block(NK6510_MSG_FOLDER, data, state);
-	if (error) {
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE || error == GN_ERR_NOTSUPPORTED) {
+		dprintf("NK6510_GetSMSFolders: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file approach */
 		error = NK6510_GetSMSFolders_S40_30(data, state);
 	}
@@ -1452,8 +1453,8 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 		return NK6510_DeleteSMS_S40_30(data, state);
 
 	error = ValidateSMS(data, state);
-	if (error != GN_ERR_NONE) {
-		dprintf("%s\n", gn_error_print(error));
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE || error == GN_ERR_NOTSUPPORTED) {
+		dprintf("NK6510_DeleteSMS: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file method */
 		error = NK6510_DeleteSMS_S40_30(data, state);
 		if (error)
@@ -1523,8 +1524,8 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 		return NK6510_GetSMS_S40_30(data, state);
 
 	error = ValidateSMS(data, state);
-	if ((error != GN_ERR_NONE) || (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)) {
-		dprintf("%s\n", gn_error_print(error));
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE || error == GN_ERR_NOTSUPPORTED) {
+		dprintf("NK6510_GetSMS: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file method */
 		error = NK6510_GetSMS_S40_30(data, state);
 		if (error)

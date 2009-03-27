@@ -53,6 +53,7 @@
     o sanity checks for number of messages in folder; increase max
       sms number in folder to 1024                      (Paweł Kot)
     o implement basic GN_OP_GetMMS                  (Daniele Forsi)
+    o don't fallback to S40_30 mode on every error      (Paweł Kot)
  * gnapplet driver updates
     o fix string type argument length passed to the phone
                                                         (Paweł Kot)
