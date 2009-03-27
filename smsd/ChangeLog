@@ -1,5 +1,9 @@
+* Fri Mar 27 2009 Paweł Kot
+- Print short version on every startup for better bugreports.
+
+
 * Tue Feb 10 2009 Jan Derfinak
-- g_string_sprintf() replaced with g_string_printf()
+- g_string_sprintf() replaced with g_string_printf().
 
 
 * Mon Feb  9 2009 Jan Derfinak

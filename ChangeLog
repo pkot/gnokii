@@ -62,6 +62,8 @@
  * smsd updates
     o fix segfault when using the nk6100 driver     (Daniele Forsi)
     o add examples directory with action files      (Daniele Forsi)
+    o print short version on every startup; it should bring better
+      bugreports                                        (Paweł Kot)
  * xgnokii updates
     o use Icon=phone instead of Icon=cellphone            (Ariszló)
 

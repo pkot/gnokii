@@ -136,9 +136,14 @@ gint LoadDB (void)
 }
 
 
+static void Short_Version (void)
+{
+  g_print (_("smsd - version %s from gnokii %s\n"), SVERSION, VERSION);
+}
+
 static void Version (void)
 {
-  g_print ("smsd - version %s from gnokii %s\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n", SVERSION, VERSION);
+  g_print (_("smsd - version %s from gnokii %s\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n"), SVERSION, VERSION);
 }
 
 
@@ -555,6 +560,9 @@ int main (int argc, char *argv[])
   bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
   textdomain(GETTEXT_PACKAGE);
 #endif
+
+  /* Introduce yourself */
+  Short_Version ();
 
   gn_elog_handler = NULL;
   ReadConfig (argc, argv);
