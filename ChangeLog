@@ -54,6 +54,8 @@
     o make Huawei phones notify SMS arrival (they seem to send
       notifications only to the second port, eg /dev/ttyUSB1)
       fixes http://savannah.nongnu.org/bugs/?25115  (Daniele Forsi)
+    o cache GetBattery as it is extensivly used by --monitor and
+      doesn't change too frequently                     (Paweł Kot)
  * nk6510 driver updates
     o fix segfault on deletesms with S40_30             (Paweł Kot)
     o sanity checks for number of messages in folder; increase max

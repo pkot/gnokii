@@ -65,6 +65,7 @@ static gn_error Reply(int messagetype, unsigned char *buffer, int length, gn_dat
 static gn_error ReplyIdentify(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
+static gn_error Parse_ReplyGetBattery(gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyReadPhonebookExt(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -929,7 +930,13 @@ static gn_error AT_GetIMEI(gn_data *data, struct gn_statemachine *state)
 /* gets battery level and power source */
 static gn_error AT_GetBattery(gn_data *data, struct gn_statemachine *state)
 {
-	if (sm_message_send(7, GN_OP_GetBatteryLevel, "AT+CBC\r", state))
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	char key[4];
+
+	snprintf(key, 3, "CBC");
+	if (map_get(&drvinst->cached_capabilities, key, 1))
+		return Parse_ReplyGetBattery(data, state);
+	else if (sm_message_send(7, GN_OP_GetBatteryLevel, "AT+CBC\r", state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_GetBatteryLevel, data, state);
 }
@@ -2111,10 +2118,44 @@ static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int len
 	return GN_ERR_NONE;
 }
 
+static gn_error Parse_ReplyGetBattery(gn_data *data, struct gn_statemachine *state)
+{
+	at_driver_instance *drvinst = AT_DRVINST(state);
+	char *line, *pos;
+	char key[4];
+
+	snprintf(key, 3, "CBC");
+	line = strdup(map_get(&drvinst->cached_capabilities, key, 1));
+	if (data->battery_level) {
+		if (data->battery_unit)
+			*(data->battery_unit) = GN_BU_Percentage;
+		pos = strchr(line, ',');
+		if (pos) {
+			pos++;
+			*(data->battery_level) = atoi(pos);
+		} else {
+			*(data->battery_level) = 1;
+		}
+	}
+	if (data->power_source) {
+		*(data->power_source) = 0;
+		pos = line + strlen("+CBC: ");
+		if (*pos == '1' ||  *pos == '2')
+			*(data->power_source) = GN_PS_ACDC;
+		else if (*pos == '0')
+			*(data->power_source) = GN_PS_BATTERY;
+	}
+	return GN_ERR_NONE;
+}
+
+/*
+ * Let's cache it. --monitor calls it twice to get battery level
+ * and battery source.
+ */
 static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
+	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
-	char *pos;
 	gn_error error;
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE) return error;
@@ -2125,25 +2166,10 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 	splitlines(&buf);
 
 	if (!strncmp(buf.line1, "AT+CBC", 6) && !strncmp(buf.line2, "+CBC: ", 6)) {
-		if (data->battery_level) {
-			if (data->battery_unit)
-				*(data->battery_unit) = GN_BU_Percentage;
-			pos = strchr(buf.line2, ',');
-			if (pos) {
-				pos++;
-				*(data->battery_level) = atoi(pos);
-			} else {
-				*(data->battery_level) = 1;
-			}
-		}
-		if (data->power_source) {
-			*(data->power_source) = 0;
-			pos = buf.line2 + strlen("+CBC: ");
-			if (*pos == '1' ||  *pos == '2')
-				*(data->power_source) = GN_PS_ACDC;
-			else if (*pos == '0')
-				*(data->power_source) = GN_PS_BATTERY;
-		}
+		char key[4];
+		snprintf(key, 3, "CBC");
+		map_add(&drvinst->cached_capabilities, strdup(key), strdup(buf.line2));
+		Parse_ReplyGetBattery(data, state);
 	}
 	return GN_ERR_NONE;
 }
