@@ -67,6 +67,8 @@
       bugreports                                        (Paweł Kot)
  * xgnokii updates
     o use Icon=phone instead of Icon=cellphone            (Ariszló)
+ * fake driver updates
+    o implement GetSMS for testing                      (Paweł Kot)
 
 0.6.27
 ======

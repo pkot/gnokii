@@ -130,6 +130,26 @@ static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char*
 	return GN_ERR_NONE;
 }
 
+#define SMS "0791214365870921240B919999999999F90000902072129025401AC8329BFD0E81ECEF7B993D07FD0907C40154AECBDF2010"
+static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error e = GN_ERR_NONE;
+	char *tmp;
+	int len;
+
+	if (!data || !data->raw_sms) {
+		e = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+	len = strlen(SMS) / 2;
+	tmp = calloc(len, 1);   
+	hex2bin(tmp, SMS, len);
+	e = gn_sms_pdu2raw(data->raw_sms, tmp, len, GN_SMS_PDU_DEFAULT);
+	free(tmp);
+out:
+	return e;
+}
+
 static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	switch (op) {
@@ -139,6 +159,8 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 		return GN_ERR_NONE;
 	case GN_OP_SendSMS:
 		return at_sms_write(data, state, "???");
+	case GN_OP_GetSMS:
+		return at_sms_get(data, state);
 	case GN_OP_GetSMSCenter:
 		return GN_ERR_NONE;
 	default:
