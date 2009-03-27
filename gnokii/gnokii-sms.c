@@ -618,6 +618,8 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	gn_sms message;
 	char *memory_type_string;
 	int start_message, end_message, count, mode = 1;
+	int folder_count = -1;
+	int messages_read = 0;
 	char filename[64];
 	gn_error error = GN_ERR_NONE;
 	gn_bmp bitmap;
@@ -625,6 +627,7 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	char ans[5];
 	struct stat buf;
 	char *message_text;
+	bool cont = true;
 
 	struct option options[] = {
 		{ "delete",     no_argument,       NULL, 'd' },
@@ -647,6 +650,31 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	end_message = parse_end_value_option(argc, argv, optind + 1, start_message);
 	if (errno || end_message < 0)
 		return getsms_usage(stderr, -1);
+
+	/* Let's determine number of messages in given folder */
+	if (end_message == INT_MAX) {
+		gn_error e;
+		int j;
+
+		memset(&folderlist, 0, sizeof(folderlist));
+		gn_data_clear(data);
+		data->sms_folder_list = &folderlist;
+
+		e = gn_sm_functions(GN_OP_GetSMSFolders, data, state);
+
+		if (e == GN_ERR_NONE) {
+			for (j = 0; j < folderlist.number; j++) {
+				data->sms_folder = folderlist.folder + j;
+				if (folderlist.folder_id[j] == gn_str2memory_type(memory_type_string)) {
+					e = gn_sm_functions(GN_OP_GetSMSFolderStatus, data, state);
+					if (e == GN_ERR_NONE) {
+						folder_count = folderlist.folder[j].number;
+						dprintf("Folder %s (%s) has %u messages\n", folderlist.folder[j].name, gn_memory_type2str(folderlist.folder_id[j]), folderlist.folder[j].number);
+					}
+				}
+			}
+		}
+	}
 
 	*filename = '\0';
 	/* parse all options (beginning with '-') */
@@ -683,8 +711,10 @@ parsefile:
 	folder.folder_id = 0;
 	data->sms_folder = &folder;
 	data->sms_folder_list = &folderlist;
+	count = start_message;
+
 	/* Now retrieve the requested entries. */
-	for (count = start_message; count <= end_message; count++) {
+	while (cont) {
 		bool done = false;
 		int offset = 0;
 
@@ -693,9 +723,11 @@ parsefile:
 		message.number = count;
 		data->sms = &message;
 
+		dprintf("Getting message #%d from %s\n", count, memory_type_string);
 		error = gn_sms_get(data, state);
 		switch (error) {
 		case GN_ERR_NONE:
+			messages_read++;
 			message_text = NULL;
 			fprintf(stdout, _("%d. %s (%s)\n"), message.number, gn_sms_message_type2str(message.type), gn_sms_message_status2str(message.status));
 			switch (message.type) {
@@ -838,17 +870,19 @@ parsefile:
 			}
 			break;
 		default:
-			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message))
-				return GN_ERR_NONE;
 			fprintf(stderr, _("GetSMS %s %d failed! (%s)\n"), memory_type_string, count, gn_error_print(error));
 			if (error == GN_ERR_INVALIDMEMORYTYPE)
 				fprintf(stderr, _("See the gnokii manual page for the supported memory types with the phone\nyou use.\n"));
-			if (error != GN_ERR_EMPTYLOCATION)
-				return error;
 			break;
 		}
 		if (mode == -1)
-			break;	}
+			cont = false;
+		if (count > end_message)
+			cont = false;
+		if ((folder_count > 0) && (messages_read >= folder_count))
+			cont = false;
+		count++;
+	}
 
 	/* FIXME: We return the value of the last read.
 	 * What should we return?
