@@ -64,6 +64,8 @@
       doesn't change too frequently                     (Paweł Kot)
     o make GetBattery understand also 2 (no battery) and 3 (power
       fault)                                        (Daniele Forsi)
+    o if AT+GMM fails, try AT+CGMM (Huawei E220 doesn't support
+      +GMM but supports +CGMM); fixes #26039            (Paweł Kot)
  * nk6510 driver updates
     o fix segfault on deletesms with S40_30             (Paweł Kot)
     o sanity checks for number of messages in folder; increase max
