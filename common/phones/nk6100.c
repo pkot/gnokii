@@ -1481,11 +1481,15 @@ static gn_error IncomingSMS1(int messagetype, unsigned char *message, int length
 	/* Read CellBroadcast */
 	case 0x23:
 		if (DRVINSTANCE(state)->on_cell_broadcast) {
+			char *aux;
+
 			memset(&cbmsg, 0, sizeof(cbmsg));
 			cbmsg.is_new = true;
 			cbmsg.channel = message[7];
-			n = char_7bit_unpack(0, length-10, sizeof(cbmsg.message)-1, message+10, cbmsg.message);
-			char_ascii_decode(cbmsg.message, cbmsg.message, n);
+			aux = calloc(sizeof(cbmsg.message), 1);
+			n = char_7bit_unpack(0, length-10, sizeof(cbmsg.message)-1, message+10, aux);
+			char_default_alphabet_decode(cbmsg.message, aux, n);
+			free(aux);
 			DRVINSTANCE(state)->on_cell_broadcast(&cbmsg, state, DRVINSTANCE(state)->cb_callback_data);
 		}
 		return GN_ERR_UNSOLICITED;

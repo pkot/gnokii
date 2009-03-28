@@ -81,7 +81,7 @@ int char_mblen(const char *src);
 unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, int len);
 unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, int len);
 
-void char_ascii_decode(unsigned char* dest, const unsigned char* src, int len);
+int char_default_alphabet_decode(unsigned char* dest, const unsigned char* src, int len);
 size_t char_ascii_encode(char *dest, size_t dest_len, const char *src, size_t len);
 
 void char_hex_decode(unsigned char* dest, const unsigned char* src, int len);
@@ -91,7 +91,7 @@ void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len);
 size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len);
 
 unsigned char char_def_alphabet_encode(unsigned char value);
-unsigned char char_def_alphabet_decode(unsigned char value);
+unsigned int char_def_alphabet_decode(unsigned char value);
 
 size_t char_uni_alphabet_encode(const char *value, size_t n, wchar_t *dest, MBSTATE *mbs);
 int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs);

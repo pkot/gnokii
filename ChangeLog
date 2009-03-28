@@ -39,6 +39,8 @@
       last one                                          (Paweł Kot)
     o represent more statuses with enum gn_power_source
                                                     (Daniele Forsi)
+    o correctly decode non-ascii characters in default alphabet
+      messages                                          (Paweł Kot)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)

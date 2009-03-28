@@ -442,10 +442,14 @@ static gn_error sms_data_decode(unsigned char *message, unsigned char *output, u
 			memcpy(output, message + udhlen, length);
 		/* 7bit SMS */
 		} else {
+			char *aux;
+
 			dprintf("Default Alphabet\n");
 			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
-			char_7bit_unpack((7-udhlen)%7, size, length, message, output);
-			char_ascii_decode(output, output, length);
+			aux = calloc(length + 1, 1);
+			char_7bit_unpack((7-udhlen)%7, size, length, message, aux);
+			char_default_alphabet_decode(output, aux, length);
+			free(aux);
 		}
 	}
 	dprintf("%s\n", output);

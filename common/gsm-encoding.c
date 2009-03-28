@@ -90,6 +90,47 @@ static unsigned char gsm_default_alphabet[GN_CHAR_ALPHABET_SIZE] = {
 	'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
 
+#define GN_CHAR_UNI_ALPHABET_SIZE 128
+
+#define GN_CHAR_UNI_ESCAPE 0x001b
+
+/* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet. Mapping to UCS-2. */
+/* Mapping according to http://unicode.org/Public/MAPPINGS/ETSI/GSM0338.TXT */
+static unsigned int gsm_default_unicode_alphabet[GN_CHAR_UNI_ALPHABET_SIZE] = {
+	/* @       £       $       ¥       è       é       ù       ì */
+	0x0040, 0x00a3, 0x0024, 0x00a5, 0x00e8, 0x00e9, 0x00f9, 0x00ec,
+	/* ò       Ç       \n      Ø       ø       \r      Å       å */
+	0x00f2, 0x00c7, 0x000a, 0x00d8, 0x00f8, 0x000d, 0x00c5, 0x00e5,
+	/* Δ       _       Φ       Γ       Λ       Ω       Π       Ψ */
+	0x0394, 0x005f, 0x03a6, 0x0393, 0x039b, 0x03a9, 0x03a0, 0x03a8,
+	/* Σ       Θ       Ξ      NBSP     Æ       æ       ß       É */
+	0x03a3, 0x0398, 0x039e, 0x00a0, 0x00c6, 0x00e6, 0x00df, 0x00c9,
+	/* ' '     !       "       #       ¤       %       &       ' */
+	0x0020, 0x0021, 0x0022, 0x0023, 0x00a4, 0x0025, 0x0026, 0x0027,
+	/* (       )       *       +       ,       -       .       / */
+	0x0028, 0x0029, 0x002a, 0x002b, 0x002c, 0x002d, 0x002e, 0x002f,
+	/* 0       1       2       3       4       5       6       7 */
+	0x0030, 0x0031, 0x0032, 0x0033, 0x0034, 0x0035, 0x0036, 0x0037,
+	/* 8       9       :       ;       <       =       >       ? */
+	0x0038, 0x0039, 0x003a, 0x003b, 0x003c, 0x003d, 0x003e, 0x003f,
+	/* ¡       A       B       C       D       E       F       G */
+	0x00a1, 0x0041, 0x0042, 0x0043, 0x0044, 0x0045, 0x0046, 0x0047,
+	/* H       I       J       K       L       M       N       O */
+	0x0048, 0x0049, 0x004a, 0x004b, 0x004c, 0x004d, 0x004e, 0x004f,
+	/* P       Q       R       S       T       U       V       W */
+	0x0050, 0x0051, 0x0052, 0x0053, 0x0054, 0x0055, 0x0056, 0x0057,
+	/* X       Y       Z       Ä       Ö       Ñ       Ü       § */
+	0x0058, 0x0059, 0x005a, 0x00c4, 0x00d6, 0x00d1, 0x00dc, 0x00a7,
+	/* ¿       a       b       c       d       e       f       g */
+	0x00bf, 0x0061, 0x0062, 0x0063, 0x0064, 0x0065, 0x0066, 0x0067,
+	/* h       i       j       k       l       m       n       o */
+	0x0068, 0x0069, 0x006a, 0x006b, 0x006c, 0x006d, 0x006e, 0x006f,
+	/* p       q       r       s       t       u       v       w */
+	0x0070, 0x0071, 0x0072, 0x0073, 0x0074, 0x0075, 0x0076, 0x0077,
+	/* x       y       z       ä       ö       ñ       ü       à */
+	0x0078, 0x0079, 0x007a, 0x00e4, 0x00f6, 0x00f1, 0x00fc, 0x00e0
+};
+
 static unsigned char gsm_reverse_default_alphabet[256];
 static bool reversed = false;
 static char application_encoding[64] = "";
@@ -108,7 +149,7 @@ static void tbl_setup_reverse()
 
 static bool char_is_escape(unsigned char value)
 {
-	return (value == GN_CHAR_ESCAPE);
+	return (value == GN_CHAR_UNI_ESCAPE);
 }
 
 static const char *get_langinfo_codeset(void)
@@ -232,20 +273,21 @@ static bool char_def_alphabet_ext(unsigned char value)
 		retval == 0x20ac);
 }
 
-static unsigned char char_def_alphabet_ext_decode(unsigned char value)
+static unsigned int char_def_alphabet_ext_decode(unsigned char value)
 {
+	dprintf("Default extended alphabet\n");
 	switch (value) {
-	case 0x0a: return 0x0c; break; /* form feed */
-	case 0x14: return '^';  break;
-	case 0x28: return '{';  break;
-	case 0x29: return '}';  break;
-	case 0x2f: return '\\'; break;
-	case 0x3c: return '[';  break;
-	case 0x3d: return '~';  break;
-	case 0x3e: return ']';  break;
-	case 0x40: return '|';  break;
-	case 0x65: return 0xa4; break; /* euro */
-	default: return '?';    break; /* invalid character */
+	case 0x0a: return 0x000c; break; /* form feed */
+	case 0x14: return 0x005e; break; /* ^ */
+	case 0x28: return 0x007b; break; /* { */
+	case 0x29: return 0x007d; break; /* } */
+	case 0x2f: return 0x005c; break; /* \ */
+	case 0x3c: return 0x005b; break; /* [ */
+	case 0x3d: return 0x007e; break; /* ~ */
+	case 0x3e: return 0x005d; break; /* ] */
+	case 0x40: return 0x007c; break; /* | */
+	case 0x65: return 0x20ac; break; /* € */
+	default:   return 0x003f; break; /* invalid character, set ? */
 	}
 }
 
@@ -285,12 +327,12 @@ unsigned char char_def_alphabet_encode(unsigned char value)
 	return gsm_reverse_default_alphabet[value];
 }
 
-unsigned char char_def_alphabet_decode(unsigned char value)
+unsigned int char_def_alphabet_decode(unsigned char value)
 {
 	if (value < GN_CHAR_ALPHABET_SIZE) {
-		return gsm_default_alphabet[value];
+		return gsm_default_unicode_alphabet[value];
 	} else {
-		return '?';
+		return 0x003f; /* '?' */
 	}
 }
 
@@ -388,18 +430,28 @@ skip:
 }
 
 /* null terminates the string */
-void char_ascii_decode(unsigned char* dest, const unsigned char* src, int len)
+int char_default_alphabet_decode(unsigned char* dest, const unsigned char* src, int len)
 {
-	int i, j;
+	int j, pos = 0;
+	MBSTATE mbs;
 
-	for (i = 0, j = 0; j < len; i++, j++) {
-		if (char_is_escape(src[j]))
-			dest[i] = char_def_alphabet_ext_decode(src[++j]);
-		else
-			dest[i] = char_def_alphabet_decode(src[j]);
+	MBSTATE_DEC_CLEAR(mbs);
+
+	for (j = 0; j < len; j++) {
+		wchar_t wc;
+		int length;
+
+		if (char_is_escape(src[j])) {
+			wc = char_def_alphabet_ext_decode(src[++j]);
+		} else {
+			wc = char_def_alphabet_decode(src[j]);
+		}
+		length = char_uni_alphabet_decode(wc, dest, &mbs);
+		dest += length;
+		pos += length;
 	}
-	dest[i] = 0;
-	return;
+	*dest = 0;
+	return pos;
 }
 
 size_t char_ascii_encode(char *dest, size_t dest_len, const char *src, size_t len)

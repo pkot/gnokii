@@ -271,12 +271,14 @@ gn_error pnok_call_divert_incoming(int messagetype, unsigned char *message, int 
 
 	/* FIXME: is this common between models? - bozo */
 	/* get prepaid info */
-	case 0x05:
-		n = char_7bit_unpack(0, message[7], sizeof(buf), message + 8, buf);
-		char_ascii_decode(buf, buf, n);
+	case 0x05: {
+		char *aux = calloc(sizeof(buf) + 1, 1);
+		n = char_7bit_unpack(0, message[7], sizeof(buf), message + 8, aux);
+		char_default_alphabet_decode(buf, aux, n);
+		free(aux);
 		dprintf("Message: Prepaid info received: \"%s\"\n", buf);
 		return GN_ERR_UNSOLICITED;
-
+	}
 	default:
 		return GN_ERR_UNHANDLEDFRAME;
 	}
