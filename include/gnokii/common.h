@@ -117,10 +117,13 @@ typedef enum {
 GNOKII_API gn_memory_type gn_str2memory_type(const char *s);
 GNOKII_API const char *gn_memory_type2str(gn_memory_type mt);
 
-/* Power source types */
+/* Power source types - see subclause 8.4 of ETSI TS 127 007 V8.6.0 (2009-01) */
 typedef enum {
-	GN_PS_ACDC = 1, /* AC/DC powered (charging) */
-	GN_PS_BATTERY   /* Internal battery */
+	GN_PS_UNKNOWN,		/* +CME ERROR: ... */
+	GN_PS_ACDC = 1,		/* +CBC: 1,... AC/DC powered (charging) */
+	GN_PS_BATTERY,		/* +CBC: 0,... Battery powered (not charging) */
+	GN_PS_NOBATTERY,	/* +CBC: 2,... No battery */
+	GN_PS_FAULT		/* +CBC: 3,... There is a power fault and calls are inhibited */
 } gn_power_source;
 
 GNOKII_API const char *gn_power_source2str(gn_power_source s);

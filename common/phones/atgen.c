@@ -2118,6 +2118,11 @@ static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int len
 	return GN_ERR_NONE;
 }
 
+/*
+ * Parse a response similar to
+ * +CBC: 0, 50
+ * see subclause 8.4 of ETSI TS 127 007 V8.6.0 (2009-01)
+*/
 static gn_error Parse_ReplyGetBattery(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -2138,12 +2143,24 @@ static gn_error Parse_ReplyGetBattery(gn_data *data, struct gn_statemachine *sta
 		}
 	}
 	if (data->power_source) {
-		*(data->power_source) = 0;
 		pos = line + strlen("+CBC: ");
-		if (*pos == '1' ||  *pos == '2')
-			*(data->power_source) = GN_PS_ACDC;
-		else if (*pos == '0')
+		switch (*pos) {
+		case '0':
 			*(data->power_source) = GN_PS_BATTERY;
+			break;
+		case '1':
+			*(data->power_source) = GN_PS_ACDC;
+			break;
+		case '2':
+			*(data->power_source) = GN_PS_NOBATTERY;
+			break;
+		case '3':
+			*(data->power_source) = GN_PS_FAULT;
+			break;
+		default:
+			dprintf("Unknown power status '%c'\n", *pos);
+			*(data->power_source) = GN_PS_UNKNOWN;
+		}
 	}
 	return GN_ERR_NONE;
 }
