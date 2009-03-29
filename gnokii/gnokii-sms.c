@@ -336,7 +336,6 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	error = gn_sms_send(data, state);
 
 	if (error == GN_ERR_NONE) {
-		dprintf("%d\n", sms.parts);
 		if (sms.parts > 1) {
 			int j;
 			fprintf(stderr, _("Message sent in %d parts with reference numbers:"), sms.parts);
