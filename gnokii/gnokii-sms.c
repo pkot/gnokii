@@ -886,7 +886,7 @@ parsefile:
 		}
 		if (mode == -1)
 			cont = false;
-		if (count > end_message)
+		if (count >= end_message)
 			cont = false;
 		if ((folder_count > 0) && (messages_read >= (folder_count - start_message + 1)))
 			cont = false;
