@@ -41,6 +41,8 @@
                                                     (Daniele Forsi)
     o correctly decode non-ascii characters in default alphabet
       messages                                          (Paweł Kot)
+    o when sending multipart sms return reference numbers for all
+      the parts                                         (Paweł Kot)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)

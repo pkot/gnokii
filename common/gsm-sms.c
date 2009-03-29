@@ -1565,6 +1565,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state);
  */
 GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 {
+	int i;
 	gn_error error = GN_ERR_NONE;
 	/*
 	 * This is for long sms handling. There we have sequence:
@@ -1612,12 +1613,21 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Sending\n");
 	error = gn_sm_functions(GN_OP_SendSMS, data, state);
-cleanup:
-	/* FIXME: how to pass reference for multipart messages? */
-	if (data->raw_sms) {
-		data->sms->reference = data->raw_sms->reference;
-		free(data->raw_sms);
+	if (data->sms->parts == 0) {
+		data->sms->parts = 1;
+		/* This is not multipart SMS. For multipart reference is allocated in sms_send_long() */
+		data->sms->reference = calloc(1, sizeof(unsigned int));
 	}
+	
+	/* We send SMS parts from the first part to last. */
+	i = 0;
+	while (i < data->sms->parts-1 && data->sms->reference[i] != 0)
+		i++;
+	data->sms->reference[i] = data->raw_sms->reference;
+
+cleanup:
+	if (data->raw_sms)
+		free(data->raw_sms);
 	data->raw_sms = old;
 	return error;
 }
@@ -1674,11 +1684,16 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 	max_sms_len -= (data->sms->udh.length + 1);
 	dprintf("max_sms_len: %d\n", max_sms_len);
 	/* Count number of SMS to be sent */
-	count = (total + max_sms_len - 1)/ max_sms_len;
+	count = (total + max_sms_len - 1) / max_sms_len;
 	dprintf("Will need %d sms-es\n", count);
+
+	data->sms->parts = count;
+	data->sms->reference = calloc(count, sizeof(unsigned int));
 
 	start = 0;
 	copied = 0;
+
+	/* Generate reference number */
 	if (!init) {
 		time_t t;
 		time(&t);
@@ -1686,6 +1701,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 		init = 1;
 	}
 	refnum = (int)(255.0*rand()/(RAND_MAX+1.0));
+
 	for (i = 0; i < count; i++) {
 		dprintf("Sending sms #%d (refnum: %d)\n", i+1, refnum);
 		data->sms->udh.udh[isConcat].u.concatenated_short_message.reference_number = refnum;

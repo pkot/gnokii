@@ -335,11 +335,20 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	/* Send the message. */
 	error = gn_sms_send(data, state);
 
-	if (error == GN_ERR_NONE)
-		fprintf(stderr, _("Send succeeded with reference %d!\n"), sms.reference);
-	else
+	if (error == GN_ERR_NONE) {
+		dprintf("%d\n", sms.parts);
+		if (sms.parts > 1) {
+			int j;
+			fprintf(stderr, _("Message sent in %d parts with reference numbers:"), sms.parts);
+			for (j = 0; j < sms.parts; j++)
+				fprintf(stderr, " %d", sms.reference[j]);
+			fprintf(stderr, "\n");
+		} else
+			fprintf(stderr, _("Send succeeded with reference %d!\n"), sms.reference[0]);
+	} else
 		fprintf(stderr, _("SMS Send failed (%s)\n"), gn_error_print(error));
 
+	free(sms.reference);
 	return error;
 }
 
