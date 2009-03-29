@@ -798,6 +798,7 @@ static gint A_SendSMSMessage(gpointer data)
 		gdat.sms = d->sms;
 		pthread_mutex_lock(&sendSMSMutex);
 		error = d->status = gn_sms_send(&gdat, statemachine);
+		free(gdat.sms->reference);
 		pthread_cond_signal(&sendSMSCond);
 		pthread_mutex_unlock(&sendSMSMutex);
 	}
