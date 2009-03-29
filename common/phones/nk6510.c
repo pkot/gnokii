@@ -1019,16 +1019,20 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 	/* get message status */
 	case 0x0f:
-		dprintf("Message: SMS message (#%i in folder #%i) status received: %i\n",
-			message[10] * 256 + message[11],  message[12], message[13]);
-
 		if (!data->raw_sms)
 			return GN_ERR_INTERNALERROR;
 
-		dprintf("Trying to get message #%i from folder #%i\n", data->raw_sms->number, data->raw_sms->memory_type);
+		if (length >= 14) {
+			dprintf("Message: SMS message (#%i in folder #%i) status received: %i\n",
+				message[10] * 256 + message[11],  message[12], message[13]);
 
-		/* Short Message status */
-		data->raw_sms->status = message[13];
+			dprintf("Trying to get message #%i from folder #%i\n", data->raw_sms->number, data->raw_sms->memory_type);
+
+			/* Short Message status */
+			data->raw_sms->status = message[13];
+		} else {
+			dprintf("status not supported?\n");
+		}
 
 		break;
 
