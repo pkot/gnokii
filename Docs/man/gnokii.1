@@ -356,9 +356,11 @@ You can use it then with \fI\-\-writephonebook\fR.
 .TP 
 .BR "\-\-writephonebook [\fI\-o|\-\-overwrite] [\-f|\-\-find\-free] [\-m|\-\-memory-type|\-\-memory memory_type] [\-n|\-\-memory-location|\-\-location number] [[\-v|\-\-vcard]|[\-l|\-\-ldif]\fP]"
 reads data from stdin and writes to phonebook.
-When \-i option is used, refuses to overwrite existing entries.
 Uses the same format as provided by the output of the getphonebook command.
-See below for details.
+Default is raw format (see below for details) and alternate formats are vCard and ldif.
+.PP
+With \fI\-\-memory-type memory_type\fP and \fI\-\-memory-location number\fP
+you can set a memory type and a location if the input data doesn't specify them.
 .PP
 When the \-o or \-\-overwrite option is used, existing entries at a given
 location are overwritten.
