@@ -208,6 +208,8 @@ GNOKII_API const char *gn_power_source2str(gn_power_source s)
 	switch (s) {
 	case GN_PS_ACDC:	return _("AC-DC");
 	case GN_PS_BATTERY:	return _("Battery");
+	case GN_PS_NOBATTERY:	return _("No battery");
+	case GN_PS_FAULT:	return _("Power fault");
 	default:		return _("Unknown");
 	}
 }
