@@ -366,7 +366,7 @@ static void RealConnect (void *phone)
   gn_sms_folder SMSFolder;
   PhoneEvent *event;
   gn_error error;
-  int consequetive_errors = 0;
+  int consecutive_errors = 0;
 
   data = calloc (1, sizeof (gn_data));
   
@@ -452,17 +452,17 @@ static void RealConnect (void *phone)
       else
       {
         g_print ("%s:%d error: %d, %s\n", __FILE__, __LINE__, error, gn_error_print(error));
-	consequetive_errors++;
-	if (consequetive_errors > MAX_CONSEQUETIVE_ERRORS)
+	consecutive_errors++;
+	if (consecutive_errors > MAX_CONSECUTIVE_ERRORS)
 	{
-	  g_print (_("Too many consequetive errors, restarting connection.\n"));
+	  g_print (_("Too many consecutive errors, restarting connection.\n"));
 	  break;
 	}
       }
     }
     else
     {
-      consequetive_errors = 0;
+      consecutive_errors = 0;
     }
 
     sleep (smsdConfig.refreshInt);
