@@ -84,6 +84,8 @@
       is ignored when using the FBUS protocol       (Daniele Forsi)
     o in gnokii man page add details to --writephonebook and
       remove reference to non existant -i parameter (Daniele Forsi)
+    o add comments to all functions in common/gsm-encoding.c
+                                                    (Daniele Forsi)
  * smsd updates
     o fix segfault when using the nk6100 driver     (Daniele Forsi)
     o add examples directory with action files      (Daniele Forsi)

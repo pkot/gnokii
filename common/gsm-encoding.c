@@ -57,21 +57,46 @@
 extern const char *locale_charset(void); /* from ../intl/localcharset.c */
 #endif
 
+/**
+ * base64_alphabet:
+ *
+ * Mapping from 8-bit binary values to base 64 encoding.
+ */
 static const char *base64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-/* BCD digits from Table 10.5.118 of 3GPP TS 04.08 with 'a' replaced by 'p' */
+
+/**
+ * bcd_digits:
+ *
+ * Mapping from ASCII to BCD digits representing phone numbers and vice versa.
+ * BCD digits are those from Table 10.5.118 of 3GPP TS 04.08 with 'a' replaced by 'p'.
+ */
 static const char *bcd_digits = "0123456789*#pbc";
 
+/**
+ * GN_CHAR_ALPHABET_SIZE:
+ *
+ * Number of characters in GSM default alphabet (for ISO/IEC 8859-1 encoding).
+ */
 #define GN_CHAR_ALPHABET_SIZE 128
 
+/**
+ * GN_CHAR_UNI_ESCAPE:
+ *
+ * Value of the escape character for the GSM Alphabet (in ISO/IEC 8859-1 encoding).
+ */
 #define GN_CHAR_ESCAPE 0x1b
 
+/**
+ * gsm_default_alphabet:
+ *
+ * Mapping from GSM default alphabet to ISO/IEC 8859-1.
+ *
+ * ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet.
+ * Characters in hex position 10, [12 to 1a] and 24 are not present on
+ * latin1 charset, so we cannot reproduce on the screen, they are
+ * Greek symbols not even present on some phones.
+ */
 static unsigned char gsm_default_alphabet[GN_CHAR_ALPHABET_SIZE] = {
-
-	/* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet */
-	/* Characters in hex position 10, [12 to 1a] and 24 are not present on
-	   latin1 charset, so we cannot reproduce on the screen, however they are
-	   greek symbol not present even on my Nokia */
-
 	'@',  0xa3, '$',  0xa5, 0xe8, 0xe9, 0xf9, 0xec,
 	0xf2, 0xc7, '\n', 0xd8, 0xf8, '\r', 0xc5, 0xe5,
 	'?',  '_',  '?',  '?',  '?',  '?',  '?',  '?',
@@ -90,12 +115,28 @@ static unsigned char gsm_default_alphabet[GN_CHAR_ALPHABET_SIZE] = {
 	'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
 
+/**
+ * GN_CHAR_UNI_ALPHABET_SIZE:
+ *
+ * Number of characters in GSM default alphabet (for UCS-2 encoding).
+ */
 #define GN_CHAR_UNI_ALPHABET_SIZE 128
 
+/**
+ * GN_CHAR_UNI_ESCAPE:
+ *
+ * Value of the escape character for the GSM Alphabet (in UCS-2 encoding).
+ */
 #define GN_CHAR_UNI_ESCAPE 0x001b
 
-/* ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet. Mapping to UCS-2. */
-/* Mapping according to http://unicode.org/Public/MAPPINGS/ETSI/GSM0338.TXT */
+/**
+ * gsm_default_unicode_alphabet:
+ *
+ * Mapping from GSM default alphabet to UCS-2.
+ *
+ * ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet. Mapping to UCS-2.
+ * Mapping according to http://unicode.org/Public/MAPPINGS/ETSI/GSM0338.TXT
+ */
 static unsigned int gsm_default_unicode_alphabet[GN_CHAR_UNI_ALPHABET_SIZE] = {
 	/* @       £       $       ¥       è       é       ù       ì */
 	0x0040, 0x00a3, 0x0024, 0x00a5, 0x00e8, 0x00e9, 0x00f9, 0x00ec,
@@ -131,10 +172,22 @@ static unsigned int gsm_default_unicode_alphabet[GN_CHAR_UNI_ALPHABET_SIZE] = {
 	0x0078, 0x0079, 0x007a, 0x00e4, 0x00f6, 0x00f1, 0x00fc, 0x00e0
 };
 
+/**
+ * gsm_reverse_default_alphabet:
+ *
+ * Mapping from ISO/IEC 8859-1 to GSM default alphabet.
+ */
 static unsigned char gsm_reverse_default_alphabet[256];
+
 static bool reversed = false;
 static char application_encoding[64] = "";
 
+/**
+ * tbl_setup_reverse:
+ *
+ * Copies data from #gsm_default_alphabet to #gsm_reverse_default_alphabet
+ * to build a reverse mapping table.
+ */
 static void tbl_setup_reverse()
 {
 	int i;
@@ -147,11 +200,27 @@ static void tbl_setup_reverse()
 	reversed = true;
 }
 
+/**
+ * char_is_escape:
+ * @value: the char to test
+ *
+ * Returns: non zero if @value is an escape character, zero otherwise
+ *
+ * Determines if @value is an escape character for GSM Alphabet.
+ */
 static bool char_is_escape(unsigned char value)
 {
 	return (value == GN_CHAR_UNI_ESCAPE);
 }
 
+/**
+ * get_langinfo_codeset:
+ *
+ * Returns: a constant string representing a charset encoding
+ *
+ * Gets the current charset encoding.
+ * Uses different methods on different platforms.
+ */
 static const char *get_langinfo_codeset(void)
 {
 	static const char *codeset = NULL;
@@ -173,6 +242,13 @@ static const char *get_langinfo_codeset(void)
 	return codeset;
 }
 
+/**
+ * gn_char_get_encoding:
+ *
+ * Returns: a constant string representing a charset encoding
+ *
+ * Gets the encoding set by the application or the default one.
+ */
 GNOKII_API const char *gn_char_get_encoding()
 {
 	if (*application_encoding)
@@ -181,7 +257,25 @@ GNOKII_API const char *gn_char_get_encoding()
 		return get_langinfo_codeset(); /* return default codeset */
 }
 
-/* detect the correct len of a string (also for multibyte chars like "umlaute") */
+/**
+ * gn_char_set_encoding:
+ * @encoding: a string representing the name of a charset encoding
+ *
+ * Sets the encoding preferred by the application.
+ */
+void gn_char_set_encoding(const char* encoding)
+{
+	snprintf(application_encoding, sizeof(application_encoding), "%s", encoding);
+}
+
+/**
+ * char_mblen:
+ * @src: the string to measure
+ *
+ * Returns: the lenght of the string
+ *
+ * Detects the correct length of a string (also for multibyte chars like "umlaute").
+ */
 int char_mblen(const char *src)
 {
 	int len = mbstowcs(NULL, src, 0);
@@ -189,6 +283,21 @@ int char_mblen(const char *src)
 	return len;
 }
 
+/**
+ * char_mbtowc:
+ * @wchar_t: buffer for the converted wide char string
+ * @src: buffer with the multibyte string to be converted
+ * @maxlen: size of @wchar_t buffer
+ * @mbs: pointer to a variable holding the shift state
+ * or NULL to use a global variable
+ *
+ * Returns: the number of bytes from @src that have been used
+ * or -1 in case of error
+ *
+ * Converts a multibyte string to a wide char string.
+ * Uses iconv() if available, else mbrtowc() if
+ * available, else mbtowc().
+ */
 static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 {
 #ifdef HAVE_ICONV
@@ -218,6 +327,20 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 #endif
 }
 
+/**
+ * char_wctomb:
+ * @dst: buffer for the converted multibyte string
+ * @src: buffer with the wide char string to be converted
+ * @mbs: pointer to a variable holding the shift state
+ * or NULL to use a global variable
+ *
+ * Returns: the number of bytes from @src that have been used
+ * or -1 in case of error
+ *
+ * Converts a wide char string to a multibyte string.
+ * Uses iconv() if available, else wcrtomb() if
+ * available, else wctomb().
+ */
 static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 {
 #ifdef HAVE_ICONV
@@ -249,13 +372,20 @@ static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 #endif
 }
 
-/*
+/**
+ * char_def_alphabet_ext:
+ * @value: the character to test
+ *
+ * Returns: non zero if the character can be represented with the Extended GSM Alphabet,
+ * zero otherwise
+ *
+ * Checks if @value is a character defined by the Extended GSM Alphabet.
+ *
  * In GSM specification there are 10 characters in the extension
  * of the default alphabet. Their values look a bit random, they are
  * only 10, and probably they will never change, so hardcoding them
  * here is rather safe.
  */
-
 static bool char_def_alphabet_ext(unsigned char value)
 {
 	wchar_t retval;
@@ -273,6 +403,14 @@ static bool char_def_alphabet_ext(unsigned char value)
 		retval == 0x20ac);
 }
 
+/**
+ * char_def_alphabet_ext_decode:
+ * @value: the character to decode
+ *
+ * Returns: the decoded character, or '?' if @value can't be decoded
+ *
+ * Converts a character from Extended GSM Alphabet to ISO/IEC 8859-1.
+ */
 static unsigned int char_def_alphabet_ext_decode(unsigned char value)
 {
 	dprintf("Default extended alphabet\n");
@@ -291,10 +429,18 @@ static unsigned int char_def_alphabet_ext_decode(unsigned char value)
 	}
 }
 
+/**
+ * char_def_alphabet_ext_encode:
+ * @value: the character to encode
+ *
+ * Returns: the encoded character, or 0 if @value can't be encoded
+ *
+ * Converts a character from ISO/IEC 8859-1 to Extended GSM Alphabet.
+ */
 static unsigned char char_def_alphabet_ext_encode(unsigned char value)
 {
 	switch (value) {
-	case 0x0c: return 0x0a; /* from feed */
+	case 0x0c: return 0x0a; /* form feed */
 	case '^':  return 0x14;
 	case '{':  return 0x28;
 	case '}':  return 0x29;
@@ -308,6 +454,16 @@ static unsigned char char_def_alphabet_ext_encode(unsigned char value)
 	}
 }
 
+/**
+ * gn_char_def_alphabet:
+ * @string: the string to test
+ *
+ * Returns: %true if the string can be represented with the GSM Alphabet,
+ * %false otherwise
+ *
+ * Checks if @value is a string composed only by characters defined by
+ * the default GSM alphabet or its extension.
+ */
 GNOKII_API bool gn_char_def_alphabet(unsigned char *string)
 {
 	unsigned int i, len = strlen(string);
@@ -321,12 +477,28 @@ GNOKII_API bool gn_char_def_alphabet(unsigned char *string)
 	return true;
 }
 
+/**
+ * char_def_alphabet_encode:
+ * @value: the character to encode
+ *
+ * Returns: the encoded character, or '?' if @value can't be encoded
+ *
+ * Converts a character from ISO/IEC 8859-1 to Default GSM Alphabet.
+ */
 unsigned char char_def_alphabet_encode(unsigned char value)
 {
 	tbl_setup_reverse();
 	return gsm_reverse_default_alphabet[value];
 }
 
+/**
+ * char_def_alphabet_decode:
+ * @value: the character to decode
+ *
+ * Returns: the decoded character or '?' if @value can't be decoded
+ *
+ * Converts a character from Default GSM Alphabet to ISO/IEC 8859-1.
+ */
 unsigned int char_def_alphabet_decode(unsigned char value)
 {
 	if (value < GN_CHAR_ALPHABET_SIZE) {
@@ -338,6 +510,20 @@ unsigned int char_def_alphabet_decode(unsigned char value)
 
 #define GN_BYTE_MASK ((1 << bits) - 1)
 
+/**
+ * char_7bit_unpack:
+ * @offset: the bit offset inside the first byte of @input from which to start reading data
+ * @in_length: length of @input in bytes
+ * @out_length: size of @output in bytes
+ * @input: buffer with the string to be converted
+ * @output: buffer for the converted string, not NUL terminated
+ *
+ * Returns: the number of bytes used in @output
+ *
+ * Converts a packed sequence of 7-bit characters from @input into an array
+ * of 8-bit characters in @output.
+ * Source characters are stored in a char array of @in_length elements.
+ */
 int char_7bit_unpack(unsigned int offset, unsigned int in_length, unsigned int out_length,
 		     unsigned char *input, unsigned char *output)
 {
@@ -376,6 +562,18 @@ int char_7bit_unpack(unsigned int offset, unsigned int in_length, unsigned int o
 	return out_num - output;
 }
 
+/**
+ * char_7bit_pack:
+ * @offset: the bit offset inside the first byte of @output from which to start writing data
+ * @input: buffer with the string to be converted
+ * @output: buffer for the converted string, not NUL terminated
+ * @in_len: (IGNORED) length of @input
+ *
+ * Returns: the number of bytes used in @output
+ *
+ * Converts an array of 8-bit characters from @input into a packed sequence
+ * of 7-bit characters in @output.
+ */
 int char_7bit_pack(unsigned int offset, unsigned char *input,
 		   unsigned char *output, unsigned int *in_len)
 {
@@ -429,7 +627,17 @@ skip:
 	return (out_num - output);
 }
 
-/* null terminates the string */
+/**
+ * char_default_alphabet_decode:
+ * @dest: buffer for the converted string, NUL terminated
+ * @src: buffer with the string to be converted
+ * @len: length of @src in bytes
+ *
+ * Converts a string from GSM Alphabet to ISO/IEC 8859-1.
+ * In the worst case where each character in @src must be converted from the
+ * Extended GSM Alphabet, size of @dest must be @len + 1; in general it must be
+ * at least @len - number_of_escape_chars + 1
+ */
 int char_default_alphabet_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int j, pos = 0;
@@ -440,7 +648,7 @@ int char_default_alphabet_decode(unsigned char* dest, const unsigned char* src, 
 	for (j = 0; j < len; j++) {
 		wchar_t wc;
 		int length;
-
+ 
 		if (char_is_escape(src[j])) {
 			wc = char_def_alphabet_ext_decode(src[++j]);
 		} else {
@@ -454,6 +662,20 @@ int char_default_alphabet_decode(unsigned char* dest, const unsigned char* src, 
 	return pos;
 }
 
+/**
+ * char_ascii_encode:
+ * @dest: buffer for the converted string, not NUL terminated
+ * @dest_len: size of @dest in bytes, must be 2 * @len in the worst case
+ * @src: buffer with the string to be converted
+ * @len: length of @src in bytes
+ *
+ * Returns: the number of bytes used in the @dest buffer for the converted string
+ *
+ * Converts a string from ISO/IEC 8859-1 to GSM Alphabet.
+ * In the worst case where each character in @src must be converted in the
+ * Extended GSM Alphabet, @dest_len must be @len * 2; in general it must be
+ * at least @len + number_of_escape_chars
+ */
 size_t char_ascii_encode(char *dest, size_t dest_len, const char *src, size_t len)
 {
 	size_t i, j, extra = 0;
@@ -470,7 +692,14 @@ size_t char_ascii_encode(char *dest, size_t dest_len, const char *src, size_t le
 	return len + extra;
 }
 
-/* null terminates the string */
+/**
+ * char_hex_decode:
+ * @dest: buffer for the converted string, NUL terminated
+ * @src: buffer with the string to be converted
+ * @len: length of @src in bytes, length of @dest must be at least (@len / 2) + 1
+ *
+ * Converts a string from GSM Alphabet in ASCII-encoded hexadecimal bytes to ISO/IEC 8859-1.
+ */
 void char_hex_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i;
@@ -485,6 +714,17 @@ void char_hex_decode(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
+/**
+ * char_hex_encode:
+ * @dest: buffer for the converted string, NUL terminated
+ * @dest_len: length of @dest in bytes, must be at least (@len * 2) + 1
+ * @src: buffer with the string to be converted
+ * @len: length of @src in bytes
+ *
+ * Returns: the number of bytes used in the @dest buffer for the converted string
+ *
+ * Converts a string from ISO/IEC 8859-1 to GSM Alphabet in ASCII-encoded hexadecimal bytes.
+ */
 size_t char_hex_encode(char *dest, size_t dest_len, const char *src, size_t len)
 {
 	int i, n = dest_len / 2 >= len ? len : dest_len / 2;
@@ -494,6 +734,19 @@ size_t char_hex_encode(char *dest, size_t dest_len, const char *src, size_t len)
 	return len * 2;
 }
 
+/**
+ * char_uni_alphabet_encode:
+ * @value: pointer to the character to be converted
+ * @n: maximum number of bytes of @value that will be examined
+ * @dest: buffer for the converted character
+ * @mbs: pointer to a variable holding the shift state
+ * or NULL to use a global variable
+ *
+ * Returns: the number of bytes from @value used by the converted string
+ * or -1 in case of error
+ *
+ * Converts a character from multibyte to wide.
+ */
 size_t char_uni_alphabet_encode(const char *value, size_t n, wchar_t *dest, MBSTATE *mbs)
 {
 	int length;
@@ -504,6 +757,18 @@ size_t char_uni_alphabet_encode(const char *value, size_t n, wchar_t *dest, MBST
 	return length;
 }
 
+/**
+ * char_uni_alphabet_decode:
+ * @value: the character to be converted
+ * @dest: buffer for the converted character
+ * @mbs: pointer to a variable holding the shift state
+ * or NULL to use a global variable
+ *
+ * Returns: the number of bytes from @value that have been used
+ * or -1 in case of error
+ *
+ * Converts a character from wide to multibyte.
+ */
 int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs)
 {
 	int length;
@@ -517,7 +782,15 @@ int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs)
 	}
 }
 
-/* null terminates the string */
+/**
+ * char_ucs2_decode:
+ * @dest: buffer for the converted string, NUL terminated
+ * @src: buffer with the string to be converted
+ * @len: length of @src in bytes, size of @dest must be at least (@len / 4) + 1
+ *
+ * Converts a string from UCS-2 encoded as ASCII-encoded hexadecimal bytes to ISO/IEC 8859-1.
+ * @len must be a multiple of 4.
+ */
 void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i_len = 0, o_len = 0, length;
@@ -547,7 +820,16 @@ void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
 	return;
 }
 
-/*
+/**
+ * char_ucs2_encode:
+ * @dest: buffer for the converted string, NUL terminated
+ * @dest_len: size of @dest
+ * @src: buffer with the string to be converted
+ * @len: length of @src in bytes, size of @dest must be at least (@len * 4) + 1
+ *
+ * Returns: the number of bytes of @dest that have been used
+ *
+ * Converts a string from ISO/IEC 8859-1 to UCS-2 encoded as ASCII-encoded hexadecimal bytes.
  * This function should convert "ABC" to "004100420043"
  */
 #define UCS2_SIZE	4
@@ -575,7 +857,16 @@ size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len
 	return o_len * UCS2_SIZE;
 }
 
-/* null terminates the string */
+/**
+ * char_unicode_decode:
+ * @dest: buffer for the converted string, NUL terminated
+ * @src: buffer with the string to be converted
+ * @len: length of @src in bytes
+ *
+ * Returns: the number of bytes of @dest that have been used
+ *
+ * Converts a string from UTF-8 to ISO/IEC 8859-1.
+ */
 unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int i, length = 0, pos = 0;
@@ -592,6 +883,16 @@ unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, 
 	return pos;
 }
 
+/**
+ * char_unicode_encode:
+ * @dest: buffer for the converted string, not NUL terminated
+ * @src: buffer with the string to be converted
+ * @len: length of @src in bytes
+ *
+ * Returns: the number of bytes of @dest that have been used
+ *
+ * Converts a string from ISO/IEC 8859-1 to UTF-8.
+ */
 unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int length, offset = 0, pos = 0;
@@ -618,6 +919,16 @@ unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, 
 }
 
 /* Conversion bin -> hex and hex -> bin */
+
+/**
+ * hex2bin:
+ * @dest: buffer for the converted string
+ * @src: buffer with the string to be converted
+ * @len: length of @src, size of @dest must be at least @len / 2
+ *
+ * Converts from ASCII-encoded hexadecimal bytes to binary.
+ * @len must be a multiple of 2.
+ */
 void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len)
 {
 	int i;
@@ -646,6 +957,14 @@ void hex2bin(unsigned char *dest, const unsigned char *src, unsigned int len)
 	}
 }
 
+/**
+ * bin2hex:
+ * @dest: buffer for the converted string, not NUL terminated
+ * @src: buffer with the string to be converted
+ * @len: length of @src, size of @dest must be at least @len * 2
+ *
+ * Converts from binary to ASCII-encoded hexadecimal bytes.
+ */
 void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len)
 {
 	int i;
@@ -662,8 +981,17 @@ void bin2hex(unsigned char *dest, const unsigned char *src, unsigned int len)
 	}
 }
 
-/* This function implements packing of numbers (SMS Center number and
-   destination number) for SMS sending function. */
+/**
+ * char_semi_octet_pack:
+ * @number: string containing the phone number to convert
+ * @output: buffer for the converted phone number, not NUL terminated
+ * @type: type of the phone number (eg. %GN_GSM_NUMBER_International)
+ *
+ * Returns: the number of semi octects used by the whole encoded string
+ *
+ * This function implements packing of numbers (SMS Center number and
+ * destination number) for SMS sending function.
+ */
 int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type)
 {
 	char *in_num = number;  /* Pointer to the input number */
@@ -704,6 +1032,15 @@ int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type
 	return (2 * (out_num - output - 1) - (count % 2));
 }
 
+/**
+ * char_bcd_number_get:
+ * @number: a phone number encoded in BCD format
+ *
+ * Returns: a static buffer with the converted phone number, NUL terminated
+ *
+ * This function implements unpacking of numbers (SMS Center number and
+ * destination number) for SMS receiving function.
+ */
 char *char_bcd_number_get(u8 *number)
 {
 	static char buffer[GN_BCD_STRING_MAX_LENGTH] = "";
@@ -742,12 +1079,20 @@ char *char_bcd_number_get(u8 *number)
 	return buffer;
 }
 
-void gn_char_set_encoding(const char* encoding)
-{
-	snprintf(application_encoding, sizeof(application_encoding), "%s", encoding);
-}
-
 /* UTF-8 conversion functions */
+
+/**
+ * utf8_decode:
+ * @outstring: buffer for the converted string, not NUL terminated
+ * @outlen: size of @outstring
+ * @instring: buffer with the string to be converted
+ * @inlen: length of @instring
+ *
+ * Returns: the number of bytes used in @outstring, or -1 in case of errors
+ *
+ * Converts a string from UTF-8 to an application specified (or system default) encoding.
+ * Uses iconv() if available, else uses internal replacement code.
+ */
 int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inlen)
 {
 	size_t nconv;
@@ -803,6 +1148,18 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
 	return (nconv < 0) ?  -1 : (char *)pout - outstring;
 }
 
+/**
+ * utf8_encode:
+ * @outstring: buffer for the converted string, not NUL terminated
+ * @outlen: size of @outstring
+ * @instring: buffer with the string to be converted
+ * @inlen: length of @instring
+ *
+ * Returns: the number of bytes used in @outstring, or -1 in case of errors
+ *
+ * Converts a string from an application specified (or system default) encoding to UTF-8.
+ * Uses iconv() if available, else uses internal replacement code.
+ */
 int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
 #if defined(HAVE_ICONV)
@@ -846,6 +1203,15 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 
 
 /* BASE64 functions */
+
+/**
+ * string_base64:
+ * @instring: the string to check
+ *
+ * Returns: 1 if the string must be encoded in base 64, 0 otherwise
+ *
+ * Verifies if a string must be encoded in base 64.
+ */
 int string_base64(const char *instring)
 {
 	for (; *instring; instring++)
@@ -854,10 +1220,17 @@ int string_base64(const char *instring)
 	return 0;
 }
 
-/*
-   Encodes a null-terminated input string with base64 encoding.
-   The buffer outstring needs to be at least 1.333 times bigger than the input string length.
-   outlen is the size of the outstring buffer excluding null termination.
+/**
+ * base64_encode:
+ * @outstring: buffer for the converted string, NUL terminated
+ * @outlen: size of @outstring, must be at least 1.333 times bigger than @inlen
+ * @instring: buffer with the string to be converted
+ * @inlen: length of @instring
+ *
+ * Returns: the length of the converted string
+ *
+ * Converts a generic string to base64 encoding.
+ * The @outstring buffer needs to be at least 1.333 times bigger than @inlen.
 */
 int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
@@ -908,6 +1281,7 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 		outleft -= 4;
 	}
 
+	/* terminate the output string */
 	*pout = 0;
 
 	if (outtemp)
@@ -916,6 +1290,17 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 	return pout - outstring;
 }
 
+/**
+ * base64_decode:
+ * @dest: buffer for the converted string, not NUL terminated
+ * @destlen: size of @dest, must be at least 3 / 4 of @inlen
+ * @source: buffer with the string to be converted
+ * @inlen: length of @source
+ *
+ * Returns: the number of bytes used in @dest
+ *
+ * Converts a generic string from base 64 encoding.
+ */
 int base64_decode(char *dest, int destlen, const char *source, int inlen)
 {
 	int dtable[256];
@@ -979,6 +1364,17 @@ endloop:
 	return dpos;
 }
 
+/**
+ * utf8_base64_encode:
+ * @dest: buffer for the converted string, NUL terminated
+ * @destlen: size of @dest
+ * @in: buffer with the string to be converted
+ * @inlen: length of @in
+ *
+ * Returns: the number of bytes used by the converted string
+ *
+ * Converts an UTF-8 string to base 64 encoding.
+ */
 int utf8_base64_encode(char *dest, int destlen, const char *in, int inlen)
 {
 	char *aux;
@@ -994,6 +1390,17 @@ int utf8_base64_encode(char *dest, int destlen, const char *in, int inlen)
 	return retval;
 }
 
+/**
+ * utf8_base64_decode:
+ * @dest: buffer for the converted string
+ * @destlen: size of @dest
+ * @in: buffer with the string to be converted
+ * @inlen: length of @in
+ *
+ * Returns: the number of bytes used by the converted string
+ *
+ * Converts an UTF-8 string to base 64 encoding.
+ */
 int utf8_base64_decode(char *dest, int destlen, const char *in, int inlen)
 {
 	char *aux;
@@ -1009,7 +1416,16 @@ int utf8_base64_decode(char *dest, int destlen, const char *in, int inlen)
 	return retval;
 }
 
-/* We are escaping the following characters (according to rfc 2426):
+/**
+ * add_slashes:
+ * @dest: buffer for the converted string, NUL terminated
+ * @src: buffer with the string to be converted
+ * @maxlen: size of @dest, must be 2 * @len + 1 in the worst case
+ * @len: length of @src
+ *
+ * Returns: the number of bytes used by the converted string
+ *
+ * Escapes the following characters (according to rfc 2426):
  * '\n', '\r', ';', ',', '\'.
  */
 int add_slashes(char *dest, char *src, int maxlen, int len)
@@ -1039,6 +1455,17 @@ int add_slashes(char *dest, char *src, int maxlen, int len)
 	return j;
 }
 
+/**
+ * strip_slashes:
+ * @dest: buffer for the converted string, NUL terminated
+ * @src: buffer with the string to be converted
+ * @maxlen: size of @dest, must be @len + 1 in the worst case
+ * @len: length of @src
+ *
+ * Returns: the number of bytes used by the converted string
+ *
+ * Unescapes the caracters escaped by add_slashes().
+ */
 int strip_slashes(char *dest, const char *src, int maxlen, int len)
 {
 	int i, j, slash_state = 0;
