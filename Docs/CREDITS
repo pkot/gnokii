@@ -172,7 +172,7 @@ Thank you to, in no particular order...
 
 *  Phil Ashby for Windows IrDA support.
 
-*  Helge Deller for forcing Pawel to do the right things.
+*  Helge Deller for forcing Paweł to do the right things.
 
 *  Hugo Hass for work on AT driver.
 
@@ -181,12 +181,12 @@ Thank you to, in no particular order...
 *  Bastien Nocera for changes to the cfgreader, variuos other patches and
    work on integrating libgnokii with gnome-phone-manager.
 
-*  Alex Kanavin for OBEX USB DKU2 support and patient help for Pawel while
+*  Alex Kanavin for OBEX USB DKU2 support and patient help for Paweł while
    porting it to gnokii.
 
 *  Daniele Forsi for active gnokii development.
 
-*  Petr Hruska for hist contribution to AT driver.
+*  Petr Hruska for his contribution to AT driver.
 
 *  Jari Turkia for trying to keep win32 port alive (with success!).
 
