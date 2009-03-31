@@ -1,1 +1,0 @@
-shlibs:Depends=libbluetooth1 (>= 2.15), libc6 (>= 2.3.4-1), libglib2.0-0 (>= 2.8.0), libgnokii2, libx11-6, libxpm4

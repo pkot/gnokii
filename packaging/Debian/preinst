@@ -1,9 +1,0 @@
-#!/bin/sh -e
-
-if getent group gnokii; then
-    echo "Found group 'gnokii', not adding..."
-else
-    /usr/sbin/groupadd gnokii
-fi
-
-#DEBHELPER#
