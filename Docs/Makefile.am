@@ -29,7 +29,6 @@ docs_DATA = 	README \
 		gnokii-hackers-howto \
 		gnokii-ir-howto \
 		gnokii-IrDA-Linux \
-		packaging-howto \
 		ringtones.txt \
 		logos.txt \
 		$(DEVEL_DOCS)
