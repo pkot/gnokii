@@ -5,27 +5,27 @@ certain area on the gnokii-ml.
 gnokii part		maintainer
 =============================================================================
 gnokii			Pawel Kot
-gnokiid			BORBELY Zoltan
-xgnokii			Jan Derfinak
+gnokiid			BORBELY Zoltan (no longer developed)
+xgnokii			Jan Derfinak (mostly in keep-alive mode)
 smsd			Jan Derfinak
 libgnokii		Pawel Kot, Daniele Forsi
-statemachine		BORBELY Zoltan, Pawel Kot
+statemachine		BORBELY Zoltan, Pawel Kot (no changes for a long time, but works just fine)
 libsms			Pawel Kot
-bitmaps			Pawel Kot
-ringtones		Pawel Kot
+bitmaps			Pawel Kot (no changes)
+ringtones		Pawel Kot (no changes)
 2110 driver		no longer maintained
 3110 driver		no longer maintained
-6110 driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot
-6210 driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot
+6110 driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot (keep-alive mode)
+6210 driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot (keep-alive mode)
 6510 driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot
 AT driver		BORBELY Zoltan, Daniele Forsi, Pawel Kot
 gnapplet driver		BORBELY Zoltan
-link layer		BORBELY Zoltan, Pawel Kot
-device layer		BORBELY Zoltan, Pawel Kot
+link layer		BORBELY Zoltan, Pawel Kot (no changes)
+device layer		BORBELY Zoltan, Pawel Kot (no changes)
 documentation		Pawel Kot, Daniele Forsi
 autoconf		Pawel Kot, BORBELY Zoltan
 win32 port		Jari Turkia
-dku2 kernel driver	Chris Kemp
+dku2 kernel driver	no longer maintained, replaced by dku2libusb driver
 
 maintainer		e-mail address
 =============================================================================
