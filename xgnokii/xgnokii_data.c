@@ -44,13 +44,6 @@ bool GTerminateThread = false;
 bool enabled = false;
 static GtkWidget *label = NULL;
 
-static inline void Help1(GtkWidget * w, gpointer data)
-{
-	gchar *indx = g_strdup_printf("/help/%s/windows/data/index.html", xgnokiiConfig.help_locale);
-	Help(w, indx);
-	g_free(indx);
-}
-
 static void UpdateStatus(void)
 {
 	gchar *buf;

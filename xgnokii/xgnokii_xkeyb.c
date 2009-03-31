@@ -123,14 +123,6 @@ static ButtonT button_5110[30] = {
 	{0, 0, 0, 0, 0x00}
 };
 
-static inline void Help1(GtkWidget * w, gpointer data)
-{
-	gchar *indx = g_strdup_printf("/help/%s/windows/xkeyb/index.html", xgnokiiConfig.help_locale);
-	Help(w, indx);
-	g_free(indx);
-}
-
-
 static GtkWidget *GetPixmap(void)
 {
 	GtkWidget *wpixmap;
@@ -235,7 +227,6 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Branch>"},
 	{NULL, "<control>W", CloseXkeyb, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
-	{NULL, NULL, Help1, 0, NULL},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };
 
@@ -244,8 +235,7 @@ static void InitMainMenu(void)
 	menu_items[0].path = _("/_File");
 	menu_items[1].path = _("/File/_Close");
 	menu_items[2].path = _("/_Help");
-	menu_items[3].path = _("/Help/_Help");
-	menu_items[4].path = _("/Help/_About");
+	menu_items[3].path = _("/Help/_About");
 }
 
 

@@ -80,7 +80,6 @@ extern GtkWidget *NewPixmap(gchar **, GdkWindow *, GdkColor *);
 extern void DeleteEvent(const GtkWidget *, const GdkEvent *, const gpointer);
 extern gint LaunchProcess(const gchar *, const gchar *, const gint, const gint, const gint);
 extern void RemoveZombie(const gint);
-extern void Help(const GtkWidget *, const gpointer);
 extern gint strrncmp(const gchar * const, const gchar * const, size_t);
 extern void GUI_Refresh(void);
 extern void SetSortColumn(GtkWidget *, SortColumn *);

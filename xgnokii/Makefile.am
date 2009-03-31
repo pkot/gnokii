@@ -1,4 +1,4 @@
-SUBDIRS = xpm docs
+SUBDIRS = xpm
 
 bin_PROGRAMS = xgnokii
 
@@ -41,9 +41,6 @@ xgnokii_SOURCES = \
 	xgnokii_speed.h \
 	xgnokii_xkeyb.h \
 	xgnokii_xring.h
-
-#FIXME install help
-HELP_DIR = docs/help
 
 pkgconfig_DATA = xgnokii.pc
 pkgconfigdir = $(libdir)/pkgconfig

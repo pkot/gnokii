@@ -47,14 +47,6 @@ static ErrorDialog errorDialog = { NULL, NULL };
 static gchar *saveFileName;
 
 
-static inline void Help1(GtkWidget * w, gpointer data)
-{
-	gchar *indx = g_strdup_printf("/help/%s/windows/dtmf/index.html", xgnokiiConfig.help_locale);
-	Help(w, indx);
-	g_free(indx);
-}
-
-
 static inline void ButtonCB(GtkWidget * widget, gpointer data)
 {
 	gchar buf[2] = " ";
@@ -212,7 +204,6 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>W", CloseDTMF, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
-	{NULL, NULL, Help1, 0, NULL},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };
 
@@ -225,8 +216,7 @@ static void InitMainMenu(void)
 	menu_items[3].path = _("/File/Sep1");
 	menu_items[4].path = _("/File/_Close");
 	menu_items[5].path = _("/_Help");
-	menu_items[6].path = _("/Help/_Help");
-	menu_items[7].path = _("/Help/_About");
+	menu_items[6].path = _("/Help/_About");
 }
 
 

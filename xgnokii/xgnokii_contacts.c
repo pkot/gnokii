@@ -127,14 +127,6 @@ inline bool GUI_ContactsIsIntialized(void)
 }
 
 
-static inline void Help1(GtkWidget * w, gpointer data)
-{
-	gchar *indx = g_strdup_printf("/help/%s/windows/contacts/index.html", xgnokiiConfig.help_locale);
-	Help(w, indx);
-	g_free(indx);
-}
-
-
 void RefreshStatusInfo(void)
 {
 	char p, s;
@@ -3080,7 +3072,6 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Branch>"},
 	{NULL, "<control>V", DialPad, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
-	{NULL, NULL, Help1, 0, NULL},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };
 
@@ -3110,8 +3101,7 @@ static void InitMainMenu(void)
 	menu_items[20].path = _("/_Dial");
 	menu_items[21].path = _("/Dial/Dial _voice");
 	menu_items[22].path = _("/_Help");
-	menu_items[23].path = _("/Help/_Help");
-	menu_items[24].path = _("/Help/_About");
+	menu_items[23].path = _("/Help/_About");
 }
 
 

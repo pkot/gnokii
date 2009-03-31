@@ -251,18 +251,6 @@ void RemoveZombie(const gint sign)
 }
 
 
-void Help(const GtkWidget * w, const gpointer data)
-{
-	gchar buf[255] = "file:";
-
-	strncat(buf, xgnokiiConfig.xgnokiidir, 255 - strlen(buf));
-	buf[254] = '\0';
-	strncat(buf, (gchar *) data, 255 - strlen(buf));
-	buf[254] = '\0';
-	LaunchProcess(xgnokiiConfig.helpviewer, buf, STDIN_FILENO, STDOUT_FILENO, STDERR_FILENO);
-}
-
-
 inline gint strrncmp(const gchar * const s1, const gchar * const s2, size_t n)
 {
 	gint l1 = strlen(s1);

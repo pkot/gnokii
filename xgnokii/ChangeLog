@@ -1,3 +1,6 @@
+* Tue 31 Mar 2009 Paweł Kot
+- Remove online documentation. It's outdated.
+
 * Thu 26 Feb 2009 Daniele Forsi
 - In xgnokii.desktop.in use Icon=phone (patch by Ariszló)
 

@@ -202,18 +202,9 @@ static struct ConfigDialogData {
 	SMSWidgets sms;
 	UserWidget user;
 	GtkWidget *mailbox;
-	GtkWidget *help;
 } configDialogData;
 
 static gn_sms_message_center tempMessageSettings;
-
-
-static inline void Help1(GtkWidget * w, gpointer data)
-{
-	gchar *indx = g_strdup_printf("/help/%s/index.html", xgnokiiConfig.help_locale);
-	Help(w, indx);
-	g_free(indx);
-}
 
 
 void GUI_InitCallerGroupsInf(void)
@@ -797,9 +788,6 @@ void GUI_ShowOptions(void)
 	} else
 		gtk_widget_hide(mail_option_frame);
 
-	/* Help */
-	gtk_entry_set_text(GTK_ENTRY(configDialogData.help), xgnokiiConfig.helpviewer);
-
 	optionsDialogIsOpened = TRUE;
 	gtk_widget_show(OptionsDialog);
 }
@@ -1011,10 +999,6 @@ static void OptionsApplyCallback(GtkWidget * widget, gpointer data)
 		xgnokiiConfig.mailbox =
 		    g_strdup(gtk_entry_get_text(GTK_ENTRY(configDialogData.mailbox)));
 	}
-
-	/* Help */
-	g_free(xgnokiiConfig.helpviewer);
-	xgnokiiConfig.helpviewer = g_strdup(gtk_entry_get_text(GTK_ENTRY(configDialogData.help)));
 }
 
 
@@ -1177,11 +1161,6 @@ static GtkWidget *CreateMenu(void)
 
 	menu_items = gtk_menu_item_new();
 	gtk_menu_append(GTK_MENU(menu), menu_items);
-	gtk_widget_show(menu_items);
-
-	menu_items = gtk_menu_item_new_with_label(_("Help"));
-	gtk_menu_append(GTK_MENU(menu), menu_items);
-	gtk_signal_connect_object(GTK_OBJECT(menu_items), "activate", GTK_SIGNAL_FUNC(Help1), NULL);
 	gtk_widget_show(menu_items);
 
 	menu_items = gtk_menu_item_new_with_label(_("About"));
@@ -2154,32 +2133,6 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.mailbox, FALSE, FALSE, 2);
 	gtk_widget_show(configDialogData.mailbox);
 
-	/* Help */
-	frame = gtk_frame_new(_("Help viewer"));
-	gtk_widget_show(frame);
-
-	vbox = gtk_vbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(frame), vbox);
-	gtk_widget_show(vbox);
-
-	label = gtk_label_new(_("Help"));
-	gtk_notebook_append_page(GTK_NOTEBOOK(notebook), frame, label);
-
-	hbox = gtk_hbox_new(FALSE, 0);
-	gtk_box_pack_start(GTK_BOX(vbox), hbox, FALSE, FALSE, 2);
-	gtk_widget_show(hbox);
-
-	label = gtk_label_new(_("Viewer:"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-	gtk_widget_show(label);
-
-	configDialogData.help = gtk_entry_new_with_max_length(HTMLVIEWER_LENGTH - 1);
-	gtk_widget_set_usize(configDialogData.help, 220, 22);
-
-	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.help, FALSE, FALSE, 2);
-	gtk_widget_show(configDialogData.help);
-
-
 	optionsDialogIsOpened = FALSE;
 	return dialog;
 }
@@ -2324,28 +2277,6 @@ static gint RemoveSplash(GtkWidget * Win)
 	return FALSE;
 }
 
-static bool LocaleHelpExists(gchar *help_locale)
-{
-#ifdef WIN32
-	bool retval = true;
-#else
-	bool retval;
-	gchar *file;
-	struct stat buf;
-
-	if (!help_locale)
-		return false;
-
-	file = g_strdup_printf("/%s/help/%s", xgnokiiConfig.xgnokiidir, help_locale);
-	if (stat(file, &buf) == 0)
-		retval = true;
-	else
-		retval = false;
-	g_free(file);
-#endif
-	return retval;
-}
-
 static void ReadConfig(void)
 {
 	if (GN_ERR_NONE != gn_lib_phoneprofile_load( NULL, &statemachine ))
@@ -2379,30 +2310,6 @@ static void ReadConfig(void)
 	    xgnokiiConfig.callerGroups[2] = xgnokiiConfig.callerGroups[3] =
 	    xgnokiiConfig.callerGroups[4] = xgnokiiConfig.callerGroups[5] = NULL;
 	xgnokiiConfig.smsSets = 0;
-#ifdef WIN32
-	xgnokiiConfig.locale = "";
-	xgnokiiConfig.help_locale = "";
-#else
-	if ((xgnokiiConfig.locale = getenv("LC_ALL")) == NULL)
-		if ((xgnokiiConfig.locale = getenv("LC_MESSAGES")) == NULL)
-			if ((xgnokiiConfig.locale = getenv("LANG")) == NULL)
-				xgnokiiConfig.locale = "POSIX";
-	xgnokiiConfig.help_locale = g_strdup(xgnokiiConfig.locale);
-#endif
-	/* we have set en_US.UTF8 locale that is not supported by xgnokii */
-	if (!LocaleHelpExists(xgnokiiConfig.help_locale)) {
-		char *pos = strchr(xgnokiiConfig.locale, '.');
-		g_free(xgnokiiConfig.help_locale);
-		if (pos)
-			xgnokiiConfig.help_locale = g_strndup(xgnokiiConfig.locale,
-							      pos - xgnokiiConfig.locale);
-		else
-			xgnokiiConfig.help_locale = NULL;
-		if (!LocaleHelpExists(xgnokiiConfig.help_locale)) {
-			g_free(xgnokiiConfig.help_locale);
-			xgnokiiConfig.help_locale = g_strdup("en_US");
-		}
-	}
 }
 
 

@@ -113,22 +113,6 @@ static InfoDialog infoDialog = { NULL, NULL };
 static QuestMark questMark;
 static GtkWidget *treeFolderItem[GN_SMS_FOLDER_MAX_NUMBER], *subTree;
 
-static inline void Help1(GtkWidget * w, gpointer data)
-{
-	gchar *indx = g_strdup_printf("/help/%s/windows/sms/index.html", xgnokiiConfig.help_locale);
-	Help(w, indx);
-	g_free(indx);
-}
-
-
-static inline void Help2(GtkWidget * w, gpointer data)
-{
-	gchar *indx = g_strdup_printf("/help/%s/sms_send.html", xgnokiiConfig.help_locale);
-	Help(w, indx);
-	g_free(indx);
-}
-
-
 static inline void CloseSMS(GtkWidget * w, gpointer data)
 {
 	gtk_widget_hide(GUI_SMSWindow);
@@ -1255,7 +1239,6 @@ static GtkItemFactoryEntry send_menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>W", CloseSMSSend, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
-	{NULL, NULL, Help2, 0, NULL},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };
 
@@ -1271,8 +1254,7 @@ static void InitSendMenu(void)
 	send_menu_items[6].path = _("/File/Sep2");
 	send_menu_items[7].path = _("/File/_Close");
 	send_menu_items[8].path = _("/_Help");
-	send_menu_items[9].path = _("/Help/_Help");
-	send_menu_items[10].path = _("/Help/_About");
+	send_menu_items[9].path = _("/Help/_About");
 }
 
 
@@ -1658,7 +1640,6 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Separator>"},
 	{NULL, "<control>B", NewBC, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
-	{NULL, NULL, Help1, 0, NULL},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };
 
@@ -1682,7 +1663,6 @@ static void InitMainMenu(void)
 	menu_items[i++].path = _("/Messages/Sep3");
 	menu_items[i++].path = _("/_Messages/_Business card");
 	menu_items[i++].path = _("/_Help");
-	menu_items[i++].path = _("/Help/_Help");
 	menu_items[i++].path = _("/Help/_About");
 }
 
