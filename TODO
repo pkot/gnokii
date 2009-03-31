@@ -1,7 +1,3 @@
-SHORT TERM
- * fix MacOS X support
- * reading outbox SM for Series40 3rd+ Edition
-
 LONG TERM
  * gnokii changes:
     o readline support (partially done: gnokii --shell)
