@@ -6,6 +6,7 @@ You'll need tools like:
  - cvs
  - make
  - gcc
+ - flex
 For certain distributions like Ubuntu most of the tools are available in
 build-essentials package. You will need also the set of autotools and
 family (they are needed just for CVS compile):
@@ -72,7 +73,7 @@ smsd plugins:
 	mysql:		libmysqlclient
 	postgresql:	libpq
 
-Please note that all libraries are autodetectes by configure script.
+Please note that all libraries are autodetected by configure script.
 
 Sources:
 http://www.xfree86.org/					libX11, libXpm
