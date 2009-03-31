@@ -163,7 +163,7 @@ Thank you to, in no particular order...
 *  Krzysztof Koziarek for help in parsing www.gsmworld.com pages to get the
    list of country and operator codes and names.
 
-*  Ron Yorston for a bunch of the paches and intresting discussions on
+*  Ron Yorston for a bunch of the paches and interesting discussions on
    gnokii-ml.
 
 *  Reiner Steib for useful patches, bug reports and other hints.
@@ -178,7 +178,7 @@ Thank you to, in no particular order...
 
 *  Martin Goldhahn for work on vCalendar support and other pieces of code.
 
-*  Bastien Nocera for changes to the cfgreader, variuos other patches and
+*  Bastien Nocera for changes to the cfgreader, various other patches and
    work on integrating libgnokii with gnome-phone-manager.
 
 *  Alex Kanavin for OBEX USB DKU2 support and patient help for Paweł while
