@@ -1596,7 +1596,7 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	/* Extract just SMS */
 	memset(&fl2, 0, sizeof(fl2));
 	for (j = 0; j < fl.file_count; j++) {
-		if (!strncmp("01", fl.files[j]->name+21, 2)) {
+		if (!strncmp("2010", fl.files[j]->name+20, 4)) {
 			strcpy(fl2.path, fl.path);
 			inc_filecount(&fl2);
 			fl2.files[fl2.file_count-1] = fl.files[j];
@@ -2039,7 +2039,9 @@ static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	/* Extract just MMS */
 	memset(&fl2, 0, sizeof(fl2));
 	for (j = 0; j < fl.file_count; j++) {
-		if (!strncmp("02", fl.files[j]->name+21, 2)) {
+		/* "1012" matches standard MMS, "1022" matches MMS Plus */
+		if (!strncmp("1012", fl.files[j]->name+20, 4) ||
+		    !strncmp("1022", fl.files[j]->name+20, 4)) {
 			strcpy(fl2.path, fl.path);
 			inc_filecount(&fl2);
 			fl2.files[fl2.file_count-1] = fl.files[j];
