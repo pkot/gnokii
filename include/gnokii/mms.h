@@ -31,18 +31,6 @@
 #ifndef _gnokii_mms_h
 #define _gnokii_mms_h
 
-/*
- * OMA-MMS-ENC-V1_3-20050214-D - Chapter 7.4 "Header Field Names and Assigned Numbers"
- * with msb set
- */
-#define GN_MMS_X_Mms_Message_Type	0x8c
-#define GN_MMS_X_Mms_Transaction_ID	0x98
-#define GN_MMS_X_Mms_MMS_Version	0x8d
-#define GN_MMS_From			0x89
-#define GN_MMS_To			0x97
-#define GN_MMS_Subject			0x96
-#define GN_MMS_Content_Type		0x84
-
 /* WAP-230-WSP-20010705-a Table 38 "Well-Known Parameter Assignments" */
 #define GN_MMS_Type_with_multipart	0x89 /* deprecated, use 0x99 */
 #define GN_MMS_Start_with_multipart	0x8a /* deprecated, use 0x9a */
@@ -150,5 +138,52 @@ typedef struct {
 	int num_parts;				/* How many items in parts array */
 	gn_mms_part *parts;
 } gn_mms;
+
+
+typedef struct {
+	char id;
+	char type;
+	char *header;
+} gn_mms_field;
+
+/* Convenience values, not defined by the standard */
+#define GN_MMS_FIELD_IS_STRING		1
+#define GN_MMS_FIELD_IS_ENCSTRING	1 /* FIXME? */
+#define GN_MMS_FIELD_IS_UINTVAR		2
+#define GN_MMS_FIELD_IS_OCTECT		3
+#define GN_MMS_FIELD_IS_YESNO		3 /* FIXME? */
+#define GN_MMS_FIELD_IS_LONG		4
+#define GN_MMS_FIELD_IS_DATE		5
+#define GN_MMS_FIELD_IS_EXPIRY		6
+#define GN_MMS_FIELD_IS_CONTENT_TYPE	7
+
+/*
+ * OMA-MMS-ENC-V1_3-20050214-D - Chapter 7.4 "Header Field Names and Assigned Numbers"
+ * with msb set
+ */
+#define	GN_MMS_Bcc			0x81
+#define	GN_MMS_Cc			0x82
+#define	GN_MMS_Content_Location		0x83
+#define	GN_MMS_Content_Type		0x84
+#define	GN_MMS_Date			0x85
+#define	GN_MMS_Delivery_Report		0x86
+#define	GN_MMS_Delivery_Time		0x87
+#define	GN_MMS_Expiry			0x88
+#define	GN_MMS_From			0x89
+#define	GN_MMS_Message_Class		0x8A
+#define	GN_MMS_Message_ID		0x8B
+#define	GN_MMS_Message_Type		0x8C
+#define	GN_MMS_MMS_Version		0x8D
+#define	GN_MMS_Message_Size		0x8E
+#define	GN_MMS_Priority			0x8F
+#define	GN_MMS_Read_Reply		0x90
+#define	GN_MMS_Report_Allowed		0x91
+#define	GN_MMS_Response_Status		0x92
+#define	GN_MMS_Response_Text		0x93
+#define	GN_MMS_Sender_Visibility	0x94
+#define	GN_MMS_Status			0x95
+#define	GN_MMS_Subject			0x96
+#define	GN_MMS_To			0x97
+#define	GN_MMS_Transaction_Id		0x98
 
 #endif /* _gnokii_mms_h */

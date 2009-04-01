@@ -76,11 +76,10 @@ int getmms_usage(FILE *f, int exitval)
 	return exitval;
 }
 
-gn_error print_mms(gn_mms *message)
+gn_error fprint_mms(FILE *file, gn_mms *message)
 {
-	fprintf(stdout, _("%d. %s (%s)\n"), message->number, _("MMS"), gn_sms_message_status2str(message->status));
-	fprintf(stdout, _("From: %s\n"), message->from);
-	fprintf(stdout, _("Subject: %s\n"), message->subject);
+	fprintf(file, _("%d. %s (%s)\n"), message->number, _("MMS"), gn_sms_message_status2str(message->status));
+	fprintf(file, "%s", message->buffer);
 
 	return GN_ERR_NONE;
 }
@@ -91,7 +90,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	int i, del = 0;
 	gn_sms_folder folder;
 	gn_sms_folder_list folderlist;
-	gn_mms message;
+	gn_mms *message;
 	char *memory_type_string;
 	int start_message, end_message, count, mode = 1;
 	char filename[64];
@@ -161,17 +160,21 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		return getmms_usage(stderr, -1);
 	}
 
+	error = gn_mms_alloc(&message);
+	if (error != GN_ERR_NONE)
+		return error;
+
 	folder.folder_id = 0;
 	data->sms_folder = &folder;
 	data->sms_folder_list = &folderlist;
 	/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
 
-		memset(&message, 0, sizeof(gn_mms));
-		message.memory_type = gn_str2memory_type(memory_type_string);
-		message.number = count;
-		message.buffer_format = output_format_type;
-		data->mms = &message;
+		memset(message, 0, sizeof(gn_mms));
+		message->memory_type = gn_str2memory_type(memory_type_string);
+		message->number = count;
+		message->buffer_format = output_format_type;
+		data->mms = message;
 
 		error = gn_mms_get(data, state);
 		switch (error) {
@@ -180,7 +183,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 				/* writebuffer() will set mode to "append" */
 				mode = writebuffer(filename, data->mms->buffer, data->mms->buffer_length, mode);
 			} else {
-				error = print_mms(&message);
+				error = fprint_mms(stdout, message);
 				fprintf(stdout, "\n");
 			}
 			if (data->mms->buffer)
@@ -199,6 +202,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		if (mode == -1)
 			break;
 	}
+	gn_mms_free(message);
 
 	return error;
 }
