@@ -1034,14 +1034,6 @@ AC_OUTPUT(
 	  xgnokii/xgnokii.pc
 	  xgnokii/Makefile
 	  xgnokii/xpm/Makefile
-	  xgnokii/docs/Makefile
-	  xgnokii/docs/help/pl_PL/netmon/Makefile
-	  xgnokii/docs/help/pl_PL/netmon/gsm/Makefile
-	  xgnokii/docs/help/pl_PL/Makefile
-	  xgnokii/docs/help/en_US/firmware/Makefile
-	  xgnokii/docs/help/en_US/netmon/Makefile
-	  xgnokii/docs/help/en_US/Makefile
-	  xgnokii/docs/help/Makefile
 	  po/Makefile.in
 	  patches/Makefile
 	  testsuite/Makefile
