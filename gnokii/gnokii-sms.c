@@ -636,6 +636,7 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	struct stat buf;
 	char *message_text;
 	bool cont = true;
+	bool all = false;
 
 	struct option options[] = {
 		{ "delete",     no_argument,       NULL, 'd' },
@@ -664,6 +665,7 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		gn_error e;
 		int j;
 
+		all = true;
 		memset(&folderlist, 0, sizeof(folderlist));
 		gn_data_clear(data);
 		data->sms_folder_list = &folderlist;
@@ -888,6 +890,9 @@ parsefile:
 		if (count >= end_message)
 			cont = false;
 		if ((folder_count > 0) && (messages_read >= (folder_count - start_message + 1)))
+			cont = false;
+		/* Avoid infinite loops */
+		if (all && error != GN_ERR_NONE && error != GN_ERR_EMPTYLOCATION)
 			cont = false;
 		count++;
 	}
