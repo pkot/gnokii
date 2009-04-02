@@ -14,17 +14,24 @@ tarball, binary package
     [logging]
     debug = on
    and attach gzipped output to the email:
-    (x)gnokii(d) [parameters] 2>errfile
+    gnokii [parameters] 2>errfile
+   replace your gnokii with the app you have problems with'
 
-It would be good if you name the problem in the subject if possible and
-name if it meets gnokii, xgnokii or gnokiid binaries or gnokii as a whole.
+It would be good if you name the problem in the subject if possible and name
+if it meets gnokii, xgnokii, gnokiid, smsd or some other app binaries or
+gnokii as a whole.
 
-(from Pawel Kot's mailing to gnokii mailing list).
+It's always good to attempt to narrow the problem. E.g. if you have problems
+with reading phonebook in xgnokii or gnocky, try gnokii CLI. If it works,
+it's xgnokii/gnocky problem. If not, most likely it's library problem.
 
 Send resulting report to gnokii-users@nongnu.org.
 
 If you want to debug yourself, by default the CVS version adds -g to CFLAGS
-when generating Makefile.global and the defines needed to print debug
-messages when generating include/config.h then in your gnokiirc set debug=on
-to see messages about libgnokii or gnokii and xdebug=on to see messages
-about xgnokii or smsd.
+when generating Makefile and the defines needed to print debug messages when
+generating include/config.h then in your gnokiirc set debug=on to see
+messages about libgnokii or gnokii and xdebug=on to see messages about
+xgnokii or smsd.
+
+For problems with gnokii applications segfaulting see
+http://wiki.gnokii.org/index.php/Segfault
