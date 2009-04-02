@@ -267,7 +267,7 @@ msgid ""
 "instead.\n"
 msgstr ""
 "La fonction gn_vcal_file_event_read() est obsolète. Merci d'utiliser "
-"gn_ical2calnote() à la place."
+"gn_ical2calnote() à la place.\n"
 
 #: vcal.lx:285 vcal.lx:346 ../common/vcal.lx:284 ../common/vcal.lx:345
 #: ../gnokii/gnokii-calendar.c:251 ../gnokii/gnokii-file.c:439
@@ -983,7 +983,7 @@ msgstr "Données GSM"
 
 #: ../common/gsm-common.c:489 ../gnokii/gnokii-wap.c:234
 msgid "GPRS"
-msgstr "GPRS\n"
+msgstr "GPRS"
 
 #: ../common/gsm-common.c:490 ../gnokii/gnokii-wap.c:242
 #: ../xgnokii/xgnokii.c:1122 ../xgnokii/xgnokii.c:1868
@@ -2430,7 +2430,7 @@ msgstr ""
 #: ../gnokii/gnokii-monitor.c:208
 #, c-format
 msgid "Argument to --monitor delay needs to be positive number\n"
-msgstr "L'argument de --monitor est un délai, qui doit donc être positif"
+msgstr "L'argument de --monitor est un délai, qui doit donc être positif\n"
 
 #: ../gnokii/gnokii-monitor.c:222
 #, c-format
@@ -2701,7 +2701,7 @@ msgstr "Groupe d'appelant"
 #: ../gnokii/gnokii-phonebook.c:208
 #, c-format
 msgid "Address information:\n"
-msgstr "Information d'adresse :"
+msgstr "Information d'adresse:\n"
 
 #: ../gnokii/gnokii-phonebook.c:210 ../gnokii/gnokii-phonebook.c:212
 #: ../gnokii/gnokii-phonebook.c:214 ../gnokii/gnokii-phonebook.c:216
