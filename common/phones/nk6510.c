@@ -1633,15 +1633,16 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	data->raw_sms->type = GN_SMS_MT_Deliver;
 	data->raw_sms->udh_indicator = bin[offset];
 	data->raw_sms->status = bin[offset];
-//	data->raw_sms->dcs = message[5];
 //	data->raw_sms->reference = message[4];
 	offset++;
-	memcpy(data->raw_sms->remote_number, bin + offset, bin[offset] + 1);
+	tmp = (bin[offset] + 1) / 2 + 2;
+	memcpy(data->raw_sms->remote_number, bin + offset, tmp);
 	dprintf("RN: %02x\n", data->raw_sms->remote_number[2]);
-	tmp = bin[offset];
-	if (tmp % 2)
-		tmp++;
-	offset += (tmp / 2 + 4);
+	offset += tmp;
+	/* TODO what is this byte that we skip? */
+	offset++;
+	data->raw_sms->dcs = bin[offset];
+	offset++;
 	memcpy(data->raw_sms->smsc_time, bin + offset, 7);
 	offset += 7;
 //	memcpy(data->raw_sms->message_center,  block + 4, block[3]);

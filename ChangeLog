@@ -76,7 +76,8 @@
     o don't fallback to S40_30 mode on every error      (Paweł Kot)
     o SMS status is sometimes not returned - check for reply length
                                                         (Paweł Kot)
-    o improve detection of SMS and MMS with S40_30  (Daniele Forsi)
+    o improve detection of SMS and MMS with S40_30 and correctly
+      decode UCS2 SMS                               (Daniele Forsi)
  * gnapplet driver updates
     o fix string type argument length passed to the phone
                                                         (Paweł Kot)
