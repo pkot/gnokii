@@ -413,7 +413,7 @@ if test "$enable_libical" = "yes"; then
 	CFLAGS="$CFLAGS $ICAL_CFLAGS"
 	AC_MSG_CHECKING(whether libical is installed)
 	AC_TRY_LINK([
-	   #include <ical.h>
+	   #include <libical/ical.h>
 	   ],[
 	   int priority;
 	   icalcomponent *pIcal=NULL;
