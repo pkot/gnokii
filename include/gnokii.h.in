@@ -68,7 +68,7 @@ typedef unsigned char uint8_t;
 #define LIBGNOKII_VERSION_MAJOR @LIBGNOKII_VERSION_MAJOR@
 #define LIBGNOKII_VERSION_MINOR @LIBGNOKII_VERSION_MINOR@
 #define LIBGNOKII_VERSION_RELEASE @LIBGNOKII_VERSION_RELEASE@
-#define LIBGNOKII_MAKE_VERSION( a,b,c ) (((a) << 16) | ((b) << 8) | (c))
+#define LIBGNOKII_MAKE_VERSION(a,b,c) (((a) << 16) | ((b) << 8) | (c))
 
 #define LIBGNOKII_VERSION \
   LIBGNOKII_MAKE_VERSION(LIBGNOKII_VERSION_MAJOR,LIBGNOKII_VERSION_MINOR,LIBGNOKII_VERSION_RELEASE)
@@ -100,64 +100,64 @@ GNOKII_API gn_error gn_lib_init();
 GNOKII_API unsigned int gn_lib_version();
 
 /* free any resources which were used by libgnokii */
-GNOKII_API void gn_lib_library_free( void );
+GNOKII_API void gn_lib_library_free(void);
 
 /* return last error code from functions below */
-GNOKII_API gn_error gn_lib_lasterror( struct gn_statemachine *state );
+GNOKII_API gn_error gn_lib_lasterror(struct gn_statemachine *state);
 
 /* initialize gnokii library and structures for given phone.
    configname is the name of the profile, if empty or NULL, [global] will be taken.
    gn_lib_phoneprofile_load assumes default config file. */
-GNOKII_API gn_error gn_lib_phoneprofile_load_from_file( const char *configfile, const char *configname, struct gn_statemachine **state );
-GNOKII_API gn_error gn_lib_phoneprofile_load( const char *configname, struct gn_statemachine **state );
+GNOKII_API gn_error gn_lib_phoneprofile_load_from_file(const char *configfile, const char *configname, struct gn_statemachine **state);
+GNOKII_API gn_error gn_lib_phoneprofile_load(const char *configname, struct gn_statemachine **state);
 
 /* Free any structures and resources which were loaded in this state machine. */
-GNOKII_API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state );
+GNOKII_API gn_error gn_lib_phoneprofile_free(struct gn_statemachine **state);
 
 /* opens connection to the phone. Necessary locking will be made */
-GNOKII_API gn_error gn_lib_phone_open( struct gn_statemachine *state );
+GNOKII_API gn_error gn_lib_phone_open(struct gn_statemachine *state);
 
 /* closes the connection to the phone */
-GNOKII_API gn_error gn_lib_phone_close( struct gn_statemachine *state );
+GNOKII_API gn_error gn_lib_phone_close(struct gn_statemachine *state);
 
 /* ask phone for static information (model, manufacturer, revision and imei) */
-GNOKII_API const char *gn_lib_get_phone_model       ( struct gn_statemachine *state ); /* e.g. 6310 */
-GNOKII_API const char *gn_lib_get_phone_product_name( struct gn_statemachine *state ); /* e.g. NPE-4 */
-GNOKII_API const char *gn_lib_get_phone_manufacturer( struct gn_statemachine *state ); /* e.g. Nokia */
-GNOKII_API const char *gn_lib_get_phone_revision    ( struct gn_statemachine *state ); /* e.g. V 04.20 */
-GNOKII_API const char *gn_lib_get_phone_imei        ( struct gn_statemachine *state );
+GNOKII_API const char *gn_lib_get_phone_model       (struct gn_statemachine *state); /* e.g. 6310 */
+GNOKII_API const char *gn_lib_get_phone_product_name(struct gn_statemachine *state); /* e.g. NPE-4 */
+GNOKII_API const char *gn_lib_get_phone_manufacturer(struct gn_statemachine *state); /* e.g. Nokia */
+GNOKII_API const char *gn_lib_get_phone_revision    (struct gn_statemachine *state); /* e.g. V 04.20 */
+GNOKII_API const char *gn_lib_get_phone_imei        (struct gn_statemachine *state);
 
 /* Get the key value from the given section and the key name */
 GNOKII_API const char *gn_lib_cfg_get(const char *section, const char *key);
 
 /* Phone Addressbook functions */
 /* get number of used/free phone addressbook memory slots */
-GNOKII_API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
+GNOKII_API gn_error gn_lib_addressbook_memstat(struct gn_statemachine *state,
 		const gn_memory_type memory_type,
-		int *num_used, int *num_free );
+		int *num_used, int *num_free);
 
 /* remove an addressbook entry physically from phone. */
-GNOKII_API gn_error gn_lib_phonebook_entry_delete( struct gn_statemachine *state,
-		const gn_memory_type memory_type, const int index );
+GNOKII_API gn_error gn_lib_phonebook_entry_delete(struct gn_statemachine *state,
+		const gn_memory_type memory_type, const int index);
 
 /* check if given addressbook entry is empty. Returns "true" if empty, 0 if not. */
-GNOKII_API int gn_lib_phonebook_entry_isempty( struct gn_statemachine *state,
-		const gn_memory_type memory_type, const int index );
+GNOKII_API int gn_lib_phonebook_entry_isempty(struct gn_statemachine *state,
+		const gn_memory_type memory_type, const int index);
 
 /* read given addressbook entry into internal structure. Afterwards ask for each value with functions below */
-GNOKII_API gn_error gn_lib_phonebook_read_entry( struct gn_statemachine *state,
-		const gn_memory_type memory_type, const int index );
+GNOKII_API gn_error gn_lib_phonebook_read_entry(struct gn_statemachine *state,
+		const gn_memory_type memory_type, const int index);
 
 /* after reading an entry with gn_lib_phonebook_read_entry() ask for the values of the phonebook entry */
-GNOKII_API const char *            gn_lib_get_pb_name           ( struct gn_statemachine *state ); /* Mr. Miller */
-GNOKII_API const char *            gn_lib_get_pb_number         ( struct gn_statemachine *state ); /* +18001189383 */
-GNOKII_API gn_phonebook_group_type gn_lib_get_pb_caller_group   ( struct gn_statemachine *state ); /* */
-GNOKII_API gn_memory_type          gn_lib_get_pb_memtype        ( struct gn_statemachine *state ); /* */
-GNOKII_API int                     gn_lib_get_pb_location       ( struct gn_statemachine *state ); /* 1*/
-GNOKII_API gn_timestamp            gn_lib_get_pb_date           ( struct gn_statemachine *state ); /* */
-GNOKII_API int                     gn_lib_get_pb_num_subentries ( struct gn_statemachine *state ); /* */
-GNOKII_API gn_error	gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index, 
-			gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, const char **number );
+GNOKII_API const char *            gn_lib_get_pb_name           (struct gn_statemachine *state); /* Mr. Miller */
+GNOKII_API const char *            gn_lib_get_pb_number         (struct gn_statemachine *state); /* +18001189383 */
+GNOKII_API gn_phonebook_group_type gn_lib_get_pb_caller_group   (struct gn_statemachine *state); /* */
+GNOKII_API gn_memory_type          gn_lib_get_pb_memtype        (struct gn_statemachine *state); /* */
+GNOKII_API int                     gn_lib_get_pb_location       (struct gn_statemachine *state); /* 1*/
+GNOKII_API gn_timestamp            gn_lib_get_pb_date           (struct gn_statemachine *state); /* */
+GNOKII_API int                     gn_lib_get_pb_num_subentries (struct gn_statemachine *state); /* */
+GNOKII_API gn_error	gn_lib_get_pb_subentry(struct gn_statemachine *state, const int index, 
+			gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, const char **number);
 
 /* How to write to a phonebook entry with 3 steps:
    a) call gn_lib_phonebook_prepare_write_entry() to initialize structures
@@ -166,21 +166,21 @@ GNOKII_API gn_error	gn_lib_get_pb_subentry( struct gn_statemachine *state, const
  */
 
 /* initialize gnokii internal phonebook structure */
-GNOKII_API gn_error gn_lib_phonebook_prepare_write_entry( struct gn_statemachine *state );
+GNOKII_API gn_error gn_lib_phonebook_prepare_write_entry(struct gn_statemachine *state);
 
 /* call each of the functions to set a specific value in current internal memory */
-GNOKII_API gn_error gn_lib_set_pb_name        ( struct gn_statemachine *state, const char *name ); /* Mr. Miller */
-GNOKII_API gn_error gn_lib_set_pb_number      ( struct gn_statemachine *state, const char *number ); /* +18001189383 */
-GNOKII_API gn_error gn_lib_set_pb_caller_group( struct gn_statemachine *state, gn_phonebook_group_type grouptype ); /* */
-GNOKII_API gn_error gn_lib_set_pb_memtype     ( struct gn_statemachine *state, gn_memory_type memtype ); /* */
-GNOKII_API gn_error gn_lib_set_pb_location    ( struct gn_statemachine *state, int location ); /* 1*/
-GNOKII_API gn_error gn_lib_set_pb_date        ( struct gn_statemachine *state, gn_timestamp timestamp ); /* */
-GNOKII_API gn_error gn_lib_set_pb_subentry    ( struct gn_statemachine *state, const int index, /* index=-1 appends it */
-	gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type, const char *number );
+GNOKII_API gn_error gn_lib_set_pb_name        (struct gn_statemachine *state, const char *name); /* Mr. Miller */
+GNOKII_API gn_error gn_lib_set_pb_number      (struct gn_statemachine *state, const char *number); /* +18001189383 */
+GNOKII_API gn_error gn_lib_set_pb_caller_group(struct gn_statemachine *state, gn_phonebook_group_type grouptype); /* */
+GNOKII_API gn_error gn_lib_set_pb_memtype     (struct gn_statemachine *state, gn_memory_type memtype); /* */
+GNOKII_API gn_error gn_lib_set_pb_location    (struct gn_statemachine *state, int location); /* 1*/
+GNOKII_API gn_error gn_lib_set_pb_date        (struct gn_statemachine *state, gn_timestamp timestamp); /* */
+GNOKII_API gn_error gn_lib_set_pb_subentry    (struct gn_statemachine *state, const int index, /* index=-1 appends it */
+	gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type, const char *number);
 
 /* and now write the addressbook entry physically to phone. */
-GNOKII_API gn_error gn_lib_phonebook_write_entry( struct gn_statemachine *state,
-        const gn_memory_type memory_type, const int index );
+GNOKII_API gn_error gn_lib_phonebook_write_entry(struct gn_statemachine *state,
+        const gn_memory_type memory_type, const int index);
 
 GNOKII_API const char *gn_subentrytype2string(gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type);
 
@@ -188,16 +188,16 @@ GNOKII_API const char *gn_subentrytype2string(gn_phonebook_entry_type entry_type
 
 /* use this function to get list of all supported phone models.
    Just start with num=0 and increase until you get back NULL */
-GNOKII_API const char *gn_lib_get_supported_phone_model( const int num );
+GNOKII_API const char *gn_lib_get_supported_phone_model(const int num);
 
 /* use this function to get list of all supported connection type strings.
    Just start with num=0 and increase until you get back NULL */
-GNOKII_API const char *gn_lib_get_supported_connection( const int num );
+GNOKII_API const char *gn_lib_get_supported_connection(const int num);
 
 /* use this function to search for a phone which is connected to this
    computer. Currently libgnokii will search only on IRDA and bluetooth.
    The state variable will be initialized if a phone was found. */
-GNOKII_API gn_error gn_lib_search_one_connected_phone( struct gn_statemachine **state );
+GNOKII_API gn_error gn_lib_search_one_connected_phone(struct gn_statemachine **state);
 
 /* use this function to return connection name to be used eg. in the
    config file */
@@ -273,7 +273,7 @@ GNOKII_API gn_error gn_cfg_phone_load(const char *iname, struct gn_statemachine 
 
 /* In/Out routines, file formats */
 GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *location) GNOKII_DEPRECATED;
-GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry);
+GNOKII_API char *gn_phonebook2vcardstr(gn_phonebook_entry *entry);
 GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry) GNOKII_DEPRECATED;
 GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entry);
 
@@ -289,15 +289,15 @@ GNOKII_API int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int nu
 GNOKII_API int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number) GNOKII_DEPRECATED;
 
 GNOKII_API int gn_calnote2ical(FILE *f, gn_calnote *calnote) GNOKII_DEPRECATED;
-GNOKII_API char * gn_calnote2icalstr (gn_calnote *calnote);
+GNOKII_API char *gn_calnote2icalstr (gn_calnote *calnote);
 GNOKII_API gn_error gn_ical2calnote(FILE *f, gn_calnote *calnote, int id) GNOKII_DEPRECATED;
-GNOKII_API gn_error gn_icalstr2calnote(const char * ical, gn_calnote *calnote, int id);
+GNOKII_API gn_error gn_icalstr2calnote(const char *ical, gn_calnote *calnote, int id);
 
 
 GNOKII_API int gn_todo2ical(FILE *f, gn_todo *ctodo) GNOKII_DEPRECATED;
-GNOKII_API char * gn_todo2icalstr(gn_todo *ctodo);
+GNOKII_API char *gn_todo2icalstr(gn_todo *ctodo);
 GNOKII_API int gn_ical2todo(FILE *f, gn_todo *ctodo, int id) GNOKII_DEPRECATED;
-GNOKII_API int gn_icalstr2todo(const char * ical, gn_todo *ctodo, int id);
+GNOKII_API int gn_icalstr2todo(const char *ical, gn_todo *ctodo, int id);
 
 GNOKII_API void gn_number_sanitize(char *number, int maxlen);
 GNOKII_API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry);
