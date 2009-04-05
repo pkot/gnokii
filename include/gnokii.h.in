@@ -337,6 +337,8 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from);
 
 /* MMS */
 GNOKII_API gn_error gn_mms_get(gn_data *data, struct gn_statemachine *state);
+GNOKII_API gn_error gn_mms_free(gn_mms *mms);
+GNOKII_API gn_error gn_mms_alloc(gn_mms **mms);
 
 /* Call service */
 GNOKII_API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state);
