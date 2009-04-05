@@ -130,6 +130,25 @@ static int match_sms_folder_str(const char *str)
 		return i;
 }
 
+static gn_sms_message_status GetMessageStatus_S40_30(const char *filename)
+{
+	if (!filename || strlen(filename) < 27)
+		return 0;
+
+	switch (filename[26]) {
+	case '4':
+		return GN_SMS_Unread;
+	case '5':
+		return GN_SMS_Read;
+	case 'A':
+		/* MMS is being downloaded */
+		return GN_SMS_Unread;
+	default:
+		dprintf("Unknown message status '%c'\n", filename[26]);
+		return 0;
+	}
+}
+
 #define ALLOC_CHUNK	128
 /*
  * Helper function for file list operations.
@@ -1621,6 +1640,8 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	if (error)
 		return error;
 
+	data->raw_sms->status = GetMessageStatus_S40_30(fl2.files[data->raw_sms->number - 1]->name);
+
 #define HEADER_LEN	0xb0	/* 176 */
 
 	bin = fi.file;
@@ -1632,7 +1653,6 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	tota_len = (bin[8] << 24) + (bin[9] << 16) + (bin[10] << 8) + bin[11];
 	data->raw_sms->type = GN_SMS_MT_Deliver;
 	data->raw_sms->udh_indicator = bin[offset];
-	data->raw_sms->status = bin[offset];
 //	data->raw_sms->reference = message[4];
 	offset++;
 	tmp = (bin[offset] + 1) / 2 + 2;
@@ -2064,6 +2084,8 @@ static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	data->file = &fi;
 	/* Get file */
 	error = NK6510_GetFile(data, state);
+
+	data->raw_mms->status = GetMessageStatus_S40_30(fl2.files[data->raw_mms->number - 1]->name);
 
 	return error;
 }
