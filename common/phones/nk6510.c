@@ -2085,6 +2085,8 @@ static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	/* Get file */
 	error = NK6510_GetFile(data, state);
 
+	data->raw_mms->status = GetMessageStatus_S40_30(fl2.files[data->raw_mms->number - 1]->name);
+
 	return error;
 }
 

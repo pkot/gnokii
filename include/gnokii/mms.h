@@ -112,6 +112,7 @@ typedef enum {
 typedef struct {
 	unsigned int number;			/* Location of the message in the memory/folder. */
 	gn_memory_type memory_type;		/* Memory type where the message is/should be stored. */
+	gn_sms_message_status status;		/* Read, Unread, Sent, Unsent, ... */
 	gn_mms_message type;			/* GN_MMS_X_Mms_Message_Type */
 	char tid[GN_MMS_MAX_VALUE_SIZE];	/* GN_MMS_X_Mms_Transaction_ID */
 	int version;				/* GN_MMS_X_Mms_MMS_Version */

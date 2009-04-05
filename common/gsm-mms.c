@@ -408,6 +408,8 @@ GNOKII_API gn_error gn_mms_get(gn_data *data, struct gn_statemachine *state)
 	if (!data->file)
 		return GN_ERR_INTERNALERROR;
 
+	data->mms->status = rawmms.status;
+
 	switch (data->mms->buffer_format) {
 	case GN_MMS_FORMAT_TEXT:
 		error = gn_mms_nokia2txt(data->file->file, data->file->file_length, &data->mms->buffer, &data->mms->buffer_length);
