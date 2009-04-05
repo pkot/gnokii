@@ -133,7 +133,7 @@ static int match_sms_folder_str(const char *str)
 static gn_sms_message_status GetMessageStatus_S40_30(const char *filename)
 {
 	if (!filename || strlen(filename) < 27)
-		return 0;
+		return GN_SMS_Unknown;
 
 	switch (filename[26]) {
 	case '4':
@@ -145,7 +145,7 @@ static gn_sms_message_status GetMessageStatus_S40_30(const char *filename)
 		return GN_SMS_Unread;
 	default:
 		dprintf("Unknown message status '%c'\n", filename[26]);
-		return 0;
+		return GN_SMS_Unknown;
 	}
 }
 

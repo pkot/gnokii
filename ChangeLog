@@ -43,6 +43,7 @@
       messages                                          (Paweł Kot)
     o when sending multipart sms return reference numbers for all
       the parts                                         (Paweł Kot)
+    o add GN_SMS_Unknown to gn_sms_message_status   (Daniele Forsi)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
