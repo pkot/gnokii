@@ -1448,7 +1448,7 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	if (sm_message_send(strlen(req), GN_OP_AT_Prompt, req, state))
 		return GN_ERR_NOTREADY;
 	error = sm_block_no_retry(GN_OP_AT_Prompt, data, state);
-	dprintf("Got response %d\n", error);
+	dprintf("Got response: %s\n", gn_error_print(error));
 	if (error)
 		return error;
 
