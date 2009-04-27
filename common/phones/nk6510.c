@@ -1584,7 +1584,7 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
     	gn_file_list fl, fl2;
     	gn_file fi;
 	gn_error error;
-	int j, i, cont_len, tota_len, offset, tmp;
+	int j, i, cont_len, tota_len, offset;
 	unsigned char *bin;
 
 	if (!data->raw_sms)
