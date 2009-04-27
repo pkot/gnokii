@@ -1651,28 +1651,11 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	cont_len = (bin[4] << 24) + (bin[5] << 16) + (bin[6] << 8) + bin[7];
 	/* total length */
 	tota_len = (bin[8] << 24) + (bin[9] << 16) + (bin[10] << 8) + bin[11];
-	data->raw_sms->type = GN_SMS_MT_Deliver;
-	data->raw_sms->udh_indicator = bin[offset];
-//	data->raw_sms->reference = message[4];
-	offset++;
-	tmp = (bin[offset] + 1) / 2 + 2;
-	memcpy(data->raw_sms->remote_number, bin + offset, tmp);
-	dprintf("RN: %02x\n", data->raw_sms->remote_number[2]);
-	offset += tmp;
-	/* TODO what is this byte that we skip? */
-	offset++;
-	data->raw_sms->dcs = bin[offset];
-	offset++;
-	memcpy(data->raw_sms->smsc_time, bin + offset, 7);
-	offset += 7;
-//	memcpy(data->raw_sms->message_center,  block + 4, block[3]);
-	data->raw_sms->length = bin[offset];
-	data->raw_sms->user_data_length = bin[offset];
-	dprintf("Length: %d\n", data->raw_sms->length);
-	dprintf("Length: %d\n", data->raw_sms->user_data_length);
-	memcpy(data->raw_sms->user_data, bin + offset + 1, bin[offset]);
+	error = gn_sms_pdu2raw(data->raw_sms, bin + offset, cont_len, GN_SMS_PDU_NOSMSC);
 
 	offset += data->raw_sms->length;
+	/* TODO: decode data in the footer? (e.g. SMSC, multiple recipients numbers */
+
 	return error;
 }
 
