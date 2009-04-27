@@ -78,8 +78,8 @@
     o SMS status is sometimes not returned - check for reply length
                                                         (Paweł Kot)
     o improve detection of SMS and MMS with S40_30 and correctly
-      decode UCS2 SMS and read/unread status also fix reading SMS
-      from non-IN folders                           (Daniele Forsi)
+      decode UCS2 SMS and read/unread/sent/unset status; also fix
+      reading SMS from non-IN folders               (Daniele Forsi)
  * gnapplet driver updates
     o fix string type argument length passed to the phone
                                                         (Paweł Kot)

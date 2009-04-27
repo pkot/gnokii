@@ -136,6 +136,11 @@ static gn_sms_message_status GetMessageStatus_S40_30(const char *filename)
 		return GN_SMS_Unknown;
 
 	switch (filename[26]) {
+	case '1':
+	case '6':
+		return GN_SMS_Unsent;
+	case '2':
+		return GN_SMS_Sent;
 	case '4':
 		return GN_SMS_Unread;
 	case '5':
