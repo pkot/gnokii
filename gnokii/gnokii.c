@@ -194,7 +194,8 @@ typedef enum {
 	OPT_CONFIGFILE,
 	OPT_CONFIGMODEL,
 	OPT_SHELL,
-	OPT_GETMMS			/* 340 */
+	OPT_GETMMS,			/* 340 */
+	OPT_DELETEMMS
 } opt_index;
 
 static FILE *logfile = NULL;
@@ -648,6 +649,9 @@ static int parse_options(int argc, char *argv[])
 		/* Get MMS message mode */
 		{ "getmms",             required_argument, NULL, OPT_GETMMS },
 
+		/* Delete MMS message mode */
+		{ "deletemms",          required_argument, NULL, OPT_DELETEMMS },
+
 		{ 0, 0, 0, 0 },
 	};
 
@@ -717,6 +721,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_DELETEFILEBYID,    1, 1, 0 },
 		{ OPT_SHELL,             0, 0, 0 },
 		{ OPT_GETMMS,            2, 6, 0 },
+		{ OPT_DELETEMMS,         2, 3, 0 },
 		{ OPT_FOOGLE,            0, 0, 0 },
 		{ 0, 0, 0, 0 },
 	};
@@ -1053,6 +1058,9 @@ static int parse_options(int argc, char *argv[])
 	/* MMS options */
 	case OPT_GETMMS:
 		rc = getmms(argc, argv, data, state);
+		break;
+	case OPT_DELETEMMS:
+		rc = deletemms(argc, argv, data, state);
 		break;
 	default:
 		rc = GN_ERR_FAILED;

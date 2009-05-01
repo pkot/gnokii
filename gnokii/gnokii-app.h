@@ -92,6 +92,8 @@ extern void mms_usage(FILE *f);
 
 extern int getmms_usage(FILE *f, int exitval);
 extern gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern int deletemms_usage(FILE *f, int exitval);
+extern gn_error deletemms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* Phonebook functions */
 extern void phonebook_usage(FILE *f);

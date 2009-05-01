@@ -288,7 +288,7 @@ gn_error gn_mms_nokia2pdu(const unsigned char *source_buffer, size_t source_leng
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 	if (total_length <= mms_length) {
-		dprintf("ERROR: total_length <= mms_length (%d != %d)\n", total_length, mms_length);
+		dprintf("ERROR: total_length <= mms_length (%d <= %d)\n", total_length, mms_length);
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 
@@ -435,6 +435,30 @@ GNOKII_API gn_error gn_mms_get(gn_data *data, struct gn_statemachine *state)
 
 	return error;
 }
+
+/**
+ * gn_mms_delete - High-level function for deleting MMS
+ * @data: GSM data for the phone driver
+ * @state: current statemachine state
+ *
+ * This function is the frontend for deleting MMS. Note that MMS field
+ * in the gn_data structure must be initialized.
+ */
+GNOKII_API gn_error gn_mms_delete(gn_data *data, struct gn_statemachine *state)
+{
+	gn_mms_raw rawmms;
+
+	if (!data->mms) return GN_ERR_INTERNALERROR;
+	memset(&rawmms, 0, sizeof(gn_mms_raw));
+	rawmms.number = data->mms->number;
+	rawmms.memory_type = data->mms->memory_type;
+	data->raw_mms = &rawmms;
+	return gn_sm_functions(GN_OP_DeleteMMS, data, state);
+}
+
+/***
+ *** OTHER FUNCTIONS
+ ***/
 
 /**
  * gn_mms_free - free an @mms

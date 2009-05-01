@@ -47,7 +47,8 @@
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
-    o implement basic --getmms command              (Daniele Forsi)
+    o add --getmms (text output doesn't decode the body) and
+      --deletemms commands                          (Daniele Forsi)
     o deprecate -l option --sendsms; gnokii will now detect itself
       long sms                                          (Paweł Kot)
     o more efficient way to get all smses               (Paweł Kot)
@@ -73,7 +74,7 @@
     o fix segfault on deletesms with S40_30             (Paweł Kot)
     o sanity checks for number of messages in folder; increase max
       sms number in folder to 1024                      (Paweł Kot)
-    o implement basic GN_OP_GetMMS                  (Daniele Forsi)
+    o implement GN_OP_GetMMS and GN_OP_DeleteMMS    (Daniele Forsi)
     o don't fallback to S40_30 mode on every error      (Paweł Kot)
     o SMS status is sometimes not returned - check for reply length
                                                         (Paweł Kot)

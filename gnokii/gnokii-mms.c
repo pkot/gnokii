@@ -46,6 +46,7 @@ void mms_usage(FILE *f)
 	fprintf(f, _("MMS options:\n"
 		     "          --getmms memory_type start [end] [{--mime|--pdu|--raw} file]\n"
 		     "                 [-d|--delete]\n"
+		     "          --deletemms memory_type start [end]\n"
 		));
 }
 
@@ -206,3 +207,64 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 
 	return error;
 }
+
+/* Displays usage of --deletemms command */
+int deletemms_usage(FILE *f, int exitval)
+{
+	fprintf(f, _(" usage: --deletemms memory start [end]  deletes messages from memory type\n"
+			"                                       (SM, ME, IN, OU, ...) starting\n"
+			"                                       from location start and ending with end;\n"
+			"                                       if end option is omitted, just one entry\n"
+			"                                       is removed;\n"
+			"                                       if 'end' is used entries are being removed\n"
+			"                                       until empty location\n"
+			"\n"
+		));
+	return exitval;
+}
+
+/* Delete MMS messages. */
+gn_error deletemms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
+{
+	gn_mms message;
+	char *memory_type_string;
+	int start_message, end_message, count;
+	gn_error error = GN_ERR_NONE;
+
+	/* Handle command line args that set type, start and end locations. */
+	memory_type_string = optarg;
+	message.memory_type = gn_str2memory_type(memory_type_string);
+	if (message.memory_type == GN_MT_XX) {
+		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
+		return GN_ERR_INVALIDMEMORYTYPE;
+	}
+
+	start_message = gnokii_atoi(argv[optind]);
+	if (errno || start_message < 0)
+		return deletemms_usage(stderr, -1);
+	end_message = parse_end_value_option(argc, argv, optind + 1, start_message);
+	if (errno || end_message < 0)
+		return deletemms_usage(stderr, -1);
+
+	/* Now delete the requested entries. */
+	for (count = start_message; count <= end_message; count++) {
+		message.number = count;
+		data->mms = &message;
+		error = gn_mms_delete(data, state);
+
+		if (error == GN_ERR_NONE)
+			fprintf(stderr, _("Deleted MMS %s %d\n"), memory_type_string, count);
+		else {
+			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message))
+				return GN_ERR_NONE;
+			fprintf(stderr, _("DeleteMMS %s %d failed!(%s)\n\n"), memory_type_string, count, gn_error_print(error));
+		}
+	}
+
+	/* FIXME: We return the value of the last read.
+	 * What should we return?
+	 */
+	return error;
+}
+
+

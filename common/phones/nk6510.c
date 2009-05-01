@@ -247,6 +247,10 @@ static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine
 
 static gn_error NK6510_GetMMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetMMSList(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_DeleteMMS(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_DeleteMMS_S40_30(gn_data *data, struct gn_statemachine *state);
+
 /*
 static gn_error NK6510_CallDivert(gn_data *data, struct gn_statemachine *state);
 */
@@ -551,6 +555,8 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_GetFileDetailsById(data, state);
 	case GN_OP_GetMMS:
 		return NK6510_GetMMS(data, state);
+	case GN_OP_DeleteMMS:
+		return NK6510_DeleteMMS(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -2008,6 +2014,49 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 /* MMS HANDLING */
 /*****************/
 
+static gn_error NK6510_GetMMSList(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+	gn_data private_data;
+	gn_file_list fl;
+	int j, i;
+
+	if (!data->raw_mms || !data->file_list)
+		return GN_ERR_INTERNALERROR;
+
+	/* Find path */
+	for (i = 0; (s40_30_mt_mappings[i].type != data->raw_mms->memory_type) && (s40_30_mt_mappings[i].path != NULL); i++);
+	if (s40_30_mt_mappings[i].path != NULL) {
+		memset(&fl, 0, sizeof(fl));
+		snprintf(fl.path, sizeof(fl.path), "%s*.*", s40_30_mt_mappings[i].path);
+	} else
+		return GN_ERR_INVALIDMEMORYTYPE;
+
+	/* Get file list */
+	gn_data_clear(&private_data);
+	private_data.file_list = &fl;
+	private_data.file = NULL;
+	error = NK6510_GetFileListCache(&private_data, state);
+	if (error)
+		return error;
+
+	/* Extract just MMS */
+	memset(data->file_list, 0, sizeof(*data->file_list));
+	for (j = 0; j < fl.file_count; j++) {
+		/* "1012" matches standard MMS, "1022" matches MMS Plus */
+		if (!strncmp("1012", fl.files[j]->name+20, 4) ||
+		    !strncmp("1022", fl.files[j]->name+20, 4)) {
+			strcpy(data->file_list->path, s40_30_mt_mappings[i].path);
+			inc_filecount(data->file_list);
+			data->file_list->files[data->file_list->file_count-1] = fl.files[j];
+		}
+	}
+
+	dprintf("%d out of %d are MMS\n", data->file_list->file_count, fl.file_count);
+
+	return error;
+}
+
 static gn_error NK6510_GetMMS(gn_data *data, struct gn_statemachine *state)
 {
 	return NK6510_GetMMS_S40_30(data, state);
@@ -2074,6 +2123,45 @@ static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	error = NK6510_GetFile(data, state);
 
 	data->raw_mms->status = GetMessageStatus_S40_30(fl2.files[data->raw_mms->number - 1]->name);
+
+	return error;
+}
+
+static gn_error NK6510_DeleteMMS(gn_data *data, struct gn_statemachine *state)
+{
+	return NK6510_DeleteMMS_S40_30(data, state);
+}
+
+static gn_error NK6510_DeleteMMS_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+	gn_file_list fl;
+	gn_file fi;
+
+	dprintf("Using DeleteMMS for Series40 3rd Ed\n");
+
+	if (!data->raw_mms)
+		return GN_ERR_INTERNALERROR;
+
+	if (data->raw_mms->number < 1)
+		return GN_ERR_INVALIDLOCATION;
+
+	memset(&fl, 0, sizeof(fl));
+	data->file_list = &fl;
+	error = NK6510_GetMMSList(data, state);
+	if (error != GN_ERR_NONE)
+		return error;
+
+	if (data->file_list->file_count < data->raw_mms->number) {
+		/* Needs to be INVALID not EMPTY for --deletemms IN 1 end to work */
+		return GN_ERR_INVALIDLOCATION;
+	}
+
+	memset(&fi, 0, sizeof(fi));
+	snprintf(fi.name, sizeof(fi.name), "%s%s", fl.path, fl.files[data->raw_mms->number - 1]->name);
+	dprintf("Deleting MMS #%d (path: %s, file: %s)\n", data->raw_mms->number, fl.path, fl.files[data->raw_mms->number - 1]->name);
+	data->file = &fi;
+	error = NK6510_DeleteFile(data, state);
 
 	return error;
 }
