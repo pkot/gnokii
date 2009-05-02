@@ -127,8 +127,6 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		switch (i) {
 		case 'd':
 			del = 1;
-			dprintf("--delete option not yet implemented\n");
-			return GN_ERR_NOTIMPLEMENTED;
 			break;
 		/* force mode -- don't ask to overwrite */
 		case 'o':
@@ -186,6 +184,12 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			} else {
 				error = fprint_mms(stdout, message);
 				fprintf(stdout, "\n");
+			}
+			if (del && mode != -1) {
+				if (GN_ERR_NONE != gn_mms_delete(data, state))
+					fprintf(stderr, _("(delete failed)\n"));
+				else
+					fprintf(stderr, _("(message deleted)\n"));
 			}
 			if (data->mms->buffer)
 				free(data->mms->buffer);
