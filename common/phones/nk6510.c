@@ -1312,7 +1312,9 @@ static gn_error NK6510_GetSMSFolderStatus_S40_30(gn_data *data, struct gn_statem
 	data->sms_folder->number = 0;
 	/* Extract just SMS */
 	for (j = 0; j < fl.file_count; j++) {
-		if (!strncmp("2010", fl.files[j]->name+20, 4))
+		if (!strncmp("2010", fl.files[j]->name+20, 4) /* standard SMS */
+		 || !strncmp("4030", fl.files[j]->name+20, 4) /* SMS in Templates */
+		)
 			data->sms_folder->number++;
 	}
 	dprintf("%d out of %d are SMS\n", data->sms_folder->number, fl.file_count);
@@ -1626,7 +1628,9 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	/* Extract just SMS */
 	memset(&fl2, 0, sizeof(fl2));
 	for (j = 0; j < fl.file_count; j++) {
-		if (!strncmp("2010", fl.files[j]->name+20, 4)) {
+		if (!strncmp("2010", fl.files[j]->name+20, 4) /* standard SMS */
+		 || !strncmp("4030", fl.files[j]->name+20, 4) /* SMS in Templates */
+		) {
 			strcpy(fl2.path, fl.path);
 			inc_filecount(&fl2);
 			fl2.files[fl2.file_count-1] = fl.files[j];
@@ -1705,7 +1709,9 @@ static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *s
 	/* Extract just SMS */
 	memset(&fl2, 0, sizeof(fl2));
 	for (j = 0; j < fl.file_count; j++) {
-		if (!strncmp("2010", fl.files[j]->name+20, 4)) {
+		if (!strncmp("2010", fl.files[j]->name+20, 4) /* standard SMS */
+		 || !strncmp("4030", fl.files[j]->name+20, 4) /* SMS in Templates */
+		) {
 			strcpy(fl2.path, fl.path);
 			inc_filecount(&fl2);
 			fl2.files[fl2.file_count-1] = fl.files[j];
@@ -2011,7 +2017,7 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 }
 
 /*****************/
-/* MMS HANDLING */
+/* MMS HANDLING  */
 /*****************/
 
 static gn_error NK6510_GetMMSList_S40_30(gn_data *data, struct gn_statemachine *state)
@@ -2043,9 +2049,11 @@ static gn_error NK6510_GetMMSList_S40_30(gn_data *data, struct gn_statemachine *
 	/* Extract just MMS */
 	memset(data->file_list, 0, sizeof(*data->file_list));
 	for (j = 0; j < fl.file_count; j++) {
-		/* "1012" matches standard MMS, "1022" matches MMS Plus */
-		if (!strncmp("1012", fl.files[j]->name+20, 4) ||
-		    !strncmp("1022", fl.files[j]->name+20, 4)) {
+		if (!strncmp("1012", fl.files[j]->name+20, 4) /* standard MMS */
+		 || !strncmp("1022", fl.files[j]->name+20, 4) /* MMS Plus */
+		 || !strncmp("4012", fl.files[j]->name+20, 4) /* standard MMS in Templates */
+		 || !strncmp("4020", fl.files[j]->name+20, 4) /* MMS Plus in Templates */
+		) {
 			strcpy(data->file_list->path, s40_30_mt_mappings[i].path);
 			inc_filecount(data->file_list);
 			data->file_list->files[data->file_list->file_count-1] = fl.files[j];
