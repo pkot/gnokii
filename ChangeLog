@@ -31,7 +31,9 @@
       need to call it explicitely                   (Daniele Forsi)
     o set To headers instead of From headers when saving to mbox
       outbox messages                                    (analyzer)
-    o implement basic getmms() function             (Daniele Forsi)
+    o add gn_mms_get() and gn_mms_delete() functions (decoding to
+      text and MIME formats is incomplete and subject to change
+      and works for received messages only)         (Daniele Forsi)
     o assign random reference ids to sent SMS (was always 0)
                                                         (Paweł Kot)
     o fix splitting unicode multipart messages          (Paweł Kot)
@@ -47,8 +49,7 @@
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
-    o add --getmms (text output doesn't decode the body) and
-      --deletemms commands                          (Daniele Forsi)
+    o add --getmms and --deletemms commands         (Daniele Forsi)
     o deprecate -l option --sendsms; gnokii will now detect itself
       long sms                                          (Paweł Kot)
     o more efficient way to get all smses               (Paweł Kot)

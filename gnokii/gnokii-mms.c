@@ -133,8 +133,6 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			mode = 0;
 			break;
 		case GN_MMS_FORMAT_MIME:
-			dprintf("--mime option not yet implemented\n");
-			return GN_ERR_NOTIMPLEMENTED;
 			/* FALL THROUGH */
 		case GN_MMS_FORMAT_PDU:
 			/* FALL THROUGH  */

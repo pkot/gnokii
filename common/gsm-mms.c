@@ -43,30 +43,30 @@
  * See OMA-MMS-ENC-V1_3-20050214-D - Chapter 7.4 "Header Field Names and Assigned Numbers"
  */
 gn_mms_field mms_fields[] = {
-	{GN_MMS_Bcc,			GN_MMS_FIELD_IS_ENCSTRING,	"Bcc"},
-	{GN_MMS_Cc,			GN_MMS_FIELD_IS_ENCSTRING,	"Cc"},
-	{GN_MMS_Content_Location,	GN_MMS_FIELD_IS_STRING,		"Content-Location"},
-	{GN_MMS_Content_Type,		GN_MMS_FIELD_IS_CONTENT_TYPE,	"Content-Type"},
-	{GN_MMS_Date,			GN_MMS_FIELD_IS_DATE,		"Date"},
-	{GN_MMS_Delivery_Report,	GN_MMS_FIELD_IS_YESNO,		"Delivery-Report"},
-	{GN_MMS_Delivery_Time,		GN_MMS_FIELD_IS_OCTECT,		"Delivery-Time"},
-	{GN_MMS_Expiry,			GN_MMS_FIELD_IS_EXPIRY,		"Expiry"},
-	{GN_MMS_From,			GN_MMS_FIELD_IS_STRING,		"From"},
-	{GN_MMS_Message_Class,		GN_MMS_FIELD_IS_OCTECT,		"Message-Class"},
-	{GN_MMS_Message_ID,		GN_MMS_FIELD_IS_STRING,		"Message-ID"},
-	{GN_MMS_Message_Type,		GN_MMS_FIELD_IS_OCTECT,		"Message-Type"},
-	{GN_MMS_MMS_Version,		GN_MMS_FIELD_IS_OCTECT,		"MMS-Version"},
-	{GN_MMS_Message_Size,		GN_MMS_FIELD_IS_LONG,		"Message-Size"},
-	{GN_MMS_Priority,		GN_MMS_FIELD_IS_OCTECT,		"Priority"},
-	{GN_MMS_Read_Reply,		GN_MMS_FIELD_IS_YESNO,		"Read-Reply"},
-	{GN_MMS_Report_Allowed,		GN_MMS_FIELD_IS_YESNO,		"Report-Allowed"},
-	{GN_MMS_Response_Status,	GN_MMS_FIELD_IS_OCTECT,		"Response-Status"},
-	{GN_MMS_Response_Text,		GN_MMS_FIELD_IS_ENCSTRING,	"Response-Text"},
-	{GN_MMS_Sender_Visibility,	GN_MMS_FIELD_IS_OCTECT,		"Sender-Visibility"},
-	{GN_MMS_Status,			GN_MMS_FIELD_IS_OCTECT,		"Status"},
-	{GN_MMS_Subject,		GN_MMS_FIELD_IS_ENCSTRING,	"Subject"},
-	{GN_MMS_To,			GN_MMS_FIELD_IS_ENCSTRING,	"To"},
-	{GN_MMS_Transaction_Id,		GN_MMS_FIELD_IS_STRING,		"Transaction-Id"}
+	{GN_MMS_Bcc,			GN_MMS_FIELD_IS_ENCSTRING,	0, "Bcc"},
+	{GN_MMS_Cc,			GN_MMS_FIELD_IS_ENCSTRING,	0, "Cc"},
+	{GN_MMS_Content_Location,	GN_MMS_FIELD_IS_STRING,		0, "Content-Location"},
+	{GN_MMS_Content_Type,		GN_MMS_FIELD_IS_CONTENT_TYPE,	0, "Content-Type"},
+	{GN_MMS_Date,			GN_MMS_FIELD_IS_DATE,		0, "Date"},
+	{GN_MMS_Delivery_Report,	GN_MMS_FIELD_IS_YESNO,		1, "Delivery-Report"},
+	{GN_MMS_Delivery_Time,		GN_MMS_FIELD_IS_OCTECT,		1, "Delivery-Time"},
+	{GN_MMS_Expiry,			GN_MMS_FIELD_IS_EXPIRY,		1, "Expiry"},
+	{GN_MMS_From,			GN_MMS_FIELD_IS_STRING,		0, "From"},
+	{GN_MMS_Message_Class,		GN_MMS_FIELD_IS_OCTECT,		1, "Message-Class"},
+	{GN_MMS_Message_ID,		GN_MMS_FIELD_IS_STRING,		1, "Message-ID"},
+	{GN_MMS_Message_Type,		GN_MMS_FIELD_IS_OCTECT,		1, "Message-Type"},
+	{GN_MMS_MMS_Version,		GN_MMS_FIELD_IS_OCTECT,		1, "MMS-Version"},
+	{GN_MMS_Message_Size,		GN_MMS_FIELD_IS_LONG,		1, "Message-Size"},
+	{GN_MMS_Priority,		GN_MMS_FIELD_IS_OCTECT,		1, "Priority"},
+	{GN_MMS_Read_Reply,		GN_MMS_FIELD_IS_YESNO,		1, "Read-Reply"},
+	{GN_MMS_Report_Allowed,		GN_MMS_FIELD_IS_YESNO,		1, "Report-Allowed"},
+	{GN_MMS_Response_Status,	GN_MMS_FIELD_IS_OCTECT,		1, "Response-Status"},
+	{GN_MMS_Response_Text,		GN_MMS_FIELD_IS_ENCSTRING,	1, "Response-Text"},
+	{GN_MMS_Sender_Visibility,	GN_MMS_FIELD_IS_OCTECT,		1, "Sender-Visibility"},
+	{GN_MMS_Status,			GN_MMS_FIELD_IS_OCTECT,		1, "Status"},
+	{GN_MMS_Subject,		GN_MMS_FIELD_IS_ENCSTRING,	0, "Subject"},
+	{GN_MMS_To,			GN_MMS_FIELD_IS_ENCSTRING,	0, "To"},
+	{GN_MMS_Transaction_Id,		GN_MMS_FIELD_IS_STRING,		1, "Transaction-Id"}
 };
 
 /**
@@ -143,15 +143,16 @@ do { \
 } while (0)
 
 /**
- * gn_mms_pdu2txt - convert an MMS from PDU to human readable format
+ * gn_mms_pdu2txtmime - convert an MMS from PDU to human readable format or to MIME
  * @buffer: to buffer to decode
  * @length: the number of bytes in the @source buffer
  * @dest_buffer: the destination of the decoding; must be free()'d by the caller
  * @dest_length: a pointer to the number of octects in @dest_buffer
+ * @mime: 0 to convert to text, 1 to convert to MIME
  *
  * Return value: a @gn_error code; in case of error @length contain the position of the error
  */
-gn_error gn_mms_pdu2txt(unsigned const char *buffer, size_t *length, unsigned char **dest_buffer, size_t *dest_length)
+static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, unsigned char **dest_buffer, size_t *dest_length, int mime)
 {
 	size_t i, j, decoded_len;
 	const gn_mms_field *field;
@@ -168,6 +169,8 @@ gn_error gn_mms_pdu2txt(unsigned const char *buffer, size_t *length, unsigned ch
 			field = gn_mms_field_lookup(buffer[i]);
 			/* TODO check if decoding overrides the input buffer */
 			if (field) {
+				if (mime && field->x)
+					APPEND(*dest_buffer, "%s", "X-");
 				/*
 				 * Decode according to WAP-230-WSP-20010705-a, Approved Version 5 July 2001 8.4.2.1 Basic rules
 				 */
@@ -251,6 +254,34 @@ gn_error gn_mms_pdu2txt(unsigned const char *buffer, size_t *length, unsigned ch
 		}
 	}
 	return GN_ERR_NONE;
+}
+
+/**
+ * gn_mms_pdu2txt - convert an MMS from PDU to human readable format
+ * @buffer: to buffer to decode
+ * @length: the number of bytes in the @source buffer
+ * @dest_buffer: the destination of the decoding; must be free()'d by the caller
+ * @dest_length: a pointer to the number of octects in @dest_buffer
+ *
+ * Return value: a @gn_error code; in case of error @length contain the position of the error
+ */
+gn_error gn_mms_pdu2txt(unsigned const char *buffer, size_t *length, unsigned char **dest_buffer, size_t *dest_length)
+{
+	return  gn_mms_pdu2txtmime(buffer, length, dest_buffer, dest_length, 0);
+}
+
+/**
+ * gn_mms_pdu2mime - convert an MMS from PDU to MIME format
+ * @buffer: to buffer to decode
+ * @length: the number of bytes in the @source buffer
+ * @dest_buffer: the destination of the decoding; must be free()'d by the caller
+ * @dest_length: a pointer to the number of octects in @dest_buffer
+ *
+ * Return value: a @gn_error code; in case of error @length contain the position of the error
+ */
+gn_error gn_mms_pdu2mime(unsigned const char *buffer, size_t *length, unsigned char **dest_buffer, size_t *dest_length)
+{
+	return  gn_mms_pdu2txtmime(buffer, length, dest_buffer, dest_length, 1);
 }
 
 #undef APPEND
@@ -377,6 +408,33 @@ gn_error gn_mms_nokia2txt(const unsigned char *source_buffer, size_t source_leng
 }
 
 /**
+ * gn_mms_nokia2mime - fill a buffer in MIME format from a buffer containing an MMS in Nokia file format
+ *
+ * @source_buffer: a pointer to the buffer containing the MMS
+ * @source_length: the number of octects in @source_buffer
+ * @dest_buffer: the address of a pointer to the destination of the decoding; must be free()'d by the caller
+ * @dest_length: a pointer to the number of octects in @dest_buffer
+ *
+ * Return value: a @gn_error code
+ */
+gn_error gn_mms_nokia2mime(const unsigned char *source_buffer, size_t source_length, unsigned char **dest_buffer, size_t *dest_length)
+{
+	gn_error error;
+	unsigned char *pdu_buffer;
+	size_t pdu_length;
+
+	error = gn_mms_nokia2pdu(source_buffer, source_length, &pdu_buffer, &pdu_length);
+	if (error != GN_ERR_NONE)
+		return error;
+
+	error = gn_mms_pdu2mime(pdu_buffer, &pdu_length, dest_buffer, dest_length);
+	if (pdu_buffer)
+		free(pdu_buffer);
+
+	return error;
+}
+
+/**
  * gn_mms_get- High-level function for reading MMS
  * @data: GSM data for the phone driver
  * @state: current statemachine state
@@ -415,7 +473,7 @@ GNOKII_API gn_error gn_mms_get(gn_data *data, struct gn_statemachine *state)
 		error = gn_mms_nokia2txt(data->file->file, data->file->file_length, &data->mms->buffer, &data->mms->buffer_length);
 		break;
 	case GN_MMS_FORMAT_MIME:
-		error = GN_ERR_NOTIMPLEMENTED;
+		error = gn_mms_nokia2mime(data->file->file, data->file->file_length, &data->mms->buffer, &data->mms->buffer_length);
 		break;
 	case GN_MMS_FORMAT_PDU:
 		error = gn_mms_nokia2pdu(data->file->file, data->file->file_length, &data->mms->buffer, &data->mms->buffer_length);

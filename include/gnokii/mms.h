@@ -144,6 +144,7 @@ typedef struct {
 typedef struct {
 	char id;
 	char type;
+	int x;
 	char *header;
 } gn_mms_field;
 
