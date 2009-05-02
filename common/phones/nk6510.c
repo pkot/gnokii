@@ -247,7 +247,7 @@ static gn_error NK6510_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine
 
 static gn_error NK6510_GetMMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *state);
-static gn_error NK6510_GetMMSList(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_GetMMSList_S40_30(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteMMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteMMS_S40_30(gn_data *data, struct gn_statemachine *state);
 
@@ -2014,7 +2014,7 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 /* MMS HANDLING */
 /*****************/
 
-static gn_error NK6510_GetMMSList(gn_data *data, struct gn_statemachine *state)
+static gn_error NK6510_GetMMSList_S40_30(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	gn_data private_data;
@@ -2064,65 +2064,36 @@ static gn_error NK6510_GetMMS(gn_data *data, struct gn_statemachine *state)
 
 static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *state)
 {
-	gn_file_list fl, fl2;
-	gn_file fi;
 	gn_error error;
-	int j, i;
+	gn_file_list fl;
+	gn_file fi;
+
+	dprintf("Using GetMMS for Series40 3rd Ed\n");
 
 	if (!data->raw_mms)
 		return GN_ERR_INTERNALERROR;
 
-	if (data->raw_mms->number < 1) {
-		dprintf("Getting MMS %d\n", data->raw_mms->number);
+	if (data->raw_mms->number < 1)
 		return GN_ERR_INVALIDLOCATION;
-	}
 
-	dprintf("Using GetMMS for Series40 3rd Ed\n");
-
-	/* Find path */
-	for (i = 0; (s40_30_mt_mappings[i].type != data->raw_mms->memory_type) && (s40_30_mt_mappings[i].path != NULL); i++);
-	if (s40_30_mt_mappings[i].path != NULL) {
-		memset(&fl, 0, sizeof(fl));
-		snprintf(fl.path, sizeof(fl.path), "%s*.*", s40_30_mt_mappings[i].path);
-	} else
-		return GN_ERR_INVALIDMEMORYTYPE;
-
-	/* Get file list */
+	memset(&fl, 0, sizeof(fl));
 	data->file_list = &fl;
-	data->file = NULL;
-	error = NK6510_GetFileListCache(data, state);
-	if (error)
+	error = NK6510_GetMMSList_S40_30(data, state);
+	if (error != GN_ERR_NONE)
 		return error;
 
-	/* Extract just MMS */
-	memset(&fl2, 0, sizeof(fl2));
-	for (j = 0; j < fl.file_count; j++) {
-		/* "1012" matches standard MMS, "1022" matches MMS Plus */
-		if (!strncmp("1012", fl.files[j]->name+20, 4) ||
-		    !strncmp("1022", fl.files[j]->name+20, 4)) {
-			strcpy(fl2.path, fl.path);
-			inc_filecount(&fl2);
-			fl2.files[fl2.file_count-1] = fl.files[j];
-		}
+	if (data->file_list->file_count < data->raw_mms->number) {
+		/* Needs to be INVALID not EMPTY for --deletemms IN 1 end to work */
+		return GN_ERR_INVALIDLOCATION;
 	}
 
-	dprintf("%d out of %d are MMS\n", fl2.file_count, fl.file_count);
-
-	/* Assign filename */
-	dprintf("Getting #%d out of %d messages\n", data->raw_mms->number, fl2.file_count);
-	if (fl2.file_count >= data->raw_mms->number) {
-		memset(&fi, 0, sizeof(fi));
-		dprintf("Getting MMS #%d (path: %s, file: %s)\n", data->raw_mms->number, s40_30_mt_mappings[i].path, fl2.files[data->raw_mms->number-1]->name);
-		snprintf(fi.name, sizeof(fi.name), "%s%s", s40_30_mt_mappings[i].path, fl2.files[data->raw_mms->number - 1]->name);
-	} else
-		/* Needs to be INVALID not EMPTY for --getsms IN 1 end to work */
-		return GN_ERR_INVALIDLOCATION;
-
+	memset(&fi, 0, sizeof(fi));
+	snprintf(fi.name, sizeof(fi.name), "%s%s", fl.path, fl.files[data->raw_mms->number - 1]->name);
+	dprintf("Getting MMS #%d (path: %s, file: %s)\n", data->raw_mms->number, fl.path, fl.files[data->raw_mms->number - 1]->name);
 	data->file = &fi;
-	/* Get file */
 	error = NK6510_GetFile(data, state);
 
-	data->raw_mms->status = GetMessageStatus_S40_30(fl2.files[data->raw_mms->number - 1]->name);
+	data->raw_mms->status = GetMessageStatus_S40_30(fl.files[data->raw_mms->number - 1]->name);
 
 	return error;
 }
@@ -2148,7 +2119,7 @@ static gn_error NK6510_DeleteMMS_S40_30(gn_data *data, struct gn_statemachine *s
 
 	memset(&fl, 0, sizeof(fl));
 	data->file_list = &fl;
-	error = NK6510_GetMMSList(data, state);
+	error = NK6510_GetMMSList_S40_30(data, state);
 	if (error != GN_ERR_NONE)
 		return error;
 
