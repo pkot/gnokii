@@ -1,0 +1,426 @@
+#!/usr/bin/env python
+"""
+  $Id$
+
+  G N O K I I
+
+  A Linux/Unix toolset and driver for the mobile phones.
+
+  This file is part of gnokii.
+
+  Gnokii is free software; you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation; either version 2 of the License, or
+  (at your option) any later version.
+
+  Gnokii is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with gnokii; if not, write to the Free Software
+  Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+
+  Copyright (C) 2009 Daniele Forsi
+
+  Configuration wizard to create a .gnokiirc
+"""
+
+import sys
+try:
+	import pygtk
+	pygtk.require("2.10")
+except:
+	pass
+try:
+	import gtk
+	import gtk.glade
+except:
+	sys.exit(1)
+try:
+	import gettext
+	gettext.install('gnokii')
+	import locale
+	locale.setlocale(locale.LC_ALL, '')
+	gtk.glade.textdomain('gnokii')
+except:
+	def _(message): return message
+
+class GnokiiAssistant(gtk.Assistant):
+
+	"""This is the GnokiiAssistant application"""
+
+	# this filename will be suggested by the save dialog
+	config_filename = '~/.gnokiirc'
+
+	# constants matching .glade file
+
+	INTRO_PAGE = 0
+
+	BRAND_PAGE = 1
+	BRAND_NOKIA = 'nokia'
+	BRAND_OTHER = 'other'
+
+	CONNECTION_PAGE = 2
+	CONNECTION_BLUETOOTH = 'bluetooth'
+	CONNECTION_USB = 'usb'
+	CONNECTION_INFRARED = 'irda'
+	CONNECTION_OTHER = 'other'
+
+	PROTOCOL_PAGE = 3
+	PROTOCOL_PROPRIETARY = 'series40'
+	PROTOCOL_AT = 'AT'
+
+	BLUETOOTH_PAGE = 5
+	BLUETOOTH_PAGE_ID = 'bluetooth_page'
+	BLUETOOTH_ADDRESS_ID = 'bluetooth_address'
+
+	ADVANCED_PAGE = 5
+	ADVANCED_PAGE_ID = 'advanced_page'
+	ADVANCED_PORT_ID = 'advanced_port'
+	ADVANCED_MODEL_ID = 'advanced_model'
+	ADVANCED_CONNECTION_ID = 'advanced_connection'
+
+	CONFIRM_PAGE = 6
+	CONFIRM_PAGE_ID = 'confirm_page'
+	CONFIRM_MODEL_ID = 'confirm_model'
+	CONFIRM_CONNECTION_ID = 'confirm_connection'
+	CONFIRM_PORT_ID = 'confirm_port'
+
+	def __init__(self):
+		gtk.Assistant.__init__(self)
+
+		self.assistant_xml = gtk.glade.XML('gnokii-configure.glade')
+		self.assistant_xml.signal_autoconnect(self)
+		self.assistant = self.assistant_xml.get_widget('gnokii_config_assistant')
+
+		self.assistant.set_forward_page_func(self.forward_page_func)
+
+		self.widget_list = {}
+		for widget in [
+
+			# constants matching .glade file
+
+			self.BLUETOOTH_PAGE_ID,
+			self.BLUETOOTH_ADDRESS_ID,
+
+			self.ADVANCED_PAGE_ID,
+			self.ADVANCED_PORT_ID,
+			self.ADVANCED_MODEL_ID,
+			self.ADVANCED_CONNECTION_ID,
+
+			self.CONFIRM_PAGE_ID,
+			self.CONFIRM_MODEL_ID,
+			self.CONFIRM_CONNECTION_ID,
+			self.CONFIRM_PORT_ID,
+
+			]:
+			self.widget_list[widget] = self.assistant_xml.get_widget(widget)
+
+		self.model_init()
+		self.connection_type_init()
+		self.protocol_init()
+		self.port_init()
+
+		self.set_defaults()
+
+		self.assistant.show()
+
+	def set_defaults(self):
+		# must match with glade settings
+		self.on_brand_nokia_toggled(None)
+		self.on_connection_bluetooth_toggled(None)
+		self.on_protocol_proprietary_toggled(None)
+
+	def model_init(self):
+		# values taken from the various common/phone/*.c of gnokii
+		models = {
+		'atgen.c'    : "AT|AT-HW",
+		'fake.c'     : "fake",
+		'gnapplet.c' : "gnapplet|symbian|3650|6600|sx1",
+		'nk3110.c'   : "3110|3810|8110|8110i",
+		'nk6100.c'   : "6110|6130|6150|6190|5110|5130|5190|3210|3310|3330|3360|3390|3410|8210|8250|8290|8850|RPM-1",
+		'nk6160.c'   : "6160|5120|6185",
+		'nk6510.c'   : "6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6800|6810|6820|6820b|6610i|6230|6650|7210|7250|7250i|7600|6170|6020|6230i|5140|5140i|6021|6500|6220|3120b|3100|3120|6015i|6101|6680|6280|3220|6136|6233|6822|6300|6030|3110c|series60|series40",
+		'nk7110.c'   : "7110|6210|6250|7190",
+		'pcsc.c'     : "pcsc"
+		}
+		self.model_type = {self.BRAND_NOKIA: [], self.BRAND_OTHER: []}
+		for model in models:
+			self.model_type[self.BRAND_NOKIA] += models[model].split("|")
+		self.model_type[self.BRAND_OTHER] = ["AT", "AT-HW", "pcsc"]
+		self.model_type[self.BRAND_NOKIA].sort()
+		self.model_type[self.BRAND_OTHER].sort()
+		self.model_type_auto = {
+			self.BRAND_NOKIA: [
+			'series40']
+			,
+			self.BRAND_OTHER: [
+			'AT']
+			}
+		# setup for GtkComboBox
+		combobox = self.widget_list[self.ADVANCED_MODEL_ID]
+		liststore = gtk.ListStore(str)
+		combobox.set_model(liststore)
+		cell = gtk.CellRendererText()
+		combobox.pack_start(cell, True)
+		combobox.add_attribute(cell, 'text', 0)
+
+	def connection_type_init(self):
+		self.connection_type = {
+			self.BRAND_NOKIA: [
+			'bluetooth',
+			'dau9p',
+			'dku2',
+			'dku2libusb',
+			'dku5',
+			'dlr3p',
+			'infrared',
+			'irda',
+			'm2bus',
+			'serial',
+			'tcp',
+			'tekram']
+			,
+			self.BRAND_OTHER: [
+			'bluetooth',
+			'irda',
+			'pcsc',
+			'serial',
+			'tcp']
+			}
+		self.connection_type[self.BRAND_NOKIA].sort()
+		self.connection_type[self.BRAND_OTHER].sort()
+		# setup for GtkComboBox
+		combobox = self.widget_list[self.ADVANCED_CONNECTION_ID]
+		liststore = gtk.ListStore(str)
+		combobox.set_model(liststore)
+		cell = gtk.CellRendererText()
+		combobox.pack_start(cell, True)
+		combobox.add_attribute(cell, 'text', 0)
+
+	def protocol_init(self):
+		self.connection_type_auto = {
+			self.BRAND_NOKIA: {
+				self.CONNECTION_BLUETOOTH : 'bluetooth',
+				self.CONNECTION_USB : 'dku2libusb',
+				self.CONNECTION_INFRARED : 'irda'
+			},
+			self.BRAND_OTHER: {
+				self.CONNECTION_BLUETOOTH : 'bluetooth',
+				self.CONNECTION_USB : 'serial',
+				self.CONNECTION_INFRARED : 'serial'
+			}}
+
+	def port_init(self):
+		self.port_auto = {
+			self.BRAND_NOKIA: {
+				self.CONNECTION_BLUETOOTH : '11:22:33:44:55:66',
+				self.CONNECTION_USB : '1',
+				self.CONNECTION_INFRARED : 'ignored'
+			},
+			self.BRAND_OTHER: {
+				self.CONNECTION_BLUETOOTH : '11:22:33:44:55:66',
+				self.CONNECTION_USB : '/dev/ttyACM0',
+				self.CONNECTION_INFRARED : '/dev/ircomm0'
+			}}
+
+	def set_brand(self, brand):
+		self.brand = brand
+		# model
+		liststore = self.widget_list[self.ADVANCED_MODEL_ID].get_model()
+		liststore.clear()
+		for item in self.model_type[self.brand]:
+			liststore.append([item])
+		# connection
+		liststore = self.widget_list[self.ADVANCED_CONNECTION_ID].get_model()
+		liststore.clear()
+		for item in self.connection_type[self.brand]:
+			liststore.append([item])
+
+	def set_model(self, model):
+		self.model = model
+
+	def set_connection(self, connection):
+		self.connection = connection
+
+	def set_connection_name(self, connection):
+		self.connection_name = connection
+
+	def set_protocol(self, protocol):
+		self.protocol = protocol
+
+	def set_port(self, port):
+		self.port = port
+
+	def create_default_config(self):
+		if self.connection == self.CONNECTION_OTHER:
+			# advanced configuration
+			self.config_model = self.model
+			self.config_port = self.port
+			self.config_connection = self.connection_name
+		else:
+			if self.brand == self.BRAND_NOKIA and self.protocol == self.PROTOCOL_AT:
+				# force AT on Nokia
+				brand = self.BRAND_OTHER
+			else:
+				brand = self.brand
+
+			self.config_model = self.model_type_auto[brand][0]
+			if self.connection == self.CONNECTION_BLUETOOTH:
+				self.config_port = self.port
+			else:
+				self.config_port = self.port_auto[brand][self.connection]
+			self.config_connection = self.connection_type_auto[brand][self.connection]
+
+		self.widget_list[self.CONFIRM_MODEL_ID].set_text(self.config_model)
+		self.widget_list[self.CONFIRM_CONNECTION_ID].set_text(self.config_connection)
+		self.widget_list[self.CONFIRM_PORT_ID].set_text(self.config_port)
+
+		self.config = '[global]\n\nmodel = %s\nconnection = %s\nport = %s\n' % (self.config_model, self.config_connection, self.config_port)
+
+	def save_response(self, widget, response, file):
+		if response == gtk.RESPONSE_ACCEPT:
+			self.config_filename = file.get_filename()
+			f = open(self.config_filename, "w")
+			f.write(self.config)
+			f.close()
+		file.destroy()
+
+	def save_config(self, widget, data=None):
+		file = gtk.FileChooserDialog(title=_("Save gnokii configuration file"),
+			   parent=self.window,
+			   action=gtk.FILE_CHOOSER_ACTION_SAVE,
+			   buttons=(gtk.STOCK_CANCEL, gtk.RESPONSE_REJECT, gtk.STOCK_OK, gtk.RESPONSE_ACCEPT))
+		file.set_do_overwrite_confirmation(True) # PyGTK 2.8+
+		file.set_current_name(self.config_filename)
+		file.connect("response", self.save_response, file)
+		file.run()
+
+	# callbacks
+
+	def gtk_main_quit(self, widget):
+		gtk.main_quit()
+
+	def forward_page_func(self, current_page, user_data = None):
+		if current_page == self.CONNECTION_PAGE:
+			# show bluetooth settings only if connection type is "bluetooth"
+			if self.connection != self.CONNECTION_BLUETOOTH:
+				current_page = self.ADVANCED_PAGE
+			# show advanced settings only if connection type is "other"
+			if self.connection == self.CONNECTION_OTHER:
+				return self.ADVANCED_PAGE
+			# show protocol settings only if brand is "Nokia"
+			if self.brand != self.BRAND_NOKIA:
+				return self.CONFIRM_PAGE
+		# show advanced settings only if connection type is "other"
+		if current_page == self.PROTOCOL_PAGE:
+			return self.CONFIRM_PAGE
+		return current_page + 1
+
+	def on_gnokii_config_assistant_prepare(self, widget, page):
+		if page == self.widget_list[self.BLUETOOTH_PAGE_ID]:
+			self.prepare_bluetooth_page(page)
+			return
+		if page == self.widget_list[self.ADVANCED_PAGE_ID]:
+			self.prepare_advanced_page(page)
+			return
+		if page == self.widget_list[self.CONFIRM_PAGE_ID]:
+			self.create_default_config()
+		self.assistant.set_page_complete(page, True)
+
+	def on_gnokii_config_assistant_apply(self, widget):
+		# debug
+		print '# brand', self.brand
+		print self.config
+		self.save_config(widget)
+
+	# brand_page
+
+	def on_brand_nokia_toggled(self, widget):
+		self.set_brand(self.BRAND_NOKIA)
+		self.on_protocol_proprietary_toggled(None)
+
+	def on_brand_other_toggled(self, widget):
+		self.set_brand(self.BRAND_OTHER)
+		self.on_protocol_at_toggled(None)
+
+	# connection_page
+
+	def on_connection_bluetooth_toggled(self, widget):
+		self.set_connection(self.CONNECTION_BLUETOOTH)
+
+	def on_connection_usb_toggled(self, widget):
+		self.set_connection(self.CONNECTION_USB)
+
+	def on_connection_infrared_toggled(self, widget):
+		self.set_connection(self.CONNECTION_INFRARED)
+
+	def on_connection_other_toggled(self, widget):
+		self.set_connection(self.CONNECTION_OTHER)
+
+	# protocol_page
+
+	def on_protocol_proprietary_toggled(self, widget):
+		self.set_protocol(self.PROTOCOL_PROPRIETARY)
+
+	def on_protocol_at_toggled(self, widget):
+		self.set_protocol(self.PROTOCOL_AT)
+
+	# bluetooth page
+
+	def on_bluetooth_address_changed(self, widget):
+		self.port = widget.get_text()
+		self.prepare_bluetooth_page(self.widget_list[self.BLUETOOTH_PAGE_ID])
+
+	def prepare_bluetooth_page(self, page):
+		""" controls sensitiviy of "Next" button according to user input """
+		if self.widget_list[self.BLUETOOTH_ADDRESS_ID].get_text() == '':
+			self.assistant.set_page_complete(page, False)
+		else:
+			self.assistant.set_page_complete(page, True)
+		self.update_buttons_state()
+		return
+
+	# advanced page
+
+	def on_advanced_model_changed(self, widget):
+		row = widget.get_active()
+		if row == -1:
+			self.set_model('')
+		else:
+			liststore = self.widget_list[self.ADVANCED_MODEL_ID].get_model()
+			self.set_model(liststore[row][0])
+		self.prepare_advanced_page(self.widget_list[self.ADVANCED_PAGE_ID])
+
+	def on_advanced_connection_changed(self, widget):
+		row = widget.get_active()
+		if row == -1:
+			self.set_connection_name('')
+		else:
+			liststore = self.widget_list[self.ADVANCED_CONNECTION_ID].get_model()
+			self.set_connection_name(liststore[row][0])
+		self.prepare_advanced_page(self.widget_list[self.ADVANCED_PAGE_ID])
+
+	def on_advanced_port_changed(self, widget):
+		self.port = widget.get_text()
+		self.prepare_advanced_page(self.widget_list[self.ADVANCED_PAGE_ID])
+
+	def prepare_advanced_page(self, page):
+		""" controls sensitiviy of "Next" button according to user input """
+		if self.widget_list[self.ADVANCED_MODEL_ID].get_active() == -1 or \
+		   self.widget_list[self.ADVANCED_CONNECTION_ID].get_active() == -1 or \
+		   self.widget_list[self.ADVANCED_PORT_ID].get_text() == '':
+			self.assistant.set_page_complete(page, False)
+		else:
+			self.assistant.set_page_complete(page, True)
+		self.update_buttons_state()
+		return
+
+	#
+
+if __name__ == "__main__":
+	assistant = GnokiiAssistant()
+	gtk.main()
+

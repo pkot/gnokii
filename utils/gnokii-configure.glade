@@ -1,0 +1,551 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE glade-interface SYSTEM "glade-2.0.dtd">
+<!--Generated with glade3 3.4.5 on Fri Apr  3 12:45:08 2009 -->
+<glade-interface>
+  <widget class="GtkAssistant" id="gnokii_config_assistant">
+    <property name="window_position">GTK_WIN_POS_CENTER</property>
+    <property name="default_width">200</property>
+    <property name="default_height">300</property>
+    <property name="icon_name">phone</property>
+    <signal name="close" handler="gtk_main_quit"/>
+    <signal name="cancel" handler="gtk_main_quit"/>
+    <signal name="apply" handler="on_gnokii_config_assistant_apply"/>
+    <signal name="prepare" handler="on_gnokii_config_assistant_prepare"/>
+    <child>
+      <widget class="GtkVBox" id="intro_page">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label1">
+            <property name="visible">True</property>
+            <property name="yalign">0</property>
+            <property name="ypad">6</property>
+            <property name="label" translatable="yes">This assistant will guide you through the creation of a configuration file that can be shared by gnokii, xgnokii, smsd, gnocky and other programs that use libgnokii.
+
+You will be able to save the configuration to a file of your choice.</property>
+            <property name="justify">GTK_JUSTIFY_FILL</property>
+            <property name="wrap">True</property>
+          </widget>
+        </child>
+      </widget>
+      <packing>
+        <property name="page_type">GTK_ASSISTANT_PAGE_INTRO</property>
+        <property name="title">gnokii Configuration Assistant</property>
+      </packing>
+    </child>
+    <child>
+      <widget class="GtkVBox" id="brand_page">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label2">
+            <property name="visible">True</property>
+            <property name="ypad">6</property>
+            <property name="label" translatable="yes">What is the brand of your phone?</property>
+            <property name="justify">GTK_JUSTIFY_FILL</property>
+            <property name="wrap">True</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkAlignment" id="alignment2">
+            <property name="visible">True</property>
+            <property name="xscale">0</property>
+            <property name="top_padding">6</property>
+            <property name="bottom_padding">6</property>
+            <child>
+              <widget class="GtkVBox" id="vbox2_2">
+                <property name="visible">True</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <widget class="GtkRadioButton" id="brand_nokia">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Nokia</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="toggled" handler="on_brand_nokia_toggled"/>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkRadioButton" id="brand_other">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Other brand</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">brand_nokia</property>
+                    <signal name="toggled" handler="on_brand_other_toggled"/>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </widget>
+      <packing>
+        <property name="title">Manufacturer</property>
+      </packing>
+    </child>
+    <child>
+      <widget class="GtkVBox" id="connection_page">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label3">
+            <property name="visible">True</property>
+            <property name="ypad">6</property>
+            <property name="label" translatable="yes">How do you connect to your phone?</property>
+            <property name="justify">GTK_JUSTIFY_FILL</property>
+            <property name="wrap">True</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkAlignment" id="alignment3">
+            <property name="visible">True</property>
+            <property name="xscale">0</property>
+            <property name="top_padding">6</property>
+            <property name="bottom_padding">6</property>
+            <child>
+              <widget class="GtkVBox" id="vbox3_2">
+                <property name="visible">True</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <widget class="GtkRadioButton" id="connection_bluetooth">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Bluetooth</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="toggled" handler="on_connection_bluetooth_toggled"/>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkRadioButton" id="connection_usb">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">USB</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">connection_other</property>
+                    <signal name="toggled" handler="on_connection_usb_toggled"/>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkRadioButton" id="connection_infrared">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Infrared</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">connection_bluetooth</property>
+                    <signal name="toggled" handler="on_connection_infrared_toggled"/>
+                  </widget>
+                  <packing>
+                    <property name="position">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkRadioButton" id="connection_other">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Other (advanced setup)</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">connection_bluetooth</property>
+                    <signal name="toggled" handler="on_connection_other_toggled"/>
+                  </widget>
+                  <packing>
+                    <property name="position">3</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkLabel" id="label3_2">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">By default this assistant suggests only the most common configurations.
+Please use the advanced setup if the proposed configuration does not work for you.</property>
+          </widget>
+          <packing>
+            <property name="position">2</property>
+          </packing>
+        </child>
+      </widget>
+      <packing>
+        <property name="title">Connection Type</property>
+      </packing>
+    </child>
+    <child>
+      <widget class="GtkVBox" id="bluetooth_page">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label4">
+            <property name="visible">True</property>
+            <property name="ypad">6</property>
+            <property name="label" translatable="yes">What is the Bluetooth address of your phone?</property>
+            <property name="justify">GTK_JUSTIFY_FILL</property>
+            <property name="wrap">True</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkAlignment" id="alignment4">
+            <property name="visible">True</property>
+            <property name="xscale">0</property>
+            <property name="top_padding">6</property>
+            <property name="bottom_padding">6</property>
+            <child>
+              <widget class="GtkVBox" id="vbox4_2">
+                <property name="visible">True</property>
+                <child>
+                  <widget class="GtkEntry" id="bluetooth_address">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <signal name="changed" handler="on_bluetooth_address_changed"/>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="label4_2">
+                    <property name="visible">True</property>
+                    <property name="label" translatable="yes">Example: 11:22:33:44:55:66</property>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </widget>
+      <packing>
+        <property name="title">Bluetooth Address</property>
+      </packing>
+    </child>
+    <child>
+      <widget class="GtkVBox" id="protocol_page">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label5">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">What protocol do you want to use to communicate with your phone?</property>
+            <property name="justify">GTK_JUSTIFY_FILL</property>
+            <property name="wrap">True</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="padding">6</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkAlignment" id="alignment5">
+            <property name="visible">True</property>
+            <property name="yalign">0.49000000953674316</property>
+            <property name="xscale">0</property>
+            <property name="top_padding">6</property>
+            <property name="bottom_padding">6</property>
+            <child>
+              <widget class="GtkVBox" id="vbox5_1">
+                <property name="visible">True</property>
+                <child>
+                  <widget class="GtkRadioButton" id="protocol_proprietary">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">Proprietary protocol (recommended)</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <signal name="toggled" handler="on_protocol_proprietary_toggled"/>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkRadioButton" id="protocol_at">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="label" translatable="yes">AT protocol</property>
+                    <property name="response_id">0</property>
+                    <property name="active">True</property>
+                    <property name="draw_indicator">True</property>
+                    <property name="group">protocol_proprietary</property>
+                    <signal name="toggled" handler="on_protocol_at_toggled"/>
+                  </widget>
+                  <packing>
+                    <property name="position">1</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </widget>
+      <packing>
+        <property name="title">Communication Protocol</property>
+      </packing>
+    </child>
+    <child>
+      <widget class="GtkVBox" id="advanced_page">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label6">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">Insert advanced settings</property>
+            <property name="justify">GTK_JUSTIFY_FILL</property>
+            <property name="wrap">True</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="padding">6</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkAlignment" id="alignment6">
+            <property name="visible">True</property>
+            <property name="xscale">0</property>
+            <property name="top_padding">6</property>
+            <property name="bottom_padding">6</property>
+            <child>
+              <widget class="GtkTable" id="table6">
+                <property name="visible">True</property>
+                <property name="n_rows">3</property>
+                <property name="n_columns">2</property>
+                <property name="column_spacing">6</property>
+                <property name="row_spacing">6</property>
+                <child>
+                  <widget class="GtkLabel" id="advanced_label_model">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="label" translatable="yes">Model:</property>
+                  </widget>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="advanced_label_connection">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="label" translatable="yes">Connection:</property>
+                  </widget>
+                  <packing>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="advanced_label_port">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="label" translatable="yes">Port:</property>
+                  </widget>
+                  <packing>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkComboBox" id="advanced_model">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <signal name="changed" handler="on_advanced_model_changed"/>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkComboBox" id="advanced_connection">
+                    <property name="visible">True</property>
+                    <signal name="changed" handler="on_advanced_connection_changed"/>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkEntry" id="advanced_port">
+                    <property name="visible">True</property>
+                    <signal name="changed" handler="on_advanced_port_changed"/>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </widget>
+      <packing>
+        <property name="title">Advanced Settings</property>
+      </packing>
+    </child>
+    <child>
+      <widget class="GtkVBox" id="confirm_page">
+        <property name="visible">True</property>
+        <child>
+          <widget class="GtkLabel" id="label7">
+            <property name="visible">True</property>
+            <property name="label" translatable="yes">The following settings will be written to the configuration file. A dialog will let you choose file name and location.</property>
+            <property name="justify">GTK_JUSTIFY_FILL</property>
+            <property name="wrap">True</property>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="padding">6</property>
+          </packing>
+        </child>
+        <child>
+          <widget class="GtkAlignment" id="alignment7">
+            <property name="visible">True</property>
+            <property name="xscale">0</property>
+            <property name="top_padding">6</property>
+            <property name="bottom_padding">6</property>
+            <child>
+              <widget class="GtkTable" id="table7">
+                <property name="visible">True</property>
+                <property name="n_rows">3</property>
+                <property name="n_columns">2</property>
+                <property name="column_spacing">6</property>
+                <property name="row_spacing">6</property>
+                <property name="homogeneous">True</property>
+                <child>
+                  <widget class="GtkLabel" id="confirm_label_port">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="label" translatable="yes">Port:</property>
+                  </widget>
+                  <packing>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="confirm_label_connection">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="label" translatable="yes">Connection:</property>
+                  </widget>
+                  <packing>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="confirm_label_model">
+                    <property name="visible">True</property>
+                    <property name="xalign">1</property>
+                    <property name="label" translatable="yes">Model:</property>
+                  </widget>
+                  <packing>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="confirm_port">
+                    <property name="visible">True</property>
+                    <property name="can_focus">True</property>
+                    <property name="xalign">0</property>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">2</property>
+                    <property name="bottom_attach">3</property>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="confirm_connection">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="top_attach">1</property>
+                    <property name="bottom_attach">2</property>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+                <child>
+                  <widget class="GtkLabel" id="confirm_model">
+                    <property name="visible">True</property>
+                    <property name="xalign">0</property>
+                  </widget>
+                  <packing>
+                    <property name="left_attach">1</property>
+                    <property name="right_attach">2</property>
+                    <property name="y_options">GTK_EXPAND</property>
+                  </packing>
+                </child>
+              </widget>
+            </child>
+          </widget>
+          <packing>
+            <property name="expand">False</property>
+            <property name="fill">False</property>
+            <property name="padding">6</property>
+            <property name="position">1</property>
+          </packing>
+        </child>
+      </widget>
+      <packing>
+        <property name="page_type">GTK_ASSISTANT_PAGE_CONFIRM</property>
+        <property name="title">Confirm Settings</property>
+      </packing>
+    </child>
+  </widget>
+</glade-interface>

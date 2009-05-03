@@ -105,6 +105,9 @@
  * translation updates
     o updated French translation                             (Ploc)
     o updated Italian translation                   (Daniele Forsi)
+ * utils updates
+    o add gnokii-configure utility (not installed by make install
+      because it depends on Python and libglade)    (Daniele Forsi)
 
 0.6.27
 ======
