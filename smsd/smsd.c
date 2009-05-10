@@ -561,11 +561,10 @@ int main (int argc, char *argv[])
   textdomain(GETTEXT_PACKAGE);
 #endif
 
-  /* Introduce yourself */
-  Short_Version ();
-
   gn_elog_handler = NULL;
   ReadConfig (argc, argv);
+  /* Introduce yourself */
+  Short_Version ();
   GTerminateThread = false;
   Run ();
 
