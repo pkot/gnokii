@@ -1,12 +1,14 @@
-
 ABOUT-NLS
 aclocal.m4
 autom4te.cache
+compile
 config.guess
 config.log
 config.status
 config.sub
 configure
+depcomp
+install-sh
 intl
 intltool-extract
 intltool-extract.in
@@ -16,7 +18,9 @@ intltool-update
 intltool-update.in
 libtool
 ltmain.sh
+m4/*
 Makefile
 Makefile.global
 Makefile.in
+missing
 mkinstalldirs
