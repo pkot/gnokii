@@ -16,7 +16,7 @@
  8.1  Perl
  8.2  PHP
 9.0   How to help
-10.0  gnokii by CVS
+10.0  gnokii by git
 11.0  Protocol Details
 12.0  References
 13.0  Handsets/Networks tested
@@ -46,9 +46,9 @@ stalled over the issue of binary versus open source releases and the project
 has proceeded without official or unofficial assistance.
 
 We have a web site at http://www.gnokii.org/ and wiki at
-http://wiki.gnokii.org/ which amongst other things give information on how
+http://wiki.gnokii.org/ which amongst other things gives information on how
 to join the gnokii mailing list, retrieving bleeding edge releases through
-CVS and more!
+git and more!
 
 
 - 2.0 About the applications -
@@ -163,7 +163,7 @@ system) provides. gnokii is present in most of the popular Linux
 distributions as well as in FreeBSD ports. To install gnokii use the way
 your distribution recommends (apt-get, yum, synaptic, emerge, ...)
 
-However, if you would like to use more up-to-date gnokii versions (ie. CVS
+However, if you would like to use more up-to-date gnokii versions (ie. git
 versions) and don't want to compile it by hand, there are several unofficial
 repositories hosting gnokii packages. There is a list of such repositories
 at http://wiki.gnokii.org/index.php/PreBuiltPackages.
@@ -265,31 +265,47 @@ appropriate.  This is particularly important if you intend making large
 changes and/or submitting big patches.
 
 
-- 10.0 gnokii by CVS -
+- 10.0 gnokii by git -
 
-The source of gnokii aplications is in the CVS server.  The server's address
-is savannah.nongnu.org.  If you are already familiar with CVS, set the
-CVSROOT to
+The source of gnokii applications is in the git server.  If you are already
+familiar with git, clone the main repository (containing libgnokii, gnokii,
+xgnokii and smsd) with:
 
-	:pserver:anonymous@cvs.savannah.nongnu.org:/sources/gnokii
+	git clone git://git.savannah.nongnu.org/gnokii.git
 
-If you are not familiar with cvs, don't worry. It's very simple. Just
-install the cvs package for your distribution and follow these steps:
+and, optionally, the other repositories with:
 
-	1. Set your environmental variable CVSROOT. If you have bash (Bourne
-           Again Shell):
+	git clone git://git.savannah.nongnu.org/gnokii/gnapplet.git		# Applet for Symbian phones
+	git clone git://git.savannah.nongnu.org/gnokii/gnocky.git		# Alternate GUI
+	git clone git://git.savannah.nongnu.org/gnokii/gnokii-artwork.git	# Optional graphic files
+	git clone git://git.savannah.nongnu.org/gnokii/gnokii-extras.git	# Additional programs and language bindings
+	git clone git://git.savannah.nongnu.org/gnokii/gnokiifs.git		# CODA file system
+	git clone git://git.savannah.nongnu.org/gnokii/knokiisync.git		# KDE Address Book synchronization
+	git clone git://git.savannah.nongnu.org/gnokii/zphone.git		# Zaurus frontend
 
-	export CVSROOT=:pserver:anonymous@cvs.savannah.nongnu.org:/sources/gnokii
+If you are not familiar with git, don't worry. It's very simple. Just
+install the git package for your distribution and follow these steps:
 
-	   If you have different shell, use different command (e.g. setenv).
+	1. Open your favorite shell, cd to the directory that will
+	   contain the gnokii directory and execute this command:
 
-	4. You are ready to checkout the latest sources:
+	   git clone git://git.savannah.nongnu.org/gnokii.git
 
-	cvs co gnokii
+	   this creates a 'gnokii' directory in which the sources and
+	   other needed files are downloaded
 
-If you prefer, there is a WWW interface to the CVS server at
+	   In future you can update to the latest sources running the
+	   following command from inside the 'gnokii' directory:
 
-http://cvs.savannah.nongnu.org/viewcvs/?root=gnokii
+	   git pull
+
+	2. There are other programs available in the gnokii repository
+	   that you can get in a similar way (see above for addresses)
+	   each in a different directory, NOT inside 'gnokii'
+
+If you prefer, there is a WWW interface to the git server at
+
+http://git.savannah.gnu.org/cgit/gnokii.git/
 
 Once you have the sources, you will need to run the following commands
 
@@ -316,7 +332,7 @@ directory gnokii.  If you are going to make substantial changes and feel
 that they should be included into gnokii please mention it on the list first
 to avoid duplicated effort.
 
-If you would like to receive email when updates are made to the CVS
+If you would like to receive email when updates are made to the git
 repository, subscribe to gnokii-commit mailing list at
 http://mail.nongnu.org/mailman/listinfo/gnokii-commit.
 

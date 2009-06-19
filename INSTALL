@@ -3,13 +3,13 @@ Gnokii installation instructions
 
 Please note that you need development packages to build gnokii from scratch.
 You'll need tools like:
- - cvs
+ - git
  - make
  - gcc
  - flex
 For certain distributions like Ubuntu most of the tools are available in
 build-essentials package. You will need also the set of autotools and
-family (they are needed just for CVS compile):
+family (they are needed just for git compile):
  - automake
  - autoconf
  - libtool
@@ -25,14 +25,14 @@ Verify with your distribution what exactly do you need.
 Quickstart
 ==========
 
-    $ libtoolize -c -f				# only for CVS copies
+    $ libtoolize -c -f				# only for git copies
     [ under Mac OS X use glibtoolize instead of libtoolize                  ]
-    $ glib-gettextize -f			# only for CVS copies
-    $ intltoolize --force --copy --automake     # only for CVS copies
-    $ aclocal -I m4				# only for CVS copies
-    $ autoheader -I m4				# only for CVS copies
-    $ automake --add-missing			# only for CVS copies
-    $ autoconf					# only for CVS copies
+    $ glib-gettextize -f			# only for git copies
+    $ intltoolize --force --copy --automake     # only for git copies
+    $ aclocal -I m4				# only for git copies
+    $ autoheader -I m4				# only for git copies
+    $ automake --add-missing			# only for git copies
+    $ autoconf					# only for git copies
     $ ./configure [<options>]
     [ instead of above commands you can simply run ./autogen.sh [<options>] ]
     [ we recommend using --enable-security option to get all gnokii         ]
@@ -101,15 +101,15 @@ Verbose instructions
 Preparations
 ------------
 
-If you retrieved this copy from CVS, then first call
+If you retrieved this copy from git, then first call
 
     $ libtoolize -c -f
     [ under Mac OS X use glibtoolize instead of libtoolize                  ]
     $ glib-gettextize -f
-    $ intltoolize --force --copy --automake     # only for CVS copies
+    $ intltoolize --force --copy --automake     # only for git copies
     $ aclocal -I m4
     $ autoheader -I m4
-    $ automake --add-missing			# only for CVS copies
+    $ automake --add-missing			# only for git copies
     $ autoconf
 
 Now you have to determine your system specific settings.
