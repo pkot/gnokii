@@ -168,32 +168,35 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_length = i->message_length + rx_byte;
 		i->state = FBUS_RX_GetMessage;
 		i->buffer_count = 0;
+		if (i->message_length > PHONET_FRAME_MAX_LENGTH) {
+			dprintf("PHONET: Message buffer overrun - resetting (message length: %d, max: %d)\n", i->message_length, PHONET_FRAME_MAX_LENGTH);
+		}
 		break;
 
 	case FBUS_RX_GetMessage:
-		i->message_buffer[i->buffer_count] = rx_byte;
-		i->buffer_count++;
+		if (i->message_length > PHONET_FRAME_MAX_LENGTH) {
+			/* Ignore this frame that would overflow the buffer */
+			if (i->buffer_count % 16 == 0)
+				dprintf("\n");
+			dprintf("%02x ", rx_byte);
+			i->buffer_count++;
 
-		if (i->buffer_count > PHONET_FRAME_MAX_LENGTH) {
-			dprintf("PHONET: Message buffer overun - resetting (buffer count: %d, max: %d)\n", i->buffer_count, PHONET_FRAME_MAX_LENGTH);
-{
-	int j;
-	for (j = 0; j < i->buffer_count; j++) {
-		if (j % 16 == 0)
-			dprintf("\n");
-		dprintf("%02x ", i->message_buffer[j]);
-	}
-}
-			i->state = FBUS_RX_Sync;
-			break;
-		}
+			if (i->buffer_count == i->message_length) {
+				dprintf("\n");
+				i->state = FBUS_RX_Sync;
+			}
+		} else {
+			i->message_buffer[i->buffer_count] = rx_byte;
+			i->buffer_count++;
 
-		/* Is that it? */
-		if (i->buffer_count == i->message_length) {
-			sm_incoming_function(i->message_type, i->message_buffer, i->message_length, state);
-			i->state = FBUS_RX_Sync;
+			/* Is that it? */
+			if (i->buffer_count == i->message_length) {
+				sm_incoming_function(i->message_type, i->message_buffer, i->message_length, state);
+				i->state = FBUS_RX_Sync;
+			}
 		}
 		break;
+
 	default:
 		i->state = FBUS_RX_Sync;
 		break;
