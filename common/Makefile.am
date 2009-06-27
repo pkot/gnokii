@@ -67,7 +67,7 @@ libgnokii_la_LDFLAGS = 				\
 	-no-undefined
 
 gnvcal.c: vcal.lx
-	$(LEX) -ognvcal.c vcal.lx
+	$(LEX) -ognvcal.c $<
 
 CLEANFILES = gnvcal.c
 EXTRA_DIST = gnokii.pc.in gnvcal.c vcal.lx
