@@ -289,10 +289,14 @@ install the git package for your distribution and follow these steps:
 	1. Open your favorite shell, cd to the directory that will
 	   contain the gnokii directory and execute this command:
 
-	   git clone git://git.savannah.nongnu.org/gnokii.git
+	   git clone --depth 1 git://git.savannah.nongnu.org/gnokii.git
 
 	   this creates a 'gnokii' directory in which the sources and
-	   other needed files are downloaded
+	   other needed files are downloaded; the --depth 1 argument
+	   creates a shallow clone which is slightly smaller and
+	   quicker to download (it is adequate for compiling but has
+	   some limitations, omit it if you want the full history, see
+	   man git-clone for details).
 
 	   In future you can update to the latest sources running the
 	   following command from inside the 'gnokii' directory:
