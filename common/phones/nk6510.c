@@ -329,7 +329,7 @@ static gn_memory_type get_gn_memory_type(int memory_type);
 
 static gn_incoming_function_type nk6510_incoming_functions[] = {
 	{ NK6510_MSG_RESET,	NK6510_IncomingReset },
-       	{ NK6510_MSG_FOLDER,	NK6510_IncomingFolder },
+	{ NK6510_MSG_FOLDER,	NK6510_IncomingFolder },
 	{ NK6510_MSG_SMS,	NK6510_IncomingSMS },
 	{ NK6510_MSG_PHONEBOOK,	NK6510_IncomingPhonebook },
 	{ NK6510_MSG_NETSTATUS,	NK6510_IncomingNetwork },
@@ -394,7 +394,7 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return pgen_terminate(data, state);
 	case GN_OP_GetModel:
 		return NK6510_GetModel(data, state);
-      	case GN_OP_GetRevision:
+	case GN_OP_GetRevision:
 		return NK6510_GetRevision(data, state);
 	case GN_OP_GetImei:
 		return NK6510_GetIMEI(data, state);
@@ -612,7 +612,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 			 *	    Data Sequence
 			 *	      UUID16 : 0x0003 - RFCOMM
 			 *	      Channel/Port (Integer) : 0xe
- 			 *
+			 *
 			 * The main secret of this is that they use RFCOMM channel 14 for their
 			 * communication protocol."
 			 */
@@ -1205,7 +1205,7 @@ static gn_error NK6510_GetSMSStatus(gn_data *data, struct gn_statemachine *state
 
 static gn_error NK6510_GetSMSFolders_S40_30(gn_data *data, struct gn_statemachine *state)
 {
-    	gn_file_list fl;
+	gn_file_list fl;
 	gn_error error;
 	int j, i;
 
@@ -1287,7 +1287,7 @@ static gn_error NK6510_CreateSMSFolder(gn_data *data, struct gn_statemachine *st
 
 static gn_error NK6510_GetSMSFolderStatus_S40_30(gn_data *data, struct gn_statemachine *state)
 {
-    	gn_file_list fl;
+	gn_file_list fl;
 	gn_error error;
 	int j, k;
 
@@ -1346,7 +1346,7 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 	 * Inbox and outbox messages can be either in SIM or phone memory.
 	 * Other folders are just in the phone memory.
 	 */
-       	if ((req[5] == NK6510_MEMORY_IN) || (req[5] == NK6510_MEMORY_OU)) { /* special case IN/OUTBOX */
+	if ((req[5] == NK6510_MEMORY_IN) || (req[5] == NK6510_MEMORY_OU)) { /* special case IN/OUTBOX */
 		dprintf("Special case IN/OUTBOX in GetSMSFolderStatus!\n");
 
 		/* Get ME folder list */
@@ -1404,7 +1404,7 @@ static gn_error NK6510_GetSMSMessageStatus(gn_data *data, struct gn_statemachine
 
 	dprintf("Getting SMS message (%i in folder %i) status...\n", data->raw_sms->number, data->raw_sms->memory_type);
 
-       	req[5] = get_memory_type(data->raw_sms->memory_type);
+	req[5] = get_memory_type(data->raw_sms->memory_type);
 	req[6] = data->raw_sms->number / 256;
 	req[7] = data->raw_sms->number % 256;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_FOLDER, 10);
@@ -1594,8 +1594,8 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 
 static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *state)
 {
-    	gn_file_list fl, fl2;
-    	gn_file fi;
+	gn_file_list fl, fl2;
+	gn_file fi;
 	gn_error error;
 	int j, i, cont_len, tota_len, offset;
 	unsigned char *bin;
@@ -1676,8 +1676,8 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 
 static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *state)
 {
-    	gn_file_list fl, fl2;
-    	gn_file fi;
+	gn_file_list fl, fl2;
+	gn_file fi;
 	gn_error error;
 	int j, i;
 
@@ -1739,15 +1739,15 @@ static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *s
 static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = { FBUS_FRAME_HEADER, 0x00,
-				   0x02,			/* 1 = SIM, 2 = ME 	*/
-				   0x02,			/* Folder   		*/
-				   0x00, 0x00,			/* Location 		*/
-				   0x03 };			/* SMS state 		*/
+				   0x02,			/* 1 = SIM, 2 = ME	*/
+				   0x02,			/* Folder		*/
+				   0x00, 0x00,			/* Location		*/
+				   0x03 };			/* SMS state		*/
 #if 0
 	unsigned char req2[200] = { FBUS_FRAME_HEADER, 0x16,
-				    0x02,			/* 1 = SIM, 2 = ME 	*/
-				    0x02,			/* Folder   		*/
-				    0x00, 0x01};		/* Location 		*/
+				    0x02,			/* 1 = SIM, 2 = ME	*/
+				    0x02,			/* Folder		*/
+				    0x00, 0x01};		/* Location		*/
 	unsigned char desc[10];
 #endif
 	gn_error error = GN_ERR_NONE;
@@ -2198,7 +2198,7 @@ static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x68, 0x00};
 	int i;
 
-  	if (!data->file_list) return GN_ERR_INTERNALERROR;
+	if (!data->file_list) return GN_ERR_INTERNALERROR;
 	data->file_list->file_count = 0;
 
 	i = strlen(data->file_list->path);
@@ -2215,8 +2215,8 @@ static gn_error NK6510_GetFileDetailsById(gn_data *data, struct gn_statemachine 
 					0x00, 0x00 }; /* Location */
 	int length, i;
 
-  	if (!data->file)
-  		return GN_ERR_INTERNALERROR;
+	if (!data->file)
+		return GN_ERR_INTERNALERROR;
 
 	length = data->file->id[0];
 	for (i = 0; i < length; i++) {
@@ -2235,7 +2235,7 @@ static gn_error NK6510_GetFileId(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x82, 0x00};
 	int i;
 
-  	if (!data->file) return GN_ERR_INTERNALERROR;
+	if (!data->file) return GN_ERR_INTERNALERROR;
 
 	i = strlen(data->file->name);
 	req[5] = char_unicode_encode(req+6, data->file->name, i);
@@ -2262,8 +2262,8 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 		DRVINSTANCE(state)->progress_callback_data = data->callback_data;
 	}
 
-  	if (!data->file)
-  		return GN_ERR_INTERNALERROR;
+	if (!data->file)
+		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
 
 	/* Get the file size */
@@ -2280,8 +2280,8 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 	/* Start the transfer */
 	req2[7] = char_unicode_encode(req2 + 8, data->file->name, i);
 	data->file->togo = 0;
-      	if (sm_message_send(req2[7] + 12, NK6510_MSG_FILE, req2, state))
-      		return GN_ERR_NOTREADY;
+	if (sm_message_send(req2[7] + 12, NK6510_MSG_FILE, req2, state))
+		return GN_ERR_NOTREADY;
 	err = sm_block(NK6510_MSG_FILE, data, state);
 	if (err != GN_ERR_NONE)
 		return err;
@@ -2341,8 +2341,8 @@ static gn_error NK6510_GetFileById(gn_data *data, struct gn_statemachine *state)
 		DRVINSTANCE(state)->progress_callback_data = data->callback_data;
 	}
 
-  	if (!data->file)
-  		return GN_ERR_INTERNALERROR;
+	if (!data->file)
+		return GN_ERR_INTERNALERROR;
 
 	length = data->file->id[0];
 	for (i = 0; i < length; i++) {
@@ -2393,15 +2393,15 @@ static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
 	gn_error err;
 	int i;
 
-  	if (!data->file)
-  		return GN_ERR_INTERNALERROR;
+	if (!data->file)
+		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
 
 	/* Start the transfer */
 	req1[7] = char_unicode_encode(req1+8, data->file->name, i);
 	data->file->togo = 0;
-      	if (sm_message_send(req1[7]+12, NK6510_MSG_FILE, req1, state))
-      		return GN_ERR_NOTREADY;
+	if (sm_message_send(req1[7]+12, NK6510_MSG_FILE, req1, state))
+		return GN_ERR_NOTREADY;
 	err = sm_block(NK6510_MSG_FILE, data, state);
 	if (err != GN_ERR_NONE)
 		return err;
@@ -2442,8 +2442,8 @@ static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x62, 0x00};
 	int i;
 
-  	if (!data->file)
-  		return GN_ERR_INTERNALERROR;
+	if (!data->file)
+		return GN_ERR_INTERNALERROR;
 	i = strlen(data->file->name);
 
 	req[5] = char_unicode_encode(req+6, data->file->name, i);
@@ -2458,8 +2458,8 @@ static gn_error NK6510_DeleteFileById(gn_data *data, struct gn_statemachine *sta
 					0x00, 0x00}; /* file identifier */
 	int i, length;
 
-  	if (!data->file)
-  		return GN_ERR_INTERNALERROR;
+	if (!data->file)
+		return GN_ERR_INTERNALERROR;
 
 	length = data->file->id[0];
 	for (i = 0; i < length; i++) {
@@ -2486,7 +2486,7 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			i = (message[8] << 8) + message[9];
 			memcpy(data->file->file + data->file->file_length - data->file->togo, message+10, i);
 			data->file->togo -= i;
-   		}
+		}
 		break;
 	case 0x15: /* Answer for GetFileDetailsById */
 		if (!data->file || !data->file_list) {
@@ -2590,7 +2590,7 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			i = (message[8] << 8) + message[9];
 			memcpy(data->file->file + data->file->file_length - data->file->togo, message+10, i);
 			data->file->togo -= i;
-   		}
+		}
 		break;
 	case 0x63:
 		/* Deleted ok */
@@ -5566,19 +5566,19 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("   IP: %s\n", data->wap_setting->gsm_data_ip);
 		pos += string_length;
 
-  		string_length = message[pos++] << 8;
+		string_length = message[pos++] << 8;
 		string_length = (string_length | message[pos++]) << 1;
 		char_unicode_decode(data->wap_setting->number, message + pos, string_length);
 		dprintf("   Number: %s\n", data->wap_setting->number);
 		pos += string_length;
 
-  		string_length = message[pos++] << 8;
+		string_length = message[pos++] << 8;
 		string_length = (string_length | message[pos++]) << 1;
 		char_unicode_decode(data->wap_setting->gsm_data_username, message + pos, string_length);
 		dprintf("   Username: %s\n", data->wap_setting->gsm_data_username);
 		pos += string_length;
 
-  		string_length = message[pos++] << 8;
+		string_length = message[pos++] << 8;
 		string_length = (string_length | message[pos++]) << 1;
 		char_unicode_decode(data->wap_setting->gsm_data_password, message + pos, string_length);
 		dprintf("   Password: %s\n", data->wap_setting->gsm_data_password);
@@ -5598,13 +5598,13 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("   Access point: %s\n", data->wap_setting->access_point_name);
 		pos += string_length;
 
-  		string_length = message[pos++] << 8;
+		string_length = message[pos++] << 8;
 		string_length = (string_length | message[pos++]) << 1;
 		char_unicode_decode(data->wap_setting->gprs_ip, message + pos, string_length);
 		dprintf("   IP: %s\n", data->wap_setting->gprs_ip);
 		pos += string_length;
 
-  		string_length = message[pos++] << 8;
+		string_length = message[pos++] << 8;
 		string_length = (string_length | message[pos++]) << 1;
 		char_unicode_decode(data->wap_setting->gprs_username, message + pos, string_length);
 		dprintf("   Username: %s\n", data->wap_setting->gprs_username);

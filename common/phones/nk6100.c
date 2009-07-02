@@ -210,7 +210,7 @@ struct {
 	char *sw_version;
 	int capabilities;
 } static nk6100_capabilities[] = {
-    	/*
+	/*
 	 * Capability setup for phone models.
 	 * Example:
 	 * { "NSE-3",	NULL,		NK6100_CAP_OLD_CALL_API }
@@ -1590,9 +1590,9 @@ static gn_error GetSMSMessage(gn_data *data, struct gn_statemachine *state)
 
 static gn_error SaveSMSMessage(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x04, 
+	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x04,
 				  0x07, /* status */
-				  0x02, 
+				  0x02,
 				  0x00, /* number */
 				  0x02 }; /* type */
 	int len;
@@ -1605,8 +1605,8 @@ static gn_error SaveSMSMessage(gn_data *data, struct gn_statemachine *state)
 
 	if (data->raw_sms->type == GN_SMS_MT_Deliver) {	/* Inbox */
 		dprintf("INBOX!\n");
-		req[4] 		= 0x03;			/* SMS State - GN_SMS_Unread */
-		req[7] 		= 0x00;			/* SMS Type */
+		req[4]		= 0x03;			/* SMS State - GN_SMS_Unread */
+		req[7]		= 0x00;			/* SMS Type */
 	}
 
 	if (data->raw_sms->status == GN_SMS_Sent)
@@ -1784,7 +1784,7 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 	case 0x0b:
 		dprintf("Message: SMS deleted successfully.\n");
 		break;
-	
+
 	/* delete sms failed */
 	case 0x0c:
 		switch (message[4]) {
@@ -2452,7 +2452,7 @@ static gn_error IncomingProfile(int messagetype, unsigned char *message, int len
 				return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
-	
+
 	/* Set ringtone OK */
 	case 0x37:
 		return GN_ERR_NONE;
@@ -2669,7 +2669,7 @@ static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 	}
 
 	/* FIXME: use some constant not 255 magic number */
-	if (!strcmp(DRVINSTANCE(state)->model, "NHM-5") 	/* Nokia 3310 */
+	if (!strcmp(DRVINSTANCE(state)->model, "NHM-5")		/* Nokia 3310 */
 	 || !strcmp(DRVINSTANCE(state)->model, "NHM-6")) {	/* Nokia 3330 */
 		/* in this case we have: length, encoding indicator, text */
 		namelen = pnok_string_encode(pos + 2, 255, note->text);
@@ -2724,9 +2724,8 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 				return GN_ERR_MEMORYFULL;
 			case 0x7d:
 				return GN_ERR_UNKNOWN;
-		        case 0x81:
-		        	/* calendar functions are busy. well, this status code is better than nothing */
-		        	return GN_ERR_LINEBUSY;
+		        case 0x81: /* calendar functions are busy. well, this status code is better than nothing */
+				return GN_ERR_LINEBUSY;
 			case 0x8d: /* waiting for PIN */
 				return GN_ERR_CODEREQUIRED;
 			default:
@@ -2777,7 +2776,7 @@ static gn_error IncomingCalendar(int messagetype, unsigned char *message, int le
 			note->alarm.timestamp.second = *pos++;
 			note->alarm.enabled = (note->alarm.timestamp.year != 0);
 			n = *pos++;
-			if (!strcmp(DRVINSTANCE(state)->model, "NHM-5") 	/* Nokia 3310 */
+			if (!strcmp(DRVINSTANCE(state)->model, "NHM-5")		/* Nokia 3310 */
 			 || !strcmp(DRVINSTANCE(state)->model, "NHM-6")) {	/* Nokia 3330 */
 				pos++; /* skip encoding byte FIXME: decode accordingly */
 				n--;   /* text length */
@@ -3144,7 +3143,7 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 			data->raw_data->length = length - 20;
 		}
 		break;
-	
+
 	/* Set bin ringtone result */
 	case 0xa0:
 		switch (message[4]) {
@@ -3467,7 +3466,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		if (DRVINSTANCE(state)->call_notification)
 			DRVINSTANCE(state)->call_notification(GN_CALL_Incoming, &cinfo, state, DRVINSTANCE(state)->call_callback_data);
 		return GN_ERR_UNSOLICITED;
-	
+
 	/* answered call */
 	case 0x07:
 		return GN_ERR_UNSOLICITED;
@@ -3481,7 +3480,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 		if (!data->call_info) return GN_ERR_UNSOLICITED;
 		data->call_info->call_id = message[4];
 		break;
-	
+
 	/* message after "terminated call" */
 	case 0x0a:
 		return GN_ERR_UNSOLICITED;
@@ -3551,12 +3550,12 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 	case 0x43:
 		if (message[4] != 0x02) return GN_ERR_UNHANDLEDFRAME;
 		return GN_ERR_UNSOLICITED;
-  	
+
 	/* FIXME: response from answer1? - bozo */
 	case 0x44:
 		if (message[4] != 0x68) return GN_ERR_UNHANDLEDFRAME;
 		return GN_ERR_UNSOLICITED;
-	
+
 	/* DTMF sent */
 	case 0x51:
 		break;
@@ -3621,13 +3620,13 @@ static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int le
 		DRVINSTANCE(state)->rlp_rx_callback(NULL);
 		return GN_ERR_NONE;
 	}
-	
+
 	/*
 	 * Nokia uses 240 bit frame size of RLP frames as per GSM 04.22
 	 * specification, so Header consists of 16 bits (2 bytes). See section
 	 * 4.1 of the specification.
 	 */
-	
+
 	frame.Header[0] = message[2];
 	frame.Header[1] = message[3];
 
@@ -3635,9 +3634,9 @@ static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int le
 	 * Next 200 bits (25 bytes) contain the Information. We store the
 	 * information in the Data array.
 	 */
-	
+
 	memcpy(frame.Data, message + 4, 25);
-	
+
 	/* The last 24 bits (3 bytes) contain FCS. */
 	frame.FCS[0] = message[29];
 	frame.FCS[1] = message[30];
@@ -3732,7 +3731,7 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 			default:
 				return GN_ERR_UNHANDLEDFRAME;
 		}
-		
+
 	/* security code status */
 	case 0x08:
 		dprintf("Message: Security Code status received: ");
@@ -3747,12 +3746,12 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 		}
 		if (data->security_code) data->security_code->type = message[4];
 		break;
-	
+
 	/* security code OK */
 	case 0x0b:
 		dprintf("Message: Security code accepted.\n");
 		break;
-	
+
 	default:
 		return GN_ERR_UNHANDLEDFRAME;
 	}

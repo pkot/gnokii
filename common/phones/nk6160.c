@@ -139,7 +139,7 @@ static gn_error initialise(struct gn_statemachine *state)
 	if (!(drvinst = malloc(sizeof(nk6160_driver_instance))))
 		return GN_ERR_FAILED;
 	state->driver.driver_instance = drvinst;
-	
+
 	switch (state->config.connection_type) {
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
@@ -174,7 +174,7 @@ static gn_error initialise(struct gn_statemachine *state)
 	data.model = model;
 
 	error = identify(&data, state);
-	if (error) 
+	if (error)
 		goto out;
 	dprintf("model: '%s'\n", model);
 	if ((pm = gn_phone_model_get(model)) == NULL) {
@@ -182,7 +182,7 @@ static gn_error initialise(struct gn_statemachine *state)
 		dump("Please read Docs/Bugs and send a bug report!\n");
 		error = GN_ERR_INTERNALERROR;
 	}
-out:	
+out:
 	if (error) {
 		dprintf("Initialization failed (%d)\n", error);
 		free(NK6160_DRVINST(state));

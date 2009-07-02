@@ -1088,7 +1088,7 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 			memcpy(data->raw_sms->message_center, message + 9, 12);
 			memcpy(data->raw_sms->remote_number, message + get_data(T, 25, 26, 24, 22), 12);
 		}
-		if (T == GN_SMS_MT_DeliveryReport) 
+		if (T == GN_SMS_MT_DeliveryReport)
 			memcpy(data->raw_sms->time, message + 43, 7);
 
 		data->raw_sms->dcs = message[23];
@@ -1372,7 +1372,7 @@ static gn_error NK7110_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 
 	dprintf("Getting SMS Folder (%i) status ...\n", req[4]);
 
-       	if (req[4] == NK7110_MEMORY_IN) { /* special case INBOX */
+	if (req[4] == NK7110_MEMORY_IN) { /* special case INBOX */
 
 		dprintf("Special case INBOX in GetSMSFolderStatus!\n");
 
@@ -2004,7 +2004,7 @@ static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 					req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
 					req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
 					data->calnote->time.year = tmptime.year;
-					
+
 					error = sm_message_send(6, NK7110_MSG_CALENDAR, req, state);
 					if (error == GN_ERR_NONE) {
 						error = sm_block(NK7110_MSG_CALENDAR, data, state);
@@ -2386,9 +2386,9 @@ static int PackWAPString(unsigned char *dest, unsigned char *string, int length_
 static gn_error NK7110_WriteWAPSetting(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[200] = { FBUS_FRAME_HEADER, 0x18,
-				   0x00 }; 		/* Location */
+				   0x00 };		/* Location */
 	unsigned char req1[200] = { FBUS_FRAME_HEADER, 0x1e,
-				    0x00 }; 		/* Location */
+				    0x00 };		/* Location */
 	unsigned char req2[] = { FBUS_FRAME_HEADER, 0x15,
 				 0x00 };		/* Location */
 
@@ -3366,7 +3366,7 @@ static gn_error NK7110_MakeCall(gn_data *data, struct gn_statemachine *state)
 	req[pos++] = len / 2;
 	pos += len;
 
-	switch (data->call_info->send_number) {	
+	switch (data->call_info->send_number) {
 	case GN_CALL_Never:   voice_end[5] = 0x01; break;
 	case GN_CALL_Always:  voice_end[5] = 0x00; break;
 	case GN_CALL_Default: voice_end[5] = 0x00; break;

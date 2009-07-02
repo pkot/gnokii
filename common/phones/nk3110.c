@@ -359,7 +359,7 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 	 * stored in DRVINSTANCE(state)->user_data, because trying to catch
 	 * all the user data frames using sm_block() would create a race
 	 * condition. */
-	   
+
 	timeout.tv_sec = 10;
 	timeout.tv_usec = 0;
 	gettimeofday(&now, NULL);
@@ -373,7 +373,7 @@ static gn_error P3110_GetSMSMessage(gn_data *data, struct gn_statemachine *state
 
 	if (DRVINSTANCE(state)->user_data_count < data->raw_sms->length)
 		return GN_ERR_TIMEOUT;
-	
+
 	/* the data has been received, copy it to the right place */
 	memcpy(data->raw_sms->user_data, DRVINSTANCE(state)->user_data,
 	       data->raw_sms->length);
@@ -429,8 +429,8 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 	/* The phone expects ASCII data instead of 7bit packed data, which
 	 * is the format used in raw_sms. So the data has to be unpacked
 	 * again. */
-	
-	ulength = char_7bit_unpack(0, data->raw_sms->user_data_length, 
+
+	ulength = char_7bit_unpack(0, data->raw_sms->user_data_length,
 					sizeof(udata),
 					data->raw_sms->user_data, udata);
 #else
@@ -478,7 +478,7 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 
 			/* for blocks other than the last one, wait for ack;
 			 * for last block, wait for reply message instead */
-			 
+
 			if (uremain == 0) break;
 
 			error = sm_block_ack(state);
@@ -509,13 +509,13 @@ static gn_error P3110_SendSMSMessage(gn_data *data, struct gn_statemachine *stat
 static gn_error P3110_ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[2];
-	
+
 	req[0] = get_memory_type(data->phonebook_entry->memory_type);
 	req[1] = data->phonebook_entry->location;
-	
+
 	if (sm_message_send(2, 0x43, req, state) != GN_ERR_NONE)
 		return GN_ERR_NOTREADY;
-	
+
 	return sm_block(0x46, data, state);
 }
 
@@ -523,22 +523,22 @@ static gn_error P3110_WritePhonebook(gn_data *data, struct gn_statemachine *stat
 {
 	int namelen, numberlen;
 	unsigned char req[256];
-	
+
 	req[0] = get_memory_type(data->phonebook_entry->memory_type);
 	req[1] = data->phonebook_entry->location;
-	
+
 	namelen = strlen(data->phonebook_entry->name);
 	numberlen = strlen(data->phonebook_entry->number);
-	
+
 	req[2] = namelen;
 	memcpy(req + 3, data->phonebook_entry->name, namelen);
-	
+
 	req[3 + namelen] = numberlen;
 	memcpy(req + 3 + namelen + 1, data->phonebook_entry->number, numberlen);
 
 	if (sm_message_send(3 + namelen + 1 + numberlen, 0x42, req, state) != GN_ERR_NONE)
 		return GN_ERR_NOTREADY;
-	
+
 	return sm_block(0x44, data, state);
 }
 
@@ -546,7 +546,7 @@ static gn_error P3110_MakeCall(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256], call_type;
 	int pos = 0, numlen;
-	
+
 	switch (data->call_info->type) {
 	case GN_CALL_Voice:
 		call_type = 0x05;
@@ -565,15 +565,15 @@ static gn_error P3110_MakeCall(gn_data *data, struct gn_statemachine *state)
 	req[pos++] = call_type;
 	req[pos++] = 0x01;	/* Address / number type? */
 	req[pos++] = numlen;
-		
+
 	memcpy(req + pos, data->call_info->number, numlen);
 	pos += numlen;
-	
+
 	/* Magic bytes taken from gnokii 0.3.5 code
 	 * These probably set up some timers or something...
 	 * According to old comments, InitField1 is not needed for
 	 * voice calls, but doesn't seem to do any harm. */
-	
+
 	req[pos++] = 0x07; /* Length of InitField1 */
 	req[pos++] = 0xa2; /* InitField1 content */
 	req[pos++] = 0x88;
@@ -584,11 +584,11 @@ static gn_error P3110_MakeCall(gn_data *data, struct gn_statemachine *state)
 	req[pos++] = 0xa8;
 
 	req[pos++] = 0x00; /* Length of InitField2 */
-	req[pos++] = 0x00; /* Length of InitField2 */	
+	req[pos++] = 0x00; /* Length of InitField2 */
 
 	if (sm_message_send(pos, 0x0a, req, state) != GN_ERR_NONE)
 		return GN_ERR_NOTREADY;
-	
+
 	return sm_block_no_retry_timeout(0x0e, 500, data, state);
 }
 
@@ -596,17 +596,17 @@ static gn_error P3110_MakeCall(gn_data *data, struct gn_statemachine *state)
 static gn_error P3110_SendRLPFrame(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[31];
-	
+
 	req[0] = (data->rlp_out_dtx) ? 0x01 : 0x00;
 	memcpy(req + 1, (unsigned char *) data->rlp_frame, 30);
-	
+
 	return sm_message_send(31, 0x01, req, state);
 }
 
 static gn_error P3110_SetRLPRXCallback(gn_data *data, struct gn_statemachine *state)
 {
 	DRVINSTANCE(state)->rlp_rx_callback = data->rlp_rx_callback;
-	
+
 	return GN_ERR_NONE;
 }
 
@@ -619,20 +619,20 @@ static gn_error P3110_IncomingNothing(int messagetype, unsigned char *message, i
 static gn_error P3110_IncomingRLPFrame(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_rlp_f96_frame frame;
-	
+
 	if (!DRVINSTANCE(state)->rlp_rx_callback) return GN_ERR_NONE;
 
 	frame.Header[0] = message[2];
 	frame.Header[1] = message[3];
-	
+
 	memcpy(frame.Data, message + 4, 25);
-	
+
 	frame.FCS[0] = message[29];
 	frame.FCS[1] = message[30];
 	frame.FCS[2] = message[31];
-	
+
 	DRVINSTANCE(state)->rlp_rx_callback(&frame);
-	
+
 	return GN_ERR_NONE;
 }
 
@@ -875,7 +875,6 @@ static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message,
 	else
 		data->raw_sms->udh_indicator = 0;
 
-
 	data->raw_sms->dcs = message[7];
 	/* FIXME the DCS is set to indicate an 8-bit message in order
 	 * to avoid the conversion from 7bit in gsm-sms.c
@@ -907,7 +906,7 @@ static gn_error P3110_IncomingSMSHeader(int messagetype, unsigned char *message,
 		 * strings with a length byte. So first the data is copied to
 		 * a temp string, zero termination is added and the result is
 		 * fed to a BCD conversion function. */
-	
+
 		strncpy(smsc, message + 17, smsc_length);
 		smsc[smsc_length] = '\0';
 		smsc_number_type = (smsc[0] == '+') ? GN_GSM_NUMBER_International : GN_GSM_NUMBER_Unknown;
@@ -1073,8 +1072,8 @@ static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, i
 			       message + 14 + option_number_length,
 			       center_number_length);
 			data->message_center->smsc.number[center_number_length] = '\0';
-			data->message_center->smsc.type = 
-				(data->message_center->smsc.number[0] == '+') ? 
+			data->message_center->smsc.type =
+				(data->message_center->smsc.number[0] == '+') ?
 					GN_GSM_NUMBER_International :
 					GN_GSM_NUMBER_Unknown;
 		}
@@ -1113,7 +1112,7 @@ static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, i
 static gn_error P3110_IncomingPhonebookRead(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	int namelen, numberlen;
-	
+
 	if(!data->phonebook_entry) return GN_ERR_INTERNALERROR;
 
 	switch (message[0]) { /* unfold message type */
@@ -1132,23 +1131,23 @@ static gn_error P3110_IncomingPhonebookRead(int messagetype, unsigned char *mess
 
 	/* empty locations are reported with empty name and number, so
 	 * check for that case here */
-	 
+
 	if (message[2] == 0x00 && message[3] == 0x00)
 		return GN_ERR_EMPTYLOCATION;
 
 	data->phonebook_entry->caller_group = 0;
 	data->phonebook_entry->subentries_count = 0;
-	
+
 	namelen = message[2];
 
 	memcpy(data->phonebook_entry->name, message + 3, namelen);
 	*(data->phonebook_entry->name + namelen) = '\0';
 
 	numberlen = message[3 + namelen];
-	
+
 	memcpy(data->phonebook_entry->number, message + 3 + namelen + 1, numberlen);
 	*(data->phonebook_entry->number + numberlen) = '\0';
-		
+
 	return GN_ERR_NONE;
 }
 
@@ -1218,7 +1217,7 @@ static gn_error P3110_IncomingStatusInfo(int messagetype, unsigned char *message
 	}
 
 	/* Only output connection status byte now as the RF and Battery
- 	   levels are displayed by the main gnokii code. */
+	   levels are displayed by the main gnokii code. */
 	dprintf("Status: %s, Battery level: %d, RF level: %d.\n",
 		StatusStr[message[2]], message[4], message[3]);
 	return GN_ERR_NONE;
@@ -1265,12 +1264,12 @@ static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsig
 
 	/* SMSC and remote number are in BCD format, but the phone wants them
 	 * in plain ASCII, so we have to convert. */
-	 
+
 	snprintf(smsc, sizeof(smsc), "%s", char_bcd_number_get(data->raw_sms->message_center));
 	snprintf(remote, sizeof(remote), "%s", char_bcd_number_get(data->raw_sms->remote_number));
 
 	dprintf("smsc:'%s' remote:'%s'\n", smsc, remote);
-	
+
 	if (save_sms) { /* make header for saving SMS */
 		req[pos++] = get_memory_type(data->raw_sms->memory_type);
 		req[pos++] = data->raw_sms->status;
@@ -1298,12 +1297,12 @@ static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsig
 	}
 
 	req[pos++] = data->raw_sms->pid;
- 	req[pos++] = data->raw_sms->dcs;
+	req[pos++] = data->raw_sms->dcs;
 
 	/* The following 7 bytes define validity for SMSs to be sent.
 	 * When saving they are apparently ignored - or somehow incorporated
 	 * into the garbage you get in the date bytes when you read a saved
-	 * SMS. So we'll just put validity in here now. */ 
+	 * SMS. So we'll just put validity in here now. */
 
 	memcpy(req + pos, data->raw_sms->validity, 7);
 	pos += 7;
@@ -1317,7 +1316,7 @@ static int sms_header_encode(gn_data *data, struct gn_statemachine *state, unsig
 
 	req[pos++] = strlen(smsc);
 	memcpy(req + pos, smsc, strlen(smsc));
-	pos += strlen(smsc);	
+	pos += strlen(smsc);
 	req[pos++] = strlen(remote);
 	memcpy(req + pos, remote, strlen(remote));
 	pos += strlen(remote);

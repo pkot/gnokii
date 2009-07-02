@@ -27,7 +27,7 @@
 
   Notice that this code was (partly) converted to "new" structure, but it
   does not have code for bus separated. I think that separating it would
-  be waste of effort... 					--pavel
+  be waste of effort...					--pavel
 
 */
 
@@ -78,10 +78,10 @@ static char *Revision = NULL,
 #define INFO \
 { \
 	"2110|2140|6080",		/* Models */ \
-	100, 				/* Max RF Level */ \
+	100,				/* Max RF Level */ \
 	0,				/* Min RF Level */ \
 	GRF_Percentage,			/* RF level units */ \
-	100,   				/* Max Battery Level */ \
+	100,				/* Max Battery Level */ \
 	0,				/* Min Battery Level */ \
 	GBU_Percentage,			/* Battery level units */ \
 	GDT_None,			/* No date/time support */ \
@@ -262,16 +262,16 @@ SendFrame( u8 *buffer, u8 command, u8 length )
 	dprintf("writing...");
 	LastChar = GetTime();
 	if (xwrite(pkt, current) == -1)
-		return  GN_ERR_INTERNALERROR);
+		return GN_ERR_INTERNALERROR;
 	if (xread(pkt2, current) == -1)
-		return  GN_ERR_INTERNALERROR);
+		return GN_ERR_INTERNALERROR;
 	dprintf("echook");
 	if (memcmp(pkt, pkt2, current)) {
 		dprintf("Bad echo?!");
 		msleep(1000);
-		return  GN_ERR_TIMEOUT);
+		return GN_ERR_TIMEOUT;
 	}
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 static gn_error
@@ -348,7 +348,7 @@ SMS(GSM_SMSMessage *message, int command)
 		return GN_ERR_BUSY;
 	}
 	SMSpos = 0;
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 
@@ -428,7 +428,7 @@ GetSMSMessage(GSM_Data *data)
 		dprintf("Error in parsesms?\n");
 
 	msleep_poll(1000);		/* If phone lost our ack, it might retransmit data */
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 #if 0
@@ -504,7 +504,7 @@ GetRFLevel(GSM_RFUnits *units, float *level)
 		*level = (100* (float) val) / 60.0;	/* This should be / 99.0 for some models other than nokia-2110 */
 		*units = GRF_Percentage;
 	}
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 static gn_error
@@ -525,7 +525,7 @@ GetBatteryLevel(GSM_BatteryUnits *units, float *level)
 		*units = GBU_Percentage;
 	}
 
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 static gn_error GetVersionInfo(void)
@@ -537,14 +537,14 @@ static gn_error GetVersionInfo(void)
 
 	strncpy( s, (void *) &PacketData[6], sizeof(VersionInfo) );
 
-	for( Revision     = s; *s != 0x0A; s++ ) if( !*s ) return  GN_ERR_NONE);
+	for( Revision     = s; *s != 0x0A; s++ ) if( !*s ) return GN_ERR_NONE;
 	*s++ = 0;
-	for( RevisionDate = s; *s != 0x0A; s++ ) if( !*s ) return  GN_ERR_NONE);
+	for( RevisionDate = s; *s != 0x0A; s++ ) if( !*s ) return GN_ERR_NONE;
 	*s++ = 0;
-	for( Model        = s; *s != 0x0A; s++ ) if( !*s ) return  GN_ERR_NONE);
+	for( Model        = s; *s != 0x0A; s++ ) if( !*s ) return GN_ERR_NONE;
 	*s++ = 0;
 	ddprintf("Revision %s, Date %s, Model %s\n", Revision, RevisionDate, Model );
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 /* Our "Not implemented" functions */
@@ -569,15 +569,15 @@ GetMemoryStatus(GSM_MemoryStatus *Status)
 		Status->Free = 150;
 		break;
 	default:
-		return  GN_ERR_NOTIMPLEMENTED);
+		return GN_ERR_NOTIMPLEMENTED;
 	}
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 static bool
 SendRLPFrame(RLP_F96Frame *frame, bool out_dtx)
 {
-	return (false);
+	return false;
 }
 
 static char *
@@ -818,14 +818,14 @@ bool OpenSerial(void)
 	result = device_open(PortDevice, true, false, false, GCT_Serial);
 	if (!result) {
 		dprintf( "Failed to open %s ...\n", PortDevice);
-		return (false);
+		return false;
 	}
 
 	ddprintf("%s opened...\n", PortDevice);
 
 	device_changespeed(9600);
 	device_setdtrrts(1, 1);
-	return (true);
+	return true;
 }
 
 static gn_error
@@ -1173,7 +1173,7 @@ GetPhonebookLocation(GSM_PhonebookEntry *entry)
 	entry->Empty = false;
 	entry->Group = 0;
 
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 /* Routine to write phonebook location in phone. Designed to be called by
@@ -1202,7 +1202,7 @@ WritePhonebookLocation(GSM_PhonebookEntry *entry)
 	printf("type= %x\n", PacketData[5]);
 	printf("location= %x\n", PacketData[6]);
 	printf("status= %x\n", PacketData[7]);
-	return  GN_ERR_NONE);
+	return GN_ERR_NONE;
 }
 
 static gn_error
@@ -1266,10 +1266,10 @@ gn_error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sta
 		err = SMS(data->SMSMessage, 3);
 		break;
 	case GOP_ReadPhonebook:
-	  	err = GetPhonebookLocation(data->PhonebookEntry);
+		err = GetPhonebookLocation(data->PhonebookEntry);
 		break;
 	case GOP_WritePhonebook:
-	  	err = WritePhonebookLocation(data->PhonebookEntry);
+		err = WritePhonebookLocation(data->PhonebookEntry);
 		break;
 	case GOP_OnSMS:
 		OnSMSFn = data->OnSMS;
@@ -1280,7 +1280,7 @@ gn_error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sta
 			CheckIncomingSMS(4);
 			CheckIncomingSMS(5);
 			err = SMS_Reserve(state);
-		} 
+		}
 		else	err = SMS_UnReserve(state);
 		break;
 	case GOP_PollSMS:			/* Our phone is able to notify us... but we do not want to burn 100% CPU polling */
