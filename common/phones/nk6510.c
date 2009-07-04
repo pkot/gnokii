@@ -4955,6 +4955,7 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 			dprintf(" unknown security Code wrong!\n");
 			break;
 		}
+		return GN_ERR_INVALIDSECURITYCODE;
 		break;
 	case 0x12:
 		dprintf("Security Code status received: ");
@@ -5017,9 +5018,18 @@ static gn_error NK6510_EnterSecurityCode(gn_data *data, struct gn_statemachine *
 				 0x02 }; /* 0x02 PIN, 0x03 PUK */
 	int len ;
 
-	/* Only PIN for the moment */
-
 	if (!data->security_code) return GN_ERR_INTERNALERROR;
+	switch (data->security_code->type) {
+	case GN_SCT_SecurityCode:
+		req[4] = 0x01;
+		break;
+	case GN_SCT_Pin:
+		req[4] = 0x02;
+		break;
+	default:
+		dprintf("Unhandled security code type %d\n", data->security_code->type);
+		return GN_ERR_NOTSUPPORTED;
+	}
 
 	len = strlen(data->security_code->code);
 	memcpy(req + 5, data->security_code->code, len);

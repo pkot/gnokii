@@ -153,7 +153,10 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                             0x16: No SIM
                             0x1A: SIM rejected!
 
-    s Enter PIN             { 0x07, 0x02, code, 0x00}
+    s Enter PIN             { 0x07, code, code(ASCII), 0x00}
+                            where code:
+                            0x01: Security Code
+                            0x02: PIN
     r Enter PIN             { return code, reason }
                             where:
                             return code: 0x08 = success

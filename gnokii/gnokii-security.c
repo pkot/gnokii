@@ -61,7 +61,7 @@ void security_usage(FILE *f)
 		));
 #ifdef SECURITY
 	fprintf(f, _(
-		     "          --entersecuritycode PIN|PIN2|PUK|PUK2 (CMD...)\n"
+		     "          --entersecuritycode PIN|PIN2|PUK|PUK2|SEC (CMD...)\n"
 		     "          --getsecuritycodestatus\n"
 		     "          --getsecuritycode\n"
 		     "          --changesecuritycode PIN|PIN2|PUK|PUK2\n"
@@ -173,7 +173,7 @@ static int get_password(const char *prompt, char *pass, int length)
 
 int entersecuritycode_usage(FILE *f, int exitval)
 {
-	fprintf(f, _(" usage: --entersecuritycode PIN|PIN2|PUK|PUK2\n"));
+	fprintf(f, _(" usage: --entersecuritycode PIN|PIN2|PUK|PUK2|SEC\n"));
 	return exitval;
 }
 
@@ -192,10 +192,8 @@ gn_error entersecuritycode(char *type, gn_data *data, struct gn_statemachine *st
 		security_code.type = GN_SCT_Pin2;
 	else if (!strcmp(type, "PUK2"))
 		security_code.type = GN_SCT_Puk2;
-	/* FIXME: Entering of security_code does not work :-(
-	else if (!strcmp(type, "security_code"))
-		security_code.type = GN_SCT_security_code;
-	*/
+	else if (!strcmp(type, "SEC"))
+		security_code.type = GN_SCT_SecurityCode;
 	else
 		return entersecuritycode_usage(stderr, -1);
 
