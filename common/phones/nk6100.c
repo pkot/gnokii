@@ -3120,7 +3120,7 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		if (message[4] != 0x01) return GN_ERR_UNKNOWN;
 		if (data->security_code) {
 			data->security_code->type = message[3];
-			snprintf(data->security_code->code, sizeof(data->security_code->code), "%s", message + 4);
+			snprintf(data->security_code->code, sizeof(data->security_code->code), "%s", message + 5);
 		}
 		break;
 #endif
