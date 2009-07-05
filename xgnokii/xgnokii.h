@@ -53,7 +53,7 @@ typedef struct {
 } UserInf;
 
 typedef struct {
-	gchar *initlength;	/* Init length from .gnokiirc file */
+	gint initlength;	/* Init length from .gnokiirc file */
 	gchar *model;		/* Model from .gnokiirc file. */
 	gchar *port;		/* Serial port from .gnokiirc file */
 	gn_connection_type connection;	/* Connection type from .gnokiirc file */

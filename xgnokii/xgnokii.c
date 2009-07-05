@@ -680,9 +680,10 @@ void GUI_ShowOptions(void)
 
 	gtk_entry_set_text(GTK_ENTRY(configDialogData.connection.model), xgnokiiConfig.model);
 
-	gtk_entry_set_text(GTK_ENTRY(configDialogData.connection.init), xgnokiiConfig.initlength);
-
 	gtk_entry_set_text(GTK_ENTRY(configDialogData.connection.bindir), xgnokiiConfig.bindir);
+
+	gtk_spin_button_set_value(GTK_SPIN_BUTTON(configDialogData.connection.init),
+				  (gdouble) xgnokiiConfig.initlength);
 
 	if (xgnokiiConfig.connection == GN_CT_Irda) {
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(configDialogData.connection.irda),
@@ -1647,20 +1648,6 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_container_add(GTK_CONTAINER(vbox), hbox);
 	gtk_widget_show(hbox);
 
-	label = gtk_label_new(_("Init length:"));
-	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
-	gtk_widget_show(label);
-
-	configDialogData.connection.init = gtk_entry_new_with_max_length(100);
-	gtk_widget_set_usize(configDialogData.connection.init, 220, 22);
-	gtk_entry_set_editable(GTK_ENTRY(configDialogData.connection.init), FALSE);
-	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.init, FALSE, FALSE, 2);
-	gtk_widget_show(configDialogData.connection.init);
-
-	hbox = gtk_hbox_new(FALSE, 0);
-	gtk_container_add(GTK_CONTAINER(vbox), hbox);
-	gtk_widget_show(hbox);
-
 	label = gtk_label_new(_("Bindir:"));
 	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 	gtk_widget_show(label);
@@ -1670,6 +1657,21 @@ static GtkWidget *CreateOptionsDialog(void)
 	gtk_entry_set_editable(GTK_ENTRY(configDialogData.connection.bindir), FALSE);
 	gtk_box_pack_end(GTK_BOX(hbox), configDialogData.connection.bindir, FALSE, FALSE, 2);
 	gtk_widget_show(configDialogData.connection.bindir);
+
+	hbox = gtk_hbox_new(FALSE, 0);
+	gtk_container_add(GTK_CONTAINER(vbox), hbox);
+	gtk_widget_show(hbox);
+
+	label = gtk_label_new(_("Init length:"));
+	gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
+	gtk_widget_show(label);
+
+	adj = (GtkAdjustment *) gtk_adjustment_new(0.0, 0.0, 1000, 1.0, 10.0, 0.0);
+	configDialogData.connection.init = gtk_spin_button_new(adj, 0, 0);
+	gtk_spin_button_set_wrap(GTK_SPIN_BUTTON(configDialogData.connection.init), TRUE);
+	gtk_spin_button_set_numeric(GTK_SPIN_BUTTON(configDialogData.connection.init), TRUE);
+	gtk_box_pack_start(GTK_BOX(hbox), configDialogData.connection.init, FALSE, FALSE, 2);
+	gtk_widget_show(configDialogData.connection.init);
 
 	hbox = gtk_hbox_new(FALSE, 0);
 	gtk_container_add(GTK_CONTAINER(vbox), hbox);
@@ -2284,8 +2286,8 @@ static void ReadConfig(void)
 
 	xgnokiiConfig.model = statemachine->config.model;
 	xgnokiiConfig.port = statemachine->config.port_device;
-	asprintf(&xgnokiiConfig.initlength, "%d", statemachine->config.init_length);
 	xgnokiiConfig.connection = statemachine->config.connection_type;
+	xgnokiiConfig.initlength = statemachine->config.init_length;
 	xgnokiiConfig.bindir = gn_lib_cfg_get("global", "bindir");
 	if (!xgnokiiConfig.bindir)
 		xgnokiiConfig.bindir = gn_lib_cfg_get("gnokiid", "bindir");
