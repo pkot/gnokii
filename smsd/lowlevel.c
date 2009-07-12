@@ -210,7 +210,7 @@ static void RefreshSMS (const gint number)
   if (number < 1)
   {
     gn_log_xdebug ("RefreshSMS is started with number of sms less than 1.\n\
-This should not happen.\nSkiping.");
+This should not happen.\nSkipping.");
     return;
   }
   
