@@ -86,6 +86,9 @@
       reading SMS from non-IN folders               (Daniele Forsi)
     o enable input of security code (this driver now supports PIN
       and SEC and throws an error for other codes)  (Daniele Forsi)
+    o distinguish between "file not found" for --getfile (return an
+      error) and "empty directory" for --getfilelist (do not return
+      an error)                                     (Daniele Forsi)
  * gnapplet driver updates
     o fix string type argument length passed to the phone
                                                         (Paweł Kot)

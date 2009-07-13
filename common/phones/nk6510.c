@@ -2603,13 +2603,18 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			error =  GN_ERR_INVALIDLOCATION;
 			goto out;
 		}
-		if (message[4] == 0x0e) {
-			dprintf("Empty directory\n");
-			goto out;
-		}
 		if (data->file) {
+			if (message[4] == 0x0e) {
+				dprintf("File not found\n");
+				error = GN_ERR_INVALIDLOCATION;
+				goto out;
+			}
 			file = data->file;
 		} else if (data->file_list) {
+			if (message[4] == 0x0e) {
+				dprintf("Empty directory\n");
+				goto out;
+			}
 			inc_filecount(data->file_list);
 			data->file_list->files[data->file_list->file_count - 1] = calloc(1, sizeof(gn_file));
 			file = data->file_list->files[data->file_list->file_count - 1];
