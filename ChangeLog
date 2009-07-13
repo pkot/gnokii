@@ -89,6 +89,9 @@
     o distinguish between "file not found" for --getfile (return an
       error) and "empty directory" for --getfilelist (do not return
       an error)                                     (Daniele Forsi)
+    o when an empty file folder is cached always use a timeout > 0
+      since 0 means "no timeout" and the list is never refreshed;
+      this also affects reading SMS from S40_30     (Daniele Forsi)
  * gnapplet driver updates
     o fix string type argument length passed to the phone
                                                         (Paweł Kot)
@@ -104,6 +107,8 @@
     o add examples directory with action files      (Daniele Forsi)
     o print short version on every startup; it should bring better
       bugreports                                        (Paweł Kot)
+    o reading SMS from S40_30 would stop working when inbox becomes
+      empty (fixed in the driver)                   (Daniele Forsi)
  * xgnokii updates
     o use Icon=phone instead of Icon=cellphone            (Ariszló)
  * fake driver updates

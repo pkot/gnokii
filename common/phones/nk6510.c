@@ -2171,7 +2171,11 @@ static gn_error NK6510_GetFileListCache(gn_data *data, struct gn_statemachine *s
 	 * it takes to get the file list.
 	 */
 	fl = map_get(&map, data->file_list->path, 0);
-	if (fl)
+	/*
+	 * A fl->file_count value of zero would give a timeout of zero which
+	 * means "no timeout", so keep the default value in that case.
+	 */
+	if (fl && fl->file_count)
 		count *= fl->file_count;
 	fl = map_get(&map, data->file_list->path, count);
 	if (!fl) {
