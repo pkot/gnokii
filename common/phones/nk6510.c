@@ -1727,7 +1727,7 @@ static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *s
 		dprintf("Deleting SMS #%d (path: %s, file: %s)\n", data->raw_sms->number, s40_30_mt_mappings[i].path, fl2.files[data->raw_sms->number-1]->name);
 		snprintf(fi.name, sizeof(fi.name), "%s%s", s40_30_mt_mappings[i].path, fl2.files[data->raw_sms->number - 1]->name);
 	} else
-		/* Needs to be INVALID not EMPTY for --getsms IN 1 end to work */
+		/* Needs to be INVALID not EMPTY for --deletesms IN 1 end to work */
 		return GN_ERR_INVALIDLOCATION;
 
 	data->file = &fi;
