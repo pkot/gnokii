@@ -2091,7 +2091,7 @@ static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *stat
 		return error;
 
 	if (data->file_list->file_count < data->raw_mms->number) {
-		/* Needs to be INVALID not EMPTY for --deletemms IN 1 end to work */
+		/* Needs to be INVALID not EMPTY for --getmms IN 1 end to work */
 		return GN_ERR_INVALIDLOCATION;
 	}
 
