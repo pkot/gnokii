@@ -924,7 +924,7 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		rawsms->report              = pdu[offset++];
 		/* TP-PI   TP-Parameter-Indicator */
 		dprintf("TP-Parameter-Indicator: 0x%02x\n", pdu[offset]);
-		parameter_indicator         = pdu[offset++];
+		parameter_indicator         = pdu[offset];
 		/* handle the "extension bit" skipping the following octects, if any (see 9.2.3.27 TP-Parameter-Indicator) */
 		while (pdu[offset++] & 0x80)
 			;
