@@ -12,8 +12,10 @@ port = /dev/ttyS0
 # For MacOSX you will need something like:
 # port = /dev/cu.USA28X1P1.1
 #
-# For Win32 you want to use:
+# For Win32 and ports from 1 to 9 you want to use:
 # port = com1:
+# or similiar. For ports greater than 9 you want to use:
+# port = \\.\COM10
 # or similiar.
 #
 # FreeBSD (probably NetBSD and OpenBSD too) use:

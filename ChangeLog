@@ -103,6 +103,8 @@
       remove reference to non existant -i parameter (Daniele Forsi)
     o add comments to all functions in common/gsm-encoding.c
                                                     (Daniele Forsi)
+    o in sample gnokiirc mention that on Win32 a COM port with a
+      number greater than 9 is named like \\.\COM10 (Daniele Forsi)
  * smsd updates
     o fix segfault when using the nk6100 driver     (Daniele Forsi)
     o add examples directory with action files      (Daniele Forsi)
