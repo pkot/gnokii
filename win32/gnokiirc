@@ -12,6 +12,9 @@ port = com1:
 # port = \\.\COM10
 # or similiar.
 #
+# Use this setting also for the Bluetooth connection:
+# port = aa:bb:cc:dd:ee:ff
+#
 # Set model to the model number of your phone. For the
 # Symbian phones use:
 # model = symbian

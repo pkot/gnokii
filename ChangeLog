@@ -105,6 +105,9 @@
                                                     (Daniele Forsi)
     o in sample gnokiirc mention that on Win32 a COM port with a
       number greater than 9 is named like \\.\COM10 (Daniele Forsi)
+    o in sample gnokiirc for Win32 mention that
+      port = aa:bb:cc:dd:ee:ff is valid too         (Daniele Forsi)
+valid too:ChangeLog
  * smsd updates
     o fix segfault when using the nk6100 driver     (Daniele Forsi)
     o add examples directory with action files      (Daniele Forsi)
