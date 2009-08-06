@@ -62,8 +62,6 @@
       unregistered SIM                                  (Paweł Kot)
     o accept also +CCLK and +CREG responses without double quotes
                                                     (Daniele Forsi)
-    o fix --getnetworkinfo on some phones (Siemens S55) with
-      unregistered SIM                                  (Paweł Kot)
     o fix --getphonebook segfault (bug #25378)          (Paweł Kot)
     o make Huawei phones notify SMS arrival (they seem to send
       notifications only to the second port, eg /dev/ttyUSB1)
