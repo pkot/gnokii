@@ -734,6 +734,9 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->smsmemorytype) {
+		ret = at_set_charset(&data, state, AT_CHAR_GSM);
+		if (ret != GN_ERR_NONE)
+			return ret;
 		memory_name = gn_memory_type2str(mt);
 		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
@@ -1351,8 +1354,6 @@ static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 	if (!data->sms_status)
 		return GN_ERR_INTERNALERROR;
 
-	at_set_charset(data, state, AT_CHAR_GSM);
-
         if (data->memory_status) {
                 ret = AT_SetSMSMemoryType(data->memory_status->memory_type,  state);
                 if (ret != GN_ERR_NONE)
@@ -1374,7 +1375,6 @@ static gn_error AT_SaveSMS(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error ret;
 
-	at_set_charset(data, state, AT_CHAR_GSM);
 	ret = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 	if (ret)
 		return ret;
@@ -1470,7 +1470,6 @@ static gn_error AT_GetSMS(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[32];
 	gn_error err;
 
-	at_set_charset(data, state, AT_CHAR_GSM);
 	err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 
 	if (err)
@@ -1494,7 +1493,6 @@ static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[32];
 	gn_error err;
 
-	at_set_charset(data, state, AT_CHAR_GSM);
 	err = AT_SetSMSMemoryType(data->raw_sms->memory_type,  state);
 	if (err)
 		return err;
