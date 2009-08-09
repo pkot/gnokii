@@ -2813,6 +2813,7 @@ static gn_error creg_parse(char **strings, int i, gn_network_info *ninfo, int la
 	char tmp[3] = {0, 0, 0};
 	char *pos;
 	int first = 0, second = 1;
+	size_t n, len;
 
 	if (!strings[i] || strlen(strings[i]) < 4 || !strings[i + 1] || strlen(strings[i + 1]) < 4)
 		return GN_ERR_FAILED;
@@ -2835,30 +2836,27 @@ static gn_error creg_parse(char **strings, int i, gn_network_info *ninfo, int la
 	tmp[1] = pos[3];
 	ninfo->LAC[second] = strtol(tmp, NULL, 16);
 
+	/*
+	 * GSM phones usually return 4 hex digits, UMTS phones can return up to 8 with optional leading 0's
+	 */
+
 	pos = strip_quotes(strings[i + 1]);
 
-	tmp[0] = pos[0];
-	tmp[1] = pos[1];
-
-	ninfo->cell_id[0] = strtol(tmp, NULL, 16);
-
-	tmp[0] = pos[2];
-	tmp[1] = pos[3];
-
-	ninfo->cell_id[1] = strtol(tmp, NULL, 16);
-
-	/* Ugly, ugly... */
-	if (strlen(pos) >= 8) {
-		tmp[0] = pos[4];
-		tmp[1] = pos[5];
-
-		ninfo->cell_id[2] = strtol(tmp, NULL, 16);
-
-		tmp[0] = pos[6];
-		tmp[1] = pos[7];
-
-		ninfo->cell_id[3] = strtol(tmp, NULL, 16);
+	n = 0;
+	len = strlen(pos);
+	if (len & 1) {
+		tmp[0] = *pos++;
+		tmp[1] = '\0';
+		ninfo->cell_id[n++] = strtol(tmp, NULL, 16);
+		len--;
 	}
+	while (len) {
+		tmp[0] = *pos++;
+		tmp[1] = *pos++;
+		ninfo->cell_id[n++] = strtol(tmp, NULL, 16);
+		len -= 2;
+	}
+
 	return GN_ERR_NONE;
 }
 

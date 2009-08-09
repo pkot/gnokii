@@ -72,6 +72,8 @@
       fault)                                        (Daniele Forsi)
     o if AT+GMM fails, try AT+CGMM (Huawei E220 doesn't support
       +GMM but supports +CGMM); fixes #26039            (Paweł Kot)
+    o accept also +CREG responses with an odd number of digits in
+      the Cell ID field                             (Daniele Forsi)
  * nk6510 driver updates
     o fix segfault on deletesms with S40_30             (Paweł Kot)
     o sanity checks for number of messages in folder; increase max
