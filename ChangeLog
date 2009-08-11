@@ -74,6 +74,8 @@
       +GMM but supports +CGMM); fixes #26039            (Paweł Kot)
     o accept also +CREG responses with an odd number of digits in
       the Cell ID field                             (Daniele Forsi)
+    o when setting a new memory name use the current encoding
+      instead of forcing "GSM" encoding             (Daniele Forsi)
  * nk6510 driver updates
     o fix segfault on deletesms with S40_30             (Paweł Kot)
     o sanity checks for number of messages in folder; increase max
