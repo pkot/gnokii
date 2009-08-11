@@ -692,9 +692,12 @@ gn_error at_memory_type_set(gn_memory_type mt, struct gn_statemachine *state)
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->memorytype) {
-		gn_data_clear(&data);
-		if (drvinst->encode_memory_type)
-			at_set_charset(&data, state, AT_CHAR_GSM);
+		if (drvinst->encode_memory_type) {
+			gn_data_clear(&data);
+			ret = at_set_charset(&data, state, AT_CHAR_GSM);
+			if (ret != GN_ERR_NONE)
+				return ret;
+		}
 		memory_name = gn_memory_type2str(mt);
 		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
@@ -734,21 +737,24 @@ gn_error AT_SetSMSMemoryType(gn_memory_type mt, struct gn_statemachine *state)
 	gn_error ret = GN_ERR_NONE;
 
 	if (mt != drvinst->smsmemorytype) {
-		ret = at_set_charset(&data, state, AT_CHAR_GSM);
-		if (ret != GN_ERR_NONE)
-			return ret;
+		if (drvinst->encode_memory_type) {
+			gn_data_clear(&data);
+			ret = at_set_charset(&data, state, AT_CHAR_GSM);
+			if (ret != GN_ERR_NONE)
+				return ret;
+		}
 		memory_name = gn_memory_type2str(mt);
 		if (!memory_name)
 			return GN_ERR_INVALIDMEMORYTYPE;
-		snprintf(req, sizeof(req), "AT+CPMS=\"%s\"\r", memory_name);
-		len = strlen(req);
+		len = snprintf(req, sizeof(req), "AT+CPMS=\"%s\"\r", memory_name);
 		ret = sm_message_send(len, GN_OP_Init, req, state);
 		if (ret != GN_ERR_NONE)
 			return ret;
 		gn_data_clear(&data);
 		ret = sm_block_no_retry(GN_OP_Init, &data, state);
-		if (ret == GN_ERR_NONE)
-			drvinst->smsmemorytype = mt;
+		if (ret != GN_ERR_NONE)
+			return ret;
+		drvinst->smsmemorytype = mt;
 	}
 	return ret;
 }
