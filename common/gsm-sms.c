@@ -669,6 +669,7 @@ static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
 	sms->user_data[0].dr_status = GN_SMS_DR_Status_None;
 	switch (sms->type) {
 	case GN_SMS_MT_DeliveryReport:
+	case GN_SMS_MT_StatusReport:
 		sms_status(rawsms->report_status, sms);
 		break;
 	case GN_SMS_MT_PictureTemplate:
@@ -767,20 +768,22 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 	} \
 	memcpy(rawsms->remote_number, pdu + offset, l); \
 	offset += l; \
-	}
+}
 
 #define COPY_USER_DATA(pdu, offset) { \
 	rawsms->length = pdu[offset++]; \
 	rawsms->user_data_length = rawsms->length; \
-	if (rawsms->udh_indicator) \
-		rawsms->user_data_length -= pdu[offset] + 1; \
-	if (pdu_len - offset > 1000) { \
-		dprintf("Phone gave as poisonous (too short?) reply, either phone went crazy or communication went out of sync\n"); \
-		ret = GN_ERR_INTERNALERROR; \
-		goto out; \
+	if (rawsms->length > 0) { \
+		if (rawsms->udh_indicator) \
+			rawsms->user_data_length -= pdu[offset] + 1; \
+		if (pdu_len - offset > GN_SMS_USER_DATA_MAX_LENGTH) { \
+			dprintf("Phone gave as poisonous (too short?) reply, either phone went crazy or communication went out of sync\n"); \
+			ret = GN_ERR_INTERNALERROR; \
+			goto out; \
+		} \
+		memcpy(rawsms->user_data, pdu + offset, pdu_len - offset); \
 	} \
-	memcpy(rawsms->user_data, pdu + offset, pdu_len - offset); \
-	}
+}
 
 	gn_error ret = GN_ERR_NONE;
 	unsigned int l, extraoffset, offset = 0;
@@ -827,7 +830,6 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 	case 0x03:
 		dprintf("Reserved TP-MTI found\n");
 		return GN_ERR_INTERNALERROR;
-		break;
 	}
 	switch (rawsms->type) {
 	case GN_SMS_MT_Deliver:
@@ -921,24 +923,27 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		memcpy(rawsms->time, pdu + offset, 7);
 		offset += 7;
 		/* TP-ST   TP-Status */
-		rawsms->report              = pdu[offset++];
+		rawsms->report_status       = pdu[offset++];
 		/* TP-PI   TP-Parameter-Indicator */
-		dprintf("TP-Parameter-Indicator: 0x%02x\n", pdu[offset]);
 		parameter_indicator         = pdu[offset];
-		/* handle the "extension bit" skipping the following octects, if any (see 9.2.3.27 TP-Parameter-Indicator) */
-		while (pdu[offset++] & 0x80)
+		/* handle the "extension bit" skipping the following octects, if any (see 9.2.3.27 TP-Parameter-Indicator):
+		 *  The most significant bit in octet 1 and any other TP-PI octets which may be added later is reserved as an extension bit
+		 *  which when set to a 1 shall indicate that another TP-PI octet follows immediately afterwards.
+		 */
+		while ((offset < pdu_len) && (pdu[offset++] & 0x80))
 			;
-		if (parameter_indicator & 0x01) {
+		if ((offset < pdu_len) && (parameter_indicator & 0x01)) {
 			/* TP-PID  TP-Protocol-Identifier */
-			rawsms->pid = pdu[offset++];
+			rawsms->pid = pdu[++offset];
 		}
-		if (parameter_indicator & 0x02) {
+		if ((offset < pdu_len) && (parameter_indicator & 0x02)) {
 			/* TP-DCS  TP-Data-Coding-Scheme */
-			rawsms->dcs = pdu[offset++];
+			rawsms->dcs = pdu[++offset];
 		}
-		if (parameter_indicator & 0x04) {
+		if ((offset < pdu_len) && (parameter_indicator & 0x04)) {
 			/* TP-UDL  TP-User-Data-Length */
 			/* TP-UD   TP-User-Data */
+			offset++;
 			COPY_USER_DATA(pdu, offset);
 		}
 		break;
