@@ -30,7 +30,7 @@
 
   Goal of this code is to provide a binary compatible layer to access
   libgnokii.so functions from external programs which are not part
-  of this gnokii CVS package.
+  of this gnokii package.
   One of those external programs is e.g. the Mobile Phone import/export
   filter of the KDE Adressbook (kaddressbook).
   Helge Deller - April 2006

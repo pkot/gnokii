@@ -1,6 +1,6 @@
 Before reporting a problem with gnokii make sure that problem still exists
 with current gnokii release (refer to http://www.gnokii.org/ to find out the
-most recent version) or even with current CVS version. If gnokii version
+most recent version) or even with current GIT version. If gnokii version
 provided by your distribution please contact the package maintainer to
 upgrade it.
 
@@ -8,7 +8,7 @@ When you report some problems with gnokii please attach the following
 information:
  - phone model
  - connection type (irda/cable with its type)
- - gnokii version (gnokii --version) along with source for it: cvs,
+ - gnokii version (gnokii --version) along with source for it: git,
 tarball, binary package
  - edit you gnokiirc and enable debugging, e.g.:
     [logging]
@@ -27,7 +27,7 @@ it's xgnokii/gnocky problem. If not, most likely it's library problem.
 
 Send resulting report to gnokii-users@nongnu.org.
 
-If you want to debug yourself, by default the CVS version adds -g to CFLAGS
+If you want to debug yourself, by default the GIT version adds -g to CFLAGS
 when generating Makefile and the defines needed to print debug messages when
 generating include/config.h then in your gnokiirc set debug=on to see
 messages about libgnokii or gnokii and xdebug=on to see messages about

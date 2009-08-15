@@ -84,7 +84,7 @@ method described above.
    will not need to install it, but we need a file from it.
 
 2) Download the latest Gnokii distribution. (If you want to install from
-   CVS, you should already know what you're doing, so you're on your
+   GIT, you should already know what you're doing, so you're on your
    own)
 
 3) Extract both Gnokii and Libtool
