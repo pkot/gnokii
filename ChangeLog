@@ -53,6 +53,7 @@
     o set GN_SMS_USER_DATA_MAX_LENGTH to 256            (Paweł Kot)
     o replace GNOKII_API bool with GNOKII_API int for the function
       definition                                        (Paweł Kot)
+    o introduce better bool definition             (Fabian Groffen)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)

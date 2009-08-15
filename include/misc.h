@@ -41,18 +41,6 @@
 
 /* Some general defines. */
 
-#ifndef false
-#  define false (0)
-#endif
-
-#ifndef true
-#  define true (!false)
-#endif
-
-#ifndef bool
-#  define bool int
-#endif
-
 #define ARRAY_LEN(x) (sizeof((x)) / sizeof((x)[0]))
 
 /* If glib.h is included, G_GNUC_PRINTF is already defined. */
