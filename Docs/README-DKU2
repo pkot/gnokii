@@ -10,54 +10,11 @@ gnokii you would need development libusb packages) and use
 connection=dku2libusb setting in your gnokiirc file. As port use number of
 compatible USB end-point (starting with 1). This setting is useful just to
 distinct more than one DKU2 phone connected to PC.
+You may want to install Docs/sample/45-nokiadku2.rules to set device
+permissions for non-root users using udev.
 
-If for some reason you want to use Linux kernel driver read on.
-
-The DKU2 cable, supplied for example with the nokia 7600/6230, is a
-straight-through lead which connects the phone to a USB port.  By default,
-the usb device exposes two endpoints which provide AT-like modem emulation. 
-This kernel module sets an alternative configuration to enable two further
-endpoints which enable Fbus communication.
-
-Module sources are in gnokii/patches.  There is one for 2.4.22 - I expect it'll
-work with most 2.4 kernels, and one for 2.6.9.
-
-The driver connects two ttys - after connecting the phone dmesg gives:
-  Nokia AT Port:
-  usbserial.c: Nokia 7600/6230 DKU2 driver converter now attached to ttyUSB0 (or usb/tts/0 for devfs)
-  Nokia FBUS Port:
-  usbserial.c: Nokia 7600/6230 DKU2 driver converter now attached to ttyUSB1 (or usb/tts/1 for devfs)
-gnokii must be configured to use the second of these - in this case /dev/ttyUSB1
-
-Note, that you need kernel sources installed in your system and the kernel
-needs support for usb-serial.
-
-
-* Install *
-
-| Get / configure / build a set of kernel sources.
-$ cd $gnokii_sources/patches/kernel_2.{4,6}
-| If you have the gnokii CVS version
-$ autoconf
-| See ./configure --help for the available options
-| Defaults are:
-|  kernsrcdir: /lib/modules/`uname -r`/build -- directory where the sources are
-|  kernmoddir: /lib/modules/`uname -r` -- base module installation directory
-$ ./configure --with-kernsrcdir=dir1 --with-kernmoddir=dir2 
-| replace dir1 and dir2 with real paths
-$ make
-| Become root
-# make install
-# modprobe nokia_dku2
-# dmesg
-| Look for the lines as shown above!
-| Edit .gnokiirc to include port=/dev/ttyUSB.. and connection=dku2 
-
-
-* Known Bugs *
-
-nokia_dku2 module may interfere with OBEX in some cases, ie. the driver claims
-the OBEX endpoint which leads OBEX communication not to work.
+Sources for the nokia_dku2 Linux kernel module have been removed since gnokii
+0.6.28.
 
 
 * Disclaimer *

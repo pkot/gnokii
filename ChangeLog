@@ -9,6 +9,9 @@
       compilation                                     (Alin Năstac)
     o use strdup instead of strndup - fixes FreeBSD < 8 compilation
                                                       (Guido Falsi)
+    o remove deprecated kernel modules for DKU2 cable; supported
+      DKU2 driver uses libusub (connection = dku2libusb)
+                                         (Daniele Forsi, Paweł Kot)
  * libgnokii changes
     o print more verbose messages on device locking problems
                                                         (Paweł Kot)
