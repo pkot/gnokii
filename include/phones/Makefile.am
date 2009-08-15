@@ -3,6 +3,7 @@ EXTRA_HEADERS = \
 		atbosch.h \
 		ateric.h \
 		atgen.h \
+		athuawei.h \
 		atlg.h \
 		atmot.h \
 		atnok.h \
