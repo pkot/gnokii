@@ -141,7 +141,11 @@ static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char*
 	return GN_ERR_NONE;
 }
 
+/* SMS-DELIVER */
 #define SMS "0791214365870921240B919999999999F90000902072129025401AC8329BFD0E81ECEF7B993D07FD0907C40154AECBDF2010"
+/* SMS-STATUS-REPORT */
+/* #define SMS "07914366999999F906CD098186666666F89080709002818090807002336080009FD6E494" */
+
 static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error e = GN_ERR_NONE;

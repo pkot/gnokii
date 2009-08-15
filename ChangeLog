@@ -122,6 +122,8 @@
  * fake driver updates
     o implement GetSMS for testing                      (Paweł Kot)
     o generate reference id for SendSMS                 (Paweł Kot)
+    o add SMS-STATUS-REPORT sample SMS for GetSMS testing
+                                                        (Paweł Kot)
  * translation updates
     o updated French translation                             (Ploc)
     o updated Italian translation                   (Daniele Forsi)
