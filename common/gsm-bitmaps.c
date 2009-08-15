@@ -105,7 +105,7 @@ GNOKII_API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y)
 	}
 }
 
-GNOKII_API bool gn_bmp_point(gn_bmp *bmp, int x, int y)
+GNOKII_API int gn_bmp_point(gn_bmp *bmp, int x, int y)
 {
 	int i = 0;
 

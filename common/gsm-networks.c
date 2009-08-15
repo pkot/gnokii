@@ -1355,7 +1355,7 @@ GNOKII_API char *gn_country_code_get(char *country_name)
 	return countries[index].code ? countries[index].code : _("undefined");
 }
 
-GNOKII_API bool gn_network_get(gn_network *network, int index)
+GNOKII_API int gn_network_get(gn_network *network, int index)
 {
 	if (index < 0 || index >= ARRAY_LEN(networks) - 1)
 		return false;
@@ -1363,7 +1363,7 @@ GNOKII_API bool gn_network_get(gn_network *network, int index)
 	return true;
 }
 
-GNOKII_API bool gn_country_get(gn_country *country, int index)
+GNOKII_API int gn_country_get(gn_country *country, int index)
 {
 	if (index < 0 || index >= ARRAY_LEN(countries) - 1)
 		return false;

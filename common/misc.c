@@ -544,7 +544,7 @@ failed:
 }
 
 /* Removes lock and frees memory */
-GNOKII_API bool gn_device_unlock(char *lock_file)
+GNOKII_API int gn_device_unlock(char *lock_file)
 {
 #ifndef WIN32
 	int err;

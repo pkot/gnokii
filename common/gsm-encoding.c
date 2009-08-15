@@ -464,7 +464,7 @@ static unsigned char char_def_alphabet_ext_encode(unsigned char value)
  * Checks if @value is a string composed only by characters defined by
  * the default GSM alphabet or its extension.
  */
-GNOKII_API bool gn_char_def_alphabet(unsigned char *string)
+GNOKII_API int gn_char_def_alphabet(unsigned char *string)
 {
 	unsigned int i, len = strlen(string);
 
