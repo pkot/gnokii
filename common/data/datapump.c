@@ -56,8 +56,8 @@
 #include "data/datapump.h"
 
 /* Prototypes */
-static int	DP_CallBack(rlp_user_inds ind, u8 *buffer, int length);
-static int	DP_SendRLPFrame(gn_rlp_f96_frame *frame, bool out_dtx);
+static int	DP_CallBack(rlp_user_inds ind, unsigned char *buffer, int length);
+static int	DP_SendRLPFrame(gn_rlp_f96_frame *frame, int out_dtx);
 
 /* Global variables */
 extern bool CommandMode;
@@ -83,7 +83,7 @@ bool dp_Initialise(int read_fd, int write_fd)
 }
 
 
-static int DP_CallBack(rlp_user_inds ind, u8 *buffer, int length)
+static int DP_CallBack(rlp_user_inds ind, unsigned char *buffer, int length)
 {
 	int i, temp;
 
@@ -183,7 +183,7 @@ void dp_CallPassup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_
 	}
 }
 
-static int DP_SendRLPFrame(gn_rlp_f96_frame *frame, bool out_dtx)
+static int DP_SendRLPFrame(gn_rlp_f96_frame *frame, int out_dtx)
 {
 	data.rlp_frame = frame;
 	data.rlp_out_dtx = out_dtx;

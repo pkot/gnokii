@@ -121,7 +121,7 @@ struct vm_queue queue;
 
 /* If initialised in debug mode, stdin/out is used instead
    of ptys for interface. */
-bool gn_vm_initialise(const char *iname, const char *bindir, bool debug_mode, bool GSMInit)
+int gn_vm_initialise(const char *iname, const char *bindir, int debug_mode, int GSMInit)
 {
 	static struct gn_statemachine State;
 	sm = &State;

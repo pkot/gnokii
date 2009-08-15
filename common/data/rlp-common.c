@@ -72,10 +72,10 @@ rlp_state      CurrentState=RLP_S0; /* We start at ADM and Detached */
 rlp_state      NextState;
 
 /* Pointer to Send function that sends frame to phone. */
-bool      (*RLP_SendFunction)(gn_rlp_f96_frame *frame, bool out_dtx);
+int      (*RLP_SendFunction)(gn_rlp_f96_frame *frame, int out_dtx);
 
 /* Pointer to Passup function which returns data/inds */
-int      (*RLP_Passup)(rlp_user_inds ind, u8 *buffer, int length);
+int      (*RLP_Passup)(rlp_user_inds ind, unsigned char *buffer, int length);
 
 
 /* State variables - see GSM 04.22, Annex A, section A.1.2 */
@@ -153,7 +153,7 @@ u8 RLP_VersionNumber = 0;
 /* Function to initialise RLP code.  Main purpose for now is
    to set the address of the RLP send function in the API code. */
 
-void rlp_initialise(bool (*rlp_send_function)(gn_rlp_f96_frame *frame, bool out_dtx), int (*rlp_passup)(rlp_user_inds ind, u8 *buffer, int length))
+void rlp_initialise(int (*rlp_send_function)(gn_rlp_f96_frame *frame, int out_dtx), int (*rlp_passup)(rlp_user_inds ind, unsigned char *buffer, int length))
 {
 	int i;
 
@@ -189,7 +189,7 @@ void rlp_initialise(bool (*rlp_send_function)(gn_rlp_f96_frame *frame, bool out_
 /* Set a user event */
 /* Called by user program for now */
 
-void rlp_user_request_set(rlp_user_requests type, bool value)
+void rlp_user_request_set(rlp_user_requests type, int value)
 {
 	switch (type) {
 	case Conn_Req:
