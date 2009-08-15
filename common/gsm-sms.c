@@ -927,8 +927,8 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		/* TP-PI   TP-Parameter-Indicator */
 		parameter_indicator         = pdu[offset];
 		/* handle the "extension bit" skipping the following octects, if any (see 9.2.3.27 TP-Parameter-Indicator):
-		 *  The most significant bit in octet 1 and any other TP-PI octets which may be added later is reserved as an extension bit
-		 *  which when set to a 1 shall indicate that another TP-PI octet follows immediately afterwards.
+		 *   The most significant bit in octet 1 and any other TP-PI octets which may be added later is reserved as an extension bit
+		 *   which when set to a 1 shall indicate that another TP-PI octet follows immediately afterwards.
 		 */
 		while ((offset < pdu_len) && (pdu[offset++] & 0x80))
 			;
@@ -943,7 +943,6 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		if ((offset < pdu_len) && (parameter_indicator & 0x04)) {
 			/* TP-UDL  TP-User-Data-Length */
 			/* TP-UD   TP-User-Data */
-			offset++;
 			COPY_USER_DATA(pdu, offset);
 		}
 		break;
