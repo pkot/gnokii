@@ -934,11 +934,11 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 			;
 		if ((offset < pdu_len) && (parameter_indicator & 0x01)) {
 			/* TP-PID  TP-Protocol-Identifier */
-			rawsms->pid = pdu[++offset];
+			rawsms->pid = pdu[offset++];
 		}
 		if ((offset < pdu_len) && (parameter_indicator & 0x02)) {
 			/* TP-DCS  TP-Data-Coding-Scheme */
-			rawsms->dcs = pdu[++offset];
+			rawsms->dcs = pdu[offset++];
 		}
 		if ((offset < pdu_len) && (parameter_indicator & 0x04)) {
 			/* TP-UDL  TP-User-Data-Length */
