@@ -60,7 +60,7 @@
 #define GN_SMS_DATETIME_MAX_LENGTH      7
 #define GN_SMS_SMSC_NUMBER_MAX_LENGTH  20
 #define GN_SMS_NUMBER_MAX_LENGTH       20
-#define GN_SMS_USER_DATA_MAX_LENGTH   512
+#define GN_SMS_USER_DATA_MAX_LENGTH   256
 #define GN_SMS_VP_MAX_LENGTH            8
 
 /* flags for encoding/decoding PDU */

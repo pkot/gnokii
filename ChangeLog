@@ -47,6 +47,7 @@
       the parts                                         (Paweł Kot)
     o add GN_SMS_Unknown to gn_sms_message_status   (Daniele Forsi)
     o fix decoding SMS-STATUS-REPORT                (Daniele Forsi)
+    o set GN_SMS_USER_DATA_MAX_LENGTH to 256            (Paweł Kot)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
