@@ -549,13 +549,15 @@ GNOKII_API int gn_device_unlock(char *lock_file)
 #ifndef WIN32
 	int err;
 
-	if (!lock_file) {
-		fprintf(stderr, _("Cannot unlock device.\n"));
-		return false;
+	if (lock_file) {
+		err = unlink(lock_file);
+		free(lock_file);
+		if (err) {
+			fprintf(stderr, _("Cannot unlock device: %s\n"), strerror(errno));
+			return false;
+		}
 	}
-	err = unlink(lock_file);
-	free(lock_file);
-	return (err + 1);
+	return true;
 #else
 	return true;
 #endif /* WIN32 */
