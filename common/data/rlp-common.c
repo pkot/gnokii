@@ -246,9 +246,6 @@ int rlp_user_request_get(rlp_user_requests type)
 
 	result = *x;
 
-	if (*x == true)
-		*x = false;
-
 	return result;
 }
 
