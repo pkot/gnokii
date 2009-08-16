@@ -26,7 +26,7 @@
   Copyright (C) 2001       Chris Kemp
   Copyright (C) 2002-2004  BORBELY Zoltan
 
-  The development of RLP protocol is sponsored by SuSE CR, s.r.o. (Pavel use
+  The development of RLP protocol is sponsored by SuSE CR, s.r.o. (Pavel uses
   the SIM card from SuSE for testing purposes).
 
   Actual implementation of RLP protocol. Based on GSM 04.22 version 7.1.0,
@@ -219,9 +219,9 @@ void rlp_user_request_set(rlp_user_requests type, int value)
 
 /* Check whether a user event is set */
 
-bool rlp_user_request_get(rlp_user_requests type) {
-
-	bool result = false, *x;
+int rlp_user_request_get(rlp_user_requests type)
+{
+	int result = false, *x;
 
 	switch (type) {
 	case Conn_Req:
