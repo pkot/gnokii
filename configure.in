@@ -1036,7 +1036,6 @@ AC_OUTPUT(
 	  xgnokii/Makefile
 	  xgnokii/xpm/Makefile
 	  po/Makefile.in
-	  patches/Makefile
 	  testsuite/Makefile
 	  testsuite/data/Makefile
 	  win32/Makefile

@@ -12,6 +12,8 @@
     o remove deprecated kernel modules for DKU2 cable; supported
       DKU2 driver uses libusub (connection = dku2libusb)
                                          (Daniele Forsi, Paweł Kot)
+    o remove patches/freebsd-ltmain_sh.patch since it is no more
+      needed                           (Daniele Forsi, Guido Falsi)
  * libgnokii changes
     o print more verbose messages on device locking problems
                                                         (Paweł Kot)
