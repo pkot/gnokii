@@ -167,9 +167,12 @@ GNOKII_API gn_error gn_lib_phone_open( struct gn_statemachine *state )
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Telephone interface init failed: %s\nQuitting.\n"),
 			gn_error_print(error));
-		/* gn_device_unlock frees state->lockfile */
-		gn_device_unlock(state->lockfile);
-		state->lockfile = NULL;
+		/* remove lockfile if it was created */
+		if (state->lockfile) {
+			/* gn_device_unlock frees state->lockfile */
+			gn_device_unlock(state->lockfile);
+			state->lockfile = NULL;
+		}
 		return LASTERROR(state, error);
 	}
 
@@ -185,8 +188,8 @@ GNOKII_API gn_error gn_lib_phone_close( struct gn_statemachine *state )
 	if (state->lockfile) {
 		/* gn_device_unlock frees state->lockfile */
 		gn_device_unlock(state->lockfile);
+		state->lockfile = NULL;
 	}
-	state->lockfile = NULL;
 
 	return LASTERROR(state, GN_ERR_NONE);
 }
