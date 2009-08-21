@@ -120,6 +120,26 @@ int sendsms_usage(FILE *f, int exitval)
 	return exitval;
 }
 
+gn_gsm_number_type get_number_type(const char *number)
+{
+	gn_gsm_number_type type;
+
+	if (!number)
+		return GN_GSM_NUMBER_Unknown;
+	if (*number == '+') {
+		type = GN_GSM_NUMBER_International;
+		number++;
+	} else {
+		type = GN_GSM_NUMBER_Unknown;
+	}
+	while (*number) {
+		if (!isdigit(*number))
+			return GN_GSM_NUMBER_Alphanumeric;
+		number++;
+	}
+	return type;
+}
+
 /* Send SMS messages. */
 gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
@@ -147,21 +167,18 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	/* The memory is zeroed here */
 	gn_sms_default_submit(&sms);
 
-	memset(&sms.remote.number, 0, sizeof(sms.remote.number));
 	snprintf(sms.remote.number, sizeof(sms.remote.number), "%s", optarg);
-	if (sms.remote.number[0] == '+')
-		sms.remote.type = GN_GSM_NUMBER_International;
-	else
-		sms.remote.type = GN_GSM_NUMBER_Unknown;
+	sms.remote.type = get_number_type(sms.remote.number);
+	if (sms.remote.type == GN_GSM_NUMBER_Alphanumeric) {
+		dprintf("Invalid phone number\n");
+		return GN_ERR_WRONGDATAFORMAT;
+	}
 
 	while ((i = getopt_long(argc, argv, "l:rv:C:8ia:o:w:", options, NULL)) != -1) {
 		switch (i) {       /* -c for compression. not yet implemented. */
 		case '1': /* SMSC number */
 			snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", optarg);
-			if (sms.smsc.number[0] == '+')
-				sms.smsc.type = GN_GSM_NUMBER_International;
-			else
-				sms.smsc.type = GN_GSM_NUMBER_Unknown;
+			sms.smsc.type = get_number_type(sms.smsc.number);
 			break;
 
 		case '2': /* SMSC number index in phone memory */
@@ -435,11 +452,8 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	while ((i = getopt_long(argc, argv, "l:rsf:dt:", options, NULL)) != -1) {
 		switch (i) {
 		case '0': /* SMSC number */
-			snprintf(sms.smsc.number, sizeof(sms.smsc.number) - 1, "%s", optarg);
-			if (sms.smsc.number[0] == '+')
-				sms.smsc.type = GN_GSM_NUMBER_International;
-			else
-				sms.smsc.type = GN_GSM_NUMBER_Unknown;
+			snprintf(sms.smsc.number, sizeof(sms.smsc.number), "%s", optarg);
+			sms.smsc.type = get_number_type(sms.smsc.number);
 			break;
 		case '1': /* SMSC number index in phone memory */
 			data->message_center = calloc(1, sizeof(gn_sms_message_center));
@@ -455,11 +469,8 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			free(data->message_center);
 			break;
 		case '2': /* sender number */
-			if (*optarg == '+')
-				sms.remote.type = GN_GSM_NUMBER_International;
-			else
-				sms.remote.type = GN_GSM_NUMBER_Unknown;
 			snprintf(sms.remote.number, GN_BCD_STRING_MAX_LENGTH, "%s", optarg);
+			sms.remote.type = get_number_type(sms.remote.number);
 			break;
 		case 'l': /* location to write to */
 			sms.number = gnokii_atoi(optarg);

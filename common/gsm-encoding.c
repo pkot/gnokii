@@ -1002,15 +1002,20 @@ int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type
 	/* The first byte in the Semi-octet representation of the address field is
 	   the Type-of-Address. This field is described in the official GSM
 	   specification 03.40 version 6.1.0, section 9.1.2.5, page 33. We support
-	   only international and unknown number. */
+	   only international, unknown and alphanumeric number. */
 
 	*out_num++ = type;
+
+	if (type == GN_GSM_NUMBER_Alphanumeric) {
+		count = strlen(number);
+		return 2 * char_7bit_pack(0, number, out_num, &count);
+	}
 
 	if ((type == GN_GSM_NUMBER_International || type == GN_GSM_NUMBER_Unknown) && *in_num == '+')
 		in_num++; /* skip leading '+' */
 
 	/* The next field is the number. It is in semi-octet representation - see
-	   GSM scpecification 03.40 version 6.1.0, section 9.1.2.3, page 31. */
+	   GSM specification 03.40 version 6.1.0, section 9.1.2.3, page 31. */
 	while (*in_num) {
 		if (count & 0x01) {
 			*out_num = *out_num | ((*in_num - '0') << 4);

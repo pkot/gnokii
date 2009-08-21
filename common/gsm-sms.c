@@ -1528,6 +1528,10 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 	/* Encoding the header */
 	rawsms->report = sms->delivery_report;
 	rawsms->remote_number[0] = char_semi_octet_pack(sms->remote.number, rawsms->remote_number + 1, sms->remote.type);
+	if (rawsms->remote_number[0] > GN_SMS_NUMBER_MAX_LENGTH) {
+		dprintf("Remote number length %d > %d\n", rawsms->remote_number[0], GN_SMS_NUMBER_MAX_LENGTH);
+		return GN_ERR_ENTRYTOOLONG;
+	}
 	rawsms->validity_indicator = GN_SMS_VP_RelativeFormat;
 	rawsms->validity[0] = 0xa9;
 

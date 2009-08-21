@@ -56,6 +56,7 @@
     o replace GNOKII_API bool with GNOKII_API int for the function
       definition                                        (Paweł Kot)
     o introduce better bool definition             (Fabian Groffen)
+    o correctly encode GN_GSM_NUMBER_Alphanumeric   (Daniele Forsi)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)
@@ -65,6 +66,9 @@
     o more efficient way to get all smses               (Paweł Kot)
     o add SEC option to --entersecuritycode to input security code
       (supported by nk6510 and nk6100 drivers)     (Ladislav Michl)
+    o make --sendsms refuse alfanumeric destination "numbers" to
+      catch typos and make --savesms accept them because it's
+      useful for testing                            (Daniele Forsi)
  * at driver updates
     o initialize reg_notification and reg_callback_date (Paweł Kot)
     o fix --getnetworkinfo on some phones (Siemens S55) with
