@@ -1527,7 +1527,7 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 	}
 	/* Encoding the header */
 	rawsms->report = sms->delivery_report;
-		rawsms->remote_number[0] = char_semi_octet_pack(sms->remote.number, rawsms->remote_number + 1, sms->remote.type);
+	rawsms->remote_number[0] = char_semi_octet_pack(sms->remote.number, rawsms->remote_number + 1, sms->remote.type);
 	rawsms->validity_indicator = GN_SMS_VP_RelativeFormat;
 	rawsms->validity[0] = 0xa9;
 
