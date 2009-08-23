@@ -1,3 +1,7 @@
+* Sun Aug 23 2009 Paweł Kot
+- Enable sending long messages with pq module.
+
+
 * Fri Mar 27 2009 Paweł Kot
 - Print short version on every startup for better bugreports.
 

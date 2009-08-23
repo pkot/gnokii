@@ -129,6 +129,7 @@
       bugreports                                        (Paweł Kot)
     o reading SMS from S40_30 would stop working when inbox becomes
       empty (fixed in the driver)                   (Daniele Forsi)
+    o enable sending long sms with postgresql module    (Paweł Kot)
  * xgnokii updates
     o use Icon=phone instead of Icon=cellphone            (Ariszló)
  * fake driver updates

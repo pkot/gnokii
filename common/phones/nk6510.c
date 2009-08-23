@@ -1826,6 +1826,7 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *message, int 
 		return GN_ERR_INTERNALERROR;
 
 	switch (message[3]) {
+	case 0x2c:
 	case NK6510_SUBSMS_INCOMING: { /* 0x04 */
 		int freerawsms = 0, freesms = 0;
 

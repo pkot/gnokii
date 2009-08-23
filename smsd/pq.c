@@ -200,8 +200,8 @@ GNOKII_API void DB_Look (const gchar * const phone)
     else
       sms.remote.type = GN_GSM_NUMBER_Unknown;
     
-    strncpy ((gchar *) sms.user_data[0].u.text, PQgetvalue (res1, i, 2), GN_SMS_MAX_LENGTH + 1);
-    sms.user_data[0].u.text[GN_SMS_MAX_LENGTH] = '\0';
+    strncpy ((gchar *) sms.user_data[0].u.text, PQgetvalue (res1, i, 2), 10 * GN_SMS_MAX_LENGTH + 1);
+    sms.user_data[0].u.text[10 * GN_SMS_MAX_LENGTH] = '\0';
     sms.user_data[0].length = strlen ((gchar *) sms.user_data[0].u.text);
     sms.user_data[0].type = GN_SMS_DATA_Text;
     sms.user_data[1].type = GN_SMS_DATA_None;
