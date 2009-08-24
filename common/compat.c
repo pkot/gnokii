@@ -22,13 +22,15 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2002 BORBELY Zoltan, Markus Plail, Pawel Kot
+  Copyright (C) 2002 BORBELY Zoltan, Markus Plail
+  Copyright (C) 2002-2009 Pawel Kot
 
   Various compatibility functions.
 
 */
 
 #include "config.h"
+#include "compat.h"
 
 #ifdef WIN32
 #  include <windows.h>
@@ -42,19 +44,47 @@ int setenv(const char *name, const char *value, int overwrite)
 	return (int)SetEnvironmentVariable(name, value);
 }
 
-void unsetenv(const char *name)
+int unsetenv(const char *name)
 {
 	SetEnvironmentVariable(name, NULL);
+	return 0;
 }
 
 #endif
 
+#ifndef HAVE_SETENV
+#  include <stdlib.h>
+/* Implemented according to http://www.greenend.org.uk/rjk/2008/putenv.html and Linux manpage */
+int setenv(const char *envname, const char *envvalue, int overwrite)
+{
+	char *str;
+
+	if (!overwrite && getenv(envname))
+		return 0;
+
+	str = malloc(strlen(envname) + 1 + strlen(envvalue) + 1);
+	if (str == NULL)
+		return 1;
+
+	sprintf(str, "%s=%s", envname, envvalue);
+
+	if (putenv(str) != 0) {
+		free(str);
+		return 1;
+	}
+
+	return 0;
+}
+
+int unsetenv(const char *name)
+{
+	return setenv(name, "", 1);
+}
+#endif
+                  
 #ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #endif
-
-#include "config.h"
-#include "compat.h"
 
 #ifndef	HAVE_GETTIMEOFDAY
 
@@ -110,7 +140,7 @@ int gettimeofday(struct timeval *tv, void *tz)
  */
 
 
-#include "stdio.h"
+#include <stdio.h>
 
 /* 
 #if defined(LIBC_SCCS) && !defined(lint)
