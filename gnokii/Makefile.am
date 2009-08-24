@@ -9,9 +9,10 @@ gnokii_SOURCES = gnokii.c gnokii-calendar.c gnokii-dial.c gnokii-file.c gnokii-l
 gnokii_LDADD = $(top_builddir)/common/libgnokii.la $(INTLLIBS) $(TERMLDFLAGS) $(TERMLIBS)
 gnokii_CFLAGS = -I$(top_srcdir)/include
 
-#if OWN_GETOPT
-#	gnokii_LDADD += $(TOPDIR)/getopt/libgetopt.la
-#endif
+# Following http://sourceware.org/ml/automake/2000-08/msg00014.html:
+# Compile getopt1.c and getopt.c unconditionally on all platforms, it
+# has its own magic for the platforms that already have it.
+gnokii_LDADD += $(top_builddir)/getopt/libgetopt.a
 
 #FIXME cross compiling
 #if WIN32_CROSS

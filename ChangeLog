@@ -15,6 +15,7 @@
     o remove patches/freebsd-ltmain_sh.patch since it is no more
       needed                           (Daniele Forsi, Guido Falsi)
     o fix setenv()/unsetenv() build on Solaris          (Paweł Kot)
+    o fix getopt_long() build on Solaris                (Paweł Kot)
  * libgnokii changes
     o print more verbose messages on device locking problems
                                                         (Paweł Kot)

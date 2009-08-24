@@ -298,29 +298,6 @@ if test $have_termios = "no"; then
 	fi
 fi
 
-dnl ======================== Checks for getopt_long support
-
-AC_CHECK_HEADER(getopt.h, ,
-      [CFLAGS="$CFLAGS -I../getopt"])
-
-AC_ARG_WITH(gnugetopt,
-   [  --with-gnugetopt=DIR    specifies the getopt library location directory],
-   [ if test x$withval=xyes; then
-        AC_MSG_WARN(Usage is: --with-gnugetopt=DIR)
-     else
-        GETOPT_LIBS="-L$withval"
-     fi
-   ]
-)
-
-OWN_GETOPT=""
-AC_CHECK_FUNC(getopt_long, , [
-        SAVE_LIBS="$LIBS $GETOPT_LIBS"
-        LIBS="$LIBS $GETOPT_LIBS"
-           AC_CHECK_LIB(gnugetopt, getopt_long, GETOPT_LIBS="$GETOPT_LIBS -lgnugetopt",
-            OWN_GETOPT="1")
-        LIBS=$SAVE_LIBS])
-
 dnl ======================== readline support
 # Readline included by default unless explicitly asked not to
 test "${with_readline+set}" != "set" && with_readline=yes

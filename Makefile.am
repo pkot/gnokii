@@ -1,4 +1,4 @@
-SUBDIRS = include common gnokii po Docs
+SUBDIRS = getopt include common gnokii po Docs
 
 if WIN32
 else
