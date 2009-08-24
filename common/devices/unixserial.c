@@ -93,20 +93,9 @@ static int cfsetspeed(struct termios *t, int speed)
 struct termios serial_termios;
 
 /* Script handling: */
-
 static void device_script_cfgfunc(const char *section, const char *key, const char *value)
 {
-#if !defined(__svr4__)
-#  if defined(HAVE_SETENV)
-	setenv(key, value, 1 /* overwrite */); /* errors ignored */
-#  else
-	char *str;
-	if (asprintf(&str, "%s=%s", key, value) > 0) {
-		putenv(str);
-		free(str);
-	}
-#  endif
-#endif
+	setenv(key, value, 1); /* errors ignored */
 }
 
 int device_script(int fd, const char *section, struct gn_statemachine *state)
