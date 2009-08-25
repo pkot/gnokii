@@ -40,6 +40,7 @@
  *
  * WAP-209-MMSEncapsulation-20020105-a - Chapter 7.2.11 "From field"
  */
+#define GN_MMS_Address_Present_Token	128
 #define GN_MMS_Insert_Address_Token	129
 
 /*

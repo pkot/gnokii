@@ -163,7 +163,7 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 	*dest_length = 0;
 	*dest_buffer = calloc(1, *dest_length + 1);
 	if (!*dest_buffer)
-		return GN_ERR_NONE;
+		return GN_ERR_MEMORYFULL;
 	for (i = 0; i < *length; i++) {
 		if ((buffer[i] & 0x80) == 0x80) {
 			field = gn_mms_field_lookup(buffer[i]);
@@ -180,7 +180,7 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 					/*
 					 * Decode a Short-Integer - could use gn_mms_dec_uintvar() but it's easier this way
 					 */
-					APPEND(*dest_buffer, "%s: 0x%x\n", field->header, buffer[i] & 0x7f);
+					APPEND(*dest_buffer, "%s: 0x%02x\n", field->header, buffer[i] & 0x7f);
 					break;
 				case GN_MMS_FIELD_IS_LONG:
 					/* FALL THROUGH */
@@ -208,6 +208,15 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 					 * Decode Text-string, Quoted-string and Extension-media
 					 */
 					if (buffer[i] <= 30) {
+						/*
+						 * Special case for "From" field. "0x01 0x81" wouldn't be a valid string anyway
+						 * because according to 8.4.2.1 Basic rules if first char is > 127 it must be quoted
+						 */
+						if (buffer[i] == 1 && buffer[i + 1] == GN_MMS_Insert_Address_Token) {
+							i++;
+							APPEND(*dest_buffer, "%s: 0x%02x\n", field->header, buffer[i]);
+							break;
+						}
 						decoded_len = buffer[i];
 						i++;
 					} else if (buffer[i] == 31) {
@@ -217,10 +226,15 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 							return error;
 						i += decoded_len;
 						decoded_len = number;
-						/* skip Address-present-token (FIXME: skipping makes sense only for received MMS) */
-						i++;
-						/* subtract 2 to skip Address-present-token and NUL terminator */
-						decoded_len -= 2;
+						/* Special case for "From" field. "0x1f length 0x80" wouldn't be a valid string anyway */
+						if (buffer[i] == GN_MMS_Address_Present_Token) {
+							/* Skip Address-present-token */
+							i++;
+							decoded_len--;
+							/* FIXME handle Char-set */
+						}
+						/* Skip NUL terminator */
+						decoded_len--;
 					} else if (buffer[i] == '"' || buffer[i] == 0x7f) {
 						i++;
 						decoded_len = strlen(&buffer[i]);
@@ -239,6 +253,11 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 					 */
 					APPEND(*dest_buffer, "%s: Decoding of Content-Type not yet implemented!\n", field->header);
 					return GN_ERR_NONE;
+				case GN_MMS_FIELD_IS_EXPIRY:
+					dprintf("WARNING: skipping %s field\n", field->header);
+					decoded_len = buffer[i];
+					i += decoded_len;
+					break;
 				default:
 					dprintf("Unhandled value type %d\n", field->type);
 					return GN_ERR_INTERNALERROR;

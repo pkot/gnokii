@@ -39,8 +39,8 @@
     o set To headers instead of From headers when saving to mbox
       outbox messages                                    (analyzer)
     o add gn_mms_get() and gn_mms_delete() functions (decoding to
-      text and MIME formats is incomplete and subject to change
-      and works for received messages only)         (Daniele Forsi)
+      text and MIME formats is incomplete and subject to change)
+                                                    (Daniele Forsi)
     o assign random reference ids to sent SMS (was always 0)
                                                         (Paweł Kot)
     o fix splitting unicode multipart messages          (Paweł Kot)
