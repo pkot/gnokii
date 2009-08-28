@@ -145,6 +145,9 @@
  * utils updates
     o add gnokii-configure utility (not installed by make install
       because it depends on Python and libglade)    (Daniele Forsi)
+ * nk7110 driver updates
+    o fix segfault on getsms and deletesms when raw_sms->number < 1
+                                                    (Daniele Forsi)
 
 0.6.27
 ======

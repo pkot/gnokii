@@ -1239,6 +1239,9 @@ static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
+	if (data->raw_sms->number < 1)
+		return GN_ERR_INVALIDLOCATION;
+
 	/* Handle memory_type = 0 explicitely, because sms_folder->folder_id = 0 by default */
 	if (data->raw_sms->memory_type == 0) return GN_ERR_INVALIDMEMORYTYPE;
 
