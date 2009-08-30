@@ -1227,16 +1227,17 @@ int string_base64(const char *instring)
 
 /**
  * base64_encode:
- * @outstring: buffer for the converted string, NUL terminated
- * @outlen: size of @outstring, must be at least 1.333 times bigger than @inlen
+ * @outstring: buffer for the converted string, will be NUL terminated
+ * @outlen: size of @outstring
  * @instring: buffer with the string to be converted
  * @inlen: length of @instring
  *
  * Returns: the length of the converted string
  *
  * Converts a generic string to base64 encoding.
- * The @outstring buffer needs to be at least 1.333 times bigger than @inlen.
-*/
+ * @outlen needs to be at least 4 / 3 times + 1 bigger than @inlen to hold
+ * the converted string and the terminator.
+ */
 int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
 	const char *pin;
@@ -1297,14 +1298,16 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 
 /**
  * base64_decode:
- * @dest: buffer for the converted string, not NUL terminated
- * @destlen: size of @dest, must be at least 3 / 4 of @inlen
+ * @dest: buffer for the converted string, will be NUL terminated
+ * @destlen: size of @dest
  * @source: buffer with the string to be converted
  * @inlen: length of @source
  *
  * Returns: the number of bytes used in @dest
  *
  * Converts a generic string from base 64 encoding.
+ * @destlen needs to be at least 3 / 4 + 1 of @inlen to hold the converted
+ * string and the terminator.
  */
 int base64_decode(char *dest, int destlen, const char *source, int inlen)
 {
@@ -1378,7 +1381,8 @@ endloop:
  *
  * Returns: the number of bytes used by the converted string
  *
- * Converts an UTF-8 string to base 64 encoding.
+ * Converts a string from application default encoding to UTF-8 then to base 64.
+ * @dest must be valid and big enough to hold the converted string.
  */
 int utf8_base64_encode(char *dest, int destlen, const char *in, int inlen)
 {
@@ -1404,7 +1408,8 @@ int utf8_base64_encode(char *dest, int destlen, const char *in, int inlen)
  *
  * Returns: the number of bytes used by the converted string
  *
- * Converts an UTF-8 string to base 64 encoding.
+ * Converts a string from base 64 to UTF-8 then to application default encoding.
+ * @dest must be valid and big enough to hold the converted string.
  */
 int utf8_base64_decode(char *dest, int destlen, const char *in, int inlen)
 {
