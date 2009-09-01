@@ -66,13 +66,46 @@ typedef enum {
  * OMA-MMS-ENC-V1_3-20050214-D - Chapter 7.3.9 "Content-Type field"
  */
 typedef enum {
+	GN_MMS_CONTENT_application_vnd_wap_multipart_mixed	= 0xa3,
 	GN_MMS_CONTENT_application_vnd_wap_multipart_related	= 0xb3,
 	GN_MMS_CONTENT_text_plain	= 0x83,
 	GN_MMS_CONTENT_image_jpeg	= 0x9e,
 	GN_MMS_CONTENT_UNKNOWN		= 0	/* a convenience value, not defined by the standard */
 } gn_mms_content;
 
-//FIXME check conformance before claiming to be 1.2, also do not hardcode string, use a function?
+/*
+ * OMA-MMS-ENC-V1_3-20050214-D - Chapter 7.4 "Header Field Names and Assigned Numbers"
+ * with msb set
+ */
+typedef enum {
+	GN_MMS_Bcc			= 0x81,
+	GN_MMS_Cc			= 0x82,
+	GN_MMS_Content_Location		= 0x83,
+	GN_MMS_Content_Type		= 0x84,
+	GN_MMS_Date			= 0x85,
+	GN_MMS_Delivery_Report		= 0x86,
+	GN_MMS_Delivery_Time		= 0x87,
+	GN_MMS_Expiry			= 0x88,
+	GN_MMS_From			= 0x89,
+	GN_MMS_Message_Class		= 0x8A,
+	GN_MMS_Message_ID		= 0x8B,
+	GN_MMS_Message_Type		= 0x8C,
+	GN_MMS_MMS_Version		= 0x8D,
+	GN_MMS_Message_Size		= 0x8E,
+	GN_MMS_Priority			= 0x8F,
+	GN_MMS_Read_Reply		= 0x90,
+	GN_MMS_Report_Allowed		= 0x91,
+	GN_MMS_Response_Status		= 0x92,
+	GN_MMS_Response_Text		= 0x93,
+	GN_MMS_Sender_Visibility	= 0x94,
+	GN_MMS_Status			= 0x95,
+	GN_MMS_Subject			= 0x96,
+	GN_MMS_To			= 0x97,
+	GN_MMS_Transaction_Id		= 0x98,
+	GN_MMS_FIELD_ID_UNKNOWN		= 0	/* a convenience value, not defined by the standard */
+} gn_mms_field_id;
+
+/* FIXME check conformance before claiming to be 1.2, also do not hardcode string, use a function? */
 #define GN_MMS_DEFAULT_VERSION 0x92
 #define GN_MMS_DEFAULT_VERSION_STRING "1.2"
 /* a convenience value, not defined by the standard */
@@ -85,22 +118,34 @@ typedef enum {
 #define GN_MMS_NOKIA_FOOTER_LEN 0x03
 
 typedef struct {
-	int type;
+	gn_mms_content type;
 	char *name;
-} gn_mms_header_field;
+} gn_mms_content_type;
 
 typedef enum {
 	GN_MMS_PART_CONTENT_NAME_STRING	= 0x01
 } gn_mms_part_flags;
 
-typedef struct gn_mms_part {
+typedef struct {
 	gn_mms_part_flags flags;
 	char *filename;
 	char *content_type;
 	size_t length;
 	char *content;
-	struct gn_mms_part *next;
 } gn_mms_part;
+
+typedef struct {
+	gn_mms_field_id id;
+	char type;
+	int x;
+	char *header;
+} gn_mms_field;
+
+typedef struct {
+	gn_mms_field_id id;
+	size_t length;
+	char *value;
+} gn_mms_field_value;
 
 typedef enum {
 	GN_MMS_FORMAT_UNKNOWN = 0,
@@ -114,14 +159,10 @@ typedef struct {
 	unsigned int number;			/* Location of the message in the memory/folder. */
 	gn_memory_type memory_type;		/* Memory type where the message is/should be stored. */
 	gn_sms_message_status status;		/* Read, Unread, Sent, Unsent, ... */
-	gn_mms_message type;			/* GN_MMS_X_Mms_Message_Type */
-	char tid[GN_MMS_MAX_VALUE_SIZE];	/* GN_MMS_X_Mms_Transaction_ID */
-	int version;				/* GN_MMS_X_Mms_MMS_Version */
-	char from[GN_MMS_MAX_VALUE_SIZE];	/* GN_MMS_From */
-	char to[GN_MMS_MAX_VALUE_SIZE];		/* GN_MMS_To */
-	char subject[GN_MMS_MAX_VALUE_SIZE];	/* GN_MMS_Subject */
-	int num_parts;				/* How many items in parts array */
-	gn_mms_part *parts;
+	size_t buffer_length;
+	unsigned char *buffer;
+	int num_values;				/* How many items in values array */
+	gn_mms_field_value *values[];
 } gn_mms_raw;
 
 typedef struct {
@@ -138,16 +179,8 @@ typedef struct {
 	size_t buffer_length;
 	unsigned char *buffer;
 	int num_parts;				/* How many items in parts array */
-	gn_mms_part *parts;
+	gn_mms_part *parts[];
 } gn_mms;
-
-
-typedef struct {
-	char id;
-	char type;
-	int x;
-	char *header;
-} gn_mms_field;
 
 /* Convenience values, not defined by the standard */
 #define GN_MMS_FIELD_IS_STRING		1
@@ -159,34 +192,5 @@ typedef struct {
 #define GN_MMS_FIELD_IS_DATE		5
 #define GN_MMS_FIELD_IS_EXPIRY		6
 #define GN_MMS_FIELD_IS_CONTENT_TYPE	7
-
-/*
- * OMA-MMS-ENC-V1_3-20050214-D - Chapter 7.4 "Header Field Names and Assigned Numbers"
- * with msb set
- */
-#define	GN_MMS_Bcc			0x81
-#define	GN_MMS_Cc			0x82
-#define	GN_MMS_Content_Location		0x83
-#define	GN_MMS_Content_Type		0x84
-#define	GN_MMS_Date			0x85
-#define	GN_MMS_Delivery_Report		0x86
-#define	GN_MMS_Delivery_Time		0x87
-#define	GN_MMS_Expiry			0x88
-#define	GN_MMS_From			0x89
-#define	GN_MMS_Message_Class		0x8A
-#define	GN_MMS_Message_ID		0x8B
-#define	GN_MMS_Message_Type		0x8C
-#define	GN_MMS_MMS_Version		0x8D
-#define	GN_MMS_Message_Size		0x8E
-#define	GN_MMS_Priority			0x8F
-#define	GN_MMS_Read_Reply		0x90
-#define	GN_MMS_Report_Allowed		0x91
-#define	GN_MMS_Response_Status		0x92
-#define	GN_MMS_Response_Text		0x93
-#define	GN_MMS_Sender_Visibility	0x94
-#define	GN_MMS_Status			0x95
-#define	GN_MMS_Subject			0x96
-#define	GN_MMS_To			0x97
-#define	GN_MMS_Transaction_Id		0x98
 
 #endif /* _gnokii_mms_h */

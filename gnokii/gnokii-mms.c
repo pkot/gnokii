@@ -157,17 +157,15 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 		return getmms_usage(stderr, -1);
 	}
 
-	error = gn_mms_alloc(&message);
-	if (error != GN_ERR_NONE)
-		return error;
-
 	folder.folder_id = 0;
 	data->sms_folder = &folder;
 	data->sms_folder_list = &folderlist;
 	/* Now retrieve the requested entries. */
 	for (count = start_message; count <= end_message; count++) {
 
-		memset(message, 0, sizeof(gn_mms));
+		error = gn_mms_alloc(&message);
+		if (error != GN_ERR_NONE)
+			break;
 		message->memory_type = gn_str2memory_type(memory_type_string);
 		message->number = count;
 		message->buffer_format = output_format_type;
@@ -189,23 +187,25 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 				else
 					fprintf(stderr, _("(message deleted)\n"));
 			}
-			if (data->mms->buffer)
-				free(data->mms->buffer);
 			break;
 		default:
-			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message))
-				return GN_ERR_NONE;
+			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message)) {
+				error = GN_ERR_NONE;
+				/* Force exit */
+				mode = -1;
+				break;
+			}
 			fprintf(stderr, _("GetMMS %s %d failed! (%s)\n"), memory_type_string, count, gn_error_print(error));
 			if (error == GN_ERR_INVALIDMEMORYTYPE)
 				fprintf(stderr, _("See the gnokii manual page for the supported memory types with the phone\nyou use.\n"));
-			if (error != GN_ERR_EMPTYLOCATION)
-				return error;
+			if (error == GN_ERR_EMPTYLOCATION)
+				error = GN_ERR_NONE;
 			break;
 		}
+		gn_mms_free(message);
 		if (mode == -1)
 			break;
 	}
-	gn_mms_free(message);
 
 	return error;
 }

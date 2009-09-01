@@ -2055,13 +2055,16 @@ static gn_error NK6510_GetMMSList_S40_30(gn_data *data, struct gn_statemachine *
 		 || !strncmp("4012", fl.files[j]->name+20, 4) /* standard MMS in Templates */
 		 || !strncmp("4020", fl.files[j]->name+20, 4) /* MMS Plus in Templates */
 		) {
-			strcpy(data->file_list->path, s40_30_mt_mappings[i].path);
 			inc_filecount(data->file_list);
 			data->file_list->files[data->file_list->file_count-1] = fl.files[j];
 		}
 	}
+	if (data->file_list->file_count)
+		strncpy(data->file_list->path, s40_30_mt_mappings[i].path, sizeof(data->file_list->path));
 
 	dprintf("%d out of %d are MMS\n", data->file_list->file_count, fl.file_count);
+
+	/* Do not free fl.files and all fl.files[i] pointers because they are owned and shared by the cache */
 
 	return error;
 }
@@ -2074,6 +2077,7 @@ static gn_error NK6510_GetMMS(gn_data *data, struct gn_statemachine *state)
 static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
+	gn_data private_data;
 	gn_file_list fl;
 	gn_file fi;
 
@@ -2085,24 +2089,35 @@ static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	if (data->raw_mms->number < 1)
 		return GN_ERR_INVALIDLOCATION;
 
+	gn_data_clear(&private_data);
 	memset(&fl, 0, sizeof(fl));
-	data->file_list = &fl;
-	error = NK6510_GetMMSList_S40_30(data, state);
+	private_data.file_list = &fl;
+	private_data.raw_mms = data->raw_mms;
+	error = NK6510_GetMMSList_S40_30(&private_data, state);
 	if (error != GN_ERR_NONE)
 		return error;
 
-	if (data->file_list->file_count < data->raw_mms->number) {
+	if (fl.file_count < data->raw_mms->number) {
 		/* Needs to be INVALID not EMPTY for --getmms IN 1 end to work */
-		return GN_ERR_INVALIDLOCATION;
+		error = GN_ERR_INVALIDLOCATION;
+	} else {
+		memset(&fi, 0, sizeof(fi));
+		snprintf(fi.name, sizeof(fi.name), "%s%s", fl.path, fl.files[private_data.raw_mms->number - 1]->name);
+		dprintf("Getting MMS #%d (filename: %s)\n", private_data.raw_mms->number, fi.name);
+
+		private_data.file = &fi;
+		error = NK6510_GetFile(&private_data, state);
+
+		data->raw_mms->status = GetMessageStatus_S40_30(fl.files[private_data.raw_mms->number - 1]->name);
+		data->raw_mms->buffer_length = fi.file_length;
+		data->raw_mms->buffer = fi.file;
+
+		if (fi.id)
+			free(fi.id);
 	}
-
-	memset(&fi, 0, sizeof(fi));
-	snprintf(fi.name, sizeof(fi.name), "%s%s", fl.path, fl.files[data->raw_mms->number - 1]->name);
-	dprintf("Getting MMS #%d (path: %s, file: %s)\n", data->raw_mms->number, fl.path, fl.files[data->raw_mms->number - 1]->name);
-	data->file = &fi;
-	error = NK6510_GetFile(data, state);
-
-	data->raw_mms->status = GetMessageStatus_S40_30(fl.files[data->raw_mms->number - 1]->name);
+	/* Do not free all fl.files[i] pointers because they are owned and shared by the cache */
+	if (fl.files)
+		free(fl.files);
 
 	return error;
 }

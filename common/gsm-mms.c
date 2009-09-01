@@ -76,7 +76,7 @@ gn_mms_field mms_fields[] = {
  *
  * Return value: a pointer to @gn_mms_field or NULL if not found
  */
-const gn_mms_field *gn_mms_field_lookup(char id)
+const gn_mms_field *gn_mms_field_lookup(gn_mms_field_id id)
 {
 	int i;
 
@@ -90,8 +90,75 @@ const gn_mms_field *gn_mms_field_lookup(char id)
 }
 
 /**
+ * content_type_fields - mapping of values defined by the standard
+ *
+ * See http://www.wapforum.org/wina (referred to by WAP-230-WSP-20010705-a - Appendix A, Table 40)
+ */
+gn_mms_content_type content_type_fields[] = {
+	{GN_MMS_CONTENT_application_vnd_wap_multipart_mixed,	"application/vnd.wap.multipart.mixed"},
+	{GN_MMS_CONTENT_application_vnd_wap_multipart_related,	"application/vnd.wap.multipart.related"},
+	{GN_MMS_CONTENT_text_plain,	"text/plain"},
+	{GN_MMS_CONTENT_image_jpeg,	"image/jpeg"},
+};
+
+/**
+ * gn_mms_content_type_lookup - search the field corresponding to the given @id
+ *
+ * @id: the identifier of the field
+ *
+ * Return value: a pointer to @gn_mms_field or NULL if not found
+ */
+const gn_mms_content_type *gn_mms_content_type_lookup(gn_mms_content type)
+{
+	int i;
+
+	type |= 0x80;
+	for (i = 0; i < sizeof(content_type_fields) / sizeof(content_type_fields[0]); i++) {
+		if (content_type_fields[i].type == type) {
+			return &content_type_fields[i];
+		}
+	}
+	return NULL;
+}
+
+/*
+ * gn_mms_detect_format - Tries to autodetect format of MMS stored in memory
+ * @source: a pointer to the buffer to decode
+ * @source_len: the number of bytes in the @source buffer
+ *
+ * Known formats are:
+ *  - #GN_MMS_FORMAT_PDU: the binary format exchanged between phone and server
+ *  - #GN_MMS_FORMAT_MIME: an ASCII translation of the PDU
+ *  - #GN_MMS_FORMAT_NOKIA: a PDU with additional Nokia information before and after it
+ */
+GNOKII_API gn_mms_format gn_mms_detect_format(const unsigned char *source, size_t source_len)
+{
+	const gn_mms_field *field;
+
+	if (!source)
+		return GN_MMS_FORMAT_UNKNOWN;
+
+	if (*source == GN_MMS_Message_Type)
+		return GN_MMS_FORMAT_PDU;
+
+	field = gn_mms_field_lookup(GN_MMS_Message_Type);
+	if (!field)
+		return GN_MMS_FORMAT_UNKNOWN;
+	if (!strncmp(source, field->header, strlen(field->header)))
+		return GN_MMS_FORMAT_MIME;
+
+	if (source_len < GN_MMS_NOKIA_HEADER_LEN + 1)
+		return GN_MMS_FORMAT_UNKNOWN;
+	/* do not check length values in header now, they can be fixed later if wrong */
+	if (*source == '\0' && source[GN_MMS_NOKIA_HEADER_LEN] == GN_MMS_Message_Type)
+		return GN_MMS_FORMAT_RAW;
+
+	return GN_MMS_FORMAT_UNKNOWN;
+}
+
+/**
  * gn_mms_dec_uintvar - decode and unsigned integer of variable length
- * @source: to buffer to decode
+ * @source: a pointer to the buffer to decode
  * @source_len: the number of bytes in the @source buffer
  * @number: the destination of the decoding
  * @decoded_len: the number of bytes from @source that have been converted
@@ -142,23 +209,133 @@ do { \
 	*dest_length = newsize; \
 } while (0)
 
+#define DUMP(buf, memory, length) \
+do { \
+	int j, n; \
+	size_t len = length; \
+	const unsigned char *source = memory; \
+	while (len > 0) { \
+		APPEND(buf, "%s", " "); \
+		if (len >= 35) \
+			n = 35; \
+		else \
+			n = len; \
+		for (j = 0; j < n; j++) { \
+			APPEND(buf, "%02x", *source); \
+			source++; \
+		} \
+		len -= n; \
+		APPEND(buf, "%s", "\n"); \
+	} \
+} while (0)
+
+#define DUMP64(buf, memory, length)  \
+do { \
+	int n; \
+	size_t len = length; \
+	const unsigned char *source = memory; \
+	unsigned char outstring[61]; \
+	while (len > 0) { \
+		if (len >= 45) \
+			n = 45; \
+		else \
+			n = len; \
+		base64_encode(outstring, sizeof(outstring), source, n); \
+		APPEND(buf, "%s", outstring); \
+		source += n; \
+		len -= n; \
+		APPEND(buf, "%s", "\n"); \
+	} \
+} while (0)
+
+/**
+ * gn_mms_dec_miscstring - decode several types of strings
+ * @source: a pointer to the buffer to decode
+ * @source_len: the number of bytes in the @source buffer
+ * @number: the destination of the decoding
+ * @decoded_len: the number of bytes from @source that have been converted
+ *
+ * Decodes a variety of string formats.
+ *
+ * Return value: a @gn_error code
+ */
+gn_error gn_mms_dec_miscstring(const unsigned char *source, size_t source_len, unsigned char **dest_buffer, size_t *dest_length, size_t *decoded_len)
+{
+	size_t i;
+	unsigned int number;
+	gn_error error;
+
+	*decoded_len = 0;
+	if (source_len < 2)
+		return GN_ERR_WRONGDATAFORMAT;
+	/*
+	 * Decode Text-string, Quoted-string and Extension-media
+	 */
+	i = 0;
+	if (source[i] == 1 && source[i + 1] == GN_MMS_Insert_Address_Token) {
+		/*
+		 * Special case for "From" field. "0x01 0x81" wouldn't be a valid string anyway
+		 * because according to 8.4.2.1 Basic rules if first char is > 127 it must be quoted
+		 */
+		/* Skip NUL terminator */
+		*decoded_len = source[i] - 1;
+		i++;
+		*dest_length = asprintf((char **) dest_buffer, "0x%02x", source[i]);
+	} else {
+		if (source[i] <= 30) {
+			/* Ignore NUL terminator */
+			*decoded_len = source[i] - 1;
+			i++;
+		} else if (source[i] == 31) {
+
+			i++;
+			error = gn_mms_dec_uintvar(&source[i], source_len - i, &number, decoded_len);
+			if (error)
+				return error;
+			i += *decoded_len;
+			*decoded_len = number;
+			/* Special case for "From" field. "0x1f length 0x80" wouldn't be a valid string anyway */
+			if (source[i] == GN_MMS_Address_Present_Token) {
+				/* Skip Address-present-token */
+				i++;
+				(*decoded_len)--;
+			}
+			/* FIXME handle Char-set */
+			dprintf("Ignoring Char-set 0x%02x\n", source[i]);
+			/* Ignore NUL terminator */
+			(*decoded_len)--;
+		} else if (source[i] == '"' || source[i] == 0x7f) {
+			/* Skip quoting char */
+			i++;
+			*decoded_len = strlen(&source[i]);
+		} else {
+			/* A null terminated string */
+			*decoded_len = strlen(&source[i]);
+		}
+		*dest_length = asprintf((char **) dest_buffer, "%*s", *decoded_len, &source[i]);
+	}
+	(*decoded_len) += i;
+
+	return GN_ERR_NONE;
+}
+
 /**
  * gn_mms_pdu2txtmime - convert an MMS from PDU to human readable format or to MIME
- * @buffer: to buffer to decode
+ * @buffer: a pointer to the buffer to decode
  * @length: the number of bytes in the @source buffer
  * @dest_buffer: the destination of the decoding; must be free()'d by the caller
  * @dest_length: a pointer to the number of octects in @dest_buffer
  * @mime: 0 to convert to text, 1 to convert to MIME
  *
- * Return value: a @gn_error code; in case of error @length contain the position of the error
+ * Return value: a @gn_error code; in case of error @length contains the position of the error
  */
 static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, unsigned char **dest_buffer, size_t *dest_length, int mime)
 {
-	size_t i, j, decoded_len;
+	size_t i, j, decoded_len, string_len;
 	const gn_mms_field *field;
 	unsigned int number;
+	unsigned char *string;
 	gn_error error;
-	char string[256];
 
 	*dest_length = 0;
 	*dest_buffer = calloc(1, *dest_length + 1);
@@ -167,7 +344,7 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 	for (i = 0; i < *length; i++) {
 		if ((buffer[i] & 0x80) == 0x80) {
 			field = gn_mms_field_lookup(buffer[i]);
-			/* TODO check if decoding overrides the input buffer */
+			/* TODO check if decoding of each field overrides the input buffer */
 			if (field) {
 				if (mime && field->x)
 					APPEND(*dest_buffer, "%s", "X-");
@@ -207,82 +384,115 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 					/*
 					 * Decode Text-string, Quoted-string and Extension-media
 					 */
-					if (buffer[i] <= 30) {
-						/*
-						 * Special case for "From" field. "0x01 0x81" wouldn't be a valid string anyway
-						 * because according to 8.4.2.1 Basic rules if first char is > 127 it must be quoted
-						 */
-						if (buffer[i] == 1 && buffer[i + 1] == GN_MMS_Insert_Address_Token) {
-							i++;
-							APPEND(*dest_buffer, "%s: 0x%02x\n", field->header, buffer[i]);
-							break;
-						}
-						decoded_len = buffer[i];
-						i++;
-					} else if (buffer[i] == 31) {
-						i++;
-						error = gn_mms_dec_uintvar(&buffer[i], *length - i, &number, &decoded_len);
-						if (error)
-							return error;
-						i += decoded_len;
-						decoded_len = number;
-						/* Special case for "From" field. "0x1f length 0x80" wouldn't be a valid string anyway */
-						if (buffer[i] == GN_MMS_Address_Present_Token) {
-							/* Skip Address-present-token */
-							i++;
-							decoded_len--;
-							/* FIXME handle Char-set */
-						}
-						/* Skip NUL terminator */
-						decoded_len--;
-					} else if (buffer[i] == '"' || buffer[i] == 0x7f) {
-						i++;
-						decoded_len = strlen(&buffer[i]);
-					} else {
-						decoded_len = strlen(&buffer[i]);
-					}
-					strncpy(string, &buffer[i], decoded_len);
-					string[decoded_len] = '\0';
-					i += decoded_len;
+					error = gn_mms_dec_miscstring(&buffer[i], *length - i, &string, &string_len, &decoded_len);
+					if (error)
+						return error;
 					APPEND(*dest_buffer, "%s: %s\n", field->header, string);
+					free(string);
+					i += decoded_len;
 					break;
 				case GN_MMS_FIELD_IS_CONTENT_TYPE:
 					/*
 					 * Decode Content-Type
 					 * See WAP-230-WSP-20010705-a, Approved Version 5 July 2001 8.4.2.24 Content type field
 					 */
-					APPEND(*dest_buffer, "%s: Decoding of Content-Type not yet implemented!\n", field->header);
-					return GN_ERR_NONE;
+					{
+						const gn_mms_content_type *type;
+						int headers_len, data_len;
+						/*
+						 * WAP-230-WSP-20010705-a 8.5 Multipart Data
+						 */
+						/* 8.4.2.1 Basic rules Constrained-encoding */
+						if (buffer[i] > 127) {
+							/* Short-integer */
+							type = gn_mms_content_type_lookup(buffer[i]);
+							if (type) {
+								APPEND(*dest_buffer, "%s: %s\n", field->header, type->name);
+							} else {
+								APPEND(*dest_buffer, "%s: 0x%02x\n", field->header, buffer[i]);
+							}
+							i++;
+						} else {
+							/* Extension-media */
+							decoded_len = buffer[i];
+							i++;
+							APPEND(*dest_buffer, "%s:", field->header);
+							DUMP(*dest_buffer, &buffer[i], decoded_len);
+							i += decoded_len;
+						}
+						/* Docs say to ignore nEntries because entries can simply be iterated */
+						i++;
+						while (i < *length) {
+							/* 8.5.3 Multipart Entry */
+							error = gn_mms_dec_uintvar(&buffer[i], *length - i, &headers_len, &decoded_len);
+							if (error)
+								return error;
+							dprintf("HeadersLen %d at 0x%x\n", headers_len, i + 0xb0);
+							i += decoded_len;
+							error = gn_mms_dec_uintvar(&buffer[i], *length - i, &data_len, &decoded_len);
+							if (error)
+								return error;
+							dprintf("DataLen %d at 0x%x\n", data_len, i + 0xb0);
+							i += decoded_len;
+							if (mime) {
+								APPEND(*dest_buffer, "Headers length: %d\n", headers_len);
+								DUMP(*dest_buffer, &buffer[i], headers_len);
+								i += headers_len;
+								/* Data */
+								APPEND(*dest_buffer, "Data length: %d\n", data_len);
+								DUMP64(*dest_buffer, &buffer[i], data_len);
+								i += data_len;
+							} else {
+								/* Headers */
+								APPEND(*dest_buffer, "Headers length: %d\n", headers_len);
+								DUMP(*dest_buffer, &buffer[i], headers_len);
+								i += headers_len;
+								/* Data */
+								APPEND(*dest_buffer, "Data length: %d\n", data_len);
+								i += data_len;
+							}
+						}
+					}
+					break;
 				case GN_MMS_FIELD_IS_EXPIRY:
-					dprintf("WARNING: skipping %s field\n", field->header);
 					decoded_len = buffer[i];
+					APPEND(*dest_buffer, "%s:", field->header);
+					DUMP(*dest_buffer, &buffer[i + 1], decoded_len);
 					i += decoded_len;
 					break;
 				default:
-					dprintf("Unhandled value type %d\n", field->type);
+					dprintf("Unhandled GN_MMS_FIELD_IS_* %d\n", field->type);
 					return GN_ERR_INTERNALERROR;
 				}
 			} else {
 				/* Text-Value */
-				dprintf("Unknown field 0x%x\n", buffer[i]);
-				return GN_ERR_FAILED;
+				dprintf("Unknown field 0x%02x\n", buffer[i]);
+				return GN_ERR_INTERNALERROR;
 			}
 		} else {
-			dprintf("Out of sync at offset 0x%x value 0x%x\n", i, buffer[i]);
-			return GN_ERR_FAILED;
+			dprintf("Out of sync at offset 0x%02x value 0x%02x\n", i, buffer[i]);
+			return GN_ERR_INTERNALERROR;
 		}
+	}
+	if (i - *length != 1) {
+		dprintf("Read buffer overflow (%d bytes)\n", i - *length);
+		return GN_ERR_INTERNALERROR;
 	}
 	return GN_ERR_NONE;
 }
 
+#undef DUMP64
+#undef DUMP
+#undef APPEND
+
 /**
  * gn_mms_pdu2txt - convert an MMS from PDU to human readable format
- * @buffer: to buffer to decode
+ * @buffer: a pointer to the buffer to decode
  * @length: the number of bytes in the @source buffer
  * @dest_buffer: the destination of the decoding; must be free()'d by the caller
  * @dest_length: a pointer to the number of octects in @dest_buffer
  *
- * Return value: a @gn_error code; in case of error @length contain the position of the error
+ * Return value: a @gn_error code; in case of error @length contains the position of the error
  */
 gn_error gn_mms_pdu2txt(unsigned const char *buffer, size_t *length, unsigned char **dest_buffer, size_t *dest_length)
 {
@@ -291,19 +501,17 @@ gn_error gn_mms_pdu2txt(unsigned const char *buffer, size_t *length, unsigned ch
 
 /**
  * gn_mms_pdu2mime - convert an MMS from PDU to MIME format
- * @buffer: to buffer to decode
+ * @buffer: a pointer to the buffer to decode
  * @length: the number of bytes in the @source buffer
  * @dest_buffer: the destination of the decoding; must be free()'d by the caller
  * @dest_length: a pointer to the number of octects in @dest_buffer
  *
- * Return value: a @gn_error code; in case of error @length contain the position of the error
+ * Return value: a @gn_error code; in case of error @length contains the position of the error
  */
 gn_error gn_mms_pdu2mime(unsigned const char *buffer, size_t *length, unsigned char **dest_buffer, size_t *dest_length)
 {
 	return  gn_mms_pdu2txtmime(buffer, length, dest_buffer, dest_length, 1);
 }
-
-#undef APPEND
 
 /**
  * gn_mms_nokia2pdu - extract the PDU from a buffer containing an MMS in Nokia file format
@@ -315,12 +523,12 @@ gn_error gn_mms_pdu2mime(unsigned const char *buffer, size_t *length, unsigned c
  *
  * Return value: a @gn_error code
  */
-gn_error gn_mms_nokia2pdu(const unsigned char *source_buffer, size_t source_length, unsigned char **dest_buffer, size_t *dest_length)
+gn_error gn_mms_nokia2pdu(const unsigned char *source_buffer, size_t *source_length, unsigned char **dest_buffer, size_t *dest_length)
 {
 	const unsigned char *nokia_header, *pdu_start;
 	size_t mms_length, total_length;
 
-	if (source_length < GN_MMS_NOKIA_HEADER_LEN)
+	if (*source_length < GN_MMS_NOKIA_HEADER_LEN)
 		return GN_ERR_WRONGDATAFORMAT;
 
 	nokia_header = source_buffer;
@@ -333,8 +541,8 @@ gn_error gn_mms_nokia2pdu(const unsigned char *source_buffer, size_t source_leng
 	dprintf("\tFooter length %d\n", total_length - mms_length - GN_MMS_NOKIA_HEADER_LEN);
 	dprintf("\tTotal length %d\n", total_length);
 
-	if (total_length != source_length) {
-		dprintf("ERROR: total_length != source_length (%d != %d)\n", total_length, source_length);
+	if (total_length != *source_length) {
+		dprintf("ERROR: total_length != source_length (%d != %d)\n", total_length, *source_length);
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 	if (total_length <= mms_length) {
@@ -361,13 +569,13 @@ gn_error gn_mms_nokia2pdu(const unsigned char *source_buffer, size_t source_leng
  *
  * Return value: a @gn_error code
  */
-gn_error gn_mms_nokia2mms(const unsigned char *source_buffer, size_t source_length, gn_mms *mms)
+gn_error gn_mms_nokia2mms(const unsigned char *source_buffer, size_t *source_length, gn_mms *mms)
 {
 	const unsigned char *nokia_header, *pdu_start;
 	size_t mms_length, total_length;
 	char string[80];
 
-	if (source_length < GN_MMS_NOKIA_HEADER_LEN)
+	if (*source_length < GN_MMS_NOKIA_HEADER_LEN)
 		return GN_ERR_WRONGDATAFORMAT;
 
 	nokia_header = source_buffer;
@@ -380,8 +588,8 @@ gn_error gn_mms_nokia2mms(const unsigned char *source_buffer, size_t source_leng
 	dprintf("\tFooter length %d\n", total_length - mms_length - GN_MMS_NOKIA_HEADER_LEN);
 	dprintf("\tTotal length %d\n", total_length);
 
-	if (total_length != source_length) {
-		dprintf("ERROR: total_length != source_length (%d != %d)\n", total_length, source_length);
+	if (total_length != *source_length) {
+		dprintf("ERROR: total_length != source_length (%d != %d)\n", total_length, *source_length);
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 	if (total_length <= mms_length) {
@@ -409,7 +617,7 @@ gn_error gn_mms_nokia2mms(const unsigned char *source_buffer, size_t source_leng
  *
  * Return value: a @gn_error code
  */
-gn_error gn_mms_nokia2txt(const unsigned char *source_buffer, size_t source_length, unsigned char **dest_buffer, size_t *dest_length)
+gn_error gn_mms_nokia2txt(const unsigned char *source_buffer, size_t *source_length, unsigned char **dest_buffer, size_t *dest_length)
 {
 	gn_error error;
 	unsigned char *pdu_buffer;
@@ -436,7 +644,7 @@ gn_error gn_mms_nokia2txt(const unsigned char *source_buffer, size_t source_leng
  *
  * Return value: a @gn_error code
  */
-gn_error gn_mms_nokia2mime(const unsigned char *source_buffer, size_t source_length, unsigned char **dest_buffer, size_t *dest_length)
+gn_error gn_mms_nokia2mime(const unsigned char *source_buffer, size_t *source_length, unsigned char **dest_buffer, size_t *dest_length)
 {
 	gn_error error;
 	unsigned char *pdu_buffer;
@@ -454,11 +662,89 @@ gn_error gn_mms_nokia2mime(const unsigned char *source_buffer, size_t source_len
 }
 
 /**
- * gn_mms_get- High-level function for reading MMS
+ * gn_mms_convert- High-level function for converting MMS
+ * @source_mms: a pointer to a @gn_mms containing the MMS to be converted
+ * @dest_mms: a pointer to a @gn_mms that will contain the converted MMS
+ *
+ * @dest_mms->buffer_format fields must set, @source_mms->buffer_format is
+ * autodetected id unset, other fields of @source_mms must be valid depending
+ * on format, @dest_mms->buffer must be free()'d by the caller on success.
+ *
+ * Return value: a @gn_error code
+ */
+GNOKII_API gn_error gn_mms_convert(const gn_mms *source_mms, gn_mms *dest_mms)
+{
+	gn_mms_format source_format;
+	gn_mms *temp_mms = NULL;
+	gn_error error = GN_ERR_NONE;
+	size_t source_length;
+
+	if (!source_mms || !dest_mms)
+		return GN_ERR_INTERNALERROR;
+
+	source_length = source_mms->buffer_length;
+	if (source_mms->buffer_format == GN_MMS_FORMAT_UNKNOWN) {
+		source_format = gn_mms_detect_format(source_mms->buffer, source_length);
+	} else {
+		source_format = source_mms->buffer_format;
+	}
+
+	/* Convert all input formats to PDU */
+	switch (source_format) {
+	case GN_MMS_FORMAT_PDU:
+		/* Do nothing */
+		break;
+	case GN_MMS_FORMAT_RAW:
+		error = gn_mms_alloc(&temp_mms);
+		if (error != GN_ERR_NONE)
+			break;
+		error = gn_mms_nokia2pdu(source_mms->buffer, &source_length, &temp_mms->buffer, &temp_mms->buffer_length);
+		temp_mms->buffer_format = GN_MMS_FORMAT_PDU;
+		source_mms = temp_mms;
+		source_length = source_mms->buffer_length;
+		break;
+	default:
+		error = GN_ERR_NOTIMPLEMENTED;
+	}
+
+	if (error == GN_ERR_NONE) {
+		/* TODO: parse source MMS instead of blindly copying it */
+		if (source_format == dest_mms->buffer_format) {
+			dest_mms->buffer_length = source_length;
+			dest_mms->buffer = malloc(source_length);
+			if (dest_mms->buffer) {
+				memcpy(dest_mms->buffer, source_mms->buffer, source_length);
+			} else {
+				error = GN_ERR_MEMORYFULL;
+			}
+			return error;
+		}
+		switch (dest_mms->buffer_format) {
+		case GN_MMS_FORMAT_TEXT:
+			error = gn_mms_pdu2txt(source_mms->buffer, &source_length, &dest_mms->buffer, &dest_mms->buffer_length);
+			break;
+		case GN_MMS_FORMAT_MIME:
+			error = gn_mms_pdu2mime(source_mms->buffer, &source_length, &dest_mms->buffer, &dest_mms->buffer_length);
+			break;
+		case GN_MMS_FORMAT_PDU:
+			/* Handled above */
+			break;
+		default:
+			error = GN_ERR_NOTIMPLEMENTED;
+		}
+	}
+	if (temp_mms)
+		gn_mms_free(temp_mms);
+
+	return error;
+}
+
+/**
+ * gn_mms_get- High-level function for reading MMS from phone
  * @data: GSM data for the phone driver
  * @state: current statemachine state
  *
- * This function is the frontend for reading MMS. Note that @mms field
+ * This function is the frontend for reading MMS from phone. The @mms field
  * in the @gn_data structure must be initialized and @data->mms->buffer
  * must be free()'d by the caller.
  *
@@ -471,8 +757,8 @@ GNOKII_API gn_error gn_mms_get(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->mms)
 		return GN_ERR_INTERNALERROR;
-	if (data->mms->number < 0)
-		return GN_ERR_EMPTYLOCATION;
+	if (data->mms->number < 1)
+		return GN_ERR_INVALIDLOCATION;
 
 	rawmms.number = data->mms->number;
 	rawmms.memory_type = data->mms->memory_type;
@@ -482,32 +768,30 @@ GNOKII_API gn_error gn_mms_get(gn_data *data, struct gn_statemachine *state)
 	if (error)
 		return error;
 
-	if (!data->file)
-		return GN_ERR_INTERNALERROR;
-
 	data->mms->status = rawmms.status;
 
 	switch (data->mms->buffer_format) {
 	case GN_MMS_FORMAT_TEXT:
-		error = gn_mms_nokia2txt(data->file->file, data->file->file_length, &data->mms->buffer, &data->mms->buffer_length);
+		error = gn_mms_nokia2txt(rawmms.buffer, &rawmms.buffer_length, &data->mms->buffer, &data->mms->buffer_length);
 		break;
 	case GN_MMS_FORMAT_MIME:
-		error = gn_mms_nokia2mime(data->file->file, data->file->file_length, &data->mms->buffer, &data->mms->buffer_length);
+		error = gn_mms_nokia2mime(rawmms.buffer, &rawmms.buffer_length, &data->mms->buffer, &data->mms->buffer_length);
 		break;
 	case GN_MMS_FORMAT_PDU:
-		error = gn_mms_nokia2pdu(data->file->file, data->file->file_length, &data->mms->buffer, &data->mms->buffer_length);
+		error = gn_mms_nokia2pdu(rawmms.buffer, &rawmms.buffer_length, &data->mms->buffer, &data->mms->buffer_length);
 		break;
 	case GN_MMS_FORMAT_RAW:
-		data->mms->buffer = data->file->file;
-		data->mms->buffer_length = data->file->file_length;
-		data->file->file = NULL;
+		data->mms->buffer = rawmms.buffer;
+		data->mms->buffer_length = rawmms.buffer_length;
+		rawmms.buffer = NULL;
 		break;
 	default:
 		error = GN_ERR_WRONGDATAFORMAT;
 	}
-	if (data->file->file) {
-		free(data->file->file);
-		data->file->file = NULL;
+	if (rawmms.buffer) {
+		if (error == GN_ERR_INTERNALERROR)
+			dprintf("%s", rawmms.buffer);
+		free(rawmms.buffer);
 	}
 
 	return error;
@@ -545,11 +829,19 @@ GNOKII_API gn_error gn_mms_delete(gn_data *data, struct gn_statemachine *state)
  */
 GNOKII_API gn_error gn_mms_free(gn_mms *mms)
 {
-	if (mms)
+	if (mms) {
+		if (mms->tid)
+			free(mms->tid);
+		if (mms->from)
+			free(mms->from);
+		if (mms->to)
+			free(mms->to);
+		if (mms->buffer)
+			free(mms->buffer);
 		free(mms);
+	}
 
 	return GN_ERR_NONE;
-
 }
 
 /**
