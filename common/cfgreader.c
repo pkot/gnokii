@@ -751,6 +751,8 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "connection", val);
 			return GN_ERR_NOCONNECTION;
 		}
+		if (!strcmp("pcsc", val))
+			fprintf(stderr, "WARNING: %s=%s is deprecated and will soon be removed. Use %s=%s instead.\n", "connection", val, "connection", "libpcsclite");
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "initlength")))

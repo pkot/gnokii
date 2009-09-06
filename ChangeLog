@@ -148,6 +148,9 @@
  * nk7110 driver updates
     o fix segfault on getsms and deletesms when raw_sms->number < 1
                                                     (Daniele Forsi)
+ * pcsc driver updates
+    o deprecate model=pcsc and connection=pcsc values; use
+      model=APDU and connection=libpcsclite instead (Daniele Forsi)
 
 0.6.27
 ======

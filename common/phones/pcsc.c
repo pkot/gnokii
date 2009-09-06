@@ -97,7 +97,7 @@ gn_driver driver_pcsc = {
 	pgen_incoming_default,
 	/* Mobile phone information */
 	{
-		"pcsc",                /* Supported models */
+		"pcsc|APDU",           /* Supported models */
 		5,                     /* Unused */ /* Max RF Level */
 		0,                     /* Unused */ /* Min RF Level */
 		GN_RF_Percentage,      /* Unused */ /* RF level units */
@@ -487,6 +487,9 @@ static gn_error Initialise(struct gn_statemachine *state)
 	char *aux = NULL;
 
 	dprintf("Initializing...\n");
+
+	if (!strcmp("pcsc", state->config.model))
+		fprintf(stderr, "WARNING: %s=%s is deprecated and will soon be removed. Use %s=%s instead.\n", "model", state->config.model, "model", "APDU");
 
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_pcsc, sizeof(gn_driver));
