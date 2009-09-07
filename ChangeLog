@@ -139,6 +139,7 @@
     o generate reference id for SendSMS                 (Paweł Kot)
     o add SMS-STATUS-REPORT sample SMS for GetSMS testing
                                                         (Paweł Kot)
+    o add more testcases for GetSMS                     (Paweł Kot)
  * translation updates
     o updated French translation                             (Ploc)
     o updated Italian translation                   (Daniele Forsi)
