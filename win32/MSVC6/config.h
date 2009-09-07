@@ -39,7 +39,7 @@
 #endif
 	
 #undef VERSION
-#define VERSION "0.6.28cvs"
+#define VERSION "0.6.28"
 
 /* No bluetooth and no IRDA */
 #undef HAVE_BLUETOOTH
