@@ -143,7 +143,7 @@ static char *sms_timestamp_print(u8 *number)
 	memset(buffer, 0, LOCAL_DATETIME_MAX_LENGTH);
 
 	/* Ugly hack, but according to the GSM specs, the year is stored
-         * as the 2 digit number. */
+	 * as the 2 digit number. */
 	if ((10*(number[0] & 0x0f) + (number[0] >> 4)) < 70)
 		snprintf(buffer, sizeof(buffer), "20");
 	else
@@ -208,7 +208,7 @@ gn_timestamp *sms_timestamp_unpack(unsigned char *number, gn_timestamp *dt)
 	dt->year = 10 * (number[0] & 0x0f) + (number[0] >> 4);
 
 	/* Ugly hack, but according to the GSM specs, the year is stored
-         * as the 2 digit number. */
+	 * as the 2 digit number. */
 	if (dt->year < 70)
 		dt->year += 2000;
 	else
@@ -248,7 +248,7 @@ unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
 		return number;
 
 	/* Ugly hack, but according to the GSM specs, the year is stored
-         * as the 2 digit number. */
+	 * as the 2 digit number. */
 	if (dt->year < 2000)
 		dt->year -= 1900;
 	else
@@ -422,7 +422,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
  * @output: room for the encoded text
  * @length: decoded text length
  * @size: encoded text length
- * @udhlen: udh length 
+ * @udhlen: udh length
  * @dcs: data coding scheme
  *
  * This function decodes either 7bit or 8bit or Unicode text to the
@@ -1129,7 +1129,7 @@ static gn_error sms_get_read(gn_data *data)
 		if (!found) {
 			dprintf("Found new (read) message. Will store it at #%i!\n", data->folder_stats[data->sms_folder->folder_id]->used);
 			dprintf("%i\n", data->sms_folder->locations[i]);
-			data->message_list[data->folder_stats[data->sms_folder->folder_id]->used][data->sms_folder->folder_id]->location = 
+			data->message_list[data->folder_stats[data->sms_folder->folder_id]->used][data->sms_folder->folder_id]->location =
 				data->sms_folder->locations[i];
 			data->message_list[data->folder_stats[data->sms_folder->folder_id]->used][data->sms_folder->folder_id]->status = GN_SMS_FLD_New;
 			data->folder_stats[data->sms_folder->folder_id]->used++;
@@ -1351,7 +1351,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 		case 2: rawsms->dcs |= 0xf1; break; /* Class 1 */
 		case 3: rawsms->dcs |= 0xf2; break; /* Class 2 */
 		case 4: rawsms->dcs |= 0xf3; break; /* Class 3 */
-		default: dprintf("What ninja-mutant class is this?\n"); break; 
+		default: dprintf("What ninja-mutant class is this?\n"); break;
 		}
 		if (sms->dcs.u.general.compressed) {
 			/* Compression not supported yet */
@@ -1747,7 +1747,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 						size = 1;
 					else if (C >= 192 && C < 224)
 						size = 2;
-					else if (C >= 224 && C < 240) 
+					else if (C >= 224 && C < 240)
 						size = 3;
 					else if (C >= 240 && C < 248)
 						size = 4;
@@ -1804,7 +1804,7 @@ GNOKII_API gn_error gn_sms_save(gn_data *data, struct gn_statemachine *state)
 	dprintf("\tDate: %s\n", sms_timestamp_print(data->raw_sms->smsc_time));
 
 	if (data->sms->smsc.number[0] != '\0') {
-		data->raw_sms->message_center[0] = 
+		data->raw_sms->message_center[0] =
 			char_semi_octet_pack(data->sms->smsc.number, data->raw_sms->message_center + 1, data->sms->smsc.type);
 		if (data->raw_sms->message_center[0] % 2) data->raw_sms->message_center[0]++;
 		if (data->raw_sms->message_center[0])
@@ -1831,7 +1831,7 @@ cleanup:
 
 /* WAPPush functions */
 
-char *encode_attr_inline_string(char token, char *string, int *data_len) 
+char *encode_attr_inline_string(char token, char *string, int *data_len)
 {
 	char *data = NULL;
 	
@@ -1851,7 +1851,7 @@ char *encode_attr_inline_string(char token, char *string, int *data_len)
 	return data;
 }
 
-char *encode_indication(gn_wap_push *wp, int *data_len) 
+char *encode_indication(gn_wap_push *wp, int *data_len)
 {
 	char *data = NULL;
 	char *attr = NULL;
@@ -1925,7 +1925,7 @@ char *encode_si(gn_wap_push *wp, int *data_len)
 	return data;
 }
 
-GNOKII_API gn_error gn_wap_push_encode(gn_wap_push *wp) 
+GNOKII_API gn_error gn_wap_push_encode(gn_wap_push *wp)
 {
 	
 	char *data = NULL;
@@ -1951,7 +1951,7 @@ GNOKII_API gn_error gn_wap_push_encode(gn_wap_push *wp)
 	return GN_ERR_NONE;
 }
 
-GNOKII_API void gn_wap_push_init(gn_wap_push *wp) 
+GNOKII_API void gn_wap_push_init(gn_wap_push *wp)
 {
 
 	if (!wp) {

@@ -281,7 +281,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 
 			if (!optarg || strlen(optarg) > 255) {
 				fprintf(stderr, _("URL is too long (max 255 chars). Quitting.\n"));
-			        return GN_ERR_INVALIDSIZE;
+				return GN_ERR_INVALIDSIZE;
 			}
 
 			sms.user_data[curpos].type = GN_SMS_DATA_WAPPush;
@@ -337,7 +337,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	if (curpos != -1) {
 		error = readtext(&sms.user_data[curpos]);
 		if (error != GN_ERR_NONE)
-		        return error;
+			return error;
 		sms.user_data[curpos].type = GN_SMS_DATA_Text;
 		if (!gn_char_def_alphabet(sms.user_data[curpos].u.text))
 			sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2;

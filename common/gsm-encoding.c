@@ -325,9 +325,9 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 	return (char*)dst == pout ? -1 : pin-src;
 #else
 #  ifdef HAVE_WCRTOMB
-        return mbrtowc(dst, src, maxlen, mbs);
+	return mbrtowc(dst, src, maxlen, mbs);
 #  else
-        return mbtowc(dst, src, maxlen);
+	return mbtowc(dst, src, maxlen);
 #  endif
 #endif
 }
@@ -433,7 +433,7 @@ static unsigned int char_def_alphabet_ext_decode(unsigned char value)
 
 /**
  * char_def_alphabet_ext_encode:
- * @value: the UCS-2 character to encode 
+ * @value: the UCS-2 character to encode
  *
  * Returns: the encoded character, or 0 if @value can't be encoded
  *
@@ -692,7 +692,7 @@ int char_default_alphabet_decode(unsigned char* dest, const unsigned char* src, 
 	for (j = 0; j < len; j++) {
 		wchar_t wc;
 		int length;
- 
+
 		if (char_is_escape(src[j])) {
 			wc = char_def_alphabet_ext_decode(src[++j]);
 		} else {
@@ -1445,7 +1445,7 @@ int base64_decode(char *dest, int destlen, const char *source, int inlen)
 		o[0] = (b[0] << 2) | (b[1] >> 4);
 		o[1] = (b[1] << 4) | (b[2] >> 2);
 		o[2] = (b[2] << 6) | b[3];
-        	i = a[2] == '=' ? 1 : (a[3] == '=' ? 2 : 3);
+		i = a[2] == '=' ? 1 : (a[3] == '=' ? 2 : 3);
 		if (i >= 1) dest[dpos++] = o[0];
 		if (i >= 2) dest[dpos++] = o[1];
 		if (i >= 3) dest[dpos++] = o[2];
