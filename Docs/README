@@ -407,7 +407,8 @@ Tons of bugfixes and updates. The most important include sms and encoding
 handling functions. We are also better with Series40 3rd+ Edition support. 
 SMSD gained stability improvements. There were also portability fixes:
 gnokii should now compile just fine (again) on most platforms. We have now
-also Bluetooth support for FreeBSD.
+also Bluetooth support for FreeBSD. Experimental support for MMS reading
+for Nokia Series40.
 
 20081006 Version 0.6.27
 Fix some portability issues for win32/MacOS X/FreeBSD/Linux. Improve support
