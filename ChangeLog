@@ -71,6 +71,7 @@
     o make --sendsms refuse alfanumeric destination "numbers" to
       catch typos and make --savesms accept them because it's
       useful for testing                            (Daniele Forsi)
+    o allow sending an empty SMS                        (Paweł Kot)
  * at driver updates
     o initialize reg_notification and reg_callback_date (Paweł Kot)
     o fix --getnetworkinfo on some phones (Siemens S55) with
