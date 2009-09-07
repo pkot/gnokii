@@ -1426,6 +1426,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 				udh_length = 0;
 			switch (al) {
 			case GN_SMS_DCS_DefaultAlphabet:
+				dprintf("Default Alphabet\n");
 				size = char_7bit_pack((7 - (udh_length % 7)) % 7,
 						      sms->user_data[i].u.text,
 						      rawsms->user_data + offset,
@@ -1434,11 +1435,13 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 				rawsms->user_data_length = size + offset;
 				break;
 			case GN_SMS_DCS_8bit:
+				dprintf("8bit\n");
 				rawsms->dcs |= 0xf4;
 				memcpy(rawsms->user_data + offset, sms->user_data[i].u.text, sms->user_data[i].u.text[0]);
 				rawsms->user_data_length = rawsms->length = length + udh_length;
 				break;
 			case GN_SMS_DCS_UCS2:
+				dprintf("UCS-2\n");
 				rawsms->dcs |= 0x08;
 				length = char_unicode_encode(rawsms->user_data + offset, sms->user_data[i].u.text, length);
 				rawsms->user_data_length = rawsms->length = length + udh_length;
