@@ -90,7 +90,7 @@ size_t char_hex_encode(char *dest, size_t dest_len, const char *src, size_t len)
 void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len);
 size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len);
 
-unsigned char char_def_alphabet_encode(unsigned char value);
+unsigned char char_def_alphabet_encode(unsigned int value);
 unsigned int char_def_alphabet_decode(unsigned char value);
 
 size_t char_uni_alphabet_encode(const char *value, size_t n, wchar_t *dest, MBSTATE *mbs);
@@ -98,6 +98,8 @@ int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs);
 
 extern char *char_bcd_number_get(u8 *number);
 extern int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type);
+
+int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen);
 
 /* Ringtones */
 int vcal_time_get(gn_timestamp *dt, char *time);

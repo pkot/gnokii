@@ -59,6 +59,9 @@
       definition                                        (Paweł Kot)
     o introduce better bool definition             (Fabian Groffen)
     o correctly encode GN_GSM_NUMBER_Alphanumeric   (Daniele Forsi)
+    o use UCS-2 internal representation when sending SMS; it will
+      allow better recognition for non-ascii but default alphabet
+      characters                                        (Paweł Kot)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)

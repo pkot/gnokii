@@ -72,6 +72,15 @@ static const char *base64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
  */
 static const char *bcd_digits = "0123456789*#pbc";
 
+#if 0
+
+/*
+ * We switched from internal representation in ISO/IEC 8859-1 encoding to UCS-2
+ * encoding. But let's leave the old stuff for the time being.
+ *
+ * FIXME: Remove in gnokii 0.6.30
+ */
+
 /**
  * GN_CHAR_ALPHABET_SIZE:
  *
@@ -114,6 +123,8 @@ static unsigned char gsm_default_alphabet[GN_CHAR_ALPHABET_SIZE] = {
 	'p',  'q',  'r',  's',  't',  'u',  'v',  'w',
 	'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
 };
+
+#endif
 
 /**
  * GN_CHAR_UNI_ALPHABET_SIZE:
@@ -172,32 +183,26 @@ static unsigned int gsm_default_unicode_alphabet[GN_CHAR_UNI_ALPHABET_SIZE] = {
 	0x0078, 0x0079, 0x007a, 0x00e4, 0x00f6, 0x00f1, 0x00fc, 0x00e0
 };
 
-/**
- * gsm_reverse_default_alphabet:
- *
- * Mapping from ISO/IEC 8859-1 to GSM default alphabet.
- */
-static unsigned char gsm_reverse_default_alphabet[256];
-
-static bool reversed = false;
 static char application_encoding[64] = "";
 
 /**
- * tbl_setup_reverse:
+ * char_def_alphabet:
+ * @value: the UCS-2 character to validate
  *
- * Copies data from #gsm_default_alphabet to #gsm_reverse_default_alphabet
- * to build a reverse mapping table.
+ * Returns: true if the given character matches default alphabed, false otherwise
+ *
+ * It could be possibly optimized but let's face it: nowedays full
+ * lookup of 128 elements table is not that time consuming.
  */
-static void tbl_setup_reverse()
+static int char_def_alphabet(unsigned int value)
 {
 	int i;
-
-	if (reversed) return;
-	memset(gsm_reverse_default_alphabet, 0x3f, 256);
-	for (i = GN_CHAR_ALPHABET_SIZE - 1; i >= 0; i--)
-		gsm_reverse_default_alphabet[ gsm_default_alphabet[i] ] = i;
-	gsm_reverse_default_alphabet['?'] = 0x3f;
-	reversed = true;
+	for (i = 0; i < GN_CHAR_UNI_ALPHABET_SIZE; i++) {
+		if (gsm_default_unicode_alphabet[i] == value) {
+			return true;
+		}
+	}
+	return false;
 }
 
 /**
@@ -208,7 +213,7 @@ static void tbl_setup_reverse()
  *
  * Determines if @value is an escape character for GSM Alphabet.
  */
-static bool char_is_escape(unsigned char value)
+static bool char_is_escape(unsigned int value)
 {
 	return (value == GN_CHAR_UNI_ESCAPE);
 }
@@ -374,7 +379,7 @@ static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 
 /**
  * char_def_alphabet_ext:
- * @value: the character to test
+ * @value: the character to test UCS-2 encoded
  *
  * Returns: non zero if the character can be represented with the Extended GSM Alphabet,
  * zero otherwise
@@ -386,11 +391,8 @@ static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
  * only 10, and probably they will never change, so hardcoding them
  * here is rather safe.
  */
-static bool char_def_alphabet_ext(unsigned char value)
+static bool char_def_alphabet_ext(unsigned int value)
 {
-	wchar_t retval;
-
-	if (char_mbtowc(&retval, &value, 1, NULL) == -1) return false;
 	return (value == 0x0c ||
 		value == '^' ||
 		value == '{' ||
@@ -400,7 +402,7 @@ static bool char_def_alphabet_ext(unsigned char value)
 		value == '~' ||
 		value == ']' ||
 		value == '|' ||
-		retval == 0x20ac);
+		value == 0x20ac);
 }
 
 /**
@@ -409,7 +411,7 @@ static bool char_def_alphabet_ext(unsigned char value)
  *
  * Returns: the decoded character, or '?' if @value can't be decoded
  *
- * Converts a character from Extended GSM Alphabet to ISO/IEC 8859-1.
+ * Converts a character from Extended GSM Alphabet to UCS-2.
  */
 static unsigned int char_def_alphabet_ext_decode(unsigned char value)
 {
@@ -431,13 +433,13 @@ static unsigned int char_def_alphabet_ext_decode(unsigned char value)
 
 /**
  * char_def_alphabet_ext_encode:
- * @value: the character to encode
+ * @value: the UCS-2 character to encode 
  *
  * Returns: the encoded character, or 0 if @value can't be encoded
  *
- * Converts a character from ISO/IEC 8859-1 to Extended GSM Alphabet.
+ * Converts a character from UCS-2 to Extended GSM Alphabet.
  */
-static unsigned char char_def_alphabet_ext_encode(unsigned char value)
+static unsigned char char_def_alphabet_ext_encode(unsigned int value)
 {
 	switch (value) {
 	case 0x0c: return 0x0a; /* form feed */
@@ -449,7 +451,7 @@ static unsigned char char_def_alphabet_ext_encode(unsigned char value)
 	case '~':  return 0x3d;
 	case ']':  return 0x3e;
 	case '|':  return 0x40;
-	case 0xa4: return 0x65; /* euro */
+	case 0x20ac: return 0x65; /* euro */
 	default: return 0x00; /* invalid character */
 	}
 }
@@ -466,14 +468,30 @@ static unsigned char char_def_alphabet_ext_encode(unsigned char value)
  */
 GNOKII_API int gn_char_def_alphabet(unsigned char *string)
 {
-	unsigned int i, len = strlen(string);
+	unsigned int i, ucs2len, inlen = strlen(string);
+	char *ucs2str;
 
-	tbl_setup_reverse();
-	for (i = 0; i < len; i++)
-		if (!char_def_alphabet_ext(string[i]) &&
-		    gsm_reverse_default_alphabet[string[i]] == 0x3f &&
-		    string[i] != '?')
+	/* First, let's know the encoding. We convert it from something to UCS-2 */
+	ucs2str = calloc(2 * inlen, sizeof(unsigned char));
+	if (!ucs2str)
+		/* We are in trouble here. Whatever would be returned is irrelevant */
+		return true;
+	ucs2len = ucs2_encode(ucs2str, 2 * inlen, string, inlen);
+
+	for (i = 0; i < ucs2len / 2; i++) {
+		unsigned int a = 0xff & ucs2str[2 * i], b = 0xff & ucs2str[2 * i + 1];
+		/*
+		 * We need the following tests:
+		 *  - check in the default alphabet table
+		 *  - check in the extended default alphabet table
+		 */
+		if (!char_def_alphabet_ext(a + 256 * b) &&
+		    !char_def_alphabet(a + 256 * b)) {
+			free(ucs2str);
 			return false;
+		}
+	}
+	free(ucs2str);
 	return true;
 }
 
@@ -483,12 +501,19 @@ GNOKII_API int gn_char_def_alphabet(unsigned char *string)
  *
  * Returns: the encoded character, or '?' if @value can't be encoded
  *
- * Converts a character from ISO/IEC 8859-1 to Default GSM Alphabet.
+ * Converts a character from UCS-2 to Default GSM Alphabet.
+ * It could be possibly optimized but let's face it: nowedays full
+ * lookup of 128 elements table is not that time consuming.
  */
-unsigned char char_def_alphabet_encode(unsigned char value)
+unsigned char char_def_alphabet_encode(unsigned int value)
 {
-	tbl_setup_reverse();
-	return gsm_reverse_default_alphabet[value];
+	int i;
+	for (i = 0; i < GN_CHAR_UNI_ALPHABET_SIZE; i++) {
+		if (gsm_default_unicode_alphabet[i] == value) {
+			return i;
+		}
+	}
+	return '?';
 }
 
 /**
@@ -497,11 +522,11 @@ unsigned char char_def_alphabet_encode(unsigned char value)
  *
  * Returns: the decoded character or '?' if @value can't be decoded
  *
- * Converts a character from Default GSM Alphabet to ISO/IEC 8859-1.
+ * Converts a character from Default GSM Alphabet to UCS-2.
  */
 unsigned int char_def_alphabet_decode(unsigned char value)
 {
-	if (value < GN_CHAR_ALPHABET_SIZE) {
+	if (value < GN_CHAR_UNI_ALPHABET_SIZE) {
 		return gsm_default_unicode_alphabet[value];
 	} else {
 		return 0x003f; /* '?' */
@@ -567,7 +592,7 @@ int char_7bit_unpack(unsigned int offset, unsigned int in_length, unsigned int o
  * @offset: the bit offset inside the first byte of @output from which to start writing data
  * @input: buffer with the string to be converted
  * @output: buffer for the converted string, not NUL terminated
- * @in_len: (IGNORED) length of @input
+ * @in_len: length of @input to be set; includes extended alphabet escape char
  *
  * Returns: the number of bytes used in @output
  *
@@ -579,9 +604,18 @@ int char_7bit_pack(unsigned int offset, unsigned char *input,
 {
 
 	unsigned char *out_num = output; /* Current pointer to the output buffer */
-	unsigned char *in_num = input;  /* Current pointer to the input buffer */
-	int bits;		     /* Number of bits directly copied to
-					the output buffer */
+	unsigned int in_num;
+	int bits;		     /* Number of bits directly copied to output buffer */
+	unsigned int ucs2len, i = 0, len = strlen(input);
+	char *ucs2str;
+
+	/* FIXME: do it outside this function */
+	/* FIXME: scheduled for 0.6.29 */
+	/* First, let's know the encoding. We convert it from something to UCS-2 */
+	ucs2str = calloc(2 * len, sizeof(unsigned char));
+	if (!ucs2str)
+		return 0;
+	ucs2len = ucs2_encode(ucs2str, 2 * len, input, len);
 
 	bits = (7 + offset) % 8;
 
@@ -592,20 +626,26 @@ int char_7bit_pack(unsigned int offset, unsigned char *input,
 		out_num++;
 	}
 
-	while ((in_num - input) < strlen(input)) {
+	*in_len = 0;
+
+	while (i < ucs2len / 2) {
 		unsigned char byte;
 		bool double_char = false;
+		unsigned int a = 0xff & ucs2str[2 * i], b = 0xff & ucs2str[2 * i + 1];
 
-		if (char_def_alphabet_ext(*in_num)) {
-			byte = GN_CHAR_ESCAPE;
+		in_num = a + 256 * b;
+
+		if (char_def_alphabet_ext(in_num)) {
+			byte = GN_CHAR_UNI_ESCAPE;
 			double_char = true;
 			goto skip;
 next_char:
-			byte = char_def_alphabet_ext_encode(*in_num);
+			byte = char_def_alphabet_ext_encode(in_num);
 			double_char = false;
-			(*in_len)++;
+			(*in_len) += 2;
 		} else {
-			byte = char_def_alphabet_encode(*in_num);
+			byte = char_def_alphabet_encode(in_num);
+			(*in_len)++;
 		}
 skip:
 		*out_num = byte >> (7 - bits);
@@ -616,14 +656,18 @@ skip:
 
 		bits--;
 
-		if (bits == -1) bits = 7;
-		else out_num++;
+		if (bits == -1)
+			bits = 7;
+		else
+			out_num++;
 
-		if (double_char) goto next_char;
+		if (double_char)
+			goto next_char;
 
-		in_num++;
+		i++;
 	}
 
+	free(ucs2str);
 	return (out_num - output);
 }
 
@@ -682,7 +726,7 @@ size_t char_ascii_encode(char *dest, size_t dest_len, const char *src, size_t le
 
 	for (i = 0, j = 0; i < dest_len && j < len; i++, j++) {
 		if (char_def_alphabet_ext(src[j])) {
-			dest[i++] = GN_CHAR_ESCAPE;
+			dest[i++] = GN_CHAR_UNI_ESCAPE;
 			dest[i] = char_def_alphabet_ext_encode(src[j]);
 			extra++;
 		} else {
@@ -790,6 +834,7 @@ int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs)
  *
  * Converts a string from UCS-2 encoded as ASCII-encoded hexadecimal bytes to ISO/IEC 8859-1.
  * @len must be a multiple of 4.
+ * Used in AT driver for UCS2 encoding commands.
  */
 void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
 {
@@ -831,6 +876,7 @@ void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
  *
  * Converts a string from ISO/IEC 8859-1 to UCS-2 encoded as ASCII-encoded hexadecimal bytes.
  * This function should convert "ABC" to "004100420043"
+ * Used in AT driver for UCS2 encoding commands.
  */
 #define UCS2_SIZE	4
 size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len)
@@ -1204,6 +1250,46 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 	}
 #endif
 	return (nconv < 0) ?  -1 : (char *)pout - outstring;
+}
+
+/* UCS-2 functions */
+
+/**
+ * ucs2_encode:
+ * @outstring: buffer for the converted string, not NUL terminated
+ * @outlen: size of @outstring
+ * @instring: buffer with the string to be converted
+ * @inlen: length of @instring
+ *
+ * Returns: the number of bytes used in @outstring, or -1 in case of errors
+ *
+ * Converts a string from an application specified (or system default) encoding to UCS-2.
+ * Uses iconv() if available, else uses internal replacement code.
+ */
+int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
+{
+#if defined(HAVE_ICONV)
+	size_t outleft, inleft, nconv;
+	ICONV_CONST char *pin;
+	char *pout;
+	iconv_t cd;
+
+	outleft = outlen;
+	inleft = inlen;
+	pin = (char *)instring;
+	pout = outstring;
+
+	cd = iconv_open("UCS-2", gn_char_get_encoding());
+
+	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
+	*pout = 0;
+	iconv_close(cd);
+	return (nconv < 0) ?  -1 : (char *)pout - outstring;
+#else
+	size_t nconv = char_unicode_encode(outstring, instring, inlen);
+	unsigned char *pin, *pout;
+	return (nconv < 0) ?  -1 : nconv;
+#endif
 }
 
 
