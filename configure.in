@@ -10,7 +10,7 @@ dnl
 
 
 AC_INIT([gnokii],
-	 [0.6.28cvs],
+	 [0.6.28],
 	 [http://www.gnokii.org/])
 
 # Before making a release, the GNOKII_LT_VERSION string should be modified.
@@ -20,7 +20,7 @@ AC_INIT([gnokii],
 # - If binary compatibility has been broken (eg removed or changed interfaces)
 #   change to C-A+1:0:0
 # - If the interface is the same as the previous version, change to C:R+1:A
-GNOKII_LT_VERSION_CURRENT=4
+GNOKII_LT_VERSION_CURRENT=5
 GNOKII_LT_VERSION_REVISION=0
 GNOKII_LT_VERSION_AGE=0
 AC_SUBST(GNOKII_LT_VERSION_CURRENT)
@@ -31,7 +31,7 @@ dnl xgnokii version
 XVERSION=1.0
 
 dnl smsd version
-SVERSION=1.4.3
+SVERSION=1.4.4
 
 AC_CANONICAL_SYSTEM
 AC_GNU_SOURCE

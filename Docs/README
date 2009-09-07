@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
-                         (C) 2001 - 2008 Paweł Kot
-                Last update  6 October 2008  Version 0.6.27
+                         (C) 2001 - 2009 Paweł Kot
+               Last update 7 September 2009  Version 0.6.28
 
 - Contents -
 
@@ -26,7 +26,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.27 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.28 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -402,6 +402,13 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+20090907 Version 0.6.28
+Tons of bugfixes and updates. The most important include sms and encoding
+handling functions. We are also better with Series40 3rd+ Edition support. 
+SMSD gained stability improvements. There were also portability fixes:
+gnokii should now compile just fine (again) on most platforms. We have now
+also Bluetooth support for FreeBSD.
+
 20081006 Version 0.6.27
 Fix some portability issues for win32/MacOS X/FreeBSD/Linux. Improve support
 for Inbox SMS reading for Series40 3rd+ Edition. Support for new memory
