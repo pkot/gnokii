@@ -62,6 +62,7 @@
     o use UCS-2 internal representation when sending SMS; it will
       allow better recognition for non-ascii but default alphabet
       characters                                        (Paweł Kot)
+    o fix off-by-one bug in base64_encode               (Paweł Kot)
  * gnokii updates
     o strip the trailing newline when --entersecuritycode did not
       read from a terminal                          (Daniele Forsi)

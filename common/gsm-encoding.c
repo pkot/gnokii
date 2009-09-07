@@ -1342,8 +1342,8 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 		unsigned int i1, i2, i3, i4;
 
 		a = *pin++;
-		b = (*pin) ? *(pin++) : 0;
-		c = (*pin) ? *(pin++) : 0;
+		b = (inleft > 1) ? *(pin++) : 0;
+		c = (inleft > 2) ? *(pin++) : 0;
 
 		/* calculate the indexes */
 		i1 = (a & 0xfc) >> 2;
