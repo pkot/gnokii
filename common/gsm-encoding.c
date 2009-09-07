@@ -189,9 +189,9 @@ static char application_encoding[64] = "";
  * char_def_alphabet:
  * @value: the UCS-2 character to validate
  *
- * Returns: true if the given character matches default alphabed, false otherwise
+ * Returns: true if the given character matches default alphabet, false otherwise
  *
- * It could be possibly optimized but let's face it: nowedays full
+ * It could be possibly optimized but let's face it: nowadays full
  * lookup of 128 elements table is not that time consuming.
  */
 static int char_def_alphabet(unsigned int value)
@@ -502,7 +502,7 @@ GNOKII_API int gn_char_def_alphabet(unsigned char *string)
  * Returns: the encoded character, or '?' if @value can't be encoded
  *
  * Converts a character from UCS-2 to Default GSM Alphabet.
- * It could be possibly optimized but let's face it: nowedays full
+ * It could be possibly optimized but let's face it: nowadays full
  * lookup of 128 elements table is not that time consuming.
  */
 unsigned char char_def_alphabet_encode(unsigned int value)
