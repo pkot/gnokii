@@ -486,7 +486,8 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		case 'f': /* Specify the folder where to save the message */
 			snprintf(memory_type, 19, "%s", optarg);
 			if (gn_str2memory_type(memory_type) == GN_MT_XX) {
-				fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
+				fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
+				fprintf(stderr, _("Run gnokii --showsmsfolderstatus for a list of supported memory types.\n"));
 				return GN_ERR_INVALIDMEMORYTYPE;
 			}
 			break;
@@ -658,6 +659,7 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	memory_type_string = optarg;
 	if (gn_str2memory_type(memory_type_string) == GN_MT_XX) {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
+		fprintf(stderr, _("Run gnokii --showsmsfolderstatus for a list of supported memory types.\n"));
 		return GN_ERR_INVALIDMEMORYTYPE;
 	}
 
@@ -889,8 +891,10 @@ parsefile:
 			break;
 		default:
 			fprintf(stderr, _("GetSMS %s %d failed! (%s)\n"), memory_type_string, count, gn_error_print(error));
-			if (error == GN_ERR_INVALIDMEMORYTYPE)
-				fprintf(stderr, _("See the gnokii manual page for the supported memory types with the phone\nyou use.\n"));
+			if (error == GN_ERR_INVALIDMEMORYTYPE) {
+				fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
+				fprintf(stderr, _("Run gnokii --showsmsfolderstatus for a list of supported memory types.\n"));
+			}
 			break;
 		}
 		if (mode == -1)
@@ -940,7 +944,8 @@ gn_error deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine
 	memory_type_string = optarg;
 	message.memory_type = gn_str2memory_type(memory_type_string);
 	if (message.memory_type == GN_MT_XX) {
-		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), optarg);
+		fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
+		fprintf(stderr, _("Run gnokii --showsmsfolderstatus for a list of supported memory types.\n"));
 		return GN_ERR_INVALIDMEMORYTYPE;
 	}
 
