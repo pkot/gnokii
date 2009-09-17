@@ -169,6 +169,29 @@ out:
 	return e;
 }
 
+static gn_error at_sms_get_sms_status(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data || !data->sms_status)
+		return GN_ERR_INTERNALERROR;
+
+	data->sms_status->number = 0;
+	data->sms_status->unread = 0;
+	data->sms_status->changed = 0;
+	data->sms_status->folders_count = 0;
+
+	return GN_ERR_NONE;
+}
+
+static gn_error at_get_model(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data)
+		return GN_ERR_INTERNALERROR;
+
+	snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", "fake");
+
+	return GN_ERR_NONE;
+}
+
 static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	switch (op) {
@@ -182,6 +205,10 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 		return at_sms_get(data, state);
 	case GN_OP_GetSMSCenter:
 		return GN_ERR_NONE;
+	case GN_OP_GetModel:
+		return at_get_model(data, state);
+	case GN_OP_GetSMSStatus:
+		return at_sms_get_sms_status(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
