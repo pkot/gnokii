@@ -6,8 +6,11 @@
 [global]
 
 # Set port to the physical port used to connect to your phone.
-# Linux version is:
-port = /dev/ttyS0
+port = /dev/ttyUSB0
+
+# Then using phone connected to the serial port (not USB) you should
+# use (for Linux):
+# port = /dev/ttyS0
 #
 # For MacOSX you will need something like:
 # port = /dev/cu.USA28X1P1.1
@@ -48,14 +51,17 @@ port = /dev/ttyS0
 # Set model to the model number of your phone. For the
 # Symbian phones use:
 # model = symbian
+#
 # For other non-Nokia phones and when you want to use AT
 # mode use:
-# model = AT
+model = AT
+#
 # If you can't figure out what to put here read the FAQ.
 # If it still doesn't help, consult gnokii-ml or #gnokii at freenode.
-model = 6510
-# There are few main models that should make use of the certain drivers.
-# These are: 6110, 7110, 6510, 3110, 2110, 6160.
+# For Nokia phones (non-Symbian), most likely you'll need:
+# model = 6510
+# There are few main models that when chosen should make use of the
+# appropriate drivers. These are: 6110, 7110, 6510, 3110, 2110, 6160.
 
 # Set IrDA device name.
 # If you use irda connection you may want gnokii to autodetect the irda
