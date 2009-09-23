@@ -319,7 +319,11 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 	outlen = sizeof(wchar_t);
 
 	cd = iconv_open("WCHAR_T", gn_char_get_encoding());
+	if (cd == (iconv_t)-1)
+		return -1;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
+	if (nconv == (size_t)-1)
+		perror("iconv");
 	iconv_close(cd);
 
 	return (char*)dst == pout ? -1 : pin-src;
@@ -362,6 +366,8 @@ static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 	outlen = 4;
 
 	cd = iconv_open(gn_char_get_encoding(), "WCHAR_T");
+	if (cd == (iconv_t)-1)
+		return -1;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	if (nconv == (size_t)-1)
 		perror("iconv");
@@ -1157,7 +1163,11 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
 	pout = outstring;
 
 	cd = iconv_open(gn_char_get_encoding(), "UTF-8");
+	if (cd == (iconv_t)-1)
+		return -1;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
+	if (nconv == (size_t)-1)
+		perror("iconv");
 	iconv_close(cd);
 	*pout = 0;
 #else
@@ -1225,8 +1235,12 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 	pout = outstring;
 
 	cd = iconv_open("UTF-8", gn_char_get_encoding());
+	if (cd == (iconv_t)-1)
+		return -1;
 
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
+	if (nconv == (size_t)-1)
+		perror("iconv");
 	*pout = 0;
 	iconv_close(cd);
 #else
@@ -1280,8 +1294,12 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 	pout = outstring;
 
 	cd = iconv_open("UCS-2", gn_char_get_encoding());
+	if (cd == (iconv_t)-1)
+		return -1;
 
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
+	if (nconv == (size_t)-1)
+		perror("iconv");
 	*pout = 0;
 	iconv_close(cd);
 	return (nconv < 0) ?  -1 : (char *)pout - outstring;
