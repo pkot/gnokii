@@ -911,6 +911,8 @@ GNOKII_API gn_error gn_cfg_read_default()
 	homedir = getenv("HOME");
 	if (homedir)
 		strncpy(rcfile, homedir, MAX_PATH_LEN);
+	else
+		rcfile[0] = '\0';
 	strncat(rcfile, "/.gnokiirc", MAX_PATH_LEN);
 #endif
 
