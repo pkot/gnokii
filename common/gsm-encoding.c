@@ -256,10 +256,13 @@ static const char *get_langinfo_codeset(void)
  */
 GNOKII_API const char *gn_char_get_encoding()
 {
-	if (*application_encoding)
-		return application_encoding; /* app has overriden encoding setting */
+	const char *coding;
+	if (*application_encoding) 
+		coding = application_encoding; /* app has overriden encoding setting */
 	else
-		return get_langinfo_codeset(); /* return default codeset */
+		coding = get_langinfo_codeset(); /* return default codeset */
+	dprintf("detected coding: %s\n", coding);
+	return coding;
 }
 
 /**
