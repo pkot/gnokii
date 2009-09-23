@@ -174,6 +174,7 @@ typedef enum {
 #define NK6510_MEMORY_F18		0x23
 #define NK6510_MEMORY_F19		0x24
 #define NK6510_MEMORY_F20		0x25	/* MY FOLDERS 20 */
+#define NK6510_MEMORY_OUS		0x1a
 /* This is used when the memory type is unknown. */
 #define NK6510_MEMORY_XX		0xff
 

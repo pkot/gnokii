@@ -6212,6 +6212,9 @@ static int get_memory_type(gn_memory_type memory_type)
 	case GN_MT_OU:
 		result = NK6510_MEMORY_OU;
 		break;
+	case GN_MT_OUS:
+		result = NK6510_MEMORY_OUS;
+		break;
 	case GN_MT_AR:
 		result = NK6510_MEMORY_AR;
 		break;
@@ -6295,6 +6298,9 @@ static gn_memory_type get_gn_memory_type(int memory_type)
 		break;
 	case NK6510_MEMORY_OU:
 		result = GN_MT_OU;
+		break;
+	case NK6510_MEMORY_OUS:
+		result = GN_MT_OUS;
 		break;
 	case NK6510_MEMORY_AR:
 		result = GN_MT_AR;

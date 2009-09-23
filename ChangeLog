@@ -8,6 +8,9 @@
  * gnokii updates
     o make SMS and MMS commands suggest using --showsmsfolderstatus
       to know which memory types are supported      (Daniele Forsi)
+ * nk6510 driver updates
+    o support SMS memory OUS on phones prior to Series 40 3rd
+                                         (Paweł Kot, Daniele Forsi)
 
 0.6.28
 ======
