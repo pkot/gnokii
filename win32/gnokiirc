@@ -18,14 +18,17 @@ port = com1:
 # Set model to the model number of your phone. For the
 # Symbian phones use:
 # model = symbian
+#
 # For other non-Nokia phones and when you want to use AT
 # mode use:
-# model = AT
+model = AT
+#
 # If you can't figure out what to put here read the FAQ.
 # If it still doesn't help, consult gnokii-ml or #gnokii at freenode.
-model = 6510
-# There are few main models that should make use of the certain drivers.
-# These are: 6110, 7110, 6510, 3110, 2110, 6160.
+# For Nokia phones (non-Symbian), most likely you'll need:
+# model = 6510
+# There are few main models that when chosen should make use of the
+# appropriate drivers. These are: 6110, 7110, 6510, 3110, 2110, 6160.
 
 # Set IrDA device name.
 # If you use irda connection you may want gnokii to autodetect the irda
@@ -86,9 +89,9 @@ use_locking = no
 # Currently used only by models AT and BIP/CIMD. Defaults to 19200.
 serial_baudrate = 19200
 
-# Force waiting after each send character the specified usec time.
+# Force waiting after each sent character the specified usec time.
 # Value -1 forces the fastest 'block' writing,
-# value 0 writes each character separately without any explicite waiting,
+# value 0 writes each character separately without any explicit waiting,
 # other positive values specify the appropriate 1/1000000 sec delaying.
 # Siemens M20 requires at least "1"!  FIXME: Model-driven autodetection
 #serial_write_usleep = 10000
@@ -103,14 +106,16 @@ serial_baudrate = 19200
 #require_dcd = 1
 
 # If you are using a bluetooth connection, you can specify the rfcomm
-# channel number here. Default value is 1.
+# channel number here. If you don't specify the value, it is autodetected
+# on connection (it may take an additional second). FBUS connections always
+# ignore this value and use channel 14.
 #rfcomm_channel = 1
 
 # There may happen various timeouts during the communication with the phone.
 # This parameter enables the retransmission policy. Ie. if the phone doesn't
-# respond, we send the frame again. This happend mainly with the older
+# respond, we send the frame again. This happened mainly with the older
 # phones. You may want to enable it when you see mysterious timeouts.
-# Be very carefull with this option. It is suspected to cause phone breakage
+# Be very careful with this option. It is suspected to cause phone breakage
 # with new DCT4 phones (like Nokia 6100). By default it is switched off
 # (sm_retry = 0)
 #sm_retry = 1
@@ -147,11 +152,13 @@ bindir = /usr/local/sbin/
 # variables when running the scripts.
 # Handy for use for $VAR substitutions in your chat(8) script.
 [connect_script]
+# Don't put your phone number here!!!
 TELEPHONE = 12345678
+
 [disconnect_script]
 
 
-# The following parameters control how libgnokii handle the debugging messages.
+# The following parameters control how libgnokii handles the debugging messages.
 # Currently there are three categories: "debug" controls the libgnokii
 # normal debug output, "rlpdebug" controls the debug output of the RLP
 # subsystem, and "xdebug" is used by the xgnokii or smsd.
