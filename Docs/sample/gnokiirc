@@ -1,5 +1,7 @@
-# This is a sample ~/.gnokiirc file.  Copy it into your
-# home directory and name it .gnokiirc.
+# This is a sample ~/.gnokiirc file for unix-like systems.
+# See win32/gnokiirc for a Windows sample.
+# Copy this file into your home directory, name it .gnokiirc and change
+# port, connection and model settings following the comments below.
 # See http://wiki.gnokii.org/index.php/Config for working examples.
 #
 
