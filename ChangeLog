@@ -14,6 +14,8 @@
  * documentation updates
     o change defaults in sample gnokiirc files for *nix and Windows
       so that it's more likely to work for new users    (Paweł Kot)
+ * libgnokii changes
+    o add more debug information to encoding functions  (Paweł Kot)
 
 0.6.28
 ======

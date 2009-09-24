@@ -326,7 +326,7 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 		return -1;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	if (nconv == (size_t)-1)
-		perror("iconv");
+		perror("char_mbtowc/iconv");
 	iconv_close(cd);
 
 	return (char*)dst == pout ? -1 : pin-src;
@@ -373,7 +373,7 @@ static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 		return -1;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	if (nconv == (size_t)-1)
-		perror("iconv");
+		perror("char_wctomb/iconv");
 	iconv_close(cd);
 
 	return nconv == -1 ? -1 : pout-dst;
@@ -1170,7 +1170,7 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
 		return -1;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	if (nconv == (size_t)-1)
-		perror("iconv");
+		perror("utf8_decode/iconv");
 	iconv_close(cd);
 	*pout = 0;
 #else
@@ -1243,7 +1243,7 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
 	if (nconv == (size_t)-1)
-		perror("iconv");
+		perror("utf8_encode/iconv");
 	*pout = 0;
 	iconv_close(cd);
 #else
@@ -1302,7 +1302,7 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
 	if (nconv == (size_t)-1)
-		perror("iconv");
+		perror("ucs2_encode/iconv");
 	*pout = 0;
 	iconv_close(cd);
 	return (nconv < 0) ?  -1 : (char *)pout - outstring;
