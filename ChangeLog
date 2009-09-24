@@ -11,6 +11,9 @@
  * nk6510 driver updates
     o support SMS memory OUS on phones prior to Series 40 3rd
                                          (Paweł Kot, Daniele Forsi)
+ * documentation updates
+    o change defaults in sample gnokiirc files for *nix and Windows
+      so that it's more likely to work for new users    (Paweł Kot)
 
 0.6.28
 ======
