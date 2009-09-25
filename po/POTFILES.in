@@ -36,11 +36,13 @@ common/phones/nk7110.c
 common/phones/nokia.c
 common/vcal.lx
 common/vcard.c
+getopt/getopt.c
 gnokii/gnokii-calendar.c
 gnokii/gnokii-dial.c
 gnokii/gnokii-file.c
 gnokii/gnokii-logo.c
 gnokii/gnokii-monitor.c
+gnokii/gnokii-mms.c
 gnokii/gnokii-other.c
 gnokii/gnokii-phonebook.c
 gnokii/gnokii-profile.c

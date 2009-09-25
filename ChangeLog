@@ -2,6 +2,7 @@
 =========================
  * translation updates
     o updated German translation                 (Carsten Grohmann)
+    o updated POTFILE files                      (Carsten Grohmann)
  * fake driver
     o implement GN_OP_GetModel and GN_OP_GetSMSStatus to allow
       testing of smsd sending                       (Daniele Forsi)
