@@ -232,13 +232,15 @@ This should not happen.\nSkipping.");
     msg->memory_type = smsdConfig.memoryType;
     msg->number = i++;
     data.sms = msg;
-    gn_log_xdebug ("Reading SMS %d\n", i - 1);
+    gn_log_xdebug ("Reading SMS %d of %d\n", i - 1, number);
     if ((error = gn_sms_get (&data, sm)) == GN_ERR_NONE)
     {
       phoneMonitor.sms.messages = g_slist_append (phoneMonitor.sms.messages, msg);
       phoneMonitor.sms.number++;
-      
-      if (phoneMonitor.sms.number == number)
+
+      gn_log_xdebug ("Message counter: %d\n", phoneMonitor.sms.number);
+
+      if (phoneMonitor.sms.number >= number)
       {
         pthread_cond_signal (&smsCond);
         return;
