@@ -1024,6 +1024,21 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		break;
 
 	/* getfolderstatus */
+	case 0x0b:
+		/*
+		 * Reponse:
+		 * 01 78 00 0b 00 00 01 00 00 00
+		 * apparently means "empty folder"
+		 */
+		 dprintf("Empty folder?\n");
+		if (!data->sms_folder)
+			return GN_ERR_INTERNALERROR;
+		data->sms_folder->sms_data = 0;
+		memset(data->sms_folder->locations, 0, sizeof(data->sms_folder->locations));
+		data->sms_folder->number = 0;
+		break;
+
+	/* getfolderstatus */
 	case 0x0d:
 		dprintf("Message: SMS Folder status received\n" );
 		if (!data->sms_folder)
@@ -1244,6 +1259,11 @@ static gn_error NK6510_GetSMSFolders(gn_data *data, struct gn_statemachine *stat
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x12, 0x00, 0x00};
 
 	dprintf("Getting SMS Folders...\n");
+	if (!data->sms_folder_list)
+		return GN_ERR_INTERNALERROR;
+
+	memset(data->sms_folder_list, 0, sizeof(gn_sms_folder_list));
+
 	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
 		return NK6510_GetSMSFolders_S40_30(data, state);
 
@@ -1334,6 +1354,12 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 	gn_error error;
 	int i;
 	gn_sms_folder phone;
+
+	if (!data->sms_folder)
+		return GN_ERR_INTERNALERROR;
+
+	/* Let's avoid suprises */
+	data->sms_folder->number = 0;
 
 	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
 		return NK6510_GetSMSFolderStatus_S40_30(data, state);

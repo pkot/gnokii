@@ -11,6 +11,12 @@
  * nk6510 driver updates
     o support SMS memory OUS on phones prior to Series 40 3rd
                                          (Paweł Kot, Daniele Forsi)
+    o add potential new answer for an empty folder      (Paweł Kot)
+    o clear folder list structure before retrieving new one
+                                                        (Paweł Kot)
+    o before getting folder status set number of elements in there
+      to 0 to avoid confusion on incorrect error handling
+                                                        (Paweł Kot)
  * documentation updates
     o change defaults in sample gnokiirc files for *nix and Windows
       so that it's more likely to work for new users    (Paweł Kot)
