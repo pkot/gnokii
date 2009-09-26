@@ -10,8 +10,10 @@ dnl
 
 
 AC_INIT([gnokii],
-	 [0.6.29git],
-	 [http://www.gnokii.org/])
+	[0.6.29git],
+	[gnokii-users@nongnu.org],
+	[gnokii],
+	[http://www.gnokii.org/])
 
 # Before making a release, the GNOKII_LT_VERSION string should be modified.
 # The string is of the form C:R:A.
