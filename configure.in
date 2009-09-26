@@ -465,6 +465,17 @@ if test "$enable_irda" = "yes"; then
 		 #include <linux/types.h>])
 fi
 
+dnl ======================== Defines location for gettext
+AC_ARG_WITH(gettext,
+	[  --with-gettext=DIR      specifies the base gettext],
+	[ if test x$withval = xyes; then
+		AC_MSG_WARN(Usage is: --with-gettext=DIR)
+	  else
+		CFLAGS="$CFLAGS -I$withval"
+	  fi
+	]
+)
+
 dnl ======================== Checks for Linux Bluetooth support
 bluetooth="no"
 AC_ARG_WITH(bluetooth,
