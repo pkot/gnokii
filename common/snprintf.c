@@ -819,7 +819,7 @@ int vasprintf(char **ptr, const char *format, va_list ap)
 
 
 #ifndef HAVE_ASPRINTF
-GNOKII_API int asprintf(char **ptr, const char *format, ...)
+int asprintf(char **ptr, const char *format, ...)
 {
 	va_list ap;
 	int ret;
@@ -835,7 +835,7 @@ GNOKII_API int asprintf(char **ptr, const char *format, ...)
 
 #ifndef HAVE_VSYSLOG
 #ifdef HAVE_SYSLOG
- void vsyslog (int facility_priority, char *format, va_list arglist)
+void vsyslog (int facility_priority, char *format, va_list arglist)
 {
 	char *msg = NULL;
 	vasprintf(&msg, format, arglist);
@@ -851,7 +851,7 @@ GNOKII_API int asprintf(char **ptr, const char *format, ...)
 
 int sprintf(char *str,const char *fmt,...);
 
- int main (void)
+int main (void)
 {
 	char buf1[1024];
 	char buf2[1024];
