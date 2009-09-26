@@ -308,7 +308,7 @@ USE_READLINE="no"
 
 AC_MSG_CHECKING(whether to use readline)
 AC_ARG_WITH(readline,
-[  --with-readline[=DIR]   Look for readline include/libs in DIR
+[  --with-readline[=DIR]     Look for readline include/libs in DIR
   --without-readline      Don't include readline support],
 [  case "$with_readline" in
   yes)
@@ -787,8 +787,8 @@ AC_ARG_ENABLE(win32,
 AM_CONDITIONAL(WIN32, test "x$WIN32" = "x1")
 
 AC_ARG_ENABLE(unix98test,
-   [  --enable-unix98test     if you want to disable UNIX98 test and assume to use it
-                          default is enabled],
+   [  --enable-unix98test     if you want to disable UNIX98 test and assume to
+                          use it; default is enabled],
    [ if test x$enable_unix98test = xno; then
 	unix98test="no"
      else
