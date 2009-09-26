@@ -412,18 +412,17 @@ GNOKII_API gint WriteSMS (gn_sms *sms)
   error = m->status;
   g_free (m);
 
-  if (smsdConfig.logFile)
+  if (error)
   {
-    if (error)
-    {
-      gn_log_xdebug ("Sending to %s unsuccessful. Error: %s\n", sms->remote.number, gn_error_print(error));
+    gn_log_xdebug ("Sending to %s unsuccessful. Error: %s\n", sms->remote.number, gn_error_print(error));
+    if (smsdConfig.logFile)
       LogFile (_("Sending to %s unsuccessful. Error %s\n"), sms->remote.number, gn_error_print(error));
-    }
-     else
-    {
-      gn_log_xdebug ("Sending to %s successful.\n", sms->remote.number);
+  }
+   else
+  {
+    gn_log_xdebug ("Sending to %s successful.\n", sms->remote.number);
+    if (smsdConfig.logFile)
       LogFile (_("Sending to %s successful.\n"), sms->remote.number);
-    }
   }
 
   return (error);
@@ -449,10 +448,8 @@ static void ReadSMS (gpointer d, gpointer userData)
     {
       case SMSD_OK:
         if (smsdConfig.logFile)
-        {
-          gn_log_xdebug ("Inserting sms from %s successful.\n", data->remote.number);
           LogFile (_("Inserting sms from %s successful.\n"), data->remote.number);
-        }
+        gn_log_xdebug ("Inserting sms from %s successful.\n", data->remote.number);
         e = (PhoneEvent *) g_malloc (sizeof(PhoneEvent));
         e->event = Event_DeleteSMSMessage;
         e->data = data;
@@ -461,10 +458,8 @@ static void ReadSMS (gpointer d, gpointer userData)
         
       case SMSD_DUPLICATE:
         if (smsdConfig.logFile)
-        {
-          gn_log_xdebug ("Duplicated sms from %s.\n", data->remote.number);
           LogFile (_("Duplicated sms from %s.\n"), data->remote.number);
-        }
+        gn_log_xdebug ("Duplicated sms from %s.\n", data->remote.number);
         e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
         e->event = Event_DeleteSMSMessage;
         e->data = data;
@@ -473,10 +468,8 @@ static void ReadSMS (gpointer d, gpointer userData)
 
       case SMSD_WAITING:
         if (smsdConfig.logFile)
-        {
-          gn_log_xdebug ("Multipart sms from %s. Waiting for the next parts.\n", data->remote.number);
           LogFile (_("Multipart sms from %s. Waiting for the next parts.\n"), data->remote.number);
-        }
+        gn_log_xdebug ("Multipart sms from %s. Waiting for the next parts.\n", data->remote.number);
         e = (PhoneEvent *) g_malloc (sizeof(PhoneEvent));
         e->event = Event_DeleteSMSMessage;
         e->data = data;
@@ -485,20 +478,18 @@ static void ReadSMS (gpointer d, gpointer userData)
         
       default:
         if (smsdConfig.logFile)
-        {
-          gn_log_xdebug ("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n",
-                         data->remote.number, data->smsc_time.year,
-                         data->smsc_time.month, data->smsc_time.day,
-                         data->smsc_time.hour, data->smsc_time.minute,
-                         data->smsc_time.second, data->smsc_time.timezone,
-                         data->user_data[0].u.text);
           LogFile (_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n"),
                    data->remote.number, data->smsc_time.year,
                    data->smsc_time.month, data->smsc_time.day,
                    data->smsc_time.hour, data->smsc_time.minute,
                    data->smsc_time.second, data->smsc_time.timezone,
                    data->user_data[0].u.text);
-        }
+        gn_log_xdebug ("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n",
+                        data->remote.number, data->smsc_time.year,
+                        data->smsc_time.month, data->smsc_time.day,
+                        data->smsc_time.hour, data->smsc_time.minute,
+                        data->smsc_time.second, data->smsc_time.timezone,
+                        data->user_data[0].u.text);
         break;
     }
   }
