@@ -28,6 +28,8 @@
                                                       (Jari Turkia)
     o make getopt stuff compile with no gettext       (Jari Turkia,
                                                          Paweł Kot)
+    o try to fix "Present But Cannot Be Compiled" warning with
+      MacOS X Bluetooth                                 (Paweł Kot)
  o win32 updates
     o MS Visual Studio does not have asprintf()/vasprintf()
                                                       (Jari Turkia)

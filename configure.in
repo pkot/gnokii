@@ -504,7 +504,14 @@ if test "$enable_bluetooth" = "yes"; then
 	AC_MSG_CHECKING([for the MacOS X bluetooth support])
 	AC_CHECK_HEADERS(CoreFoundation/CoreFoundation.h)
 	AC_CHECK_HEADERS(IOBluetooth/Bluetooth.h)
-	AC_CHECK_HEADERS(IOBluetooth/IOBluetoothUserLib.h)
+	AC_CHECK_HEADERS([IOBluetooth/IOBluetoothUserLib.h], [], [],
+[[#ifdef HAVE_COREFOUNDATION_COREFOUNDATION_H
+#  include <CoreFoundation/CoreFoundation.h>
+#endif
+#ifdef HAVE_IOBLUETOOTH_BLUETOOTH_H
+#  include <IOBluetooth/Bluetooth.h>
+#endif
+]])
 	AC_TRY_COMPILE([#include <CoreFoundation/CoreFoundation.h>
 			#include <IOBluetooth/Bluetooth.h>
 			#include <IOBluetooth/IOBluetoothUserLib.h>],
