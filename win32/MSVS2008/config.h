@@ -90,10 +90,10 @@
 #define HAVE_C99_VSNPRINTF 1
 
 /* Define if you have asprintf */
-#define HAVE_ASPRINTF 1
+#undef HAVE_ASPRINTF
 
 /* Define if you have vasprintf */
-#define HAVE_VASPRINTF 1
+#undef HAVE_VASPRINTF
 
 /* Define if you have strsep */
 #undef HAVE_STRSEP
@@ -120,6 +120,9 @@
 
 /* Define if struct msghdr has msg_control field */
 #undef HAVE_MSGHDR_MSG_CONTROL
+
+/* Define to 1 if you have the `setenv' function. */
+#define HAVE_SETENV 1
 
 /* FIXME: Disable some odd warnings, comment these lines if u wanna fix the bad code lines */
 #pragma warning(disable : 4244) // conversion from 'int ' to 'float ', possible loss of data
