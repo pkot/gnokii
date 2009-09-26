@@ -41,6 +41,7 @@ AC_GNU_SOURCE
 AC_CONFIG_SRCDIR([gnokii/gnokii.c])
 dnl gettext doesn't like the config.status being somewhere else :(
 dnl AC_CONFIG_AUX_DIR(config)
+AC_CONFIG_MACRO_DIR([m4])
 
 AM_INIT_AUTOMAKE([1.8 dist-bzip2])
 
