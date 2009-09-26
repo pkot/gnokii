@@ -320,7 +320,7 @@ time_t timegm(struct tm *tm);
 #    ifdef __cplusplus
 	typedef bool _Bool;
 #    else
-	typedef unsigned char _Bool;
+#define _Bool signed char
 #    endif
 #  endif
 #  define bool _Bool
