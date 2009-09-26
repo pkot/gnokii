@@ -26,10 +26,12 @@
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)
+    o make getopt stuff compile with no gettext       (Jari Turkia,
+                                                         Paweł Kot)
  o win32 updates
     o MS Visual Studio does not have asprintf()/vasprintf()
                                                       (Jari Turkia)
-    o MS Visual Studion has setenv()                  (Jari Turkia)
+    o MS Visual Studio has setenv()                   (Jari Turkia)
 
 0.6.28
 ======

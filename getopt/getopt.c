@@ -66,12 +66,7 @@
 # include <unixlib.h>
 #endif
 
-#ifdef _LIBC
-# include <libintl.h>
-#else
-# include "gettext.h"
-# define _(msgid) gettext (msgid)
-#endif
+#include "compat.h"
 
 #if defined _LIBC && defined USE_IN_LIBIO
 # include <wchar.h>
