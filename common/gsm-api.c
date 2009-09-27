@@ -106,6 +106,8 @@ static gn_error register_driver(gn_driver *driver, const char *model, char *setu
 
 	if (setupmodel) {
 		data = calloc(1, sizeof(gn_data));
+		if (!data)
+			return GN_ERR_INTERNALERROR:
 		data->model = setupmodel;
 		p_data = data;
 	} else {
@@ -114,7 +116,8 @@ static gn_error register_driver(gn_driver *driver, const char *model, char *setu
 	if (strstr(driver->phone.models, model) != NULL)
 		error = driver->functions(GN_OP_Init, p_data, sm);
 
-	if (data) free(data);
+	if (data)
+		free(data);
 	return error;
 }
 
