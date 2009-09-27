@@ -107,7 +107,7 @@ static gn_error register_driver(gn_driver *driver, const char *model, char *setu
 	if (setupmodel) {
 		data = calloc(1, sizeof(gn_data));
 		if (!data)
-			return GN_ERR_INTERNALERROR:
+			return GN_ERR_INTERNALERROR;
 		data->model = setupmodel;
 		p_data = data;
 	} else {
