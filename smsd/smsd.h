@@ -30,8 +30,12 @@
 #ifndef SMSD_H
 #define SMSD_H
 
-#include <glib.h>
+#include "config.h"
+#include "compat.h"
+
 #include "gnokii.h"
+
+#include <glib.h>
 
 /* error definition */
 #define SMSD_OK		0
