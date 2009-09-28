@@ -4,7 +4,7 @@
 HOST=i386-mingw32
 ##### config end #######
 
-./configure --host=$HOST --prefix=/ --enable-security --disable-nls --enable-win32 --without-x
+./configure --host=$HOST --prefix=/ --enable-security --disable-nls --enable-win --without-x
 
 HOST_CC="cc"
 export HOST_CC

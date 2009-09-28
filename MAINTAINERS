@@ -24,7 +24,7 @@ link layer		BORBELY Zoltan, Pawel Kot (no changes)
 device layer		BORBELY Zoltan, Pawel Kot (no changes)
 documentation		Pawel Kot, Daniele Forsi
 autoconf		Pawel Kot, BORBELY Zoltan
-win32 port		Jari Turkia
+Windows port		Jari Turkia
 dku2 kernel driver	no longer maintained, replaced by dku2libusb driver
 
 maintainer		e-mail address

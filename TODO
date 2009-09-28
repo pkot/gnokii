@@ -16,7 +16,7 @@ LONG TERM
     o syncml support
     o support new phones with filesystems, cameras and other bells'n'whistles
     o Nokia 9210 and family
-    o bluetooth support for win32 (coded, but doesn't work)
+    o bluetooth support for Windows (coded, but doesn't work)
 
  * GNOME/KDE support
     o external apps
