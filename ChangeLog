@@ -31,10 +31,11 @@
     o try to fix "Present But Cannot Be Compiled" warning with
       MacOS X Bluetooth                                 (Paweł Kot)
     o add --with-gettext option to configure            (Paweł Kot)
- o win32 updates
+ * Windows updates
     o MS Visual Studio does not have asprintf()/vasprintf()
                                                       (Jari Turkia)
     o MS Visual Studio has setenv()                   (Jari Turkia)
+    o rename win32 dir to Windows (it's also win64)     (Paweł Kot)
 
 0.6.28
 ======

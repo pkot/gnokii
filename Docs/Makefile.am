@@ -14,7 +14,7 @@ docs_DATA = 	README \
 		README-DKU2 \
 		README-MacOSX \
 		README-PCSC \
-		README-WIN32 \
+		README-WINDOWS \
 		README-dancall \
 		README-ericsson \
 		README-siemens \
