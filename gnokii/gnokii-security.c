@@ -50,8 +50,6 @@
 #include "gnokii-app.h"
 #include "gnokii.h"
 
-#define PRINT_ERROR(error)	fprintf(stderr, "%s\n", gn_error_print(error))
-
 void security_usage(FILE *f)
 {
 	fprintf(f, _(
@@ -91,7 +89,7 @@ gn_error getlocksinfo(gn_data *data, struct gn_statemachine *state)
 	data->locks_info = locks_info;
 
 	if ((error = gn_sm_functions(GN_OP_GetLocksInfo, data, state)) != GN_ERR_NONE) {
-		PRINT_ERROR(error);
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 		return error;
 	}
 
@@ -123,7 +121,7 @@ gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state)
 		fprintf(stdout, _("Security code is: %s\n"), sc.code);
 		break;
 	default:
-		PRINT_ERROR(error);
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 		break;
 	}
 	return error;
@@ -303,7 +301,7 @@ gn_error changesecuritycode(char *type, gn_data *data, struct gn_statemachine *s
 		fprintf(stderr, _("Code changed.\n"));
 		break;
 	default:
-		PRINT_ERROR(error);
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 		break;
 	}
 
