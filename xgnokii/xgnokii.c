@@ -59,8 +59,6 @@
 #  include <signal.h>
 #else
 #  include <windows.h>
-#  include "../win32/winserial.h"
-#  define WRITEPHONE(a, b, c) WriteCommBlock(b, c)
 #  undef IN
 #  undef OUT
 #endif
