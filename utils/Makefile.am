@@ -1,3 +1,5 @@
+DEFS = -DLOCALEDIR=\"$(localedir)\"
+
 sbin_PROGRAMS = mgnokiidev
 mgnokiidev_SOURCES = mgnokiidev.c
 mgnokiidev_LDADD = $(INTLLIBS) $(TCP_LIBS)
