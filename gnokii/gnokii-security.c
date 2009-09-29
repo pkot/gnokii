@@ -129,7 +129,7 @@ gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state)
 
 static int get_password(const char *prompt, char *pass, int length)
 {
-#ifdef WIN32
+#if defined(WIN32) || defined(__HAIKU__)
 	int count = 0;
 
 	fprintf(stdout, "%s", prompt);

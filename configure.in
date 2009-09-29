@@ -449,6 +449,10 @@ dnl ======================== Checks for gethostbyname support
 AC_CHECK_FUNC(gethostbyname, ,
 	AC_CHECK_LIB(nsl, gethostbyname, TCP_LIBS="-lnsl"
 		     AC_SUBST(TCP_LIBS)))
+dnl Haiku requires -lnetwork for socket functions
+AC_CHECK_FUNC(gethostbyname, ,
+	AC_CHECK_LIB(network, gethostbyname, TCP_LIBS="-lnetwork"
+		     AC_SUBST(TCP_LIBS)))
 
 dnl ======================== Checks for Linux IrDA support
 USE_IRDA="no"
