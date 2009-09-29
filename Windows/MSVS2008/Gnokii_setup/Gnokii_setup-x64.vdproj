@@ -3,7 +3,7 @@
 "VSVersion" = "3:800"
 "ProjectType" = "8:{978C614F-708E-4E1A-B201-565925725DBA}"
 "IsWebType" = "8:FALSE"
-"ProjectName" = "8:Gnokii setup"
+"ProjectName" = "8:Gnokii setup x64"
 "LanguageId" = "3:1033"
 "CodePage" = "3:1252"
 "UILanguageId" = "3:1033"
@@ -25,6 +25,12 @@
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
+        "Entry"
+        {
+        "MsmKey" = "8:_A8EA662D9A5C490DABEDD816754BE6FD"
+        "OwnerKey" = "8:_UNDEFINED"
+        "MsmSig" = "8:_UNDEFINED"
+        }
     }
     "Configurations"
     {
@@ -33,7 +39,7 @@
         "DisplayName" = "8:Debug"
         "IsDebugOnly" = "11:TRUE"
         "IsReleaseOnly" = "11:FALSE"
-        "OutputFilename" = "8:Debug\\Gnokii.msi"
+        "OutputFilename" = "8:Win32\\Debug\\Gnokii-Win32.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -60,7 +66,7 @@
         "DisplayName" = "8:Release"
         "IsDebugOnly" = "11:FALSE"
         "IsReleaseOnly" = "11:TRUE"
-        "OutputFilename" = "8:Release\\Gnokii.msi"
+        "OutputFilename" = "8:x64\\Release\\Gnokii-x64.msi"
         "PackageFilesAs" = "3:2"
         "PackageFileSize" = "3:-2147483648"
         "CabType" = "3:1"
@@ -135,7 +141,7 @@
         {
             "{3C67513D-01DD-4637-8A68-80971EB9504F}:_47594F28A2A641EEABDAF46CE48F9285"
             {
-            "DefaultLocation" = "8:[ProgramFilesFolder]\\Gnokii"
+            "DefaultLocation" = "8:[ProgramFiles64Folder]\\Gnokii"
             "Name" = "8:#1925"
             "AlwaysCreate" = "11:FALSE"
             "Condition" = "8:"
@@ -184,7 +190,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:Gnokii"
         "ProductCode" = "8:{25D47B1C-EAD4-41BD-B69E-7E507C10D6A6}"
-        "PackageCode" = "8:{D9FE701E-D8B5-419A-A00E-55B53006C8C4}"
+        "PackageCode" = "8:{05FF8EE8-1C4A-47D3-9909-793893969C46}"
         "UpgradeCode" = "8:{D725933B-6423-4BB1-B06D-7E905E9AA9D1}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:FALSE"
@@ -194,7 +200,7 @@
         "Manufacturer" = "8:Gnokii project"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
-        "Title" = "8:Gnokii"
+        "Title" = "8:Gnokii setup-x64"
         "Subject" = "8:"
         "ARPCONTACT" = "8:Gnokii project"
         "Keywords" = "8:"
@@ -204,7 +210,7 @@
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
-        "TargetPlatform" = "3:0"
+        "TargetPlatform" = "3:1"
         "PreBuildEvent" = "8:"
         "PostBuildEvent" = "8:"
         "RunPostBuildEvent" = "3:0"
@@ -704,7 +710,7 @@
         {
             "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_1E0FA563BAB6403A92865089394592A7"
             {
-            "SourcePath" = "8:..\\Release\\gnokii.exe"
+            "SourcePath" = "8:..\\x64\\Release\\gnokii.exe"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_47594F28A2A641EEABDAF46CE48F9285"
@@ -725,6 +731,34 @@
             "OutputConfiguration" = "8:"
             "OutputGroupCanonicalName" = "8:Built"
             "OutputProjectGuid" = "8:{681F70AD-B62A-42F3-A85E-94DE5E160437}"
+            "ShowKeyOutput" = "11:TRUE"
+                "ExcludeFilters"
+                {
+                }
+            }
+            "{5259A561-127C-4D43-A0A1-72F10C7B3BF8}:_A8EA662D9A5C490DABEDD816754BE6FD"
+            {
+            "SourcePath" = "8:..\\x64\\Release\\gnokii.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_47594F28A2A641EEABDAF46CE48F9285"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:FALSE"
+            "IsolateTo" = "8:"
+            "ProjectOutputGroupRegister" = "3:1"
+            "OutputConfiguration" = "8:"
+            "OutputGroupCanonicalName" = "8:Built"
+            "OutputProjectGuid" = "8:{93B245DE-6DCE-46E2-BFF1-171383B0643C}"
             "ShowKeyOutput" = "11:TRUE"
                 "ExcludeFilters"
                 {
