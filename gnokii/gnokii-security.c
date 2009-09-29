@@ -154,15 +154,16 @@ static int get_password(const char *prompt, char *pass, int length)
 		strncpy(pass, getpass(prompt), length - 1);
 	} else {
 		count = getline(&s, &s_len, stdin);
-		if (count > 0 && s) {
+		if (count > 0) {
 			/* strip the trailing newline to be compatible with getpass() */
 			count--;
 			if (s[count] == '\n') {
 				s[count] = '\0';
 			}
 			strncpy(pass, s, length - 1);
-			free(s);
 		}
+		if (s)
+			free(s);
 	}
 	pass[length - 1] = 0;
 #endif
