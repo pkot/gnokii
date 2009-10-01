@@ -225,8 +225,11 @@ static void version(void)
 
 /* The function usage is only informative - it prints this program's usage and
    command-line options. */
-static int usage(FILE *f, int retval)
+static int usage(FILE *f, int argc, char *argv[])
 {
+	int i;
+	int all = 0;
+
 	fprintf(f, _("Usage:\n"
 		     "	gnokii [CONFIG OPTIONS] OPTIONS\n"
 		     "\nCONFIG OPTIONS\n"
@@ -235,25 +238,61 @@ static int usage(FILE *f, int retval)
 		     "\nOPTIONS\n"
 		     "Use just one option at a time.\n"
 		     "General options:\n"
-		     "          --help\n"
+		     "          --help [all] [monitor] [sms] [mms] [phonebook] [calendar] [todo]\n"
+		     "                 [dial] [profile] [settings] [wap] [logo] [ringtone]\n"
+		     "                 [security] [file] [other]...\n"
 		     "          --version\n"
 		     "          --shell\n"));
-	monitor_usage(f);
-	sms_usage(f);
-	mms_usage(f);
-	phonebook_usage(f);
-	calendar_usage(f);
-	todo_usage(f);
-	dial_usage(f);
-	profile_usage(f);
-	settings_usage(f);
-	wap_usage(f);
-	logo_usage(f);
-	ringtone_usage(f);
-	security_usage(f);
-	file_usage(f);
-	other_usage(f);
-	return retval;
+	/* Print "short usage" only */
+	if (argc == -1)
+		return -1;
+
+	for (i = 1; i < argc; i++) {
+		if (!strcmp(argv[i], "all")) {
+			all = 1;
+			break;
+		}
+	}
+
+	/* FIXME? throw an error if argv[i] is duplicated or unknown */
+	for (i = 1; i < argc; i++) {
+		if (all || !strcmp(argv[i], "monitor"))
+			monitor_usage(f);
+		if (all || !strcmp(argv[i], "sms"))
+			sms_usage(f);
+		if (all || !strcmp(argv[i], "mms"))
+			mms_usage(f);
+		if (all || !strcmp(argv[i], "phonebook"))
+			phonebook_usage(f);
+		if (all || !strcmp(argv[i], "calendar"))
+			calendar_usage(f);
+		if (all || !strcmp(argv[i], "todo"))
+			todo_usage(f);
+		if (all || !strcmp(argv[i], "dial"))
+			dial_usage(f);
+		if (all || !strcmp(argv[i], "profile"))
+			profile_usage(f);
+		if (all || !strcmp(argv[i], "settings"))
+			settings_usage(f);
+		if (all || !strcmp(argv[i], "wap"))
+			wap_usage(f);
+		if (all || !strcmp(argv[i], "logo"))
+			logo_usage(f);
+		if (all || !strcmp(argv[i], "ringtone"))
+			ringtone_usage(f);
+#ifdef SECURITY
+		if (all || !strcmp(argv[i], "security"))
+			security_usage(f);
+#endif
+		if (all || !strcmp(argv[i], "file"))
+			file_usage(f);
+		if (all || !strcmp(argv[i], "other"))
+			other_usage(f);
+		if (all)
+			break;
+	}
+
+	return 0;
 }
 
 static void gnokii_error_logger(const char *fmt, va_list ap)
@@ -398,7 +437,7 @@ static int parse_options(int argc, char *argv[])
 	static struct option long_options[] = {
 		/* FIXME: these comments are nice, but they would be more useful as docs for the user */
 		/* Display usage. */
-		{ "help",               no_argument,       NULL, OPT_HELP },
+		{ "help",               optional_argument, NULL, OPT_HELP },
 
 		/* Display version and build information. */
 		{ "version",            no_argument,       NULL, OPT_VERSION },
@@ -658,6 +697,7 @@ static int parse_options(int argc, char *argv[])
 	/* Every command which requires arguments should have an appropriate entry
 	   in this array. */
 	static struct gnokii_arg_len gals[] = {
+		{ OPT_HELP,              1, 100, 0 },
 		{ OPT_CONFIGFILE,        1, 100, 0 },
 		{ OPT_CONFIGMODEL,       1, 100, 0 },
 #ifdef SECURITY
@@ -735,7 +775,7 @@ static int parse_options(int argc, char *argv[])
 	switch (c) {
 	/* No argument given - we should display usage. */
 	case -1:
-		return usage(stderr, -1);
+		return usage(stderr, -1, NULL);
 	/* First, error conditions */
 	case '?':
 	case ':':
@@ -746,8 +786,6 @@ static int parse_options(int argc, char *argv[])
 			fprintf(stderr, _("Use '--help' for usage information.\n"));
 		return 1;
 	/* Then, options with no arguments */
-	case OPT_HELP:
-		return usage(stdout, 0);
 	case OPT_VERSION:
 		version();
 		return 0;
@@ -768,21 +806,23 @@ static int parse_options(int argc, char *argv[])
 	   not work as expected; instead args --cmd2 args is passed as a
 	   parameter. */
 	if (checkargs(c, gals, argc, long_options[opt_index].has_arg)) {
-		return usage(stderr, -1);
+		return usage(stderr, -1, NULL);
 	}
 
 	/* Other options that do not need initialization */
 	switch (c) {
 	case OPT_CONFIGFILE:
 		if (configfile)
-			return usage(stderr, -1);
+			return usage(stderr, -1, NULL);
 		configfile = optarg;
 		return parse_options(argc, argv);
 	case OPT_CONFIGMODEL:
 		if (configmodel)
-			return usage(stderr, -1);
+			return usage(stderr, -1, NULL);
 		configmodel = optarg;
 		return parse_options(argc, argv);
+	case OPT_HELP:
+		return usage(stdout, argc, argv);
 	case OPT_VIEWLOGO:
 		return viewlogo(optarg);
 	case OPT_LISTNETWORKS:

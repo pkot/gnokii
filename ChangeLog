@@ -23,6 +23,9 @@
  * documentation updates
     o change defaults in sample gnokiirc files for *nix and Windows
       so that it's more likely to work for new users    (Paweł Kot)
+    o make output of gnokii --help shorter by default and add an
+      optional argument to print all help or only a part; for old
+      behavior use gnokii --help all                (Daniele Forsi)
  * libgnokii updates
     o add more debug information to encoding functions  (Paweł Kot)
  * build system updates
