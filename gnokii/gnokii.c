@@ -1079,6 +1079,7 @@ int shell(gn_data *data, struct gn_statemachine *state)
 	int len, i, argc = 1;
 	char **argv = NULL;
 	int size = ARGV_CHUNK;
+	int empty = 1;
 
 	argv = calloc(size, sizeof(char *));
 	while (1) {
@@ -1097,16 +1098,20 @@ int shell(gn_data *data, struct gn_statemachine *state)
 			while (*input == ' ')
 				input++;
 			tmp = strstr(input, " ");
-			if (tmp)
+			if (tmp) {
 				len = tmp - input;
-			else
+				*tmp = '\0';
+			} else
 				len = strlen(input);
-			if (len > 0)
+			if (len > 0) {
 				argv[argc++] = strdup(input);
-			input = tmp;
+				empty = 0;
+                        }
+                        input = tmp + (tmp ? 1 : 0);
 		} while (input);
 		argv[argc] = NULL;
-		parse_options(argc, argv);
+		if (!empty)
+        		parse_options(argc, argv);
 		for (i = 1; i < argc; i++)
 			free(argv[i]);
 		free(old);
