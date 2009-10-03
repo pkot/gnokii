@@ -102,6 +102,10 @@ gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statem
 			return getcalendarnote_usage(stderr, -1);
 		}
 	}
+	if (argc > optind + 1) {
+		/* There are too many arguments that don't start with '-' */
+		return getcalendarnote_usage(stderr, -1);
+	}
 
 	for (i = first_location; i <= last_location; i++) {
 		memset(&calnote, 0, sizeof(calnote));
