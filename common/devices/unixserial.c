@@ -363,6 +363,12 @@ gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)
 	int new_speed = B9600;
 
 	switch (speed) {
+	case 2400:
+		new_speed = B2400;
+		break;
+	case 4600:
+		new_speed = B4800;
+		break;
 	case 9600:
 		new_speed = B9600;
 		break;
