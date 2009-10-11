@@ -40,6 +40,7 @@ echo s/@LIBGNOKII_VERSION_RELEASE@/%LIBGNOKII_VERSION_RELEASE%/ >> %temp%\gnokii
 
 rem Execute sed with parameters
 sed -f %temp%\gnokii_version.sed %GNOKII_H_IN_PATH%\gnokii.h.in > %GNOKII_H_IN_PATH%\gnokii.h
+del /q %TEMP%\gnokii_version.sed
 
 echo done!
 
