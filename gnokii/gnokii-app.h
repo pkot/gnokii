@@ -110,7 +110,9 @@ extern void calendar_usage(FILE *f);
 
 extern int getcalendarnote_usage(FILE *f, int exitval);
 extern gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern int writecalendarnote_usage(FILE *f, int exitval);
 extern gn_error writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern int deletecalendarnote_usage(FILE *f, int exitval);
 extern gn_error deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 
 /* ToDo functions */
@@ -118,6 +120,7 @@ extern void todo_usage(FILE *f);
 
 extern int gettodo_usage(FILE *f, int exitval);
 extern gn_error gettodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
+extern int writetodo_usage(FILE *f, int exitval);
 extern gn_error writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error deletealltodos(gn_data *data, struct gn_statemachine *state);
 
@@ -128,6 +131,7 @@ extern gn_error getspeeddial(char *number, gn_data *data, struct gn_statemachine
 extern gn_error setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state);
 extern gn_error dialvoice(char *number, gn_data *data, struct gn_statemachine *state);
 extern gn_error senddtmf(char *string, gn_data *data, struct gn_statemachine *state);
+extern int answercall_usage(FILE *f, int exitval);
 extern gn_error answercall(char *callid, gn_data *data, struct gn_statemachine *state);
 extern gn_error hangup(char *callid, gn_data *data, struct gn_statemachine *state);
 extern int divert_usage(FILE *f, int exitval);
