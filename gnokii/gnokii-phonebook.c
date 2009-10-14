@@ -408,7 +408,7 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 
 			if (error == GN_ERR_NONE || error == GN_ERR_EMPTYLOCATION) {
 				if (!aux.empty && error != GN_ERR_EMPTYLOCATION) {
-					char ans[8];
+					char ans[8] = "";
 
 					fprintf(stdout, _("Location busy. "));
 					confirm = -1;
