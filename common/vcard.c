@@ -312,12 +312,12 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 	v = strdup (vcard);
 	fold = strstr (v, "\n ");
 	while (fold != NULL) {
-		memmove (fold, fold + 2, strlen (fold) - 2);
+		memmove (fold, fold + 2, strlen (fold) - 1);
 		fold = strstr (fold, "\n ");
 	}
 	fold = strstr (v, "\n\t");
 	while (fold != NULL) {
-		memmove (fold, fold + 2, strlen (fold) - 2);
+		memmove (fold, fold + 2, strlen (fold) - 1);
 		fold = strstr (v, "\n\t");
 	}
 
