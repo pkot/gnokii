@@ -327,6 +327,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		s = strstr (s + 1, "\n");
 	}
 
+	/* FIXME on error STORESUB() and STORENUM() leak memory allocated by gnokii_strsplit() */
 	lines = gnokii_strsplit (v, "\n", num_lines);
 
 	for (i = 0; i < num_lines; i++) {
@@ -389,7 +390,8 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		if (BEGINS("END:VCARD"))
 			break;
 	}
-	
+	gnokii_strfreev(lines);
+
 	return 0;
 }
 
