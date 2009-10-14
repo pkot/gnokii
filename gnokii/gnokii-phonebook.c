@@ -345,7 +345,7 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 	line = oline;
 
 	/* Go through data from stdin. */
-	while (1) {
+	while (!feof(stdin)) {
 		error = GN_ERR_NONE;
 
 		memset(&entry, 0, sizeof(gn_phonebook_entry));
