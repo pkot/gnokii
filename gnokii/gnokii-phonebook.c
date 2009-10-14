@@ -447,7 +447,7 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 			 * location */
 			default_location++;
 		} else
-			fprintf(stderr, _("Write FAILED (%s): memory type: %s, loc: %d, name: %s, number: %s\n"), 
+			fprintf(stderr, _("Write failed (%s): memory type: %s, loc: %d, name: %s, number: %s\n"),
 				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 	}
 out:
