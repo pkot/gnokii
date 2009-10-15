@@ -969,7 +969,7 @@ gn_error deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine
 		else {
 			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message))
 				return GN_ERR_NONE;
-			fprintf(stderr, _("DeleteSMS %s %d failed!(%s)\n\n"), memory_type_string, count, gn_error_print(error));
+			fprintf(stderr, _("Deleting SMS %s %d failed!(%s)\n\n"), memory_type_string, count, gn_error_print(error));
 		}
 	}
 
@@ -1033,12 +1033,12 @@ gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			return getsmsc_usage(stderr, -1);
 
 		if (start > stop) {
-			fprintf(stderr, _("Starting SMS center number is greater than stop\n"));
+			fprintf(stderr, _("SMS center: start location's number is greater than end location's number\n"
 			return GN_ERR_INVALIDLOCATION;
 		}
 
 		if (start < 1) {
-			fprintf(stderr, _("SMS center number must be greater than 0\n"));
+			fprintf(stderr, _("SMS center: location number must be greater than 0\n"));
 			return GN_ERR_INVALIDLOCATION;
 		}
 	} else {
@@ -1237,7 +1237,7 @@ gn_error showsmsfolderstatus(gn_data *data, struct gn_statemachine *state)
 	for (i = 0; i < folders.number; i++) {
 		data->sms_folder = folders.folder + i;
 		if ((error = gn_sm_functions(GN_OP_GetSMSFolderStatus, data, state)) != GN_ERR_NONE) {
-			fprintf(stderr, _("Cannot stat folder \"%s\": %s\n"), folders.folder[i].name, gn_error_print(error));
+			fprintf(stderr, _("Cannot get status of folder \"%s\": %s\n"), folders.folder[i].name, gn_error_print(error));
 			return error;
 		}
 		fprintf(stdout, _("%3d %-42s %4s %4u\n"), i, folders.folder[i].name, gn_memory_type2str(folders.folder_id[i]), folders.folder[i].number);
