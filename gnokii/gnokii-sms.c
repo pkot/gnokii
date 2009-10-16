@@ -1032,11 +1032,6 @@ gn_error getsmsc(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		if (errno || stop < 0)
 			return getsmsc_usage(stderr, -1);
 
-		if (start > stop) {
-			fprintf(stderr, _("SMS center: start location's number is greater than end location's number\n"
-			return GN_ERR_INVALIDLOCATION;
-		}
-
 		if (start < 1) {
 			fprintf(stderr, _("SMS center: location number must be greater than 0\n"));
 			return GN_ERR_INVALIDLOCATION;
