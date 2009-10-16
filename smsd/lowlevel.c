@@ -272,6 +272,7 @@ static gint A_SendSMSMessage (gpointer data)
 {
   D_SMSMessage *d = (D_SMSMessage *) data;
   gn_data *dt;
+  gn_error status;
 
   if (!d)
     return (GN_ERR_UNKNOWN);
@@ -296,12 +297,13 @@ static gint A_SendSMSMessage (gpointer data)
   gn_data_clear (dt);
   dt->sms = d->sms;
   d->status = gn_sms_send (dt, sm);
+  status = d->status;
   free (dt->sms->reference);
   free (dt);
   pthread_cond_signal (&sendSMSCond);
   pthread_mutex_unlock (&sendSMSMutex);
 
-  return (d->status);
+  return (status);
 }
 
 /*
