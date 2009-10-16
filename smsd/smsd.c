@@ -414,7 +414,7 @@ GNOKII_API gint WriteSMS (gn_sms *sms)
   {
     gn_log_xdebug ("Sending to %s unsuccessful. Error: %s\n", sms->remote.number, gn_error_print(error));
     if (smsdConfig.logFile)
-      LogFile (_("Sending to %s unsuccessful. Error %s\n"), sms->remote.number, gn_error_print(error));
+      LogFile (_("Sending to %s unsuccessful. Error: %s\n"), sms->remote.number, gn_error_print(error));
   }
    else
   {
