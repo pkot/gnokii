@@ -518,6 +518,7 @@ static void Run (void)
 {
   struct sigaction act;
   
+  act.sa_flags = 0;
   act.sa_handler = MainExit;
   sigemptyset (&(act.sa_mask));
   
