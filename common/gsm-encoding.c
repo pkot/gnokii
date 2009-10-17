@@ -1303,7 +1303,6 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
 	if (nconv == (size_t)-1)
 		perror("ucs2_encode/iconv");
-	*pout = 0;
 	iconv_close(cd);
 	return (nconv < 0) ?  -1 : (char *)pout - outstring;
 #else
