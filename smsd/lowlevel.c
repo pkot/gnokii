@@ -228,15 +228,15 @@ This should not happen.\nSkipping.");
      */
     else if (error == GN_ERR_INVALIDLOCATION && i > 1)
     {
-      gn_log_xdebug ("Invalid location\n");
+      gn_log_xdebug ("gn_sms_get returned error %d: %s\n", error, gn_error_print (error));
       g_free (msg);
       pthread_cond_signal (&smsCond);
       break;
     }
     else
     {
+      gn_log_xdebug ("gn_sms_get returned error %d: %s\n", error, gn_error_print (error));
       g_free (msg);
-      gn_log_xdebug ("gn_sms_get returned %d\n", error);
     }
 
     usleep (500000);
@@ -309,8 +309,8 @@ static gint A_DeleteSMSMessage (gpointer data)
     gn_log_xdebug ("Deleting SMS %d\n", dt->sms->number);
     /* FIXME: error handling */
     error = gn_sms_delete (dt, sm);
+    gn_log_xdebug ("gn_sms_delete returned error %d: %s\n", error, gn_error_print (error));
 
-    gn_log_xdebug ("Error: %s\n", gn_error_print(error));
 //    pthread_mutex_lock (&smsMutex);
     phoneMonitor.sms.messages = g_slist_remove (phoneMonitor.sms.messages, data);
     phoneMonitor.sms.number--;
@@ -387,7 +387,7 @@ static void RealConnect (void *phone)
       SMSFolder.folder_id = smsdConfig.memoryType;
       if ((error = gn_sm_functions (GN_OP_GetSMSFolderStatus, data, sm)) == GN_ERR_NONE)
       {
-        gn_log_xdebug ("GN_OP_GetSMSFolderStatus returned  %d\n",
+        gn_log_xdebug ("GN_OP_GetSMSFolderStatus returned (number) %d\n",
                        SMSFolder.number);
         gn_log_xdebug ("phoneMonitor.sms.number %d\n",
                        phoneMonitor.sms.number);
@@ -409,7 +409,8 @@ static void RealConnect (void *phone)
       {
         gn_log_xdebug ("GN_OP_GetSMSStatus returned (number, unread) %d, %d\n",
                        SMSStatus.number, SMSStatus.unread);
-        gn_log_xdebug ("phoneMonitor %d\n", phoneMonitor.sms.number);
+        gn_log_xdebug ("phoneMonitor.sms.number %d\n",
+                       phoneMonitor.sms.number);
         if (/* phoneMonitor.sms.unRead != SMSStatus.unread || */
             phoneMonitor.sms.number != SMSStatus.number)
         {
