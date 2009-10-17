@@ -54,9 +54,9 @@ typedef struct {
 
 typedef struct {
   struct {
-    gchar *model;
-    gchar *revision;
-    gchar *version;
+    const gchar *model;
+    const gchar *revision;
+    const gchar *version;
   } phone;
   struct {
 //    gint    unRead;

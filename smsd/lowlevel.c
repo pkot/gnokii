@@ -78,41 +78,17 @@ inline static PhoneEvent *RemoveEvent (void)
 
 static gn_error InitModelInf (void)
 {
-  gn_data data;
-  gn_error error;
-  char *aux;
-  char model[GN_MODEL_MAX_LENGTH], rev[GN_REVISION_MAX_LENGTH], 
-	manufacturer[GN_MANUFACTURER_MAX_LENGTH];
+  phoneMonitor.phone.version = gn_lib_get_phone_product_name (sm);
 
-  gn_data_clear(&data);
-  data.manufacturer = manufacturer;
-  data.model = model;
-  data.revision = rev;
-                          
-  error = gn_sm_functions (GN_OP_GetModel, &data, sm);
-  if (error != GN_ERR_NONE)
-  {
-    return error;
-  }
-    
-  g_free (phoneMonitor.phone.version);
-  phoneMonitor.phone.version = g_strdup (model);
+  phoneMonitor.phone.model = gn_lib_get_phone_model (sm);
 
-  g_free (phoneMonitor.phone.model);
-  aux = (char *)gn_phone_model_get(model)->model;
-  if (aux == NULL)
-    phoneMonitor.phone.model = g_strdup (_("unknown"));
-  else
-    phoneMonitor.phone.model = g_strdup (aux);
+  phoneMonitor.supported = gn_phone_model_get (phoneMonitor.phone.model)->flags;
 
-  phoneMonitor.supported = gn_phone_model_get (model)->flags;
+  phoneMonitor.phone.revision = gn_lib_get_phone_revision (sm);
 
-  g_free (phoneMonitor.phone.revision);
-  phoneMonitor.phone.revision = g_strdup (rev);
-
-  gn_log_xdebug ("Version: %s\n", phoneMonitor.phone.version);
-  gn_log_xdebug ("Model: %s\n", phoneMonitor.phone.model);
-  gn_log_xdebug ("Revision: %s\n", phoneMonitor.phone.revision);
+  gn_log_xdebug ("Model        : %s\n", gn_lib_get_phone_model (sm));
+  gn_log_xdebug ("Product name : %s\n", gn_lib_get_phone_product_name (sm));
+  gn_log_xdebug ("Revision     : %s\n", gn_lib_get_phone_revision (sm));
 
   return GN_ERR_NONE;
 }
@@ -164,9 +140,9 @@ static gn_error fbusinit (const char * const iname)
 
 void InitPhoneMonitor (void)
 {
-  phoneMonitor.phone.model = g_strdup (_("unknown"));
-  phoneMonitor.phone.version = g_strdup (_("unknown"));
-  phoneMonitor.phone.revision = g_strdup (_("unknown"));
+  phoneMonitor.phone.model = _("unknown");
+  phoneMonitor.phone.version = _("unknown");
+  phoneMonitor.phone.revision = _("unknown");
   phoneMonitor.supported = 0;
 //  phoneMonitor.working = FALSE;
 //  phoneMonitor.sms.unRead = 0;
