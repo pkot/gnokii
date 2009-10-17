@@ -111,7 +111,7 @@ static gn_error fbusinit (const char * const iname)
   if (error != GN_ERR_NONE)
   {
     g_print (_("Cannot load phone %s!\nDo you have proper section in gnokiirc?\n"), iname);
-    g_print (_("%s\n"), gn_error_print(error));
+    g_print (_("Error: %s\n"), gn_error_print (error));
     exit (-1);
   }
 
@@ -124,7 +124,7 @@ static gn_error fbusinit (const char * const iname)
   if (error != GN_ERR_NONE)
   {
     g_print (_("GSM/FBUS init failed! (Unknown model?). Quitting.\n"));
-    g_print (_("%s\n"), gn_error_print(error));
+    g_print (_("Error: %s\n"), gn_error_print (error));
     return (error);
   }
 

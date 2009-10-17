@@ -222,7 +222,7 @@ gn_error getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemac
 			fprintf(stdout, _("%s: %s\n"), _("Session mode"), gn_wap_session2str(wapsetting.session));
 			fprintf(stdout, _("%s: %s\n"), _("Connection security"), (wapsetting.security ? _("yes") : _("no")));
 			fprintf(stdout, _("%s: %s\n"), _("Data bearer"), gn_wap_bearer2str(wapsetting.bearer));
-			fprintf(stdout, _("%s\n"), _("GSM data"));
+			fprintf(stdout, "%s\n", _("GSM data"));
 			fprintf(stdout, _("   %s: %s\n"), _("Authentication type"), gn_wap_authentication2str(wapsetting.security));
 			fprintf(stdout, _("   %s: %s\n"), _("Data call type"), gn_wap_call_type2str(wapsetting.call_type));
 			fprintf(stdout, _("   %s: %s\n"), _("Data call speed"), gn_wap_call_speed2str(wapsetting.call_speed));
@@ -231,7 +231,7 @@ gn_error getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemac
 			fprintf(stdout, _("   %s: %s\n"), _("Number"), wapsetting.number);
 			fprintf(stdout, _("   %s: %s\n"), _("Username"), wapsetting.gsm_data_username);
 			fprintf(stdout, _("   %s: %s\n"), _("Password"), wapsetting.gsm_data_password);
-			fprintf(stdout, _("%s\n"), _("GPRS"));
+			fprintf(stdout, "%s\n", _("GPRS"));
 			fprintf(stdout, _("   %s: %s\n"), _("Connection"), gn_wap_gprs2str(wapsetting.gprs_connection));
 			fprintf(stdout, _("   %s: %s\n"), _("Authentication type"), gn_wap_authentication2str(wapsetting.gprs_authentication));
 			fprintf(stdout, _("   %s: %s\n"), _("Login type"), gn_wap_login2str(wapsetting.gprs_login));
@@ -239,7 +239,7 @@ gn_error getwapsetting(int argc, char *argv[], gn_data *data, struct gn_statemac
 			fprintf(stdout, _("   %s: %s\n"), _("IP"), wapsetting.gprs_ip);
 			fprintf(stdout, _("   %s: %s\n"), _("Username"), wapsetting.gprs_username);
 			fprintf(stdout, _("   %s: %s\n"), _("Password"), wapsetting.gprs_password);
-			fprintf(stdout, _("%s\n"), _("SMS"));
+			fprintf(stdout, "%s\n", _("SMS"));
 			fprintf(stdout, _("   %s: %s\n"), _("Service number"), wapsetting.sms_service_number);
 			fprintf(stdout, _("   %s: %s\n"), _("Server number"), wapsetting.sms_server_number);
 		}
