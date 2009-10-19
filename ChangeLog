@@ -41,6 +41,8 @@
                                                       (Jari Turkia)
     o MS Visual Studio has setenv()                   (Jari Turkia)
     o rename win32 dir to Windows (it's also win64)     (Paweł Kot)
+ * translation updates
+    o updated Italian translation                   (Daniele Forsi)
 
 0.6.28
 ======
