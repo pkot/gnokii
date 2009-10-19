@@ -158,7 +158,7 @@ int gn_vm_initialise(const char *iname, const char *bindir, int debug_mode, int 
 	}
 
 	if (dp_Initialise(PtyRDFD, PtyWRFD) != true) {
-		fprintf (stderr, _("gn_vm_Initialise - dp_Initialise failed!\n"));
+		fprintf (stderr, _("gn_vm_initialise - dp_Initialise failed!\n"));
 		return (false);
 	}
 
