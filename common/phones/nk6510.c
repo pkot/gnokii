@@ -2354,7 +2354,7 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 		progress = 100 * (data->file->file_length - data->file->togo) / data->file->file_length;
 		if (!DRVINSTANCE(state)->progress_indication) {
 			fprintf(stderr, _("Progress: %3d%% completed"), progress);
-			/* It's separated for the tranlators convenience */
+			/* It's separated for the translators convenience */
 			fprintf(stderr, "\r");
 		} else
 			DRVINSTANCE(state)->progress_indication(progress, DRVINSTANCE(state)->progress_callback_data);
