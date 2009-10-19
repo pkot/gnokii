@@ -7,7 +7,6 @@ common/devices/unixirda.c
 common/devices/unixserial.c
 common/devices/winbluetooth.c
 common/devices/winirda.c
-common/gnvcal.c
 common/gsm-bitmaps.c
 common/gsm-common.c
 common/gsm-error.c
