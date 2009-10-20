@@ -28,6 +28,9 @@
       behavior use gnokii --help all                (Daniele Forsi)
  * libgnokii updates
     o add more debug information to encoding functions  (Paweł Kot)
+    o add ids for Nokia 5130 XpressMusic and Nokia 5310 XpressMusic
+      to misc.c only (use model=series40 for both)
+                                    (Gustavo Delfino, pier_andreit)
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)
