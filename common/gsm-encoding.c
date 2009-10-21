@@ -1307,7 +1307,7 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 	return (nconv < 0) ?  -1 : (char *)pout - outstring;
 #else
 	size_t nconv = char_unicode_encode(outstring, instring, inlen);
-	unsigned char *pin, *pout;
+
 	return (nconv < 0) ?  -1 : nconv;
 #endif
 }
