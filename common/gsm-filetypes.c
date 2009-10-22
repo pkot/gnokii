@@ -169,7 +169,8 @@ gn_error file_rtttl_load(FILE *file, gn_ringtone *ringtone)
 	unsigned char buffer[2000];
 	unsigned char *def, *notes, *ptr;
 
-	fread(buffer, 2000, 1, file);
+	if (fread(buffer, 1, 2000, file) < 1)
+		return GN_ERR_FAILED;
 
 	/* This is for buggy RTTTL ringtones without name. */
 	if (buffer[0] != RTTTL_SEP[0]) {
@@ -539,8 +540,9 @@ gn_error file_nokraw_save(FILE *file, gn_ringtone *ringtone, int dct4)
 gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info)
 {
 	FILE *file;
-	unsigned char buffer[300];
+	unsigned char buffer[9];
 	int error;
+	size_t count;
 	gn_filetypes filetype = GN_FT_None;
 
 	file = fopen(filename, "rb");
@@ -548,21 +550,21 @@ gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info)
 	if (!file)
 		return GN_ERR_FAILED;
 
-	fread(buffer, 1, 9, file); /* Read the header of the file. */
+	count = fread(buffer, 1, 9, file); /* Read the header of the file. */
 
 	/* Attempt to identify filetype */
 
-	if (memcmp(buffer, "NOL", 3) == 0) {               /* NOL files have 'NOL' at the start */
+	if (count >= 3 && memcmp(buffer, "NOL", 3) == 0) {               /* NOL files have 'NOL' at the start */
 		filetype = GN_FT_NOL;
-	} else if (memcmp(buffer, "NGG", 3) == 0) {        /* NGG files have 'NGG' at the start */
+	} else if (count >= 3 && memcmp(buffer, "NGG", 3) == 0) {        /* NGG files have 'NGG' at the start */
 		filetype = GN_FT_NGG;
-	} else if (memcmp(buffer, "FORM", 4) == 0) {       /* NSL files have 'FORM' at the start */
+	} else if (count >= 4 && memcmp(buffer, "FORM", 4) == 0) {       /* NSL files have 'FORM' at the start */
 		filetype = GN_FT_NSL;
-	} else if (memcmp(buffer, "NLM", 3) == 0) {        /* NLM files have 'NLM' at the start */
+	} else if (count >= 3 && memcmp(buffer, "NLM", 3) == 0) {        /* NLM files have 'NLM' at the start */
 		filetype = GN_FT_NLM;
-	} else if (memcmp(buffer, "BM", 2) == 0) {         /* BMP, I61 and GGP files have 'BM' at the start */
+	} else if (count >= 2 && memcmp(buffer, "BM", 2) == 0) {         /* BMP, I61 and GGP files have 'BM' at the start */
 		filetype = GN_FT_BMP;
-	} else if (memcmp(buffer, "/* XPM */", 9) == 0) {  /* XPM files have 'XPM' at the start */
+	} else if (count >= 9 && memcmp(buffer, "/* XPM */", 9) == 0) {  /* XPM files have 'XPM' at the start */
 		filetype = GN_FT_XPMF;
 	}
 
@@ -665,7 +667,9 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 
 	gn_bmp_clear(bitmap);
 
-	fread(buffer, 1, 34, file); /* required part of header */
+	/* required part of header */
+	if (fread(buffer, 1, 34, file) != 34)
+		return GN_ERR_FAILED;
 
 	h = buffer[22] + 256 * buffer[21]; /* height of image in the file */
 	w = buffer[18] + 256 * buffer[17]; /* width of image in the file */
@@ -710,7 +714,9 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 	}
 
 	pos = buffer[10] - 34;
-	fread(buffer, 1, pos, file); /* the rest of the header (if exists) and the color palette */
+	/* the rest of the header (if exists) and the color palette */
+	if (fread(buffer, 1, pos, file) != pos)
+		return GN_ERR_WRONGDATAFORMAT;
 
 	dprintf("First color in BMP file: %i %i %i ", buffer[pos-8], buffer[pos-7], buffer[pos-6]);
 	if (buffer[pos-8] == 0x00 && buffer[pos-7] == 0x00 && buffer[pos-6] == 0x00) dprintf("(black)");
@@ -733,7 +739,8 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 		i = 1;
 		for (x = 0; x < w; x++) {
 			if (pos == 7) { /* new byte ! */
-				fread(buffer, 1, 1, file);
+				if (fread(buffer, 1, 1, file) != 1)
+					return GN_ERR_WRONGDATAFORMAT;
 				sizeimage++;
 				i++;
 				if (i == 5) i = 1; /* each line is written in multiples of 4 bytes */
@@ -751,7 +758,8 @@ gn_error file_bmp_load(FILE *file, gn_bmp *bitmap)
 		pos = 7; /* going to the new byte */
 		if (i != 1) {
 			while (i != 5) { /* each line is written in multiples of 4 bytes */
-				fread(buffer, 1, 1, file);
+				if (fread(buffer, 1, 1, file) != 1)
+					return GN_ERR_WRONGDATAFORMAT;
 				sizeimage++;
 				i++;
 			}
@@ -766,8 +774,8 @@ gn_error file_nol_load(FILE *file, gn_bmp *bitmap, gn_phone *info)
 	unsigned char buffer[GN_BMP_MAX_SIZE + 20];
 	int i, j;
 
-
-	fread(buffer, 1, 20, file);
+	if (fread(buffer, 1, 20, file) != 20)
+		return GN_ERR_FAILED;
 	snprintf(bitmap->netcode, sizeof(bitmap->netcode), "%d %02d", buffer[6] + 256 * buffer[7], buffer[8]);
 
 	bitmap->width = buffer[10];
@@ -812,7 +820,8 @@ gn_error file_ngg_load(FILE *file, gn_bmp *bitmap, gn_phone *info)
 
 	bitmap->type = GN_BMP_CallerLogo;
 
-	fread(buffer, 1, 16, file);
+	if (fread(buffer, 1, 16, file) != 16)
+		return GN_ERR_FAILED;
 	bitmap->width = buffer[6];
 	bitmap->height = buffer[8];
 	bitmap->size = bitmap->height * bitmap->width / 8;
@@ -906,8 +915,10 @@ gn_error file_nlm_load(FILE *file, gn_bmp *bitmap)
 	int pos, pos2, x, y;
 	div_t division;
 
-	fread(buffer, 1, 5, file);
-	fread(buffer, 1, 1, file);
+	if (fread(buffer, 1, 5, file) != 5)
+		return GN_ERR_FAILED;
+	if (fread(buffer, 1, 1, file) != 1)
+		return GN_ERR_FAILED;
 
 	switch (buffer[0]) {
 	case 0x00:
@@ -926,7 +937,8 @@ gn_error file_nlm_load(FILE *file, gn_bmp *bitmap)
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 
-	fread(buffer, 1, 4, file);
+	if (fread(buffer, 1, 4, file) != 4)
+		return GN_ERR_FAILED;
 	bitmap->width = buffer[1];
 	bitmap->height = buffer[2];
 	bitmap->size = bitmap->width * bitmap->height / 8;
@@ -956,7 +968,8 @@ gn_error file_ota_load(FILE *file, gn_bmp *bitmap, gn_phone *info)
 	char buffer[4];
 
 	/* We could check for extended info here - indicated by the 7th bit being set in the first byte */
-	fread(buffer, 1, 4, file);
+	if (fread(buffer, 1, 4, file) != 4)
+		return GN_ERR_FAILED;
 
 	bitmap->width = buffer[1];
 	bitmap->height = buffer[2];

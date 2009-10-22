@@ -96,8 +96,14 @@ static void OkLoadDialog(GtkWidget * w, GtkFileSelection * fs)
 		return;
 	}
 
-	fgets(line, MAX_DTMF_LENGTH + 1, f);
-	gtk_entry_set_text(GTK_ENTRY(displayEntry), line);
+	if (fgets(line, MAX_DTMF_LENGTH + 1, f) == NULL) {
+		g_snprintf(buf, 80, _("Error reading file!"));
+		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
+		gtk_widget_show(errorDialog.dialog);
+	} else {
+		gtk_entry_set_text(GTK_ENTRY(displayEntry), line);
+	}
+
 	fclose(f);
 }
 
