@@ -3,6 +3,7 @@
  * translation updates
     o updated German translation                 (Carsten Grohmann)
     o updated POTFILE files                      (Carsten Grohmann)
+    o updated Italian translation                   (Daniele Forsi)
  * fake driver
     o implement GN_OP_GetModel and GN_OP_GetSMSStatus to allow
       testing of smsd sending                       (Daniele Forsi)
@@ -44,8 +45,6 @@
                                                       (Jari Turkia)
     o MS Visual Studio has setenv()                   (Jari Turkia)
     o rename win32 dir to Windows (it's also win64)     (Paweł Kot)
- * translation updates
-    o updated Italian translation                   (Daniele Forsi)
 
 0.6.28
 ======
