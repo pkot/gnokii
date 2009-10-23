@@ -95,7 +95,6 @@
 
 #include "gnokii-app.h"
 #include "gnokii.h"
-#include <sys/stat.h>
 
 struct gnokii_arg_len {
 	int gal_opt; /* option name (opt_index) */
