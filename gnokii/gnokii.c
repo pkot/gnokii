@@ -72,7 +72,6 @@
 
 #  include <windows.h>
 #  include <process.h>
-#  include <io.h>
 #  include <getopt.h>
 
 #else

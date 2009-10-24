@@ -49,6 +49,10 @@
 #include <signal.h>
 #ifndef WIN32
 #  include <fcntl.h>
+#else
+/*
+#  include <io.h>
+*/
 #endif
 
 #include "gnokii-app.h"
