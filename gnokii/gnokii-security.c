@@ -46,6 +46,9 @@
 #  define _GNU_SOURCE 1
 #endif
 #include <getopt.h>
+#ifdef WIN32
+#  include <io.h>
+#endif
 
 #include "gnokii-app.h"
 #include "gnokii.h"
@@ -129,45 +132,35 @@ gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state)
 
 static int get_password(const char *prompt, char *pass, int length)
 {
-#if defined(WIN32) || defined(__HAIKU__)
-	int count = 0;
-
-	fprintf(stdout, "%s", prompt);
-	fgets(pass, length, stdin);
-
-	/* strip the trailing newline to be compatible with getpass() */
-	while (count < length && pass[count]) {
-		if (pass[count] == '\r' || pass[count] == '\n') {
-			pass[count] = '\0';
-			break;
-		}
-		count++;
-	}
-#else
-	/* FIXME: manual says: Do not use getpass */
-	char *s = NULL;
 	int fd = fileno(stdin);
-	ssize_t count;
-	size_t s_len;
+	int count;
 
 	if (isatty(fd)) {
-		strncpy(pass, getpass(prompt), length - 1);
-	} else {
-		count = getline(&s, &s_len, stdin);
-		if (count > 0) {
-			/* strip the trailing newline to be compatible with getpass() */
-			count--;
-			if (s[count] == '\n') {
-				s[count] = '\0';
-			}
+#ifdef HAVE_GETPASS
+		const char *s;
+
+		/* FIXME: man getpass says it was removed in POSIX.1-2001 */
+		s = getpass(prompt);
+		if (s) {
 			strncpy(pass, s, length - 1);
+			pass[length - 1] = '\0';
+
+			return strlen(pass);
 		}
-		if (s)
-			free(s);
-	}
-	pass[length - 1] = 0;
+		return -1;
+#else
+		fprintf(stdout, "%s", prompt);
 #endif
-	return 0;
+	}
+	if (fgets(pass, length, stdin)) {
+		/* Strip trailing newline like getpass() would do */
+		for (count = 0; pass[count] && pass[count] != '\n'; count++)
+			;
+		pass[count] = '\0';
+
+		return count;
+	}
+	return -1;
 }
 
 int entersecuritycode_usage(FILE *f, int exitval)
