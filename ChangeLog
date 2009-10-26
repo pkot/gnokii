@@ -4,7 +4,7 @@
     o updated German translation                 (Carsten Grohmann)
     o updated POTFILE files                      (Carsten Grohmann)
     o updated Italian translation                   (Daniele Forsi)
- * fake driver
+ * fake driver updates
     o implement GN_OP_GetModel and GN_OP_GetSMSStatus to allow
       testing of smsd sending                       (Daniele Forsi)
  * gnokii updates
@@ -12,6 +12,8 @@
       to know which memory types are supported      (Daniele Forsi)
     o fix command with multiple arguments handling in --shell
                                                         (Paweł Kot)
+    o show reference number also for sendlogo() and sendringtone()
+                                                    (Daniele Forsi)
  * nk6510 driver updates
     o support SMS memory OUS on phones prior to Series 40 3rd
                                          (Paweł Kot, Daniele Forsi)
@@ -40,6 +42,8 @@
     o try to fix "Present But Cannot Be Compiled" warning with
       MacOS X Bluetooth                                 (Paweł Kot)
     o add --with-gettext option to configure            (Paweł Kot)
+    o update reference files in testsuite and add a new test for
+      SMS encoding                                  (Daniele Forsi)
  * Windows updates
     o MS Visual Studio does not have asprintf()/vasprintf()
                                                       (Jari Turkia)

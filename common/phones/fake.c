@@ -93,7 +93,6 @@ static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char*
 {
 	unsigned char req[10240], req2[5120];
 	int length, tmp, offset = 0;
-	static int init = 0;
 
 	if (!data->raw_sms) return GN_ERR_INTERNALERROR;
 
@@ -130,14 +129,8 @@ static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char*
 	req[length * 2 + 1] = 0;
 	fprintf(stdout, "%s\n", req);
 
-	/* Generate reference number */
-	if (!init) {
-		time_t t;
-		time(&t);
-		srand(t);
-		init = 1;
-	}
-	data->raw_sms->reference = (int)(255.0*rand()/(RAND_MAX+1.0));
+	/* Generate reference number (use a constant to match output from testsuite) */
+	data->raw_sms->reference = 1;
 	return GN_ERR_NONE;
 }
 

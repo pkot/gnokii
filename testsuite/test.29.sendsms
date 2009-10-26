@@ -1,0 +1,2 @@
+# Send SMS with all chars of GSM Alphabet in the order they appear in the standard (the following line is UTF-8)
+echo -e "@£\x24¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\xc2\xa0ÆæßÉ \x21\x22#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà" | $GNOKII --sendsms 123456789
