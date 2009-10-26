@@ -238,7 +238,7 @@ static int usage(FILE *f, int argc, char *argv[])
 		     "General options:\n"
 		     "          --help [all] [monitor] [sms] [mms] [phonebook] [calendar] [todo]\n"
 		     "                 [dial] [profile] [settings] [wap] [logo] [ringtone]\n"
-		     "                 [security] [file] [other]...\n"
+		     "                 [security] [file] [other]\n"
 		     "          --version\n"
 		     "          --shell\n"));
 	/* Print "short usage" only */
@@ -278,10 +278,9 @@ static int usage(FILE *f, int argc, char *argv[])
 			logo_usage(f);
 		if (all || !strcmp(argv[i], "ringtone"))
 			ringtone_usage(f);
-#ifdef SECURITY
+		/* Unconditional compile here because security_usage() has its own conditional */
 		if (all || !strcmp(argv[i], "security"))
 			security_usage(f);
-#endif
 		if (all || !strcmp(argv[i], "file"))
 			file_usage(f);
 		if (all || !strcmp(argv[i], "other"))
