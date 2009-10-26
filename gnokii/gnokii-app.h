@@ -232,12 +232,4 @@ extern void list_gsm_networks(void);
 extern gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state);
 extern int gnokii_atoi(char *string);
 
-/* Compatibility functions */
-#ifndef HAVE_GETLINE
-#  ifdef HAVE_SYS_PARAM_H
-#    include <sys/param.h>
-#  endif
-int getline(char **line, size_t *len, FILE *stream);
-#endif
-
 #endif /* __gnokii_app_h_ */

@@ -1157,7 +1157,7 @@ int shell(gn_data *data, struct gn_statemachine *state)
 	free(argv);
 	return 0;
 #else
-	fprintf(stderr, "gnokii needs to be compiled with getline support to enable this option.\n");
+	fprintf(stderr, _("gnokii needs to be compiled with readline support to enable this option.\n"));
 	return -1;
 #endif
 }
