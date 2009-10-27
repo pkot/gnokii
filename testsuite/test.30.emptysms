@@ -1,0 +1,2 @@
+# Empty SMS allowed on purpose since commit 8c4f263c6c8b99d042231caf3006b95d54128a99 send to longest allowed number
+echo | $GNOKII --sendsms +12345678901234567890
