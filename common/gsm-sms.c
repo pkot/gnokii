@@ -563,7 +563,7 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 		case 0x07: /* UDH Source Indicator */
 		default:
 			udh->udh[nr].type = GN_SMS_UDH_Unknown;
-			dprintf("Not supported UDH\n");
+			dprintf("User Data Header type 0x%02x isn't supported\n", message[pos]);
 			break;
 		}
 		length -= (udh_length + 2);
@@ -616,7 +616,7 @@ static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 		dprintf("Mobile Originated (sent) message:\n");
 		break;
 	default:
-		dprintf("Not supported message type: %d\n", sms->type);
+		dprintf("SMS message type 0x%02x isn't supported\n", sms->type);
 		return GN_ERR_NOTSUPPORTED;
 	}
 
@@ -1293,7 +1293,7 @@ static char *sms_udh_encode(gn_sms_raw *rawsms, int type)
 		rawsms->length += headers[type].length;
 		break;
 	default:
-		dprintf("Not supported User Data Header type\n");
+		dprintf("User Data Header type 0x%02x isn't supported\n", type);
 		break;
 	}
 	if (!rawsms->udh_indicator) {
@@ -1351,10 +1351,11 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 		case 2: rawsms->dcs |= 0xf1; break; /* Class 1 */
 		case 3: rawsms->dcs |= 0xf2; break; /* Class 2 */
 		case 4: rawsms->dcs |= 0xf3; break; /* Class 3 */
-		default: dprintf("What ninja-mutant class is this?\n"); break;
+		default: dprintf("General Data Coding class 0x%02x isn't supported\n", sms->dcs.u.general.m_class); break;
 		}
 		if (sms->dcs.u.general.compressed) {
 			/* Compression not supported yet */
+			dprintf("SMS message compression isn't supported\n");
 			/* dcs[0] |= 0x20; */
 		}
 		al = sms->dcs.u.general.alphabet;
@@ -1370,6 +1371,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 
 		break;
 	default:
+		dprintf("Data Coding Scheme type 0x%02x isn't supported\n", sms->dcs.type);
 		return GN_ERR_WRONGDATAFORMAT;
 	}
 
@@ -1525,7 +1527,7 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 		break;
 	case GN_SMS_MT_DeliveryReport:
 	default:
-		dprintf("Not supported message type: %d\n", rawsms->type);
+		dprintf("Raw SMS message type 0x%02x isn't supported\n", rawsms->type);
 		return GN_ERR_NOTSUPPORTED;
 	}
 	/* Encoding the header */
