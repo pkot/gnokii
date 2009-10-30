@@ -27,7 +27,6 @@ common/misc.c
 common/nokia-decoding.c
 common/phones/atgen.c
 common/phones/generic.c
-common/phones/nk2110.c
 common/phones/nk3110.c
 common/phones/nk6100.c
 common/phones/nk6510.c

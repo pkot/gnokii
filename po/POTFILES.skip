@@ -1,5 +1,6 @@
 common/data/at-emulator.c
 common/devices/winserial.c
 common/gnvcal.c
+common/phones/nk2110.c
 common/phones/pcsc.c
 utils/gnokii-configure.glade
