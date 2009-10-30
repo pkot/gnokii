@@ -125,7 +125,8 @@ gn_error getcalendarnote(int argc, char *argv[], gn_data *data, struct gn_statem
 				ical = gn_calnote2icalstr(&calnote);
 				fprintf(stdout, "%s\n", ical);
 				free (ical);
-			} else {  /* plaint text output */
+			} else {  /* Plain text output */
+				/* Translators: this is the header of a calendar note. Example: 1 (1). Type: Meeting */
 				fprintf(stdout, _("%d (%d). %s: %s\n"), i, calnote.location, _("Type"), gn_calnote_type2str(calnote.type));
 
 				fprintf(stdout, _("   Start date: %d-%02d-%02d\n"), calnote.time.year,

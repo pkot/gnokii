@@ -171,7 +171,8 @@ gn_error getprofile(int argc, char *argv[], gn_data *data, struct gn_statemachin
 				p.message_tone, p.vibration, p.warning_tone,
 				p.caller_groups, p.automatic_answer);
 		} else {
-			fprintf(stdout, "%d. \"%s\"\n", p.number, p.name);
+			/* Translators: %d is the profile number, %s is the profile name. Example: 1. "Outdoors" */
+			fprintf(stdout, _("%d. \"%s\"\n"), p.number, p.name);
 			if (p.default_name == -1) fprintf(stdout, _(" (name defined)\n"));
 			fprintf(stdout, _("Incoming call alert: %s\n"), gn_profile_callalert_type2str(p.call_alert));
 			fprintf(stdout, _("Ringing tone: %s (%d)\n"), get_ringtone_name(p.ringtone, data, state), p.ringtone);
