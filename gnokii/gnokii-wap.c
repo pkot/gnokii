@@ -100,7 +100,7 @@ gn_error getwapbookmark(char *number, gn_data *data, struct gn_statemachine *sta
 
 int writewapbookmark_usage(FILE *f, int exitval)
 {
-	fprintf(f, _("usage: --writebookmark name URL\n"));
+	fprintf(f, _(" usage: --writebookmark name URL\n"));
 	return exitval;
 }
 

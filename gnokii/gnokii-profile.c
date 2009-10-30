@@ -62,7 +62,7 @@ void profile_usage(FILE *f)
 
 int getprofile_usage(FILE *f, int exitval)
 {
-	fprintf(f, _("usage: --getprofile [start_number [end_number]] [-r|--raw]\n"));
+	fprintf(f, _(" usage: --getprofile [start_number [end_number]] [-r|--raw]\n"));
 	return exitval;
 }
 
@@ -259,7 +259,7 @@ gn_error getactiveprofile(gn_data *data, struct gn_statemachine *state)
 
 int setactiveprofile_usage(FILE *f, int exitval)
 {
-	fprintf(f, _("usage: --setactiveprofile profile_number\n"));
+	fprintf(f, _(" usage: --setactiveprofile profile_number\n"));
 	return exitval;
 }
 
