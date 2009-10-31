@@ -235,8 +235,8 @@ gn_timestamp *sms_timestamp_unpack(unsigned char *number, gn_timestamp *dt)
 
 /**
  * sms_timestamp_pack - converts gnokii's datetime struct to the binary datetime
- * @number: binary variable to be filled
  * @dt: datetime structure to be read
+ * @number: binary variable to be filled
  *
  */
 unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
@@ -287,7 +287,7 @@ unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
  * received SMS - delivery report and fills in the SMS structure with
  * the correct message according to the GSM specification.
  * This function only applies to the delivery reports. Delivery reports
- * contain only one part, so it is assumed all other part except 0th are
+ * contain only one part, so it is assumed all other parts except 0th are
  * NULL.
  */
 static gn_error sms_status(unsigned char status, gn_sms *sms)
@@ -372,7 +372,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 				dprintf("SM does not exist");
 				break;
 			default:
-				dprintf("Reserved/Specific to SC: %x", status);
+				dprintf("Reserved/Specific to SC: 0x%02x", status);
 				break;
 			}
 		}
@@ -401,7 +401,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			dprintf("Error in SME");
 			break;
 		default:
-			dprintf("Reserved/Specific to SC: %x", status);
+			dprintf("Reserved/Specific to SC: 0x%02x", status);
 			break;
 		}
 	} else {
@@ -409,7 +409,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Unknown"));
 
 		/* more detailed reason only for debug */
-		dprintf("Reserved/Specific to SC: %x", status);
+		dprintf("Reserved/Specific to SC: 0x%02x", status);
 	}
 	dprintf("\n");
 	sms->user_data[0].length = strlen(sms->user_data[0].u.text);
@@ -1307,7 +1307,7 @@ static char *sms_udh_encode(gn_sms_raw *rawsms, int type)
 /**
  * sms_concat_header_encode - Adds concatenated messages header
  * @rawsms: processed SMS
- * @this: current part number
+ * @curr: current part number
  * @total: total parts number
  *
  * This function adds sequent part of the concatenated messages header. Note
@@ -1324,16 +1324,14 @@ static gn_error sms_concat_header_encode(gn_sms_raw *rawsms, int curr, int total
 }
 
 /**
- * sms_data_encode - encodes the date from the SMS structure to the phone frame
+ * sms_data_encode - Encodes the data from the SMS structure to the phone frame
  *
- * @SMS: SMS structure to be encoded
- * @dcs: Data Coding Scheme field in the frame to be set
- * @message: phone frame to be filled in
- * @multipart: do we send one message or more?
- * @clen: coded data length
+ * @sms: #gn_sms structure holding user provided data
+ * @rawsms: #gn_sms_raw structure to be filled with encoded data
  *
- * This function does the phone frame encoding basing on the given SMS
- * structure. This function is capable of creating only one frame at a time.
+ * This function converts values from libgnokii format to a format more similar
+ * to the GSM standard.
+ * This function is capable of creating only one frame at a time.
  */
 static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 {
@@ -1509,7 +1507,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 			return GN_ERR_NONE;
 
 		default:
-			dprintf("What kind of ninja-mutant user_data is this?\n");
+			dprintf("User Data type 0x%02x isn't supported\n", sms->user_data[i].type);
 			break;
 		}
 	}
@@ -1538,7 +1536,7 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 		return GN_ERR_ENTRYTOOLONG;
 	}
 	rawsms->validity_indicator = GN_SMS_VP_RelativeFormat;
-	rawsms->validity[0] = 0xa9;
+	rawsms->validity[0] = GN_SMS_VP_72H;
 
 	for (i = 0; i < sms->udh.number; i++)
 		if (sms->udh.udh[i].type == GN_SMS_UDH_ConcatenatedMessages)
