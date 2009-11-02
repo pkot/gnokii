@@ -34,6 +34,9 @@
     o add ids for Nokia 5130 XpressMusic and Nokia 5310 XpressMusic
       to misc.c only (use model=series40 for both)
                                     (Gustavo Delfino, pier_andreit)
+    o add TA and CB memory types to gn_str2memory_type() and to
+      gn_memory_type2str(); they were only in
+      gn_memory_type_print()                        (Daniele Forsi)
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)

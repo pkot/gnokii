@@ -55,6 +55,8 @@ GNOKII_API gn_memory_type gn_str2memory_type(const char *s)
 	X(BD);
 	X(SD);
 	X(MT);
+	X(TA);
+	X(CB);
 	X(IN);
 	X(OU);
 	X(AR);
@@ -104,6 +106,8 @@ GNOKII_API const char *gn_memory_type2str(gn_memory_type mt)
 	X(BD);
 	X(SD);
 	X(MT);
+	X(TA);
+	X(CB);
 	X(IN);
 	X(OU);
 	X(AR);
