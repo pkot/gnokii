@@ -196,7 +196,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 				mode = -1;
 				break;
 			}
-			fprintf(stderr, _("Getting MMS failed (location %d from memory %s! (%s)\n"), count, memory_type_string, gn_error_print(error));
+			fprintf(stderr, _("Getting MMS failed (location %d from memory %s)! (%s)\n"), count, memory_type_string, gn_error_print(error));
 			if (error == GN_ERR_INVALIDMEMORYTYPE) {
 				fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
 				fprintf(stderr, _("Run gnokii --showsmsfolderstatus for a list of supported memory types.\n"));
@@ -259,11 +259,11 @@ gn_error deletemms(int argc, char *argv[], gn_data *data, struct gn_statemachine
 		error = gn_mms_delete(data, state);
 
 		if (error == GN_ERR_NONE)
-			fprintf(stderr, _("Deleted MMS %s %d\n"), memory_type_string, count);
+			fprintf(stderr, _("Deleted MMS (location %d from memory %s)\n"), count, memory_type_string);
 		else {
 			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message))
 				return GN_ERR_NONE;
-			fprintf(stderr, _("DeleteMMS %s %d failed!(%s)\n\n"), memory_type_string, count, gn_error_print(error));
+			fprintf(stderr, _("Deleting MMS failed (location %d from memory %s)! (%s)\n"), count, memory_type_string, gn_error_print(error));
 		}
 	}
 

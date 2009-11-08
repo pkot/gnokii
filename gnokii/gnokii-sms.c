@@ -965,11 +965,11 @@ gn_error deletesms(int argc, char *argv[], gn_data *data, struct gn_statemachine
 		error = gn_sms_delete(data, state);
 
 		if (error == GN_ERR_NONE)
-			fprintf(stderr, _("Deleted SMS %s %d\n"), memory_type_string, count);
+			fprintf(stderr, _("Deleted SMS (location %d from memory %s)\n"), count, memory_type_string);
 		else {
 			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message))
 				return GN_ERR_NONE;
-			fprintf(stderr, _("Deleting SMS %s %d failed!(%s)\n\n"), memory_type_string, count, gn_error_print(error));
+			fprintf(stderr, _("Deleting SMS failed (location %d from %s memory)! (%s)\n"), count, memory_type_string, gn_error_print(error));
 		}
 	}
 
