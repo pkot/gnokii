@@ -886,45 +886,170 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 	return true;
 }
 
-#define MAX_PATH_LEN 200
-GNOKII_API gn_error gn_cfg_read_default()
-{
-	gn_error error;
-	char *homedir;
-	char rcfile[MAX_PATH_LEN];
+#define MAX_PATH_LEN 255
+
+#define CHECK_SIZE()	if (*retval >= size) { \
+	size *= 2; \
+	config_file_locations = realloc(config_file_locations, size); \
+}
+
+/*
+ * get_locations() returns the list of possible config file locations that
+ * may be used on the given system.  It returns the array of paths to the
+ * config files.  @retval parameter denotes how many locations are returned. 
+ * The resulting array needs to be freed afterwards.
+ */ 
 #ifdef WIN32
-	char globalrc[MAX_PATH_LEN];
-	char *systemroot;
+/* Windows version */
+static char **get_locations(int *retval)
+{
+	char **config_file_locations;
+	char *appdata, *homedrive, *homepath, *systemroot; /* env variables */
+	int size = 3; /* default size for config_file_locations */
+	char path[MAX_PATH_LEN];
 
+	*retval = size;
+
+	config_file_locations = calloc(size, sizeof(char *));
+
+	appdata = getenv("APPDATA");
+	homedrive = getenv("HOMEDRIVE");
+	homepath = getenv("HOMEPATH");
 	systemroot = getenv("SYSTEMROOT");
-	strncpy(globalrc, systemroot ? systemroot : "", MAX_PATH_LEN);
-	strncat(globalrc, "\\gnokiirc", MAX_PATH_LEN);
+	/* 1. %APPDATA%\gnokii\config */
+	snprintf(path, MAX_PATH_LEN, "%s\\gnokii\\config", appdata);
+	config_file_locations[0] = strdup(path);
+	/* old gnokii behaviour */
+	/* 2. %HOMEDRIVE%\%HOMEPATH%\_gnokiirc */
+	snprintf(path, MAX_PATH_LEN, "%s\\%s\\_gnokiirc", homedrive, homepath);
+	config_file_locations[1] = strdup(path);
+	/* 3. %SYSTEMROOT%\gnokiirc */
+	snprintf(path, MAX_PATH_LEN, "%s\\gnokiirc", systemroot);
+	config_file_locations[2] = strdup(path);
 
-	homedir = getenv("HOMEDRIVE");
-	strncpy(rcfile, homedir ? homedir : "", MAX_PATH_LEN);
-	homedir = getenv("HOMEPATH");
-	strncat(rcfile, homedir ? homedir : "", MAX_PATH_LEN);
-	strncat(rcfile, "\\_gnokiirc", MAX_PATH_LEN);
-#else
-	const char globalrc[] = "/etc/gnokiirc";
+	return retval;
+}
+#else /* WIN32 */
+#  ifdef __MACH__
+/* Mac OS X version */
+static char **get_locations(int *retval)
+{
+	char **config_file_locations;
+	char *home; /* env variables */
+	int size = 3; /* default size for config_file_locations */
+	char path[MAX_PATH_LEN];
 
-	homedir = getenv("HOME");
-	if (homedir)
-		strncpy(rcfile, homedir, MAX_PATH_LEN);
+	*retval = size;
+
+	config_file_locations = calloc(size, sizeof(char *));
+
+	home = getenv("HOME");
+	/* 1. $HOME/Library/Preferences/gnokii/config */
+	snprintf(path, MAX_PATH_LEN, "%s/Library/Preferences/gnokii/config", home);
+	config_file_locations[0] = strdup(path);
+	/* old gnokii behaviour */
+	/* 2. $HOME/.gnokiirc */
+	snprintf(path, MAX_PATH_LEN, "%s/.gnokiirc", home);
+	config_file_locations[1] = strdup(path);
+	/* 3. /etc/gnokiirc */
+	snprintf(path, MAX_PATH_LEN, "/etc/gnokiirc");
+	config_file_locations[2] = strdup(path);
+
+	return retval;
+}
+#  endif /* __darwin__ */
+/* freedesktop.org compliancy: http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html */
+#define XDG_CONFIG_HOME	"/.config"	/* $HOME/.config */
+#define XDG_CONFIG_DIRS "/etc/xdg"
+static char **get_locations(int *retval)
+{
+	char **config_file_locations;
+	char *xdg_config_home, *xdg_config_dirs, *home; /* env variables */
+	char **xdg_config_dir;
+	char *aux;
+	int j, i = 0;
+	char path[MAX_PATH_LEN];
+	int size = 8; /* default size for config_file_locations */
+	int xcd_size = 4; /* default size for xdg_config_dir - number of elements */
+	int free_xdg_config_home = 0;
+
+	*retval = 0;
+	config_file_locations = calloc(size, sizeof(char *));
+
+	/* First, let's get all env variables we will need */
+	home = getenv("HOME");
+
+	xdg_config_home = getenv("XDG_CONFIG_HOME");
+	if (!xdg_config_home) {
+		xdg_config_home = calloc(MAX_PATH_LEN, sizeof(char));
+		free_xdg_config_home = 1;
+		sprintf(xdg_config_home, "%s%s", home, XDG_CONFIG_HOME);
+	}
+
+	aux = getenv("XDG_CONFIG_DIRS");
+	if (aux)
+		xdg_config_dirs = strdup(aux);
 	else
-		rcfile[0] = '\0';
-	strncat(rcfile, "/.gnokiirc", MAX_PATH_LEN);
-#endif
+		xdg_config_dirs = strdup(XDG_CONFIG_DIRS);
 
-	/* Try opening .gnokirc from users home directory first */
-	if ((error = gn_cfg_file_read(rcfile)) != GN_ERR_NONE) {
-		fprintf(stderr, _("Couldn't read %s config file.\n"), rcfile);
-		/* It failed so try for /etc/gnokiirc */
-		if ((error == GN_ERR_NOCONFIG) && ((error = gn_cfg_file_read(globalrc)) != GN_ERR_NONE)) {
-			/* That failed too so exit */
-			fprintf(stderr, _("Couldn't read %s config file.\n"), globalrc);
+	/* split out xdg_config_dirs into tokens separated by ':' */
+	xdg_config_dir = calloc(xcd_size, sizeof(char *));
+	while ((aux = strsep(&xdg_config_dirs, ":")) != NULL) {
+		xdg_config_dir[i++] = strdup(aux);
+		if (i >= xcd_size) {
+			xcd_size *= 2;
+			xdg_config_dir = realloc(xdg_config_dir, xcd_size);
 		}
 	}
+	free(xdg_config_dirs);
+
+	/* 1. $XDG_CONFIG_HOME/gnokii/config ($HOME/.config) */
+	snprintf(path, MAX_PATH_LEN, "%s/gnokii/config", xdg_config_home);
+	config_file_locations[(*retval)++] = strdup(path);
+
+	/* 2. $XDG_CONFIG_DIRS/gnokii/config (/etc/xdg) */
+	for (j = 0; j < i; j++) {
+		snprintf(path, MAX_PATH_LEN, "%s/gnokii/config", xdg_config_dir[j]);
+		config_file_locations[(*retval)++] = strdup(path);
+		CHECK_SIZE();
+		free(xdg_config_dir[j]);
+	}
+	free(xdg_config_dir);
+
+	/* old gnokii behaviour */
+
+	/* 3. $HOME/.gnokiirc */
+	snprintf(path, MAX_PATH_LEN, "%s/.gnokiirc", home);
+	config_file_locations[(*retval)++] = strdup(path);
+	CHECK_SIZE();
+
+	/* 4. /etc/gnokiirc */
+	snprintf(path, MAX_PATH_LEN, "/etc/gnokiirc");
+	config_file_locations[(*retval)++] = strdup(path);
+
+	if (free_xdg_config_home)
+		free(xdg_config_home);
+
+	return config_file_locations;
+}
+#endif /* !WIN32 && !__darwin__ */
+
+GNOKII_API gn_error gn_cfg_read_default()
+{
+	gn_error error = GN_ERR_FAILED;
+	char **config_file_locations = NULL;
+	int num, i;
+
+	config_file_locations = get_locations(&num);
+
+	for (i = 0; i < num; i++) {
+		if (error != GN_ERR_NONE)
+			error = gn_cfg_file_read(config_file_locations[i]);
+		if (error != GN_ERR_NONE)
+			fprintf(stderr, _("Couldn't read %s config file.\n"), config_file_locations[i]);
+		free(config_file_locations[i]);
+	}		
+	free(config_file_locations);
 	return error;
 }
 
@@ -961,10 +1086,6 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 
 	if (gn_cfg_info == NULL) {
 		/* this is bad, but the previous was much worse - bozo */
-		if (file)
-			fprintf(stderr, _("Couldn't read %s config file.\n"), file);
-		else
-			fprintf(stderr, _("Couldn't read config.\n"));
 		return GN_ERR_NOCONFIG;
 	}
 	gn_config_default.model[0] = 0;

@@ -37,6 +37,12 @@
     o add TA and CB memory types to gn_str2memory_type() and to
       gn_memory_type2str(); they were only in
       gn_memory_type_print()                        (Daniele Forsi)
+    o use more standard config file locations:
+        %APPDATA%\gnokii for Windows
+        $HOME/Library/Preferences/gnokii for MacOS X
+        $XDG_CONFIG_HOME/gnokii for others (following
+          freedesktop.org)
+      backward compatibility is preserved               (Paweł Kot)
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)
