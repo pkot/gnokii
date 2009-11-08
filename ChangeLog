@@ -7,6 +7,9 @@
  * fake driver updates
     o implement GN_OP_GetModel and GN_OP_GetSMSStatus to allow
       testing of smsd sending                       (Daniele Forsi)
+    o implement GN_OP_Identify                          (Paweł Kot)
+    o give hints how to configure gnokii with --identify and
+      --getsms                                          (Paweł Kot)
  * gnokii updates
     o make SMS and MMS commands suggest using --showsmsfolderstatus
       to know which memory types are supported      (Daniele Forsi)

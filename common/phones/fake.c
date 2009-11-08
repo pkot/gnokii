@@ -89,6 +89,14 @@ static gn_error fake_initialise(struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
+static gn_error fake_identify(gn_data *data, struct gn_statemachine *state)
+{
+	fprintf(stderr, _("Apparently you didn't configure gnokii. Please do it prior to using it.\n"
+			  "You can get some clues from comments included in sample config file or give\n"
+			  "a try with gnokii-configure utility included in gnokii distribution.\n"));
+	return GN_ERR_NONE;
+}
+
 static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char* cmd)
 {
 	unsigned char req[10240], req2[5120];
@@ -135,13 +143,14 @@ static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char*
 }
 
 /* SMS-DELIVER */
+#define SMS "0791214365870921240BD067F77B9D4E0300009011800000004094C3B7DB9C3ED7E565D0D9FD5EA7D320B83CFD9683E86F507D9E769F4169BA0B947DD741E3B01B742ED341F377BB0C1AB3EBE539C82C7FB741E377BB5D76D3E7A0B47BCCAE93CB6450DA0D9A87DB707619347EBBCDE933C89C6697416F39882ECF83EE693A1A7476BFD7E9746BFC769BD3E7BABC0C32CBDF6D509D9E66CF41E4B4DC05"
 /* Text: Hello! vowels àèìòì euro */
-#define SMS "0791214365870921240B919999999999F90000902072129025401AC8329BFD0E81ECEF7B993D07FD0907C40154AECBDF2010"
+//#define SMS "0791214365870921240B919999999999F90000902072129025401AC8329BFD0E81ECEF7B993D07FD0907C40154AECBDF2010" */
 /* Text: € */
-/* #define SMS "0791214365870921240B919999999999F9000090907000920480029B32" */
+//#define SMS "0791214365870921240B919999999999F9000090907000920480029B32"
 /* SMS-STATUS-REPORT */
 /* Status: delivered */
-/* #define SMS "07914366999999F906CD098186666666F89080709002818090807002336080009FD6E494" */
+//#define SMS "07914366999999F906CD098186666666F89080709002818090807002336080009FD6E494" */
 
 static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 {
@@ -190,6 +199,8 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 	switch (op) {
 	case GN_OP_Init:
 		return fake_initialise(state);
+	case GN_OP_Identify:
+		return fake_identify(data, state);
 	case GN_OP_Terminate:
 		return GN_ERR_NONE;
 	case GN_OP_SendSMS:
