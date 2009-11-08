@@ -3805,7 +3805,7 @@ msgstr "(wiadomość usunięta)\n"
 #: ../gnokii/gnokii-sms.c:891
 #, c-format
 msgid "GetSMS %s %d failed! (%s)\n"
-msgstr "Nieudane GetSMS %s %d!(%s)\n"
+msgstr "Nieudane pobranie SMS z pozycji %d w pamięci %s! (%s)\n"
 
 #: ../gnokii/gnokii-sms.c:893
 #, c-format
