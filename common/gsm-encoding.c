@@ -261,7 +261,6 @@ GNOKII_API const char *gn_char_get_encoding()
 		coding = application_encoding; /* app has overriden encoding setting */
 	else
 		coding = get_langinfo_codeset(); /* return default codeset */
-	dprintf("detected coding: %s\n", coding);
 	return coding;
 }
 
