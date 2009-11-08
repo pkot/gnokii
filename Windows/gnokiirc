@@ -1,8 +1,11 @@
-# This is a sample _gnokiirc file for Windows systems.
+# This is a sample config file for Windows systems.
 # See Docs/sample/gnokiirc for a unix-like sample.
-# Copy this file into your home directory, name it _gnokiirc and change
-# port, connection and model settings following the comments below.
-# See http://wiki.gnokii.org/index.php/Config for working examples.
+# Copy this file into
+#  - gnokii installation directory (%APPDATA%\gnokii) and name it config
+#  - your home directory (%HOMEDRIVE%\%HOMEPATH%) and name it _gnokiirc
+#  - windows installation directory (%SYSTEMROOT%) and name it gnokiirc
+# Then change port, connection and model settings following the comments
+# below.  See http://wiki.gnokii.org/index.php/Config for working examples.
 #
 
 [global]

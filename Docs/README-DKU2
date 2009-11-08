@@ -7,7 +7,7 @@
 The recommended way to use DKU2 cable is to use included in gnokii userspace
 libusb driver. Ensure that you have libusb on your system (if you compile
 gnokii you would need development libusb packages) and use
-connection=dku2libusb setting in your gnokiirc file. As port use number of
+connection=dku2libusb setting in your config file. As port use number of
 compatible USB end-point (starting with 1). This setting is useful just to
 distinct more than one DKU2 phone connected to PC.
 You may want to install Docs/sample/45-nokiadku2.rules to set device

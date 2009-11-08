@@ -14,7 +14,7 @@ You can download pcsc-lite from http://pcsclite.alioth.debian.org/ and
 a driver suitable to you reader could be available from
 http://www.musclecard.com/
 
-A typical gnokiirc configuration to use this driver is:
+A typical configuration to use this driver is:
   port = 0
   model = pcsc
   connection = pcsc

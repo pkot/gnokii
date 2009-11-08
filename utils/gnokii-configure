@@ -24,10 +24,11 @@
 
   Copyright (C) 2009 Daniele Forsi
 
-  Configuration wizard to create a .gnokiirc
+  Configuration wizard to create a config file
 """
 
 import sys
+import os
 try:
 	import pygtk
 	pygtk.require("2.10")
@@ -52,7 +53,14 @@ class GnokiiAssistant(gtk.Assistant):
 	"""This is the GnokiiAssistant application"""
 
 	# this filename will be suggested by the save dialog
-	config_filename = '~/.gnokiirc'
+	config_dir = os.environ.get('XDG_CONFIG_HOME')
+	if config_dir is None:
+	        config_dir = os.environ.get('HOME') + '/.config/gnokii'
+        try:
+                os.makedirs(config_dirs, '0700')
+        except:
+                pass
+	config_filename = config_dir + '/config'
 
 	# constants matching .glade file
 

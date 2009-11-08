@@ -55,15 +55,16 @@ Current versions do not compile.
 This is on a TODO list and will be supported on later versions.
 
 
-Configuring gnokii / gnokiirc
-=============================
+Configuring gnokii
+==================
 
-Current versions attempt to read the gnokiirc from:
+Current versions attempt to read the config file from:
 
-   1. User's home directory: %HOMEDRIVE%\%HOMEPATH%\_gnokiirc
-   2. Windows installation directory: %SYSTEMROOT%\gnokiirc
+   1. Application installation directory: %APPDATA%\gnokii\config
+   2. User's home directory: %HOMEDRIVE%\%HOMEPATH%\_gnokiirc
+   3. Windows installation directory: %SYSTEMROOT%\gnokiirc
 
-If user gnokii configuration can not be found, system global is used.
+First being found (the lookup order is as above) is used.
 
 Three values are required in the config file for gnokii to work: port, model
 and connection. See the comments in the config file for further information.

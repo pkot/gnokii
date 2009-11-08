@@ -141,15 +141,15 @@
   README.  Here is the short way for configure infrared with gnokii:
 
 
-  1. Copy the file sample/gnokiirc as .gnokiirc in your homedir.
+  1. Copy the file sample/gnokiirc to yourhomedir.
+
+       mkdir -p ~/.config/gnokii
+       cp Docs/sample/gnokiirc ~/.config/gnokii/config
 
 
-       cp Docs/sample/gnokiirc ~/.gnokiirc
 
 
-
-
-  2. Edit the ~/.gnokiirc file:
+  2. Edit the config file:
 
 
        port       = /dev/ttyS1 # Set this to the port where you infrared-equipment is connected.
@@ -161,7 +161,7 @@
 
   3. Make the complete gnokii-software with make in gnokii-dir.
 
-  Thats all! If you use infrared in ~/.gnokiirc all parts of the gnokii-
+  Thats all! If you use infrared in the config all parts of the gnokii-
   distribution use communication over infrared! This parts are in
   moment:
 

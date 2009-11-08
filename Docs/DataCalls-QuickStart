@@ -13,13 +13,15 @@ e.g.
    groupadd gnokii
    make install
 
-(2) Create /etc/gnokiirc or ~/.gnokiirc
+(2) Create /etc/xdg/gnokii/config or ~/.config/gnokii/config
 
-   cp Docs/sample/gnokiirc /etc/gnokiirc
+   mkdir -p /etc/gnokii/config
+   cp Docs/sample/gnokiirc /etc/xdg/gnokii/config
    
    or
    
-   cp Docs/sample/gnokiirc ~/.gnokiirc
+   mkdir -p ~/.config/gnokii
+   cp Docs/sample/gnokiirc ~/.config/gnokii/config
 
    Edit to suit; in my case:
 

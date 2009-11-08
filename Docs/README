@@ -171,23 +171,28 @@ at http://wiki.gnokii.org/index.php/PreBuiltPackages.
 
 - 6.0 Configuration -
 
-Once you have installed the binaries, you should copy the sample/gnokiirc
-file from the Docs directory to your home directory and name it .gnokiirc
+Once you have installed the binaries, you should take the sample/gnokiirc
+file from the Docs directory. Af of 0.7.0 version gnokii follows
+freedesktop.org specifications and looks for the config file in
+$XDG_CONFIG_HOME/gnokii/config. Verify the setting in your system (usually
+it should be $HOME/.config) and place there your config file.
 Using your favorite editor ensure that the settings are correct for your
 system, the sample file has details of the various options available. You
 may refer to <http://wiki.gnokii.org/index.php/Config> for the
-configurations known to work.
+configurations known to work. You may use gnokii-configure utility for
+assistance. It is provided in utils dir in gnokii distribution.
 
 If you used a pre-built version of gnokii (.rpm, .deb etc) it may have
-installed a /etc/gnokiirc file.  If it has, the settings in this file will
-be used in the absence of a .gnokiirc file in your home directory.
+installed a /etc/xdg/gnokii/config or /etc/gnokiirc file.  If it has, the
+settings in this file will be used in the absence of a config file in
+your home directory.
 
 Note that you will need read/write permissions on whatever device you
-specify in .gnokiirc.  You can now use gnokii and xgnokii.
+specify in config file.  You can now use gnokii and xgnokii.
 
 Review the notes specific to your model of phone in the appropriate README
 file. These files also provide information about what functionality is
-available for each model. Sample gnokiirc provided with gnokii sources
+available for each model. Sample config file provided with gnokii sources
 provides many examples and explanations.
 
 In order to make use of the AT emulator provided by gnokiid through

@@ -141,7 +141,7 @@ Options:
 
 -t, --phone phone_number
 	You can run more instances of smsd. One instance per phone. In this
-	setup you must configure phone section in gnokiirc. For example:
+	setup you must configure phone section in the config file. For example:
 
 	[global]
 	port = /dev/ttyS0

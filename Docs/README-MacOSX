@@ -36,7 +36,7 @@ This is not a problem of Gnokii but a problem with Apple. The MacOS X IrDA
 protocol stack is completely undocumented thus unusable. Unless they change
 this or someone ports the IrDA stack from linux we're out of luck, sorry.
 
-Contents of my .gnokiirc file:
+Contents of my config file:
 port = /dev/cu.USA28X21P1.1
 model = 6210
 initlength = default

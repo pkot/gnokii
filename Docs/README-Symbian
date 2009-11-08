@@ -104,7 +104,7 @@ You can install the SIS file in the same way as another symbian application.
 You can transfer it to the phone over the OBEX protocol (OBEX is available
 over IrDA or Bluetooth or cable connection).
 
-You can use the following settings in your gnokiirc to access the phone:
+You can use the following settings in your config file to access the phone:
 
 - Bluetooth connection
 

@@ -1,8 +1,10 @@
-# This is a sample ~/.gnokiirc file for unix-like systems.
-# See Windows/gnokiirc for a Windows sample.
-# Copy this file into your home directory, name it .gnokiirc and change
-# port, connection and model settings following the comments below.
-# See http://wiki.gnokii.org/index.php/Config for working examples.
+# This is a sample config file for unix-like systems.  See Windows/gnokiirc
+# for a Windows sample.
+# 
+# Copy this file into $XDG_CONFIG_HOME/gnokii/config (which is
+# $HOME/.config/gnokii/config in most cases) and change port, connection and
+# model settings following the comments below.  See
+# http://wiki.gnokii.org/index.php/Config for working examples.
 #
 
 [global]

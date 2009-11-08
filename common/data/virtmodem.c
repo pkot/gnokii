@@ -362,7 +362,7 @@ static int VM_PtySetup(const char *bindir)
 	strncat(mgnokiidev, "mgnokiidev", sizeof(mgnokiidev) - strlen(mgnokiidev));
 
 	if (access(mgnokiidev, X_OK) != 0) {
-		fprintf(stderr, _("Cannot access %s, check the bindir in your gnokiirc!\n"), mgnokiidev);
+		fprintf(stderr, _("Cannot access %s, check the bindir in your config file!\n"), mgnokiidev);
 		exit(1);
 	}
 

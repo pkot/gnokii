@@ -264,7 +264,8 @@ GNOKII_API char *gn_cfg_get(struct gn_cfg_header *cfg, const char *section, cons
 GNOKII_API gn_error gn_cfg_file_read(const char *filename) GNOKII_DEPRECATED;
 /* Read the config from the file already put into the memory */
 GNOKII_API gn_error gn_cfg_memory_read(const char **lines) GNOKII_DEPRECATED;
-/* Read the config from the standard $HOME/.gnokiirc or /etc/gnokiirc locations */
+/* Read the config from the standard $XDG_CONFIG_HOME/gnokii/config,
+ * $XDG_CONFIG_DIRS/gnokii/config, $HOME/.gnokiirc or /etc/gnokiirc locations */
 GNOKII_API gn_error gn_cfg_read_default() GNOKII_DEPRECATED;
 /* free any resources which were used by libgnokii */
 GNOKII_API void gn_cfg_free_default() GNOKII_DEPRECATED;

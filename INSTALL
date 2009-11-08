@@ -39,8 +39,9 @@ Quickstart
     [ capabilities                                                          ]
     $ make
     # make install
-    $ cp Docs/sample/gnokiirc ~/.gnokiirc
-    $ $EDITOR ~/.gnokiirc
+    $ mkdir -p .config/gnokii
+    $ cp Docs/sample/gnokiirc ~/.config/gnokii/config
+    $ $EDITOR ~/.config/gnokii/config
     [ adjust config according to your setup and follow hints in the file    ]
 
 Requirements
@@ -217,7 +218,8 @@ Configuration
 Copy the example config file for gnokii from the Docs/sample/ directory to
 your home directory:
 
-    $ cp Docs/sample/gnokiirc ~/.gnokiirc
+    $ mkdir -p ~/.config/gnokii
+    $ cp Docs/sample/gnokiirc ~/.config/gnokii/config
 
 It is a plain ASCII file which can be read in any editor. Make sure you do 
 not save it in a wordprocessor's binary-format. It has to remain plain 
