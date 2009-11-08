@@ -890,7 +890,7 @@ parsefile:
 			}
 			break;
 		default:
-			fprintf(stderr, _("Getting SMS failed (location %d from %s memory)! (%s)\n"), memory_type_string, count, gn_error_print(error));
+			fprintf(stderr, _("Getting SMS failed (location %d from %s memory)! (%s)\n"), count, memory_type_string, gn_error_print(error));
 			if (error == GN_ERR_INVALIDMEMORYTYPE) {
 				fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
 				fprintf(stderr, _("Run gnokii --showsmsfolderstatus for a list of supported memory types.\n"));

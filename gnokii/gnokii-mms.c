@@ -196,7 +196,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 				mode = -1;
 				break;
 			}
-			fprintf(stderr, _("GetMMS %s %d failed! (%s)\n"), memory_type_string, count, gn_error_print(error));
+			fprintf(stderr, _("Getting MMS failed (location %d from memory %s! (%s)\n"), count, memory_type_string, gn_error_print(error));
 			if (error == GN_ERR_INVALIDMEMORYTYPE) {
 				fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
 				fprintf(stderr, _("Run gnokii --showsmsfolderstatus for a list of supported memory types.\n"));
