@@ -26,11 +26,11 @@
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2000      Jan Derfinak
   Copyright (C) 2001      Jan Kratochvil
-  Copyright (C) 2001-2005 Pawel Kot
+  Copyright (C) 2001-2009 Pawel Kot
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2005      Bastien Nocera
 
-  Config file (/etc/gnokiirc and ~/.gnokiirc) reader.
+  Config reader.
 
   Modified from code by Tim Potter.
 
