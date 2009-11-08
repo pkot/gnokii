@@ -1,1 +1,2 @@
+# This is again operator logo. But this time we convert it from xpm format
 $GNOKII --sendlogo op 0800123456 ../Docs/sample/logo/gnokiiop.xpm "203 01"

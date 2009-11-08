@@ -1,4 +1,2 @@
-#
 # Try to send a picture SMS.
-#
 echo "Ahojky; jeste jeden inverzni brontosaur... --pavel 0604343103" | $GNOKII --sendlogo picture 0604343103 ../Docs/sample/logo/bronto.xpm

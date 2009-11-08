@@ -1,4 +1,3 @@
-#
+# This tests sending a picture message which is some kind of Nokia specific.
 # Well, this test is actually wrong. gnokiiop.xpm is too small to act as picture message.
-#
 echo "Ahoj, tohle je mala zprava na testovani telefonu" | $GNOKII --sendlogo picture 0604343103 ../Docs/sample/logo/gnokiiop.xpm

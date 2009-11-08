@@ -1,1 +1,2 @@
+# This tests sending ringtone via SMS. Not really useful nowadays
 $GNOKII --sendringtone ../Docs/sample/ringtone/star.rtttl 0604343103

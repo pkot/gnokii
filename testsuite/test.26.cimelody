@@ -1,1 +1,2 @@
+# Testing concatenated imelody sending via SMS
 cat ../Docs/sample/ringtone/star.imelody | $GNOKII --sendsms 0604343103 --concat "1;2;3" -i

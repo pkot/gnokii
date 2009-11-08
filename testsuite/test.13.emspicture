@@ -1,5 +1,3 @@
-#
-# Send pacman to 0604343103
-# 
+# Send pacman to 0604343103 as EMS. Does anybody use it anymore?
 $GNOKII --sendlogo emspicture 0604343103 ../Docs/sample/logo/pacman.xpm
 
