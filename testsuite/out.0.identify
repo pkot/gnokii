@@ -1,3 +1,6 @@
+Apparently you didn't configure gnokii. Please do it prior to using it.
+You can get some clues from comments included in sample config file or give
+a try with gnokii-configure utility included in gnokii distribution.
 IMEI         : Unknown
 Manufacturer : Unknown
 Model        : Unknown
