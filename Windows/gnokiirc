@@ -19,14 +19,16 @@ port = com1:
 #
 # Use this setting also for the Bluetooth connection:
 # port = aa:bb:cc:dd:ee:ff
-#
+
+# Change it according to instructions:
+model = fake
 # Set model to the model number of your phone. For the
 # Symbian phones use:
 # model = symbian
 #
 # For other non-Nokia phones and when you want to use AT
 # mode use:
-model = AT
+# model = AT
 #
 # If you can't figure out what to put here read the FAQ.
 # If it still doesn't help, consult gnokii-ml or #gnokii at freenode.

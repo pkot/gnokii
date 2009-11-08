@@ -10,7 +10,7 @@
 [global]
 
 # Set port to the physical port used to connect to your phone.
-port = /dev/ttyUSB0
+port = none
 
 # Then using phone connected to the serial port (not USB) you should
 # use (for Linux):
@@ -46,13 +46,15 @@ port = /dev/ttyUSB0
 # Default is 1.
 # port = 1
 
+# Change it according to instructions
+model = fake
 # Set model to the model number of your phone. For the
 # Symbian phones use:
 # model = symbian
 #
 # For other non-Nokia phones and when you want to use AT
 # mode use:
-model = AT
+# model = AT
 #
 # If you can't figure out what to put here read the FAQ.
 # If it still doesn't help, consult gnokii-ml or #gnokii at freenode.
