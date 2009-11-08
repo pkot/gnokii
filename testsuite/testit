@@ -5,7 +5,7 @@ if [ $# -eq 2 ] ; then
 	export GNOKII=$2
 elif [ $# -eq 0 ] ; then
 	export TESTDIR=`pwd`
-	export GNOKII="../gnokii/gnokii --config $TESTDIR/gnokiirc"
+	export GNOKII="../gnokii/gnokii --config $TESTDIR/.gnokiirc"
 else
 	echo "*** Usage: ./testit [Path to test files] [gnokii command] ***"
 	exit 1
