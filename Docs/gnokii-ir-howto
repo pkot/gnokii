@@ -141,7 +141,7 @@
   README.  Here is the short way for configure infrared with gnokii:
 
 
-  1. Copy the file sample/gnokiirc to yourhomedir.
+  1. Copy the file sample/gnokiirc to your homedir.
 
        mkdir -p ~/.config/gnokii
        cp Docs/sample/gnokiirc ~/.config/gnokii/config

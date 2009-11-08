@@ -172,7 +172,7 @@ at http://wiki.gnokii.org/index.php/PreBuiltPackages.
 - 6.0 Configuration -
 
 Once you have installed the binaries, you should take the sample/gnokiirc
-file from the Docs directory. Af of 0.7.0 version gnokii follows
+file from the Docs directory. As of 0.7.0 version gnokii follows
 freedesktop.org specifications and looks for the config file in
 $XDG_CONFIG_HOME/gnokii/config. Verify the setting in your system (usually
 it should be $HOME/.config) and place there your config file.
