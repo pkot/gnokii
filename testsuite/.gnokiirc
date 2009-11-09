@@ -3,3 +3,6 @@ port = /dev/null
 model = fake
 initlength = default
 connection = serial
+
+[fake_driver]
+sms_inbox = ./sms
