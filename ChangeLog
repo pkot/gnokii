@@ -10,6 +10,8 @@
     o implement GN_OP_Identify                          (Paweł Kot)
     o give hints how to configure gnokii with --identify and
       --getsms                                          (Paweł Kot)
+    o enable reading SMS from external directory which makes
+      testing much easier                               (Paweł Kot)
  * gnokii updates
     o make SMS and MMS commands suggest using --showsmsfolderstatus
       to know which memory types are supported      (Daniele Forsi)

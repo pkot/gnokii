@@ -218,3 +218,7 @@ port = foobar
 model = fake
 connection = serial
 
+# This is internal configuration for fake driver. The purpose is mostly
+# testing only.
+[fake_driver]
+sms_inbox = /tmp/sms

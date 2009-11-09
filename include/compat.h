@@ -111,6 +111,10 @@
 #  include <termios.h>
 #endif
 
+#ifdef HAVE_DIRENT_H
+#  include <dirent.h>
+#endif
+
 #if !defined(INT_MAX)
 #  define INT_MAX 2147483647
 #endif

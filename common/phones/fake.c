@@ -30,11 +30,6 @@
 
 #include "config.h"
 
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <time.h>
-
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
@@ -142,34 +137,123 @@ static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char*
 	return GN_ERR_NONE;
 }
 
-/* SMS-DELIVER */
-#define SMS "0791214365870921240BD067F77B9D4E0300009011800000004094C3B7DB9C3ED7E565D0D9FD5EA7D320B83CFD9683E86F507D9E769F4169BA0B947DD741E3B01B742ED341F377BB0C1AB3EBE539C82C7FB741E377BB5D76D3E7A0B47BCCAE93CB6450DA0D9A87DB707619347EBBCDE933C89C6697416F39882ECF83EE693A1A7476BFD7E9746BFC769BD3E7BABC0C32CBDF6D509D9E66CF41E4B4DC05"
-/* Text: Hello! vowels àèìòì euro */
-//#define SMS "0791214365870921240B919999999999F90000902072129025401AC8329BFD0E81ECEF7B993D07FD0907C40154AECBDF2010" */
-/* Text: € */
-//#define SMS "0791214365870921240B919999999999F9000090907000920480029B32"
-/* SMS-STATUS-REPORT */
-/* Status: delivered */
-//#define SMS "07914366999999F906CD098186666666F89080709002818090807002336080009FD6E494" */
+static char *sms_inbox[] = {
+	/* SMS-DELIVER */
+	/* From: gnokii */
+	/* Text: Configure gnokii prior to using it. You can get some clues from comments included in sample config file or try with gnokii-configure from utils dir. */
+	"0791214365870921240BD067F77B9D4E0300009011800000004094C3B7DB9C3ED7E565D0D9FD5EA7D320B83CFD9683E86F507D9E769F4169BA0B947DD741E3B01B742ED341F377BB0C1AB3EBE539C82C7FB741E377BB5D76D3E7A0B47BCCAE93CB6450DA0D9A87DB707619347EBBCDE933C89C6697416F39882ECF83EE693A1A7476BFD7E9746BFC769BD3E7BABC0C32CBDF6D509D9E66CF41E4B4DC05",
+	/* Text: Hello! vowels àèìòì euro */
+	"0791214365870921240B919999999999F90000902072129025401AC8329BFD0E81ECEF7B993D07FD0907C40154AECBDF2010",
+	/* Text: € */
+	"0791214365870921240B919999999999F9000090907000920480029B32",
+	/* SMS-STATUS-REPORT */
+	/* Status: delivered */
+	"07914366999999F906CD098186666666F89080709002818090807002336080009FD6E494"
+};
 
+static gn_error at_sms_get_generic(gn_data *data, struct gn_statemachine *state, char *sms)
+{
+	gn_error e;
+	int len = strlen(sms) / 2;
+	char *tmp = calloc(len, 1);
+
+	if (!tmp)
+		return GN_ERR_FAILED;
+
+	hex2bin(tmp, sms, len);
+	e = gn_sms_pdu2raw(data->raw_sms, tmp, len, GN_SMS_PDU_DEFAULT);
+	free(tmp);
+	return e;
+}
+
+static gn_error at_sms_get_static(gn_data *data, struct gn_statemachine *state, int position)
+{
+	if (position > sizeof(sms_inbox)/sizeof(char *))
+		return GN_ERR_EMPTYLOCATION;
+
+	return at_sms_get_generic(data, state, sms_inbox[position - 1]);
+}
+
+#ifndef WIN32
+#define MAX_PATH_LEN 256
+static gn_error at_sms_get_from_file(gn_data *data, struct gn_statemachine *state, int position, DIR *d, const char *dirpath)
+{
+	gn_error e = GN_ERR_EMPTYLOCATION;
+	int i, n, offset, size = 256;
+	struct dirent *dent;
+	FILE *f;
+	char *sms_text;
+	struct stat buf;
+	char path[MAX_PATH_LEN];
+
+	/* iterate to Nth position */
+	for (i = 0; i < position; i++) {
+		dent = readdir(d);
+		if (dent) {
+			snprintf(path, MAX_PATH_LEN, "%s/%s", dirpath, dent->d_name);
+			n = stat(path, &buf);
+			if (!S_ISREG(buf.st_mode))
+				i--;
+		} else
+			goto out;
+	}
+	f = fopen(path, "r");
+	if (!f) {
+		e = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+	sms_text = calloc(size, sizeof(char));
+	n = size - 1;
+	offset = 0;
+	while (fgets(sms_text + offset, size, f)) {
+		offset += size - 1;
+		sms_text = realloc(sms_text, offset + size);
+	}
+	e = at_sms_get_generic(data, state, sms_text);
+	free(sms_text);
+	fclose(f);
+out:
+	closedir(d);
+	return e;
+}
+#endif
+
+#ifdef WIN32
+static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data || !data->raw_sms)
+		return GN_ERR_INTERNALERROR;
+	position = data->raw_sms->number;
+	return at_sms_get_static(data, state, position);
+}
+#else
 static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error e = GN_ERR_NONE;
-	char *tmp;
-	int len;
+	const char *path;
+	DIR *d;
+	int position;
 
 	if (!data || !data->raw_sms) {
 		e = GN_ERR_INTERNALERROR;
 		goto out;
 	}
-	len = strlen(SMS) / 2;
-	tmp = calloc(len, 1);   
-	hex2bin(tmp, SMS, len);
-	e = gn_sms_pdu2raw(data->raw_sms, tmp, len, GN_SMS_PDU_DEFAULT);
-	free(tmp);
+	position = data->raw_sms->number;
+	if (position < 1) {
+		e = GN_ERR_INVALIDLOCATION;
+		goto out;
+	}
+
+	path = gn_lib_cfg_get("fake_driver", "sms_inbox");
+	if (!path || (d = opendir(path)) == NULL)
+		e = at_sms_get_static(data, state, position);
+	else
+		e = at_sms_get_from_file(data, state, position, d, path);
+
 out:
 	return e;
 }
+#endif
 
 static gn_error at_sms_get_sms_status(gn_data *data, struct gn_statemachine *state)
 {
