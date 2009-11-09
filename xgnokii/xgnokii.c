@@ -891,12 +891,12 @@ static gint ButtonPressEvent(GtkWidget * widget, GdkEventButton * event)
 			    event->y >= 15 && event->y <= 30)) {
 			GUI_ShowContacts();
 		} else if (event->x >= 190 && event->x <= 210 && event->y >= 70 && event->y <= 85) {
-			if (!phoneMonitor.supported & PM_SMS)
+			if ((!phoneMonitor.supported) & PM_SMS)
 				phoneMonitor.working = _("SMS not supported!");
 			else
 				GUI_ShowSMS();
 		} else if (event->x >= 235 && event->x <= 248 && event->y >= 27 && event->y <= 75) {
-			if (!phoneMonitor.supported & PM_CALENDAR)
+			if ((!phoneMonitor.supported) & PM_CALENDAR)
 				phoneMonitor.working = _("Calendar not supported!");
 			else
 				GUI_ShowCalendar();
