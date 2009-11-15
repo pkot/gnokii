@@ -7,6 +7,7 @@ You'll need tools like:
  - make
  - gcc
  - flex
+ - pkg-config
 For certain distributions like Ubuntu most of the tools are available in
 build-essentials package. You will need also the set of autotools and
 family (they are needed just for git compile):
@@ -14,7 +15,7 @@ family (they are needed just for git compile):
  - autoconf
  - libtool
  - gettext
- - pkg-config
+ - intltool
 For building gnokii you will need development packages for the used
 libraries. They are usually marked with -dev suffix:
  - libbluetooth3
