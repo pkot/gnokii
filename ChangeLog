@@ -48,6 +48,8 @@
         $XDG_CONFIG_HOME/gnokii for others (following
           freedesktop.org)
       backward compatibility is preserved               (Paweł Kot)
+    o fallback to use mbrtowc()/wcrtomb() or mbtowc()/wctomb() if
+      iconv_open() fails                            (Daniele Forsi)
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)

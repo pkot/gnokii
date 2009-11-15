@@ -302,8 +302,8 @@ int char_mblen(const char *src)
  * or -1 in case of error
  *
  * Converts a multibyte string to a wide char string.
- * Uses iconv() if available, else mbrtowc() if
- * available, else mbtowc().
+ * Uses iconv() if it is available and iconv_open() succeeds, else mbrtowc()
+ * if available, else mbtowc().
  */
 static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 {
@@ -322,19 +322,19 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 
 	cd = iconv_open("WCHAR_T", gn_char_get_encoding());
 	if (cd == (iconv_t)-1)
-		return -1;
+		goto fallback;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	if (nconv == (size_t)-1)
 		perror("char_mbtowc/iconv");
 	iconv_close(cd);
 
 	return (char*)dst == pout ? -1 : pin-src;
-#else
-#  ifdef HAVE_WCRTOMB
+fallback:
+#endif
+#ifdef HAVE_WCRTOMB
 	return mbrtowc(dst, src, maxlen, mbs);
-#  else
+#else
 	return mbtowc(dst, src, maxlen);
-#  endif
 #endif
 }
 
@@ -349,8 +349,8 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
  * or -1 in case of error
  *
  * Converts a wide char string to a multibyte string.
- * Uses iconv() if available, else wcrtomb() if
- * available, else wctomb().
+ * Uses iconv() if it is available and iconv_open() succeeds, else wcrtomb()
+ * if available, else wctomb().
  */
 static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 {
@@ -369,19 +369,19 @@ static int char_wctomb(char *dst, wchar_t src, MBSTATE *mbs)
 
 	cd = iconv_open(gn_char_get_encoding(), "WCHAR_T");
 	if (cd == (iconv_t)-1)
-		return -1;
+		goto fallback;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	if (nconv == (size_t)-1)
 		perror("char_wctomb/iconv");
 	iconv_close(cd);
 
 	return nconv == -1 ? -1 : pout-dst;
-#else
-    #ifdef HAVE_WCRTOMB
+fallback:
+#endif
+#ifdef HAVE_WCRTOMB
 	return wcrtomb(dst, src, mbs);
-    #else
+#else
 	return wctomb(dst, src);
-    #endif
 #endif
 }
 
