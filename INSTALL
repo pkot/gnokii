@@ -17,11 +17,9 @@ family (they are needed just for git compile):
  - gettext
  - intltool
 For building gnokii you will need development packages for the used
-libraries. They are usually marked with -dev suffix:
- - libbluetooth3
- - libbluetooth3-dev
- - libical0
- - libical-dev
+libraries. They are usually marked with -dev suffix, like:
+ - libbluetooth3 vs libbluetooth3-dev
+ - libical0 vs libical-dev
 Verify with your distribution what exactly do you need.
 
 Quickstart
@@ -41,7 +39,7 @@ Quickstart
     [ capabilities                                                          ]
     $ make
     # make install
-    $ mkdir -p .config/gnokii
+    $ mkdir -p ~/.config/gnokii
     $ cp Docs/sample/gnokiirc ~/.config/gnokii/config
     $ $EDITOR ~/.config/gnokii/config
     [ adjust config according to your setup and follow hints in the file    ]
@@ -66,6 +64,7 @@ libical support:	libical-0.24, you may want to use gnokii internal iCal
 			and todo entries into iCal files and reading such
 			files.
 libusb support:		libusb (for DKU2 cables support)
+libreadline support:    required by gnokii for --shell command support
 SIM readers support:    libpcsclite (to use a Smart Card reader instead of a phone)
 country name translation: iso-codes package (its presence is detected at runtime if
 			NLS is enabled so it can be installed at any time without
@@ -89,6 +88,7 @@ http://pcsclite.alioth.debian.org/                      libpcsclite
 http://pkg-isocodes.alioth.debian.org/			iso-codes (country name translation)
 http://www.mysql.com/					libmysqlclient
 http://www.postgresql.com/				libpq
+http://tiswww.case.edu/php/chet/readline/rltop.html	libreadline
 
 However all of the libraries should be shipped by any modern Linux (and not
 only) distribution.
@@ -229,3 +229,32 @@ text. vi, mcedit, kedit, joe or even emacs are good examples.
 
 Change the settings to fit your setup. The file should be self-explaining.
 Strings starting with `#' are comments (from `#' char till end of the line).
+
+Ubuntu hints
+============
+
+The hints most likely apply against any other Debian-based distribution and
+similiar steps need to be taken for any other distribution. The described
+steps were taken on fresh Ubuntu 9.10 installation.
+
+Grab build environment. It will install compiler, most important libraries
+like libc, make and so:
+
+    $ sudo apt-get install build-essential
+
+Get the most packages possible for gnokii compile:
+
+    $ sudo apt-get build-dep gnokii
+
+As of now build requirements are incomplete, hopefully will be fixed
+for the next version. For now you need to get some stuff manually:
+
+    $ sudo apt-get install flex libreadline6-dev
+
+If you want to play on git version you need to have git and additional
+tools:
+
+    $ sudo apt-get install git-core libtool automake autoconf intltool
+
+Now you should be able to proceed with instructions described in previous
+sections.
