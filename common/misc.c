@@ -129,6 +129,7 @@ static gn_phone_model models[] = {
 	{"2600",  "RH-59",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"2630",  "RM-298",	PM_DEFAULT },
 	{"2650",  "RH-53",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
+	{"2760",  "RM-258",	PM_DEFAULT }, /* Series 40 5th Edition */
 	{"3100",  "RH-19",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"3100b", "RH-50",	PM_DEFAULT },
 	{"3105",  "RH-48",	PM_OLD_DEFAULT },
