@@ -1771,6 +1771,16 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 			dprintf("DEBUG: copied: %d\n", copied);
 			break;
 		default:
+			start += copied;
+			if (ud[0].length - start >= max_sms_len) {
+				copied = max_sms_len;
+			} else {
+				copied = (ud[0].length - start) % (max_sms_len);
+			}
+			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
+			data->sms->user_data[0].type = ud[0].type;
+			data->sms->user_data[0].length = copied;
+			memcpy(data->sms->user_data[0].u.text, ud[0].u.text+start, copied);
 			switch (ud[0].type) {
 			case GN_SMS_DATA_Bitmap:
 				break;
