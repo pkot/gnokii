@@ -339,7 +339,8 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		if (error != GN_ERR_NONE)
 			return error;
 		sms.user_data[curpos].type = GN_SMS_DATA_Text;
-		if (!gn_char_def_alphabet(sms.user_data[curpos].u.text))
+		if ((sms.dcs.u.general.alphabet != GN_SMS_DCS_8bit)
+		    && !gn_char_def_alphabet(sms.user_data[curpos].u.text))
 			sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2;
 		sms.user_data[++curpos].type = GN_SMS_DATA_None;
 	}
