@@ -62,7 +62,7 @@ void security_usage(FILE *f)
 		));
 #ifdef SECURITY
 	fprintf(f, _(
-		     "          --entersecuritycode PIN|PIN2|PUK|PUK2|SEC (CMD...)\n"
+		     "          --entersecuritycode PIN|PIN2|PUK|PUK2|SEC [COMMAND]\n"
 		     "          --getsecuritycodestatus\n"
 		     "          --getsecuritycode\n"
 		     "          --changesecuritycode PIN|PIN2|PUK|PUK2\n"

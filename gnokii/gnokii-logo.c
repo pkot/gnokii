@@ -63,7 +63,7 @@ void logo_usage(FILE *f)
 		     "          --getlogo op [logofile [network_code]]\n"
 		     "          --getlogo startup [logofile [network_code]]\n"
 		     "          --getlogo caller [caller_group_number [logofile\n"
-		     "                 [network code]]]\n"
+		     "                 [network_code]]]\n"
 		     "          --getlogo {dealer|text}\n"
 		     "          --viewlogo logofile\n"
 		     ));
