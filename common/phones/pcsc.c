@@ -427,7 +427,7 @@ static gn_error get_phase(const char **phase)
 		case 1: *phase = "1"; break;
 		case 2: *phase = "2"; break;
 		case 3: *phase = "2+"; break;
-		default: dprintf("Unknown Phase Identification 0x%02d\n", IoStruct.pbRecvBuffer[0]);
+		default: dprintf("Unknown Phase Identification 0x%02x\n", IoStruct.pbRecvBuffer[0]);
 		}
 	}
 
