@@ -559,7 +559,7 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 		snprintf(data->manufacturer, GN_MANUFACTURER_MAX_LENGTH, "%s (%s)", gn_network_name_get(net_code), gn_country_name_get(mcc));
 	}
 
-	snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", "pcsc");
+	snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", "APDU");
 
 	/* read SIM "Phase Identification" */
 	/* ignore errors, set default value above */

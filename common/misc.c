@@ -324,7 +324,7 @@ static gn_phone_model models[] = {
 	{"N-Gage", "NEM-4",	PM_OLD_DEFAULT },
 	{"RinGo", "NHX-7",	PM_OLD_DEFAULT },
 	{"sx1",  "SX1",		PM_DEFAULT },
-	{"SIM/USIM", "pcsc",	0 },
+	{"SIM/USIM", "APDU",	0 },
 	{NULL,    NULL, 0 } /* keep last one as NULL */
 };
 
