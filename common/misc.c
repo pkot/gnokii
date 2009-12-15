@@ -213,6 +213,7 @@ static gn_phone_model models[] = {
 	{"6080",  "NME-2",	PM_OLD_DEFAULT },
 	{"6081",  "NME-2A",	PM_OLD_DEFAULT },
 	{"6081",  "NME-2E",	PM_OLD_DEFAULT },
+	{"6085",  "RM-260",     PM_DEFAULT },
 	{"6090",  "NME-3",	PM_OLD_DEFAULT },
 	{"6100",  "NPL-2",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6108",  "RH-4",	PM_OLD_DEFAULT },
