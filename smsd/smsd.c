@@ -433,7 +433,7 @@ static void ReadSMS (gpointer d, gpointer userData)
   PhoneEvent *e;
   gint error;
 
-  if (data->type == GN_SMS_MT_Deliver || data->type == GN_SMS_MT_DeliveryReport)
+  if (data->type == GN_SMS_MT_Deliver || data->type == GN_SMS_MT_StatusReport)
   {
     gn_log_xdebug ("%d. %s   ", data->number, data->remote.number);
     gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,

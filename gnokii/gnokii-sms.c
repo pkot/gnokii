@@ -752,7 +752,7 @@ parsefile:
 			message_text = NULL;
 			fprintf(stdout, _("%d. %s (%s)\n"), message.number, gn_sms_message_type2str(message.type), gn_sms_message_status2str(message.status));
 			switch (message.type) {
-			case GN_SMS_MT_DeliveryReport:
+			case GN_SMS_MT_StatusReport:
 				fprintf(stdout, _("Sending date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.smsc_time.day, message.smsc_time.month, message.smsc_time.year, \
 					message.smsc_time.hour, message.smsc_time.minute, message.smsc_time.second);

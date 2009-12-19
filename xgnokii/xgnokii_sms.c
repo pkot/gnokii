@@ -221,7 +221,7 @@ static int IsValidSMSforFolder(gpointer d, gpointer userData)
 			return 1;
 	} else {
 		if ((data->type == GN_SMS_MT_Deliver && !SMS.currentBox) ||
-		    (data->type == GN_SMS_MT_DeliveryReport && !SMS.currentBox) ||
+		    (data->type == GN_SMS_MT_StatusReport && !SMS.currentBox) ||
 		    (data->type == GN_SMS_MT_Submit && SMS.currentBox))
 			return 1;
 	}
@@ -296,7 +296,7 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		*/
 		gchar *row[4];
 		switch (data->type) {
-		case GN_SMS_MT_DeliveryReport:
+		case GN_SMS_MT_StatusReport:
 			switch (data->status) {
 			case GN_SMS_Read:
 				row[0] = g_strdup(_("read report"));

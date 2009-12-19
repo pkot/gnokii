@@ -69,6 +69,15 @@
                                                       (Jari Turkia)
     o MS Visual Studio has setenv()                   (Jari Turkia)
     o rename win32 dir to Windows (it's also win64)     (Paweł Kot)
+ * nk6100 driver updates
+    o use GN_SMS_MT_StatusReport to indicate delivery notifications
+                                                    (Daniele Forsi)
+ * nk6510 driver updates
+    o use GN_SMS_MT_StatusReport to indicate delivery notifications
+                                                    (Daniele Forsi)
+ * nk7110 driver updates
+    o use GN_SMS_MT_StatusReport to indicate delivery notifications
+                                                    (Daniele Forsi)
 
 0.6.28
 ======

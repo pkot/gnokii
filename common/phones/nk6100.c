@@ -1724,10 +1724,10 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 
 		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
 
-#define	getdata(d,dr,s)	(message[(data->raw_sms->type == GN_SMS_MT_Deliver) ? (d) : ((data->raw_sms->type == GN_SMS_MT_DeliveryReport) ? (dr) : (s))])
+#define	getdata(d,dr,s)	(message[(data->raw_sms->type == GN_SMS_MT_Deliver) ? (d) : ((data->raw_sms->type == GN_SMS_MT_StatusReport) ? (dr) : (s))])
 		switch (message[7]) {
 		case 0x00: data->raw_sms->type	= GN_SMS_MT_Deliver; break;
-		case 0x01: data->raw_sms->type	= GN_SMS_MT_DeliveryReport; break;
+		case 0x01: data->raw_sms->type	= GN_SMS_MT_StatusReport; break;
 		case 0x02: data->raw_sms->type	= GN_SMS_MT_Submit; break;
 		default: return GN_ERR_UNHANDLEDFRAME;
 		}
@@ -1743,7 +1743,7 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 			data->raw_sms->user_data_length -= message[getdata(24, 23, 25)] + 1;
 		memcpy(data->raw_sms->user_data, &getdata(43, 22, 44), data->raw_sms->length);
 
-		if (data->raw_sms->type == GN_SMS_MT_DeliveryReport) {
+		if (data->raw_sms->type == GN_SMS_MT_StatusReport) {
 			data->raw_sms->reply_via_same_smsc = message[11];
 			memcpy(data->raw_sms->time, message + 42, 7);
 			data->raw_sms->report_status = message[22];

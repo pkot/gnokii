@@ -634,7 +634,7 @@ static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 	dprintf("\tSMS center number: %s\n", sms->smsc.number);
 
 	/* Delivery time */
-	if (sms->type == GN_SMS_MT_DeliveryReport) {
+	if (sms->type == GN_SMS_MT_StatusReport) {
 		sms_timestamp_unpack(rawsms->time, &(sms->time));
 		dprintf("\tDelivery date: %s\n", sms_timestamp_print(rawsms->time));
 	}

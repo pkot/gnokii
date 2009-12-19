@@ -818,9 +818,9 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 		block = message + 16;
 		memcpy(data->raw_sms->smsc_time, message + 6, 7);
 		break;
-	case 0x01: /* delivery report */
-		dprintf("Type: Delivery Report\n");
-		data->raw_sms->type = GN_SMS_MT_DeliveryReport;
+	case 0x01: /* status report */
+		dprintf("Type: Status Report\n");
+		data->raw_sms->type = GN_SMS_MT_StatusReport;
 		dprintf("Reference id: %d\n", data->raw_sms->reference);
 		block = message + 20;
 		memcpy(data->raw_sms->smsc_time, message + 6, 7);

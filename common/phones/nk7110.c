@@ -1011,7 +1011,7 @@ static inline unsigned int get_data(gn_sms_message_type t, unsigned int a,
 	switch (t) {
 	case GN_SMS_MT_Deliver:        return a;
 	case GN_SMS_MT_Submit:         return b;
-	case GN_SMS_MT_DeliveryReport: return c;
+	case GN_SMS_MT_StatusReport:   return c;
 	case GN_SMS_MT_Picture:        return d;
 	default:                       return 0;
 	}
@@ -1088,7 +1088,7 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 			memcpy(data->raw_sms->message_center, message + 9, 12);
 			memcpy(data->raw_sms->remote_number, message + get_data(T, 25, 26, 24, 22), 12);
 		}
-		if (T == GN_SMS_MT_DeliveryReport)
+		if (T == GN_SMS_MT_StatusReport)
 			memcpy(data->raw_sms->time, message + 43, 7);
 
 		data->raw_sms->dcs = message[23];
