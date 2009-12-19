@@ -261,6 +261,7 @@ static gn_phone_model models[] = {
 	{"6610i", "RM-37",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6650",  "NHM-1",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6680",  "RM-36",	PM_DEFAULT | PM_NETMONITOR },
+	{"6700 classic",  "RM-470",	PM_DEFAULT },  /* Series 40 6th Edition */
 	{"6800",  "NHL-6",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6800",  "NSB-9",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6810",  "RM-2",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },

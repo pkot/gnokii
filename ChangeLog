@@ -39,9 +39,9 @@
  * libgnokii updates
     o add more debug information to encoding functions  (Paweł Kot)
     o add ids for Nokia 2760, Nokia 5130 XpressMusic, Nokia 5310
-      XpressMusic and Nokia 6085 to misc.c (use model=series40 for
-      all)         (Jaakko Saarinen, Gustavo Delfino, pier_andreit,
-                                                   Peter Whittaker)
+      XpressMusic, Nokia 6700 classic and Nokia 6085 to misc.c (use
+      model=series40 for all)    (Jaakko Saarinen, Gustavo Delfino,
+                    pier_andreit, Jacopo De Simoi, Peter Whittaker)
     o add TA and CB memory types to gn_str2memory_type() and to
       gn_memory_type2str(); they were only in
       gn_memory_type_print()                        (Daniele Forsi)
