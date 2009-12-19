@@ -93,7 +93,7 @@ static gn_phone_model models[] = {
 	{"1100",  "RH-18",	PM_OLD_DEFAULT },
 	{"1100",  "RH-38",	PM_OLD_DEFAULT },
 	{"1100b", "RH-36",	PM_OLD_DEFAULT },
-	{"1209",  "RH-105",	PM_OLD_DEFAULT },	/* phone supports a very limited command set */
+	{"1209",  "RH-105",	PM_OLD_DEFAULT }, /* Series 30, phone supports a very limited command set */
 	{"1220",  "NKC-1",	PM_OLD_DEFAULT },
 	{"1260",  "NKW-1",	PM_OLD_DEFAULT },
 	{"1261",  "NKW-1C",	PM_OLD_DEFAULT },
@@ -198,7 +198,7 @@ static gn_phone_model models[] = {
 	{"5185",  "NSD-1A",	PM_OLD_DEFAULT },
 	{"5190",  "NSB-1",	PM_OLD_DEFAULT | PM_NETMONITOR | PM_DATA | PM_AUTHENTICATION },
 	{"5210",  "NSM-5",	PM_DEFAULT },
-	{"5300 XpressMusic",  "RM-146",	PM_DEFAULT },
+	{"5300 XpressMusic",  "RM-146",	PM_DEFAULT }, /* Series 40 3rd Edition */
 	{"5310 XpressMusic",  "RM-303",	PM_DEFAULT },
 	{"5510",  "NPM-5",	PM_OLD_DEFAULT },
 	{"6010",  "NPM-10",	PM_OLD_DEFAULT },
