@@ -359,6 +359,23 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		STORE("TEL;TYPE=PREF,VOICE:", entry->number);
 		STORE("TEL;TYPE=PREF:", entry->number);
 
+		if (BEGINS("ADR;TYPE=HOME,PREF:")) {
+			/* 64 is the value of GN_PHONEBOOK_ADDRESS_MAX_LENGTH */
+			/* FIXME sscanf() doesn't accept empty fields */
+			if (0 < sscanf(buf + 19, "%64[^;];%64[^;];%64[^;];%64[^;];%64[^;];%64[^;];%64[^;]\n",
+				entry->address.post_office_box,
+				entry->address.extended_address,
+				entry->address.street,
+				entry->address.city,
+				entry->address.state_province,
+				entry->address.zipcode,
+				entry->address.country
+			)) {
+				entry->address.has_address = 1;
+			}
+			continue;
+		}
+
 		STORESUB("URL:", GN_PHONEBOOK_ENTRY_URL);
 		STORESUB("EMAIL;TYPE=INTERNET:", GN_PHONEBOOK_ENTRY_Email);
 		STORESUB("ADR;TYPE=HOME:", GN_PHONEBOOK_ENTRY_Postal);
