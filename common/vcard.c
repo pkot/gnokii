@@ -345,6 +345,8 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 			buf[--line_len] = '\0';
 
 		if (BEGINS("N:")) {
+			/* 64 is the value of GN_PHONEBOOK_PERSON_MAX_LENGTH */
+			/* FIXME sscanf() doesn't accept empty fields */
 			if (0 < sscanf(buf +2 , "%64[^;];%64[^;];%64[^;];%64[^;];%64[^;]\n",
 				entry->person.family_name,
 				entry->person.given_name,
@@ -354,6 +356,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 			)) {
 				entry->person.has_person = 1;
 			}
+			continue;
 		}
 		STORE("FN:", entry->name);
 		STORE("TEL;TYPE=PREF,VOICE:", entry->number);
