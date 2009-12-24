@@ -410,6 +410,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		if (BEGINS("END:VCARD"))
 			break;
 	}
+	free (v);
 	gnokii_strfreev(lines);
 
 	return 0;
