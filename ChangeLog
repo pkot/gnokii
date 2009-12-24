@@ -78,6 +78,9 @@
  * nk7110 driver updates
     o use GN_SMS_MT_StatusReport to indicate delivery notifications
                                                     (Daniele Forsi)
+ * smsd updates
+    o add quoting around phone number to mysql code that handles
+      multipart messages                          (Paulius Bulotas)
 
 0.6.28
 ======

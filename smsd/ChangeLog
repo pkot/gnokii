@@ -1,3 +1,8 @@
+* Thu 24 Dec 2009 Daniele Forsi
+- Add quoting around phone number to mysql code that handles multipart
+  messages. Patch by Paulius Bulotas.
+
+
 * Sun Aug 23 2009 Paweł Kot
 - Enable sending long messages with pq module.
 

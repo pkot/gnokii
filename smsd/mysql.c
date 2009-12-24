@@ -236,7 +236,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
       }
       g_free(tmpText);
       g_string_printf(buf, "UPDATE multipartinbox SET processed = 1 \
-                            WHERE number=%s AND refnum=%i AND maxnum=%i",
+                            WHERE number='%s' AND refnum=%i AND maxnum=%i",
                       data->remote.number,
                       data->udh.udh[0].u.concatenated_short_message.reference_number,
                       data->udh.udh[0].u.concatenated_short_message.maximum_number);
