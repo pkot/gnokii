@@ -341,6 +341,7 @@ GNOKII_API gn_error gn_mms_get(gn_data *data, struct gn_statemachine *state);
 GNOKII_API gn_error gn_mms_delete(gn_data *data, struct gn_statemachine *state);
 GNOKII_API gn_error gn_mms_free(gn_mms *mms);
 GNOKII_API gn_error gn_mms_alloc(gn_mms **mms);
+GNOKII_API gn_error gn_mms_convert(const gn_mms *source_mms, gn_mms *dest_mms);
 
 /* Call service */
 GNOKII_API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state);
