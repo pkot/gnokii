@@ -56,8 +56,8 @@ void at_samsung_init(char* foundmodel, char* setupmodel, struct gn_statemachine 
 	*/
 
 	if (foundmodel && !strncasecmp("SGH-L760", foundmodel, 8))
-        	AT_DRVINST(state)->ucs2_as_utf8 = 1;
-	
+		AT_DRVINST(state)->ucs2_as_utf8 = 1;
+
 	/* phone lacks many usefull commands :( */
 	at_insert_send_function(GN_OP_GetBatteryLevel, Unsupported, state);
 	at_insert_send_function(GN_OP_GetPowersource, Unsupported, state);
