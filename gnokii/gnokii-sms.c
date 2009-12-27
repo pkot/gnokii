@@ -763,7 +763,7 @@ parsefile:
 						fprintf(stdout,_("%02d00"), message.smsc_time.timezone);
 				}
 				fprintf(stdout, "\n");
-				fprintf(stdout, _("Response date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
+				fprintf(stdout, _("Delivery date/time: %02d/%02d/%04d %02d:%02d:%02d "), \
 					message.time.day, message.time.month, message.time.year, \
 					message.time.hour, message.time.minute, message.time.second);
 				if (message.smsc_time.timezone) {
@@ -773,7 +773,7 @@ parsefile:
 						fprintf(stdout,_("%02d00"), message.time.timezone);
 				}
 				fprintf(stdout, "\n");
-				fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
+				fprintf(stdout, _("Recipient: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
 				fprintf(stdout, _("Text:\n"));
 				message_text = message.user_data[0].u.text;
 				break;
@@ -809,7 +809,7 @@ parsefile:
 				switch (message.type) {
 				case GN_SMS_MT_Submit:
 				case GN_SMS_MT_SubmitSent:
-					fprintf(stdout, _("Receiver: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
+					fprintf(stdout, _("Recipient: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
 					break;
 				default:
 					fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
