@@ -100,6 +100,7 @@ extern char *char_bcd_number_get(u8 *number);
 extern int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type);
 
 int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen);
+int ucs2_decode(char *outstring, size_t outlen, const char *instring, size_t inlen);
 
 /* Ringtones */
 int vcal_time_get(gn_timestamp *dt, char *time);

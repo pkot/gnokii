@@ -1311,6 +1311,31 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 #endif
 }
 
+int ucs2_decode(char *outstring, size_t outlen, const char *instring, size_t inlen)
+{
+	size_t nconv;
+
+#if defined(HAVE_ICONV)
+	ICONV_CONST char *pin;
+	char *pout;
+	iconv_t cd;
+
+	pin = (char *)instring;
+	pout = outstring;
+
+	cd = iconv_open(gn_char_get_encoding(), "UCS-2");
+	if (cd == (iconv_t)-1)
+		return -1;
+	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
+	if (nconv == (size_t)-1)
+		perror("ucs2_decode/iconv");
+	iconv_close(cd);
+	return (nconv < 0) ?  -1 : (char *)pout - outstring;
+#else
+	return 0;
+#endif
+}
+
 
 /* BASE64 functions */
 
