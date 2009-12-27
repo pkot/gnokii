@@ -330,7 +330,7 @@ static char *extpb_scan_entry(at_driver_instance *drvinst, char *buffer, gn_phon
 		ix = entry->subentries_count++;
 		entry->subentries[ix].entry_type = type;
 		entry->subentries[ix].number_type = number_type;
-		at_decode(drvinst->charset, entry->subentries[ix].data.number, pos, len);
+		at_decode(drvinst->charset, entry->subentries[ix].data.number, pos, len, drvinst->ucs2_as_utf8);
 		if (entry->number[0] == 0 && type == GN_PHONEBOOK_ENTRY_Number)
 			snprintf(entry->number, sizeof(entry->number), "%s", entry->subentries[ix].data.number);
 	}
@@ -396,7 +396,7 @@ size_t at_encode(at_charset charset, char *dst, size_t dst_len, const char *src,
 	return ret+1;
 }
 
-void at_decode(int charset, char *dst, char *src, int len)
+void at_decode(int charset, char *dst, char *src, int len, int ucs2_as_utf8)
 {
 	switch (charset) {
 	/* char_*_decode() functions null terminate the strings */
@@ -407,7 +407,11 @@ void at_decode(int charset, char *dst, char *src, int len)
 		char_hex_decode(dst, src, len);
 		break;
 	case AT_CHAR_UCS2:
-		char_ucs2_decode(dst, src, len);
+		if (ucs2_as_utf8)
+			/* This function is defined in atsam.c */
+			decode_ucs2_as_utf8(dst, src, len);
+		else
+			char_ucs2_decode(dst, src, len);
 		break;
 	default:
 		memcpy(dst, src, len);
@@ -1868,7 +1872,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 			dprintf("NUMBER: %s\n", pos);
 			pos = strip_quotes(pos);
 			if (drvinst->encode_number)
-				at_decode(drvinst->charset, data->phonebook_entry->number, pos, strlen(pos));
+				at_decode(drvinst->charset, data->phonebook_entry->number, pos, strlen(pos), drvinst->ucs2_as_utf8);
 			else
 				snprintf(data->phonebook_entry->number, sizeof(data->phonebook_entry->number), "%s", pos);
 		}
@@ -1877,7 +1881,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 		if (pos) {
 			dprintf("NAME: %s\n", pos);
 			pos = strip_quotes(pos);
-			at_decode(drvinst->charset, data->phonebook_entry->name, pos, strlen(pos));
+			at_decode(drvinst->charset, data->phonebook_entry->name, pos, strlen(pos), drvinst->ucs2_as_utf8);
 		}
 		/* store date/time (usually sent with DC, MC, RC entries) */
 		pos = part[4];
@@ -1889,7 +1893,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 				pos++;
 			if (drvinst->encode_number) {
 				date_buf = calloc(strlen(pos) + 1, sizeof(char));
-				at_decode(drvinst->charset, date_buf, pos, strlen(pos));
+				at_decode(drvinst->charset, date_buf, pos, strlen(pos), drvinst->ucs2_as_utf8);
 				pos = date_buf;
 				dprintf("DATE: %s\n", pos);
 			}
@@ -2981,7 +2985,7 @@ static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int 
 			break;
 		case 0: /* network operator name given */
 			pos = strip_quotes(strings[2]);
-			at_decode(drvinst->charset, tmp, pos, strlen(pos));
+			at_decode(drvinst->charset, tmp, pos, strlen(pos), drvinst->ucs2_as_utf8);
 			snprintf(data->network_info->network_code, sizeof(data->network_info->network_code), "%s", gn_network_code_get(tmp));
 			break;
 		case 2: /* network operator code given */
@@ -3226,6 +3230,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	drvinst->encode_number = 0;
 	drvinst->lac_swapped = 0;
 	drvinst->extended_phonebook = 0;
+	drvinst->ucs2_as_utf8 = 0;
 
 	drvinst->if_pos = 0;
 	for (i = 0; i < GN_OP_AT_Max; i++) {

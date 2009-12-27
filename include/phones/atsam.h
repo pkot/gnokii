@@ -36,5 +36,6 @@
 #include "gnokii-internal.h"
 
 void at_samsung_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state);
+size_t decode_ucs2_as_utf8(char *dst, const char *src, int len);
 
 #endif

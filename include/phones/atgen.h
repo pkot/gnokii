@@ -161,6 +161,10 @@ typedef struct {
 	 */
 	int extended_phonebook;
 
+	/*
+	 * This is for weird encoding found in some Samsung phones.
+	 */
+	int ucs2_as_utf8;
 } at_driver_instance;
 
 #define AT_DRVINST(s) (*((at_driver_instance **)(&(s)->driver.driver_instance)))
@@ -183,7 +187,7 @@ char *skipcrlf(unsigned char *str);
 char *findcrlf(unsigned char *str, int test, int maxlength);
 char *strip_quotes(char *s);
 
-void at_decode(int charset, char *dst, char *src, int len);
+void at_decode(int charset, char *dst, char *src, int len, int ucs2_as_utf8);
 size_t at_encode(at_charset charset, char *dst, size_t dst_len, const char *src, size_t len);
 
 extern char *memorynames[];

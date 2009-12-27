@@ -28,6 +28,8 @@
     o before getting folder status set number of elements in there
       to 0 to avoid confusion on incorrect error handling
                                                         (Paweł Kot)
+    o use GN_SMS_MT_StatusReport to indicate delivery notifications
+                                                    (Daniele Forsi)
  * documentation updates
     o change defaults in sample gnokiirc files for *nix and Windows
       so that it's more likely to work for new users    (Paweł Kot)
@@ -72,15 +74,14 @@
  * nk6100 driver updates
     o use GN_SMS_MT_StatusReport to indicate delivery notifications
                                                     (Daniele Forsi)
- * nk6510 driver updates
-    o use GN_SMS_MT_StatusReport to indicate delivery notifications
-                                                    (Daniele Forsi)
  * nk7110 driver updates
     o use GN_SMS_MT_StatusReport to indicate delivery notifications
                                                     (Daniele Forsi)
  * smsd updates
     o add quoting around phone number to mysql code that handles
       multipart messages                          (Paulius Bulotas)
+ * at driver updates
+    o support Samsung SMS encoding                      (Paweł Kot)
 
 0.6.28
 ======
