@@ -64,7 +64,7 @@ ConfigEntry config[] = {
 
 static void GetDefaultValues()
 {
-	const gchar *homedir;
+	const gchar *datadir;
 
 	xgnokiiConfig.user.name = g_strdup("");
 	xgnokiiConfig.user.title = g_strdup("");
@@ -73,9 +73,10 @@ static void GetDefaultValues()
 	xgnokiiConfig.user.fax = g_strdup("");
 	xgnokiiConfig.user.email = g_strdup("");
 	xgnokiiConfig.user.address = g_strdup("");
-	if ((homedir = g_get_home_dir()) == NULL)
-		homedir = "";
-	xgnokiiConfig.mailbox = g_strdup_printf("%s/Mail/smsbox", homedir);
+	datadir = g_strconcat(g_get_user_data_dir(), "/gnokii/xgnokii/Mail", NULL);
+	if (!g_file_test(datadir, G_FILE_TEST_IS_DIR))
+		g_mkdir_with_parents(datadir, 0700);
+	xgnokiiConfig.mailbox = g_strdup_printf("%s/smsbox", datadir);
 	xgnokiiConfig.maxSIMLen = g_strdup("14");
 	xgnokiiConfig.maxPhoneLen = g_strdup("16");
 }
@@ -85,7 +86,7 @@ void GUI_ReadXConfig()
 {
 	FILE *file;
 	gchar *line;
-	const gchar *homedir;
+	const gchar *confdir;
 	gchar *rcfile;
 	gchar *current;
 	register gint len;
@@ -94,20 +95,15 @@ void GUI_ReadXConfig()
 	GetDefaultValues();
 
 #ifdef WIN32
-/*  homedir = getenv("HOMEDRIVE");
-  g_strconcat(homedir, getenv("HOMEPATH"), NULL); */
-	homedir = g_get_home_dir();
-	rcfile = g_strconcat(homedir, "\\_xgnokiirc", NULL);
+	confdir = g_strconcat(getenv("APPDATA"), "\\gnokii", NULL);
+	if (!g_file_test(confdir, G_FILE_TEST_IS_DIR))
+		g_mkdir_with_parents(confdir, 0700);
+	rcfile = g_strconcat(config, "\\xgnokii-config", NULL);
 #else
-	if ((homedir = g_get_home_dir()) == NULL) {
-		g_print(_("WARNING: Can't find HOME environment variable!\n"));
-		return;
-	}
-
-	if ((rcfile = g_strconcat(homedir, "/.xgnokiirc", NULL)) == NULL) {
-		g_print(_("WARNING: Can't allocate memory for config reading!\n"));
-		return;
-	}
+	confdir = g_strconcat(g_get_user_config_dir(), "/gnokii", NULL);
+	if (!g_file_test(confdir, G_FILE_TEST_IS_DIR))
+		g_mkdir_with_parents(confdir, 0700);
+	rcfile = g_strconcat(confdir, "/xgnokii-config", NULL);
 #endif
 
 	if ((file = fopen(rcfile, "r")) == NULL) {
@@ -195,23 +191,20 @@ gint GUI_SaveXConfig()
 {
 	FILE *file;
 	gchar *line;
-	const gchar *homedir;
+	const gchar *confdir;
 	gchar *rcfile;
 	register gint i;
 
 #ifdef WIN32
-	homedir = g_get_home_dir();
-	rcfile = g_strconcat(homedir, "\\_xgnokiirc", NULL);
+	confdir = g_strconcat(getenv("APPDATA"), "\\gnokii", NULL);
+	if (!g_file_test(confdir, G_FILE_TEST_IS_DIR))
+		g_mkdir_with_parents(confdir, 0700);
+	rcfile = g_strconcat(config, "\\xgnokii-config", NULL);
 #else
-	if ((homedir = g_get_home_dir()) == NULL) {
-		g_print(_("ERROR: Can't find HOME environment variable!\n"));
-		return(1);
-	}
-
-	if ((rcfile = g_strconcat(homedir, "/.xgnokiirc", NULL)) == NULL) {
-		g_print(_("ERROR: Can't allocate memory for config writing!\n"));
-		return(2);
-	}
+	confdir = g_strconcat(g_get_user_config_dir(), "/gnokii", NULL);
+	if (!g_file_test(confdir, G_FILE_TEST_IS_DIR))
+		g_mkdir_with_parents(confdir, 0700);
+	rcfile = g_strconcat(confdir, "/xgnokii-config", NULL);
 #endif
 
 	if ((file = fopen(rcfile, "w")) == NULL) {
