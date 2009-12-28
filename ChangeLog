@@ -82,6 +82,8 @@
       multipart messages                          (Paulius Bulotas)
  * at driver updates
     o support Samsung SMS encoding                      (Paweł Kot)
+ * pcsc driver updates
+    o show name of virtual operator in --identify   (Daniele Forsi)
 
 0.6.28
 ======

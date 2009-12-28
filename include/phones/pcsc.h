@@ -89,6 +89,7 @@ subclause : command
 /* misc defines */
 #define GN_PCSC_ICCID_MAX_LENGTH 21
 #define GN_PCSC_IMSI_MAX_LENGTH 16
+#define GN_PCSC_SPN_MAX_LENGTH 17
 
 /* some file identifiers (full list is in subclause 10.7) */
 
@@ -114,6 +115,8 @@ subclause : command
 #define GN_PCSC_FILE_EF_SMSP 0x6f42
 /* Last Numbers Dialed */
 #define GN_PCSC_FILE_EF_LND 0x6F44
+/* Service Provider Name */
+#define GN_PCSC_FILE_EF_SPN 0x6F46
 /* Service Dialing Numbers */
 #define GN_PCSC_FILE_EF_SDN 0x6F49
 /* Location Information */
