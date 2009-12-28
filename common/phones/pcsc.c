@@ -563,9 +563,6 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 		dprintf("ICCID = %s\n", iccid);
 	}
 
-	/* read Service Provider Name */
-	(void) get_spn(spn);
-
 	/* read IMSI */
 	error = get_imsi(imsi);
 	if (error == GN_ERR_NONE) {
@@ -581,6 +578,8 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 		snprintf(net_code, sizeof(net_code), "%s %s", mcc, mnc);
 		/* get operator and country names as strings from libgnokii */
 		network_name = gn_network_name_get(net_code);
+		/* read Service Provider Name */
+		(void) get_spn(spn);
 		if (*spn && strcmp(spn, network_name))
 			snprintf(data->manufacturer, GN_MANUFACTURER_MAX_LENGTH, "%s, %s (%s)", spn, network_name, gn_country_name_get(mcc));
 		else
