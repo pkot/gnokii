@@ -966,7 +966,7 @@ static char **get_locations(int *retval)
 	char **config_file_locations;
 	char *xdg_config_home, *xdg_config_dirs, *home; /* env variables */
 	char **xdg_config_dir;
-	char *aux;
+	char *aux, *dirs;
 	int j, i = 0;
 	char path[MAX_PATH_LEN];
 	int size = 8; /* default size for config_file_locations */
@@ -992,6 +992,7 @@ static char **get_locations(int *retval)
 	else
 		xdg_config_dirs = strdup(XDG_CONFIG_DIRS);
 
+	dirs = xdg_config_dirs;
 	/* split out xdg_config_dirs into tokens separated by ':' */
 	xdg_config_dir = calloc(xcd_size, sizeof(char *));
 	while ((aux = strsep(&xdg_config_dirs, ":")) != NULL) {
@@ -1001,7 +1002,7 @@ static char **get_locations(int *retval)
 			xdg_config_dir = realloc(xdg_config_dir, xcd_size);
 		}
 	}
-	free(xdg_config_dirs);
+	free(dirs);
 
 	/* 1. $XDG_CONFIG_HOME/gnokii/config ($HOME/.config) */
 	snprintf(path, MAX_PATH_LEN, "%s/gnokii/config", xdg_config_home);
