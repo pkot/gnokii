@@ -287,8 +287,10 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 		return fake_identify(data, state);
 	case GN_OP_Terminate:
 		return GN_ERR_NONE;
+	case GN_OP_SaveSMS:
+		return at_sms_write(data, state, "CMGW");
 	case GN_OP_SendSMS:
-		return at_sms_write(data, state, "???");
+		return at_sms_write(data, state, "CMGS");
 	case GN_OP_GetSMS:
 		return at_sms_get(data, state);
 	case GN_OP_GetSMSCenter:
