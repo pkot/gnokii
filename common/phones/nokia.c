@@ -319,7 +319,7 @@ int pnok_fbus_sms_encode(unsigned char *req, gn_data *data, struct gn_statemachi
 	if (data->raw_sms->type != GN_SMS_MT_Deliver)
 		memcpy(req + pos, data->raw_sms->validity, 7);
 	else
-		memcpy(req + pos, data->raw_sms->smsc_time, 7);  /* FIXME: Real date instead of hardcoded */
+		memcpy(req + pos, data->raw_sms->smsc_time, 7);
 	pos += 7;
 
 	memcpy(req + pos, data->raw_sms->user_data, data->raw_sms->user_data_length);
