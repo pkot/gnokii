@@ -927,7 +927,7 @@ static char **get_locations(int *retval)
 	snprintf(path, MAX_PATH_LEN, "%s\\gnokiirc", systemroot);
 	config_file_locations[2] = strdup(path);
 
-	return retval;
+	return config_file_locations;
 }
 #else /* WIN32 */
 #  ifdef __MACH__
@@ -955,9 +955,9 @@ static char **get_locations(int *retval)
 	snprintf(path, MAX_PATH_LEN, "/etc/gnokiirc");
 	config_file_locations[2] = strdup(path);
 
-	return retval;
+	return config_file_locations;
 }
-#  endif /* __darwin__ */
+#  else /* !__MACH__ */
 /* freedesktop.org compliancy: http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html */
 #define XDG_CONFIG_HOME	"/.config"	/* $HOME/.config */
 #define XDG_CONFIG_DIRS "/etc/xdg"
@@ -1033,7 +1033,8 @@ static char **get_locations(int *retval)
 
 	return config_file_locations;
 }
-#endif /* !WIN32 && !__darwin__ */
+#  endif /* !__MACH__ */
+#endif /* !WIN32 */
 
 GNOKII_API gn_error gn_cfg_read_default()
 {
