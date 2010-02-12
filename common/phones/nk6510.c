@@ -137,6 +137,7 @@ static gn_sms_message_status GetMessageStatus_S40_30(const char *filename)
 
 	switch (filename[26]) {
 	case '1':
+	case '3': /* SMS sending failed */
 	case '6':
 		return GN_SMS_Unsent;
 	case '2':
