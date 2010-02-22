@@ -621,7 +621,7 @@ static int gn_ical2todo_real(icalcomponent *comp, gn_todo *ctodo, int id)
 
 		/* summary goes into text */
 		/* TODO: UTF8 --> ascii */
-		snprintf(ctodo->text, GN_CALNOTE_MAX_LENGTH-1, "%s", icalcomponent_get_summary(compresult));
+		snprintf(ctodo->text, GN_TODO_MAX_LENGTH-1, "%s", icalcomponent_get_summary(compresult));
 
 		/* priority */
 		ctodo->priority = icalproperty_get_priority((const icalproperty *)priority);
