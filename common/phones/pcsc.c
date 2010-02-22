@@ -434,6 +434,26 @@ static gn_error get_phase(const char **phase)
 	return error;
 }
 
+/* read SPN and convert it into an ASCII string in the provided buffer (at least GN_PCSC_SPN_MAX_LENGTH bytes long)
+according to subclause 10.3.11 and Annex B
+*/
+static gn_error get_spn(char *result)
+{
+	LONG ret;
+	BYTE *buf;
+	gn_error error;
+
+	ret = pcsc_read_file(&IoStruct, GN_PCSC_FILE_DF_GSM, GN_PCSC_FILE_EF_SPN);
+	error = get_gn_error(&IoStruct, ret);
+	if (error != GN_ERR_NONE) return error;
+
+	/* Skip first byte (it's a bit field) */
+	buf = IoStruct.pbRecvBuffer + 1;
+	alpha_tag_decode(result, buf, GN_PCSC_SPN_MAX_LENGTH);
+
+	return GN_ERR_NONE;
+}
+
 /* functions for libgnokii stuff */
 
 static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
@@ -533,6 +553,7 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 	char imsi[GN_PCSC_IMSI_MAX_LENGTH], iccid[GN_PCSC_ICCID_MAX_LENGTH];
+	char spn[GN_PCSC_SPN_MAX_LENGTH] = "";
 	const char *phase = "??";
 
 	/* read ICCID */
@@ -545,7 +566,7 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 	/* read IMSI */
 	error = get_imsi(imsi);
 	if (error == GN_ERR_NONE) {
-		char mcc[4], mnc[4], net_code[8];
+		char mcc[4], mnc[4], net_code[8], *network_name;
 		int mnc_len = 2;
 
 		/* extract MCC and MNC */
@@ -556,7 +577,13 @@ static gn_error Identify(gn_data *data, struct gn_statemachine *state)
 		dprintf("IMSI = %s Home PLMN = MCC %s MNC %s\n", imsi, mcc, mnc);
 		snprintf(net_code, sizeof(net_code), "%s %s", mcc, mnc);
 		/* get operator and country names as strings from libgnokii */
-		snprintf(data->manufacturer, GN_MANUFACTURER_MAX_LENGTH, "%s (%s)", gn_network_name_get(net_code), gn_country_name_get(mcc));
+		network_name = gn_network_name_get(net_code);
+		/* read Service Provider Name */
+		(void) get_spn(spn);
+		if (*spn && strcmp(spn, network_name))
+			snprintf(data->manufacturer, GN_MANUFACTURER_MAX_LENGTH, "%s, %s (%s)", spn, network_name, gn_country_name_get(mcc));
+		else
+			snprintf(data->manufacturer, GN_MANUFACTURER_MAX_LENGTH, "%s (%s)", network_name, gn_country_name_get(mcc));
 	}
 
 	snprintf(data->model, GN_MODEL_MAX_LENGTH, "%s", "APDU");

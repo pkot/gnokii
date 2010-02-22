@@ -836,7 +836,7 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		dprintf("SMS-DELIVER found\n");
 		/* TP-MMS  TP-More-Messages-to-Send */
 		rawsms->more_messages       = pdu[offset] & 0x04;
-		// bits 3 and 4 of the first octet unused;
+		/* Bits 3 and 4 of the first octet are unused */
 		/* TP-SRI  TP-Status-Report-Indication */
 		rawsms->report_status       = pdu[offset] & 0x20;
 		/* TP-UDHI TP-User-Data-Header-Indication */

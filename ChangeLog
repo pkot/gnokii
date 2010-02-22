@@ -6,7 +6,8 @@
     o updated Italian translation                   (Daniele Forsi)
  * fake driver updates
     o implement GN_OP_GetModel and GN_OP_GetSMSStatus to allow
-      testing of smsd sending                       (Daniele Forsi)
+      testing of smsd sending and GN_OP_SaveSMS to allow testing of
+      gnokii --savesms                              (Daniele Forsi)
     o implement GN_OP_Identify                          (Paweł Kot)
     o give hints how to configure gnokii with --identify and
       --getsms                                          (Paweł Kot)
@@ -82,6 +83,8 @@
       multipart messages                          (Paulius Bulotas)
  * at driver updates
     o support Samsung SMS encoding                      (Paweł Kot)
+ * pcsc driver updates
+    o show name of virtual operator in --identify   (Daniele Forsi)
 
 0.6.28
 ======
