@@ -278,7 +278,8 @@ int gn_vcal_file_event_read(char *filename, gn_calnote *cnote, int number)
 	char time[16] = "", endtime[16] = "", alarm[16] = "";
 	char todo_priority[2] = "";
 
-	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead.\n"));
+	/* translators: %s are replaced by function names */
+	fprintf(stderr, _("Function %s() is deprecated. Use %s() instead.\n"), __FUNCTION__, "gn_ical2calnote");
 	file = fopen(filename, "r");
 	if (!file) {
 		fprintf(stderr, _("Can't open file %s for reading!\n"), filename);
@@ -339,7 +340,8 @@ int gn_vcal_file_todo_read(char *filename, gn_todo *ctodo, int number)
 	char time[16] = "", endtime[16] = "", alarm[16] = "";
 	char todo_priority[3] = "", meeting_location[64] = "";
 
-	fprintf(stderr, _("Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() instead.\n"));
+	/* translators: %s are replaced by function names */
+	fprintf(stderr, _("Function %s() is deprecated. Use %s() instead.\n"), __FUNCTION__, "gn_ical2todo");
 	file = fopen(filename, "r");
 	if (!file) {
 		fprintf(stderr, _("Can't open file %s for reading!\n"), filename);
