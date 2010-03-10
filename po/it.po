@@ -1,13 +1,13 @@
 # This is the Italian locale definition for Gnokii.
 # Copyright (C) 2000 Gabriele Stella <gstella@libero.it>
-#               2006-2009 Daniele Forsi <daniele@forsi.it>
+#               2006-2010 Daniele Forsi <daniele@forsi.it>
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2009-12-07 17:10+0100\n"
-"PO-Revision-Date: 2009-12-07 18:16+0100\n"
+"Report-Msgid-Bugs-To: feedback@gnokii.org\n"
+"POT-Creation-Date: 2010-03-10 10:32+0100\n"
+"PO-Revision-Date: 2010-03-10 10:41+0100\n"
 "Last-Translator: Daniele Forsi <daniele@forsi.it>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
 "MIME-Version: 1.0\n"
@@ -66,27 +66,27 @@ msgstr "Usare «%s» o «%s».\n"
 msgid "Assuming: %s\n"
 msgstr "Sostituito con: %s\n"
 
-#: ../common/cfgreader.c:1049
+#: ../common/cfgreader.c:1051
 #, c-format
 msgid "Couldn't read %s config file.\n"
 msgstr "Impossibile aprire il file di configurazione «%s».\n"
 
-#: ../common/cfgreader.c:1064
+#: ../common/cfgreader.c:1066
 #, c-format
 msgid "Failed to initialize libgnokii.\n"
 msgstr "Impossibile inizializzare libgnokii.\n"
 
-#: ../common/cfgreader.c:1069
+#: ../common/cfgreader.c:1071
 #, c-format
 msgid "Couldn't open a config file or memory.\n"
 msgstr "Impossibile aprire un file di configurazione o la memoria.\n"
 
-#: ../common/cfgreader.c:1155
+#: ../common/cfgreader.c:1157
 #, c-format
 msgid "Config error - no model specified.\n"
 msgstr "Errore di configurazione - nessun modello specificato.\n"
 
-#: ../common/cfgreader.c:1159
+#: ../common/cfgreader.c:1161
 #, c-format
 msgid "Config error - no port specified.\n"
 msgstr "Errore di configurazione - nessuna porta specificata.\n"
@@ -437,8 +437,8 @@ msgstr "Cartella messaggi n° 20"
 #: ../common/gsm-common.c:603 ../common/gsm-common.c:617
 #: ../common/gsm-common.c:628 ../common/gsm-common.c:640
 #: ../common/gsm-sms.c:409 ../common/libfunctions.c:196
-#: ../common/phones/atgen.c:2649 ../common/phones/atgen.c:2656
-#: ../common/phones/atgen.c:3137 ../common/phones/nk6100.c:4050
+#: ../common/phones/atgen.c:2653 ../common/phones/atgen.c:2660
+#: ../common/phones/atgen.c:3141 ../common/phones/nk6100.c:4050
 #: ../gnokii/gnokii-ringtone.c:90 ../xgnokii/xgnokii_calendar.c:187
 #: ../xgnokii/xgnokii_contacts.c:765 ../xgnokii/xgnokii_contacts.c:821
 #: ../xgnokii/xgnokii_contacts.c:948 ../xgnokii/xgnokii_contacts.c:990
@@ -1037,7 +1037,7 @@ msgstr "No"
 #: ../common/gsm-common.c:557 ../common/gsm-common.c:566
 #: ../gnokii/gnokii-profile.c:185 ../gnokii/gnokii-profile.c:192
 msgid "On"
-msgstr "Si"
+msgstr "Sì"
 
 # le traduzioni seguenti che non sono letterali
 # sono simili ai messaggi mostrati dal telefono
@@ -1451,70 +1451,70 @@ msgstr "Impossibile aprire il dispositivo GNBUS"
 msgid "Couldn't open M2BUS device"
 msgstr "Impossibile aprire il dispositivo M2BUS"
 
-#: ../common/misc.c:453
+#: ../common/misc.c:455
 #, c-format
 msgid "Cannot lock NULL device. Set port config parameter correctly.\n"
 msgstr ""
 "Impossibile bloccare il device NULL. Impostare correttamente il parametro "
 "nella configurazione.\n"
 
-#: ../common/misc.c:468
+#: ../common/misc.c:470
 #, c-format
 msgid "Out of memory error while locking device.\n"
 msgstr "Memoria esaurita durante il blocco del dispositivo.\n"
 
-#: ../common/misc.c:497
+#: ../common/misc.c:499
 #, c-format
 msgid "Lockfile %s is stale. Overriding it...\n"
 msgstr "Il file di blocco %s è obsoleto. Verrà ignorato...\n"
 
-#: ../common/misc.c:500
+#: ../common/misc.c:502
 #, c-format
 msgid "Overriding file %s failed, please check the permissions.\n"
 msgstr "Impossibile scavalcare il file di blocco %s, controllare i permessi.\n"
 
-#: ../common/misc.c:501 ../common/misc.c:516
+#: ../common/misc.c:503 ../common/misc.c:518
 #, c-format
 msgid "Cannot lock device.\n"
 msgstr "Impossibile bloccare il dispositivo.\n"
 
-#: ../common/misc.c:505
+#: ../common/misc.c:507
 #, c-format
 msgid "Device already locked with %s.\n"
 msgstr "Il dispositivo è già bloccato con %s.\n"
 
-#: ../common/misc.c:514
+#: ../common/misc.c:516
 #, c-format
 msgid "Unable to read lockfile %s.\n"
 msgstr "Impossibile leggere il file di blocco %s.\n"
 
-#: ../common/misc.c:515
+#: ../common/misc.c:517
 #, c-format
 msgid "Please check for reason and remove the lockfile by hand.\n"
 msgstr "Cercare le cause e rimuovere manualmente il file di blocco.\n"
 
-#: ../common/misc.c:525
+#: ../common/misc.c:527
 #, c-format
 msgid "Device seems to be locked by unknown process.\n"
 msgstr "Il dispositivo sembra bloccato da un processo sconosciuto.\n"
 
-#: ../common/misc.c:527
+#: ../common/misc.c:529
 #, c-format
 msgid "Please check permission on lock directory.\n"
 msgstr "Controllare i permessi della directory di blocco.\n"
 
-#: ../common/misc.c:529
+#: ../common/misc.c:531
 #, c-format
 msgid "Cannot create lockfile %s. Please check for existence of the path.\n"
 msgstr ""
 "Impossibile creare il file di blocco %s. Controllare se il percorso esiste.\n"
 
-#: ../common/misc.c:534
+#: ../common/misc.c:536
 #, c-format
 msgid "Failed to write to the lockfile %s.\n"
 msgstr "Impossibile scrivere nel file di blocco «%s».\n"
 
-#: ../common/misc.c:559
+#: ../common/misc.c:561
 #, c-format
 msgid "Cannot unlock device: %s\n"
 msgstr "Impossibile sbloccare il dispositivo: %s\n"
@@ -1537,16 +1537,16 @@ msgstr "Altro"
 # nemmeno sul mio telefono non è tradotto
 #. Set a default SMSC name because +CSCA doesn't provide one
 #. Set a default name
-#: ../common/phones/atgen.c:2029 ../common/phones/nk6100.c:1535
-#: ../common/phones/nk6510.c:1946 ../common/phones/nk7110.c:1484
-#: ../common/phones/pcsc.c:666 ../xgnokii/xgnokii.c:521
+#: ../common/phones/atgen.c:2033 ../common/phones/nk6100.c:1535
+#: ../common/phones/nk6510.c:1947 ../common/phones/nk7110.c:1484
+#: ../common/phones/pcsc.c:693 ../xgnokii/xgnokii.c:521
 #: ../xgnokii/xgnokii_sms.c:842
 #, c-format
 msgid "Set %d"
 msgstr "Set %d"
 
 # numero del chiamante
-#: ../common/phones/atgen.c:2646
+#: ../common/phones/atgen.c:2650
 #, c-format
 msgid "Withheld"
 msgstr "Privato"
@@ -1598,7 +1598,7 @@ msgstr "Cercapersone"
 #. for (i = 0; i < len; i++) dprintf("%02x ", req[i]);
 #. dprintf("\n");
 #.
-#: ../common/phones/nk6510.c:1811
+#: ../common/phones/nk6510.c:1812
 #, c-format
 msgid ""
 "6510 series phones seem to be quite sensitive to malformed SMS messages\n"
@@ -1611,18 +1611,18 @@ msgstr ""
 "va storto.\n"
 "Continuare veramente?"
 
-#: ../common/phones/nk6510.c:1814
+#: ../common/phones/nk6510.c:1815
 #, c-format
 msgid "(yes/no) "
-msgstr "(si/no) "
+msgstr "(sì/no) "
 
-#: ../common/phones/nk6510.c:1816 ../gnokii/gnokii-phonebook.c:418
+#: ../common/phones/nk6510.c:1817 ../gnokii/gnokii-phonebook.c:418
 #: ../gnokii/gnokii-sms.c:546 ../gnokii/gnokii-sms.c:845
 #: ../gnokii/gnokii-utils.c:65 ../gnokii/gnokii-wap.c:223
 msgid "yes"
-msgstr "si"
+msgstr "sì"
 
-#: ../common/phones/nk6510.c:2356 ../common/phones/nk6510.c:2421
+#: ../common/phones/nk6510.c:2357 ../common/phones/nk6510.c:2422
 #, c-format
 msgid "Progress: %3d%% completed"
 msgstr "Avanzamento: %3d%% completato"
@@ -1644,26 +1644,23 @@ msgstr ""
 msgid "offset: %04x\n"
 msgstr "posizione: %04x\n"
 
-#: ../common/phones/pcsc.c:567
+#: ../common/phones/pcsc.c:594
 #, c-format
 msgid "Phase %s SIM"
 msgstr "SIM fase %s"
 
-#: ../common/vcal.lx:161
+#: ../common/vcal.lx:170
 #, c-format
 msgid "Error: Invalid calendar note number!\n"
 msgstr "Errore: il numero del promemoria non è valido.\n"
 
-#: ../common/vcal.lx:281 ../common/vcal.lx:342
+#. translators: %s are replaced by function names
+#: ../common/vcal.lx:291 ../common/vcal.lx:353
 #, c-format
-msgid ""
-"Function gn_vcal_file_event_read() is deprecated. Use gn_ical2calnote() "
-"instead.\n"
-msgstr ""
-"L'uso della funzione gn_vcal_file_event_read() è sconsigliato. Usare "
-"gn_ical2calnote().\n"
+msgid "Function %s() is deprecated. Use %s() instead.\n"
+msgstr "La funzione %s() è sconsigliata. Usare %s().\n"
 
-#: ../common/vcal.lx:284 ../common/vcal.lx:345 ../gnokii/gnokii-calendar.c:256
+#: ../common/vcal.lx:294 ../common/vcal.lx:356 ../gnokii/gnokii-calendar.c:256
 #: ../gnokii/gnokii-file.c:439 ../gnokii/gnokii-file.c:446
 #: ../gnokii/gnokii-todo.c:162 ../smsd/file.c:186
 #: ../xgnokii/xgnokii_contacts.c:2700 ../xgnokii/xgnokii_dtmf.c:93
@@ -1672,7 +1669,7 @@ msgstr ""
 msgid "Can't open file %s for reading!\n"
 msgstr "Impossibile aprire il file %s in lettura.\n"
 
-#: ../common/vcal.lx:293 ../common/vcal.lx:354
+#: ../common/vcal.lx:303 ../common/vcal.lx:365
 #, c-format
 msgid "Error parsing vCalendar file!\n"
 msgstr "Errore nel formato del file vCalendar.\n"
@@ -1837,7 +1834,7 @@ msgstr ""
 "          --version\n"
 "          --shell\n"
 
-#: ../gnokii/gnokii.c:317 ../xgnokii/xgnokii_cfg.c:207
+#: ../gnokii/gnokii.c:317
 #, c-format
 msgid "ERROR: Can't find HOME environment variable!\n"
 msgstr "ERRORE: impossibile trovare la variabile di ambiente HOME.\n"
@@ -1992,7 +1989,7 @@ msgstr "   %s: "
 
 #: ../gnokii/gnokii-calendar.c:171
 msgid "Repeat"
-msgstr "Ripeti"
+msgstr "Ripetizione"
 
 #: ../gnokii/gnokii-calendar.c:182
 #, c-format
@@ -2159,25 +2156,26 @@ msgstr "Chiamata veloce n° %d: %d:%d\n"
 
 #: ../gnokii/gnokii-dial.c:98 ../gnokii/gnokii-dial.c:151
 #: ../gnokii/gnokii-dial.c:191 ../gnokii/gnokii-dial.c:222
-#: ../gnokii/gnokii-dial.c:253 ../gnokii/gnokii-logo.c:298
-#: ../gnokii/gnokii-logo.c:469 ../gnokii/gnokii-monitor.c:454
-#: ../gnokii/gnokii-monitor.c:457 ../gnokii/gnokii-monitor.c:480
-#: ../gnokii/gnokii-other.c:190 ../gnokii/gnokii-phonebook.c:253
-#: ../gnokii/gnokii-profile.c:112 ../gnokii/gnokii-profile.c:162
-#: ../gnokii/gnokii-security.c:95 ../gnokii/gnokii-security.c:127
-#: ../gnokii/gnokii-security.c:205 ../gnokii/gnokii-security.c:247
-#: ../gnokii/gnokii-security.c:298 ../gnokii/gnokii-settings.c:122
-#: ../gnokii/gnokii-settings.c:146 ../gnokii/gnokii-settings.c:180
-#: ../gnokii/gnokii-settings.c:204 ../gnokii/gnokii-sms.c:556
-#: ../gnokii/gnokii-sms.c:1060 ../gnokii/gnokii-sms.c:1138
-#: ../gnokii/gnokii-sms.c:1168 ../gnokii/gnokii-sms.c:1201
-#: ../gnokii/gnokii-sms.c:1340 ../gnokii/gnokii-sms.c:1342
-#: ../gnokii/gnokii-wap.c:94 ../gnokii/gnokii-wap.c:129
-#: ../gnokii/gnokii-wap.c:162 ../gnokii/gnokii-wap.c:248
-#: ../gnokii/gnokii-wap.c:323 ../smsd/lowlevel.c:114 ../smsd/lowlevel.c:127
-#: ../smsd/mysql.c:70 ../smsd/mysql.c:96 ../smsd/mysql.c:337
-#: ../smsd/mysql.c:345 ../smsd/mysql.c:396 ../smsd/pq.c:70 ../smsd/pq.c:95
-#: ../smsd/pq.c:139 ../smsd/pq.c:180 ../smsd/pq.c:229
+#: ../gnokii/gnokii-dial.c:253 ../gnokii/gnokii-dial.c:386
+#: ../gnokii/gnokii-logo.c:298 ../gnokii/gnokii-logo.c:469
+#: ../gnokii/gnokii-monitor.c:454 ../gnokii/gnokii-monitor.c:457
+#: ../gnokii/gnokii-monitor.c:480 ../gnokii/gnokii-other.c:190
+#: ../gnokii/gnokii-phonebook.c:253 ../gnokii/gnokii-profile.c:112
+#: ../gnokii/gnokii-profile.c:162 ../gnokii/gnokii-security.c:95
+#: ../gnokii/gnokii-security.c:127 ../gnokii/gnokii-security.c:205
+#: ../gnokii/gnokii-security.c:247 ../gnokii/gnokii-security.c:298
+#: ../gnokii/gnokii-settings.c:122 ../gnokii/gnokii-settings.c:146
+#: ../gnokii/gnokii-settings.c:180 ../gnokii/gnokii-settings.c:204
+#: ../gnokii/gnokii-sms.c:556 ../gnokii/gnokii-sms.c:1060
+#: ../gnokii/gnokii-sms.c:1138 ../gnokii/gnokii-sms.c:1168
+#: ../gnokii/gnokii-sms.c:1201 ../gnokii/gnokii-sms.c:1340
+#: ../gnokii/gnokii-sms.c:1342 ../gnokii/gnokii-wap.c:94
+#: ../gnokii/gnokii-wap.c:129 ../gnokii/gnokii-wap.c:162
+#: ../gnokii/gnokii-wap.c:248 ../gnokii/gnokii-wap.c:323
+#: ../smsd/lowlevel.c:114 ../smsd/lowlevel.c:127 ../smsd/mysql.c:70
+#: ../smsd/mysql.c:96 ../smsd/mysql.c:337 ../smsd/mysql.c:345
+#: ../smsd/mysql.c:396 ../smsd/pq.c:70 ../smsd/pq.c:95 ../smsd/pq.c:139
+#: ../smsd/pq.c:180 ../smsd/pq.c:229
 #, c-format
 msgid "Error: %s\n"
 msgstr "Errore: %s\n"
@@ -3008,7 +3006,7 @@ msgstr "Chiamata in corso: %-3s\n"
 #: ../gnokii/gnokii-monitor.c:343 ../gnokii/gnokii-monitor.c:345
 #: ../gnokii/gnokii-settings.c:200
 msgid "on"
-msgstr "si"
+msgstr "sì"
 
 #: ../gnokii/gnokii-monitor.c:331 ../gnokii/gnokii-monitor.c:333
 #: ../gnokii/gnokii-monitor.c:335 ../gnokii/gnokii-monitor.c:337
@@ -3266,7 +3264,7 @@ msgstr "Posizione occupata. "
 #: ../gnokii/gnokii-sms.c:843 ../gnokii/gnokii-utils.c:63
 #, c-format
 msgid "Overwrite? (yes/no) "
-msgstr "Sovrascrivere? (si/no) "
+msgstr "Sovrascrivere? (sì/no) "
 
 #: ../gnokii/gnokii-phonebook.c:420 ../gnokii/gnokii-sms.c:547
 #: ../gnokii/gnokii-utils.c:67 ../gnokii/gnokii-wap.c:223
@@ -4103,13 +4101,13 @@ msgstr "%02d00"
 
 #: ../gnokii/gnokii-sms.c:766
 #, c-format
-msgid "Response date/time: %02d/%02d/%04d %02d:%02d:%02d "
-msgstr "Data/ora della risposta: %02d/%02d/%04d %d.%02d.%02d "
+msgid "Delivery date/time: %02d/%02d/%04d %02d:%02d:%02d "
+msgstr "Data/ora consegna: %02d/%02d/%04d %d.%02d.%02d "
 
 #: ../gnokii/gnokii-sms.c:776 ../gnokii/gnokii-sms.c:812
 #, c-format
-msgid "Receiver: %s Msg Center: %s\n"
-msgstr "Ricevente: %s Centro Msg: %s\n"
+msgid "Recipient: %s Msg Center: %s\n"
+msgstr "Destinatario: %s Centro Msg: %s\n"
 
 #
 #: ../gnokii/gnokii-sms.c:777 ../gnokii/gnokii-sms.c:795
@@ -5593,28 +5591,23 @@ msgstr "Errore: %s: linea %d: impossibile allocare memoria.\n"
 msgid "couldn't allocate colour"
 msgstr "impossibile allocare il colore"
 
-#: ../xgnokii/xgnokii_cfg.c:103
-#, c-format
-msgid "WARNING: Can't find HOME environment variable!\n"
-msgstr "ATTENZIONE: impossibile trovare la variabile di ambiente HOME\n"
-
-#: ../xgnokii/xgnokii_cfg.c:108 ../xgnokii/xgnokii_cfg.c:121
+#: ../xgnokii/xgnokii_cfg.c:117
 #, c-format
 msgid "WARNING: Can't allocate memory for config reading!\n"
 msgstr ""
 "ATTENZIONE: impossibile allocare memoria per leggere la configurazione.\n"
 
-#: ../xgnokii/xgnokii_cfg.c:212 ../xgnokii/xgnokii_cfg.c:228
-#, c-format
-msgid "ERROR: Can't allocate memory for config writing!\n"
-msgstr "ERRORE: impossibile allocare memoria per scrivere la configurazione.\n"
-
-#: ../xgnokii/xgnokii_cfg.c:218
+#: ../xgnokii/xgnokii_cfg.c:211
 #, c-format
 msgid "ERROR: Can't open file %s for writing!\n"
 msgstr "ERRORE: impossibile scrivere sul file %s\n"
 
-#: ../xgnokii/xgnokii_cfg.c:233
+#: ../xgnokii/xgnokii_cfg.c:221
+#, c-format
+msgid "ERROR: Can't allocate memory for config writing!\n"
+msgstr "ERRORE: impossibile allocare memoria per scrivere la configurazione.\n"
+
+#: ../xgnokii/xgnokii_cfg.c:226
 #, c-format
 msgid "ERROR: Can't write config file!\n"
 msgstr "ERRORE: Impossibile scrivere il file di configurazione.\n"
@@ -5629,7 +5622,7 @@ msgstr "Info"
 
 #: ../xgnokii/xgnokii_common.c:146
 msgid "Yes"
-msgstr "Si"
+msgstr "Sì"
 
 #: ../xgnokii/xgnokii_common.c:155
 msgid "No"
@@ -6780,3 +6773,9 @@ msgstr "Nome suoneria"
 #: ../xgnokii/xgnokii_xring.c:930
 msgid "Set tempo"
 msgstr "Imposta il tempo"
+
+#~ msgid "Response date/time: %02d/%02d/%04d %02d:%02d:%02d "
+#~ msgstr "Data/ora della risposta: %02d/%02d/%04d %d.%02d.%02d "
+
+#~ msgid "WARNING: Can't find HOME environment variable!\n"
+#~ msgstr "ATTENZIONE: impossibile trovare la variabile di ambiente HOME\n"
