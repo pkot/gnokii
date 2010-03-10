@@ -20,6 +20,8 @@
                                                         (Paweł Kot)
     o show reference number also for sendlogo() and sendringtone()
                                                     (Daniele Forsi)
+    o fix random segfault when using --deletecalendarnote
+                                                    (Daniele Forsi)
  * nk6510 driver updates
     o support SMS memory OUS on phones prior to Series 40 3rd
                                          (Paweł Kot, Daniele Forsi)

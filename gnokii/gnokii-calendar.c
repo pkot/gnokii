@@ -337,6 +337,7 @@ gn_error deletecalendarnote(int argc, char *argv[], gn_data *data, struct gn_sta
 	gn_data_clear(data);
 	memset(&calnote, 0, sizeof(gn_calnote));
 	data->calnote = &calnote;
+	memset(&clist, 0, sizeof(gn_calnote_list));
 	data->calnote_list = &clist;
 
 	first_location = gnokii_atoi(optarg);
