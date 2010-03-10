@@ -508,7 +508,7 @@ GNOKII_API gn_error gn_ical2calnote(FILE *f, gn_calnote *calnote, int id)
 #endif /* HAVE_LIBICAL */
 }
 
-/* read a vcalendar event given by id from file f and store the data in calnote */
+/* read a vcalendar event given by id from string ical and store the data in calnote */
 GNOKII_API gn_error gn_icalstr2calnote(const char * ical, gn_calnote *calnote, int id)
 {
 #ifdef HAVE_LIBICAL
