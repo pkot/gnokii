@@ -3399,7 +3399,8 @@ static int calnote_type_map(int type)
  *							...
  * [42 - 43] xx xx		in case of Birthday: year of birth; otherwise unknown (ff ff)
  * [44 - 45] 20 00		unknown (2 octets)
- * [46 - 49] 00 00 00 00	unknown (4 octets)
+ * [46 - 47] xx xx		occurrences (2 octets)
+ * [48 - 49] 00 00		unknown (2 octets)
  * [50 - 51] xx xx		first text field length (2 octets) [L1]
  * [52 - 52] xx			second text field length (1 octet) [L2]
  * [53 - 53] 00			unknown (1 octet)
@@ -3741,7 +3742,7 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 				    0xff, 0xff, /* birth year */
 				    0x20, /* todo priority */
 				    0x00, /* todo completed */
-				    0x00, 0x00, /* number of occuriences */
+				    0x00, 0x00, /* number of occurences */
 				    0x00,
 				    0x00, /* text length */
 				    0x00, /* phone length/meeting location */
