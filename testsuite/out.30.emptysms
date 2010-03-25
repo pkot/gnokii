@@ -1,3 +1,3 @@
-AT+???=18
+AT+CMGS=18
 00110014912143658709214365870900000000
 Send succeeded with reference 1!
