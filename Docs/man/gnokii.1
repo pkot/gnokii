@@ -199,7 +199,7 @@ If \-\-delete switch is used, the message is deleted after reading.
 deletes SMS messages from specified \fImemory type\fR starting at entry \fIstart\fR and ending at \fIend\fR.
 If \fIend\fI is not specified only one location \- \fIstart\fR is deleted.
 .TP 
-.BR "\-\-sendsms \fIdestination\fP [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-r|\-\-report] [\-8|\-\-8bit] [\-C|\-\-class \fIn\fP] [\-v|\-\-validity \fIn\fP] [\-l|\-\-long \fIn\fP] [\-i|\-\-imelody] [\-a|\-\-animation \fIfile;file;file;file\fR] [\-o|\-\-concat \fIthis;total;serial\fR] [\-w|\-\-wappush \fIurl\fR]"
+.BR "\-\-sendsms \fIdestination\fP [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-r|\-\-report] [\-8|\-\-8bit] [\-C|\-\-class \fIn\fP] [\-v|\-\-validity \fIn\fP] [\-i|\-\-imelody] [\-a|\-\-animation \fIfile;file;file;file\fR] [\-o|\-\-concat \fIthis;total;serial\fR] [\-w|\-\-wappush \fIurl\fR]"
 sends an SMS message to \fIdestination\fR via \fImessage_center_number\fR or SMSC number taken from phone memory from address \fImessage_center_index\fR.
 If this argument is omitted SMSC number is taken from phone memory from location 1.
 Message text is taken from STDIN.
@@ -212,8 +212,6 @@ Meaning of other optional parameters:
 \-C | \-\-class \fIn\fR \- Class Message \fIn\fR, where \fIn\fR can be 0..3
 .PP 
 \-v | \-\-validity \fIn\fR \- validity in minutes
-.PP 
-\-l | \-\-long \fIn\fR \- send no more then \fIn\fR characters, default is 160
 .PP 
 \-i | \-\-imelody \- send iMelody within SMS
 .PP
