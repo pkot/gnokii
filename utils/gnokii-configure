@@ -152,12 +152,12 @@ class GnokiiAssistant(gtk.Assistant):
 		'nk6160.c'   : "6160|5120|6185",
 		'nk6510.c'   : "6510|6310|8310|6310i|6360|6610|6100|5100|3510|3510i|3595|6800|6810|6820|6820b|6610i|6230|6650|7210|7250|7250i|7600|6170|6020|6230i|5140|5140i|6021|6500|6220|3120b|3100|3120|6015i|6101|6680|6280|3220|6136|6233|6822|6300|6030|3110c|series60|series40",
 		'nk7110.c'   : "7110|6210|6250|7190",
-		'pcsc.c'     : "pcsc"
+		'pcsc.c'     : "pcsc|APDU"
 		}
 		self.model_type = {self.BRAND_NOKIA: [], self.BRAND_OTHER: []}
 		for model in models:
 			self.model_type[self.BRAND_NOKIA] += models[model].split("|")
-		self.model_type[self.BRAND_OTHER] = ["AT", "AT-HW", "pcsc"]
+		self.model_type[self.BRAND_OTHER] = ["AT", "AT-HW", "APDU"]
 		self.model_type[self.BRAND_NOKIA].sort()
 		self.model_type[self.BRAND_OTHER].sort()
 		self.model_type_auto = {
@@ -194,7 +194,7 @@ class GnokiiAssistant(gtk.Assistant):
 			self.BRAND_OTHER: [
 			'bluetooth',
 			'irda',
-			'pcsc',
+			'libpcsclite',
 			'serial',
 			'tcp']
 			}
