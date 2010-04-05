@@ -59,6 +59,10 @@
     o fallback to use mbrtowc()/wcrtomb() or mbtowc()/wctomb() if
       iconv_open() fails                            (Daniele Forsi)
     o fix sending multipart 8-bit SMS               (Daniele Forsi)
+    o fix SMS encoding                                  (Paweł Kot)
+    o fix SMS splitting into parts (concatenated messages with
+      UCS-2 encoding)                                   (Paweł Kot)
+    o add dependency on glib                            (Paweł Kot)
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)

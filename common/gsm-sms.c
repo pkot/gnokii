@@ -34,6 +34,8 @@
 
 #include "config.h"
 
+#include <glib.h>
+
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
@@ -1443,7 +1445,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 			case GN_SMS_DCS_UCS2:
 				dprintf("UCS-2\n");
 				rawsms->dcs |= 0x08;
-				length = char_unicode_encode(rawsms->user_data + offset, sms->user_data[i].u.text, length);
+				length = ucs2_encode(rawsms->user_data + offset, GN_SMS_LONG_MAX_LENGTH, sms->user_data[i].u.text, length);
 				rawsms->user_data_length = rawsms->length = length + udh_length;
 				break;
 			default:
@@ -1553,9 +1555,9 @@ static void sms_dump_raw(gn_sms_raw *rawsms)
 
 	memset(buf, 0, 10240);
 
-	dprintf("dcs: 0x%x\n", rawsms->dcs);
-	dprintf("Length: 0x%x\n", rawsms->length);
-	dprintf("user_data_length: 0x%x\n", rawsms->user_data_length);
+	dprintf("dcs: 0x%02x\n", rawsms->dcs);
+	dprintf("Length: 0x%02x\n", rawsms->length);
+	dprintf("user_data_length: 0x%02x\n", rawsms->user_data_length);
 	dprintf("ValidityIndicator: %d\n", rawsms->validity_indicator);
 	bin2hex(buf, rawsms->user_data, rawsms->user_data_length);
 	dprintf("user_data: %s\n", buf);
@@ -1578,6 +1580,7 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 {
 	int i;
 	gn_error error = GN_ERR_NONE;
+
 	/*
 	 * This is for long sms handling. There we have sequence:
 	 * 1.		gn_sms_send()
@@ -1600,6 +1603,21 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->sms)
 		return GN_ERR_INTERNALERROR;
+
+
+	/*
+	 * We need to convert sms text to a known encoding (UTF-8) to count the input chars.
+	 */
+	i = 0;
+	while (data->sms->user_data[i].type != GN_SMS_DATA_None) {
+		gchar *str;
+		gsize inlen, outlen;
+
+	       	str = g_locale_to_utf8(data->sms->user_data[i].u.text, -1, &inlen, &outlen, NULL);
+	       	data->sms->user_data[i].chars = g_utf8_strlen(str, outlen);
+	       	g_free(str);
+	       	i++;
+	}
 
 	data->raw_sms = malloc(sizeof(*data->raw_sms));
 	memset(data->raw_sms, 0, sizeof(*data->raw_sms));
@@ -1681,7 +1699,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 			total += (data->sms->user_data[i].length * 7 + 7) / 8;
 			break;
 		case GN_SMS_DCS_UCS2:
-			total += (data->sms->user_data[i].length * 2);
+			total += (data->sms->user_data[i].chars * 2);
 			break;
 		default:
 			total += data->sms->user_data[i].length;
@@ -1736,7 +1754,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 			start += copied;
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
 			data->sms->user_data[0].type = ud[0].type;
-			/* We assume UTF8 input */
+			/* FIXME: We assume UTF8 input */
 			size = 1;
 #define C ud[0].u.text[start + j]
 			for (j = 0, k = 0; start + j < ud[0].length && k < max_sms_len / 2; j++) {
@@ -1756,15 +1774,15 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 					else if (C >= 252 && C < 254)
 						size = 6;
 					else
+						/* FIXME: handle it somehow */
 						dprintf("CHARACTER ENCODING ERROR\n");
-					/* Avoid cutting the character */
-					if (j + size > max_sms_len / 2) {
-						dprintf("DEBUG: break: %d %d %d\n", j, size, max_sms_len / 2);
-						break;
-					}
 					k++;
 				}
-				data->sms->user_data[0].u.text[j] = ud[0].u.text[start + j];
+				/* Avoid cutting a character */
+				if (k < max_sms_len / 2)
+					data->sms->user_data[0].u.text[j] = ud[0].u.text[start + j];
+				else
+					j--;
 			}
 #undef C
 			data->sms->user_data[0].length = copied = j;

@@ -317,20 +317,23 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 
 	pin = (char *)src;
 	pout = (char *)dst;
-	inlen = 4;
-	outlen = sizeof(wchar_t);
+	/* Let's assume that we have at most 4-bytes wide characters */
+	inlen = maxlen;
+	outlen = maxlen * sizeof(wchar_t);
 
 	cd = iconv_open("WCHAR_T", gn_char_get_encoding());
 	if (cd == (iconv_t)-1)
 		goto fallback;
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
-	if (nconv == (size_t)-1)
+	if ((nconv == (size_t)-1) && (pin == src))
 		perror("char_mbtowc/iconv");
 	iconv_close(cd);
 
 	return (char*)dst == pout ? -1 : pin-src;
 fallback:
 #endif
+	if (maxlen >= MB_CUR_MAX)
+		maxlen = MB_CUR_MAX - 1;
 #ifdef HAVE_WCRTOMB
 	return mbrtowc(dst, src, maxlen, mbs);
 #else
@@ -803,8 +806,6 @@ size_t char_uni_alphabet_encode(const char *value, size_t n, wchar_t *dest, MBST
 {
 	int length;
 
-	if (n > MB_CUR_MAX)
-		n = MB_CUR_MAX;
 	length = char_mbtowc(dest, value, n, mbs);
 	return length;
 }
@@ -949,11 +950,17 @@ unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, 
  */
 unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, int len)
 {
-	int length, offset = 0, pos = 0;
-	wchar_t  wc;
+	int pos = 0;
 	MBSTATE mbs;
+#ifndef HAVE_ICONV
+	int length, offset = 0;
+	wchar_t  wc;
+#endif
 
 	MBSTATE_ENC_CLEAR(mbs);
+#ifdef HAVE_ICONV
+	pos = ucs2_encode(dest, len, src, len);
+#else
 	while (offset < len) {
 		length = char_uni_alphabet_encode(src + offset, len - offset, &wc, &mbs);
 		switch (length) {
@@ -969,6 +976,7 @@ unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, 
 			break;
 		}
 	}
+#endif
 	return pos;
 }
 
@@ -1295,7 +1303,7 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 	pin = (char *)instring;
 	pout = outstring;
 
-	cd = iconv_open("UCS-2", gn_char_get_encoding());
+	cd = iconv_open("UCS-2BE", gn_char_get_encoding());
 	if (cd == (iconv_t)-1)
 		return -1;
 

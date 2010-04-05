@@ -43,18 +43,6 @@
 
 #define ARRAY_LEN(x) (sizeof((x)) / sizeof((x)[0]))
 
-/* If glib.h is included, G_GNUC_PRINTF is already defined. */
-#ifndef G_GNUC_PRINTF
-/* Stolen from <glib.h>: */
-#  if	__GNUC__ > 2 || (__GNUC__ == 2 && __GNUC_MINOR__ > 4)
-#    define G_GNUC_PRINTF( format_idx, arg_idx )	\
-      __attribute__((format (printf, format_idx, arg_idx)))
-#  else	/* !__GNUC__ */
-#    define G_GNUC_PRINTF( format_idx, arg_idx )
-#  endif	/* !__GNUC__ */
-#endif
-
-
 #define GNOKII_MAX(a, b)  (((a) > (b)) ? (a) : (b))
 #define GNOKII_MIN(a, b)  (((a) < (b)) ? (a) : (b))
 

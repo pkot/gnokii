@@ -377,7 +377,8 @@ typedef struct {
 
 typedef struct {
 	gn_sms_data_type type;
-	unsigned int length;
+	unsigned int length;	/* Number of bytes used */
+	unsigned int chars;	/* Number of chars used */
 	union {
 		unsigned char text[10 * GN_SMS_MAX_LENGTH + 1];
 		gn_sms_multi multi;
