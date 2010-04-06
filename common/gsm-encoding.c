@@ -959,7 +959,7 @@ unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, 
 
 	MBSTATE_ENC_CLEAR(mbs);
 #ifdef HAVE_ICONV
-	pos = ucs2_encode(dest, len, src, len);
+	pos = ucs2_encode(dest, 2 * len, src, len);
 #else
 	while (offset < len) {
 		length = char_uni_alphabet_encode(src + offset, len - offset, &wc, &mbs);
