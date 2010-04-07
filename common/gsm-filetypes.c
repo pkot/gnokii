@@ -1605,6 +1605,9 @@ GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char 
 				entry->subentries[entry->subentries_count].data.date.minute = local_atoi(line + offset + 10, 2);
 				entry->subentries[entry->subentries_count].data.date.second = local_atoi(line + offset + 12, 2);
 				break;
+			case GN_PHONEBOOK_ENTRY_ExtGroup:
+				entry->subentries[entry->subentries_count].data.id = local_atoi(line + offset, 3);
+				break;
 			default:
 				STORE_TOKEN(entry->subentries[entry->subentries_count].data.number);
 				break;
@@ -1687,6 +1690,13 @@ GNOKII_API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *ent
 			fprintf(f, ";%d;0;%d;%04u%02u%02u%02u%02u%02u", entry->subentries[i].entry_type, entry->subentries[i].id,
 				entry->subentries[i].data.date.year, entry->subentries[i].data.date.month, entry->subentries[i].data.date.day,
 				entry->subentries[i].data.date.hour, entry->subentries[i].data.date.minute, entry->subentries[i].data.date.second);
+			break;
+		case GN_PHONEBOOK_ENTRY_ExtGroup:
+			fprintf(f, ";%d;%d;%d;%03d",
+				entry->subentries[i].entry_type,
+				entry->subentries[i].number_type,
+				entry->subentries[i].id,
+				entry->subentries[i].data.id);
 			break;
 		default:
 			add_slashes(escaped_name, entry->subentries[i].data.number, sizeof(escaped_name), strlen(entry->subentries[i].data.number));

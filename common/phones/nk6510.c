@@ -3148,6 +3148,7 @@ retry:
 					if (entry->subentries[i].entry_type == entry->subentries[j].entry_type &&
 					    entry->subentries[i].number_type == entry->subentries[j].number_type &&
 					    !strcmp(entry->subentries[i].data.number, entry->subentries[j].data.number)) {
+					    	dprintf("duplicate subentry!\n");
 						duplicate = 1;
 						break;
 					}
@@ -3177,6 +3178,12 @@ retry:
 						string[4] = j;
 						count += PackBlock(0x0b, j + 5, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 					}
+					break;
+				case GN_PHONEBOOK_ENTRY_ExtGroup:
+					string[0] = 0;
+					string[1] = 0;
+					string[2] = entry->subentries[i].data.id;
+					count += PackBlock(0x43, 3, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
 					break;
 				case GN_PHONEBOOK_ENTRY_Date:
 				case GN_PHONEBOOK_ENTRY_Birthday:

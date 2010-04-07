@@ -303,6 +303,9 @@ typedef struct {
 		 * GN_PHONEBOOK_ENTRY_RingtoneAdv
 		 */
 		char fileid[6];                                  /* Bitmap or ringtone fileid */
+		/* GN_PHONEBOOK_ENTRY_ExtGroup
+		 */
+		int id;                                          /* Any number, like ID */
 	} data;
 	int id;
 } gn_phonebook_subentry;

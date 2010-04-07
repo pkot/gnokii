@@ -281,6 +281,7 @@ GNOKII_API const char *gn_phonebook_entry_type2str(gn_phonebook_entry_type t)
 	case GN_PHONEBOOK_ENTRY_Company:		return _("Company");
 	case GN_PHONEBOOK_ENTRY_Nickname:		return _("Nickname");
 	case GN_PHONEBOOK_ENTRY_Birthday:		return _("Birthday");
+	case GN_PHONEBOOK_ENTRY_ExtGroup:		return _("Caller group id");
 	default:					return _("Unknown");
 	}
 }
@@ -318,6 +319,7 @@ GNOKII_API const char *gn_subentrytype2string(gn_phonebook_entry_type entry_type
 	case GN_PHONEBOOK_ENTRY_Company:
 	case GN_PHONEBOOK_ENTRY_Nickname:
 	case GN_PHONEBOOK_ENTRY_Birthday:
+	case GN_PHONEBOOK_ENTRY_ExtGroup:
 		return gn_phonebook_entry_type2str(entry_type);
 	case GN_PHONEBOOK_ENTRY_Number:
 		switch (number_type) {

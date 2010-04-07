@@ -68,7 +68,8 @@
                                                         (Paweł Kot)
     o introduce flag PM_EXTPBK2 for phonebook support on Series40
       3rd Ed+                                           (Paweł Kot)
-    o support reading caller groups on Series30 3rd Ed+ (Paweł Kot)
+    o support reading caller groups on Series40 3rd Ed+ (Paweł Kot)
+    o support writing caller groups on Series40 3rd Ed+ (Paweł Kot)
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)
