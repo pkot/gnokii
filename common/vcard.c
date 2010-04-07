@@ -60,7 +60,7 @@ static void vcard_append_printf(vcard_string *str, const char *fmt, ...)
 	/* 3 characters for each line beyond the first one,
 	 * plus the length of the buffer
 	 * plus the line feed and the nul byte to finish it off */
-	len = (lines - 1) * 3 + strlen (buf) + 3;
+	len = (lines - 1) * 3 + strlen(buf) + 3;
 
 	/* The first malloc must have a nul byte at the end */
 	if (str->str)
@@ -75,17 +75,17 @@ static void vcard_append_printf(vcard_string *str, const char *fmt, ...)
 	for (l = 0; l < lines; l++) {
 		int to_copy;
 
-		to_copy = GNOKII_MIN(76, strlen (buf) - 76 * l);
-		memcpy (str->end,  buf + 76 * l, to_copy);
+		to_copy = GNOKII_MIN(76, strlen(buf) - 76 * l);
+		memcpy(str->end,  buf + 76 * l, to_copy);
 		str->end = str->end + to_copy;
 		if (l != lines - 1) {
 			char *s = "\r\n ";
-			memcpy (str->end, s, 3);
+			memcpy(str->end, s, 3);
 			str->end += 3;
 		}
 	}
 
-	memcpy (str->end, s, 2);
+	memcpy(str->end, s, 2);
 	str->end += 2;
 	str->end[0] = '\0';
 
@@ -98,7 +98,7 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 	int i;
 	char name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
 
-	memset(&str, 0, sizeof (str));
+	memset(&str, 0, sizeof(str));
 
 	vcard_append_printf(&str, "BEGIN:VCARD");
 	vcard_append_printf(&str, "VERSION:3.0");
@@ -188,6 +188,9 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 		case GN_PHONEBOOK_ENTRY_Birthday:
 			vcard_append_printf(&str, "BDAY:%s", entry->subentries[i].data.number);
 			break;
+		case GN_PHONEBOOK_ENTRY_ExtGroup:
+			vcard_append_printf(&str, "X-GSM-CALLERGROUPID:%d", entry->subentries[i].data.id);
+			break;
 		case GN_PHONEBOOK_ENTRY_Ringtone:
 		case GN_PHONEBOOK_ENTRY_Pointer:
 		case GN_PHONEBOOK_ENTRY_Logo:
@@ -217,11 +220,11 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 	char *vcard;
 	int retval;
 
-	vcard = gn_phonebook2vcardstr (entry);
+	vcard = gn_phonebook2vcardstr(entry);
 	if (vcard == NULL)
 		return -1;
-	retval = fputs (vcard, f);
-	free (vcard);
+	retval = fputs(vcard, f);
+	free(vcard);
 
 	return retval;
 }
@@ -250,15 +253,15 @@ static void str_append_printf(vcard_string *str, const char *s)
 	int len;
 
 	if (str->str == NULL) {
-		str->str = strdup (s);
-		str->len = strlen (s) + 1;
+		str->str = strdup(s);
+		str->len = strlen(s) + 1;
 		return;
 	}
 
-	len = strlen (s);
+	len = strlen(s);
 	str->str = realloc(str->str, len + str->len);
 
-	memcpy (str->str + str->len - 1, s, len);
+	memcpy(str->str + str->len - 1, s, len);
 	str->len = str->len + len;
 	str->end = str->str + str->len;
 
@@ -281,15 +284,15 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 			break;
 	}
 
-	str_append_printf (&str, "BEGIN:VCARD\r\n");
+	str_append_printf(&str, "BEGIN:VCARD\r\n");
 	while (fgets(buf, 1024, f)) {
-		str_append_printf (&str, buf);
+		str_append_printf(&str, buf);
 		if (BEGINS("END:VCARD"))
 			break;
 	}
 
-	retval = gn_vcardstr2phonebook (str.str, entry);
-	free (str.str);
+	retval = gn_vcardstr2phonebook(str.str, entry);
+	free(str.str);
 
 	return retval;
 }
@@ -309,26 +312,26 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 	memset(memory_name, 0, sizeof(memory_name));
 
 	/* Remove folding */
-	v = strdup (vcard);
-	fold = strstr (v, "\n ");
+	v = strdup(vcard);
+	fold = strstr(v, "\n ");
 	while (fold != NULL) {
-		memmove (fold, fold + 2, strlen (fold) - 1);
-		fold = strstr (fold, "\n ");
+		memmove(fold, fold + 2, strlen(fold) - 1);
+		fold = strstr(fold, "\n ");
 	}
-	fold = strstr (v, "\n\t");
+	fold = strstr(v, "\n\t");
 	while (fold != NULL) {
-		memmove (fold, fold + 2, strlen (fold) - 1);
-		fold = strstr (v, "\n\t");
+		memmove(fold, fold + 2, strlen(fold) - 1);
+		fold = strstr(v, "\n\t");
 	}
 
 	/* Count the number of lines */
-	s = strstr (v, "\n");
+	s = strstr(v, "\n");
 	for (num_lines = 0; s != NULL; num_lines++) {
-		s = strstr (s + 1, "\n");
+		s = strstr(s + 1, "\n");
 	}
 
 	/* FIXME on error STORESUB() and STORENUM() leak memory allocated by gnokii_strsplit() */
-	lines = gnokii_strsplit (v, "\n", num_lines);
+	lines = gnokii_strsplit(v, "\n", num_lines);
 
 	for (i = 0; i < num_lines; i++) {
 		char *buf;
@@ -338,7 +341,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 			continue;
 
 		buf = lines[i];
-		line_len = strlen (buf);
+		line_len = strlen(buf);
 
 		/* Strip traling '\r's */
 		while (line_len > 0 && buf[line_len-1] == '\r')
@@ -355,6 +358,17 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 				entry->person.honorific_suffixes
 			)) {
 				entry->person.has_person = 1;
+				/* Temporary solution. In the phone driver we should handle person struct */
+				if (entry->person.family_name[0]) {
+					strcpy(entry->subentries[entry->subentries_count].data.number, entry->person.family_name);
+					entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_LastName;
+					entry->subentries_count++;
+				}
+				if (entry->person.given_name[0]) {
+					strcpy(entry->subentries[entry->subentries_count].data.number, entry->person.given_name);
+					entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_FirstName;
+					entry->subentries_count++;
+				}
 			}
 			continue;
 		}
@@ -406,11 +420,17 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		STORENUM("TEL;TYPE=WORK:", GN_PHONEBOOK_NUMBER_Work);
 		STORENUM("TEL;TYPE=PREF:", GN_PHONEBOOK_NUMBER_General);
 		STORENUM("TEL;TYPE=VOICE:", GN_PHONEBOOK_NUMBER_Common);
+		if (BEGINS("X-GSM-CALLERGROUPID:")) {
+			entry->subentries[entry->subentries_count].data.id = atoi(buf + strlen("X-GSM-CALLERGROUPID:"));
+			entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_ExtGroup;
+			entry->subentries_count++;
+        		continue;
+		}
 
 		if (BEGINS("END:VCARD"))
 			break;
 	}
-	free (v);
+	free(v);
 	gnokii_strfreev(lines);
 
 	return 0;
