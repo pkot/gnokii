@@ -502,7 +502,7 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 		}
 
 		/* recurrence */
-		rrule = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
+		rrule = icalcomponent_get_first_property(compresult, ICAL_RRULE_PROPERTY);
 		if (rrule) {
 			recur = icalproperty_get_rrule(rrule);
 			calnote->occurrences = recur.count;
@@ -510,13 +510,13 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 			case ICAL_SECONDLY_RECURRENCE:
 				dprintf("Not suppported recurrence type. Aproximating recurrence\n");
 				calnote->recurrence = recur.interval / 3600;
-				if (calnote->recurrence)
+				if (!calnote->recurrence)
 					calnote->recurrence = 1;
 				break;
 			case ICAL_MINUTELY_RECURRENCE:
 				dprintf("Not suppported recurrence type. Aproximating recurrence\n");
 				calnote->recurrence = recur.interval / 60;
-				if (calnote->recurrence)
+				if (!calnote->recurrence)
 					calnote->recurrence = 1;
 				break;
 			case ICAL_HOURLY_RECURRENCE:
