@@ -290,8 +290,17 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 				data->bitmap->number = blockstart[5] - 1;
 			dprintf("   Group: %d\n", blockstart[5] - 1);
 			break;
-		case GN_PHONEBOOK_ENTRY_ExtGroup:   /* Extended caller group number: in Series40 3rd Ed and later groups are defined by users */
-			dprintf("   ExtGroup: %d\n", blockstart[7]);
+		case GN_PHONEBOOK_ENTRY_ExtGroup: /* Extended caller group number: in Series40 3rd Ed and later groups are defined by users */
+			if (!subentry) {
+				dprintf("ERROR!!!");
+				break;
+			}
+			subentry->entry_type  = blockstart[0];
+			subentry->number_type = 0;
+			subentry->id          = blockstart[4];
+			subentry->data.id     = blockstart[7];
+			subblock_count++;
+			data->phonebook_entry->subentries_count++;
 			break;
 		case GN_PHONEBOOK_ENTRY_RingtoneAdv:   /* Newer ringtones */
 			switch(blockstart[15]) {

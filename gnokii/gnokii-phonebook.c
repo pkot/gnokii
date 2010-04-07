@@ -175,7 +175,7 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 			case 2: {
 					char *s;
 
-					s = gn_phonebook2vcardstr (&entry);
+					s = gn_phonebook2vcardstr(&entry);
 					fprintf (stdout, "%s", s);
 					free (s);
 				}
@@ -225,6 +225,9 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 				for (i = 0; i < entry.subentries_count; i++) {
 					fprintf(stdout, "%s: ", gn_subentrytype2string(entry.subentries[i].entry_type, entry.subentries[i].number_type));
 					switch (entry.subentries[i].entry_type) {
+					case GN_PHONEBOOK_ENTRY_ExtGroup:
+					        fprintf(stdout, "%d", entry.subentries[i].data.id);
+					        break;
 					case GN_PHONEBOOK_ENTRY_Birthday:
 					case GN_PHONEBOOK_ENTRY_Date:
 						fprintf(stdout, _("%04u.%02u.%02u %02u:%02u:%02u"), entry.subentries[i].data.date.year, entry.subentries[i].data.date.month, entry.subentries[i].data.date.day, entry.subentries[i].data.date.hour, entry.subentries[i].data.date.minute, entry.subentries[i].data.date.second);
