@@ -290,6 +290,9 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 				data->bitmap->number = blockstart[5] - 1;
 			dprintf("   Group: %d\n", blockstart[5] - 1);
 			break;
+		case GN_PHONEBOOK_ENTRY_ExtGroup:   /* Extended caller group number: in Series40 3rd Ed and later groups are defined by users */
+			dprintf("   ExtGroup: %d\n", blockstart[7]);
+			break;
 		case GN_PHONEBOOK_ENTRY_RingtoneAdv:   /* Newer ringtones */
 			switch(blockstart[15]) {
 			case 0x01:
@@ -315,6 +318,12 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			break;
 		default:
 			dprintf("Unknown phonebook block %02x\n", blockstart[0]);
+			{
+				int j;
+				for (j = 0; j < blockstart[3]; j++)
+					dprintf("%02x ", blockstart[j]);
+				dprintf("\n");
+			}
 			break;
 		}
 		blockstart += blockstart[3];

@@ -63,6 +63,12 @@
     o fix SMS splitting into parts (concatenated messages with
       UCS-2 encoding)                                   (Paweł Kot)
     o add dependency on glib                            (Paweł Kot)
+    o make --writephonebook work on Series40 3rd Ed+    (Paweł Kot)
+    o when reading phonebook dump unknown blocks in debug mode
+                                                        (Paweł Kot)
+    o introduce flag PM_EXTPBK2 for phonebook support on Series40
+      3rd Ed+                                           (Paweł Kot)
+    o support reading caller groups on Series30 3rd Ed+ (Paweł Kot)
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)

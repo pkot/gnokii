@@ -2239,7 +2239,7 @@ static gn_error NK6510_GetFileListCache(gn_data *data, struct gn_statemachine *s
 static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x68, 0x00};
-	int i;
+	int i, timeout = NK6510_GETFILELIST_TIMEOUT;
 
 	if (!data->file_list) return GN_ERR_INTERNALERROR;
 	data->file_list->file_count = 0;
@@ -2247,8 +2247,11 @@ static gn_error NK6510_GetFileList(gn_data *data, struct gn_statemachine *state)
 	i = strlen(data->file_list->path);
 	req[5] = char_unicode_encode(req+6, data->file_list->path, i);
 
+	if (data->file_list->file_count)
+		timeout = NK6510_FILE_CACHE_TIMEOUT * data->file_list->file_count;
+	dprintf("Timeout for getting file list: %d\n", timeout);
 	if (sm_message_send(req[5]+9, NK6510_MSG_FILE, req, state)) return GN_ERR_NOTREADY;
-	return sm_block_no_retry_timeout(NK6510_MSG_FILE, NK6510_GETFILELIST_TIMEOUT, data, state);
+	return sm_block_no_retry_timeout(NK6510_MSG_FILE, timeout, data, state);
 }
 
 static gn_error NK6510_GetFileDetailsById(gn_data *data, struct gn_statemachine *state)
@@ -3044,10 +3047,11 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 		0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00}; /* blocks */
 	char string[GN_PHONEBOOK_ENTRY_MAX_LENGTH];
 	int block, i, j, defaultn;
-	unsigned int count = 22;
+	unsigned int count;
 	gn_phonebook_entry *entry;
 	unsigned int postal_count;
 	int postal_block = 0;
+	gn_error error = GN_ERR_NONE;
 
 	if (data->phonebook_entry)
 		entry = data->phonebook_entry;
@@ -3058,18 +3062,57 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	req[12] = (entry->location >> 8);
 	req[13] = entry->location & 0xff;
 
+retry:
+	count = 22;
 	block = 1;
 	if (!entry->empty) {
-		/* Name */
-		j = char_unicode_encode((string + 1), entry->name, strlen(entry->name));
-		string[0] = j;
-		count += PackBlock(0x07, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+		/*
+		 * Nokia Series40 3rd Ed and later fails on writing caller group block 0x1e.
+		 * In that case, let's not write it and let's use First Name, Last Name
+		 * not to loose the information.
+		 */
+		if (DRVINSTANCE(state)->pm->flags & PM_EXTPBK2) {
+			int found = 0;
 
-		/* Group */
-		string[0] = entry->caller_group + 1;
-		string[1] = 0;
-		string[2] = 0x55;
-		count += PackBlock(0x1e, 3, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+			for (i = 0; i < entry->subentries_count; i++) {
+				switch (entry->subentries[i].entry_type) {
+				case GN_PHONEBOOK_ENTRY_LastName:
+					/* Last name */
+					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, strlen(entry->subentries[i].data.number));
+					string[0] = j;
+					count += PackBlock(0x47, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+					found = 1;
+					break;
+				case GN_PHONEBOOK_ENTRY_FirstName:
+					/* First name */
+					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, strlen(entry->subentries[i].data.number));
+					string[0] = j;
+					count += PackBlock(0x46, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+					found = 1;
+					break;
+				default:
+					break;
+				}
+			}
+			if (!found) {
+				/* Use Name as Last Name */
+				j = char_unicode_encode((string + 1), entry->name, strlen(entry->name));
+				string[0] = j;
+				count += PackBlock(0x47, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+			}
+		} else {
+			/* Name */
+			j = char_unicode_encode((string + 1), entry->name, strlen(entry->name));
+			string[0] = j;
+			count += PackBlock(0x07, j + 1, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+
+			/* Group */
+			string[0] = entry->caller_group + 1;
+			string[1] = 0;
+			string[2] = 0x55;
+			count += PackBlock(0x1e, 3, &block, string, req + count, GN_PHONEBOOK_ENTRY_MAX_LENGTH - count);
+		}
+
 		/* We don't require the application to fill in any subentry.
 		 * if it is not filled in, let's take just one number we have.
 		 */
@@ -3216,7 +3259,15 @@ static gn_error NK6510_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	} else {
 		return NK6510_DeletePhonebookLocation(data, state);
 	}
-	SEND_MESSAGE_BLOCK(NK6510_MSG_PHONEBOOK, count);
+	if (sm_message_send(count, NK6510_MSG_PHONEBOOK, req, state))
+		return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_PHONEBOOK, data, state);
+	if (error == GN_ERR_FAILED && !(DRVINSTANCE(state)->pm->flags & PM_EXTPBK2)) {
+		dprintf("Writing failed. Falling back to a new method.\n");
+		DRVINSTANCE(state)->pm->flags |= PM_EXTPBK2;
+		goto retry;
+	}
+	return error;
 }
 
 /******************/
