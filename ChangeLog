@@ -74,6 +74,7 @@
       separate fields                                   (Paweł Kot)
     o support reading and writing caller grops on Series40 3rd Ed+
       from/to vcard files                               (Paweł Kot)
+    o support recurrence in ical files                  (Paweł Kot)
  * build system updates
     o remove GNOKII_API from the definition of asprinf
                                                       (Jari Turkia)

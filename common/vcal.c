@@ -107,7 +107,7 @@ static void ical_append_printf(ical_string *str, const char *fmt, ...)
 /*
 	ICALENDAR Reading functions
  */
-GNOKII_API char * gn_calnote2icalstr (gn_calnote *calnote)
+GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 {
 	ical_string str;
 
@@ -198,6 +198,42 @@ GNOKII_API char * gn_calnote2icalstr (gn_calnote *calnote)
 		break;
 	}
 
+	if (calnote->recurrence) {
+		char rrule[64];
+		char *freq;
+		int interval = 1;
+
+		switch (calnote->recurrence) {
+		case GN_CALNOTE_NEVER:
+			goto norecurrence;
+		case GN_CALNOTE_DAILY:
+			freq = "DAILY";
+			break;
+		case GN_CALNOTE_WEEKLY:
+			freq = "WEEKLY";
+			break;
+		case GN_CALNOTE_2WEEKLY:
+			freq = "WEEKLY";
+			interval = 2;
+			break;
+		case GN_CALNOTE_MONTHLY:
+			freq = "MONTHLY";
+			break;
+		case GN_CALNOTE_YEARLY:
+			freq = "YEARLY";
+			break;
+		default:
+			freq = "HOURLY";
+			interval = calnote->recurrence;
+			break;
+		}
+		if (calnote->occurrences == 0)
+			snprintf(rrule, sizeof(rrule), "FREQ=%s;INTERVAL=%d", freq, interval);
+		else
+			snprintf(rrule, sizeof(rrule), "FREQ=%s;COUNT=%d;INTERVAL=%d", freq, calnote->occurrences, interval);
+		properties[iprop++] = icalproperty_new_rrule(icalrecurrencetype_from_string(rrule));
+	}
+norecurrence:
 	snprintf(compuid, sizeof(compuid), "guid.gnokii.org_%d_%d", calnote->location, rand());
 
 	pIcal = icalcomponent_vanew(ICAL_VCALENDAR_COMPONENT,
@@ -374,7 +410,10 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 	} else {
 		const char *str;
 		icalcomponent *alarm = {0};
+		icalproperty *rrule;
+		struct icalrecurrencetype recur;
 		retval = GN_ERR_NONE;
+
 		calnote->phone_number[0] = 0;
 
 		/* type */
@@ -459,6 +498,49 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 					calnote->alarm.timestamp.second = alarm_start.second;
 					/* TODO: time zone? */
 				}
+			}
+		}
+
+		/* recurrence */
+		rrule = icalcomponent_get_first_property(comp, ICAL_RRULE_PROPERTY);
+		if (rrule) {
+			recur = icalproperty_get_rrule(rrule);
+			calnote->occurrences = recur.count;
+			switch (recur.freq) {
+			case ICAL_SECONDLY_RECURRENCE:
+				dprintf("Not suppported recurrence type. Aproximating recurrence\n");
+				calnote->recurrence = recur.interval / 3600;
+				if (calnote->recurrence)
+					calnote->recurrence = 1;
+				break;
+			case ICAL_MINUTELY_RECURRENCE:
+				dprintf("Not suppported recurrence type. Aproximating recurrence\n");
+				calnote->recurrence = recur.interval / 60;
+				if (calnote->recurrence)
+					calnote->recurrence = 1;
+				break;
+			case ICAL_HOURLY_RECURRENCE:
+				calnote->recurrence = recur.interval;
+				break;
+			case ICAL_DAILY_RECURRENCE:
+				calnote->recurrence = recur.interval * 24;
+				break;
+			case ICAL_WEEKLY_RECURRENCE:
+				calnote->recurrence = recur.interval * 24 * 7;
+				break;
+			case ICAL_MONTHLY_RECURRENCE:
+				calnote->recurrence = GN_CALNOTE_MONTHLY;
+				break;
+			case ICAL_YEARLY_RECURRENCE:
+				calnote->recurrence = GN_CALNOTE_YEARLY;
+				break;
+			case ICAL_NO_RECURRENCE:
+				calnote->recurrence = GN_CALNOTE_NEVER;
+				break;
+			default:
+				dprintf("Not supported recurrence type. Assuming never\n");
+				calnote->recurrence = GN_CALNOTE_NEVER;
+				break;
 			}
 		}
 
