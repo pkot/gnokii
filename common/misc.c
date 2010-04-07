@@ -136,7 +136,7 @@ static gn_phone_model models[] = {
 	{"3108",  "RH-6",	PM_OLD_DEFAULT },
 	{"3110",  "NHE-8",	PM_OLD_DEFAULT | PM_DATA },
 	{"3110",  "0310" ,	PM_OLD_DEFAULT | PM_DATA }, /* NHE-8 */
-	{"3110c", "RM-237",     PM_DEFAULT | PM_SMSFILE }, /* Nokia 3110 classic */
+	{"3110c", "RM-237",     PM_DEFAULT | PM_SMSFILE | PM_EXTPBK2 }, /* Nokia 3110 classic */
 	{"3120",  "RH-19",	PM_DEFAULT },
 	{"3120b", "RH-50",	PM_DEFAULT },
 	{"3200",  "RH-30",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
@@ -242,8 +242,8 @@ static gn_phone_model models[] = {
 	{"6233",  "RM123_145_-", PM_DEFAULT | PM_NETMONITOR },
 	{"6250",  "NHM-3",	PM_DEFAULT | PM_NETMONITOR },
 	{"6280",  "RH-78",	PM_DEFAULT | PM_NETMONITOR },
-	{"6300",  "RM-217",     PM_DEFAULT | PM_FULLPBK | PM_SMSFILE },
-	{"6303",  "RM-443",     PM_DEFAULT | PM_FULLPBK | PM_SMSFILE }, /* Nokia 6303 classic */
+	{"6300",  "RM-217",     PM_DEFAULT | PM_FULLPBK | PM_SMSFILE | PM_EXTPBK2 },
+	{"6303",  "RM-443",     PM_DEFAULT | PM_FULLPBK | PM_SMSFILE | PM_EXTPBK2 }, /* Nokia 6303 classic */
 	{"6310",  "NPE-4",	PM_DEFAULT },
 	{"6310i", "NPL-1",	PM_DEFAULT },
 	{"6340",  "NPM-2",	PM_OLD_DEFAULT },
