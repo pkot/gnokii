@@ -548,11 +548,17 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 		if (!str)
 			str = "";
 		snprintf(calnote->mlocation, sizeof(calnote->mlocation), "%s", str);
-
-		dprintf("Component found\n%s\n", icalcomponent_as_ical_string(compresult));
 	}
-	if (compresult)
+	if (compresult) {
+#ifdef DEBUG
+		char *temp;
+
+		temp = icalcomponent_as_ical_string(compresult);
+		dprintf("Component found\n%s\n", temp);
+		free(temp);
+#endif
 		icalcomponent_free(compresult);
+	}
 
 	return retval;
 }
