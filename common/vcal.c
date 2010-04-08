@@ -58,7 +58,7 @@ static char *ical_fgets(char *s, size_t size, void *d)
 
 /* This string is used so often that we keep it as long as the program is
  * running. Due to VERSION being defined in both libical and gnokii we need
- * to us a static string instead of a pre-compiler macro.
+ * to use a static string instead of a pre-processor macro.
  */
 static char vcal_prodid[64] = {0};
 static inline const char *get_prodid()
@@ -508,13 +508,13 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 			calnote->occurrences = recur.count;
 			switch (recur.freq) {
 			case ICAL_SECONDLY_RECURRENCE:
-				dprintf("Not suppported recurrence type. Aproximating recurrence\n");
+				dprintf("Not suppported recurrence type. Approximating recurrence\n");
 				calnote->recurrence = recur.interval / 3600;
 				if (!calnote->recurrence)
 					calnote->recurrence = 1;
 				break;
 			case ICAL_MINUTELY_RECURRENCE:
-				dprintf("Not suppported recurrence type. Aproximating recurrence\n");
+				dprintf("Not suppported recurrence type. Approximating recurrence\n");
 				calnote->recurrence = recur.interval / 60;
 				if (!calnote->recurrence)
 					calnote->recurrence = 1;

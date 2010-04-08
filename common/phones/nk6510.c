@@ -3800,7 +3800,7 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 				    0xff, 0xff, /* birth year */
 				    0x20, /* todo priority */
 				    0x00, /* todo completed */
-				    0x00, 0x00, /* number of occurences */
+				    0x00, 0x00, /* number of occurrences */
 				    0x00,
 				    0x00, /* text length */
 				    0x00, /* phone length/meeting location */
@@ -3886,7 +3886,7 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 	if (calnote->alarm.enabled) {
 		long seconds;
 
-		/* Alarm for birtday is special. We need to set for the same
+		/* Alarm for birthday is special. We need to set for the same
 		 * year we set the start date. */
 		if (calnote->type == GN_CALNOTE_BIRTHDAY)
 			calnote->time.year = calnote->alarm.timestamp.year;
