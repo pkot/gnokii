@@ -113,8 +113,8 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 
 #ifdef HAVE_LIBICAL
 #  define MAX_PROP_INDEX 5
-	icalcomponent *pIcal = NULL;
-	struct icaltimetype stime = {0}, etime = {0}/*, atime = {0}*/;
+	icalcomponent *pIcal = NULL, *vevent = NULL;
+	struct icaltimetype stime = {0}, etime = {0};
 	icalproperty *properties[MAX_PROP_INDEX+1] = {0}; /* order and number of properties vary */
 	int iprop = 0;
 	char compuid[64];
@@ -146,19 +146,27 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 		properties[iprop++] = icalproperty_new_dtend(etime);
 	}
 
-	/* FIXME: how to set alarm?
 	if (calnote->alarm.enabled) {
-		atime.year = (calnote->alarm.timestamp.year == 0xffff ? 1800 : calnote->alarm.timestamp.year);
-		atime.month = calnote->alarm.timestamp.month;
-		atime.day = calnote->alarm.timestamp.day;
-		atime.hour = calnote->alarm.timestamp.hour;
-		atime.minute = calnote->alarm.timestamp.minute;
-		atime.second = calnote->alarm.timestamp.second;
-		atime.is_daylight = 1;
+		icalproperty *aproperty[2];
+		struct icaltriggertype trig;
 
-		properties[iprop++] = icalproperty_new_FIXME(atime);
+		trig.time.year = (calnote->alarm.timestamp.year == 0xffff ? 1800 : calnote->alarm.timestamp.year);
+		trig.time.month = calnote->alarm.timestamp.month;
+		trig.time.day = calnote->alarm.timestamp.day;
+		trig.time.hour = calnote->alarm.timestamp.hour;
+		trig.time.minute = calnote->alarm.timestamp.minute;
+		trig.time.second = calnote->alarm.timestamp.second;
+		trig.time.is_daylight = 1;
+
+		aproperty[0] = icalproperty_new_trigger(trig);
+		/* FIXME: with ICAL_ACTION_DISPLAY a DESCRIPTION property is mandatory */
+		aproperty[1] = icalproperty_new_action(calnote->alarm.tone ? ICAL_ACTION_AUDIO : ICAL_ACTION_DISPLAY);
+
+		vevent = icalcomponent_vanew(ICAL_VALARM_COMPONENT,
+					     aproperty[0],
+					     aproperty[1],
+					     NULL);
 	}
-	*/
 
 	/* TODO: should the strings be configurable? */
 	switch(calnote->type) {
@@ -249,6 +257,7 @@ norecurrence:
 							properties[3],
 							properties[4],
 							0),
+				    vevent,
 				    0);
 
 	if (pIcal) {
@@ -466,7 +475,7 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 		}
 
 		/* alarm */
-		alarm = icalcomponent_get_first_component(comp, ICAL_VALARM_COMPONENT);
+		alarm = icalcomponent_get_first_component(compresult, ICAL_VALARM_COMPONENT);
 		if (alarm) {
 			icalproperty *trigger = NULL;
 
@@ -474,6 +483,7 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 			if (trigger) {
 				struct icaltriggertype trigger_value;
 				struct icaltimetype alarm_start;
+				icalproperty *property;
 
 				trigger_value = icalvalue_get_trigger(icalproperty_get_value(trigger));
 				if (icaltriggertype_is_null_trigger(trigger_value) ||
@@ -497,6 +507,9 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 					calnote->alarm.timestamp.minute = alarm_start.minute;
 					calnote->alarm.timestamp.second = alarm_start.second;
 					/* TODO: time zone? */
+
+					property = icalcomponent_get_first_property(alarm, ICAL_ACTION_PROPERTY);
+					calnote->alarm.tone = icalproperty_get_action(property) == ICAL_ACTION_AUDIO ? 1 : 0;
 				}
 			}
 		}
