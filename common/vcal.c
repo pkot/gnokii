@@ -179,11 +179,6 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 	case GN_CALNOTE_BIRTHDAY:
 		icalcomponent_add_property(vevent, icalproperty_new_categories("ANNIVERSARY"));
 		icalcomponent_add_property(vevent, icalproperty_new_summary(calnote->text));
-		do {
-			char rrule[64];
-			snprintf(rrule, sizeof(rrule), "FREQ=YEARLY;INTERVAL=1;BYMONTH=%d", stime.month);
-			icalcomponent_add_property(vevent, icalproperty_new_rrule(icalrecurrencetype_from_string(rrule)));
-		} while (0);
 		stime.is_date = 1;
 		calnote->recurrence = GN_CALNOTE_YEARLY;
 		break;
@@ -222,7 +217,9 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 			interval = calnote->recurrence;
 			break;
 		}
-		if (calnote->occurrences == 0)
+		if (calnote->type == GN_CALNOTE_BIRTHDAY)
+			snprintf(rrule, sizeof(rrule), "FREQ=YEARLY;INTERVAL=1;BYMONTH=%d", stime.month);
+		else if (calnote->occurrences == 0)
 			snprintf(rrule, sizeof(rrule), "FREQ=%s;INTERVAL=%d", freq, interval);
 		else
 			snprintf(rrule, sizeof(rrule), "FREQ=%s;COUNT=%d;INTERVAL=%d", freq, calnote->occurrences, interval);
