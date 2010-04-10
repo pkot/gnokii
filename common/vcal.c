@@ -112,11 +112,8 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 	ical_string str;
 
 #ifdef HAVE_LIBICAL
-#  define MAX_PROP_INDEX 6
-	icalcomponent *pIcal = NULL;
+	icalcomponent *pIcal = NULL, *vevent;
 	struct icaltimetype stime = {0}, etime = {0};
-	icalproperty *properties[MAX_PROP_INDEX+1] = {0}; /* order and number of properties vary */
-	int iprop = 0;
 	char compuid[64];
 
 	memset(&str, 0, sizeof (str));
@@ -134,6 +131,18 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 
 	stime.is_daylight = 1;
 
+	snprintf(compuid, sizeof(compuid), "guid.gnokii.org_%d_%d", calnote->location, rand());
+
+	vevent = icalcomponent_vanew(ICAL_VEVENT_COMPONENT,
+				     icalproperty_new_dtstart(stime),
+				     icalproperty_new_uid(compuid),
+				     icalproperty_new_categories("GNOKII"),
+				     0);
+	if (!vevent) {
+		dprintf("ERROR in icalcomponent_vanew() creating VEVENT\n");
+		return NULL;
+	}
+
 	if (calnote->end_time.year) {
 		etime.year = (calnote->end_time.year == 0xffff ? 1800 : calnote->end_time.year);
 		etime.month = calnote->end_time.month;
@@ -143,66 +152,44 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 		etime.second = calnote->end_time.second;
 		etime.is_daylight = 1;
 
-		properties[iprop++] = icalproperty_new_dtend(etime);
-	}
-
-	if (calnote->alarm.enabled) {
-		icalproperty *aproperty[2];
-		struct icaltriggertype trig;
-
-		trig.time.year = (calnote->alarm.timestamp.year == 0xffff ? 1800 : calnote->alarm.timestamp.year);
-		trig.time.month = calnote->alarm.timestamp.month;
-		trig.time.day = calnote->alarm.timestamp.day;
-		trig.time.hour = calnote->alarm.timestamp.hour;
-		trig.time.minute = calnote->alarm.timestamp.minute;
-		trig.time.second = calnote->alarm.timestamp.second;
-		trig.time.is_daylight = 1;
-
-		aproperty[0] = icalproperty_new_trigger(trig);
-		/* FIXME: with ICAL_ACTION_DISPLAY a DESCRIPTION property is mandatory */
-		aproperty[1] = icalproperty_new_action(calnote->alarm.tone ? ICAL_ACTION_AUDIO : ICAL_ACTION_DISPLAY);
-
-		properties[iprop++] = icalcomponent_vanew(ICAL_VALARM_COMPONENT,
-							  aproperty[0],
-						   	  aproperty[1],
-							  NULL);
+		icalcomponent_add_property(vevent, icalproperty_new_dtend(etime));
 	}
 
 	/* TODO: should the strings be configurable? */
 	switch(calnote->type) {
 	case GN_CALNOTE_MEMO:
-		properties[iprop++] = icalproperty_new_categories("MISCELLANEOUS");
-		properties[iprop++] = icalproperty_new_summary(calnote->text);
+		icalcomponent_add_property(vevent, icalproperty_new_categories("MISCELLANEOUS"));
+		icalcomponent_add_property(vevent, icalproperty_new_summary(calnote->text));
 		break;
 	case GN_CALNOTE_REMINDER:
-		properties[iprop++] = icalproperty_new_categories("REMINDER");
-		properties[iprop++] = icalproperty_new_summary(calnote->text);
+		icalcomponent_add_property(vevent, icalproperty_new_categories("REMINDER"));
+		icalcomponent_add_property(vevent, icalproperty_new_summary(calnote->text));
 		break;
 	case GN_CALNOTE_CALL:
-		properties[iprop++] = icalproperty_new_categories("PHONE CALL");
-		properties[iprop++] = icalproperty_new_summary(calnote->phone_number);
-		properties[iprop++] = icalproperty_new_description(calnote->text);
+		icalcomponent_add_property(vevent, icalproperty_new_categories("PHONE CALL"));
+		icalcomponent_add_property(vevent, icalproperty_new_summary(calnote->phone_number));
+		icalcomponent_add_property(vevent, icalproperty_new_description(calnote->text));
 		break;
 	case GN_CALNOTE_MEETING:
-		properties[iprop++] = icalproperty_new_categories("MEETING");
-		properties[iprop++] = icalproperty_new_summary(calnote->text);
+		icalcomponent_add_property(vevent, icalproperty_new_categories("MEETING"));
+		icalcomponent_add_property(vevent, icalproperty_new_summary(calnote->text));
 		if (calnote->mlocation[0])
-			properties[iprop++] = icalproperty_new_location(calnote->mlocation);
+			icalcomponent_add_property(vevent, icalproperty_new_location(calnote->mlocation));
 		break;
 	case GN_CALNOTE_BIRTHDAY:
-		properties[iprop++] = icalproperty_new_categories("ANNIVERSARY");
-		properties[iprop++] = icalproperty_new_summary(calnote->text);
+		icalcomponent_add_property(vevent, icalproperty_new_categories("ANNIVERSARY"));
+		icalcomponent_add_property(vevent, icalproperty_new_summary(calnote->text));
 		do {
 			char rrule[64];
 			snprintf(rrule, sizeof(rrule), "FREQ=YEARLY;INTERVAL=1;BYMONTH=%d", stime.month);
-			properties[iprop++] = icalproperty_new_rrule(icalrecurrencetype_from_string(rrule));
+			icalcomponent_add_property(vevent, icalproperty_new_rrule(icalrecurrencetype_from_string(rrule)));
 		} while (0);
 		stime.is_date = 1;
 		calnote->recurrence = GN_CALNOTE_YEARLY;
 		break;
 	default:
-		properties[iprop++] = icalproperty_new_categories("UNKNOWN");
-		properties[iprop++] = icalproperty_new_summary(calnote->text);
+		icalcomponent_add_property(vevent, icalproperty_new_categories("UNKNOWN"));
+		icalcomponent_add_property(vevent, icalproperty_new_summary(calnote->text));
 		break;
 	}
 
@@ -239,25 +226,35 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 			snprintf(rrule, sizeof(rrule), "FREQ=%s;INTERVAL=%d", freq, interval);
 		else
 			snprintf(rrule, sizeof(rrule), "FREQ=%s;COUNT=%d;INTERVAL=%d", freq, calnote->occurrences, interval);
-		properties[iprop++] = icalproperty_new_rrule(icalrecurrencetype_from_string(rrule));
+		icalcomponent_add_property(vevent, icalproperty_new_rrule(icalrecurrencetype_from_string(rrule)));
 	}
 norecurrence:
-	snprintf(compuid, sizeof(compuid), "guid.gnokii.org_%d_%d", calnote->location, rand());
+
+	if (calnote->alarm.enabled) {
+		icalcomponent *valarm;
+		struct icaltriggertype trig;
+
+		trig.time.year = (calnote->alarm.timestamp.year == 0xffff ? 1800 : calnote->alarm.timestamp.year);
+		trig.time.month = calnote->alarm.timestamp.month;
+		trig.time.day = calnote->alarm.timestamp.day;
+		trig.time.hour = calnote->alarm.timestamp.hour;
+		trig.time.minute = calnote->alarm.timestamp.minute;
+		trig.time.second = calnote->alarm.timestamp.second;
+		trig.time.is_daylight = 1;
+
+		valarm = icalcomponent_new_valarm();
+
+		icalcomponent_add_property(valarm, icalproperty_new_trigger(trig));
+		/* FIXME: with ICAL_ACTION_DISPLAY a DESCRIPTION property is mandatory */
+		icalcomponent_add_property(valarm, icalproperty_new_action(calnote->alarm.tone ? ICAL_ACTION_AUDIO : ICAL_ACTION_DISPLAY));
+
+		icalcomponent_add_component(vevent, valarm);
+	}
 
 	pIcal = icalcomponent_vanew(ICAL_VCALENDAR_COMPONENT,
 				    icalproperty_new_version("2.0"),
 				    icalproperty_new_prodid(get_prodid()),
-				    icalcomponent_vanew(ICAL_VEVENT_COMPONENT,
-							icalproperty_new_dtstart(stime),
-							icalproperty_new_uid(compuid),
-							icalproperty_new_categories("GNOKII"),
-							properties[0],
-							properties[1],
-							properties[2],
-							properties[3],
-							properties[4],
-							properties[5],
-							0),
+				    vevent,
 				    0);
 
 	if (pIcal) {
@@ -280,7 +277,7 @@ norecurrence:
 		icalcomponent_free(pIcal);
 		pIcal = NULL;
 	} else {
-		dprintf("ERROR in icalcomponent_vanew()\n");
+		dprintf("ERROR in icalcomponent_vanew() creating VCALENDAR\n");
 	}
 	return str.str;
 #else
