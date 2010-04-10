@@ -112,8 +112,8 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 	ical_string str;
 
 #ifdef HAVE_LIBICAL
-#  define MAX_PROP_INDEX 5
-	icalcomponent *pIcal = NULL, *vevent = NULL;
+#  define MAX_PROP_INDEX 6
+	icalcomponent *pIcal = NULL;
 	struct icaltimetype stime = {0}, etime = {0};
 	icalproperty *properties[MAX_PROP_INDEX+1] = {0}; /* order and number of properties vary */
 	int iprop = 0;
@@ -162,10 +162,10 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 		/* FIXME: with ICAL_ACTION_DISPLAY a DESCRIPTION property is mandatory */
 		aproperty[1] = icalproperty_new_action(calnote->alarm.tone ? ICAL_ACTION_AUDIO : ICAL_ACTION_DISPLAY);
 
-		vevent = icalcomponent_vanew(ICAL_VALARM_COMPONENT,
-					     aproperty[0],
-					     aproperty[1],
-					     NULL);
+		properties[iprop++] = icalcomponent_vanew(ICAL_VALARM_COMPONENT,
+							  aproperty[0],
+						   	  aproperty[1],
+							  NULL);
 	}
 
 	/* TODO: should the strings be configurable? */
@@ -256,8 +256,8 @@ norecurrence:
 							properties[2],
 							properties[3],
 							properties[4],
+							properties[5],
 							0),
-				    vevent,
 				    0);
 
 	if (pIcal) {
