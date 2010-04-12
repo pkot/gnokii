@@ -496,8 +496,8 @@ GNOKII_API int gn_char_def_alphabet(unsigned char *string)
 		 *  - check in the default alphabet table
 		 *  - check in the extended default alphabet table
 		 */
-		if (!char_def_alphabet_ext(a + 256 * b) &&
-		    !char_def_alphabet(a + 256 * b)) {
+		if (!char_def_alphabet(256 * a + b) &&
+		    !char_def_alphabet_ext(256 * a + b)) {
 			free(ucs2str);
 			return false;
 		}
@@ -644,7 +644,7 @@ int char_7bit_pack(unsigned int offset, unsigned char *input,
 		bool double_char = false;
 		unsigned int a = 0xff & ucs2str[2 * i], b = 0xff & ucs2str[2 * i + 1];
 
-		in_num = a + 256 * b;
+		in_num = 256 * a + b;
 
 		if (char_def_alphabet_ext(in_num)) {
 			byte = GN_CHAR_UNI_ESCAPE;
