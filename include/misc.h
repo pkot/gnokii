@@ -92,8 +92,10 @@
 #define PM_AUTHENTICATION	0x0200
 #define PM_FOLDERS		0x0400
 #define PM_FULLPBK		0x0800
+/* Verify if these three might not be coupled into one */
 #define PM_SMSFILE		0x1000
 #define PM_EXTPBK2		0x2000
+#define PM_EXTCALENDAR		0x4000
 
 /* This one indicated reported cases of breaking the phone by xgnokii
  * in FBUS orver IrDA mode */

@@ -442,7 +442,7 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 	case GN_OP_GetCalendarNote:
 		return NK6510_GetCalendarNote(data, state);
 	case GN_OP_WriteCalendarNote:
-		return NK6510_WriteCalendarNote2(data, state);
+		return NK6510_WriteCalendarNote(data, state);
 	case GN_OP_DeleteCalendarNote:
 		return NK6510_DeleteCalendarNote(data, state);
 	case GN_OP_DeleteWAPBookmark:
@@ -2295,9 +2295,9 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[512] = {FBUS_FRAME_HEADER, 0x68, 0x00};
 	unsigned char req2[512] = {FBUS_FRAME_HEADER, 0x72, 0x00, 0x00, 0x00};
 	unsigned char req3[] = {FBUS_FRAME_HEADER, 0x5e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03,
-				0x00, 0x00, 0x00, 0x00, // Start position
+				0x00, 0x00, 0x00, 0x00, /* Start position */
 			        0x00, 0x00, 0x04, 0x00,
-				0x00, 0x00, 0x00, 0x00}; // Size
+				0x00, 0x00, 0x00, 0x00}; /* Size */
 	unsigned char req4[] = {FBUS_FRAME_HEADER, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
 	gn_error err;
 	int i;
@@ -2438,7 +2438,7 @@ static gn_error NK6510_PutFile(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req1[512] = {FBUS_FRAME_HEADER, 0x72, 0x11, 0x00, 0x00};
 	unsigned char req2[512] = {FBUS_FRAME_HEADER, 0x58, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03,
-				0x00, 0x00, 0x00, 0x00}; // Size
+				0x00, 0x00, 0x00, 0x00}; /* Size */
 	unsigned char req3[] = {FBUS_FRAME_HEADER, 0x74, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03};
 	gn_error err;
 	int i;
@@ -3576,13 +3576,13 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 	if (!data || !data->calnote) return GN_ERR_INTERNALERROR;
 
 	switch (message[3]) {
-	case NK6510_SUBCAL_NOTE_RCVD:
+	case NK6510_SUBCAL_NOTE_RCVD: /* 0x1a */
 		e = calnote_decode(message, length, data);
 		break;
-	case NK6510_SUBCAL_NOTE2_RCVD:
+	case NK6510_SUBCAL_NOTE2_RCVD: /* 0x7e */
 		e = calnote2_decode(message, length, data);
 		break;
-	case 0x9f:
+	case NK6510_SUBCAL_INFO2_RCVD: /* 0x9f */
 		/* message[4]	- number of notes locations in this frame
 		 * message[5]	- 0x07
 		 * message[6-7] - 0x00 0x00
@@ -3603,7 +3603,7 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 		if (message[4] == 0)
 			data->calnote_list->number = data->calnote_list->last;
 		break;
-	case NK6510_SUBCAL_INFO_RCVD:
+	case NK6510_SUBCAL_INFO_RCVD: /* 0x3b */
 		dprintf("Calendar Notes Info received!\n Total count: %i\n", message[4] * 256 + message[5]);
 		data->calnote_list->number = message[4] * 256 + message[5];
 		dprintf("Location of Notes: ");
@@ -3618,23 +3618,27 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 		if (message[7] != 0)
 			data->calnote_list->number = data->calnote_list->last;
 		break;
-	case NK6510_SUBCAL_FREEPOS_RCVD:
+	case NK6510_SUBCAL_FREEPOS_RCVD: /* 0x32 */
 		dprintf("First free position received: %i!\n", message[4] * 256 + message[5]);
 		data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
 		break;
-	case NK6510_SUBCAL_DEL_NOTE_RESP:
+	case NK6510_SUBCAL_FREEPOS2_RCVD: /* 0x96 */
+		dprintf("First free position received: %i!\n", message[7] * 256 + message[8]);
+		data->calnote->location = (((unsigned int)message[7]) << 8) + message[8];
+		break;
+	case NK6510_SUBCAL_DEL_NOTE_RESP: /* 0x0c */
 		dprintf("Succesfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
 		break;
-	case NK6510_SUBCAL_ADD_MEETING_RESP:
-	case NK6510_SUBCAL_ADD_CALL_RESP:
-	case NK6510_SUBCAL_ADD_BIRTHDAY_RESP:
-	case NK6510_SUBCAL_ADD_REMINDER_RESP:
+	case NK6510_SUBCAL_ADD_MEETING_RESP: /* 0x02 */
+	case NK6510_SUBCAL_ADD_CALL_RESP: /* 0x04 */
+	case NK6510_SUBCAL_ADD_BIRTHDAY_RESP: /* 0x06 */
+	case NK6510_SUBCAL_ADD_REMINDER_RESP: /* 0x08 */
 		if (message[6]) e = GN_ERR_FAILED;
 		dprintf("Attempt to write calendar note at %i. Status: %i\n",
 			message[4] * 256 + message[5],
 			1 - message[6]);
 		break;
-	case NK6510_SUBCAL_ADD_NOTE_RESP:
+	case NK6510_SUBCAL_ADD_NOTE_RESP: /* 0x66 */
 		switch (message[4]) {
 		case 0x00:
 			dprintf("Calendar note written at %d location\n", message[8] * 256 + message[9]);
@@ -3773,6 +3777,12 @@ static gn_error NK6510_FirstCalendarFreePos(gn_data *data, struct gn_statemachin
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 4);
 }
 
+static gn_error NK6510_FirstCalendarFreePos2(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x95, 0x00 };
+	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 5);
+}
+
 static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
@@ -3806,13 +3816,16 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 				    0x00, /* phone length/meeting location */
 				    0x00, 0x00, 0x00};
 
-	if (!data->calnote) return GN_ERR_INTERNALERROR;
+	dprintf("WriteCalendarNote2\n");
+	if (!data->calnote)
+		return GN_ERR_INTERNALERROR;
 
 	calnote = data->calnote;
 
 	/* 6510 needs to seek the first free pos to inhabit with next note */
-	error = NK6510_FirstCalendarFreePos(data, state);
-	if (error != GN_ERR_NONE) return error;
+	error = NK6510_FirstCalendarFreePos2(data, state);
+	if (error != GN_ERR_NONE)
+		return error;
 
 	/* Set location */
 	req[8] = calnote->location / 256;
@@ -3862,10 +3875,11 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 	req[41] = calnote->recurrence % 256;
 
 	/* Occurrences */
+	/* FIXME: it doesn't work 
 	if (calnote->recurrence) {
 		req[46] = calnote->occurrences / 256;
 		req[47] = calnote->occurrences % 256;
-	}
+	}*/
 
 	/* Set start time and end time */
 	req[28] = calnote->time.year / 256;
@@ -3924,13 +3938,19 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	long seconds, minutes;
 	gn_error error;
 
-	if (!data->calnote) return GN_ERR_INTERNALERROR;
+	if (DRVINSTANCE(state)->pm->flags & PM_EXTCALENDAR)
+		return NK6510_WriteCalendarNote(data, state);
+
+	dprintf("WriteCalendarNote\n");
+	if (!data->calnote)
+		return GN_ERR_INTERNALERROR;
 
 	calnote = data->calnote;
 
 	/* 6510 needs to seek the first free pos to inhabit with next note */
 	error = NK6510_FirstCalendarFreePos(data, state);
-	if (error != GN_ERR_NONE) return error;
+	if (error != GN_ERR_NONE)
+		return error;
 
 	/* Location */
 	req[4] = calnote->location >> 8;
@@ -4123,7 +4143,8 @@ static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 		return GN_ERR_INVALIDLOCATION;
 	}
 
-	if (own_list) data->calnote_list = NULL;
+	if (own_list)
+		data->calnote_list = NULL;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 6);
 }
 
@@ -5858,7 +5879,7 @@ static gn_error NK6510_WriteWAPSetting(gn_data *data, struct gn_statemachine *st
 	req[pos++] = length / 256;
 	req[pos++] = length % 256;
 
-	req[pos++] = 0x00; // data->wap_setting->gprs_authentication;
+	req[pos++] = 0x00; /* data->wap_setting->gprs_authentication; */
 	req[pos++] = data->wap_setting->gprs_connection;
 	req[pos++] = data->wap_setting->gprs_login;
 

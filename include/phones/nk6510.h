@@ -123,6 +123,8 @@ typedef enum {
 #define NK6510_SUBCAL_INFO_RCVD		0x3b	/* Received calendar summary */
 #define NK6510_SUBCAL_NOTE2_RCVD	0x7e	/* Received note (with more details) */
 #define NK6510_SUBCAL_ADD_NOTE_RESP	0x66	/* Add calendar note response */
+#define NK6510_SUBCAL_INFO2_RCVD	0x9f	/* Received calendar summary */
+#define NK6510_SUBCAL_FREEPOS2_RCVD	0x96	/* Received first free position */
 
 /* Calendar note types */
 #define NK6510_NOTE_REMINDER		0x00	/* Reminder */
