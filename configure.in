@@ -10,7 +10,7 @@ dnl
 
 
 AC_INIT([gnokii],
-	[0.6.29git],
+	[0.6.29],
 	[gnokii-users@nongnu.org],
 	[gnokii],
 	[http://www.gnokii.org/])
@@ -22,7 +22,7 @@ AC_INIT([gnokii],
 # - If binary compatibility has been broken (eg removed or changed interfaces)
 #   change to C-A+1:0:0
 # - If the interface is the same as the previous version, change to C:R+1:A
-GNOKII_LT_VERSION_CURRENT=5
+GNOKII_LT_VERSION_CURRENT=6
 GNOKII_LT_VERSION_REVISION=0
 GNOKII_LT_VERSION_AGE=0
 AC_SUBST(GNOKII_LT_VERSION_CURRENT)
