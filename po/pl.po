@@ -1,7 +1,7 @@
 # translation of pl.po to Polish
 # This is the Polish locale definition for Gnokii.
 # Copyright (C) 2000 Jacek Fiok <j.fiok@zodiac.mimuw.edu.pl>.
-# Copyright (C) 2002, 2005, 2007, 2008, 2009 Paweł Kot
+# Copyright (C) 2002, 2005, 2007, 2008, 2009, 2010 Paweł Kot
 # Copyright (C) 2003, 2004 Daniel Koć <kocio@linuxnews.pl>
 #
 msgid ""
