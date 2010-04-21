@@ -699,9 +699,8 @@ msgid "Birthday"
 msgstr "Compleanno"
 
 #: ../common/gsm-common.c:284
-#, fuzzy
 msgid "Caller group id"
-msgstr "Gruppo chiamanti"
+msgstr "Identificativo gruppo chiamanti"
 
 #: ../common/gsm-common.c:345 ../common/nokia-decoding.c:343
 #: ../common/phones/nk6100.c:990 ../xgnokii/xgnokii.c:221
@@ -3794,7 +3793,7 @@ msgid "What kind of reset do you want??\n"
 msgstr "Quale tipo di reset si desidera?\n"
 
 #: ../gnokii/gnokii-sms.c:65
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "SMS options:\n"
 "          --sendsms destination [--smsc message_center_number |\n"
@@ -3821,9 +3820,9 @@ msgstr ""
 "Opzioni SMS:\n"
 "          --sendsms destinatario [--smsc numero_centro_messaggi |\n"
 "                 --smscno indice_centro_messaggi] [-r|--report] [-8|--8bit]\n"
-"                 [-C|--class n] [-v|--validity n] [-l|--long n]\n"
+"                 [-C|--class n] [-v|--validity n]\n"
 "                 [-i|--imelody] [-a|--animation file;file;file;file]\n"
-"                 [-o|--concat questa;totale;serie] [-w|--wappush url]\n"
+"                 [-o|--concat questo;totale;serie] [-w|--wappush url]\n"
 "          --savesms [--sender mittente] [--smsc numero_centro_messaggi |\n"
 "                 --smscno indice_centro_messaggi] [-f|--folder id_cartella]\n"
 "                 [-l|--location numero] [-s|--sent|-r|--read] [-d|--"
@@ -3841,7 +3840,7 @@ msgstr ""
 "          --smsreader\n"
 
 #: ../gnokii/gnokii-sms.c:90
-#, fuzzy, c-format
+#, c-format
 msgid ""
 " usage: --sendsms destination              recipient number (msisdn)\n"
 "        --smsc message_center_number       number (msisdn) of the message\n"
@@ -3879,9 +3878,6 @@ msgstr ""
 "                                           messaggi\n"
 "        --smscno indice_centro_messaggi    indice del centro messaggi\n"
 "                                           memorizzato nel telefono\n"
-"        -l n\n"
-"        --long n                           invia un messaggio più lungo dei\n"
-"                                           normali 160 caratteri\n"
 "        -r\n"
 "        --report                           richiedi il Rapporto di invio "
 "SMS\n"
