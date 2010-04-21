@@ -1,3 +1,11 @@
+SHORT TERM
+ * remove encoding workarounds -- should be purely based on libiconv and
+   glib (with maybe some options for Windows)
+ * polish support for FreeDesktop.org file location standards
+ * improve Series40 support
+ * remove outdated translations
+ * cleanup phone flags
+
 LONG TERM
  * gnokii changes:
     o readline support (partially done: gnokii --shell)
@@ -12,6 +20,7 @@ LONG TERM
     o change structures to be dynamically allocatable (in progress)
 
  * driver changes
+    o allow two drivers to be used in parallel (ie. mixed drivers)
     o obex support
     o syncml support
     o support new phones with filesystems, cameras and other bells'n'whistles
