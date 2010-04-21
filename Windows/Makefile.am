@@ -7,7 +7,8 @@ EXTRA_DIST =						\
 	MSVS2005/config.h				\
 	MSVS2005/gnokii.vcproj				\
 	MSVS2005/libgnokii.vcproj			\
-	MSVS2008/Gnokii_setup/Gnokii_setup.vdproj	\
+	MSVS2008/Gnokii_setup/Gnokii_setup-Win32.vdproj	\
+	MSVS2008/Gnokii_setup/Gnokii_setup-x64.vdproj	\
 	MSVS2008/gnokii.sln				\
 	MSVS2008/config.h				\
 	MSVS2008/gnokii.vcproj				\
@@ -20,4 +21,3 @@ EXTRA_DIST =						\
 	MSVC8/config.h					\
 	MSVC8/gnokii.vcproj				\
 	MSVC8/libgnokii.vcproj
-
