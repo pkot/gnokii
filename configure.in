@@ -10,7 +10,7 @@ dnl
 
 
 AC_INIT([gnokii],
-	[0.6.29],
+	[0.6.30git],
 	[gnokii-users@nongnu.org],
 	[gnokii],
 	[http://www.gnokii.org/])
