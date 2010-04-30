@@ -3117,7 +3117,7 @@ retry:
 		 * if it is not filled in, let's take just one number we have.
 		 */
 		if (!entry->subentries_count) {
-			string[0] = GN_PHONEBOOK_ENTRY_Number;
+			string[0] = GN_PHONEBOOK_NUMBER_General;
 			string[1] = string[2] = string[3] = 0;
 			j = strlen(entry->number);
 			j = char_unicode_encode((string + 5), entry->number, j);
