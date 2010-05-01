@@ -183,7 +183,8 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 			vcard_append_printf(&str, "ORG:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Nickname:
-			vcard_append_printf(&str, "NICKNAME:%s", entry->subentries[i].data.number);
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			vcard_append_printf(&str, "NICKNAME:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Birthday:
 			vcard_append_printf(&str, "BDAY:%04u%02u%02u%02uT%02u%02u",
@@ -194,10 +195,12 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 			vcard_append_printf(&str, "X-GSM-CALLERGROUPID:%d", entry->subentries[i].data.id);
 			break;
 		case GN_PHONEBOOK_ENTRY_PTTAddress:
-			vcard_append_printf(&str, "X-SIP;POC:%s", entry->subentries[i].data.number);
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			vcard_append_printf(&str, "X-SIP;POC:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_UserID:
-			vcard_append_printf(&str, "X-WV-ID:%s", entry->subentries[i].data.number);
+			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
+			vcard_append_printf(&str, "X-WV-ID:%s", name);
 			break;
 		case GN_PHONEBOOK_ENTRY_Ringtone:
 		case GN_PHONEBOOK_ENTRY_Pointer:
