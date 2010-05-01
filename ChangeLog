@@ -1,5 +1,8 @@
 0.6.30 (not released yet)
 =========================
+ * libgnokii updates
+    o fix printing BDAY for phonebook entries in vCard format
+                                                    (Daniele Forsi)
 
 0.6.29
 ======

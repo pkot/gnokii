@@ -186,7 +186,9 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 			vcard_append_printf(&str, "NICKNAME:%s", entry->subentries[i].data.number);
 			break;
 		case GN_PHONEBOOK_ENTRY_Birthday:
-			vcard_append_printf(&str, "BDAY:%s", entry->subentries[i].data.number);
+			vcard_append_printf(&str, "BDAY:%04u%02u%02u%02uT%02u%02u",
+				entry->subentries[i].data.date.year, entry->subentries[i].data.date.month, entry->subentries[i].data.date.day,
+				entry->subentries[i].data.date.hour, entry->subentries[i].data.date.minute, entry->subentries[i].data.date.second);
 			break;
 		case GN_PHONEBOOK_ENTRY_ExtGroup:
 			vcard_append_printf(&str, "X-GSM-CALLERGROUPID:%d", entry->subentries[i].data.id);
