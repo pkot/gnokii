@@ -128,6 +128,12 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 				blockstart[6], blockstart[7], blockstart[8], blockstart[9], blockstart[10], blockstart[11]);
 			memcpy(subentry->data.fileid, blockstart+6, 6);
 			break;
+		case GN_PHONEBOOK_ENTRY_Video:
+			dprintf("Video\n");
+			dprintf("   Video id: %02x %02x %02x %02x %02x %02x\n",
+				blockstart[6], blockstart[7], blockstart[8], blockstart[9], blockstart[10], blockstart[11]);
+			memcpy(subentry->data.fileid, blockstart+6, 6);
+			break;
 		case GN_PHONEBOOK_ENTRY_PostalAddress:
 			dprintf("Postal Address %d parts\n", blockstart[7]);
 			blocks += blockstart[7];
