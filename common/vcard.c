@@ -193,6 +193,12 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 		case GN_PHONEBOOK_ENTRY_ExtGroup:
 			vcard_append_printf(&str, "X-GSM-CALLERGROUPID:%d", entry->subentries[i].data.id);
 			break;
+		case GN_PHONEBOOK_ENTRY_PTTAddress:
+			vcard_append_printf(&str, "X-SIP;POC:%s", entry->subentries[i].data.number);
+			break;
+		case GN_PHONEBOOK_ENTRY_UserID:
+			vcard_append_printf(&str, "X-WV-ID:%s", entry->subentries[i].data.number);
+			break;
 		case GN_PHONEBOOK_ENTRY_Ringtone:
 		case GN_PHONEBOOK_ENTRY_Pointer:
 		case GN_PHONEBOOK_ENTRY_Logo:

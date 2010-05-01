@@ -1,7 +1,8 @@
 0.6.30 (not released yet)
 =========================
  * libgnokii updates
-    o fix printing BDAY for phonebook entries in vCard format
+    o fix printing BDAY for phonebook entries in vCard format and
+      add label for PTT Address (X-SIP;POC) and User ID (X-WV-ID)
                                                     (Daniele Forsi)
 
 0.6.29
