@@ -24,7 +24,7 @@ libsmsd_file_la_LDFLAGS = $(modules_flags)
 libsmsd_file_la_LIBADD = $(GLIB_LIBS)
 
 smsd_SOURCES = smsd.h smsd.c lowlevel.c lowlevel.h db.h
-smsd_LDADD = $(GLIB_LIBS) $(PTHREAD_LIBS) $(INTLLIBS) $(top_builddir)/common/libgnokii.la
+smsd_LDADD = $(GLIB_LIBS) $(GMODULE_LIBS) $(PTHREAD_LIBS) $(INTLLIBS) $(top_builddir)/common/libgnokii.la
 
 AM_CFLAGS =				\
 	-I$(top_srcdir)/include		\
