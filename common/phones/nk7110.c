@@ -1187,7 +1187,7 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("\tFolder name: ");
 			len = 0;
 			/* search for the next folder's index number, i.e. length of the folder name */
-			while (message[i+1] != nextfolder && i < length) {
+			while (i + 1 < length && message[i + 1] != nextfolder) {
 				i += 2;
 				len += 2;
 			}
