@@ -7,6 +7,8 @@
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)
+ * nk7110 driver updates
+    o fix reading SMS from AR and TE                (Daniele Forsi)
 
 0.6.29
 ======
