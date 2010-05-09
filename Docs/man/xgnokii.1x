@@ -1,4 +1,4 @@
-.TH "xgnokii" "1x" "Oct 31, 2006" "Erik Rossen, Daniele Forsi" "gnokii"
+.TH "xgnokii" "1x" "May 10, 2010" "Erik Rossen, Daniele Forsi" "gnokii"
 .SH "NAME"
 xgnokii \- graphical interface of the gnokii telephone toolkit
 .SH "SYNOPSIS"
@@ -7,7 +7,12 @@ xgnokii \- graphical interface of the gnokii telephone toolkit
 .SH "DESCRIPTION"
 .PP 
 .B xgnokii
-is a fancy graphical interface for gnokii.  It has plenty of doo\-dads.
+is a fancy graphical interface for libgnokii.
+It uses the settings in the [global] section of the configuration file of
+.BR gnokii(1).
+.PP 
+You can assume that your phone is supported, however there are rare cases that you will get very limited functionality with
+.BR xgnokii .
 .PP 
 .B xgnokii
 can save contacts in vCard format (thanks to Pavel Machek <pavel at ucw dot cz>) if you add .vcard or .gcrd extension (case sensitive) to the file name in the export contacts dialog.
@@ -17,7 +22,7 @@ is a multiple systems tool suite and (eventually) modem/fax driver for the mobil
 .PP 
 .B gnokii
 at the beginning was designed to support Nokia phones. At the moment it supports most of the
-Nokia mobiles and also supports other phones that understand AT commands (see man gnokii for a list of supported phones).
+Nokia mobiles and also supports other phones that understand AT commands.
 
 .SH "DIAGNOSTICS"
 Various error messages are printed to STDERR when xdebug = on is set in gnokii config file
@@ -27,8 +32,7 @@ This man page is too short. See more details in gnokii man page.
 
 .SH "AUTHOR"
 Jan Derfinak is the author of the
-.B xgnokii
-.
+.BR xgnokii .
 
 Hugh Blemings <hugh at blemings dot org> and Pavel Janik ml. <Pavel.Janik at
 suse dot cz> and Pawel Kot <gnokii at gmail dot com> are the authors of the
@@ -43,4 +47,5 @@ See also Docs/CREDITS from the gnokii sources.
 This program is distributed under the GNU Public License Version 2, or (at your option) any later version.
 
 .SH "SEE ALSO"
-gnokii, gnokiid
+.BR gnokii (1),
+.BR gnokiid (1)
