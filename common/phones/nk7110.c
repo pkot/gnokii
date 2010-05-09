@@ -1252,7 +1252,7 @@ static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 
 	if (data->raw_sms->memory_type != data->sms_folder->folder_id) {
 		if ((error = NK7110_GetSMSFolders(data, state)) != GN_ERR_NONE) return error;
-		if ((get_memory_type(data->raw_sms->memory_type) >
+		if ((data->raw_sms->memory_type >
 		     data->sms_folder_list->folder_id[data->sms_folder_list->number - 1]) ||
 		    (data->raw_sms->memory_type < 12))
 			return GN_ERR_INVALIDMEMORYTYPE;
