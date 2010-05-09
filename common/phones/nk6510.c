@@ -915,7 +915,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 		case 0x84: /* Time blocks (not BCD encoded) */
 			/* Make it BCD format then ;-) */
 			/* This is an ugly hack. Dunno how to do it correctly for now */
-			data->raw_sms->smsc_time[0] = ((block[3] & 0x0f) % 10) << 4;
+			data->raw_sms->smsc_time[0] = ((block[3] & 0x0f) / 10) + (((block[3] & 0x0f) % 10) << 4);
 			for (j = 1; j < block[2]; j++) {
 				data->raw_sms->smsc_time[j] =
 					(block[j+3] / 10) + ((block[j+3] % 10) << 4);
