@@ -799,7 +799,7 @@ static void ResetLayout(unsigned char *message, gn_data *data)
 
 static void ParseLayout(unsigned char *message, gn_data *data)
 {
-	int i, j, subblocks;
+	int i, j, subblocks, year;
 	unsigned char *block = message;
 
 	ResetLayout(message, data);
@@ -914,9 +914,9 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			break;
 		case 0x84: /* Time blocks (not BCD encoded) */
 			/* Make it BCD format then ;-) */
-			/* This is an ugly hack. Dunno how to do it correctly for now */
-			data->raw_sms->smsc_time[0] = ((block[3] & 0x0f) / 10) + (((block[3] & 0x0f) % 10) << 4);
-			for (j = 1; j < block[2]; j++) {
+			year = ((block[2] << 8) + block[3]) % 100;
+			data->raw_sms->smsc_time[0] = (year / 10) + ((year % 10) << 4);
+			for (j = 1; j < GN_SMS_DATETIME_MAX_LENGTH; j++) {
 				data->raw_sms->smsc_time[j] =
 					(block[j+3] / 10) + ((block[j+3] % 10) << 4);
 			}
