@@ -1,0 +1,51 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gnokii", "gnokii.vcxproj", "{681F70AD-B62A-42F3-A85E-94DE5E160437}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libgnokii", "libgnokii.vcxproj", "{93B245DE-6DCE-46E2-BFF1-171383B0643C}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Gnokii setup Win32", "Gnokii_setup\Gnokii_setup-Win32.vdproj", "{52325EA7-CFC3-488D-A213-2ACF154E30DA}"
+EndProject
+Project("{54435603-DBB4-11D2-8724-00A0C9A8B90C}") = "Gnokii setup x64", "Gnokii_setup\Gnokii_setup-x64.vdproj", "{ECA1C110-D9D3-4A9E-A375-2F5B516D50A8}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{C5B7B27C-8210-40DA-942C-C83961BAAC78}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Debug|x64 = Debug|x64
+		Release|Win32 = Release|Win32
+		Release|x64 = Release|x64
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{681F70AD-B62A-42F3-A85E-94DE5E160437}.Debug|Win32.ActiveCfg = Debug|Win32
+		{681F70AD-B62A-42F3-A85E-94DE5E160437}.Debug|Win32.Build.0 = Debug|Win32
+		{681F70AD-B62A-42F3-A85E-94DE5E160437}.Debug|x64.ActiveCfg = Debug|x64
+		{681F70AD-B62A-42F3-A85E-94DE5E160437}.Debug|x64.Build.0 = Debug|x64
+		{681F70AD-B62A-42F3-A85E-94DE5E160437}.Release|Win32.ActiveCfg = Release|Win32
+		{681F70AD-B62A-42F3-A85E-94DE5E160437}.Release|Win32.Build.0 = Release|Win32
+		{681F70AD-B62A-42F3-A85E-94DE5E160437}.Release|x64.ActiveCfg = Release|x64
+		{681F70AD-B62A-42F3-A85E-94DE5E160437}.Release|x64.Build.0 = Release|x64
+		{93B245DE-6DCE-46E2-BFF1-171383B0643C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{93B245DE-6DCE-46E2-BFF1-171383B0643C}.Debug|Win32.Build.0 = Debug|Win32
+		{93B245DE-6DCE-46E2-BFF1-171383B0643C}.Debug|x64.ActiveCfg = Debug|x64
+		{93B245DE-6DCE-46E2-BFF1-171383B0643C}.Debug|x64.Build.0 = Debug|x64
+		{93B245DE-6DCE-46E2-BFF1-171383B0643C}.Release|Win32.ActiveCfg = Release|Win32
+		{93B245DE-6DCE-46E2-BFF1-171383B0643C}.Release|Win32.Build.0 = Release|Win32
+		{93B245DE-6DCE-46E2-BFF1-171383B0643C}.Release|x64.ActiveCfg = Release|x64
+		{93B245DE-6DCE-46E2-BFF1-171383B0643C}.Release|x64.Build.0 = Release|x64
+		{52325EA7-CFC3-488D-A213-2ACF154E30DA}.Debug|Win32.ActiveCfg = Debug
+		{52325EA7-CFC3-488D-A213-2ACF154E30DA}.Debug|x64.ActiveCfg = Debug
+		{52325EA7-CFC3-488D-A213-2ACF154E30DA}.Release|Win32.ActiveCfg = Release
+		{52325EA7-CFC3-488D-A213-2ACF154E30DA}.Release|Win32.Build.0 = Release
+		{52325EA7-CFC3-488D-A213-2ACF154E30DA}.Release|x64.ActiveCfg = Release
+		{ECA1C110-D9D3-4A9E-A375-2F5B516D50A8}.Debug|Win32.ActiveCfg = Debug
+		{ECA1C110-D9D3-4A9E-A375-2F5B516D50A8}.Debug|x64.ActiveCfg = Debug
+		{ECA1C110-D9D3-4A9E-A375-2F5B516D50A8}.Release|Win32.ActiveCfg = Release
+		{ECA1C110-D9D3-4A9E-A375-2F5B516D50A8}.Release|x64.ActiveCfg = Release
+		{ECA1C110-D9D3-4A9E-A375-2F5B516D50A8}.Release|x64.Build.0 = Release
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
