@@ -9,6 +9,9 @@
                                                         (Paweł Kot)
  * nk7110 driver updates
     o fix reading SMS from AR and TE                (Daniele Forsi)
+ * win32 updates
+    o enable compile under cywin/mingw             (Santeri Toikka)
+    o enable MSVS 2010 compilation                 (Santeri Toikka)
 
 0.6.29
 ======
