@@ -221,6 +221,7 @@ out:
 #ifdef WIN32
 static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 {
+	int position;
 	if (!data || !data->raw_sms)
 		return GN_ERR_INTERNALERROR;
 	position = data->raw_sms->number;
