@@ -199,7 +199,6 @@ static gn_error get_gn_error(PCSC_IOSTRUCT *ios, LONG ret)
 	case SCARD_W_UNPOWERED_CARD:
 	case SCARD_W_RESET_CARD:
 	case SCARD_W_REMOVED_CARD:
-	case SCARD_W_INSERTED_CARD:
 	 	return GN_ERR_SIMPROBLEM;
 	case SCARD_E_NO_MEMORY:
 		return GN_ERR_MEMORYFULL;
