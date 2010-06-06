@@ -7,6 +7,8 @@
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)
+    o parse call notification frames on Series 40 (tested on 3rd
+      Ed.); closes https://savannah.nongnu.org/bugs/?20895
  * nk7110 driver updates
     o fix reading SMS from AR and TE                (Daniele Forsi)
  * win32 updates
