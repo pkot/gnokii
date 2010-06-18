@@ -227,6 +227,19 @@ static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 	position = data->raw_sms->number;
 	return at_sms_get_static(data, state, position);
 }
+
+static gn_error at_sms_get_sms_status(gn_data *data, struct gn_statemachine *state)
+{
+	if (!data || !data->sms_status)
+		return GN_ERR_INTERNALERROR;
+
+	data->sms_status->number = 0;
+	data->sms_status->unread = 0;
+	data->sms_status->changed = 0;
+	data->sms_status->folders_count = 0;
+
+	return GN_ERR_NONE;
+}
 #else
 static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 {
@@ -254,10 +267,27 @@ static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 out:
 	return e;
 }
-#endif
+
+static int count_files(DIR *d, const char *dirpath)
+{
+	int i = 0;
+	struct dirent *dent;
+	struct stat buf;
+	char path[MAX_PATH_LEN];
+
+	while ((dent = readdir(d)) != NULL) {
+		snprintf(path, MAX_PATH_LEN, "%s/%s", dirpath, dent->d_name);
+		if (!stat(path, &buf) && S_ISREG(buf.st_mode))
+			i++;
+	}
+	return i;
+}
 
 static gn_error at_sms_get_sms_status(gn_data *data, struct gn_statemachine *state)
 {
+	DIR *d;
+	const char *path;
+
 	if (!data || !data->sms_status)
 		return GN_ERR_INTERNALERROR;
 
@@ -266,8 +296,15 @@ static gn_error at_sms_get_sms_status(gn_data *data, struct gn_statemachine *sta
 	data->sms_status->changed = 0;
 	data->sms_status->folders_count = 0;
 
+	path = gn_lib_cfg_get("fake_driver", "sms_inbox");
+	if (!path || (d = opendir(path)) == NULL)
+		return GN_ERR_NONE;
+	data->sms_status->number = data->sms_status->unread = count_files(d, path);
+	closedir(d);
+	
 	return GN_ERR_NONE;
 }
+#endif
 
 static gn_error at_get_model(gn_data *data, struct gn_statemachine *state)
 {
