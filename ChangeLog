@@ -14,6 +14,9 @@
  * win32 updates
     o enable compile under cywin/mingw             (Santeri Toikka)
     o enable MSVS 2010 compilation                 (Santeri Toikka)
+ * fake driver updates
+    o implement enough GN_OP_GetSMSStatus and GN_OP_DeleteSMS to
+      test smsd receiving with static and file SMS  (Daniele Forsi)
 
 0.6.29
 ======

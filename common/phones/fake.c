@@ -185,6 +185,16 @@ static gn_error at_sms_get_status_static(gn_data *data, struct gn_statemachine *
 	return count;
 }
 
+static gn_error at_sms_delete_static(gn_data *data, struct gn_statemachine *state, int position)
+{
+	if (position > sizeof(sms_inbox)/sizeof(char *) || !sms_inbox[position - 1])
+		return GN_ERR_EMPTYLOCATION;
+
+	sms_inbox[position - 1] = NULL;
+
+	return GN_ERR_NONE;
+}
+
 #ifndef WIN32
 #define MAX_PATH_LEN 256
 static gn_error at_sms_get_from_file(gn_data *data, struct gn_statemachine *state, int position, DIR *d, const char *dirpath)
@@ -227,6 +237,32 @@ out:
 	closedir(d);
 	return e;
 }
+
+static gn_error at_sms_delete_from_file(gn_data *data, struct gn_statemachine *state, int position, DIR *d, const char *dirpath)
+{
+	gn_error e = GN_ERR_NONE;
+	int i, n;
+	struct dirent *dent;
+	struct stat buf;
+	char path[MAX_PATH_LEN];
+
+	/* iterate to Nth position */
+	for (i = 0; i < position; i++) {
+		dent = readdir(d);
+		if (dent) {
+			snprintf(path, MAX_PATH_LEN, "%s/%s", dirpath, dent->d_name);
+			n = stat(path, &buf);
+			if (!S_ISREG(buf.st_mode))
+				i--;
+		} else
+			goto out;
+	}
+	if (unlink(path))
+		e = GN_ERR_FAILED;
+out:
+	closedir(d);
+	return e;
+}
 #endif
 
 #ifdef WIN32
@@ -237,6 +273,15 @@ static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_INTERNALERROR;
 	position = data->raw_sms->number;
 	return at_sms_get_static(data, state, position);
+}
+
+static gn_error at_sms_delete(gn_data *data, struct gn_statemachine *state)
+{
+	int position;
+	if (!data || !data->raw_sms)
+		return GN_ERR_INTERNALERROR;
+	position = data->raw_sms->number;
+	return at_sms_delete_static(data, state, position);
 }
 
 static gn_error at_sms_get_sms_status(gn_data *data, struct gn_statemachine *state)
@@ -317,6 +362,33 @@ static gn_error at_sms_get_sms_status(gn_data *data, struct gn_statemachine *sta
 	
 	return GN_ERR_NONE;
 }
+
+static gn_error at_sms_delete(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error e = GN_ERR_NONE;
+	const char *path;
+	DIR *d;
+	int position;
+
+	if (!data || !data->raw_sms) {
+		e = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+	position = data->raw_sms->number;
+	if (position < 1) {
+		e = GN_ERR_INVALIDLOCATION;
+		goto out;
+	}
+
+	path = gn_lib_cfg_get("fake_driver", "sms_inbox");
+	if (!path || (d = opendir(path)) == NULL)
+		e = at_sms_delete_static(data, state, position);
+	else
+		e = at_sms_delete_from_file(data, state, position, d, path);
+
+out:
+	return e;
+}
 #endif
 
 static gn_error at_get_model(gn_data *data, struct gn_statemachine *state)
@@ -344,6 +416,8 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 		return at_sms_write(data, state, "CMGS");
 	case GN_OP_GetSMS:
 		return at_sms_get(data, state);
+	case GN_OP_DeleteSMS:
+		return at_sms_delete(data, state);
 	case GN_OP_GetSMSCenter:
 		return GN_ERR_NONE;
 	case GN_OP_GetModel:
