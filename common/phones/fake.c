@@ -174,6 +174,17 @@ static gn_error at_sms_get_static(gn_data *data, struct gn_statemachine *state, 
 	return at_sms_get_generic(data, state, sms_inbox[position - 1]);
 }
 
+static gn_error at_sms_get_status_static(gn_data *data, struct gn_statemachine *state)
+{
+	int i, count = 0;
+
+	for (i = 0; i < sizeof(sms_inbox)/sizeof(char *); i++)
+		if (sms_inbox[i])
+			count++;
+
+	return count;
+}
+
 #ifndef WIN32
 #define MAX_PATH_LEN 256
 static gn_error at_sms_get_from_file(gn_data *data, struct gn_statemachine *state, int position, DIR *d, const char *dirpath)
@@ -297,10 +308,12 @@ static gn_error at_sms_get_sms_status(gn_data *data, struct gn_statemachine *sta
 	data->sms_status->folders_count = 0;
 
 	path = gn_lib_cfg_get("fake_driver", "sms_inbox");
-	if (!path || (d = opendir(path)) == NULL)
-		return GN_ERR_NONE;
-	data->sms_status->number = data->sms_status->unread = count_files(d, path);
-	closedir(d);
+	if (!path || (d = opendir(path)) == NULL) {
+		data->sms_status->number = data->sms_status->unread = at_sms_get_status_static(data, state);
+	} else {
+		data->sms_status->number = data->sms_status->unread = count_files(d, path);
+		closedir(d);
+	}
 	
 	return GN_ERR_NONE;
 }
