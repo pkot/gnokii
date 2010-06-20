@@ -17,6 +17,10 @@
  * fake driver updates
     o implement enough GN_OP_GetSMSStatus and GN_OP_DeleteSMS to
       test smsd receiving with static and file SMS  (Daniele Forsi)
+ * at driver updates
+    o drop "T" modifier from ATDT because not all phones ignore it
+      and it prevents the use of direct dialling from phonebooks;
+      see gnokii man page and GSM 07.07             (Daniele Forsi)
 
 0.6.29
 ======

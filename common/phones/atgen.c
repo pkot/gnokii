@@ -1559,7 +1559,7 @@ static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->call_info)
 		return GN_ERR_INTERNALERROR;
-	snprintf(req, sizeof(req), "ATDT%s;\r", data->call_info->number);
+	snprintf(req, sizeof(req), "ATD%s;\r", data->call_info->number);
 	if (sm_message_send(strlen(req), GN_OP_MakeCall, req, state))
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_MakeCall, data, state);

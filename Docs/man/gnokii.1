@@ -1,4 +1,4 @@
-.TH "gnokii" "1" "Sep 29, 2008" "Dag Wieers, Pawel Kot" "gnokii"
+.TH "gnokii" "1" "Jun 20, 2010" "Dag Wieers, Pawel Kot" "gnokii"
 .SH "NAME"
 gnokii \- modem/fax driver for the mobile phones
 .SH "SYNOPSIS"
@@ -80,6 +80,11 @@ specify speed dial.
 initiate voice call.
 On success print the \fIcallid\fP identifier to be used with the \-\-hangup command.
 The \-\-monitor command can be used to show the \fIcallid\fP.
+
+With \fImodel = AT\fP direct dialing from phonebooks is supported with careful use
+of shell escaping, for example:
+ gnokii \-\-dialvoice ">SM42"   # dial the number in location 42 of SM memory
+ gnokii \-\-dialvoice '>"Home"' # dial the number if string matches exactly a contact name
 .TP 
 .BR "\-\-senddtmf \fIstring\fP"
 send DTMF sequence.
