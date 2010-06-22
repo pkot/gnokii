@@ -4521,7 +4521,7 @@ msgid ""
 "          --getwapbookmark number\n"
 "          --writewapbookmark name URL\n"
 "          --deletewapbookmark number\n"
-"          --getwapsetting number [-r|raw]\n"
+"          --getwapsetting number [-r|--raw]\n"
 "          --writewapsetting\n"
 "          --activatewapsetting number\n"
 msgstr ""
@@ -4529,7 +4529,7 @@ msgstr ""
 "          --getwapbookmark numero\n"
 "          --writewapbookmark nome URL\n"
 "          --deletewapbookmark numero\n"
-"          --getwapsetting numero [-r|raw]\n"
+"          --getwapsetting numero [-r|--raw]\n"
 "          --writewapsetting\n"
 "          --activatewapsetting numero\n"
 
@@ -4567,7 +4567,7 @@ msgstr "Preferiti WAP n° %d eliminato.\n"
 #: ../gnokii/gnokii-wap.c:171
 #, c-format
 msgid " usage: --getwapsetting number [-r|--raw]\n"
-msgstr " Uso: --getwapsetting numero [-r|raw]\n"
+msgstr " Uso: --getwapsetting numero [-r|--raw]\n"
 
 #: ../gnokii/gnokii-wap.c:221 ../xgnokii/xgnokii_contacts.c:725
 #: ../xgnokii/xgnokii_contacts.c:803 ../xgnokii/xgnokii_contacts.c:942

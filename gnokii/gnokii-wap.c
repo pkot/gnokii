@@ -56,7 +56,7 @@ void wap_usage(FILE *f)
 		     "          --getwapbookmark number\n"
 		     "          --writewapbookmark name URL\n"
 		     "          --deletewapbookmark number\n"
-		     "          --getwapsetting number [-r|raw]\n"
+		     "          --getwapsetting number [-r|--raw]\n"
 		     "          --writewapsetting\n"
 		     "          --activatewapsetting number\n"
 		     ));
