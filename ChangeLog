@@ -9,6 +9,8 @@
                                                         (Paweł Kot)
     o parse call notification frames on Series 40 (tested on 3rd
       Ed.); closes https://savannah.nongnu.org/bugs/?20895
+                                                    (Daniele Forsi)
+    o free the cached file lists up on exist            (Paweł Kot)
  * nk7110 driver updates
     o fix reading SMS from AR and TE                (Daniele Forsi)
  * win32 updates

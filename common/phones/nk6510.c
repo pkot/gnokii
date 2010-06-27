@@ -73,6 +73,8 @@ typedef struct {
 	char *path;
 } path2mt_t;
 
+static struct map *file_cache_map = NULL;
+
 static path2mt_t s40_30_mt_mappings[] = {
 	{ GN_MT_IN, "C:\\predefmessages\\1\\" },
 	{ GN_MT_OUS, "C:\\predefmessages\\2\\" },
@@ -189,6 +191,7 @@ static void inc_filecount(gn_file_list *fl)
 /* Functions prototypes */
 static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_Initialise(struct gn_statemachine *state);
+static gn_error NK6510_Terminate(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK6510_GetModel(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetRevision(gn_data *data, struct gn_statemachine *state);
@@ -391,8 +394,7 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 	case GN_OP_Init:
 		return NK6510_Initialise(state);
 	case GN_OP_Terminate:
-		FREE(DRVINSTANCE(state));
-		return pgen_terminate(data, state);
+		return NK6510_Terminate(data, state);
 	case GN_OP_GetModel:
 		return NK6510_GetModel(data, state);
 	case GN_OP_GetRevision:
@@ -679,6 +681,13 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	}
 
 	return GN_ERR_NONE;
+}
+
+static gn_error NK6510_Terminate(gn_data *data, struct gn_statemachine *state)
+{
+	FREE(DRVINSTANCE(state));
+	map_free(&file_cache_map);
+	return pgen_terminate(data, state);
 }
 
 /**********************/
@@ -2203,7 +2212,6 @@ static gn_error NK6510_GetFileListCache(gn_data *data, struct gn_statemachine *s
 {
 	gn_error error = GN_ERR_NONE;
 	gn_file_list *fl;
-	static struct map *map = NULL;
 	int count = NK6510_FILE_CACHE_TIMEOUT;
 
 	dprintf("Trying to retrieve filelist of %s from cache\n", data->file_list->path);
@@ -2213,14 +2221,14 @@ static gn_error NK6510_GetFileListCache(gn_data *data, struct gn_statemachine *s
 	 * use proper timeout: the more files are in the folder the longer
 	 * it takes to get the file list.
 	 */
-	fl = map_get(&map, data->file_list->path, 0);
+	fl = map_get(&file_cache_map, data->file_list->path, 0);
 	/*
 	 * A fl->file_count value of zero would give a timeout of zero which
 	 * means "no timeout", so keep the default value in that case.
 	 */
 	if (fl && fl->file_count)
 		count *= fl->file_count;
-	fl = map_get(&map, data->file_list->path, count);
+	fl = map_get(&file_cache_map, data->file_list->path, count);
 	if (!fl) {
 		dprintf("Cache empty or expired\n");
 		error = NK6510_GetFileList(data, state);
@@ -2228,7 +2236,7 @@ static gn_error NK6510_GetFileListCache(gn_data *data, struct gn_statemachine *s
 			char *path = strdup(data->file_list->path);
 			fl = calloc(1, sizeof(gn_file_list));
 			memcpy(fl, data->file_list, sizeof(gn_file_list));
-			map_add(&map, path, fl);
+			map_add(&file_cache_map, path, fl);
 		}
 	} else {
 		memcpy(data->file_list, fl, sizeof(gn_file_list));
