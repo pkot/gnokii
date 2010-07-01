@@ -2356,7 +2356,7 @@ static gn_error ReplyGetSMSStatus(int messagetype, unsigned char *buffer, int le
 	buf.length = length;
 	splitlines(&buf);
 
-	if (sscanf(buf.line2, "+CPMS: \"%*c%*c\",%d,%*d", &data->sms_status->number) != 1)
+	if (sscanf(buf.line2, "+CPMS: \"%*[^\"]\",%d,%*d", &data->sms_status->number) != 1)
 		return GN_ERR_FAILED;
 
 	data->sms_status->unread = 0;
