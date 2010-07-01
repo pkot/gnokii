@@ -228,29 +228,28 @@ static int usage(FILE *f, int argc, char *argv[])
 	int i;
 	int all = 0;
 
-	fprintf(f, _("Usage:\n"
-		     "	gnokii [CONFIG OPTIONS] OPTIONS\n"
-		     "\nCONFIG OPTIONS\n"
-		     "		--config filename\n"
-		     "		--phone phone_section\n"
-		     "\nOPTIONS\n"
-		     "Use just one option at a time.\n"
-		     "General options:\n"
-		     "          --help [all] [monitor] [sms] [mms] [phonebook] [calendar] [todo]\n"
-		     "                 [dial] [profile] [settings] [wap] [logo] [ringtone]\n"
-		     "                 [security] [file] [other]\n"
-		     "          --version\n"
-		     "          --shell\n"));
-	/* Print "short usage" only */
-	if (argc == -1)
-		return -1;
-
 	for (i = 1; i < argc; i++) {
 		if (!strcmp(argv[i], "all")) {
 			all = 1;
 			break;
 		}
 	}
+
+	/* Don't print general options if specific help was requested */
+	if (all || argc == -1)
+		fprintf(f, _("Usage:\n"
+			     "	gnokii [CONFIG OPTIONS] OPTIONS\n"
+			     "\nCONFIG OPTIONS\n"
+			     "		--config filename\n"
+			     "		--phone phone_section\n"
+			     "\nOPTIONS\n"
+			     "Use just one option at a time.\n"
+			     "General options:\n"
+			     "          --help [all] [monitor] [sms] [mms] [phonebook] [calendar] [todo]\n"
+			     "                 [dial] [profile] [settings] [wap] [logo] [ringtone]\n"
+			     "                 [security] [file] [other]\n"
+			     "          --version\n"
+			     "          --shell\n"));
 
 	/* FIXME? throw an error if argv[i] is duplicated or unknown */
 	for (i = 1; i < argc; i++) {
