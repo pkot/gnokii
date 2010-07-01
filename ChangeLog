@@ -4,6 +4,8 @@
     o fix printing BDAY for phonebook entries in vCard format and
       add label for PTT Address (X-SIP;POC) and User ID (X-WV-ID)
                                                     (Daniele Forsi)
+    o fix mbox format of --getsms for sent messages; closes
+      https://savannah.nongnu.org/bugs/?30050       (Daniele Forsi)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)

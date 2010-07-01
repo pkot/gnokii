@@ -2108,7 +2108,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	switch (sms->status) {
 	case GN_SMS_Sent:
 	case GN_SMS_Unsent:
-		CONCAT(buf, tmp, size, "To %s@%s %s", sms->remote.number, from, asctime(loctime));
+		CONCAT(buf, tmp, size, "From %s@%s %s", "+0", from, asctime(loctime));
 		break;
 	case GN_SMS_Read:
 	case GN_SMS_Unread:
