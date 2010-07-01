@@ -902,7 +902,7 @@ size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len
 		 */
 		length = char_uni_alphabet_encode(src + i, len - i, &wc, &mbs);
 		/* We stop reading after first unreadable input */
-		if (!length)
+		if (length < 1)
 			return o_len * UCS2_SIZE;
 		i += length;
 		/* We write here 4 chars + NULL termination */
