@@ -1331,8 +1331,8 @@ static gn_error AT_GetSMSFolders(gn_data *data, struct gn_statemachine *state)
 
 static gn_error AT_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
 {
-	gn_sms_status smsstatus = {0, 0, 0, 0}, *save_smsstatus;
-	gn_memory_status memory_status = {0, 0, 0}, *save_memory_status;
+	gn_sms_status smsstatus = {0, 0, 0, 0, GN_MT_XX}, *save_smsstatus;
+	gn_memory_status memory_status = {GN_MT_ME, 0, 0}, *save_memory_status;
 	gn_error ret;
 
 	memory_status.memory_type = data->sms_folder->folder_id;
