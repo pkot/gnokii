@@ -515,13 +515,13 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 			calnote->occurrences = recur.count;
 			switch (recur.freq) {
 			case ICAL_SECONDLY_RECURRENCE:
-				dprintf("Not suppported recurrence type. Approximating recurrence\n");
+				dprintf("Not supported recurrence type. Approximating recurrence\n");
 				calnote->recurrence = recur.interval / 3600;
 				if (!calnote->recurrence)
 					calnote->recurrence = 1;
 				break;
 			case ICAL_MINUTELY_RECURRENCE:
-				dprintf("Not suppported recurrence type. Approximating recurrence\n");
+				dprintf("Not supported recurrence type. Approximating recurrence\n");
 				calnote->recurrence = recur.interval / 60;
 				if (!calnote->recurrence)
 					calnote->recurrence = 1;
