@@ -885,7 +885,8 @@ void char_ucs2_decode(unsigned char* dest, const unsigned char* src, int len)
  *
  * Converts a string from ISO/IEC 8859-1 to UCS-2 encoded as ASCII-encoded hexadecimal bytes.
  * This function should convert "ABC" to "004100420043"
- * Used in AT driver for UCS2 encoding commands.
+ * Used only in AT driver for UCS2 encoding commands.
+ * It reads char by char from the input.
  */
 #define UCS2_SIZE	4
 size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len)
@@ -895,16 +896,15 @@ size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len
 	MBSTATE mbs;
 
 	MBSTATE_ENC_CLEAR(mbs);
-	for (i = 0, o_len = 0; i < len && o_len < dest_len / UCS2_SIZE; o_len++) {
+	for (i = 0, o_len = 0; i < len && o_len < dest_len / UCS2_SIZE; o_len++, i++) {
 		/*
 		 * We read input by convertible chunks. 'length' is length of
 		 * the read chunk.
 		 */
-		length = char_uni_alphabet_encode(src + i, len - i, &wc, &mbs);
+		length = char_uni_alphabet_encode(src + i, 1, &wc, &mbs);
 		/* We stop reading after first unreadable input */
 		if (length < 1)
 			return o_len * UCS2_SIZE;
-		i += length;
 		/* We write here 4 chars + NULL termination */
 		/* XXX: We should probably check wchar_t size. */
 		snprintf(dest + (o_len * UCS2_SIZE), UCS2_SIZE + 1, "%04x", wc);
