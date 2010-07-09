@@ -1329,6 +1329,25 @@ static gn_error AT_GetSMSFolders(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetSMSFolders, data, state);
 }
 
+static gn_error AT_GetSMSStatusInternal(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error ret;
+
+	if (!data->sms_status)
+		return GN_ERR_INTERNALERROR;
+
+        if (data->memory_status) {
+                ret = AT_SetSMSMemoryType(data->memory_status->memory_type,  state);
+                if (ret != GN_ERR_NONE)
+                        return ret;
+        }
+
+	ret = sm_message_send(9, GN_OP_GetSMSStatus, "AT+CPMS?\r", state);
+	if (ret != GN_ERR_NONE)
+		return GN_ERR_NOTREADY;
+	return sm_block_no_retry(GN_OP_GetSMSStatus, data, state);
+}
+
 static gn_error AT_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *state)
 {
 	gn_sms_status smsstatus = {0, 0, 0, 0, GN_MT_XX}, *save_smsstatus;
@@ -1346,7 +1365,7 @@ static gn_error AT_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *sta
 	data->sms_status = &smsstatus;
 	save_memory_status = data->memory_status;
 	data->memory_status = &memory_status;
-	ret = state->driver.functions(GN_OP_GetSMSStatus, data, state);
+	ret = AT_GetSMSStatusInternal(data, state);
 	data->memory_status = save_memory_status;
 	data->sms_status = save_smsstatus;
 	if (ret != GN_ERR_NONE)
@@ -1359,21 +1378,27 @@ static gn_error AT_GetSMSFolderStatus(gn_data *data, struct gn_statemachine *sta
 
 static gn_error AT_GetSMSStatus(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error ret;
+	gn_sms_status smsstatus = {0, 0, 0, 0, GN_MT_XX}, *save_smsstatus;
+	gn_memory_status memory_status = {GN_MT_ME, 0, 0}, *save_memory_status;
+	gn_error ret = GN_ERR_NONE;
 
-	if (!data->sms_status)
-		return GN_ERR_INTERNALERROR;
-
-        if (data->memory_status) {
-                ret = AT_SetSMSMemoryType(data->memory_status->memory_type,  state);
-                if (ret != GN_ERR_NONE)
-                        return ret;
-        }
-
-	ret = sm_message_send(9, GN_OP_GetSMSStatus, "AT+CPMS?\r", state);
+	save_smsstatus = data->sms_status;
+	data->sms_status = &smsstatus;
+	save_memory_status = data->memory_status;
+	data->memory_status = &memory_status;
+	ret = AT_GetSMSStatusInternal(data, state);
 	if (ret != GN_ERR_NONE)
-		return GN_ERR_NOTREADY;
-	return sm_block_no_retry(GN_OP_GetSMSStatus, data, state);
+		goto out;
+	save_smsstatus->number = smsstatus.number;
+	data->memory_status->memory_type = GN_MT_SM;
+	ret = AT_GetSMSStatusInternal(data, state);
+	if (ret != GN_ERR_NONE)
+		goto out;
+	save_smsstatus->number += smsstatus.number;
+out:
+	data->memory_status = save_memory_status;
+	data->sms_status = save_smsstatus;
+	return ret;
 }
 
 static gn_error AT_SendSMS(gn_data *data, struct gn_statemachine *state)
