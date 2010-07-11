@@ -1,4 +1,4 @@
-.TH "gnokii" "1" "Jun 20, 2010" "Dag Wieers, Pawel Kot" "gnokii"
+.TH "gnokii" "1" "Jul 11, 2010" "Dag Wieers, Pawel Kot" "gnokii"
 .SH "NAME"
 gnokii \- modem/fax driver for the mobile phones
 .SH "SYNOPSIS"
@@ -448,22 +448,85 @@ subentry is the number
 subentry is the ringtone
 .IP
 .B 19
-subentry is the date
+subentry is the date (used for DC, RD, LD)
 .IP
 .B 26
-subentry is the pointer
+subentry is the pointer (pointer to the other memory)
 .IP
 .B 27
-subentry is the logo
+subentry is the logo (bitmap)
 .IP
 .B 28
 subentry is the logo switch
 .IP
 .B 30
-subentry is the group
+subentry is the group (octect)
 .IP
 .B 44
 subentry is the URL
+.IP
+.B 47
+subentry is the location (octect)
+.IP
+.B 51
+subentry is the image (file id)
+.IP
+.B 55
+subentry is the ringtoneadv (file id or ringtone)
+.IP
+.B 56
+subentry is the userid
+.IP
+.B 63
+subentry is the pttaddress
+.IP
+.B 67
+subentry is the extgroup
+.IP
+.B 69
+subentry is the video (file id)
+.IP
+.B 70
+subentry is the firstname
+.IP
+.B 71
+subentry is the lastname
+.IP
+.B 74
+subentry is the postaladdress
+.IP
+.B 75
+subentry is the extendedaddress
+.IP
+.B 76
+subentry is the street
+.IP
+.B 77
+subentry is the city
+.IP
+.B 78
+subentry is the stateprovince
+.IP
+.B 79
+subentry is the zipcode
+.IP
+.B 50
+subentry is the country
+.IP
+.B 82
+subentry is the formalname
+.IP
+.B 84
+subentry is the jobtitle
+.IP
+.B 85
+subentry is the company
+.IP
+.B 86
+subentry is the nickname
+.IP
+.B 87
+subentry is the birthday
 .PP
 Possible subentry number types are described in the \fIgnokii/common.h\fR
 file:
