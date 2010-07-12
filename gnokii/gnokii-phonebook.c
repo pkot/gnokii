@@ -371,6 +371,11 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 			break;
 		}
 
+		if (feof(stdin)) {
+			error = GN_ERR_NONE;
+			goto out;
+		}
+
 		if (error != GN_ERR_NONE)
 			goto out;
 
