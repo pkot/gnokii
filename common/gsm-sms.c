@@ -1635,7 +1635,7 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 
 	sms_dump_raw(data->raw_sms);
 	if (data->raw_sms->user_data_length > MAX_SMS_PART) {
-		dprintf("SMS is too long? %d\n", data->raw_sms->user_data_length);
+		dprintf("SMS is %d octects long but we can only send %d octects in a single SMS\n", data->raw_sms->user_data_length, MAX_SMS_PART);
 		error = sms_send_long(data, state);
 		goto cleanup;
 	}
@@ -1711,10 +1711,10 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 
 	/* We need to attach user data header to each part */
 	max_sms_len -= (data->sms->udh.length + 1);
-	dprintf("max_sms_len: %d\n", max_sms_len);
 	/* Count number of SMS to be sent */
 	count = (total + max_sms_len - 1) / max_sms_len;
 	dprintf("Will need %d sms-es\n", count);
+	dprintf("SMS is %d octects long but we can only send %d octects in a single SMS after adding %d octects for udh\n", total, max_sms_len, data->sms->udh.length + 1);
 
 	data->sms->parts = count;
 	data->sms->reference = calloc(count, sizeof(unsigned int));
