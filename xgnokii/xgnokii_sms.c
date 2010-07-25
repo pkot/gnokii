@@ -389,14 +389,13 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 
 static inline void RefreshFolder(void)
 {
-	dprintf("RefreshFolder\n\n\n\n\n");
+	GtkTextBuffer *buffer;
+
+	dprintf("RefreshFolder\n\n\n");
 
 	/* Clear the SMS text window */
-
-	gtk_text_freeze(GTK_TEXT(SMS.smsText));
-	gtk_text_set_point(GTK_TEXT(SMS.smsText), 0);
-	gtk_text_forward_delete(GTK_TEXT(SMS.smsText), gtk_text_get_length(GTK_TEXT(SMS.smsText)));
-	gtk_text_thaw(GTK_TEXT(SMS.smsText));
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(SMS.smsText));
+	gtk_text_buffer_set_text(buffer, "", 0);
 
 	gtk_clist_freeze(GTK_CLIST(SMS.smsClist));
 	gtk_clist_clear(GTK_CLIST(SMS.smsClist));
@@ -429,7 +428,8 @@ static void ClickEntry(GtkWidget * clist,
 	gchar *buf;
 	gchar *text1, *text2, *text3;
 	text2 = g_strdup(_("unread"));
-	
+	GtkTextBuffer *buffer;
+
 	     /* Mark SMS as read */
 
 	if (gtk_clist_get_text(GTK_CLIST(clist), row, 0, &(text1))) {
@@ -453,27 +453,23 @@ static void ClickEntry(GtkWidget * clist,
 			gtk_clist_thaw(GTK_CLIST(clist));
 		};
 	};
-	
-	gtk_text_freeze(GTK_TEXT(SMS.smsText));
 
-	gtk_text_set_point(GTK_TEXT(SMS.smsText), 0);
-	gtk_text_forward_delete(GTK_TEXT(SMS.smsText), gtk_text_get_length(GTK_TEXT(SMS.smsText)));
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(SMS.smsText));
 
-	gtk_text_insert(GTK_TEXT(SMS.smsText), NULL, &(SMS.colour), NULL, _("From: "), -1);
+	gtk_text_buffer_set_text(buffer, "", 0);
+
+	gtk_text_buffer_insert_at_cursor(buffer, _("From: "), -1);
 	gtk_clist_get_text(GTK_CLIST(clist), row, 2, &buf);
-	gtk_text_insert(GTK_TEXT(SMS.smsText), NULL, &(SMS.smsText->style->black), NULL, buf, -1);
-	gtk_text_insert(GTK_TEXT(SMS.smsText), NULL, &(SMS.smsText->style->black), NULL, "\n", -1);
+	gtk_text_buffer_insert_at_cursor(buffer, buf, -1);
+	gtk_text_buffer_insert_at_cursor(buffer, "\n", -1);
 
-	gtk_text_insert(GTK_TEXT(SMS.smsText), NULL, &(SMS.colour), NULL, _("Date: "), -1);
+	gtk_text_buffer_insert_at_cursor(buffer, _("Date: "), -1);
 	gtk_clist_get_text(GTK_CLIST(clist), row, 1, &buf);
-	gtk_text_insert(GTK_TEXT(SMS.smsText), NULL, &(SMS.smsText->style->black), NULL, buf, -1);
-	gtk_text_insert(GTK_TEXT(SMS.smsText), NULL, &(SMS.smsText->style->black), NULL,
-			"\n\n", -1);
+	gtk_text_buffer_insert_at_cursor(buffer, buf, -1);
+	gtk_text_buffer_insert_at_cursor(buffer, "\n\n", -1);
 
 	gtk_clist_get_text(GTK_CLIST(clist), row, 3, &buf);
-	gtk_text_insert(GTK_TEXT(SMS.smsText), NULL, &(SMS.smsText->style->black), NULL, buf, -1);
-
-	gtk_text_thaw(GTK_TEXT(SMS.smsText));
+	gtk_text_buffer_insert_at_cursor(buffer, buf, -1);
 }
 
 
@@ -780,8 +776,11 @@ static inline void RefreshSMSStatus(void)
 {
 	gchar *buf;
 	guint l, m;
+	GtkTextBuffer *buffer;
 
-	l = gtk_text_get_length(GTK_TEXT(sendSMS.smsSendText));
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(sendSMS.smsSendText));
+	/* FIXME: char count is not the same as octects to be sent */
+	l = gtk_text_buffer_get_char_count(buffer);
 
 	if (l <= GN_SMS_MAX_LENGTH)
 		buf = g_strdup_printf("%d/1", l);
@@ -796,18 +795,9 @@ static inline void RefreshSMSStatus(void)
 }
 
 
-static inline gint RefreshSMSLength(GtkWidget * widget, GdkEventKey * event, gpointer callback_data)
+static inline gint RefreshSMSLength(GtkWidget * widget, gpointer callback_data)
 {
 	RefreshSMSStatus();
-	if (gtk_editable_get_editable (GTK_EDITABLE(widget)) == FALSE)
-		return (FALSE);
-	if (event->keyval == GDK_BackSpace || event->keyval == GDK_Clear ||
-	    event->keyval == GDK_Insert || event->keyval == GDK_Delete ||
-	    event->keyval == GDK_Home || event->keyval == GDK_End ||
-	    event->keyval == GDK_Left || event->keyval == GDK_Right ||
-	    event->keyval == GDK_Up || event->keyval == GDK_Down ||
-	    event->keyval == GDK_Return || (event->keyval >= 0x20 && event->keyval <= 0xFF))
-		return (TRUE);
 
 	return (FALSE);
 }
@@ -1091,6 +1081,8 @@ static void DoSendSMS(void)
 	gint offset, nr_msg, l;
 	gint longSMS;
 	register gint i = 0, j;
+	GtkTextBuffer *buffer;
+	GtkTextIter startIter, endIter;
 
 	if (CheckAddressMain()) {
 		gtk_label_set_text(GTK_LABEL(errorDialog.text),
@@ -1099,8 +1091,13 @@ static void DoSendSMS(void)
 		return;
 	}
 
-	text = gtk_editable_get_chars(GTK_EDITABLE(sendSMS.smsSendText), 0, -1);
-	l = strlen(text);
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(sendSMS.smsSendText));
+	/* FIXME: char count is not the same as octects to be sent */
+	l = gtk_text_buffer_get_char_count(buffer);
+
+	gtk_text_buffer_get_start_iter(buffer, &startIter);
+	gtk_text_buffer_get_end_iter(buffer, &endIter);
+	text = gtk_text_buffer_get_text(buffer, &startIter, &endIter, FALSE);
 
 	addresses = g_strsplit(gtk_entry_get_text(GTK_ENTRY(sendSMS.addr)), ",", 0);
 
@@ -1280,9 +1277,8 @@ static void CreateSMSSendWindow(void)
 	sendSMS.SMSSendWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
 	gtk_window_set_wmclass(GTK_WINDOW(sendSMS.SMSSendWindow), "SMSSendWindow", "Xgnokii");
 
-	/*
 	gtk_widget_set_usize (GTK_WIDGET (sendSMS.SMSSendWindow), 436, 220);
-	*/
+
 	gtk_signal_connect(GTK_OBJECT(sendSMS.SMSSendWindow), "delete_event",
 			   GTK_SIGNAL_FUNC(DeleteEvent), NULL);
 	gtk_widget_realize(sendSMS.SMSSendWindow);
@@ -1379,16 +1375,13 @@ static void CreateSMSSendWindow(void)
 	gtk_box_pack_end(GTK_BOX(vbox), sendSMS.status, TRUE, TRUE, 5);
 	gtk_widget_show(sendSMS.status);
 
-	sendSMS.smsSendText = gtk_text_new(NULL, NULL);
+	sendSMS.smsSendText = gtk_text_view_new();
 	gtk_widget_set_usize(GTK_WIDGET(sendSMS.smsSendText), 0, 120);
-	gtk_text_set_editable(GTK_TEXT(sendSMS.smsSendText), TRUE);
-	gtk_text_set_word_wrap(GTK_TEXT(sendSMS.smsSendText), TRUE);
-	gtk_signal_connect_after(GTK_OBJECT(sendSMS.smsSendText),
-				 "key_press_event",
-				 GTK_SIGNAL_FUNC(RefreshSMSLength), (gpointer) NULL);
-	gtk_signal_connect_after(GTK_OBJECT(sendSMS.smsSendText),
-				 "button_press_event",
-				 GTK_SIGNAL_FUNC(RefreshSMSLength), (gpointer) NULL);
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(sendSMS.smsSendText), TRUE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(sendSMS.smsSendText), GTK_WRAP_WORD);
+	g_signal_connect_after(G_OBJECT(gtk_text_view_get_buffer(GTK_TEXT_VIEW(sendSMS.smsSendText))),
+				 "changed",
+				 G_CALLBACK(RefreshSMSLength), (gpointer) NULL);
 
 	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_container_set_border_width(GTK_CONTAINER(scrolledWindow), 5);
@@ -1430,6 +1423,8 @@ static void CreateSMSSendWindow(void)
 
 static void NewSMS(void)
 {
+	GtkTextBuffer *buffer;
+
 	if (!sendSMS.SMSSendWindow)
 		CreateSMSSendWindow();
 
@@ -1437,11 +1432,8 @@ static void NewSMS(void)
 
 	gtk_tooltips_disable(sendSMS.addrTip);
 
-	gtk_text_freeze(GTK_TEXT(sendSMS.smsSendText));
-	gtk_text_set_point(GTK_TEXT(sendSMS.smsSendText), 0);
-	gtk_text_forward_delete(GTK_TEXT(sendSMS.smsSendText),
-				gtk_text_get_length(GTK_TEXT(sendSMS.smsSendText)));
-	gtk_text_thaw(GTK_TEXT(sendSMS.smsSendText));
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(sendSMS.smsSendText));
+	gtk_text_buffer_set_text(buffer, "", 0);
 
 	gtk_entry_set_text(GTK_ENTRY(sendSMS.addr), "");
 
@@ -1454,6 +1446,7 @@ static void NewSMS(void)
 static void ForwardSMS(void)
 {
 	gchar *buf;
+	GtkTextBuffer *buffer;
 
 	if (GTK_CLIST(SMS.smsClist)->selection == NULL)
 		return;
@@ -1465,17 +1458,11 @@ static void ForwardSMS(void)
 
 	gtk_tooltips_disable(sendSMS.addrTip);
 
-	gtk_text_freeze(GTK_TEXT(sendSMS.smsSendText));
-	gtk_text_set_point(GTK_TEXT(sendSMS.smsSendText), 0);
-	gtk_text_forward_delete(GTK_TEXT(sendSMS.smsSendText),
-				gtk_text_get_length(GTK_TEXT(sendSMS.smsSendText)));
 	gtk_clist_get_text(GTK_CLIST(SMS.smsClist),
 			   GPOINTER_TO_INT(GTK_CLIST(SMS.smsClist)->selection->data), 3, &buf);
 
-	gtk_text_insert(GTK_TEXT(sendSMS.smsSendText), NULL, &(sendSMS.smsSendText->style->black),
-			NULL, buf, -1);
-
-	gtk_text_thaw(GTK_TEXT(sendSMS.smsSendText));
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(sendSMS.smsSendText));
+	gtk_text_buffer_set_text(buffer, buf, -1);
 
 	gtk_entry_set_text(GTK_ENTRY(sendSMS.addr), "");
 
@@ -1496,6 +1483,7 @@ static inline gint CompareSMSMessageLocation (gconstpointer a, gconstpointer b)
 static void ReplySMS(void)
 {
 	gchar *buf;
+	GtkTextBuffer *buffer;
 	/*
 	GSList *r;
 	gn_sms msg;
@@ -1509,17 +1497,11 @@ static void ReplySMS(void)
 
 	gtk_window_set_title(GTK_WINDOW(sendSMS.SMSSendWindow), _("Reply Message"));
 
-	gtk_text_freeze(GTK_TEXT(sendSMS.smsSendText));
-	gtk_text_set_point(GTK_TEXT(sendSMS.smsSendText), 0);
-	gtk_text_forward_delete(GTK_TEXT(sendSMS.smsSendText),
-				gtk_text_get_length(GTK_TEXT(sendSMS.smsSendText)));
 	gtk_clist_get_text(GTK_CLIST(SMS.smsClist),
 			   GPOINTER_TO_INT(GTK_CLIST(SMS.smsClist)->selection->data), 3, &buf);
 
-	gtk_text_insert(GTK_TEXT(sendSMS.smsSendText), NULL,
-			&(sendSMS.smsSendText->style->black), NULL, buf, -1);
-
-	gtk_text_thaw(GTK_TEXT(sendSMS.smsSendText));
+	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(sendSMS.smsSendText));
+	gtk_text_buffer_set_text(buffer, buf, -1);
 
 	/*
 	msg.Number = *(((MessagePointers *) gtk_clist_get_row_data(GTK_CLIST (SMS.smsClist),
@@ -1784,12 +1766,9 @@ void GUI_CreateSMSWindow(void)
 
 
 	/* Message viewer */
-	SMS.smsText = gtk_text_new(NULL, NULL);
-	gtk_text_set_editable(GTK_TEXT(SMS.smsText), FALSE);
-	gtk_text_set_word_wrap(GTK_TEXT(SMS.smsText), TRUE);
-	/*
-	gtk_text_set_line_wrap (GTK_TEXT (SMS.smsText), TRUE);
-	*/
+	SMS.smsText = gtk_text_view_new();
+	gtk_text_view_set_editable(GTK_TEXT_VIEW(SMS.smsText), FALSE);
+	gtk_text_view_set_wrap_mode(GTK_TEXT_VIEW(SMS.smsText), GTK_WRAP_WORD);
 
 	scrolledWindow = gtk_scrolled_window_new(NULL, NULL);
 	gtk_scrolled_window_set_policy(GTK_SCROLLED_WINDOW(scrolledWindow),

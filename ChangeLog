@@ -27,6 +27,9 @@
       and it prevents the use of direct dialling from phonebooks;
       see gnokii man page and GSM 07.07             (Daniele Forsi)
     o for GetSMSStatus sum messages from ME and SM      (Paweł Kot)
+ * xgnokii updates
+    o support UTF-8 text when editing SMS and when showing details.
+      Fixes https://bugs.launchpad.net/bugs/604947  (Daniele Forsi)
 
 0.6.29
 ======
