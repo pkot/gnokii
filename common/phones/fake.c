@@ -168,7 +168,7 @@ static gn_error at_sms_get_generic(gn_data *data, struct gn_statemachine *state,
 
 static gn_error at_sms_get_static(gn_data *data, struct gn_statemachine *state, int position)
 {
-	if (position > sizeof(sms_inbox)/sizeof(char *))
+	if (position > sizeof(sms_inbox)/sizeof(char *) || sms_inbox[position - 1] == NULL)
 		return GN_ERR_EMPTYLOCATION;
 
 	return at_sms_get_generic(data, state, sms_inbox[position - 1]);
