@@ -1,37 +1,44 @@
-Before reporting a problem with gnokii make sure that problem still exists
-with current gnokii release (refer to http://www.gnokii.org/ to find out the
-most recent version) or even with current GIT version. If gnokii version
-provided by your distribution please contact the package maintainer to
-upgrade it.
+Before reporting a problem with gnokii make sure that:
+  * it isn't a known problem (use a search engine)
+  * it still exists in the current development version
+  * you can explain how to reproduce it 
 
-When you report some problems with gnokii please attach the following
-information:
- - phone model
- - connection type (irda/cable with its type)
- - gnokii version (gnokii --version) along with source for it: git,
-tarball, binary package
- - edit you gnokiirc and enable debugging, e.g.:
-    [logging]
-    debug = on
-   and attach gzipped output to the email:
-    gnokii [parameters] 2>errfile
-   replace your gnokii with the app you have problems with'
+Your report will be useless without the following information:
+  * phone model and how do you connect (Bluetooth/IrDa/cable with its
+    type)
+  * the values of the configuration parameters model, connection and port
+  * which program you are using (gnokii, xgnokii, smsd) and its version
+  * (gnokii --version or smsd --version) along with source for it: git,
+    tarball, binary package
+  * edit your gnokiirc and enable debugging (see below) and attach gzipped
+    output to the email: 
 
-It would be good if you name the problem in the subject if possible and name
-if it meets gnokii, xgnokii, gnokiid, smsd or some other app binaries or
-gnokii as a whole.
+      $ LC_MESSAGES=en_US.UTF8 gnokii {parameters} >errfile 2>&1
+      (with LC_MESSAGE=en_US.UTF8 the program output and the error messages
+      will be in English) 
 
-It's always good to attempt to narrow the problem. E.g. if you have problems
-with reading phonebook in xgnokii or gnocky, try gnokii CLI. If it works,
-it's xgnokii/gnocky problem. If not, most likely it's library problem.
+  * if you get a SEGFAULT, a backtrace is needed (refer to
+    http://wiki.gnokii.org/index.php/Segfault)
+  * if you get encoding errors always use the git version
+  * if you are using a Nokia do your tests also with the fake driver
+  * if you get communication errors, kernel version (and libusb version
+    when using connection = dku2libusb) 
 
-Send resulting report to gnokii-users@nongnu.org.
+Send resulting report to gnokii-users (at) nongnu.org
 
-If you want to debug yourself, by default the GIT version adds -g to CFLAGS
-when generating Makefile and the defines needed to print debug messages when
-generating include/config.h then in your gnokiirc set debug=on to see
-messages about libgnokii or gnokii and xdebug=on to see messages about
-xgnokii or smsd.
+If you want to debug yourself, use the git version and run autogen.sh (or
+configure) with --disable-shared to build statically linked versions that
+are easier to deal with, in this case the executables can be run as:
 
-For problems with gnokii applications segfaulting see
-http://wiki.gnokii.org/index.php/Segfault
+gnokii/gnokii
+xgnokii/xgnokii
+smsd/smsd
+
+Debug routines are compiled in by default and can be enabled in the
+[logging] section of the configuration file.  To enable the debug output for
+the drivers and for gnokii, set debug = on. To enable the debug output for
+higer level routines of smsd and xgnokii, set xdebug = on.
+
+  [logging]
+  debug = on
+  xdebug = on
