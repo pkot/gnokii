@@ -7,6 +7,8 @@
     o fix mbox format of --getsms for sent messages; closes
       https://savannah.nongnu.org/bugs/?30050       (Daniele Forsi)
     o fix char_ucs2_encode() function                   (Paweł Kot)
+    o add id for Nokia 2730 to misc.c only; uses model=series40
+                                                  (Iain Mac Donald)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)
