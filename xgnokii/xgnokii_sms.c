@@ -391,7 +391,7 @@ static inline void RefreshFolder(void)
 {
 	GtkTextBuffer *buffer;
 
-	dprintf("RefreshFolder\n\n\n");
+	gn_log_xdebug("RefreshFolder\n\n\n");
 
 	/* Clear the SMS text window */
 	buffer = gtk_text_view_get_buffer(GTK_TEXT_VIEW(SMS.smsText));
@@ -433,7 +433,7 @@ static void ClickEntry(GtkWidget * clist,
 	     /* Mark SMS as read */
 
 	if (gtk_clist_get_text(GTK_CLIST(clist), row, 0, &(text1))) {
-		dprintf("*text1: %s *text2: %s \n", text1, text2);
+		gn_log_xdebug("*text1: %s *text2: %s \n", text1, text2);
 
 		/* strcpm(text1,text2) = 0 if text1 is the same string as text2 */
 		if (!(strcmp(text1, text2) )) {

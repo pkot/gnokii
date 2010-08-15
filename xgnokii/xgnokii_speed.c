@@ -249,7 +249,7 @@ static void SaveSpeedDial(void)
 	if (speedDialInitialized) {
 		for (i = 1; i < 10; i++) {
 			if ((d = (D_SpeedDial *) gtk_clist_get_row_data(GTK_CLIST(clist), i - 1))) {
-				dprintf("locaction: %i\n", d->entry.location);
+				gn_log_xdebug("location: %i\n", d->entry.location);
 				if (d->entry.location == 0)
 					continue;
 				if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {

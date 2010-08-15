@@ -264,8 +264,8 @@ void GUI_InitPhoneMonitor(void)
 
 static gint compare_folder_and_number(const gn_sms *a, const gn_sms *b)
 {
-	dprintf("memory type a: %i memory type b: %i\n", a->memory_type, b->memory_type);
-	dprintf("message number a: %i message number b: %i\n", a->number, b->number);
+	gn_log_xdebug("memory type a: %i memory type b: %i\n", a->memory_type, b->memory_type);
+	gn_log_xdebug("message number a: %i message number b: %i\n", a->number, b->number);
 	if (a->memory_type == b->memory_type)
 		if (a->number == b->number)
 			return 0;
@@ -291,8 +291,8 @@ static void RefreshSMS(const gint number)
 
 	gn_data_clear(&gdat);
 
-	dprintf("RefreshSMS: changed: %i\n", SMSStatus.changed);
-	dprintf("RefreshSMS: unread: %i, total: %i\n", SMSStatus.unread,
+	gn_log_xdebug("RefreshSMS: changed: %i\n", SMSStatus.changed);
+	gn_log_xdebug("RefreshSMS: unread: %i, total: %i\n", SMSStatus.unread,
 		SMSStatus.number);
 	for (i = 0; i < SMSStatus.folders_count; i++) {
 		dummy = 0;
@@ -300,7 +300,7 @@ static void RefreshSMS(const gint number)
 			if ((MessagesList[j][i].status == GN_SMS_FLD_Changed) ||
 			    (MessagesList[j][i].status == GN_SMS_FLD_NotRead) ||
 			    (MessagesList[j][i].status == GN_SMS_FLD_New))
-				dprintf("RefreshSMS: change #%i in folder %i at location %i!\n",
+				gn_log_xdebug("RefreshSMS: change #%i in folder %i at location %i!\n",
 					++dummy, i, MessagesList[j][i].location);
 		}
 	}
@@ -310,7 +310,7 @@ static void RefreshSMS(const gint number)
 			for (j = 0; j < FolderStats[i].used; j++) {
 				if (MessagesList[j][i].status == GN_SMS_FLD_Deleted ||
 				    MessagesList[j][i].status == GN_SMS_FLD_Changed) {
-					dprintf("We got a deleted message here to handle!\n");
+					gn_log_xdebug("We got a deleted message here to handle!\n");
 					pthread_mutex_lock(&smsMutex);
 					msg = g_malloc0(sizeof(gn_sms));
 
@@ -340,10 +340,10 @@ static void RefreshSMS(const gint number)
 					gdat.raw_sms = raw;
 
 					gdat.sms->number = MessagesList[j][i].location;
-					gdat.sms->memory_type =(gn_memory_type) i + 12 ;
-					dprintf("#: %i, mt: %i\n", gdat.sms->number, gdat.sms->memory_type);
+					gdat.sms->memory_type =(gn_memory_type) i + 12;
+					gn_log_xdebug("#: %i, mt: %i\n", gdat.sms->number, gdat.sms->memory_type);
 					if ((error = gn_sms_get_no_validate(&gdat, statemachine)) == GN_ERR_NONE) {
-						dprintf("Found valid SMS ...\n %s\n",
+						gn_log_xdebug("Found valid SMS ...\n %s\n",
 							msg->user_data[0].u.text);
 						pthread_mutex_lock(&smsMutex);
 						phoneMonitor.sms.messages =
@@ -382,7 +382,7 @@ static void RefreshSMS(const gint number)
 
 			gdat.sms = msg;
 			if ((error = gn_sms_get(&gdat, statemachine)) == GN_ERR_NONE) {
-				dprintf("Found valid SMS ...\n");
+				gn_log_xdebug("Found valid SMS ...\n");
 				pthread_mutex_lock(&smsMutex);
 				phoneMonitor.sms.messages =
 				    g_slist_append(phoneMonitor.sms.messages, msg);
@@ -508,7 +508,7 @@ static gint A_GetMemoryLocationAll(gpointer data)
 			}
 		}
 		if ((error == GN_ERR_NONE) && (entry.empty == false)) read++;
-		dprintf("Name: %s\n", entry.name);
+		gn_log_xdebug("Name: %s\n", entry.name);
 		error = mla->InsertEntry(&entry); 
 		/* FIXME: It only works this way at the moment */
 		/*		if (error != GN_ERR_NONE)
@@ -1391,7 +1391,7 @@ void *GUI_Connect(void *a)
 		}
 
 		if ((gn_sms_get_folder_changes(&gdat, statemachine, (phoneMonitor.supported & PM_FOLDERS))) == GN_ERR_NONE) {
-			dprintf("old UR: %i, new UR: %i, old total: %i, new total: %i\n",
+			gn_log_xdebug("old UR: %i, new UR: %i, old total: %i, new total: %i\n",
 				phoneMonitor.sms.unRead, gdat.sms_status->unread,
 				phoneMonitor.sms.number, gdat.sms_status->number);
 			phoneMonitor.sms.changed += gdat.sms_status->changed;
