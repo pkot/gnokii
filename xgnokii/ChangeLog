@@ -1,3 +1,6 @@
+* Sun 25 Jul 2010 Daniele Forsi
+- Replace GtkText with GtkTextView in SMS windows to gain UTF-8 support
+
 * Tue 31 Mar 2009 Paweł Kot
 - Remove online documentation. It's outdated.
 
