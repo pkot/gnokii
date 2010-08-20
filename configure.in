@@ -5,9 +5,11 @@ dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janik ml.
 dnl                2000 Karel Zak, Pawel Kot
 dnl                2002 BORBELY Zoltan
 dnl
-dnl  $Id$
-dnl
 
+dnl
+dnl IMPORTANT NOTE
+dnl The first PKG_CHECK_MODULES call must not be conditional
+dnl
 
 AC_INIT([gnokii],
 	[0.6.30git],
@@ -607,45 +609,6 @@ if test `uname -s` = "NetBSD" ; then
 	fi
 fi
 
-dnl ======================== Checks for libpcsclite
-USE_LIBPCSCLITE="no"
-AC_ARG_ENABLE(libpcsclite,
-              AC_HELP_STRING([--disable-libpcsclite],
-                             [disable libpcsclite support (default is autodetected)]
-                            ),,
-              [enable_libpcsclite=yes])
-if test "$enable_libpcsclite" = "yes"; then
-	PKG_CHECK_MODULES(LIBPCSCLITE, libpcsclite >= 1.3.1, USE_LIBPCSCLITE=yes, USE_LIBPCSCLITE=no)
-	if test "$USE_LIBPCSCLITE" = yes; then
-		OLD_CFLAGS="$CFLAGS"
-		CFLAGS="$LIBPCSCLITE_CFLAGS $OLD_CFLAGS"
-		AC_MSG_CHECKING([if libpcsclite includes are installed and usable])
-		AC_TRY_COMPILE([#include <PCSC/wintypes.h>
-				#include <PCSC/winscard.h>],
-				[SCARDCONTEXT hContext;
-				SCARDHANDLE hCard;
-				DWORD dwActiveProtocol;
-				SCARD_IO_REQUEST *pioSendPci, pioRecvPci;
-				BYTE buf[256];],
-				USE_LIBPCSCLITE=yes,
-				USE_LIBPCSCLITE=no)
-		AC_MSG_RESULT($USE_LIBPCSCLITE)
-		CFLAGS="$OLD_CFLAGS"
-		if test "$USE_LIBPCSCLITE" = yes; then
-			AC_DEFINE([HAVE_PCSC], [1], [Define if you have libpcsclite])
-		fi
-	fi
-fi
-if test "$USE_LIBPCSCLITE" = yes; then
-	OLD_CFLAGS="$CFLAGS"
-	CFLAGS="$LIBPCSCLITE_CFLAGS $OLD_CFLAGS"
-	AC_CHECK_TYPE([LPCSTR],
-	    [AC_DEFINE([HAVE_LPCSTR], 1, 
-	       [Define to 1 if libpcsclite defines the type 'LPCSTR'.])],
-	    [], [#include <PCSC/wintypes.h>])
-	CFLAGS="$OLD_CFLAGS"
-fi
-
 dnl ======================== Checks for X base support
 
 found_gtk=no
@@ -790,6 +753,45 @@ AC_ARG_ENABLE(security,
      fi ],
    [ security="no" ]
 )
+
+dnl ======================== Checks for libpcsclite
+USE_LIBPCSCLITE="no"
+AC_ARG_ENABLE(libpcsclite,
+              AC_HELP_STRING([--disable-libpcsclite],
+                             [disable libpcsclite support (default is autodetected)]
+                            ),,
+              [enable_libpcsclite=yes])
+if test "$enable_libpcsclite" = "yes"; then
+	PKG_CHECK_MODULES(LIBPCSCLITE, libpcsclite >= 1.3.1, USE_LIBPCSCLITE=yes, USE_LIBPCSCLITE=no)
+	if test "$USE_LIBPCSCLITE" = yes; then
+		OLD_CFLAGS="$CFLAGS"
+		CFLAGS="$LIBPCSCLITE_CFLAGS $OLD_CFLAGS"
+		AC_MSG_CHECKING([if libpcsclite includes are installed and usable])
+		AC_TRY_COMPILE([#include <PCSC/wintypes.h>
+				#include <PCSC/winscard.h>],
+				[SCARDCONTEXT hContext;
+				SCARDHANDLE hCard;
+				DWORD dwActiveProtocol;
+				SCARD_IO_REQUEST *pioSendPci, pioRecvPci;
+				BYTE buf[256];],
+				USE_LIBPCSCLITE=yes,
+				USE_LIBPCSCLITE=no)
+		AC_MSG_RESULT($USE_LIBPCSCLITE)
+		CFLAGS="$OLD_CFLAGS"
+		if test "$USE_LIBPCSCLITE" = yes; then
+			AC_DEFINE([HAVE_PCSC], [1], [Define if you have libpcsclite])
+		fi
+	fi
+fi
+if test "$USE_LIBPCSCLITE" = yes; then
+	OLD_CFLAGS="$CFLAGS"
+	CFLAGS="$LIBPCSCLITE_CFLAGS $OLD_CFLAGS"
+	AC_CHECK_TYPE([LPCSTR],
+	    [AC_DEFINE([HAVE_LPCSTR], 1, 
+	       [Define to 1 if libpcsclite defines the type 'LPCSTR'.])],
+	    [], [#include <PCSC/wintypes.h>])
+	CFLAGS="$OLD_CFLAGS"
+fi
 
 AC_ARG_ENABLE(win,
    [  --enable-win            if you want Windows support ],
