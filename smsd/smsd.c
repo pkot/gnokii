@@ -69,7 +69,7 @@ bool GTerminateThread;
 
 /* Local variables */
 static DBConfig connection;
-void (*DB_Bye) (void) = NULL;;
+void (*DB_Bye) (void) = NULL;
 gint (*DB_ConnectInbox) (const DBConfig) = NULL;
 gint (*DB_ConnectOutbox) (const DBConfig) = NULL;
 gint (*DB_InsertSMS) (const gn_sms * const, const gchar * const) = NULL;
@@ -516,6 +516,8 @@ static void GetSMS (void)
 
 static void Run (void)
 {
+    /* Windows doesn't support signaling */
+#ifndef WIN32
   struct sigaction act;
   
   act.sa_flags = 0;
@@ -530,6 +532,7 @@ static void Run (void)
   act.sa_handler = SIG_IGN;
   sigemptyset (&(act.sa_mask));
   sigaction (SIGALRM, &act, NULL);
+#endif
 #endif
 
   InitPhoneMonitor ();

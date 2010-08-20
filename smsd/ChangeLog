@@ -1,3 +1,8 @@
+* Fri 20 Aug 2010 Paweł Kot
+- Add SQLite3 backend module by Santeri Toikka.
+- Version changed to 1.4.5
+
+
 * Thu 24 Dec 2009 Daniele Forsi
 - Add quoting around phone number to mysql code that handles multipart
   messages. Patch by Paulius Bulotas.

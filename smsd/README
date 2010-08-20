@@ -123,9 +123,9 @@ Options:
 
 -m, --module db_module
 	Specify which module to use for connection to DB server.
-	Currently supported are pq for PostgreSQL, mysql for MySQL and file
-	for the text file (see THE FILE MODULE section). Default is file
-	module.
+	Currently supported are pq for PostgreSQL, mysql for MySQL, sqlite for 
+	SQLite3 and file for the text file (see THE FILE MODULE section).
+	Default is file module. 
 
 -l, --libdir path_to_db_module
 	Specify path to DB modules. If you specify pq module, smsd searches
@@ -217,6 +217,8 @@ The configure script autodetects the plugins to build:
    (plugin file is libsmsd_pq.so)
  - the MySQL module is built if mysql_config is present
    (plugin file is libsmsd_mysql.so)
+ - the SQLIte module is built if sqlite3 libraries are detected
+   (plugin file is libsmsd_sqlite.so)
  - the file module is built if glib is present
    (plugin file is libsmsd_file.so)
 

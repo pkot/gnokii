@@ -32,6 +32,8 @@
  * xgnokii updates
     o support UTF-8 text when editing SMS and when showing details.
       Fixes https://bugs.launchpad.net/bugs/604947  (Daniele Forsi)
+ * smsd updates
+    o add SQLite3 backend module                   (Santeri Toikka)
 
 0.6.29
 ======
