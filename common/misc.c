@@ -129,15 +129,15 @@ static gn_phone_model models[] = {
 	{"2600",  "RH-59",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"2630",  "RM-298",	PM_DEFAULT },
 	{"2650",  "RH-53",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
-	{"2730 classic",  "RM-578",	PM_DEFAULT }, /* Series 40 5th Edition FP 1 */
-	{"2760",  "RM-258",	PM_DEFAULT }, /* Series 40 5th Edition */
+	{"2730 classic",  "RM-578",	PM_DEFAULT_S40_3RD }, /* Series 40 5th Edition FP 1 */
+	{"2760",  "RM-258",	PM_DEFAULT_S40_3RD }, /* Series 40 5th Edition */
 	{"3100",  "RH-19",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"3100b", "RH-50",	PM_DEFAULT },
 	{"3105",  "RH-48",	PM_OLD_DEFAULT },
 	{"3108",  "RH-6",	PM_OLD_DEFAULT },
 	{"3110",  "NHE-8",	PM_OLD_DEFAULT | PM_DATA },
 	{"3110",  "0310" ,	PM_OLD_DEFAULT | PM_DATA }, /* NHE-8 */
-	{"3110c", "RM-237",     PM_DEFAULT | PM_SMSFILE | PM_EXTPBK2 | PM_EXTCALENDAR }, /* Nokia 3110 classic */
+	{"3110c", "RM-237",     PM_DEFAULT_S40_3RD }, /* Nokia 3110 classic */
 	{"3120",  "RH-19",	PM_DEFAULT },
 	{"3120b", "RH-50",	PM_DEFAULT },
 	{"3200",  "RH-30",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
@@ -243,8 +243,8 @@ static gn_phone_model models[] = {
 	{"6233",  "RM123_145_-", PM_DEFAULT | PM_NETMONITOR },
 	{"6250",  "NHM-3",	PM_DEFAULT | PM_NETMONITOR },
 	{"6280",  "RH-78",	PM_DEFAULT | PM_NETMONITOR },
-	{"6300",  "RM-217",     PM_DEFAULT | PM_FULLPBK | PM_SMSFILE | PM_EXTPBK2 | PM_EXTCALENDAR },
-	{"6303",  "RM-443",     PM_DEFAULT | PM_FULLPBK | PM_SMSFILE | PM_EXTPBK2 | PM_EXTCALENDAR }, /* Nokia 6303 classic */
+	{"6300",  "RM-217",     PM_DEFAULT_S40_3RD | PM_FULLPBK },
+	{"6303",  "RM-443",     PM_DEFAULT_S40_3RD | PM_FULLPBK }, /* Nokia 6303 classic */
 	{"6310",  "NPE-4",	PM_DEFAULT },
 	{"6310i", "NPL-1",	PM_DEFAULT },
 	{"6340",  "NPM-2",	PM_OLD_DEFAULT },
@@ -263,7 +263,7 @@ static gn_phone_model models[] = {
 	{"6610i", "RM-37",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6650",  "NHM-1",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6680",  "RM-36",	PM_DEFAULT | PM_NETMONITOR },
-	{"6700 classic",  "RM-470",	PM_DEFAULT },  /* Series 40 6th Edition */
+	{"6700 classic",  "RM-470",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition */
 	{"6800",  "NHL-6",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6800",  "NSB-9",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
 	{"6810",  "RM-2",	PM_DEFAULT | PM_XGNOKIIBREAKAGE },
