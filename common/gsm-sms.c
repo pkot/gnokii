@@ -1435,6 +1435,7 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 						      &length);
 				rawsms->length = length + (udh_length * 8 + 6) / 7;
 				rawsms->user_data_length = size + offset;
+				dprintf("\tencoded size: %d\n\trawsms length: %d\n\trawsms user data length: %d\n", size, rawsms->length, rawsms->user_data_length);
 				break;
 			case GN_SMS_DCS_8bit:
 				dprintf("8bit\n");
@@ -1605,6 +1606,7 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_INTERNALERROR;
 
 
+	dprintf("=====> ENTER gn_sms_send()\n");
 	/*
 	 * We need to convert sms text to a known encoding (UTF-8) to count the input chars.
 	 */
@@ -1634,6 +1636,10 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 		goto cleanup;
 
 	sms_dump_raw(data->raw_sms);
+	dprintf("Input is %d characters long\n", data->sms->user_data[0].length);
+	dprintf("SMS is %d octets long\n", data->raw_sms->user_data_length);
+	if (data->sms->user_data[i].type == GN_SMS_DCS_DefaultAlphabet)
+		dprintf("Number of extended alphabet chars: %d\n", char_def_alphabet_ext_count(data->sms->user_data[0].u.text, data->sms->user_data[0].length));
 	if (data->raw_sms->user_data_length > MAX_SMS_PART) {
 		dprintf("SMS is %d octects long but we can only send %d octects in a single SMS\n", data->raw_sms->user_data_length, MAX_SMS_PART);
 		error = sms_send_long(data, state);
@@ -1677,6 +1683,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 	gn_sms_user_data ud[GN_SMS_PART_MAX_NUMBER];
 	gn_error error = GN_ERR_NONE;
 
+	dprintf("=====> ENTER sms_send_long()\n");
 	/* count -- number of SMS to be sent
 	 * total -- total number of octets to be sent
 	 */
@@ -1696,7 +1703,10 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 	while (data->sms->user_data[i].type != GN_SMS_DATA_None) {
 		switch (data->sms->dcs.u.general.alphabet) {
 		case GN_SMS_DCS_DefaultAlphabet:
-			total += (data->sms->user_data[i].length * 7 + 7) / 8;
+			/*
+			 * Extended alphabet chars are doubled on the input.
+			 */
+			total += ((data->sms->user_data[i].length + char_def_alphabet_ext_count(data->sms->user_data[i].u.text, data->sms->user_data[i].length)) * 7 + 7) / 8;
 			break;
 		case GN_SMS_DCS_UCS2:
 			total += (data->sms->user_data[i].chars * 2);
@@ -1739,13 +1749,25 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 		switch (data->sms->dcs.u.general.alphabet) {
 		case GN_SMS_DCS_DefaultAlphabet:
 			start += copied;
-			if (ud[0].length - start >= max_sms_len * 8 / 7) {
-				copied = max_sms_len * 8 / 7;
-			} else {
-				copied = (ud[0].length - start) % (max_sms_len * 8 / 7);
-			}
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
 			data->sms->user_data[0].type = ud[0].type;
+			dprintf("%d %d\n", ud[0].length, start);
+			/*
+			 * copied: number of input characters processed
+			 * size: number of octets as encoded in the default alphabet (extended characters count as 2 octets)
+			 */
+			copied = 0;
+			size = 0;
+			while ((size < max_sms_len * 8 / 7) && (copied < ud[0].length - start)) {
+				if (char_def_alphabet_ext(ud[0].u.text[start + copied]))
+					size++;
+				size++;
+				copied++;
+			}
+			/* avoid off-by-one problem */
+			if (size > max_sms_len * 8 / 7)
+				copied--;
+			dprintf("\tnumber of processed characters: %d\n\tsize of the input: %d\n", copied, size);
 			data->sms->user_data[0].length = copied;
 			memcpy(data->sms->user_data[0].u.text, ud[0].u.text+start, copied);
 			break;

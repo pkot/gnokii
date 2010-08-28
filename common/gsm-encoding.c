@@ -402,7 +402,7 @@ fallback:
  * only 10, and probably they will never change, so hardcoding them
  * here is rather safe.
  */
-static bool char_def_alphabet_ext(unsigned int value)
+bool char_def_alphabet_ext(unsigned int value)
 {
 	return (value == 0x0c ||
 		value == '^' ||
@@ -414,6 +414,22 @@ static bool char_def_alphabet_ext(unsigned int value)
 		value == ']' ||
 		value == '|' ||
 		value == 0x20ac);
+}
+
+/**
+ * char_def_alphabet_ext_count:
+ * @input: input string
+ * @lengh: input string length
+ *
+ * Returns: number of extended GSM alphabet characters in the input string
+ */
+int char_def_alphabet_ext_count(unsigned char *input, int length)
+{
+	int i, retval = 0;
+	for (i = 0; i < length; i++)
+		if (char_def_alphabet_ext(input[i]))
+			retval++;
+	return retval;
 }
 
 /**
@@ -645,7 +661,6 @@ int char_7bit_pack(unsigned int offset, unsigned char *input,
 		unsigned int a = 0xff & ucs2str[2 * i], b = 0xff & ucs2str[2 * i + 1];
 
 		in_num = 256 * a + b;
-
 		if (char_def_alphabet_ext(in_num)) {
 			byte = GN_CHAR_UNI_ESCAPE;
 			double_char = true;

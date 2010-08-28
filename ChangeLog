@@ -9,6 +9,8 @@
     o fix char_ucs2_encode() function                   (Paweł Kot)
     o add id for Nokia 2730 to misc.c only; uses model=series40
                                                   (Iain Mac Donald)
+    o fix a problem with a multipart message in default alphabet
+      and extended alphabet characters                  (Paweł Kot)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)

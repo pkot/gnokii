@@ -101,6 +101,9 @@ extern int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_numb
 
 int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen);
 
+int char_def_alphabet_ext_count(unsigned char *input, int length);
+bool char_def_alphabet_ext(unsigned int value);
+
 /* Ringtones */
 int vcal_time_get(gn_timestamp *dt, char *time);
 int calnote_fill(gn_calnote *note, char *type, char *text, char *desc,
