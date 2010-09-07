@@ -154,6 +154,7 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 		serial_changespeed(state->device.fd, speed, state);
 		break;
 	case GN_CT_Tekram:
+		dprintf("Serial device: setting speed to %d\n", speed);
 		tekram_changespeed(state->device.fd, speed, state);
 		break;
 	case GN_CT_Irda:
