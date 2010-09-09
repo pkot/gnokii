@@ -3,6 +3,11 @@
 - Version changed to 1.4.5
 
 
+* Tue 10 Aug 2010 Daniele Forsi
+- Specify in man page that only regular messages and status reports area
+  handled, all other remain in the phone memory.
+
+
 * Thu 24 Dec 2009 Daniele Forsi
 - Add quoting around phone number to mysql code that handles multipart
   messages. Patch by Paulius Bulotas.
