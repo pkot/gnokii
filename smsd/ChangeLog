@@ -1,3 +1,7 @@
+* Thu  9 Sep 2010 Daniele Forsi
+- Add more information to man page
+
+
 * Fri 20 Aug 2010 Paweł Kot
 - Add SQLite3 backend module by Santeri Toikka.
 - Version changed to 1.4.5
