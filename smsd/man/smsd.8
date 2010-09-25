@@ -163,7 +163,7 @@ Specify user password.
 
 .TP
 .BR -d,\ --db\ db_name
-Specify database name or full path to database file (sqlite).
+Specify database name for 'pq' and 'mysql' modules or full path to database file for 'sqlite' module (defaults to 'sms').
 
 .TP
 .BR -c,\ --host\ db_hostname
@@ -171,7 +171,7 @@ Specify database server host name.
 
 .TP
 .BR -s,\ --schema\ db_hostname
-Specify database schema.
+Specify database schema used by the PostgreSQL module (defaults to 'public').
 
 .TP
 .BR -m,\ --module\ db_module
