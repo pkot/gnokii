@@ -1,4 +1,4 @@
-.TH "smsd" "8" "September 9, 2010" "" "Gnokii"
+.TH "smsd" "8" "September 27, 2010" "" "Gnokii"
 .SH "NAME"
 smsd \- daemon for handling incoming and outgoing SMSes using libgnokii
 .SH "SYNOPSIS"
@@ -272,9 +272,9 @@ sms status this option is ignored.
 
 .TP
 .BR -b,\ --inbox\ memory_type
-Where to look for new messages (defaults to IN which is the correct value for
-Nokia phones, for other phones use SM for the SIM card or ME for the phone
-memory). For debugging or for unusual setups you can use another memory type
+Where to look for new messages (defaults to IN for most Nokia phones and to
+SM for all other phones).
+For debugging or for unusual setups you can use another memory type
 supported by your phone (eg. IN for the Inbox, OU for the Outbox, AR for the
 Archive, TE for the Templates and F1,...,F20 for your own folders).
 Use gnokii --showsmsfolderstatus for a list of such memory types.
