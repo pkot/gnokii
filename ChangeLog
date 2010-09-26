@@ -7,8 +7,8 @@
     o fix mbox format of --getsms for sent messages; closes
       https://savannah.nongnu.org/bugs/?30050       (Daniele Forsi)
     o fix char_ucs2_encode() function                   (Paweł Kot)
-    o add id for Nokia 2730 to misc.c only; uses model=series40
-                                                  (Iain Mac Donald)
+    o add ids for Nokia 2730 and 6133 to misc.c only; use
+      model=series40 for both       (Iain Mac Donald, John Lapeyre)
     o fix a problem with a multipart message in default alphabet
       and extended alphabet characters                  (Paweł Kot)
     o make sure that Series40 3rd Ed+ get proper capabilties
