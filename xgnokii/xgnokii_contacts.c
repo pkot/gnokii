@@ -2257,7 +2257,7 @@ void GUI_RefreshContacts(void)
 				row[2] = "P";
 			else
 				row[2] = "S";
-			if (phoneMonitor.supported & PM_CALLERGROUP)
+			if (phoneMonitor.supported & PM_CALLERGROUP & (int)pbEntry->entry.caller_group >= 0 )
 				row[3] = xgnokiiConfig.callerGroups[pbEntry->entry.caller_group];
 			else
 				row[3] = "";

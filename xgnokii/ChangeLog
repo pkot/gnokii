@@ -1,3 +1,8 @@
+* Sun 26 Sep 2010 Matthias Mucks
+- On 64Bit Machines, while reading contacts from a mobile,
+  'pbEntry->entry.caller_group' sometimes contains a large nubmer,
+  seems to be unsigned -1, which causes the SEGFAULT
+
 * Sun 15 Aug 2010 Daniele Forsi
 - Replace dprintf() with gn_log_xdebug()
 
@@ -86,7 +91,7 @@
 - Deleting calendar notes work.
 - Initialization timeout shorted from 15 secs to 10 secs.
 
-* Sun Jun 18 03:18:27 CEST 2000 Jan Derfinak <ja@mail.upjs.sk
+* Sun Jun 18 03:18:27 CEST 2000 Jan Derfinak
 - Saving SMS's to mailbox. Original idea from Petri Lahti <petri.lahti@iki.fi>
 - User configurable maximum length of names in contacts on SIM and phone.
 
