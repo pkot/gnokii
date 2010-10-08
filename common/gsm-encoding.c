@@ -800,7 +800,7 @@ size_t char_hex_encode(char *dest, size_t dest_len, const char *src, size_t len)
 	int i, n = dest_len / 2 >= len ? len : dest_len / 2;
 
 	for (i = 0; i < n; i++)
-		snprintf(dest + i * 2, 3, "%02x", char_def_alphabet_encode(src[i]));
+		snprintf(dest + i * 2, 3, "%02X", char_def_alphabet_encode(src[i]));
 	return len * 2;
 }
 
@@ -922,7 +922,7 @@ size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len
 			return o_len * UCS2_SIZE;
 		/* We write here 4 chars + NULL termination */
 		/* XXX: We should probably check wchar_t size. */
-		snprintf(dest + (o_len * UCS2_SIZE), UCS2_SIZE + 1, "%04x", wc);
+		snprintf(dest + (o_len * UCS2_SIZE), UCS2_SIZE + 1, "%04X", wc);
 	}
 	return o_len * UCS2_SIZE;
 }

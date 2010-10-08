@@ -13,6 +13,9 @@
       and extended alphabet characters                  (Paweł Kot)
     o make sure that Series40 3rd Ed+ get proper capabilties
                                                         (Paweł Kot)
+    o when encoding to hex format make sure we're using uppercase
+      that should be compliant with the lagrer number of the
+      devices                                 (Msquared, Paweł Kot)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)
