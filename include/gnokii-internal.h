@@ -162,6 +162,8 @@ typedef void (*cfg_foreach_func)(const char *section, const char *key, const cha
 void cfg_foreach(const char *section, cfg_foreach_func func);
 char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key, const char *value);
 int cfg_file_write(struct gn_cfg_header *cfg, const char *filename);
+/* Get some information about the given phone */
+gn_phone_model *gn_cfg_get_phone_model(struct gn_cfg_header *cfg, const char *product_name);
 
 gn_error isdn_cause2gn_error(char **src, char **msg, unsigned char loc, unsigned char cause);
 

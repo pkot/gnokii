@@ -104,5 +104,6 @@
 
 char **gnokii_strsplit(const char *string, const char *delimiter, int tokens);
 void gnokii_strfreev(char **str_array);
+int gnokii_strcmpsep(const char *s1, const char *s2, char sep);
 
 #endif /* _gnokii_misc_h */

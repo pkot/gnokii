@@ -865,6 +865,89 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 	return GN_ERR_NONE;
 }
 
+#define SETFLAG(f) \
+if (!gnokii_strcmpsep(#f, val, ',')) {\
+	phone_model.flags |= PM_##f;\
+	dprintf("Flag PM_%s\n", #f);\
+	continue;\
+}
+/* Load phone flags (formerly a static array in misc.c) */
+gn_phone_model *gn_cfg_get_phone_model(struct gn_cfg_header *cfg, const char *product_name)
+{
+	struct gn_cfg_header *hdr;
+	char *val, *comma, *end, *section = "flags";
+	int count;
+	static gn_phone_model phone_model = {NULL, NULL, 0};
+	static char model[GN_MODEL_MAX_LENGTH] = "";
+
+	if (phone_model.model)
+		return &phone_model;
+
+	val = gn_cfg_get(gn_cfg_info, section, product_name);
+	if (val) {
+		phone_model.model = model;
+		/* Ignore trailing whitespace (leading whitespace has been stripped when loading the config file) */
+		comma = val;
+		while (*comma && *comma != ',')
+			comma++;
+		end = comma;
+		while (end > val && (isblank(*end) || *end == ','))
+			end--;
+		count = end - val + 1;
+		snprintf(model, GN_MODEL_MAX_LENGTH, "%.*s", count, val);
+
+		/* Check flags */
+		val = comma;
+		for (;;) {
+			while (*val && *val != ',')
+				val++;
+			/* This skips also empty fields */
+			while (*val && (*val == ',' || isblank(*val)))
+				val++;
+			if (!*val)
+				break;
+			SETFLAG(OLD_DEFAULT);
+			SETFLAG(DEFAULT);
+			SETFLAG(DEFAULT_S40_3RD);
+			SETFLAG(CALLERGROUP);
+			SETFLAG(NETMONITOR);
+			SETFLAG(KEYBOARD);
+			SETFLAG(SMS);
+			SETFLAG(CALENDAR);
+			SETFLAG(DTMF);
+			SETFLAG(DATA);
+			SETFLAG(SPEEDDIAL);
+			SETFLAG(EXTPBK);
+			SETFLAG(AUTHENTICATION);
+			SETFLAG(FOLDERS);
+			SETFLAG(FULLPBK);
+			SETFLAG(SMSFILE);
+			SETFLAG(EXTPBK2);
+			SETFLAG(EXTCALENDAR);
+			SETFLAG(XGNOKIIBREAKAGE);
+			/* FIXME? duplicated code from above */
+			comma = val;
+			while (*comma && *comma != ',')
+				comma++;
+			end = comma;
+			while (end > val && (isblank(*end) || *end == ','))
+				end--;
+			count = end - val + 1;
+			dprintf("Unknown flag \"%.*s\"\n", count, val);
+		}
+		return &phone_model;
+	}
+#undef SETFLAG
+
+	/* Give the user some hint on why the product_name wasn't found */
+	hdr = cfg_header_get(cfg, (char *)section);
+	if (!hdr) {
+		fprintf(stderr, _("No %s section in the config file.\n"), section);
+	}
+
+	return &phone_model;
+}
+
 static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 {
 	char *val;

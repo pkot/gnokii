@@ -50,6 +50,7 @@
 
 #include "misc.h"
 #include "gnokii.h"
+#include "gnokii-internal.h"
 
 GNOKII_API gn_log_target gn_log_debug_mask = GN_LOG_T_NONE;
 GNOKII_API gn_log_target gn_log_rlpdebug_mask = GN_LOG_T_NONE;
@@ -365,7 +366,7 @@ GNOKII_API gn_phone_model *gn_phone_model_get(const char *product_name)
 
 GNOKII_API const char *gn_model_get(const char *product_name)
 {
-	return (gn_phone_model_get(product_name)->model);
+	return gn_cfg_get_phone_model(gn_cfg_info, product_name)->model;
 }
 
 static void log_printf(gn_log_target mask, const char *fmt, va_list ap)
@@ -633,6 +634,35 @@ void gnokii_strfreev(char **str_array)
 		tmp++;
 	}
 	free(str_array);
+}
+
+/**
+ * gnokii_strcmpsep:
+ * @s1: a string, NUL terminated, may NOT contain @sep
+ * @s2: a string, NUL terminated, may contain @sep
+ * @sep: comparison stops if this char is found in @s2
+ *
+ * Returns: < 0 if @s1 < @s2
+ *            0 if @s1 == @s2
+ *          > 0 if @s1 > @s2
+ *
+ * Compares two strings up to a NUL terminator or a separator char.
+ * Leading and trailing white space in @s2 is ignored.
+ */
+int gnokii_strcmpsep(const char *s1, const char *s2, char sep)
+{
+	while (isblank(*s2))
+		s2++;
+	while (*s1 && *s1 == *s2) {
+		s1++;
+		s2++;
+	}
+	while (isblank(*s2))
+		s2++;
+	if (!*s1 && *s2 == sep)
+		return 0;
+
+	return *s1 - *s2;
 }
 
 /*
