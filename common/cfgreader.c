@@ -729,7 +729,7 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 		return GN_ERR_NOPHONE;
 	}
 
-	/* You need to specify at least model and port in the phone section */
+	/* You need to specify at least model, port and connection in the phone section */
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "model"))) {
 		fprintf(stderr, _("You need to define '%s' in the config file.\n"), "model");
 		return GN_ERR_NOMODEL;
