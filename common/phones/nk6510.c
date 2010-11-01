@@ -672,7 +672,6 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 	}
 
 	if (!strncmp(data.model, "NMM-3", 5)) {
-		state->driver.phone.max_battery_level = 4;
 		state->driver.phone.operator_logo_width = 0;
 		state->driver.phone.operator_logo_height = 0;
 		state->driver.phone.startup_logo_width = 0;
