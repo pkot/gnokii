@@ -3946,7 +3946,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	gn_error error;
 
 	if (DRVINSTANCE(state)->pm->flags & PM_EXTCALENDAR)
-		return NK6510_WriteCalendarNote(data, state);
+		return NK6510_WriteCalendarNote2(data, state);
 
 	dprintf("WriteCalendarNote\n");
 	if (!data->calnote)
