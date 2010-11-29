@@ -5449,7 +5449,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		break;
 
 	case 0xf0:
-		error = GN_ERR_UNHANDLEDFRAME;
+		error = GN_ERR_NOTSUPPORTED;
 		break;
 
 	default:
