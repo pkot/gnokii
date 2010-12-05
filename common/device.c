@@ -41,7 +41,7 @@
 #include "devices/serial.h"
 #include "devices/tekram.h"
 #include "devices/dku2libusb.h"
-
+#include "devices/socketphonet.h"
 
 GNOKII_API int device_getfd(struct gn_statemachine *state)
 {
@@ -78,6 +78,9 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	case GN_CT_DKU2LIBUSB:
 		state->device.fd = fbusdku2usb_open(state);
 		break;
+	case GN_CT_SOCKETPHONET:
+		state->device.fd = socketphonet_open(file, with_async, state);
+		break;
 	default:
 		state->device.fd = -1;
 		break;
@@ -110,6 +113,9 @@ void device_close(struct gn_statemachine *state)
 	case GN_CT_DKU2LIBUSB:
 		fbusdku2usb_close(state);
 		break;
+	case GN_CT_SOCKETPHONET:
+		socketphonet_close(state);
+		break;
 	default:
 		break;
 	}
@@ -139,6 +145,7 @@ void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 	case GN_CT_Tekram:
 	case GN_CT_TCP:
 	case GN_CT_DKU2LIBUSB:
+	case GN_CT_SOCKETPHONET:
 	default:
 		break;
 	}
@@ -161,6 +168,7 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 	case GN_CT_Bluetooth:
 	case GN_CT_TCP:
 	case GN_CT_DKU2LIBUSB:
+	case GN_CT_SOCKETPHONET:
 	default:
 		break;
 	}
@@ -183,6 +191,8 @@ size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 		return tcp_read(state->device.fd, buf, nbytes, state);
 	case GN_CT_DKU2LIBUSB:
 		return fbusdku2usb_read(buf, nbytes, state);
+	case GN_CT_SOCKETPHONET:
+		return socketphonet_read(state->device.fd, buf, nbytes, state);
 	default:
 		break;
 	}
@@ -206,6 +216,8 @@ size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 		return tcp_write(state->device.fd, buf, n, state);
 	case GN_CT_DKU2LIBUSB:
 		return fbusdku2usb_write(buf, n, state);
+	case GN_CT_SOCKETPHONET:
+		return socketphonet_write(state->device.fd, buf, n, state);
 	default:
 		break;
 	}
@@ -229,6 +241,8 @@ int device_select(struct timeval *timeout, struct gn_statemachine *state)
 		return tcp_select(state->device.fd, timeout, state);
 	case GN_CT_DKU2LIBUSB:
 		return fbusdku2usb_select(timeout, state);
+	case GN_CT_SOCKETPHONET:
+		return socketphonet_select(state->device.fd, timeout, state);
 	default:
 		break;
 	}

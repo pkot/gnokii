@@ -323,6 +323,7 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_DKU2LIBUSB:
 	case GN_CT_Bluetooth:
+	case GN_CT_SOCKETPHONET:
 		if (phonet_open(state) == true)
 			error = GN_ERR_NONE;
 		break;

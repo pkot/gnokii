@@ -47,6 +47,7 @@
 #include "phones/nk6510.h"
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
+#include "links/socket-phonet.h"
 #include "phones/nokia.h"
 #include "map.h"
 
@@ -625,6 +626,7 @@ static gn_error NK6510_Initialise(struct gn_statemachine *state)
 		case GN_CT_DKU2:
 		case GN_CT_DKU2LIBUSB:
 		case GN_CT_Irda:
+		case GN_CT_SOCKETPHONET:
 			err = phonet_initialise(state);
 			/* Don't loop forever */
 			attempt = 3;

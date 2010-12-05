@@ -26,6 +26,9 @@
     o free the cached file lists up on exist            (Paweł Kot)
     o fix crash when writing calendar notes to Series 40 3rd Ed.
       and later                                     (Daniele Forsi)
+    o add support for phonet Linux kernel driver for Nokia phones
+      over USB connections only (use connection=phonet port=usbpn0)
+                                                    (Daniele Forsi)
  * nk7110 driver updates
     o fix reading SMS from AR and TE                (Daniele Forsi)
  * win32 updates

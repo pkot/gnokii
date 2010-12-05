@@ -45,6 +45,10 @@ port = none
 # to your computer using DKU2 cable. Numbering goes from 1 upwards.
 # Default is 1.
 # port = 1
+#
+# If you use connection type phonet use it to denote the network device to use.
+# See README-6510 for more details.
+# port = usbpn0
 
 # Change it according to instructions
 model = fake
@@ -85,9 +89,11 @@ model = fake
 # to understand what this changes if you're curious.
 initlength = default
 
-# The type of the connection, for IR set this to infrared or irda.
-# For the nk6110 driver only infrared is valid for the IrDA connection.
-# See Docs/gnokii-ir-howto for more detailes on this.
+# Most USB cables for Nokia phones should work with the libusb driver
+# (recommended)
+# connection = dku2libusb
+# and with the new kernel driver (Linux 2.6.28+)
+# connection = phonet
 # If you have 6210/6250/7110 phone and dau9p cable (the one you can
 # use with 6100 series and cannot use hardware modem from the phone)
 # you may want to use 'dau9p' value to get faster initialization.
@@ -96,10 +102,8 @@ initlength = default
 # Note that it is recommended and currently the best way to use this
 # cable with nk6510 driver.
 connection = serial
-# With DKU-2 cable use the following setting if you want to libusb driver
-# (recommended):
-# connection = dku2libusb
-# or the following setting if you want to use Linux kernel driver
+# With DKU-2 cable use the following setting with the now unsupported Linux
+# kernel driver that was provided with older libgnokii versions:
 # connection = dku2
 # With DKU-5 cable use the following setting
 # connection = dku5
@@ -110,6 +114,8 @@ connection = serial
 # For infrared connection with phones other than Nokia 6110/6130/6150 use:
 # connection = irda
 # Don't forget to run: 'irattach irda0 -s' or similiar before running gnokii
+# For the nk6110 driver only connection=infrared is valid for IrDA.
+# See Docs/gnokii-ir-howto for more detailes on this.
 # For connection with a PC/SC compatible Smart Card reader use:
 # connection = pcsc
 

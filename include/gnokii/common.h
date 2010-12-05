@@ -53,7 +53,8 @@ typedef enum {
 	GN_CT_M2BUS,	/* Serial connection with M2BUS protocol */
 	GN_CT_DKU2,	/* DKU2 usb connection using nokia_dku2 kernel driver */
 	GN_CT_DKU2LIBUSB, /* DKU2 usb connection using libusb */
-	GN_CT_PCSC      /* PC/SC SIM Card reader using libpsclite */
+	GN_CT_PCSC,     /* PC/SC SIM Card reader using libpsclite */
+	GN_CT_SOCKETPHONET /* Linux PHONET kernel driver */
 } gn_connection_type;
 
 GNOKII_API const char *gn_connection_type2str(gn_connection_type t);

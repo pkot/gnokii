@@ -12,7 +12,8 @@ UNIX_FILES = \
 	unixbluetooth.c \
 	osxbluetooth.c \
 	unixirda.c \
-	tcp.c
+	tcp.c \
+	socketphonet.c
 
 if WIN32
 PLATFORM_FILES = $(WIN32_FILES)

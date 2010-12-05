@@ -42,6 +42,7 @@ various connection media:
 | dlr3p		| dlr3p			|
 | IrDA		| irda			|
 | Bluetooth	| bluetooth		|
+| USB		| dku2libusb or phonet	|
 -----------------------------------------
 When you don't know what your cable is you can first try serial value.
 
@@ -68,6 +69,22 @@ The current code is able to:
 Hint: For all these phones you can also use AT driver, as they all have a
 builtin hardware modem, but it usually supports less commands so it isn't
 recommended.
+
+* phonet Driver *
+
+Linux 2.6.28 and later versions provide a network kernel driver called
+"phonet" that conflicts with the dku2libusb driver provided by libgnokii and
+that can connect to the same phones.
+The port value is the device name as seen with "ifconfig", usually usbpn0.
+When using this driver you may encounter the following errors:
+* "Operation not permitted" - run as root:
+  setcap cap_sys_admin,cap_net_raw=+ep $(which gnokii)
+* "Address family not supported by protocol" - run "modprobe cdc_phonet" as
+  root and remove the cdc_phonet and phonet modules from the blacklist if
+  you put them there to use the dku2libusb driver
+* "No such device" - the phone isn't connected: choose "Nokia PC Suite" or
+  "Nokia mode" from phone's menu
+* "No route to host" - run as root "ifconfig usbpn0 up"
 
 * TODO *
 

@@ -501,7 +501,10 @@ static struct { gn_connection_type ct; const char *str; } connectiontypes[] = {
 #ifndef WIN32
 	{ GN_CT_TCP,        "tcp" },
 #endif
-	{ GN_CT_Tekram,     "tekram" }
+	{ GN_CT_Tekram,     "tekram" },
+#ifdef HAVE_SOCKETPHONET
+	{ GN_CT_SOCKETPHONET, "phonet" },
+#endif
 };
 
 GNOKII_API gn_connection_type gn_get_connectiontype(const char *connection_type_string)
@@ -567,6 +570,12 @@ GNOKII_API int gn_lib_is_connectiontype_supported(gn_connection_type ct)
 #endif
 	case GN_CT_TCP:
 #ifndef WIN32
+		return 0;
+#else
+		return 1;
+#endif
+	case GN_CT_SOCKETPHONET:
+#ifndef HAVE_SOCKETPHONET
 		return 0;
 #else
 		return 1;
