@@ -133,13 +133,15 @@ size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemach
 	int received;
 	unsigned char *frame = buf;
 
-	received = recvfrom(fd, buf + 8, sizeof(buf) - 8, 0, NULL, NULL);
+	received = recvfrom(fd, buf + 8, nbytes - 8, 0, NULL, NULL);
 	if (received == -1) {
 		perror("recvfrom");
 		return -1;
 	}
 
-	/* Hack!!! REbuild header as expected by phonet_rx_statemachine() */
+	/* Hack!!! Rebuild header as expected by phonet_rx_statemachine() */
+	/* FIXME: why we need to add another 2 bytes? */
+	received += 2;
 	frame[0] = FBUS_PHONET_DKU2_FRAME_ID;
 	frame[1] = FBUS_PHONET_BLUETOOTH_DEVICE_PC;
 	frame[2] = FBUS_DEVICE_PHONE;
