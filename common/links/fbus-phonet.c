@@ -242,7 +242,9 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 	if (!state)
 		return GN_ERR_FAILED;
 
-	/* FIXME - we should check for the message length ... */
+	if (messagesize > PHONET_TRANSMIT_MAX_LENGTH) {
+		return GN_ERR_MEMORYFULL;
+	}
 
 	/* Now construct the message header. */
 
