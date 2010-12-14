@@ -47,7 +47,6 @@
 #include "phones/nk6510.h"
 #include "links/fbus.h"
 #include "links/fbus-phonet.h"
-#include "links/socket-phonet.h"
 #include "phones/nokia.h"
 #include "map.h"
 

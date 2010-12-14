@@ -5,7 +5,6 @@ libLINKS_la_SOURCES = \
 	atbus.c \
 	fbus.c \
 	fbus-phonet.c \
-	socket-phonet.c \
 	fbus-3110.c \
 	m2bus.c \
 	gnbus.c \
