@@ -4184,6 +4184,7 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 				case 0x04:
 				case 0x09:
 					dprintf("Not logged in any network.\n");
+					break;
 				case 0x06:
 				case 0x0b:
 					dprintf("Inactive SIM.\n");
