@@ -256,8 +256,8 @@ static gn_phone_model models[] = {
 	{"6360",  "NPW-2",	PM_DEFAULT },
 	{"6370",  "NHP-2FX",	PM_OLD_DEFAULT },
 	{"6385",  "NHP-2AX",	PM_OLD_DEFAULT },
-	{"6500",  "NHM-7",	PM_DEFAULT | PM_NETMONITOR }, /* Series 40 5th Edition */
-	{"6500c", "RM-265",	PM_DEFAULT_S40_3RD | PM_FULLPBK },
+	{"6500",  "NHM-7",	PM_DEFAULT | PM_NETMONITOR },
+	{"6500c", "RM-265",	PM_DEFAULT_S40_3RD | PM_FULLPBK }, /* Series 40 5th Edition */
 	{"6510",  "NPM-9",	PM_DEFAULT },
 	{"6560",  "RH-25",	PM_OLD_DEFAULT },
 	{"6585",  "RH-34",	PM_OLD_DEFAULT },
