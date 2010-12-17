@@ -3661,6 +3661,9 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 			break;
 		}
 		break;
+	case NK6510_SUBCAL_UNSUPPORTED: /* 0xf0 */
+		e = GN_ERR_NOTSUPPORTED;
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", NK6510_MSG_CALENDAR, message[3]);
 		e = GN_ERR_UNHANDLEDFRAME;

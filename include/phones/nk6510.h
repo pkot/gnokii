@@ -125,6 +125,7 @@ typedef enum {
 #define NK6510_SUBCAL_ADD_NOTE_RESP	0x66	/* Add calendar note response */
 #define NK6510_SUBCAL_INFO2_RCVD	0x9f	/* Received calendar summary */
 #define NK6510_SUBCAL_FREEPOS2_RCVD	0x96	/* Received first free position */
+#define NK6510_SUBCAL_UNSUPPORTED	0xf0	/* Error code for unsupported FBUS frames */
 
 /* Calendar note types */
 #define NK6510_NOTE_REMINDER		0x00	/* Reminder */
