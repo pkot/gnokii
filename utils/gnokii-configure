@@ -99,7 +99,9 @@ class GnokiiAssistant(gtk.Assistant):
 	def __init__(self):
 		gtk.Assistant.__init__(self)
 
-		self.assistant_xml = gtk.glade.XML('gnokii-configure.glade')
+		pathname = os.path.dirname(sys.argv[0])
+		guifile = os.path.join(pathname, 'gnokii-configure.glade')
+		self.assistant_xml = gtk.glade.XML(guifile)
 		self.assistant_xml.signal_autoconnect(self)
 		self.assistant = self.assistant_xml.get_widget('gnokii_config_assistant')
 
