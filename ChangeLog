@@ -7,11 +7,11 @@
     o fix mbox format of --getsms for sent messages; closes
       https://savannah.nongnu.org/bugs/?30050       (Daniele Forsi)
     o fix char_ucs2_encode() function                   (Paweł Kot)
-    o add ids for Nokia 1101, 1110, 2730, 6133 and 2330c to misc.c
-      only; 1101 is untested, 1110 is Series 30 so it doesn't
-      support many commands; use model=series40 for all
+    o add ids for Nokia 1101, 1110, 2730, 6133, 2330c and 6500c to
+      misc.c only; 1101 is untested, 1110 doesn't support many
+      commands because it's a Series 30; use model=series40 for all
                    (Daniele Forsi, sai on #gnokii, Iain Mac Donald,
-                                     John Lapeyre, Dennis Schridde)
+                              John Lapeyre, Dennis Schridde, Kevin)
     o fix a problem with a multipart message in default alphabet
       and extended alphabet characters                  (Paweł Kot)
     o make sure that Series40 3rd Ed+ get proper capabilties
