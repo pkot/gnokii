@@ -30,7 +30,7 @@
 */
 
 #include "config.h"
-
+#include "compat.h" /* for __ptr_t definition */
 #include "gnokii.h"
 
 #ifndef HAVE_SOCKETPHONET
@@ -40,7 +40,7 @@ int socketphonet_close(struct gn_statemachine *state)
 	return -1;
 }
 
-int socketphonet_open(const char *interface, int with_async, struct gn_statemachine *state)
+int socketphonet_open(const char *iface, int with_async, struct gn_statemachine *state)
 {
 	return -1;
 }

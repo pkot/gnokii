@@ -32,10 +32,12 @@
 #ifndef _gnokii_devices_linuxphonet_h
 #define _gnokii_devices_linuxphonet_h
 
+#include "gnokii.h"
+
 int socketphonet_close(struct gn_statemachine *state);
-int socketphonet_open(const char *interface, int with_async, struct gn_statemachine *state);
+int socketphonet_open(const char *iface, int with_async, struct gn_statemachine *state);
 size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state);
 size_t socketphonet_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state);
 int socketphonet_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
 
-#endif /* #ifndef _gnokii_devices_linuxphonet_h */
+#endif /* _gnokii_devices_linuxphonet_h */
