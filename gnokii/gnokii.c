@@ -299,35 +299,70 @@ static void gnokii_error_logger(const char *fmt, va_list ap)
 	}
 }
 
+#define MAX_PATH_LEN 255
 static int install_log_handler(void)
 {
-	char logname[256];
-	char *home;
-#ifdef WIN32
+	int retval = 0;
+	char logname[MAX_PATH_LEN];
+	char *path, *basepath;
 	char *file = "gnokii-errors";
-#else
-	char *file = ".gnokii-errors";
+	int free_path = 0;
+#ifndef WIN32
+	struct stat buf;
+	int st;
+	int home = 0;
 #endif
 
-	if ((home = getenv("HOME")) == NULL) {
 #ifdef WIN32
-		home = ".";
+	basepath = getenv("APPDATA");
+#elif __MACH__
+	basepath = getenv("HOME");
 #else
-		fprintf(stderr, _("ERROR: Can't find HOME environment variable!\n"));
-		return -1;
+/* freedesktop.org compliancy: http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html */
+#define XDG_CACHE_HOME "/.cache" /* $HOME/.cache */
+	basepath = getenv("XDG_CACHE_HOME");
+	if (!basepath) {
+		basepath = getenv("HOME");
+		home = 1;
+	}
+#endif
+	if (!basepath)
+		path = ".";
+	else {
+		path = calloc(MAX_PATH_LEN, sizeof(char));
+		free_path = 1;
+#ifdef WIN32
+		snprintf(path, MAX_PATH_LEN, "%s\\gnokii", basepath);
+#elif __MACH__
+		snprintf(path, MAX_PATH_LEN, "%s/Library/Logs/gnokii", basepath);
+#else
+		if (home)
+			snprintf(path, MAX_PATH_LEN, "%s%s/gnokii", basepath, XDG_CACHE_HOME);
+		else
+			snprintf(path, MAX_PATH_LEN, "%s/gnokii", basepath);
 #endif
 	}
 
-	snprintf(logname, sizeof(logname), "%s/%s", home, file);
+#ifndef WIN32
+	st = stat(path, &buf);
+	if (st)
+		mkdir(path, S_IRWXU);
+#endif
+
+	snprintf(logname, sizeof(logname), "%s/%s", path, file);
 
 	if ((logfile = fopen(logname, "a")) == NULL) {
 		fprintf(stderr, _("Cannot open logfile %s\n"), logname);
-		return -1;
+		retval = -1;
+		goto out;
 	}
 
 	gn_elog_handler = gnokii_error_logger;
 
-	return 0;
+out:
+	if (free_path)
+		free(path);
+	return retval;
 }
 
 /* businit is the generic function which waits for the FBUS link. The limit

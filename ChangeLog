@@ -50,6 +50,9 @@
       Fixes https://bugs.launchpad.net/bugs/604947  (Daniele Forsi)
  * smsd updates
     o add SQLite3 backend module                   (Santeri Toikka)
+ * gnokii updates
+    o place gnokii-errors into the better location - freedesktop
+      compliant                                         (Paweł Kot)
 
 0.6.29
 ======
