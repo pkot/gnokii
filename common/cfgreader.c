@@ -907,6 +907,7 @@ static char **get_locations(int *retval)
 	char *appdata, *homedrive, *homepath, *systemroot; /* env variables */
 	int size = 3; /* default size for config_file_locations */
 	char path[MAX_PATH_LEN];
+	const char *fname = "gnokii.ini";
 
 	*retval = size;
 
@@ -917,14 +918,14 @@ static char **get_locations(int *retval)
 	homepath = getenv("HOMEPATH");
 	systemroot = getenv("SYSTEMROOT");
 	/* 1. %APPDATA%\gnokii\config */
-	snprintf(path, MAX_PATH_LEN, "%s\\gnokii\\config", appdata);
+	snprintf(path, MAX_PATH_LEN, "%s\\gnokii\\%s", appdata, fname);
 	config_file_locations[0] = strdup(path);
 	/* old gnokii behaviour */
 	/* 2. %HOMEDRIVE%\%HOMEPATH%\_gnokiirc */
-	snprintf(path, MAX_PATH_LEN, "%s\\%s\\_gnokiirc", homedrive, homepath);
+	snprintf(path, MAX_PATH_LEN, "%s\\%s\\%s", homedrive, homepath, fname);
 	config_file_locations[1] = strdup(path);
 	/* 3. %SYSTEMROOT%\gnokiirc */
-	snprintf(path, MAX_PATH_LEN, "%s\\gnokiirc", systemroot);
+	snprintf(path, MAX_PATH_LEN, "%s\\%s", systemroot, fname);
 	config_file_locations[2] = strdup(path);
 
 	return config_file_locations;
