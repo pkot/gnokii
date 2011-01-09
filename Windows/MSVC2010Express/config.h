@@ -125,6 +125,10 @@
 /* Define to 1 if you have libusb installed */
 #define HAVE_LIBUSB 1
 
+/* Define to 1 if you have libiconv installed */
+#define HAVE_ICONV 1
+#define HAVE_LOCALE_CHARSET 1
+
 /* FIXME: Disable some odd warnings, comment these lines if u wanna fix the bad code lines */
 #pragma warning(disable : 4244) // conversion from 'int ' to 'float ', possible loss of data
 #pragma warning(disable : 4761) // integral size mismatch in argument; conversion supplied

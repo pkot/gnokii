@@ -17,11 +17,16 @@ Compilation prerequisits
 3.1 Download from http://sourceforge.net/projects/libusb-win32/files/libusb-win32-releases/1.2.2.0/
  - libusb-win32 binaries (http://sourceforge.net/projects/libusb-win32/files/libusb-win32-releases/1.2.2.0/libusb-win32-bin-1.2.2.0.zip/download)
  
-4. Create ext directory in top-level gnokii directory
-4.1 Create glib subdirectory in ext directory and extract there glib dev zip
-4.2 Create libusb subdirectory in ext directory and extract there libusb-win32 binaries:
+4. iconv dependencies
+4.1 Download from http://sourceforge.net/projects/gettext/http://sourceforge.net/projects/gettext/
+ - libiconv-1.9.1.bin.woe32 binaries (http://sourceforge.net/projects/gettext/files/libiconv-win32/1.9.1/libiconv-1.9.1.bin.woe32.zip/download)
+ 
+5. Create ext directory in top-level gnokii directory
+5.1 Create glib subdirectory in ext directory and extract there glib dev zip
+5.2 Create libusb subdirectory in ext directory and extract there libusb-win32 binaries:
  - libusb-win32-bin-1.2.2.0/include/usb.h -> usb.h
  - libusb-win32-bin-1.2.2.0/lib/msvc/libusb.lib -> libusb.lib
+5.3 Create iconv subdirectory in ext directory and extract there libiconv zip
 
 Runtime prerequsits
 ===================
@@ -30,6 +35,7 @@ Make sure that following files are present in the same directory as gnokii.exe a
  - intl.dll (from gettext-runtime runtime)
  - libglib-2.0-0.dll (from glib runtime)
  - libusb0.dll (from libusb-win32: libusb-win32-bin-1.2.2.0/bin/x86/libusb0_x86.dll)
+ - iconv.dll (from libiconv binaries)
 
 Place the sample config file (gnokiirc from Windows directory) into one of the locations:
  - %AppDataFolder%\gnokii\config (C:\Documents and Settings\<username>\Application Data\gnokii\config or C:\Users\<username>\AppData\Roaming\gnokii\config)

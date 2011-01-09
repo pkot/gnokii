@@ -234,14 +234,7 @@ static const char *get_langinfo_codeset(void)
 #ifdef HAVE_LANGINFO_CODESET
 		codeset = nl_langinfo(CODESET);
 #else
-#  ifdef WIN32
-		/* As suggested by Ben Bryant, http://codesnipers.com/?q=node/46 */
-		char szCP[10];
-		snprintf(szCP, sizeof(szCP), ".%d", GetACP());
-		codeset = setlocale(LC_ALL, szCP);
-#  else
 		codeset = locale_charset();
-#  endif
 #endif
 	}
 	return codeset;
@@ -289,6 +282,10 @@ int char_mblen(const char *src)
 	dprintf("char_mblen(%s): %i\n", src, len);
 	return len;
 }
+
+#ifndef ICONV_CONST
+#  define ICONV_CONST const
+#endif
 
 /**
  * char_mbtowc:
@@ -982,6 +979,9 @@ unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, 
 		case -1:
 			dest[pos++] =  wc >> 8 & 0xFF;
 			dest[pos++] =  wc & 0xFF;
+			offset++;
+			break;
+		case 0: /* Avoid infinite loop */
 			offset++;
 			break;
 		default:
