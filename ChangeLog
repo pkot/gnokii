@@ -22,6 +22,9 @@
     o use libiconv on WIN32                             (Paweł Kot)
 	o avoid segfault with gn_cfg_phone_load() when state is not
 	  initialized                                       (Paweł Kot)
+	o add gn_lib_phoneprofile_load_from_external() for 3rd party
+	  apps to initialize gnokii not using gnokii config file
+	                                                    (Paweł Kot)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)

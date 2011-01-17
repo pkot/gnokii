@@ -1,5 +1,4 @@
 /*
-  $Id$
 
   G N O K I I
 
@@ -23,7 +22,7 @@
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001      Chris Kemp
-  Copyrught (C) 2001-2004 Pawel Kot
+  Copyrught (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2003 BORBELY Zoltan
   Copyright (C) 2002      Pavel Machek, Marcin Wiacek
   Copyright (C) 2006      Helge Deller
@@ -85,18 +84,24 @@ GNOKII_API unsigned int gn_lib_version()
 	return LIBGNOKII_VERSION;
 }
 
-GNOKII_API gn_error gn_lib_phoneprofile_load_from_file(const char *configfile, const char *configname, struct gn_statemachine **state)
+static gn_error load_from_file(const char *configfile, const char *configname)
 {
-	gn_error error = GN_ERR_NONE;
+	if (configfile && *configfile)
+		return gn_cfg_file_read(configfile);
+	else
+		return gn_cfg_read_default();
+}
+
+static gn_error load_from_memory(char **lines)
+{
+	return gn_cfg_memory_read(lines);
+}
+
+static gn_error phoneprofile_load(const char *configname, gn_error error, struct gn_statemachine **state)
+{
 	*state = NULL;
 
-	if (!gn_cfg_info) {
-		if (configfile && *configfile)
-			error = gn_cfg_file_read(configfile);
-		else
-			error = gn_cfg_read_default();
-	}
-	if (GN_ERR_NONE == error) {
+	if (error = GN_ERR_NONE) {
 		/* allocate and initialize data structures */
 		*state = malloc(sizeof(**state));
 		if (*state) {
@@ -116,11 +121,30 @@ GNOKII_API gn_error gn_lib_phoneprofile_load_from_file(const char *configfile, c
 	return LASTERROR((*state), GN_ERR_NONE);
 }
 
+GNOKII_API gn_error gn_lib_phoneprofile_load_from_file(const char *configfile, const char *configname, struct gn_statemachine **state)
+{
+	gn_error error = GN_ERR_NONE;
+
+	if (!gn_cfg_info)
+		error = load_from_file(configfile, configname);
+
+	return phoneprofile_load(configname, error, state);
+}
+
+GNOKII_API gn_error gn_lib_phoneprofile_load_from_external(char **lines, struct gn_statemachine **state)
+{
+	gn_error error = GN_ERR_NONE;
+
+	if (!gn_cfg_info)
+		error = load_from_memory(lines);
+
+	return phoneprofile_load(NULL, error, state);
+}
+
 GNOKII_API gn_error gn_lib_phoneprofile_load(const char *configname, struct gn_statemachine **state)
 {
 	return gn_lib_phoneprofile_load_from_file(NULL, configname, state);
 }
-
 
 GNOKII_API gn_error gn_lib_phoneprofile_free( struct gn_statemachine **state )
 {
