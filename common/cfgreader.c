@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -26,7 +24,7 @@
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2000      Jan Derfinak
   Copyright (C) 2001      Jan Kratochvil
-  Copyright (C) 2001-2009 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2005      Bastien Nocera
 
@@ -1145,6 +1143,9 @@ GNOKII_API gn_error gn_cfg_phone_load(const char *iname, struct gn_statemachine 
 {
 	char section[256];
 	gn_error error;
+
+	if (!state)
+		return GN_ERR_INTERNALERROR;
 
 	if (iname == NULL || *iname == '\0') {
 		state->config = gn_config_global;

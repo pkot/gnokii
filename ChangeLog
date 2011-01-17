@@ -20,6 +20,8 @@
       that should be compliant with the lagrer number of the
       devices                                 (Msquared, Paweł Kot)
     o use libiconv on WIN32                             (Paweł Kot)
+	o avoid segfault with gn_cfg_phone_load() when state is not
+	  initialized                                       (Paweł Kot)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)
