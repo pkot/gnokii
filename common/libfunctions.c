@@ -22,7 +22,7 @@
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001      Chris Kemp
-  Copyrught (C) 2001-2011 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2003 BORBELY Zoltan
   Copyright (C) 2002      Pavel Machek, Marcin Wiacek
   Copyright (C) 2006      Helge Deller
@@ -101,7 +101,7 @@ static gn_error phoneprofile_load(const char *configname, gn_error error, struct
 {
 	*state = NULL;
 
-	if (error = GN_ERR_NONE) {
+	if (error == GN_ERR_NONE) {
 		/* allocate and initialize data structures */
 		*state = malloc(sizeof(**state));
 		if (*state) {
@@ -113,7 +113,7 @@ static gn_error phoneprofile_load(const char *configname, gn_error error, struct
 			error = GN_ERR_MEMORYFULL;
 		}
 	}
-	if (GN_ERR_NONE != error) {
+	if (error != GN_ERR_NONE) {
 		gn_lib_phoneprofile_free(state);
 		gn_lib_library_free();
 		return error;
