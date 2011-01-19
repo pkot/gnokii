@@ -111,7 +111,8 @@ typedef enum {
 	GN_MT_F18,
 	GN_MT_F19,
 	GN_MT_F20, /* 20th CUSTOM FOLDER */
-	GN_MT_LAST = GN_MT_F20,
+	GN_MT_BM, /* Cell Broadcast Messages */
+	GN_MT_LAST = GN_MT_BM,
 	GN_MT_XX = 0xff	/* Error code for unknown memory type (returned by fbus-xxxx functions). */
 } gn_memory_type;
 

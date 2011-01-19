@@ -25,6 +25,8 @@
 	o add gn_lib_phoneprofile_load_from_external() for 3rd party
 	  apps to initialize gnokii not using gnokii config file
 	                                                    (Paweł Kot)
+    o add BM memory for Cell Broadcast Messages, untested
+      reportedly supported by some AT phones        (Daniele Forsi)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)
