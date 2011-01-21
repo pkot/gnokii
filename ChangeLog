@@ -27,6 +27,9 @@
 	                                                    (Paweł Kot)
     o add BM memory for Cell Broadcast Messages, untested
       reportedly supported by some AT phones        (Daniele Forsi)
+    o do not change the translation domain of the calling program;
+      this didn't affect gnokii, xgnokii or smsd because they use
+      the same translation domain as libgnokii      (Daniele Forsi)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)
