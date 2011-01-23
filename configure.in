@@ -12,7 +12,7 @@ dnl The first PKG_CHECK_MODULES call must not be conditional
 dnl
 
 AC_INIT([gnokii],
-	[0.6.30],
+	[0.6.31git],
 	[gnokii-users@nongnu.org],
 	[gnokii],
 	[http://www.gnokii.org/])
