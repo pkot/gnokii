@@ -1,5 +1,5 @@
-0.6.30 (not released yet)
-=========================
+0.6.30
+======
  * libgnokii updates
     o fix printing BDAY for phonebook entries in vCard format and
       add label for PTT Address (X-SIP;POC) and User ID (X-WV-ID)
@@ -17,7 +17,7 @@
     o make sure that Series40 3rd Ed+ get proper capabilties
                                                         (Paweł Kot)
     o when encoding to hex format make sure we're using uppercase
-      that should be compliant with the lagrer number of the
+      that should be compliant with the larger number of the
       devices                                 (Msquared, Paweł Kot)
     o use libiconv on WIN32                             (Paweł Kot)
     o avoid segfault with gn_cfg_phone_load() when state is not

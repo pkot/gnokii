@@ -20,9 +20,9 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2011 Pawe≥ Kot
+  Copyright (C) 2011 Pawe≈Ç Kot
 
-  This is the config.h file for GNOKII for MSVS2010 compilers, you can
+  This is the config.h file for GNOKII for MSVC2010Express compiler, you can
   edit this manually. This is not auto generated.
 
 */
@@ -33,11 +33,11 @@
 #if defined(_MSC_VER) && defined(WIN32)
 #	pragma once
 #else
-#	error This config.h is only for MSVS2010 compiler !!!
+#	error This config.h is only for MSVC2010Express compiler !!!
 #endif
 
 #undef VERSION
-#define VERSION "0.6.30git"
+#define VERSION "0.6.30"
 
 /* We support Bluetooth and IRDA on MSVS 2010 */
 #define HAVE_BLUETOOTH 1

@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 2003 Marcus Godehardt
 
-  This is the config.h file for GNOKII for MSVS2008 compilers, you can
+  This is the config.h file for GNOKII for MSVS2008 compiler, you can
   edit this manually. This is not auto generated.
 
 */
@@ -39,7 +37,7 @@
 #endif
 
 #undef VERSION
-#define VERSION "0.6.30git"
+#define VERSION "0.6.30"
 
 /* We support Bluetooth and IRDA on MSVS 2008 */
 #define HAVE_BLUETOOTH 1
