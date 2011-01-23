@@ -20,4 +20,11 @@ EXTRA_DIST =						\
 	MSVC8/gnokii.sln				\
 	MSVC8/config.h					\
 	MSVC8/gnokii.vcproj				\
-	MSVC8/libgnokii.vcproj
+	MSVC8/libgnokii.vcproj				\
+	MSVC2010Express/gnokii.sln			\
+	MSVC2010Express/config.h			\
+	MSVC2010Express/README				\
+	MSVC2010Express/gnokii/gnokii.vcxproj		\
+	MSVC2010Express/gnokii/gnokii.vcxproj.filters	\
+	MSVC2010Express/libgnokii/libgnokii.vcxproj	\
+	MSVC2010Express/libgnokii/libgnokii.vcxproj.filters
