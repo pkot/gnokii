@@ -3961,6 +3961,14 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	/* 6510 needs to seek the first free pos to inhabit with next note */
 	error = NK6510_FirstCalendarFreePos(data, state);
 	if (error != GN_ERR_NONE)
+		if (error == GN_ERR_UNHANDLEDFRAME) {
+			error = NK6510_WriteCalendarNote2(data, state);
+			if (error = GN_ERR_NONE) {
+				dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
+				dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+			}
+			return error;
+		}
 		return error;
 
 	/* Location */

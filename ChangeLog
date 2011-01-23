@@ -43,6 +43,8 @@
     o add support for phonet Linux kernel driver for Nokia phones
       over USB connections only (use connection=phonet port=usbpn0)
                                                     (Daniele Forsi)
+    o when WriteCalendarNote fails with 0xf0 frame fallback to
+      WriteCalendarNote2 as suggested by Daniele Forsi  (Paweł Kot)
  * nk7110 driver updates
     o fix reading SMS from AR and TE                (Daniele Forsi)
  * win32 updates
