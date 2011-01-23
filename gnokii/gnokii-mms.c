@@ -45,7 +45,7 @@ void mms_usage(FILE *f)
 {
 	fprintf(f, _("MMS options:\n"
 		     "          --getmms memory_type start [end] [{--mime|--pdu|--raw} file]\n"
-		     "                 [-d|--delete]\n"
+		     "                 [-d|--delete] [-o|--overwrite]\n"
 		     "          --deletemms memory_type start [end]\n"
 		));
 }
