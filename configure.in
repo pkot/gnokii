@@ -24,9 +24,9 @@ AC_INIT([gnokii],
 # - If binary compatibility has been broken (eg removed or changed interfaces)
 #   change to C-A+1:0:0
 # - If the interface is the same as the previous version, change to C:R+1:A
-GNOKII_LT_VERSION_CURRENT=6
+GNOKII_LT_VERSION_CURRENT=7
 GNOKII_LT_VERSION_REVISION=0
-GNOKII_LT_VERSION_AGE=0
+GNOKII_LT_VERSION_AGE=1
 AC_SUBST(GNOKII_LT_VERSION_CURRENT)
 AC_SUBST(GNOKII_LT_VERSION_REVISION)
 AC_SUBST(GNOKII_LT_VERSION_AGE)

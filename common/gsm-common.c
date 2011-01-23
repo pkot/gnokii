@@ -84,6 +84,7 @@ GNOKII_API gn_memory_type gn_str2memory_type(const char *s)
 	X(F18);
 	X(F19);
 	X(F20);
+	X(BM);
 	return GN_MT_XX;
 #undef X
 }
@@ -135,6 +136,7 @@ GNOKII_API const char *gn_memory_type2str(gn_memory_type mt)
 	X(F18);
 	X(F19);
 	X(F20);
+	X(BM);
 	default: return NULL;
 	}
 #undef X
@@ -184,6 +186,7 @@ GNOKII_API const char *gn_memory_type_print(gn_memory_type mt)
 	case GN_MT_F18: return _("SMS Folder 18");
 	case GN_MT_F19: return _("SMS Folder 19");
 	case GN_MT_F20: return _("SMS Folder 20");
+	case GN_MT_BM: return _("Cell Broadcast");
 	default: return _("Unknown");
 	}
 }

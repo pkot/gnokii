@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -26,7 +24,7 @@
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2000      Jan Derfinak
   Copyright (C) 2001      Jan Kratochvil
-  Copyright (C) 2001-2009 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2005      Bastien Nocera
 
@@ -990,6 +988,7 @@ static char **get_locations(int *retval)
 	char *appdata, *homedrive, *homepath, *systemroot; /* env variables */
 	int size = 3; /* default size for config_file_locations */
 	char path[MAX_PATH_LEN];
+	const char *fname = "gnokii.ini";
 
 	*retval = size;
 
@@ -1000,14 +999,14 @@ static char **get_locations(int *retval)
 	homepath = getenv("HOMEPATH");
 	systemroot = getenv("SYSTEMROOT");
 	/* 1. %APPDATA%\gnokii\config */
-	snprintf(path, MAX_PATH_LEN, "%s\\gnokii\\config", appdata);
+	snprintf(path, MAX_PATH_LEN, "%s\\gnokii\\%s", appdata, fname);
 	config_file_locations[0] = strdup(path);
 	/* old gnokii behaviour */
 	/* 2. %HOMEDRIVE%\%HOMEPATH%\_gnokiirc */
-	snprintf(path, MAX_PATH_LEN, "%s\\%s\\_gnokiirc", homedrive, homepath);
+	snprintf(path, MAX_PATH_LEN, "%s\\%s\\%s", homedrive, homepath, fname);
 	config_file_locations[1] = strdup(path);
 	/* 3. %SYSTEMROOT%\gnokiirc */
-	snprintf(path, MAX_PATH_LEN, "%s\\gnokiirc", systemroot);
+	snprintf(path, MAX_PATH_LEN, "%s\\%s", systemroot, fname);
 	config_file_locations[2] = strdup(path);
 
 	return config_file_locations;
@@ -1227,6 +1226,9 @@ GNOKII_API gn_error gn_cfg_phone_load(const char *iname, struct gn_statemachine 
 {
 	char section[256];
 	gn_error error;
+
+	if (!state)
+		return GN_ERR_INTERNALERROR;
 
 	if (iname == NULL || *iname == '\0') {
 		state->config = gn_config_global;

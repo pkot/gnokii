@@ -1,0 +1,211 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BCAF23A4-33E2-4D41-9897-4801197F0344}</ProjectGuid>
+    <RootNamespace>libgnokii</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>DynamicLibrary</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>MultiByte</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <IncludePath>..;..\..\..\include;..\..\..\ext\glib\include\glib-2.0;..\..\..\ext\glib\lib\glib-2.0\include;..\..\..\ext\libusb;..\..\..\ext\iconv\include;$(IncludePath)</IncludePath>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <IncludePath>..;..\..\..\include;..\..\..\ext\glib\include\glib-2.0;..\..\..\ext\glib\lib\glib-2.0\include;..\..\..\ext\libusb;..\..\..\ext\iconv\include;$(IncludePath)</IncludePath>
+    <TargetExt>.dll</TargetExt>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_USRDLL;GNOKIIDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>..\..\..\ext\glib\lib;..\..\..\ext\libusb;..\..\..\ext\iconv\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WS2_32.lib;winmm.lib;glib-2.0.lib;libusb.lib;iconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;_USRDLL;GNOKIIDLL_EXPORTS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>..\..\..\ext\glib\lib;..\..\..\ext\libusb;..\..\..\ext\iconv\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalDependencies>WS2_32.lib;winmm.lib;glib-2.0.lib;libusb.lib;iconv.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\common\cfgreader.c" />
+    <ClCompile Include="..\..\..\common\compat.c" />
+    <ClCompile Include="..\..\..\common\device.c" />
+    <ClCompile Include="..\..\..\common\devices\bluetooth.c" />
+    <ClCompile Include="..\..\..\common\devices\dku2libusb.c" />
+    <ClCompile Include="..\..\..\common\devices\irda.c" />
+    <ClCompile Include="..\..\..\common\devices\osxbluetooth.c" />
+    <ClCompile Include="..\..\..\common\devices\socketphonet.c" />
+    <ClCompile Include="..\..\..\common\devices\tcp.c" />
+    <ClCompile Include="..\..\..\common\devices\tekram.c" />
+    <ClCompile Include="..\..\..\common\devices\winbluetooth.c" />
+    <ClCompile Include="..\..\..\common\devices\winirda.c" />
+    <ClCompile Include="..\..\..\common\devices\winserial.c" />
+    <ClCompile Include="..\..\..\common\gsm-api.c" />
+    <ClCompile Include="..\..\..\common\gsm-bitmaps.c" />
+    <ClCompile Include="..\..\..\common\gsm-call.c" />
+    <ClCompile Include="..\..\..\common\gsm-common.c" />
+    <ClCompile Include="..\..\..\common\gsm-encoding.c" />
+    <ClCompile Include="..\..\..\common\gsm-error.c" />
+    <ClCompile Include="..\..\..\common\gsm-filetypes.c" />
+    <ClCompile Include="..\..\..\common\gsm-mms.c" />
+    <ClCompile Include="..\..\..\common\gsm-networks.c" />
+    <ClCompile Include="..\..\..\common\gsm-ringtones.c" />
+    <ClCompile Include="..\..\..\common\gsm-sms.c" />
+    <ClCompile Include="..\..\..\common\gsm-statemachine.c" />
+    <ClCompile Include="..\..\..\common\ldif.c" />
+    <ClCompile Include="..\..\..\common\libfunctions.c" />
+    <ClCompile Include="..\..\..\common\links\atbus.c" />
+    <ClCompile Include="..\..\..\common\links\cbus.c" />
+    <ClCompile Include="..\..\..\common\links\fbus-3110.c" />
+    <ClCompile Include="..\..\..\common\links\fbus-phonet.c" />
+    <ClCompile Include="..\..\..\common\links\fbus.c" />
+    <ClCompile Include="..\..\..\common\links\gnbus.c" />
+    <ClCompile Include="..\..\..\common\links\m2bus.c" />
+    <ClCompile Include="..\..\..\common\links\utils.c" />
+    <ClCompile Include="..\..\..\common\localcharset.c" />
+    <ClCompile Include="..\..\..\common\map.c" />
+    <ClCompile Include="..\..\..\common\misc.c" />
+    <ClCompile Include="..\..\..\common\nokia-decoding.c" />
+    <ClCompile Include="..\..\..\common\phones\atbosch.c" />
+    <ClCompile Include="..\..\..\common\phones\ateric.c" />
+    <ClCompile Include="..\..\..\common\phones\atgen.c" />
+    <ClCompile Include="..\..\..\common\phones\athuawei.c" />
+    <ClCompile Include="..\..\..\common\phones\atlg.c" />
+    <ClCompile Include="..\..\..\common\phones\atmot.c" />
+    <ClCompile Include="..\..\..\common\phones\atnok.c" />
+    <ClCompile Include="..\..\..\common\phones\atsag.c" />
+    <ClCompile Include="..\..\..\common\phones\atsam.c" />
+    <ClCompile Include="..\..\..\common\phones\atsie.c" />
+    <ClCompile Include="..\..\..\common\phones\atsoer.c" />
+    <ClCompile Include="..\..\..\common\phones\dc2711.c" />
+    <ClCompile Include="..\..\..\common\phones\fake.c" />
+    <ClCompile Include="..\..\..\common\phones\generic.c" />
+    <ClCompile Include="..\..\..\common\phones\gnapplet.c" />
+    <ClCompile Include="..\..\..\common\phones\nk2110.c" />
+    <ClCompile Include="..\..\..\common\phones\nk3110.c" />
+    <ClCompile Include="..\..\..\common\phones\nk6100.c" />
+    <ClCompile Include="..\..\..\common\phones\nk6160.c" />
+    <ClCompile Include="..\..\..\common\phones\nk6510.c" />
+    <ClCompile Include="..\..\..\common\phones\nk7110.c" />
+    <ClCompile Include="..\..\..\common\phones\nokia.c" />
+    <ClCompile Include="..\..\..\common\phones\pcsc.c" />
+    <ClCompile Include="..\..\..\common\pkt.c" />
+    <ClCompile Include="..\..\..\common\readmidi.c" />
+    <ClCompile Include="..\..\..\common\sms-nokia.c" />
+    <ClCompile Include="..\..\..\common\snprintf.c" />
+    <ClCompile Include="..\..\..\common\vcal.c" />
+    <ClCompile Include="..\..\..\common\vcard.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\cfgreader.h" />
+    <ClInclude Include="..\..\..\include\compat.h" />
+    <ClInclude Include="..\..\..\include\device.h" />
+    <ClInclude Include="..\..\..\include\devices\dku2libusb.h" />
+    <ClInclude Include="..\..\..\include\devices\irda.h" />
+    <ClInclude Include="..\..\..\include\devices\osxbluetooth.h" />
+    <ClInclude Include="..\..\..\include\devices\serial.h" />
+    <ClInclude Include="..\..\..\include\devices\tcp.h" />
+    <ClInclude Include="..\..\..\include\devices\tekram.h" />
+    <ClInclude Include="..\..\..\include\gnokii-internal.h" />
+    <ClInclude Include="..\..\..\include\gnokii.h" />
+    <ClInclude Include="..\..\..\include\gnokii\bitmaps.h" />
+    <ClInclude Include="..\..\..\include\gnokii\call.h" />
+    <ClInclude Include="..\..\..\include\gnokii\common.h" />
+    <ClInclude Include="..\..\..\include\gnokii\data.h" />
+    <ClInclude Include="..\..\..\include\gnokii\encoding.h" />
+    <ClInclude Include="..\..\..\include\gnokii\error.h" />
+    <ClInclude Include="..\..\..\include\gnokii\mms.h" />
+    <ClInclude Include="..\..\..\include\gnokii\networks.h" />
+    <ClInclude Include="..\..\..\include\gnokii\ringtones.h" />
+    <ClInclude Include="..\..\..\include\gnokii\sms.h" />
+    <ClInclude Include="..\..\..\include\gnokii\statemachine.h" />
+    <ClInclude Include="..\..\..\include\gnokii\wappush.h" />
+    <ClInclude Include="..\..\..\include\gsm-filetypes.h" />
+    <ClInclude Include="..\..\..\include\links\atbus.h" />
+    <ClInclude Include="..\..\..\include\links\cbus.h" />
+    <ClInclude Include="..\..\..\include\links\fbus-3110.h" />
+    <ClInclude Include="..\..\..\include\links\fbus-common.h" />
+    <ClInclude Include="..\..\..\include\links\fbus-phonet.h" />
+    <ClInclude Include="..\..\..\include\links\fbus.h" />
+    <ClInclude Include="..\..\..\include\links\gnbus.h" />
+    <ClInclude Include="..\..\..\include\links\m2bus.h" />
+    <ClInclude Include="..\..\..\include\links\utils.h" />
+    <ClInclude Include="..\..\..\include\localcharset.h" />
+    <ClInclude Include="..\..\..\include\map.h" />
+    <ClInclude Include="..\..\..\include\misc.h" />
+    <ClInclude Include="..\..\..\include\nokia-decoding.h" />
+    <ClInclude Include="..\..\..\include\phones\atbosch.h" />
+    <ClInclude Include="..\..\..\include\phones\ateric.h" />
+    <ClInclude Include="..\..\..\include\phones\atgen.h" />
+    <ClInclude Include="..\..\..\include\phones\athuawei.h" />
+    <ClInclude Include="..\..\..\include\phones\atlg.h" />
+    <ClInclude Include="..\..\..\include\phones\atmot.h" />
+    <ClInclude Include="..\..\..\include\phones\atnok.h" />
+    <ClInclude Include="..\..\..\include\phones\atsag.h" />
+    <ClInclude Include="..\..\..\include\phones\atsam.h" />
+    <ClInclude Include="..\..\..\include\phones\atsie.h" />
+    <ClInclude Include="..\..\..\include\phones\atsoer.h" />
+    <ClInclude Include="..\..\..\include\phones\dc2711.h" />
+    <ClInclude Include="..\..\..\include\phones\generic.h" />
+    <ClInclude Include="..\..\..\include\phones\gnapplet.h" />
+    <ClInclude Include="..\..\..\include\phones\nk2110.h" />
+    <ClInclude Include="..\..\..\include\phones\nk3110.h" />
+    <ClInclude Include="..\..\..\include\phones\nk6100.h" />
+    <ClInclude Include="..\..\..\include\phones\nk6510.h" />
+    <ClInclude Include="..\..\..\include\phones\nk7110.h" />
+    <ClInclude Include="..\..\..\include\phones\nokia.h" />
+    <ClInclude Include="..\..\..\include\phones\pcsc.h" />
+    <ClInclude Include="..\..\..\include\pkt.h" />
+    <ClInclude Include="..\..\..\include\sms-nokia.h" />
+    <ClInclude Include="..\config.h" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

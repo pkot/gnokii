@@ -89,6 +89,7 @@ typedef struct {
 
 /* "Union Functional Descriptor" from CDC spec 5.2.3.X
  * used to find data/slave DKU2 FBUS interface */
+#pragma pack(1)
 struct cdc_union_desc {
 	u_int8_t      bLength;
 	u_int8_t      bDescriptorType;
@@ -96,7 +97,8 @@ struct cdc_union_desc {
 
 	u_int8_t      bMasterInterface0;
 	u_int8_t      bSlaveInterface0;
-} __attribute__ ((packed));
+};
+#pragma pack()
 
 /* Nokia is the vendor we are interested in */
 #define NOKIA_VENDOR_ID	0x0421

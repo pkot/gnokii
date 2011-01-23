@@ -1,0 +1,408 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\common\cfgreader.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\vcard.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\compat.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\device.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-api.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-bitmaps.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-call.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-common.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-encoding.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-error.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-filetypes.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-mms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-networks.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-ringtones.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-sms.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\gsm-statemachine.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\ldif.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\libfunctions.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\localcharset.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\map.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\misc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\nokia-decoding.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\pkt.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\readmidi.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\sms-nokia.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\snprintf.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\vcal.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atbosch.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\ateric.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atgen.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\athuawei.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atlg.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atmot.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atnok.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atsag.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atsam.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atsie.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\atsoer.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\dc2711.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\fake.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\generic.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\gnapplet.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\nk2110.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\nk3110.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\nk6100.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\nk6160.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\nk6510.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\nk7110.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\nokia.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\phones\pcsc.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\links\atbus.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\links\cbus.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\links\fbus-3110.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\links\fbus.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\links\fbus-phonet.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\links\gnbus.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\links\m2bus.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\links\utils.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\bluetooth.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\dku2libusb.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\irda.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\osxbluetooth.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\tcp.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\tekram.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\winbluetooth.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\winirda.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\winserial.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\common\devices\socketphonet.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\include\cfgreader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\compat.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\device.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii-internal.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gsm-filetypes.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\localcharset.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\map.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\misc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\nokia-decoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\pkt.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\sms-nokia.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atbosch.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\ateric.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atgen.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\athuawei.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atlg.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atmot.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atnok.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atsag.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atsam.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atsie.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\atsoer.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\dc2711.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\generic.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\gnapplet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\nk2110.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\nk3110.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\nk6100.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\nk6510.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\nk7110.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\nokia.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\phones\pcsc.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\atbus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\cbus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\fbus-3110.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\fbus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\fbus-common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\fbus-phonet.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\gnbus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\m2bus.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\links\utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\bitmaps.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\call.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\common.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\data.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\encoding.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\error.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\mms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\networks.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\ringtones.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\sms.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\statemachine.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii\wappush.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\devices\dku2libusb.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\devices\irda.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\devices\osxbluetooth.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\devices\serial.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\devices\tcp.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\devices\tekram.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\include\gnokii.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\config.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+</Project>

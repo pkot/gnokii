@@ -1,7 +1,5 @@
 /* -*- linux-c -*-
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -1213,8 +1211,6 @@ GetSMSStatus(GSM_SMSMemoryStatus *Status)
 	return GN_ERR_NONE;
 }
 
-#endif /* WIN32 */
-
 static gn_error link_Loop(struct timeval *tm)
 {
 	POLLIT;
@@ -1309,3 +1305,5 @@ gn_error P2110_Functions(GSM_Operation op, GSM_Data *data, GSM_Statemachine *sta
 	}
 	return err;
 }
+
+#endif /* WIN32 */
