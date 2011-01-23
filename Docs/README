@@ -414,7 +414,7 @@ Enhancements in handling and discovering series40 3rd+ edition phones.
 Numerous bugfixes in libgnokii including important fixes to sms handling.
 Fixes for Windows builds. SQLite3 backend for smsd.
 
-20100425 Version 0.6.29
+20100423 Version 0.6.29
 Major bugfixes in the encoding procedures. That should fix all problems
 regarding SMS encoding on libiconv-based systems. This release may not work
 properly or even build on Windows and systems without libiconv support.
