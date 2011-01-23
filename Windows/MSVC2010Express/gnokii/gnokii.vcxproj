@@ -92,6 +92,29 @@
     <ClCompile Include="..\..\..\gnokii\gnokii-wap.c" />
     <ClCompile Include="..\..\..\gnokii\gnokii.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\getopt\getopt.h" />
+    <ClInclude Include="..\..\..\getopt\getopt_int.h" />
+    <ClInclude Include="..\..\..\gnokii\gnokii-app.h" />
+    <ClInclude Include="..\..\..\include\compat.h" />
+    <ClInclude Include="..\..\..\include\gnokii.h" />
+    <ClInclude Include="..\..\..\include\gnokii\bitmaps.h" />
+    <ClInclude Include="..\..\..\include\gnokii\call.h" />
+    <ClInclude Include="..\..\..\include\gnokii\common.h" />
+    <ClInclude Include="..\..\..\include\gnokii\data.h" />
+    <ClInclude Include="..\..\..\include\gnokii\encoding.h" />
+    <ClInclude Include="..\..\..\include\gnokii\error.h" />
+    <ClInclude Include="..\..\..\include\gnokii\mms.h" />
+    <ClInclude Include="..\..\..\include\gnokii\networks.h" />
+    <ClInclude Include="..\..\..\include\gnokii\ringtones.h" />
+    <ClInclude Include="..\..\..\include\gnokii\rlp-common.h" />
+    <ClInclude Include="..\..\..\include\gnokii\sms.h" />
+    <ClInclude Include="..\..\..\include\gnokii\statemachine.h" />
+    <ClInclude Include="..\..\..\include\gnokii\virtmodem.h" />
+    <ClInclude Include="..\..\..\include\gnokii\wappush.h" />
+    <ClInclude Include="..\..\..\include\misc.h" />
+    <ClInclude Include="..\config.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
