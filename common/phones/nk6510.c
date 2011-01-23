@@ -1259,7 +1259,9 @@ static gn_error NK6510_GetSMSFolders_S40_30(gn_data *data, struct gn_statemachin
 	}
 	data->sms_folder_list->number = j;
 
-	DRVINSTANCE(state)->pm->flags |= PM_SMSFILE;
+	dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
+	dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+	DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
 	return error;
 }
 
@@ -1529,10 +1531,13 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 		dprintf("NK6510_DeleteSMS: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file method */
 		error = NK6510_DeleteSMS_S40_30(data, state);
-		if (error)
+		if (error != GN_ERR_NONE)
 			dprintf("%s\n", gn_error_print(error));
-		else
-			DRVINSTANCE(state)->pm->flags |= PM_SMSFILE;
+		else {
+			dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
+			dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+			DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
+		}
 		return error;
 	}
 
@@ -1600,10 +1605,13 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 		dprintf("NK6510_GetSMS: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file method */
 		error = NK6510_GetSMS_S40_30(data, state);
-		if (error)
+		if (error != GN_ERR_NONE)
 			dprintf("%s\n", gn_error_print(error));
-		else
-			DRVINSTANCE(state)->pm->flags |= PM_SMSFILE;
+		else {
+			dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
+			dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+			DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
+		}
 		return error;
 	}
 
@@ -3279,7 +3287,9 @@ retry:
 	error = sm_block(NK6510_MSG_PHONEBOOK, data, state);
 	if (error == GN_ERR_FAILED && !(DRVINSTANCE(state)->pm->flags & PM_EXTPBK2)) {
 		dprintf("Writing failed. Falling back to a new method.\n");
-		DRVINSTANCE(state)->pm->flags |= PM_EXTPBK2;
+		dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
+		dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+		DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
 		goto retry;
 	}
 	return error;
