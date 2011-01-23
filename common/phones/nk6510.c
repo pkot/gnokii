@@ -3962,6 +3962,10 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	error = NK6510_FirstCalendarFreePos(data, state);
 	if (error != GN_ERR_NONE)
 		if (error == GN_ERR_UNHANDLEDFRAME) {
+			/*
+			 * GN_ERR_UNHANDLED most likely means 0xf0 frame. Experience shows that
+			 * with high probability we have series40 3rd+ Ed phone.
+			 */
 			error = NK6510_WriteCalendarNote2(data, state);
 			if (error = GN_ERR_NONE) {
 				dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
