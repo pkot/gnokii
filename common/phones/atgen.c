@@ -2169,11 +2169,11 @@ static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int len
 static gn_error Parse_ReplyGetBattery(gn_data *data, struct gn_statemachine *state)
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
-	char *line, *pos;
+	const char *line, *pos;
 	char key[4];
 
 	snprintf(key, 4, "CBC");
-	line = strdup(map_get(&drvinst->cached_capabilities, key, 1));
+	line = map_get(&drvinst->cached_capabilities, key, 1);
 	if (data->battery_level) {
 		if (data->battery_unit)
 			*(data->battery_unit) = GN_BU_Percentage;
