@@ -956,7 +956,7 @@ static gn_error AT_GetBattery(gn_data *data, struct gn_statemachine *state)
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	char key[4];
 
-	snprintf(key, 3, "CBC");
+	snprintf(key, 4, "CBC");
 	if (map_get(&drvinst->cached_capabilities, key, 1))
 		return Parse_ReplyGetBattery(data, state);
 	else if (sm_message_send(7, GN_OP_GetBatteryLevel, "AT+CBC\r", state))
@@ -2172,7 +2172,7 @@ static gn_error Parse_ReplyGetBattery(gn_data *data, struct gn_statemachine *sta
 	char *line, *pos;
 	char key[4];
 
-	snprintf(key, 3, "CBC");
+	snprintf(key, 4, "CBC");
 	line = strdup(map_get(&drvinst->cached_capabilities, key, 1));
 	if (data->battery_level) {
 		if (data->battery_unit)
@@ -2227,7 +2227,7 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 
 	if (!strncmp(buf.line1, "AT+CBC", 6) && !strncmp(buf.line2, "+CBC: ", 6)) {
 		char key[4];
-		snprintf(key, 3, "CBC");
+		snprintf(key, 4, "CBC");
 		map_add(&drvinst->cached_capabilities, strdup(key), strdup(buf.line2));
 		Parse_ReplyGetBattery(data, state);
 	}
