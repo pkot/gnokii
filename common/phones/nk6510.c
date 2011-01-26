@@ -221,7 +221,7 @@ static gn_error NK6510_SetDateTime(gn_data *data, struct gn_statemachine *state)
 static gn_error NK6510_SetAlarm(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *state);
-static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine *state);
+static gn_error NK6510_WriteCalendarNote_S40_30(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK6510_DeleteWAPBookmark(gn_data *data, struct gn_statemachine *state);
@@ -3811,13 +3811,13 @@ static gn_error NK6510_FirstCalendarFreePos(gn_data *data, struct gn_statemachin
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 4);
 }
 
-static gn_error NK6510_FirstCalendarFreePos2(gn_data *data, struct gn_statemachine *state)
+static gn_error NK6510_FirstCalendarFreePos_S40_30(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x95, 0x00 };
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 5);
 }
 
-static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine *state)
+static gn_error NK6510_WriteCalendarNote_S40_30(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	gn_calnote *calnote;
@@ -3850,14 +3850,14 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 				    0x00, /* phone length/meeting location */
 				    0x00, 0x00, 0x00};
 
-	dprintf("WriteCalendarNote2\n");
+	dprintf("WriteCalendarNote_S40_30\n");
 	if (!data->calnote)
 		return GN_ERR_INTERNALERROR;
 
 	calnote = data->calnote;
 
 	/* 6510 needs to seek the first free pos to inhabit with next note */
-	error = NK6510_FirstCalendarFreePos2(data, state);
+	error = NK6510_FirstCalendarFreePos_S40_30(data, state);
 	if (error != GN_ERR_NONE)
 		return error;
 
@@ -3974,7 +3974,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	gn_error error;
 
 	if (DRVINSTANCE(state)->pm->flags & PM_EXTCALENDAR)
-		return NK6510_WriteCalendarNote2(data, state);
+		return NK6510_WriteCalendarNote_S40_30(data, state);
 
 	dprintf("WriteCalendarNote\n");
 	if (!data->calnote)
@@ -3990,7 +3990,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 			 * GN_ERR_NOTSUPPORTED most likely means 0xf0 frame. Experience shows that
 			 * with high probability we have series40 3rd+ Ed phone.
 			 */
-			error = NK6510_WriteCalendarNote2(data, state);
+			error = NK6510_WriteCalendarNote_S40_30(data, state);
 			if (error == GN_ERR_NONE) {
 				dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
 				dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
@@ -5376,7 +5376,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 			break;
 		/* Some of dct4 phones respond with this to NK6510_MakeCall()
 		 * frames. Let's repond with the error code to retry with
-		 * NK6510_MakeCall2(). The exact meaning is not known.
+		 * NK6510_MakeCall_S40_30(). The exact meaning is not known.
 		 */
 		case 0x01:
 			dprintf("Make call failed.\n");
@@ -5515,7 +5515,7 @@ static gn_error NK6510_GetActiveCalls(gn_data *data, struct gn_statemachine *sta
 	SEND_MESSAGE_BLOCK(NK6510_MSG_COMMSTATUS, 4);
 }
 
-static gn_error NK6510_MakeCall2(gn_data *data, struct gn_statemachine *state)
+static gn_error NK6510_MakeCall_S40_30(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	unsigned char req[100] = {FBUS_FRAME_HEADER, 0x01,
@@ -5626,7 +5626,7 @@ static gn_error NK6510_MakeCall(gn_data *data, struct gn_statemachine *state)
 	error = sm_block(NK6510_MSG_COMMSTATUS, data, state);
 
 	if (error == GN_ERR_NOTSUPPORTED)
-		error = NK6510_MakeCall2(data, state);
+		error = NK6510_MakeCall_S40_30(data, state);
 
 	if (error != GN_ERR_NONE) {
 		goto out;
