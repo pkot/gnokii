@@ -5,6 +5,7 @@
       used driver in runtime                            (Paweł Kot)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
+    o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
 
 0.6.30
 ======

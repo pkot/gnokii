@@ -3648,6 +3648,9 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 	case NK6510_SUBCAL_DEL_NOTE_RESP: /* 0x0c */
 		dprintf("Succesfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
 		break;
+	case NK6510_SUBCAL_DEL_NOTE2_RESP: /* 0x70 */
+		dprintf("Succesfully deleted calendar note: %i!\n", message[8] * 256 + message[9]);
+		break;
 	case NK6510_SUBCAL_ADD_MEETING_RESP: /* 0x02 */
 	case NK6510_SUBCAL_ADD_CALL_RESP: /* 0x04 */
 	case NK6510_SUBCAL_ADD_BIRTHDAY_RESP: /* 0x06 */
@@ -4166,8 +4169,42 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, count);
 }
 
+static gn_error NK6510_DeleteCalendarNote_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = { FBUS_FRAME_HEADER,
+				0x6f,      /* delete calendar note */
+				0x00, 0x00, 0x00, 0x00,
+				0x00, 0x00}; /*location */
+	gn_calnote_list list;
+	bool own_list = true;
+
+	if (data->calnote_list)
+		own_list = false;
+	else {
+		memset(&list, 0, sizeof(gn_calnote_list));
+		data->calnote_list = &list;
+	}
+
+	if (data->calnote_list->number == 0)
+		NK6510_GetCalendarNotesInfo(data, state);
+
+	if (data->calnote->location < data->calnote_list->number + 1 &&
+	    data->calnote->location > 0) {
+		req[8] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+		req[9] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+	} else {
+		return GN_ERR_INVALIDLOCATION;
+	}
+
+	if (own_list)
+		data->calnote_list = NULL;
+	map_del(&location_map, "calendar");
+	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 10);
+}
+
 static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
+	gn_error error;
 	unsigned char req[] = { FBUS_FRAME_HEADER,
 				0x0b,      /* delete calendar note */
 				0x00, 0x00}; /*location */
@@ -4194,8 +4231,29 @@ static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 
 	if (own_list)
 		data->calnote_list = NULL;
-	map_del(&location_map, "calendar");
-	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 6);
+
+	if (sm_message_send(8, NK6510_MSG_CALENDAR, req, state))
+		return GN_ERR_NOTREADY;
+	error = sm_block(NK6510_MSG_CALENDAR, data, state);
+
+	dprintf("%s\n", gn_error_print(error));
+	if (error == GN_ERR_NOTSUPPORTED) {
+		dprintf("Rollback to S40_30\n");
+		/*
+		 * GN_ERR_NOTSUPPORTED most likely means 0xf0 frame. Experience shows that
+		 * with high probability we have series40 3rd+ Ed phone.
+		 */
+		error = NK6510_DeleteCalendarNote_S40_30(data, state);
+		if (error == GN_ERR_NONE) {
+			dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
+			dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+			DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
+		}
+	}
+	if (error == GN_ERR_NONE)
+		map_del(&location_map, "calendar");
+
+	return error;
 }
 
 /********************/
