@@ -621,3 +621,23 @@ GNOKII_API gn_error gn_lib_search_one_connected_phone(struct gn_statemachine **s
 	return GN_ERR_NOTIMPLEMENTED;
 }
 
+GNOKII_API gn_error gn_lib_phone_change_driver(struct gn_statemachine *state, const char* driver)
+{
+	gn_error error;
+
+	/* terminate the connection */
+	error = gn_lib_phone_close(state);
+	if (error != GN_ERR_NONE)
+		return error;
+	error = gn_lib_phoneprofile_free(&state);
+	if (error != GN_ERR_NONE)
+		return error;
+
+	/* change the driver */
+	error = gn_cfg_phone_load(driver, state);
+	if (error != GN_ERR_NONE)
+		return error;
+
+	/* initialize new connection */
+	return gn_lib_phone_open(state);
+}

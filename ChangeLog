@@ -1,5 +1,8 @@
 0.6.31 (not released yet)
 =========================
+ * libgnokii updates
+    o add gn_lib_phone_change_driver() function to allow replacing
+      used driver in runtime                            (Paweł Kot)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
 

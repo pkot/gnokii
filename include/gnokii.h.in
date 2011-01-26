@@ -121,6 +121,14 @@ GNOKII_API gn_error gn_lib_phone_open(struct gn_statemachine *state);
 /* closes the connection to the phone */
 GNOKII_API gn_error gn_lib_phone_close(struct gn_statemachine *state);
 
+/*
+ * Changes the driver used for connection.
+ * It closes the existing one and initializes new one.
+ * The new driver must be present in the parsed configuration (this function does not reread the config).
+ * @driver is the name of the phone section from the config.
+ */
+GNOKII_API gn_error gn_lib_phone_change_driver(struct gn_statemachine *state, const char *driver);
+
 /* ask phone for static information (model, manufacturer, revision and imei) */
 GNOKII_API const char *gn_lib_get_phone_model       (struct gn_statemachine *state); /* e.g. 6310 */
 GNOKII_API const char *gn_lib_get_phone_product_name(struct gn_statemachine *state); /* e.g. NPE-4 */
