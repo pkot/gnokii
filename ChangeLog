@@ -1,5 +1,7 @@
 0.6.31 (not released yet)
 =========================
+ * nk6510 driver updates
+    o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
 
 0.6.30
 ======

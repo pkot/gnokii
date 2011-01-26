@@ -3641,8 +3641,8 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 		data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
 		break;
 	case NK6510_SUBCAL_FREEPOS2_RCVD: /* 0x96 */
-		dprintf("First free position received: %i!\n", message[7] * 256 + message[8]);
-		data->calnote->location = (((unsigned int)message[7]) << 8) + message[8];
+		dprintf("First free position received: %i!\n", message[8] * 256 + message[9]);
+		data->calnote->location = (((unsigned int)message[8]) << 8) + message[9];
 		break;
 	case NK6510_SUBCAL_DEL_NOTE_RESP: /* 0x0c */
 		dprintf("Succesfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
