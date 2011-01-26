@@ -6168,6 +6168,9 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 		}
 		dprintf("\n");
 		break;
+	case 0xf0:
+		error = GN_ERR_NOTSUPPORTED;
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x01 (%d)\n", message[3]);
 		error = GN_ERR_UNHANDLEDFRAME;
@@ -6212,11 +6215,13 @@ static gn_error NK6510_GetToDo(gn_data *data, struct gn_statemachine *state)
 		error = GN_ERR_INVALIDLOCATION;
 	} else {
 		error = NK6510_GetToDoLocations(data, state);
-		if (!data->todo_list->number ||
-		    data->todo->location > data->todo_list->number) {
-			error = GN_ERR_EMPTYLOCATION;
-		} else {
-			return NK6510_GetToDo_Internal(data, state, data->todo_list->location[data->todo->location - 1]);
+		if (error == GN_ERR_NONE) {
+			if (!data->todo_list->number ||
+			    data->todo->location > data->todo_list->number) {
+				error = GN_ERR_EMPTYLOCATION;
+			} else {
+				return NK6510_GetToDo_Internal(data, state, data->todo_list->location[data->todo->location - 1]);
+			}
 		}
 	}
 	return error;
