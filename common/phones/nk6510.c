@@ -4212,6 +4212,9 @@ static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 	gn_calnote_list list;
 	bool own_list = true;
 
+	if (DRVINSTANCE(state)->pm->flags & PM_EXTCALENDAR)
+		return NK6510_DeleteCalendarNote_S40_30(data, state);
+
 	if (data->calnote_list)
 		own_list = false;
 	else {
