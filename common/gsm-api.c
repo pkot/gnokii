@@ -86,15 +86,6 @@ BOOL APIENTRY DllMain(HANDLE hModule,
 
 #endif	/* defined(WIN32) && defined(_USRDLL) */
 
-struct gn_statemachine gn_sm;
-gn_error (*gn_gsm_f)(gn_operation op, gn_data *data, struct gn_statemachine *state);
-
-
-/* Define pointer to the gn_phone structure used by external code to
-   obtain information that varies from model to model. This structure is also
-   defined in gsm-common.h */
-GNOKII_API gn_phone *gn_gsm_info;
-
 /* Initialise interface to the phone. Model number should be a string such as
    3810, 5110, 6110 etc. Device is the serial port to use e.g. /dev/ttyS0, the
    user must have write permission to the device. */
