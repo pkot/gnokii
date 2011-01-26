@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -23,7 +21,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 2002      Markus Plail
-  Copyright (C) 2002-2006 Pawel Kot, BORBELY Zoltan
+  Copyright (C) 2002-2006 BORBELY Zoltan
+  Copyright (C) 2002-2011 Pawel Kot
 
   This file provides functions specific to the Nokia 6510 series.
   See README for more details on supported mobile phones.
@@ -74,6 +73,7 @@ typedef struct {
 } path2mt_t;
 
 static struct map *file_cache_map = NULL;
+static struct map *location_map = NULL;
 
 static path2mt_t s40_30_mt_mappings[] = {
 	{ GN_MT_IN, "C:\\predefmessages\\1\\" },
@@ -687,6 +687,7 @@ static gn_error NK6510_Terminate(gn_data *data, struct gn_statemachine *state)
 {
 	FREE(DRVINSTANCE(state));
 	map_free(&file_cache_map);
+	map_free(&location_map);
 	return pgen_terminate(data, state);
 }
 
@@ -3689,6 +3690,8 @@ static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachin
 				0x00, 0x00, /* start looking with this position */
 				0x00};
 	gn_error error;
+	gn_calnote_list *cl;
+	char *str;
 
 	if (!data->calnote_list->last)
 		data->calnote_list->location[0] = 0;
@@ -3705,6 +3708,10 @@ static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachin
 		dprintf("Message received\n");
 	} while (data->calnote_list->last < data->calnote_list->number);
 	dprintf("Loop exited\n");
+	cl = calloc(1, sizeof(gn_calnote_list));
+	memcpy(cl, data->calnote_list, sizeof(gn_calnote_list));
+	str = strdup("calendar");
+	map_add(&location_map, str, cl);
 	return error;
 }
 #undef LAST_INDEX
@@ -3714,22 +3721,28 @@ static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachin
  */
 static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error = GN_ERR_NOTREADY;
+	gn_error error = GN_ERR_NONE;
 	unsigned char req[] = { FBUS_FRAME_HEADER, 0x7d, 0x00, 0x00, 0x00, 0x00,
 				0x00, 0x00, /* Location */
 				0xff, 0xff, 0xff, 0xff };
 	unsigned char date[] = { FBUS_FRAME_HEADER, NK6510_SUBCLO_GET_DATE };
 	gn_data	tmpdata;
 	gn_timestamp tmptime;
+	gn_calnote_list *cl;
 
 	dprintf("Getting calendar note...\n");
 	if (data->calnote->location < 1) {
 		error = GN_ERR_INVALIDLOCATION;
 	} else {
 		tmpdata.datetime = &tmptime;
-		dprintf("Getting notes info\n");
-		error = NK6510_GetCalendarNotesInfo(data, state);
-		dprintf("Got calendar info\n");
+		cl = map_get(&location_map, "calendar", 0);
+		if (!cl) {
+			dprintf("Getting notes info\n");
+			error = NK6510_GetCalendarNotesInfo(data, state);
+			dprintf("Got calendar info\n");
+		} else {
+			memcpy(data->calnote_list, cl, sizeof(gn_calnote_list));
+		}
 		if (error == GN_ERR_NONE) {
 			if (!data->calnote_list->number ||
 			    data->calnote->location > data->calnote_list->number) {
@@ -3939,6 +3952,7 @@ static gn_error NK6510_WriteCalendarNote2(gn_data *data, struct gn_statemachine 
 		}
 	}
 
+	map_del(&location_map, "calendar");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, count);
 }
 
@@ -4148,6 +4162,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	req[count] = 0x00;
 	dprintf("Count after padding = %d\n", count);
 
+	map_del(&location_map, "calendar");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, count);
 }
 
@@ -4179,6 +4194,7 @@ static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 
 	if (own_list)
 		data->calnote_list = NULL;
+	map_del(&location_map, "calendar");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 6);
 }
 
