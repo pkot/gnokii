@@ -177,6 +177,36 @@ serial_baudrate = 19200
 # forever.
 smsc_timeout = 10
 
+# If your Nokia phone isn't correctly handled by libgnokii you can describe
+# its features with a comma separated list of flags (and please write to the
+# mailing list so it can be fixed).
+# For phones older than Series 40 use OLD_DEFAULT; for Series 40 3rd Edition
+# and later Series 40 use DEFAULT_S40_3RD; for all other Nokias use DEFAULT.
+# Format is: product name=model name[,flag]...
+# where product name is the corresponding string returned by gnokii --identify
+# model name is the marketing name of the phone and valid flags are:
+# AUTHENTICATION: phone needs a special protocol initialization
+# CALENDAR: phone supports calendar events (first protocol)
+# CALLERGROUP: phone supports caller groups in phonebooks
+# DATA: phone supports an old non-AT protocol for data communications (DON'T use this)
+# DEFAULT_S40_3RD: shortcut for DEFAULT, SMSFILE, EXTPBK2, EXTCALENDAR
+# DEFAULT: shortcut for OLD_DEFAULT, CALLERGROUP, EXTPBK, FOLDERS
+# DTMF: phone can send DTMF tones
+# EXTCALENDAR: phone supports calendar events (second protocol)
+# EXTPBK: phonebooks supports more than just name and number (first protocol)
+# EXTPBK2: phonebooks supports more than just name and number (second protocol)
+# FOLDERS: SMS are stored in IN, OU, ... instead of SM, ME
+# FULLPBK: currently unused
+# KEYBOARD: keypresses can be emulated by the computer
+# NETMONITOR: phone supports Nokia NetMonitor
+# OLD_DEFAULT: shortcut for SPEEDDIAL, SMS, DTMF, KEYBOARD, CALENDAR
+# SMSFILE: SMS are stored in the phone's filesystem
+# SMS: phone supports SMS
+# SPEEDDIAL: phone supports speed dials
+# XGNOKIIBREAKAGE: enable dangerous functions known to damage some phones (DON'T use this)
+[flags]
+#RM-237=3110c, DEFAULT_S40_30
+
 # Set this to 1 if you want to break your phone with xgnokii. Works only
 # with few Nokia models and FBUS communication
 [xgnokii]
