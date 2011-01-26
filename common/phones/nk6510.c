@@ -3987,7 +3987,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 
 	/* 6510 needs to seek the first free pos to inhabit with next note */
 	error = NK6510_FirstCalendarFreePos(data, state);
-	if (error != GN_ERR_NONE)
+	if (error != GN_ERR_NONE) {
 		if (error == GN_ERR_NOTSUPPORTED) {
 			/*
 			 * GN_ERR_NOTSUPPORTED most likely means 0xf0 frame. Experience shows that
@@ -4002,6 +4002,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 			return error;
 		}
 		return error;
+	}
 
 	/* Location */
 	req[4] = calnote->location >> 8;
