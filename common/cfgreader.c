@@ -998,14 +998,14 @@ static char **get_locations(int *retval)
 	homedrive = getenv("HOMEDRIVE");
 	homepath = getenv("HOMEPATH");
 	systemroot = getenv("SYSTEMROOT");
-	/* 1. %APPDATA%\gnokii\config */
+	/* 1. %APPDATA%\gnokii\gnokii.ini */
 	snprintf(path, MAX_PATH_LEN, "%s\\gnokii\\%s", appdata, fname);
 	config_file_locations[0] = strdup(path);
 	/* old gnokii behaviour */
-	/* 2. %HOMEDRIVE%\%HOMEPATH%\_gnokiirc */
+	/* 2. %HOMEDRIVE%\%HOMEPATH%\gnokii.ini */
 	snprintf(path, MAX_PATH_LEN, "%s\\%s\\%s", homedrive, homepath, fname);
 	config_file_locations[1] = strdup(path);
-	/* 3. %SYSTEMROOT%\gnokiirc */
+	/* 3. %SYSTEMROOT%\gnokii.ini */
 	snprintf(path, MAX_PATH_LEN, "%s\\%s", systemroot, fname);
 	config_file_locations[2] = strdup(path);
 
