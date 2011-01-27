@@ -307,9 +307,9 @@ static int install_log_handler(void)
 	char *path, *basepath;
 	char *file = "gnokii-errors";
 	int free_path = 0;
-#ifndef WIN32
 	struct stat buf;
 	int st;
+#if !defined WIN32 && !defined __MACH__
 	int home = 0;
 #endif
 
@@ -331,23 +331,26 @@ static int install_log_handler(void)
 	else {
 		path = calloc(MAX_PATH_LEN, sizeof(char));
 		free_path = 1;
-#ifdef WIN32
+#ifdef WIN32 /* Windows */
 		snprintf(path, MAX_PATH_LEN, "%s\\gnokii", basepath);
 #elif __MACH__
 		snprintf(path, MAX_PATH_LEN, "%s/Library/Logs/gnokii", basepath);
 #else
-		if (home)
+		if (home) {
 			snprintf(path, MAX_PATH_LEN, "%s%s/gnokii", basepath, XDG_CACHE_HOME);
-		else
+		} else {
 			snprintf(path, MAX_PATH_LEN, "%s/gnokii", basepath);
+                }
 #endif
 	}
 
-#ifndef WIN32
+	st = stat(basepath, &buf);
+	if (st)
+	        mkdir(basepath, S_IRWXU);
+
 	st = stat(path, &buf);
 	if (st)
 		mkdir(path, S_IRWXU);
-#endif
 
 	snprintf(logname, sizeof(logname), "%s/%s", path, file);
 
