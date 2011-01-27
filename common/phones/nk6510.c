@@ -4495,19 +4495,21 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 {
 	int i, j, n;
 	unsigned char *pos;
-	gn_ringtone_list *rl;
+	gn_ringtone_list *rl = data->ringtone_list;
 
 	switch (message[3]) {
 	case 0x08:
 		dprintf("List of ringtones received!\n");
-		if (!(rl = data->ringtone_list)) return GN_ERR_INTERNALERROR;
+		if (!rl)
+			return GN_ERR_INTERNALERROR;
 		rl->count = 256 * message[4] + message[5];
 		rl->userdef_location = NK6510_RINGTONE_USERDEF_LOCATION;
 		rl->userdef_count = 10;
 		if (rl->count > GN_RINGTONE_MAX_COUNT) rl->count = GN_RINGTONE_MAX_COUNT;
 		i = 6;
 		for (j = 0; j < rl->count; j++) {
-			if (message[i + 4] != 0x01 || message[i + 6] != 0x00) return GN_ERR_UNHANDLEDFRAME;
+			if ((message[i + 4] != 0x01 && message[i + 4] != 0x02) || message[i + 6] != 0x00)
+				return GN_ERR_UNHANDLEDFRAME;
 			rl->ringtone[j].location = 256 * message[i + 2] + message[i + 3];
 			rl->ringtone[j].user_defined = (message[i + 5] == 0x02);
 			rl->ringtone[j].readable = 1;
