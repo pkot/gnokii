@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -23,7 +21,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999-2000 Hugh Blemings, Pavel Janik
-  Copyright (C) 2000-2004 Pawel Kot, BORBELY Zoltan
+  Copyright (C) 2000-2004 BORBELY Zoltan
+  Copyright (C) 2000-2011 Pawel Kot
   Copyright (C) 2000      Marcin Wiacek, Chris Kemp
   Copyright (C) 2002      Ladis Michl
   Copyright (C) 2003      Osma Suominen, Martin Goldhahn
@@ -43,6 +42,14 @@
 #endif
 
 #include "gnokii.h"
+
+#define return_on_error(func) \
+do { \
+	gn_error error; \
+	error = func; \
+	if (error != GN_ERR_NONE) \
+		return error; \
+} while (0)
 
 /* SMS */
 gn_error gn_sms_parse(gn_data *data);
