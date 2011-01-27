@@ -42,6 +42,7 @@
       this didn't affect gnokii, xgnokii or smsd because they use
       the same translation domain as libgnokii      (Daniele Forsi)
     o fix calendar functions flags for 5130, 5310   (Daniele Forsi)
+    o add [flags] section to the config file        (Daniele Forsi)
  * nk6510 driver updates
     o fix parsing SMS date from saved messages, bug #29830
                                                         (Paweł Kot)
