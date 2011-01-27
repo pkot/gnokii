@@ -1627,7 +1627,8 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 	data->raw_sms->status = GN_SMS_Sent;
 
 	data->raw_sms->message_center[0] = char_semi_octet_pack(data->sms->smsc.number, data->raw_sms->message_center + 1, data->sms->smsc.type);
-	if (data->raw_sms->message_center[0] % 2) data->raw_sms->message_center[0]++;
+	if (data->raw_sms->message_center[0] % 2)
+		data->raw_sms->message_center[0]++;
 	if (data->raw_sms->message_center[0])
 		data->raw_sms->message_center[0] = data->raw_sms->message_center[0] / 2 + 1;
 

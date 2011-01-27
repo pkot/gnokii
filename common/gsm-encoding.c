@@ -1080,7 +1080,6 @@ int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type
 	   only international, unknown and alphanumeric number. */
 
 	*out_num++ = type;
-
 	
 	if (((type & GN_GSM_NUMBER_Type_Mask) & GN_GSM_NUMBER_Alphanumeric_Mask) == GN_GSM_NUMBER_Alphanumeric_Mask) {
 		count = strlen(number);
