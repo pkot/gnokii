@@ -46,6 +46,8 @@
 #include "gnokii.h"
 #include "device.h"
 
+#include "gnokii-internal.h"
+
 #ifdef ENABLE_NLS
 #  include <locale.h>
 #endif
@@ -623,20 +625,12 @@ GNOKII_API gn_error gn_lib_search_one_connected_phone(struct gn_statemachine **s
 
 GNOKII_API gn_error gn_lib_phone_change_driver(struct gn_statemachine *state, const char* driver)
 {
-	gn_error error;
-
 	/* terminate the connection */
-	error = gn_lib_phone_close(state);
-	if (error != GN_ERR_NONE)
-		return error;
-	error = gn_lib_phoneprofile_free(&state);
-	if (error != GN_ERR_NONE)
-		return error;
+	return_on_error(gn_lib_phone_close(state));
+	return_on_error(gn_lib_phoneprofile_free(&state));
 
 	/* change the driver */
-	error = gn_cfg_phone_load(driver, state);
-	if (error != GN_ERR_NONE)
-		return error;
+	return_on_error(gn_cfg_phone_load(driver, state));
 
 	/* initialize new connection */
 	return gn_lib_phone_open(state);
