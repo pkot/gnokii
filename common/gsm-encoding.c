@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -23,7 +21,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999-2000 Pavel Janik ml.
-  Copyright (C) 2001-2005 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002      Markus Plail, Manfred Jonsson
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2003      Martin Goldhahn
@@ -1083,12 +1081,14 @@ int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type
 
 	*out_num++ = type;
 
-	if (type == GN_GSM_NUMBER_Alphanumeric) {
+	if (((type & GN_GSM_NUMBER_Type_Mask) & GN_GSM_NUMBER_Alphanumeric_Mask) == GN_GSM_NUMBER_Alphanumeric_Mask) {
 		count = strlen(number);
 		return 2 * char_7bit_pack(0, number, out_num, &count);
 	}
 
-	if ((type == GN_GSM_NUMBER_International || type == GN_GSM_NUMBER_Unknown) && *in_num == '+')
+	if (((((type & GN_GSM_NUMBER_Type_Mask) & GN_GSM_NUMBER_International_Mask) == GN_GSM_NUMBER_International) ||
+		(type & GN_GSM_NUMBER_Type_Mask) == 0) && /* Unknown */
+		*in_num == '+')
 		in_num++; /* skip leading '+' */
 
 	/* The next field is the number. It is in semi-octet representation - see

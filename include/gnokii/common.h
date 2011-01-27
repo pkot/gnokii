@@ -661,8 +661,33 @@ typedef struct {
 
 #define GN_BCD_STRING_MAX_LENGTH 40
 
-/* This data-type is used to specify the type of the number. See the official
-   GSM specification 03.40, version 6.1.0, section 9.1.2.5, page 35-37. */
+/*
+ * This data-type is used to specify the type of the number. See the official
+ * GSM specification 03.40, version 6.1.0, section 9.1.2.5, page 35-37 (old)
+ * 3GPP TS 23.040, version 6.7.0, section 9.1.2.5, page 39-41 (new)
+ */
+
+/* bit 7 is always 1 */
+#define GN_GSM_NUMBER_Type_Mask			0x70
+
+#define GN_GSM_NUMBER_International_Mask	0x10
+#define GN_GSM_NUMBER_National_Mask		0x20
+#define GN_GSM_NUMBER_Network_Mask		0x30
+#define GN_GSM_NUMBER_Subecriber_Mask		0x40
+#define GN_GSM_NUMBER_Alphanumeric_Mask		0x50
+#define GN_GSM_NUMBER_Abbreviated_Mask		0x60
+
+#define GN_GSM_NUMBER_Numbering_Plan_Mask	0x0f
+
+#define GN_GSM_NUMBER_ISDN_Plan_Mask		0x01
+#define GN_GSM_NUMBER_Data_Plan_Mask		0x03
+#define GN_GSM_NUMBER_Telex_Plan_Mask		0x04
+#define GN_GSM_NUMBER_Specific1_Plan_Mask	0x05
+#define GN_GSM_NUMBER_Specific2_Plan_Mask	0x06
+#define GN_GSM_NUMBER_National_Plan_Mask	0x08
+#define GN_GSM_NUMBER_Private_Plan_Mask		0x09
+#define GN_GSM_NUMBER_ERMES_Plan_Mask		0x0a
+
 typedef enum {
 	GN_GSM_NUMBER_Unknown       = 0x81, /* Unknown number */
 	GN_GSM_NUMBER_International = 0x91, /* International number */

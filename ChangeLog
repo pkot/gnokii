@@ -3,6 +3,8 @@
  * libgnokii updates
     o add gn_lib_phone_change_driver() function to allow replacing
       used driver in runtime                            (Paweł Kot)
+    o GSM number type is rather mask than define; use it as such
+      when parsing the input                            (Paweł Kot)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
