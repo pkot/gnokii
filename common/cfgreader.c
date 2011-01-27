@@ -889,7 +889,7 @@ gn_phone_model *gn_cfg_get_phone_model(struct gn_cfg_header *cfg, const char *pr
 		while (*comma && *comma != ',')
 			comma++;
 		end = comma;
-		while (end > val && (isblank(*end) || *end == ','))
+		while (end > val && (isspace(*end) || *end == ','))
 			end--;
 		count = end - val + 1;
 		snprintf(model, GN_MODEL_MAX_LENGTH, "%.*s", count, val);
@@ -900,7 +900,7 @@ gn_phone_model *gn_cfg_get_phone_model(struct gn_cfg_header *cfg, const char *pr
 			while (*val && *val != ',')
 				val++;
 			/* This skips also empty fields */
-			while (*val && (*val == ',' || isblank(*val)))
+			while (*val && (*val == ',' || isspace(*val)))
 				val++;
 			if (!*val)
 				break;
@@ -928,7 +928,7 @@ gn_phone_model *gn_cfg_get_phone_model(struct gn_cfg_header *cfg, const char *pr
 			while (*comma && *comma != ',')
 				comma++;
 			end = comma;
-			while (end > val && (isblank(*end) || *end == ','))
+			while (end > val && (isspace(*end) || *end == ','))
 				end--;
 			count = end - val + 1;
 			dprintf("Unknown flag \"%.*s\"\n", count, val);

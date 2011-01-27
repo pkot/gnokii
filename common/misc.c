@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2000      Jan Derfinak
-  Copyright (C) 2000-2004 Pawel Kot
+  Copyright (C) 2000-2011 Pawel Kot
   Copyright (C) 2001      Jan Kratochvil, Ladis Michl, Chris Kemp
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2002      Manfred Jonsson, Markus Plail
@@ -651,13 +649,13 @@ void gnokii_strfreev(char **str_array)
  */
 int gnokii_strcmpsep(const char *s1, const char *s2, char sep)
 {
-	while (isblank(*s2))
+	while (isspace(*s2))
 		s2++;
 	while (*s1 && *s1 == *s2) {
 		s1++;
 		s2++;
 	}
-	while (isblank(*s2))
+	while (isspace(*s2))
 		s2++;
 	if (!*s1 && *s2 == sep)
 		return 0;
