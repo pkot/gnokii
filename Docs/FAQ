@@ -1,20 +1,18 @@
 GNOKII FAQ
-Pawel Kot, pkot@bezsensu.pl
+Pawel Kot, gnokii@gmail.com
 Hugh Blemings, hugh@blemings.org
-
-$Id$
 
 -------------------------------------------------------------------------------
 Q. What is gnokii?
 
 A. It is the name of a project that aims to develop tools and drivers for
-   Nokia mobile phones. These tools include modem drivers, console tools,
-   GUI applications etc. All software that forms part of the project is
-   released under the GNU General Public License.  Please see the COPYING
+   the mobile phones and modems. These tools include modem drivers, console
+   tools, GUI applications etc. All software that forms part of the project
+   is released under the GNU General Public License.  Please see the COPYING
    file for more details on license/copying issues, the lack of warranty
    and where to send a postcard if you like gnokii :-)  Gnokii is designed
-   to work on a variety of operating systems (Linux, FreeBSD, etc.) and
-   hardware platforms (PPC, Intel, etc.)
+   to work on a variety of operating systems (Linux, FreeBSD, MacOS X,
+   Windows) and hardware platforms (PPC, Intel, etc.)
 
 -------------------------------------------------------------------------------
 Q. How do you pronounce gnokii?
@@ -40,6 +38,10 @@ A. You can assume that your phone is supported, however there are rare cases
    Symbian series60 3rd edition (most Nokia n and e series) are not
    supported by gnapplet driver due to changes in Symbian API. For now you
    can get some functionality using AT driver.
+   
+   gnokii will not work with iPhones, Windows Mobile phones, BlackBerries
+   and most likely Androids. You can try using AT driver for that purpose
+   but expected results are miserable.
 
 -------------------------------------------------------------------------------
 Q. I get "Hmmm... GSM_LinkOK never went true. Quitting." message when
@@ -75,24 +77,31 @@ A. No. There is no need. gnokii isn't intended for setuid/setgid operation.
    using groups management.
 
 -------------------------------------------------------------------------------
-Q: Can I use IrDA with 6210/7110 and gnokii?
-
-A: Yes. Just put this line
-
-        connection = irda
-
-   into your config file.
-
--------------------------------------------------------------------------------
 Q. I'd like to send/receive sms, to handle voice calls, etc from my own
    application. What should I do?
 
 A. If the license of your application is GPL the easiest solution is to
    use libgnokii. In this case you needn't to handle low level stuff,
    libgnokii will do it for you. If you want to use a scripting language,
-   Konstantin Agouros had written a perl module, you can download it from
+   you can choose between Perl, PHP and Ruby
 
-   http://www.agouros.de/gnokii
+   First version of Perl bindings was prepared by Konstantin Agouros and is
+   available at:
+
+     http://www.agouros.de/gnokii
+
+   Please note that this version does not work with current version. The
+   up-do-date version was prepared by H. Merijn Brand and is available at:
+
+     http://repo.or.cz/w/GSM-Gnokii.git
+
+   PHP bindings were prepared by Daniele Forsi and are available at:
+
+     git://git.savannah.nongnu.org/gnokii/gnokii-extras.git
+
+   Ruby bindings were prepared by Thyagarajan Shanmugham and are available at:
+
+     http://github.com/thyagarajan/rubynokii/wikis/home
 
 -------------------------------------------------------------------------------
 Q. Can I get a copy of the protocol for the <insert phone model here>?
@@ -109,122 +118,14 @@ A. We don't have any formal documentation of the protocols in use.
    subdirectory in gnokii sources. Note that not all known protocol functions
    are implemented in gnokii.
 
-   Alternatively there are some web sites that have collated some
-   information:
-   
-     Nokia 5110/6110
-       http://www.gadgets.demon.co.uk/nokia61xx/protocol.html
-
-     Marcin Wiacek's pages are also useful;
-       http://www.mwiacek.com
-
-     Nagy Balazs' pages:
-       {Seem to have dissapeared, anyone have a new link ? - Hugh}
-
-     If you find the previous pages hard to read, there's a good introduction:
+   There's a good introduction to FBUS:
        http://www.embedtronics.com/nokia/fbus.html
-
--------------------------------------------------------------------------------
-Q. Does gnokii work under Sun's Solaris?
-
-A. In general yes, but it depends on hardware -- your serial port
-   must support at least 115200 baud rate. Sun Enterprise 250 machine is known
-   to work with gnokii.  Earlier Sparc machines (IPC, IPX, Classic) probably
-   won't work due to hardware limitations.
-
-   If your hardware doesn't support 115200 baud rate you can try the M2BUS
-   mode (don't forget it needs an M2BUS capable cable). It is much slower
-   but it should work.
-
--------------------------------------------------------------------------------
-Q. Could you tell me the key for on, off and select menu in
-    gnokii --keysequence function?
-
-A. M: menu, N: names, P: power, G: green phone, R: red phone, U: up, D: down
-   +: increase volume, -: decrease volume, 0123456789#* as is. N means
-   cancel for Nokia 3210 and 3310. Only the nk6100 (6110 and compatibles)
-   and nk7110 (7110 and compatibles) drivers supports this functionality.
-
--------------------------------------------------------------------------------
-Q. How can I redirect a call without the broken gnokii --divert command?
-
-A. You can use the gsm-code *21*yournumber# for this. Pipe it in per
-   stdout to gnokii with the following command: "echo '*21*yournumber#G' |
-   gnokii --keysequence". The 'G' at the end stands for the handy key with
-   'Green phone'-symbol on it. Note: This will take some time, because your
-   provider has to affirm it. I.e. redirecting to a number in Munich,
-   Germany (tested on Nokia 8210):
-   echo '*21*089123455678#G' | gnokii --keysequence
-
--------------------------------------------------------------------------------
-Q. I get 'undefined symbol: GSM_ELogHandler' when runnig gnokii. What's
-   wrong?
-
-A. gnokii didn't install correctly. You probably had gnokii installed already
-   and you either forgot to run 'make install' or the installation didn't
-   overwrite the old library. Remove the old libgnokii.so and then rerun
-   'make install'.
-
--------------------------------------------------------------------------------
-Q. I had problems during compilation with gnvcal.lx/gnvcal.c. What should I do?
-
-A. Install flex. It should be available in every Linux distribution as well
-   as in CygWin.
 
 -------------------------------------------------------------------------------
 Q. Which cable for the Nokia phones should I use?
 
-A. For Nokia 61X0/51X0 models you should use DAU9P cable. Nokia 61X0 models are
-   also able to use an infrared connection.
-
-   For Nokia 7110/62X0/6310 models you need either DAU9P or DLR3P cable. With
-   DLR3P cable you can use AT commands to talk to the phone. These phones are
-   also able to use an irda connection.
-
-   For modern Nokia phones without external memory (6100, 3100, 3120, 3200,
-   3220, 6610, 7210, 7250, 68xx, 6200, 6220) use DKU-5 cable. The recent
-   replacement for this cable is named CA-42.
-
-   For modern Nokia phones with external memory (6620, 7610, 6630, 3230, 6230,
-   668x, 9300, 7710, 9500, 3200) use DKU-2 cable.
-
-   Most Nokia phones that have no visible connector have one under the battery.
-   See our cables page (http://www.gnokii.org/cables.shtml) to find sites
-   with more details and some suggested places to buy the cable.
-
-   For other vendors see user manuals and vendor websites.
-
-   Most of the modern phones have the irda or bluettoth connector.
-
--------------------------------------------------------------------------------
-Q. I get 'Sorry, phone has not yet been converted to new style.
-   Phone.Functions == NULL!' message. What's wrong?
-
-A. You're using an ancient version of gnokii! Upgrade! See our downloads
-   page for the details (http://www.gnokii.org/downloads.shtml).
-
--------------------------------------------------------------------------------
-Q. I get 'ERROR: Modem DCD is down and global/require_dcd parameter is set!'
-   What should I do?
-
-A. Either comment out require_dcd variable in the config file or set it to 0
-
--------------------------------------------------------------------------------
-Q. I can't compile gnokii. It fails when building the po directory.
-
-A. You need to run gettextize. See autogen.sh and INSTALL files. If you don't
-   have it on your system, grab the -current tarball which should have all
-   needed files already generated.
-
--------------------------------------------------------------------------------
-Q. When connecting by IrDA I got "Couldn't open PHONET device: No route to
-   host" message. What can be wrong?
-
-A. Something's wrong with the irda device setup. Try to run:
-
-echo 115200 > /proc/sys/net/irda/max_baud_rate
-
-   and see whether it helps.
+A. Please refer to the vendor website. They always have the most accurate
+    information.
 
 -------------------------------------------------------------------------------
 Q. My phone is not mentioned as supported by gnokii, but it seems that it is
@@ -235,42 +136,20 @@ A. It is quite simple. If you use AT compatible phone you can just use
    'model = AT' in the config file. If you have Nokia and you would like to
    enable FBUS mode (it has more facilities then AT mode), there are few
    things you should do.
+
+   For modern Nokias you can have either series40 or series60 phone. You can
+   check this information at http://www.forum.nokia.com/Devices/.
+   If you have series60 you are unlucky. You need to stick to AT driver. If you
+   have series40 you may just try to run gnokii. If it doesn't work you may try
+   adding the following section to the config file:
    
-   For example, let's say you want to check the support for Nokia
-   6211, which should be compatible with Nokia 6210. First, find the
-   correct driver. The drivers are located in the common/phones/ directory
-   within the gnokii sources:
+   [flags]
+   RM-443=6303, PM_DEFAULT_S40_30
 
-pkot@bzzzt:~/gnokii/common/phones$ grep -n 6210 *
-nk7110.c:148:      "7110|6210|6250|7190",      /* Supported models */
-nk7110.c:958:   /* This is ugly hack. But the picture message format in 6210
-nk7110.c:1197:  /* Nokia 6210 and family does not show not "fixed" messages from the
-nk7110.c:1610:  /* 6210/7110 needs to seek the first free pos to inhabit with next note */
-
-   Line 148 in this case is the one you want as it is where we define
-   the GSM_Phone structure. Just add new model, so the line will contain:
-
-7110|6210|6250|7190|6211
-
-   Once this is done, look in the file common/misc.c.  It contains a large
-   phone capabilities table. Find the one for the phone that is similar to
-   yours. In our case this is 6210:
-
-{"6210",  "NPE-3", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS }
-
-   We will replace two first fields as for our phone. The second field is
-   the phone model identifier. In most of the phones to get this type on
-   your phone keyboard the following sequence: *#0000#. If it doesn't work
-   search the Internet for the information. Let's say in our example that
-   the string is NPL-3. Our line will contain:
-
-{"6211",  "NPL-3", PM_CALLERGROUP | PM_CALENDAR | PM_SPEEDDIAL | PM_NETMONITOR | PM_EXTPBK | PM_SMS | PM_FOLDERS }
-
-   This is almost everything. Now recompile the sources and add
-   "model = 6211" (according to your Nokia model) to the config and try if
-   it works. In any case let us know (to the gnokii mailing list) about the
-   result.
-
+   The flags are explained in the sample config file. You can choose the right
+   flags by comparing the OS version with the models configured in
+   common/misc.c already.
+   
 -------------------------------------------------------------------------------
 Q. I'm using the Win32 gnokii distribution and got the error "Couldn't open
    FBUS device". What's wrong?
@@ -288,15 +167,23 @@ A. Place the new section in your config file (or update existing section in
    debug = on
 
 -------------------------------------------------------------------------------
-Q. Gnokii does not work with my Fedora system with planetccrma patches.
-   Could you please fix it?
-
-A. There is nothing wrong with gnokii. Please contact people from
-   planetccrma responsible for the kernel patches and ask them to fix the
-   problem.
--------------------------------------------------------------------------------
 Q. Please help me configure my Nokia eXX/nYY to work with gnokii.
 
 A. Nokia e and n series are Symbian Series60 3rd Edition based. Our gnapplet
    driver is not compatible with this OS (yet). You can get limited
    functionality (due to Symbian limitation) by using AT driver.
+
+-------------------------------------------------------------------------------
+Q. Why bluetooth connection under Windows does not work?
+
+A. gnokii supports only MS bluetooth stack on Windows. Make sure you use it.
+
+-------------------------------------------------------------------------------
+Q. Where gnokii config file is located?
+
+A. As of gnokii 0.6.30 the primary locations where the config files are
+   searched is:
+     Windows: %APPDATA%\gnokii\gnokii.ini
+     MacOS X: $HOME/Library/Preferences/gnokii/config
+     Everything else: $XDG_CONFIG_HOME/gnokii/config or
+       $HOME/.config/gnokii/config
