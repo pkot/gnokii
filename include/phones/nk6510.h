@@ -210,7 +210,7 @@ typedef enum {
  *   - get file list
  *   - filter sms files by name
  *   - get file
- * It is repeated for every SMS. As 'get file list' is the longest opration
+ * It is repeated for every SMS. As 'get file list' is the longest operation
  * it makes sense to cache the results. Define here for how long (seconds)
  * data is cached.
  */
