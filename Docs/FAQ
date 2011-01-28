@@ -17,7 +17,9 @@ A. It is the name of a project that aims to develop tools and drivers for
 -------------------------------------------------------------------------------
 Q. How do you pronounce gnokii?
 
-A. You can pronounce gnokii as "gnooki" or "gnocki" as you prefer :-)
+A. You can pronounce gnokii as "gnooki" or "gnocki" as you prefer :-)  Note,
+   that there's already a gnocky project, a gtk2 frontend to gnokii, so keep
+   it in mind to be able to distinct them.
 
 -------------------------------------------------------------------------------
 Q. What models are supported?
