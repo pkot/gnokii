@@ -2779,7 +2779,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		if (data->phonebook_entry) {
 			data->phonebook_entry->empty = true;
-			data->phonebook_entry->caller_group = 5; /* no group */
+			data->phonebook_entry->caller_group = GN_PHONEBOOK_GROUP_None;
 			data->phonebook_entry->name[0] = '\0';
 			data->phonebook_entry->number[0] = '\0';
 			data->phonebook_entry->subentries_count = 0;
