@@ -71,9 +71,10 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 		return -1;
 	}
 	/* Create a bluetooth socket */
-	if ((fd = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) < 0) {
+	if ((fd = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) == INVALID_SOCKET) {
 		perror("socket");
 		dprintf("Failed to create a bluetooth socket\n");
+		WSACleanup();
 		return -1;
 	}
 	/* Prepare socket structure for the bluetooth socket */
@@ -82,6 +83,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	if (str2ba(addr, &sa.btAddr)) {
 		dprintf("Incorrect bluetooth address given in the config file\n");
 		closesocket(fd);
+		WSACleanup();
 		return -1;
 	}
 	sa.port = channel & 0xff;
@@ -90,6 +92,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 		perror("socket");
 		dprintf("Failed to connect to bluetooth socket\n");
 		closesocket(fd);
+		WSACleanup();
 		return -1;
 	}
 	return (int)fd;
