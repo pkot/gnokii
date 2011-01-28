@@ -1,10 +1,10 @@
 SHORT TERM
  * remove encoding workarounds -- should be purely based on libiconv and
-   glib (with maybe some options for Windows)
- * polish support for FreeDesktop.org file location standards
- * improve Series40 support
+   glib (in progress)
+ * polish support for FreeDesktop.org file location standards (in progress)
+ * improve Series40 support (in progress)
  * cleanup phone flags
- * bring back Windows support
+ * bring back Windows support (in progress)
 
 LONG TERM
  * gnokii changes:
@@ -25,7 +25,7 @@ LONG TERM
     o syncml support
     o support new phones with filesystems, cameras and other bells'n'whistles
     o Nokia 9210 and family
-    o bluetooth support for Windows (coded, but doesn't work)
+    o bluetooth support for Windows (works only with MS bluetooth stack)
 
  * GNOME/KDE support
     o external apps
