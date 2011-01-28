@@ -85,7 +85,7 @@ Q. I'd like to send/receive sms, to handle voice calls, etc from my own
 A. If the license of your application is GPL the easiest solution is to
    use libgnokii. In this case you needn't to handle low level stuff,
    libgnokii will do it for you. If you want to use a scripting language,
-   you can choose between Perl, PHP and Ruby
+   you can choose between Perl, PHP and Ruby.
 
    First version of Perl bindings was prepared by Konstantin Agouros and is
    available at:
