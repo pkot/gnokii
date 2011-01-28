@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
   Copyright (C) 1999-2000  Gary Reuter, Reinhold Jordan
-  Copyright (C) 1999-2006  Pawel Kot
+  Copyright (C) 1999-2011  Pawel Kot
   Copyright (C) 2000-2002  Marcin Wiacek, Chris Kemp, Manfred Jonsson
   Copyright (C) 2001       Marian Jancar, Bartek Klepacz
   Copyright (C) 2001-2002  Pavel Machek, Markus Plail
@@ -212,9 +210,9 @@ static void version(void)
 	fprintf(stderr, _("Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 			  "Copyright (C) Pavel Janik ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 			  "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
-			  "Copyright (C) Pawel Kot <gnokii@gmail.com>, 2001-2009\n"
+			  "Copyright (C) Pawel Kot <gnokii@gmail.com>, 2001-2011\n"
 			  "Copyright (C) BORBELY Zoltan <bozo@andrews.hu>, 2002\n"
-			  "Copyright (C) Daniele Forsi <daniele@forsi.it>, 2004-2009\n"
+			  "Copyright (C) Daniele Forsi <daniele@forsi.it>, 2004-2011\n"
 			  "gnokii is free software, covered by the GNU General Public License, and you are\n"
 			  "welcome to change it and/or distribute copies of it under certain conditions.\n"
 			  "There is absolutely no warranty for gnokii.  See GPL for details.\n"
