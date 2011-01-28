@@ -3,7 +3,6 @@ SHORT TERM
    glib (with maybe some options for Windows)
  * polish support for FreeDesktop.org file location standards
  * improve Series40 support
- * remove outdated translations: cs, et, nl, sk, sl, zh_CN
  * cleanup phone flags
  * bring back Windows support
 
