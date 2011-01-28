@@ -1,14 +1,27 @@
-README-WIN32
-============
+README-WINDOWS
+==============
 
 The graphical X version, the AT-emulator and virtual device are not ported to
-Win32. This might change in the future but as far as I know no work is in
+Windows. This might change in the future but as far as I know no work is in
 progress. Of course the effort of porting only makes sense if there is a need.
-Do you have the need for extended Win32 functionality don't ask me but let us
+Do you have the need for extended Windows functionality don't ask me but let us
 all know on the gnokii mailing list.
 
 Recent Windows-related information is updated on the gnokii wiki. The main
 Windows page is: http://wiki.gnokii.org/index.php/Windows
+
+
+Compile using Microsoft Visual C++ 2010 Express Edition
+=======================================================
+
+Below a description how to compile gnokii with the Microsoft Visual C++ 2010 Express Edition.
+
+1) Extract gnokii source into <path>
+2) (optional) Build settings are in <path>\Windows\MSVC2010Express\config.h you may edit that.
+2) Read <path>\Windows\MSVS2011Express\README to install additional libraries required to compile.
+3) Open <path>\Windows\MSVS2011Express\gnokii.sln and compile :)
+
+Distributed gnokii binaries for Windows are built with this compiler.
 
 
 Compile using Microsoft Visual Studio 2005
@@ -19,8 +32,8 @@ Below a description how to compile gnokii with the Microsoft Visual Studio 2005 
 Both the commercial MSVS 2005 or MS Visual C++ 2005 Express Edition do work.
 
 1) Extract gnokii source into <path>
-2) (optional) Build settings are in <path>\win32\MSVS2005\config.h you may edit that.
-3) Open <path>\win32\MSVS2005\gnokii.sln and compile :)
+2) (optional) Build settings are in <path>\Windows\MSVS2005\config.h you may edit that.
+3) Open <path>\Windows\MSVS2005\gnokii.sln and compile :)
 
 The solution will contain three projects: gnokii.dll, gnokii.exe and setup.
 The setup build will fail on Visual C++ Express edition as the setup tools are
@@ -60,9 +73,9 @@ Configuring gnokii
 
 Current versions attempt to read the config file from:
 
-   1. Application installation directory: %APPDATA%\gnokii\config
-   2. User's home directory: %HOMEDRIVE%\%HOMEPATH%\_gnokiirc
-   3. Windows installation directory: %SYSTEMROOT%\gnokiirc
+   1. Application installation directory: %APPDATA%\gnokii\gnokii.ini
+   2. User's home directory: %HOMEDRIVE%\%HOMEPATH%\gnokii.ini
+   3. Windows installation directory: %SYSTEMROOT%\gnokii.ini
 
 First being found (the lookup order is as above) is used.
 
@@ -103,7 +116,7 @@ Bluetooth support for Windows
 =============================
 
 gnokii does support Bluetooth connection on Windows system. The support is built
-in as default.
+in as default. Please note that it supports only MS bluetooth stack.
 
 If you want to disable the Bluetooth do the following:
 1) Disable Bluetooth support in config.h file (see above) by replacing a line:
