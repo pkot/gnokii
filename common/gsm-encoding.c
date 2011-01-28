@@ -577,8 +577,6 @@ int char_7bit_pack(unsigned int offset, unsigned char *input,
 	unsigned int ucs2len, i = 0, len = strlen(input);
 	char *ucs2str;
 
-	/* FIXME: do it outside this function */
-	/* FIXME: scheduled for 0.6.31 */
 	/* First, let's know the encoding. We convert it from something to UCS-2 */
 	ucs2str = calloc(2 * len, sizeof(unsigned char));
 	if (!ucs2str)
