@@ -70,60 +70,6 @@ static const char *base64_alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnop
  */
 static const char *bcd_digits = "0123456789*#pbc";
 
-#if 0
-
-/*
- * We switched from internal representation in ISO/IEC 8859-1 encoding to UCS-2
- * encoding. But let's leave the old stuff for the time being.
- *
- * FIXME: Remove in gnokii 0.6.30
- */
-
-/**
- * GN_CHAR_ALPHABET_SIZE:
- *
- * Number of characters in GSM default alphabet (for ISO/IEC 8859-1 encoding).
- */
-#define GN_CHAR_ALPHABET_SIZE 128
-
-/**
- * GN_CHAR_UNI_ESCAPE:
- *
- * Value of the escape character for the GSM Alphabet (in ISO/IEC 8859-1 encoding).
- */
-#define GN_CHAR_ESCAPE 0x1b
-
-/**
- * gsm_default_alphabet:
- *
- * Mapping from GSM default alphabet to ISO/IEC 8859-1.
- *
- * ETSI GSM 03.38, version 6.0.1, section 6.2.1; Default alphabet.
- * Characters in hex position 10, [12 to 1a] and 24 are not present on
- * latin1 charset, so we cannot reproduce on the screen, they are
- * Greek symbols not even present on some phones.
- */
-static unsigned char gsm_default_alphabet[GN_CHAR_ALPHABET_SIZE] = {
-	'@',  0xa3, '$',  0xa5, 0xe8, 0xe9, 0xf9, 0xec,
-	0xf2, 0xc7, '\n', 0xd8, 0xf8, '\r', 0xc5, 0xe5,
-	'?',  '_',  '?',  '?',  '?',  '?',  '?',  '?',
-	'?',  '?',  '?',  '?',  0xc6, 0xe6, 0xdf, 0xc9,
-	' ',  '!',  '\"', '#',  0xa4,  '%',  '&',  '\'',
-	'(',  ')',  '*',  '+',  ',',  '-',  '.',  '/',
-	'0',  '1',  '2',  '3',  '4',  '5',  '6',  '7',
-	'8',  '9',  ':',  ';',  '<',  '=',  '>',  '?',
-	0xa1, 'A',  'B',  'C',  'D',  'E',  'F',  'G',
-	'H',  'I',  'J',  'K',  'L',  'M',  'N',  'O',
-	'P',  'Q',  'R',  'S',  'T',  'U',  'V',  'W',
-	'X',  'Y',  'Z',  0xc4, 0xd6, 0xd1, 0xdc, 0xa7,
-	0xbf, 'a',  'b',  'c',  'd',  'e',  'f',  'g',
-	'h',  'i',  'j',  'k',  'l',  'm',  'n',  'o',
-	'p',  'q',  'r',  's',  't',  'u',  'v',  'w',
-	'x',  'y',  'z',  0xe4, 0xf6, 0xf1, 0xfc, 0xe0
-};
-
-#endif
-
 /**
  * GN_CHAR_UNI_ALPHABET_SIZE:
  *
