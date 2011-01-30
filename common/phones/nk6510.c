@@ -4556,7 +4556,7 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 		if (!data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
 		pos = message + 8;
 		char_unicode_decode(data->ringtone->name, pos, 2 * message[7]);
-		dprintf("Got ringtone: %s\n", data->ringtone->name);
+		dprintf("Got ringtone %d: %s\n", (message[4] << 8) + message[5], data->ringtone->name);
 		pos += 2 * message[7];
 		i = (pos[0] << 8) + pos[1];
 		pos += 2;
