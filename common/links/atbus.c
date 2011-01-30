@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 2001-2002 Manfred Jonsson <manfred.jonsson@gmx.de>
   Copyright (C) 2001-2003 Ladis Michl
-  Copyright (C) 2001-2004 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2002 Pavel Machek
 
@@ -300,6 +298,7 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 	state->link.loop = &atbus_loop;
 	state->link.send_message = &at_send_message;
 	state->link.reset = &atbus_reset;
+	state->link.cleanup = NULL;
 	AT_BUSINST(state) = businst;
 	atbus_reset(state);
 

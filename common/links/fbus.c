@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -677,6 +675,7 @@ gn_error fbus_initialise(int attempt, struct gn_statemachine *state)
 	state->link.loop = &fbus_loop;
 	state->link.send_message = &fbus_send_message;
 	state->link.reset = &fbus_reset;
+	state->link.cleanup = NULL;
 
 	/* Check for a valid init length */
 	if (state->config.init_length == 0)

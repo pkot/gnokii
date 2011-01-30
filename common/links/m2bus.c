@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,8 @@
 
   Copyright (C) 2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2000 Chris Kemp
-  Copyright (C) 2002-2004 BORBELY Zoltan, Pawel Kot
+  Copyright (C) 2002-2004 BORBELY Zoltan
+  Copyright (C) 2002-2011 Pawel Kot
   Copyright (C) 2002 Ladis Michl
 
   This file provides an API for accessing functions via m2bus.
@@ -466,6 +465,7 @@ gn_error m2bus_initialise(struct gn_statemachine *state)
 	state->link.loop = &m2bus_loop;
 	state->link.send_message = &m2bus_send_message;
 	state->link.reset = &m2bus_reset;
+	state->link.cleanup = NULL;
 
 	/* Start up the link */
 	if ((M2BUSINST(state) = calloc(1, sizeof(m2bus_link))) == NULL)

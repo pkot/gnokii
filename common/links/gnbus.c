@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia mobile phones.
@@ -290,6 +288,7 @@ gn_error gnbus_initialise(struct gn_statemachine *state)
 	state->link.loop = &gnbus_loop;
 	state->link.send_message = &gnbus_send_message;
 	state->link.reset = &gnbus_reset;
+	state->link.cleanup = NULL;
 
 	/* Start up the link */
 	if ((GNBUSINST(state) = calloc(1, sizeof(gnbus_link))) == NULL)

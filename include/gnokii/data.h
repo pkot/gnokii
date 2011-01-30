@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -23,7 +21,8 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
-  Copyright (C) 2002-2004 BORBELY Zoltan, Pawel Kot
+  Copyright (C) 2002-2004 BORBELY Zoltan
+  Copyright (C) 2002-2011 Pawel Kot
   Copyright (C) 2002      Ladis Michl, Markus Plail, Pavel Machek, Chris Kemp
 
 */
@@ -154,6 +153,7 @@ typedef struct {
 				 struct gn_statemachine *state);
 	void *link_instance;
 	void (*reset)(struct gn_statemachine *state);
+	void (*cleanup)(struct gn_statemachine *state);
 } gn_link;
 
 typedef struct {

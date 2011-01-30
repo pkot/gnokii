@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2000-2001 Chris Kemp
-  Copyright (C) 2001-2004 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2001      Manfred Jonsson, Martin Jancar
   Copyright (C) 2002      Ladis Michl
   Copyright (C) 2002-2003 BORBELY Zoltan
@@ -60,6 +58,24 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 #define FBUSINST(s) (*((phonet_incoming_message **)(&(s)->link.link_instance)))
 
 #define FBUS_PHONET_BLUETOOTH_INITSEQ 0xd0, 0x00, 0x01
+
+/*--------------------------------------------*/
+
+static int verify_max_message_len(int len, char **message_buffer)
+{
+	static int max_message_len = 0;
+
+	if (len > max_message_len) {
+		dprintf("overrun: %d %d\n", len, max_message_len);
+		*message_buffer = realloc(*message_buffer, len + 1);
+		max_message_len = len + 1;
+	}
+	if (*message_buffer)
+		return max_message_len;
+	else
+		return 0;
+}
+
 
 /*--------------------------------------------*/
 
@@ -168,32 +184,23 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_length = i->message_length + rx_byte;
 		i->state = FBUS_RX_GetMessage;
 		i->buffer_count = 0;
-		if (i->message_length > PHONET_FRAME_MAX_LENGTH) {
-			dprintf("PHONET: Message buffer overrun - resetting (message length: %d, max: %d)\n", i->message_length, PHONET_FRAME_MAX_LENGTH);
-		}
 		break;
 
 	case FBUS_RX_GetMessage:
-		if (i->message_length > PHONET_FRAME_MAX_LENGTH) {
-			/* Ignore this frame that would overflow the buffer */
-			if (i->buffer_count % 16 == 0)
-				dprintf("\n");
-			dprintf("%02x ", rx_byte);
-			i->buffer_count++;
+		if (!verify_max_message_len(i->message_length, &(i->message_buffer))) {
+			dprintf("PHONET: Failed to allocate memory for larger buffer\n");
+			dprintf("PHONET: Message buffer overrun - resetting (message length: %d, max: %d)\n", i->message_length, PHONET_FRAME_MAX_LENGTH);
+			dprintf("PHONET: Resetting\n");
+			i->state = FBUS_RX_Sync;
+			break;
+		}
+		i->message_buffer[i->buffer_count] = rx_byte;
+		i->buffer_count++;
 
-			if (i->buffer_count == i->message_length) {
-				dprintf("\n");
-				i->state = FBUS_RX_Sync;
-			}
-		} else {
-			i->message_buffer[i->buffer_count] = rx_byte;
-			i->buffer_count++;
-
-			/* Is that it? */
-			if (i->buffer_count == i->message_length) {
-				sm_incoming_function(i->message_type, i->message_buffer, i->message_length, state);
-				i->state = FBUS_RX_Sync;
-			}
+		/* Is that it? */
+		if (i->buffer_count == i->message_length) {
+			sm_incoming_function(i->message_type, i->message_buffer, i->message_length, state);
+			i->state = FBUS_RX_Sync;
 		}
 		break;
 
@@ -231,7 +238,6 @@ static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *sta
 }
 
 /* Main function to send an fbus message */
-
 static gn_error phonet_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 
@@ -303,6 +309,12 @@ static void phonet_reset(struct gn_statemachine *state)
 	FBUSINST(state)->buffer_count = 0;
 }
 
+static void phonet_cleanup(struct gn_statemachine *state)
+{
+	free(FBUSINST(state)->message_buffer);
+	FBUSINST(state)->message_buffer = NULL;
+}
+
 /* Initialise variables and start the link */
 gn_error phonet_initialise(struct gn_statemachine *state)
 {
@@ -317,6 +329,9 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	state->link.reset = &phonet_reset;
 
 	if ((FBUSINST(state) = calloc(1, sizeof(phonet_incoming_message))) == NULL)
+		return GN_ERR_MEMORYFULL;
+
+	if (!verify_max_message_len(PHONET_FRAME_MAX_LENGTH, &(FBUSINST(state)->message_buffer)))
 		return GN_ERR_MEMORYFULL;
 
 	switch (state->config.connection_type) {

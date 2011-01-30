@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -23,7 +21,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janik ml.
-  Copyright (C) 2001-2004 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002      Ladis Michl
   Copyright (C) 2002-2003 BORBELY Zoltan
   Copyright (C) 2003-2004 Osma Suominen
@@ -358,6 +356,7 @@ gn_error fb3110_initialise(struct gn_statemachine *state)
 	state->link.loop = &fb3110_loop;
 	state->link.send_message = &fb3110_message_send;
 	state->link.reset = &fb3110_reset;
+	state->link.cleanup = NULL;
 
 	/* Check for a valid init length */
 	if (state->config.init_length == 0)

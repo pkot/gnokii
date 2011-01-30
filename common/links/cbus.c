@@ -23,7 +23,7 @@
   Copyright (C) 2001      Pavel Machek <pavel@ucw.cz>
   Copyright (C) 2001-2003 Ladislav Michl <ladis@linux-mips.org>
   Copyright (C) 2001      Manfred Jonsson
-  Copyright (C) 2001-2004 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2003 BORBELY Zoltan
 
  */
@@ -330,6 +330,7 @@ gn_error cbus_initialise(struct gn_statemachine *state)
 	state->link.loop = &cbus_loop;
 	state->link.send_message = &cbus_send_message;
 	state->link.reset = NULL;
+	state->link.cleanup = NULL;
 	CBUSINST(state) = businst;
 
 	if (state->config.connection_type == GN_CT_Serial) {

@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 2001-2002 Pavel Machek, Ladis Michl, Manfred Jonsson <manfred.jonsson@gmx.de>
   Copyright (C) 2001 Chris Kemp
-  Copyright (C) 2001-2004 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2004 BORBELY Zoltan
 
 */
@@ -49,6 +47,8 @@ gn_error link_terminate(struct gn_statemachine *state)
 		return GN_ERR_FAILED;
 
 	/* device_close(&(state->Device)); */
+	if (state->link.cleanup)
+		state->link.cleanup(state);
 	if (state->link.link_instance) {
 		free(state->link.link_instance);
 		state->link.link_instance = NULL;

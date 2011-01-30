@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2000      Chris Kemp
-  Copyright (C) 2001-2004 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002      BORBELY Zoltan, Ladis Michl
 
   This file provides an API for accessing functions via fbus over irda.
@@ -63,7 +61,7 @@ typedef struct {
 	int message_destination;
 	int message_type;
 	int message_length;
-	char message_buffer[PHONET_FRAME_MAX_LENGTH];
+	char *message_buffer;
 } phonet_incoming_message;
 
 #endif   /* #ifndef _gnokii_links_fbus_phonet_h */
