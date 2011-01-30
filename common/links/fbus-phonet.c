@@ -143,6 +143,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		    rx_byte == FBUS_PHONET_DKU2_FRAME_ID) {
 			i->state = FBUS_RX_GetDestination;
 		}
+		i->message_corrupted = 0;
 		break;
 
 	case FBUS_RX_GetDestination:
@@ -184,16 +185,25 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_length = i->message_length + rx_byte;
 		i->state = FBUS_RX_GetMessage;
 		i->buffer_count = 0;
-		break;
-
-	case FBUS_RX_GetMessage:
 		if (!verify_max_message_len(i->message_length, &(i->message_buffer))) {
 			dprintf("PHONET: Failed to allocate memory for larger buffer\n");
 			dprintf("PHONET: Message buffer overrun - resetting (message length: %d, max: %d)\n", i->message_length, PHONET_FRAME_MAX_LENGTH);
-			dprintf("PHONET: Resetting\n");
-			i->state = FBUS_RX_Sync;
-			break;
+			i->message_corrupted = 1;
 		}
+		break;
+
+	case FBUS_RX_GetMessage:
+		/*
+		 * If message is corrupted it means that we couldn't allocate full
+		 * space to store it. Therefore let's just print out the message.
+		 */
+		if (i->message_corrupted) {
+			if (i->buffer_count % 16 == 0)
+				dprintf("\n");
+			dprintf("%02x ", rx_byte);
+			i->buffer_count++;
+		}
+
 		i->message_buffer[i->buffer_count] = rx_byte;
 		i->buffer_count++;
 

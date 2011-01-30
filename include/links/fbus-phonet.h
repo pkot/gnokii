@@ -62,6 +62,7 @@ typedef struct {
 	int message_type;
 	int message_length;
 	char *message_buffer;
+	int message_corrupted;
 } phonet_incoming_message;
 
 #endif   /* #ifndef _gnokii_links_fbus_phonet_h */
