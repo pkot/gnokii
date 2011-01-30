@@ -1126,13 +1126,15 @@ GNOKII_API gn_error gn_cfg_read_default()
 
 	config_file_locations = get_locations(&num);
 
+	for (i = 0; i < num && error != GN_ERR_NONE; i++) {
+		error = gn_cfg_file_read(config_file_locations[i]);
+	}
 	for (i = 0; i < num; i++) {
-		if (error != GN_ERR_NONE)
-			error = gn_cfg_file_read(config_file_locations[i]);
+		/* If it couldn't read any config show all filenames tried */
 		if (error != GN_ERR_NONE)
 			fprintf(stderr, _("Couldn't read %s config file.\n"), config_file_locations[i]);
 		free(config_file_locations[i]);
-	}		
+	}
 	free(config_file_locations);
 	return error;
 }
