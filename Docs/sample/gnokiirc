@@ -207,16 +207,29 @@ smsc_timeout = 10
 [flags]
 #RM-237=3110c, DEFAULT_S40_30
 
+[gnokii]
+# Set this to the path where you want gnokii-errors to be stored.
+# gnokii-errors file stores the information about unhandled frames
+# received while communicating with gnokii.
+# The default paths are:
+#  on Windows: %APPDATA%\\gnokii
+#  on MacOS X: $HOME/Library/Logs/gnokii
+#  on everything else: $XDG_CACHE_HOME/gnokii or $HOME/.cache/gnokii
+# Do not include filename in the path.
+# Make sure that specified folder or directory exists. Otherwise the output
+# will be redirected to stderr.
+#gnokiierrorpath=.
+
+[xgnokii]
 # Set this to 1 if you want to break your phone with xgnokii. Works only
 # with few Nokia models and FBUS communication
-[xgnokii]
 allow_breakage = 0
 
+[gnokiid]
 # Set bindir to point to the location of the various gnokiid binaries.
 # In particular ensure that mgnokiidev is in this location, with
 # permissions 4750, owned by root, group gnokii.  Ensure you
 # are in the gnokii group and that the group exists...
-[gnokiid]
 bindir = /usr/local/sbin/
 
 # Any entries in the following two sections will be set as environment

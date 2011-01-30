@@ -311,44 +311,47 @@ static int install_log_handler(void)
 	int home = 0;
 #endif
 
+	path = gn_cfg_get(gn_cfg_info, "gnokii", "errorlogpath");
+	if (!path) {
 #ifdef WIN32
-	basepath = getenv("APPDATA");
+		basepath = getenv("APPDATA");
 #elif __MACH__
-	basepath = getenv("HOME");
+		basepath = getenv("HOME");
 #else
 /* freedesktop.org compliancy: http://standards.freedesktop.org/basedir-spec/latest/ar01s03.html */
 #define XDG_CACHE_HOME "/.cache" /* $HOME/.cache */
-	basepath = getenv("XDG_CACHE_HOME");
-	if (!basepath) {
-		basepath = getenv("HOME");
-		home = 1;
-	}
+		basepath = getenv("XDG_CACHE_HOME");
+		if (!basepath) {
+			basepath = getenv("HOME");
+			home = 1;
+		}
 #endif
-	if (!basepath)
-		path = ".";
-	else {
-		path = calloc(MAX_PATH_LEN, sizeof(char));
-		free_path = 1;
+		if (!basepath)
+			path = ".";
+		else {
+			path = calloc(MAX_PATH_LEN, sizeof(char));
+			free_path = 1;
 #ifdef WIN32 /* Windows */
-		snprintf(path, MAX_PATH_LEN, "%s\\gnokii", basepath);
+			snprintf(path, MAX_PATH_LEN, "%s\\gnokii", basepath);
 #elif __MACH__
-		snprintf(path, MAX_PATH_LEN, "%s/Library/Logs/gnokii", basepath);
+			snprintf(path, MAX_PATH_LEN, "%s/Library/Logs/gnokii", basepath);
 #else
-		if (home) {
-			snprintf(path, MAX_PATH_LEN, "%s%s/gnokii", basepath, XDG_CACHE_HOME);
-		} else {
-			snprintf(path, MAX_PATH_LEN, "%s/gnokii", basepath);
-                }
+			if (home) {
+				snprintf(path, MAX_PATH_LEN, "%s%s/gnokii", basepath, XDG_CACHE_HOME);
+			} else {
+				snprintf(path, MAX_PATH_LEN, "%s/gnokii", basepath);
+			}
 #endif
-	}
+		}
 
-	st = stat(basepath, &buf);
-	if (st)
+		st = stat(basepath, &buf);
+		if (st)
 	        mkdir(basepath, S_IRWXU);
 
-	st = stat(path, &buf);
-	if (st)
-		mkdir(path, S_IRWXU);
+		st = stat(path, &buf);
+		if (st)
+			mkdir(path, S_IRWXU);
+	}
 
 	snprintf(logname, sizeof(logname), "%s/%s", path, file);
 
