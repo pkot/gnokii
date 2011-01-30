@@ -3028,7 +3028,8 @@ static gn_error GetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	/* You can only get logos which have been altered, */
 	/* the standard logos can't be read!! */
 
-	req[15] = GNOKII_MIN(data->bitmap->number + 1, GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER);
+	if (data->bitmap->number >= GN_PHONEBOOK_CALLER_GROUPS_MAX_NUMBER)
+		return GN_ERR_INVALIDLOCATION;
 	req[15] = data->bitmap->number + 1;
 	dprintf("Getting caller(%d) logo...\n", req[15]);
 	SEND_MESSAGE_BLOCK(NK6510_MSG_PHONEBOOK, 18);
