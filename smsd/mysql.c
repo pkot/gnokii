@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   S M S D
 
   A Linux/Unix tool for the mobile phones.
@@ -246,6 +244,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
         gn_log_xdebug ("%s\n", buf);
         gn_log_xdebug ("Error: %s\n", mysql_error (&mysqlIn));
         g_string_free (buf, TRUE);
+        g_free (text);
         return SMSD_NOK;
       }
       mysql_free_result (res);

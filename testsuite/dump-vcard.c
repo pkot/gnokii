@@ -51,6 +51,8 @@ int main (int argc, char **argv)
 		}
 		if (fread (buf, 1024 * 1024, 1, f) < 0) {
 			perror ("Failed to read");
+			free (buf);
+			fclose (f);
 			return 1;
 		}
 
