@@ -229,9 +229,7 @@ GNOKII_API struct gn_cfg_header *gn_cfg_variable_set(struct gn_cfg_header *confi
 		return NULL;
 	}
 
-	hdr = cfg_variable_set(hdr, name, value, overwrite);
-
-	return hdr;
+	return cfg_variable_set(hdr, name, value, overwrite);
 }
 
 /*
