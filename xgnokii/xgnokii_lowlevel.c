@@ -434,7 +434,7 @@ static gint A_GetMemoryStatus(gpointer data)
 
 static gint A_GetMemoryLocation(gpointer data)
 {
-	gn_error error = error;
+	gn_error error = GN_ERR_UNKNOWN;
 	D_MemoryLocation *ml = (D_MemoryLocation *) data;
 	gn_data gdat;
 
@@ -570,7 +570,7 @@ static gint A_WriteMemoryLocationAll(gpointer data)
 
 static gint A_DeleteMemoryLocation(gpointer data)
 {
-	gn_error error = error;
+	gn_error error = GN_ERR_UNKNOWN;
 	D_MemoryLocation *ml = (D_MemoryLocation *) data;
 	gn_data gdat;
 
