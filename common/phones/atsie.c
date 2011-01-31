@@ -50,14 +50,11 @@ static at_send_function_type writephonebook;
 static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 {
 	gn_phonebook_entry newphone;
-	char *rptr, *wptr;
 
 	if (writephonebook == NULL)
 		return GN_ERR_UNKNOWN;
 	if (data->phonebook_entry != NULL) {
 		memcpy(&newphone, data->phonebook_entry, sizeof(gn_phonebook_entry));
-		rptr = data->phonebook_entry->name;
-		wptr = newphone.name;
 		data->phonebook_entry = &newphone;
 	}
 	return (*writephonebook)(data, state);

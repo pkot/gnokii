@@ -1164,10 +1164,9 @@ static gn_error sms_get_deleted(gn_data *data)
 
 static gn_error sms_verify_status(gn_data *data)
 {
-	int i, j, found = 0;
+	int i, j;
 
 	for (i = 0; i < data->folder_stats[data->sms_folder->folder_id]->used; i++) {		/* Cycle through all messages we know of */
-		found = 0;
 		if ((data->message_list[i][data->sms_folder->folder_id]->status == GN_SMS_FLD_NotRead) ||	/* if it is a unread one, i.e. not in folderstatus */
 				(data->message_list[i][data->sms_folder->folder_id]->status == GN_SMS_FLD_NotReadHandled)) {
 			for (j = 0; j < data->sms_folder->number; j++) {

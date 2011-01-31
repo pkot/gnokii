@@ -199,7 +199,7 @@ static gn_error at_sms_delete_static(gn_data *data, struct gn_statemachine *stat
 static gn_error at_sms_get_from_file(gn_data *data, struct gn_statemachine *state, int position, DIR *d, const char *dirpath)
 {
 	gn_error e = GN_ERR_EMPTYLOCATION;
-	int i, n, offset, size = 256;
+	int i, offset, size = 256;
 	struct dirent *dent;
 	FILE *f;
 	char *sms_text;
@@ -211,7 +211,7 @@ static gn_error at_sms_get_from_file(gn_data *data, struct gn_statemachine *stat
 		dent = readdir(d);
 		if (dent) {
 			snprintf(path, MAX_PATH_LEN, "%s/%s", dirpath, dent->d_name);
-			n = stat(path, &buf);
+			stat(path, &buf);
 			if (!S_ISREG(buf.st_mode))
 				i--;
 		} else
@@ -223,7 +223,6 @@ static gn_error at_sms_get_from_file(gn_data *data, struct gn_statemachine *stat
 		goto out;
 	}
 	sms_text = calloc(size, sizeof(char));
-	n = size - 1;
 	offset = 0;
 	while (fgets(sms_text + offset, size, f)) {
 		char *aux;
@@ -249,7 +248,7 @@ out:
 static gn_error at_sms_delete_from_file(gn_data *data, struct gn_statemachine *state, int position, DIR *d, const char *dirpath)
 {
 	gn_error e = GN_ERR_NONE;
-	int i, n;
+	int i;
 	struct dirent *dent;
 	struct stat buf;
 	char path[MAX_PATH_LEN];
@@ -259,7 +258,7 @@ static gn_error at_sms_delete_from_file(gn_data *data, struct gn_statemachine *s
 		dent = readdir(d);
 		if (dent) {
 			snprintf(path, MAX_PATH_LEN, "%s/%s", dirpath, dent->d_name);
-			n = stat(path, &buf);
+			stat(path, &buf);
 			if (!S_ISREG(buf.st_mode))
 				i--;
 		} else

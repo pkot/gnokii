@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -117,7 +115,6 @@ gn_error setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state
 {
 	gn_speed_dial entry;
 	gn_error error;
-	char *memory_type_string;
 
 	gn_data_clear(data);
 	data->speed_dial = &entry;
@@ -125,10 +122,8 @@ gn_error setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state
 	/* Handle command line args that set type, start and end locations. */
 	if (strcmp(argv[optind], "ME") == 0) {
 		entry.memory_type = GN_MT_ME;
-		memory_type_string = "ME";
 	} else if (strcmp(argv[optind], "SM") == 0) {
 		entry.memory_type = GN_MT_SM;
-		memory_type_string = "SM";
 	} else {
 		fprintf(stderr, _("Unknown memory type %s (use ME, SM, ...)!\n"), argv[optind]);
 		return GN_ERR_INVALIDMEMORYTYPE;
