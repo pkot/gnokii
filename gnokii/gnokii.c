@@ -1155,6 +1155,7 @@ int shell(gn_data *data, struct gn_statemachine *state)
 	char **argv = NULL;
 	int size = ARGV_CHUNK;
 	int empty = 1;
+	int retval = 0;
 
 	argv = calloc(size, sizeof(char *));
 	while (1) {
@@ -1167,8 +1168,15 @@ int shell(gn_data *data, struct gn_statemachine *state)
 			break;
 		do {
 			if (argc >= size) {
+				char *aux;
 				size += ARGV_CHUNK;
-				argv = realloc(argv, size * sizeof(char *));
+				aux = realloc(argv, size * sizeof(char *));
+				if (aux)
+					argv = aux;
+				else {
+					retval = -1;
+					goto err;
+				}
 			}
 			while (*input == ' ')
 				input++;
@@ -1181,8 +1189,8 @@ int shell(gn_data *data, struct gn_statemachine *state)
 			if (len > 0) {
 				argv[argc++] = strdup(input);
 				empty = 0;
-                        }
-                        input = tmp + (tmp ? 1 : 0);
+			}
+			input = tmp + (tmp ? 1 : 0);
 		} while (input);
 		argv[argc] = NULL;
 		if (!empty)
@@ -1191,8 +1199,9 @@ int shell(gn_data *data, struct gn_statemachine *state)
 			free(argv[i]);
 		free(old);
 	}
+err:
 	free(argv);
-	return 0;
+	return retval;
 #else
 	fprintf(stderr, _("gnokii needs to be compiled with readline support to enable this option.\n"));
 	return -1;

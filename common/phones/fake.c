@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -22,7 +20,8 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2002 Pavel Machek, Pawel Kot
+  Copyright (C) 2002      Pavel Machek
+  Copyright (C) 2002-2011 Pawel Kot
 
   This file provides functions for some functionality testing (eg. SMS)
 
@@ -174,7 +173,7 @@ static gn_error at_sms_get_static(gn_data *data, struct gn_statemachine *state, 
 	return at_sms_get_generic(data, state, sms_inbox[position - 1]);
 }
 
-static gn_error at_sms_get_status_static(gn_data *data, struct gn_statemachine *state)
+static int at_sms_get_status_static(gn_data *data, struct gn_statemachine *state)
 {
 	int i, count = 0;
 
@@ -227,10 +226,19 @@ static gn_error at_sms_get_from_file(gn_data *data, struct gn_statemachine *stat
 	n = size - 1;
 	offset = 0;
 	while (fgets(sms_text + offset, size, f)) {
+		char *aux;
 		offset += size - 1;
-		sms_text = realloc(sms_text, offset + size);
+		aux = realloc(sms_text, offset + size);
+		if (aux)
+			sms_text = aux;
+		else {
+			dprintf("Failed to allocate memory\n");
+			e = GN_ERR_INTERNALERROR;
+			goto err;
+		}
 	}
 	e = at_sms_get_generic(data, state, sms_text);
+err:
 	free(sms_text);
 	fclose(f);
 out:

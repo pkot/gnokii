@@ -571,11 +571,19 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 		}
 
 		if (nonempty) {
+			void *aux;
+
 			num_lines++;
 			buf = malloc((hash ? hash : line_end) - line_begin + 1);
 			snprintf(buf, (hash ? hash : line_end) - line_begin + 1, "%s", line_begin);
-			split_lines = realloc(split_lines,
+			aux = realloc(split_lines,
 					(num_lines + 1) * sizeof(char*));
+			if (aux)
+				split_lines = aux;
+			else {
+				free(buf);
+				goto err_alloc;
+			}
 			split_lines[num_lines - 1] = buf;
 		}
 
@@ -585,14 +593,15 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 		}
 	}
 
-
-	free(lines);
 	if (split_lines == NULL)
 		goto out;
 	split_lines[num_lines] = NULL;
 
 	/* Finally, load the configuration from the split lines */
 	header = cfg_memory_read((const char **)split_lines);
+
+err_alloc:
+	free(lines);
 
 	/* Free the split_lines */
 	for (i = 0; split_lines[i] != NULL; i++) {
@@ -970,8 +979,16 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 #define MAX_PATH_LEN 255
 
 #define CHECK_SIZE()	if (*retval >= size) { \
+	void *aux; \
 	size *= 2; \
-	config_file_locations = realloc(config_file_locations, size); \
+	aux = realloc(config_file_locations, size); \
+	if (aux) \
+		config_file_locations = aux; \
+	else {\
+		free(config_file_locations); \
+		config_file_locations = NULL; \
+		goto out; \
+	} \
 }
 
 /*
@@ -1045,7 +1062,7 @@ static char **get_locations(int *retval)
 #define XDG_CONFIG_DIRS "/etc/xdg"
 static char **get_locations(int *retval)
 {
-	char **config_file_locations;
+	char **config_file_locations = NULL;
 	char *xdg_config_home, *xdg_config_dirs, *home; /* env variables */
 	char **xdg_config_dir;
 	char *aux, *dirs;
@@ -1056,8 +1073,6 @@ static char **get_locations(int *retval)
 	int free_xdg_config_home = 0;
 
 	*retval = 0;
-	config_file_locations = calloc(size, sizeof(char *));
-
 	/* First, let's get all env variables we will need */
 	home = getenv("HOME");
 
@@ -1080,14 +1095,25 @@ static char **get_locations(int *retval)
 	while ((aux = strsep(&xdg_config_dirs, ":")) != NULL) {
 		xdg_config_dir[i++] = strdup(aux);
 		if (i >= xcd_size) {
+			char *aux;
 			xcd_size *= 2;
-			xdg_config_dir = realloc(xdg_config_dir, xcd_size);
+			aux = realloc(xdg_config_dir, xcd_size);
+			if (aux)
+				xdg_config_dir = aux;
+			else {
+				dprintf("Failed to allocate\n");
+				free(xdg_config_dirs);
+				free(dirs);
+				goto out;
+			}
 		}
 	}
 	free(dirs);
 
 	/* 1. $XDG_CONFIG_HOME/gnokii/config ($HOME/.config) */
 	snprintf(path, MAX_PATH_LEN, "%s/gnokii/config", xdg_config_home);
+
+	config_file_locations = calloc(size, sizeof(char *));
 	config_file_locations[(*retval)++] = strdup(path);
 
 	/* 2. $XDG_CONFIG_DIRS/gnokii/config (/etc/xdg) */
@@ -1110,6 +1136,7 @@ static char **get_locations(int *retval)
 	snprintf(path, MAX_PATH_LEN, "/etc/gnokiirc");
 	config_file_locations[(*retval)++] = strdup(path);
 
+out:
 	if (free_xdg_config_home)
 		free(xdg_config_home);
 
