@@ -706,7 +706,7 @@ static gint A_GetCallerGroup(gpointer data)
 	pthread_mutex_lock(&callerGroupMutex);
 	gdat.bitmap = &bitmap;
 	error = cg->status = gn_sm_functions(GN_OP_GetBitmap, &gdat, statemachine);
-	snprintf(cg->text, 256, "%s", bitmap.text);
+	snprintf(cg->text, sizeof(cg->text), "%s", bitmap.text);
 	pthread_cond_signal(&callerGroupCond);
 	pthread_mutex_unlock(&callerGroupMutex);
 
