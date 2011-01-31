@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
   Copyright (C) 1999-2000  Gary Reuter, Reinhold Jordan
-  Copyright (C) 1999-2006  Pawel Kot
+  Copyright (C) 1999-2011  Pawel Kot
   Copyright (C) 2000-2002  Marcin Wiacek, Chris Kemp, Manfred Jonsson
   Copyright (C) 2001       Marian Jancar, Bartek Klepacz
   Copyright (C) 2001-2002  Pavel Machek, Markus Plail
@@ -421,7 +419,7 @@ int putfile_usage(FILE *f, int exitval)
 /* Put file */
 gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
-    	gn_file fi;
+	gn_file fi;
 	gn_error error;
 	FILE *f;
 
@@ -443,15 +441,16 @@ gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	rewind(f);
 	fi.file = malloc(fi.file_length);
 	if (fread(fi.file, 1, fi.file_length, f) != fi.file_length) {
-		fprintf(stderr, _("Can't open file %s for reading!\n"), optarg);
-		return GN_ERR_FAILED;
+		fprintf(stderr, _("File %s corrupted!\n"), optarg);
+		goto out;
 	}
 
 	if ((error = gn_sm_functions(GN_OP_PutFile, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to put file to %s: %s\n"), argv[optind], gn_error_print(error));
 
+out:
 	free(fi.file);
-//fclose(f);
+	fclose(f);
 
 	return error;
 }

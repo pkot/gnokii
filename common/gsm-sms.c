@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -22,7 +20,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2001-2003 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2001-2002 Markus Plail, Pavel Machek <pavel@ucw.cz>
   Copyright (C) 2002-2003 Ladis Michl
   Copyright (C) 2003-2004 BORBELY Zoltan
@@ -1921,6 +1919,7 @@ char *encode_indication(gn_wap_push *wp, int *data_len)
 	data = malloc(*data_len);
 	
 	if (!data) {
+		free(attr);
 	    return NULL;
 	}
 	

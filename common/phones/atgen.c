@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 2001      Manfred Jonsson <manfred.jonsson@gmx.de>
   Copyright (C) 2002      Pavel Machek, Petr Cech
-  Copyright (C) 2002-2008 Pawel Kot
+  Copyright (C) 2002-2011 Pawel Kot
   Copyright (C) 2002-2003 Ladis Michl
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2003-2004 Igor Popik
@@ -2006,15 +2004,19 @@ static gn_error ReplyReadPhonebookExt(int messagetype, unsigned char *buffer, in
 				return GN_ERR_INTERNALERROR;
 			tmp[0] = 0;
 			if (first_name) {
-				if (strlen(first_name) + strlen(entry->name) + 1 > sizeof(entry->name))
+				if (strlen(first_name) + strlen(entry->name) + 1 > sizeof(entry->name)) {
+					free(tmp);
 					return GN_ERR_FAILED;
+				}
 				strncat(entry->name, first_name, strlen(first_name));
 				if (last_name)
 					strncat(entry->name, " ", strlen(" "));
 			}
 			if (last_name) {
-				if (strlen(last_name) + strlen(entry->name) + 1 > sizeof(entry->name))
+				if (strlen(last_name) + strlen(entry->name) + 1 > sizeof(entry->name)) {
+					free(tmp);
 					return GN_ERR_FAILED;
+				}
 				strncat(entry->name, last_name, strlen (last_name));
 			}
 			free(tmp);

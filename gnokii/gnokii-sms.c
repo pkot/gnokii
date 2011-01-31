@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
   Copyright (C) 1999-2000  Gary Reuter, Reinhold Jordan
-  Copyright (C) 1999-2006  Pawel Kot
+  Copyright (C) 1999-2011  Pawel Kot
   Copyright (C) 2000-2002  Marcin Wiacek, Chris Kemp, Manfred Jonsson
   Copyright (C) 2001       Marian Jancar, Bartek Klepacz
   Copyright (C) 2001-2002  Pavel Machek, Markus Plail
@@ -1275,6 +1273,7 @@ static gn_error smsslave(gn_sms *message, struct gn_statemachine *state, void *c
 		snprintf(buf, sizeof(buf), "%s/sms_%s_%d_%d", smsdir, number, getpid(), unknown++);
 	if ((output = fopen(buf, "r")) != NULL) {
 		fprintf(stderr, _("### Exists?!\n"));
+		fclose(output);
 		return GN_ERR_FAILED;
 	}
 	mkdir(smsdir, 0700);
