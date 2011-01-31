@@ -2878,7 +2878,7 @@ static gn_error NK6510_ReadPhonebookLocation(gn_data *data, struct gn_statemachi
 			       0x00, 0x01, /*location */
 			       0x00, 0x00};
 
-	dprintf("Reading phonebook location (%d)\n", location);
+	dprintf("Reading phonebook location %d from memory 0x%02x\n", location, memtype);
 
 	req[9] = memtype;
 	req[14] = location >> 8;
