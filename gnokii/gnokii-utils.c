@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -24,7 +22,7 @@
 
   Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
   Copyright (C) 1999-2000  Gary Reuter, Reinhold Jordan
-  Copyright (C) 1999-2006  Pawel Kot
+  Copyright (C) 1999-2011  Pawel Kot
   Copyright (C) 2000-2002  Marcin Wiacek, Chris Kemp, Manfred Jonsson
   Copyright (C) 2001       Marian Jancar, Bartek Klepacz
   Copyright (C) 2001-2002  Pavel Machek, Markus Plail
@@ -103,6 +101,8 @@ int writefile(char *filename, char *text, int mode)
 
 int writebuffer(const char *filename, const char *buffer, size_t nitems, int mode)
 {
+	/* Return value is used as new mode. Set it to append mode */
+	int retval = 2;
 	FILE *file;
 
 	mode = askoverwrite(filename, mode);
@@ -116,13 +116,14 @@ int writebuffer(const char *filename, const char *buffer, size_t nitems, int mod
 
 	if (!file) {
 		fprintf(stderr, _("Can't open file %s for writing!\n"),  filename);
-		return -1;
+		retval = -1;
+		goto out;
 	}
 	if (fwrite(buffer, 1, nitems, file) != nitems)
-		return -1;
+		retval = -1;
 	fclose(file);
-	/* Return value is used as new mode. Set it to append mode */
-	return 2;
+out:
+	return retval;
 }
 
 gn_error readtext(gn_sms_user_data *udata)

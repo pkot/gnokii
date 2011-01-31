@@ -171,6 +171,7 @@ static void GetPixmaps(gchar *path)
 			pixmapFiles++;
 		}
 	}
+	closedir(dir);
 	pixmapsInitialized = TRUE;
 }
 
