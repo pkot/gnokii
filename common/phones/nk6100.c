@@ -729,6 +729,8 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x01, 0x00, 0x00, 0x00};
 
 	if (!data->phonebook_entry) return GN_ERR_INTERNALERROR;
+	if ((data->phonebook_entry->location < 0) || (data->phonebook_entry->location > 255))
+		return GN_ERR_INVALIDLOCATION;
 
 	dprintf("Reading phonebook location (%d/%d)\n", data->phonebook_entry->memory_type, data->phonebook_entry->location);
 	req[4] = get_memory_type(data->phonebook_entry->memory_type);
@@ -746,6 +748,9 @@ static gn_error WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	gn_phonebook_entry *pe;
 	unsigned char *pos;
 	int namelen, numlen;
+
+	if ((data->phonebook_entry->location < 0) || (data->phonebook_entry->location > 255))
+		return GN_ERR_INVALIDLOCATION;
 
 	pe = data->phonebook_entry;
 	pos = req+4;
@@ -809,6 +814,9 @@ static gn_error GetCallerGroupData(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x00};
 
+	if ((data->bitmap->number < 0) || (data->bitmap->number > 255))
+		return GN_ERR_INVALIDLOCATION;
+
 	req[4] = data->bitmap->number;
 	if (sm_message_send(5, 0x03, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x03, data, state);
@@ -841,6 +849,9 @@ static gn_error GetSpeedDial(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x16, 0x00};
 
+	if ((data->speed_dial->number < 0) || (data->speed_dial->number > 255))
+		return GN_ERR_INVALIDLOCATION;
+
 	req[4] = data->speed_dial->number;
 
 	if (sm_message_send(5, 0x03, req, state)) return GN_ERR_NOTREADY;
@@ -850,6 +861,12 @@ static gn_error GetSpeedDial(gn_data *data, struct gn_statemachine *state)
 static gn_error SetSpeedDial(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x19, 0x00, 0x00, 0x00};
+
+	if ((data->speed_dial->location < 0) || (data->speed_dial->location > 255))
+		return GN_ERR_INVALIDLOCATION;
+
+	if ((data->speed_dial->number < 0) || (data->speed_dial->number > 255))
+		return GN_ERR_INVALIDLOCATION;
 
 	req[4] = data->speed_dial->number;
 	req[5] = get_memory_type(data->speed_dial->memory_type);
@@ -1907,7 +1924,7 @@ static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state)
 		len = strlen(bmp->text);
 		if (len > 255) {
 			dprintf("WelcomeNoteText is too long\n");
-			return GN_ERR_INTERNALERROR;
+			return GN_ERR_INVALIDSIZE;
 		}
 		*pos++ = 0x18;
 		*pos++ = 0x01;	/* one block */
@@ -1921,7 +1938,7 @@ static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state)
 		len = strlen(bmp->text);
 		if (len > 255) {
 			dprintf("DealerNoteText is too long\n");
-			return GN_ERR_INTERNALERROR;
+			return GN_ERR_INVALIDSIZE;
 		}
 		*pos++ = 0x18;
 		*pos++ = 0x01;	/* one block */
@@ -1934,7 +1951,7 @@ static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state)
 	case GN_BMP_StartupLogo:
 		if (bmp->size > GN_BMP_MAX_SIZE) {
 			dprintf("StartupLogo is too long\n");
-			return GN_ERR_INTERNALERROR;
+			return GN_ERR_INVALIDSIZE;
 		}
 		*pos++ = 0x18;
 		*pos++ = 0x01;	/* one block */
@@ -1949,7 +1966,7 @@ static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state)
 	case GN_BMP_OperatorLogo:
 		if (bmp->size > GN_BMP_MAX_SIZE) {
 			dprintf("OperatorLogo is too long\n");
-			return GN_ERR_INTERNALERROR;
+			return GN_ERR_INVALIDSIZE;
 		}
 		if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NBS_UPLOAD)
 			return NBSUpload(data, state, GN_SMS_DATA_Bitmap);
@@ -1973,11 +1990,11 @@ static gn_error SetBitmap(gn_data *data, struct gn_statemachine *state)
 		len = strlen(bmp->text);
 		if (len > 255) {
 			dprintf("Callergroup name is too long\n");
-			return GN_ERR_INTERNALERROR;
+			return GN_ERR_INVALIDSIZE;
 		}
 		if (bmp->size > GN_BMP_MAX_SIZE) {
 			dprintf("CallerLogo is too long\n");
-			return GN_ERR_INTERNALERROR;
+			return GN_ERR_INVALIDSIZE;
 		}
 		*pos++ = 0x13;
 		*pos++ = bmp->number;
@@ -2016,6 +2033,9 @@ static gn_error GetProfileFeature(int id, gn_data *data, struct gn_statemachine 
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x13, 0x01, 0x00, 0x00};
 
+	if ((data->profile->number < 0) || (data->profile->number > 255))
+		return GN_ERR_INVALIDLOCATION;
+
 	req[5] = data->profile->number;
 	req[6] = (unsigned char)id;
 
@@ -2026,6 +2046,9 @@ static gn_error GetProfileFeature(int id, gn_data *data, struct gn_statemachine 
 static gn_error SetProfileFeature(gn_data *data, struct gn_statemachine *state, int id, int value)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x01, 0x00, 0x00, 0x00, 0x01};
+
+	if ((data->profile->number < 0) || (data->profile->number > 255))
+		return GN_ERR_INVALIDLOCATION;
 
 	req[5] = data->profile->number;
 	req[6] = (unsigned char)id;
@@ -2045,6 +2068,9 @@ static gn_error GetProfile(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->profile)
 		return GN_ERR_UNKNOWN;
+	if ((data->profile->number < 0) || (data->profile->number > 255))
+		return GN_ERR_INVALIDLOCATION;
+
 	prof = data->profile;
 	req[4] = prof->number;
 
@@ -2116,6 +2142,9 @@ static gn_error SetProfile(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->profile)
 		return GN_ERR_UNKNOWN;
+	if ((data->profile->number < 0) || (data->profile->number > 255))
+		return GN_ERR_INVALIDLOCATION;
+
 	prof = data->profile;
 	dprintf("Setting profile %d (%s)\n", prof->number, prof->name);
 
@@ -2614,6 +2643,9 @@ static gn_error GetCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x66, 0x00};
 
+	if ((data->calnote->location < 0) || (data->calnote->location > 255))
+		return GN_ERR_INVALIDLOCATION;
+
 	req[4] = data->calnote->location;
 
 	if (sm_message_send(5, 0x13, req, state)) return GN_ERR_NOTREADY;
@@ -2631,6 +2663,8 @@ static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 
 	if (!data->calnote)
 		return GN_ERR_UNKNOWN;
+	if ((data->calnote->location < 0) || (data->calnote->location > 255))
+		return GN_ERR_INVALIDLOCATION;
 
 	note = data->calnote;
 	pos = req + 7;
@@ -2699,6 +2733,9 @@ static gn_error WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 static gn_error DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x68, 0x00};
+
+	if ((data->calnote->location < 0) || (data->calnote->location > 255))
+		return GN_ERR_INVALIDLOCATION;
 
 	req[4] = data->calnote->location;
 
