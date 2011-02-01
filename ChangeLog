@@ -8,6 +8,8 @@
     o avoid overruns in phonet                          (Paweł Kot)
     o print names of config files it tried to open only if none
       could be used                                 (Daniele Forsi)
+    o fix setting alarms for zero length events read from icalendar
+      files (eg. birthdays)                         (Daniele Forsi)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)

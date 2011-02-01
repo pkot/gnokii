@@ -480,8 +480,7 @@ static int gn_ical2calnote_real(icalcomponent *comp, gn_calnote *calnote, int id
 				icalproperty *property;
 
 				trigger_value = icalvalue_get_trigger(icalproperty_get_value(trigger));
-				if (icaltriggertype_is_null_trigger(trigger_value) ||
-						icaltriggertype_is_bad_trigger(trigger_value)) {
+				if (icaltriggertype_is_bad_trigger(trigger_value)) {
 					calnote->alarm.enabled = 0;
 				} else {
 					if (icaltime_is_null_time(trigger_value.time)) {
