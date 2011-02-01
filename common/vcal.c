@@ -242,8 +242,13 @@ norecurrence:
 		valarm = icalcomponent_new_valarm();
 
 		icalcomponent_add_property(valarm, icalproperty_new_trigger(trig));
-		/* FIXME: with ICAL_ACTION_DISPLAY a DESCRIPTION property is mandatory */
-		icalcomponent_add_property(valarm, icalproperty_new_action(calnote->alarm.tone ? ICAL_ACTION_AUDIO : ICAL_ACTION_DISPLAY));
+		/* With ICAL_ACTION_DISPLAY a DESCRIPTION property is mandatory */
+		if (calnote->alarm.tone) {
+			icalcomponent_add_property(valarm, icalproperty_new_action(ICAL_ACTION_AUDIO));
+		} else {
+			icalcomponent_add_property(valarm, icalproperty_new_action(ICAL_ACTION_DISPLAY));
+			icalcomponent_add_property(valarm, icalproperty_new_description(calnote->text));
+		}
 
 		icalcomponent_add_component(vevent, valarm);
 	}
