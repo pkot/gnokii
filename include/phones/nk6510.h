@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -144,7 +142,7 @@ typedef enum {
 #define NK6510_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
 #define NK6510_MEMORY_GROUPS		0x10	/* Caller groups */
 
-#define NK6510_MEMORY_DC		0x01	/* ME dialed calls list */
+#define NK6510_MEMORY_DC		0x01	/* ME dialled calls list */
 #define NK6510_MEMORY_MC		0x02	/* ME missed (unanswered received) calls list */
 #define NK6510_MEMORY_RC		0x03	/* ME received calls list */
 #define NK6510_MEMORY_FD		0x04	/* ?? SIM fixdialling-phonebook */

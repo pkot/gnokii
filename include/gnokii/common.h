@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for Nokia the phones.
@@ -78,9 +76,9 @@ typedef enum {
 	GN_MT_DC, /* Dialled numbers */
 	GN_MT_RC, /* Received numbers */
 	GN_MT_MC, /* Missed numbers */
-	GN_MT_LD, /* Last dialed */
-	GN_MT_BD, /* Barred Dialing Numbers */
-	GN_MT_SD, /* Service Dialing Numbers */
+	GN_MT_LD, /* Last dialled */
+	GN_MT_BD, /* Barred Dialling Numbers */
+	GN_MT_SD, /* Service Dialling Numbers */
 	GN_MT_MT, /* combined ME and SIM phonebook */
 	GN_MT_TA, /* for compatibility only: TA=computer memory */
 	GN_MT_CB, /* Currently selected memory */
@@ -335,9 +333,9 @@ typedef struct {
 							     phonebook is not used */
 } gn_phonebook_entry;
 
-/* This define speed dialing entries. */
+/* This define speed dialling entries. */
 typedef struct {
-	int number;                 /* Which number is used to dialing? */
+	int number;                 /* Which number is used to dialling? */
 	gn_memory_type memory_type; /* Memory type of the number. */
 	int location;               /* Location of the number in MemoryType. */
 } gn_speed_dial;

@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -103,9 +101,9 @@ subclause : command
 #define GN_PCSC_FILE_DF_GSM 0x7F20
 /* International Mobile Subscriber Identity (IMSI) */
 #define GN_PCSC_FILE_EF_IMSI 0x6F07
-/* Abbreviated Dialing Numbers */
+/* Abbreviated Dialling Numbers */
 #define GN_PCSC_FILE_EF_ADN 0x6F3A
-/* Fixed Dialing Numbers */
+/* Fixed Dialling Numbers */
 #define GN_PCSC_FILE_EF_FDN 0x6F3B
 /* Short Messages */
 #define GN_PCSC_FILE_EF_SMS 0x6F3C
@@ -113,15 +111,15 @@ subclause : command
 #define GN_PCSC_FILE_EF_MSISDN 0x6F40
 /* Short Message Service Parameters */
 #define GN_PCSC_FILE_EF_SMSP 0x6f42
-/* Last Numbers Dialed */
+/* Last Numbers Dialled */
 #define GN_PCSC_FILE_EF_LND 0x6F44
 /* Service Provider Name */
 #define GN_PCSC_FILE_EF_SPN 0x6F46
-/* Service Dialing Numbers */
+/* Service Dialling Numbers */
 #define GN_PCSC_FILE_EF_SDN 0x6F49
 /* Location Information */
 #define GN_PCSC_FILE_EF_LOCI 0x6F7E
-/* Barred Dialing Numbers */
+/* Barred Dialling Numbers */
 #define GN_PCSC_FILE_EF_BDN 0x6F4D
 /* Administrative data */
 #define GN_PCSC_FILE_EF_AD 0x6FAD

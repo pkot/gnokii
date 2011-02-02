@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -150,12 +148,12 @@ GNOKII_API const char *gn_memory_type_print(gn_memory_type mt)
 	case GN_MT_FD: return _("Fixed dial numbers");
 	case GN_MT_ON: return _("Own numbers");
 	case GN_MT_EN: return _("Emergency numbers");
-	case GN_MT_DC: return _("Dialed numbers");
+	case GN_MT_DC: return _("Dialled numbers");
 	case GN_MT_RC: return _("Received numbers");
 	case GN_MT_MC: return _("Missed numbers");
-	case GN_MT_LD: return _("Last dialed");
-	case GN_MT_BD: return _("Barred dialing numbers");
-	case GN_MT_SD: return _("Service dialing numbers");
+	case GN_MT_LD: return _("Last dialled");
+	case GN_MT_BD: return _("Barred dialling numbers");
+	case GN_MT_SD: return _("Service dialling numbers");
 	case GN_MT_MT: return _("Combined ME and SIM phonebook");
 	case GN_MT_TA: return _("Computer memory");
 	case GN_MT_CB: return _("Currently selected memory");
