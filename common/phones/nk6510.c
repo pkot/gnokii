@@ -3453,7 +3453,9 @@ static int calnote_type_map(int type)
 
 /* Calendar note new frame description:
  * [00 - 03] xx xx xx xx	FBUS specific (type, etc)
- * [04 - 07] 00 00 00 00	unknown (4 octets)
+ * [04 - 04] 00			unknown (1 octet)
+ * [05 - 05] xx			type (1 octet): 0x00 - calendar, 0x01 - todo, 0x02 - note
+ * [06 - 07] 00 00		unknown (2 octets)
  * [08 - 11] 00 00 00 00	unknown (4 octets)
  * [12 - 13] xx xx		location (2 octets)
  * [14 - 17] xx xx xx xx	alarm (4 octets):	ff ff ff ff - no alarm,
@@ -3476,7 +3478,8 @@ static int calnote_type_map(int type)
  *							a8 - every week
  *							...
  * [42 - 43] xx xx		in case of Birthday: year of birth; otherwise unknown (ff ff)
- * [44 - 45] 20 00		unknown (2 octets)
+ * [44 - 44] xx			priority (1 octet): 0x30 - high, 0x20 - medium, 0x10 - low (used in TODO)
+ * [45 - 45] xx			status (1 octet): 0x00 - not done, 0x01 - done (used in TODO)
  * [46 - 47] xx xx		occurrences (2 octets)
  * [48 - 49] 00 00		unknown (2 octets)
  * [50 - 51] xx xx		first text field length (2 octets) [L1]
@@ -3502,6 +3505,7 @@ static gn_error calnote2_decode(unsigned char *message, int length, gn_data *dat
 	}
 	/* Type */
 	data->calnote->type = calnote_type_map(message[27]);
+	dprintf("type: %d\n", message[27]);
 	/* Location */
 	data->calnote->location = message[12] * 256 + message[13];
 	/* Start time */
@@ -3586,6 +3590,51 @@ out:
 	return e;
 }
 
+/*
+ * FIXME
+ * TODO should handle also
+ *  - start time and date
+ *  - end time and data
+ *  - alarm
+ *  - task status
+ */
+static gn_error todo_decode(unsigned char *message, int length, gn_data *data)
+{
+	gn_error e = GN_ERR_NONE;
+	int len;
+
+	if (!data->todo) {
+		e = GN_ERR_INTERNALERROR;
+		goto out;
+	}
+	/* Location */
+	data->todo->location = message[12] * 256 + message[13];
+	dprintf("location: %d\n", data->todo->location);
+	/* Priority */
+	switch (message[44]) {
+	case 0x10:
+		data->todo->priority = GN_TODO_LOW;
+		break;
+	case 0x20:
+		data->todo->priority = GN_TODO_MEDIUM;
+		break;
+	case 0x30:
+		data->todo->priority = GN_TODO_HIGH;
+		break;
+	default:
+		dprintf("Unknown priority (%d), assuming medium\n", message[44]);
+		data->todo->priority = GN_TODO_MEDIUM;
+		break;
+	}
+	dprintf("priority: %d\n", data->todo->priority);
+	/* Main text */
+	len = 256 * message[50] + message[51];
+	char_unicode_decode(data->todo->text, message + 54, len * 2);
+	dprintf("text: %s\n", data->todo->text);
+out:
+	return e;
+}
+
 #define NEXT_CALNOTE data->calnote_list->location[data->calnote_list->last+i]
 
 static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
@@ -3595,12 +3644,26 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 
 	if (!data || !data->calnote) return GN_ERR_INTERNALERROR;
 
+	dprintf("Incoming Calendar\n");
 	switch (message[3]) {
 	case NK6510_SUBCAL_NOTE_RCVD: /* 0x1a */
 		e = calnote_decode(message, length, data);
 		break;
 	case NK6510_SUBCAL_NOTE2_RCVD: /* 0x7e */
-		e = calnote2_decode(message, length, data);
+		switch (message[5]) {
+		case 0x00: /* calendar */
+			e = calnote2_decode(message, length, data);
+			break;
+		case 0x01: /* todo */
+			e = todo_decode(message, length, data);
+			break;
+		case 0x02: /* note */
+			e = GN_ERR_NOTSUPPORTED;
+			break;
+		default:
+			e = GN_ERR_INTERNALERROR;
+			break;
+		}
 		break;
 	case NK6510_SUBCAL_INFO2_RCVD: /* 0x9f */
 		/* message[4]	- number of notes locations in this frame
@@ -3688,15 +3751,17 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 }
 
 #define LAST_INDEX (data->calnote_list->last > 0 ? data->calnote_list->last - 1 : 0)
-static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state)
+static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachine *state, int type)
 {
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x9e, 0xff, 0xff, 0x00, 0x00,
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x9e,
+				0xff, 0xff, 0x00, 0x00,
 				0x00, 0x00, /* start looking with this position */
 				0x00};
 	gn_error error;
 	gn_calnote_list *cl;
 	char *str;
 
+	req[10] = type;
 	if (!data->calnote_list->last)
 		data->calnote_list->location[0] = 0;
 	do {
@@ -3720,19 +3785,26 @@ static gn_error NK6510_GetCalendarNotesInfo(gn_data *data, struct gn_statemachin
 }
 #undef LAST_INDEX
 
-/* To get fresh information from the phone
+/*
+ * To get fresh information from the phone
  * set data->calnote_list->list to 0
  */
-static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
+static gn_error NK6510_GetCalToDo_S40_30(gn_data *data, struct gn_statemachine *state, int type)
 {
 	gn_error error = GN_ERR_NONE;
-	unsigned char req[] = { FBUS_FRAME_HEADER, 0x7d, 0x00, 0x00, 0x00, 0x00,
+	unsigned char req[] = { FBUS_FRAME_HEADER, 0x7d,
+				0x00, /* category: 0x00 calendar, 0x01 todo, 0x02 note */
+				0x00, 0x00, 0x00,
 				0x00, 0x00, /* Location */
 				0xff, 0xff, 0xff, 0xff };
 	unsigned char date[] = { FBUS_FRAME_HEADER, NK6510_SUBCLO_GET_DATE };
 	gn_data	tmpdata;
 	gn_timestamp tmptime;
 	gn_calnote_list *cl;
+
+	if (type != 0x00 && type != 0x01 && type != 0x02)
+		return GN_ERR_INTERNALERROR;
+	req[4] = type;
 
 	dprintf("Getting calendar note...\n");
 	if (data->calnote->location < 1) {
@@ -3742,7 +3814,7 @@ static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 		cl = map_get(&location_map, "calendar", 0);
 		if (!cl) {
 			dprintf("Getting notes info\n");
-			error = NK6510_GetCalendarNotesInfo(data, state);
+			error = NK6510_GetCalendarNotesInfo(data, state, type);
 			dprintf("Got calendar info\n");
 		} else {
 			memcpy(data->calnote_list, cl, sizeof(gn_calnote_list));
@@ -3769,6 +3841,11 @@ static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 	}
 
 	return error;
+}
+
+static gn_error NK6510_GetCalendarNote(gn_data *data, struct gn_statemachine *state)
+{
+	return NK6510_GetCalToDo_S40_30(data, state, 0x00);
 }
 
 long NK6510_GetNoteAlarmDiff(gn_timestamp *time, gn_timestamp *alarm)
@@ -3821,14 +3898,14 @@ static gn_error NK6510_FirstCalendarFreePos_S40_30(gn_data *data, struct gn_stat
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 5);
 }
 
-static gn_error NK6510_WriteCalendarNote_S40_30(gn_data *data, struct gn_statemachine *state)
+static gn_error NK6510_WriteCalTodo_S40_30(gn_data *data, struct gn_statemachine *state, int type)
 {
 	gn_error error = GN_ERR_NONE;
 	gn_calnote *calnote;
 	int len, count = 54;
 	unsigned char req[1024] = { FBUS_FRAME_HEADER,
 				    0x65,
-				    0x00, /* category: 0x00 calendar, 0x01 todo */
+				    0x00, /* category: 0x00 calendar, 0x01 todo, 0x02 note */
 				    0x00, 0x00, 0x00,
 				    0x00, 0x00, /* location */
 				    0x00, 0x00, 0x00, 0x00,
@@ -3854,9 +3931,14 @@ static gn_error NK6510_WriteCalendarNote_S40_30(gn_data *data, struct gn_statema
 				    0x00, /* phone length/meeting location */
 				    0x00, 0x00, 0x00};
 
-	dprintf("WriteCalendarNote_S40_30\n");
+	dprintf("WriteCalTodo_S40_30\n");
 	if (!data->calnote)
 		return GN_ERR_INTERNALERROR;
+
+	if (type != 0x00 && type != 0x01 && type != 0x02)
+		return GN_ERR_INTERNALERROR;
+
+	req[4] = type;
 
 	calnote = data->calnote;
 
@@ -3959,6 +4041,12 @@ static gn_error NK6510_WriteCalendarNote_S40_30(gn_data *data, struct gn_statema
 	map_del(&location_map, "calendar");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, count);
 }
+
+static gn_error NK6510_WriteCalendarNote_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+	return NK6510_WriteCalTodo_S40_30(data, state, 0x00);
+}
+
 
 static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
@@ -4171,14 +4259,20 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, count);
 }
 
-static gn_error NK6510_DeleteCalendarNote_S40_30(gn_data *data, struct gn_statemachine *state)
+static gn_error NK6510_DeleteCalTodo_S40_30(gn_data *data, struct gn_statemachine *state, int type)
 {
 	unsigned char req[] = { FBUS_FRAME_HEADER,
 				0x6f,      /* delete calendar note */
-				0x00, 0x00, 0x00, 0x00,
+				0x00,      /* 0x00 - calendar, 0x01 - todo, 0x02 - note */
+				0x00, 0x00, 0x00,
 				0x00, 0x00}; /*location */
 	gn_calnote_list list;
 	bool own_list = true;
+
+	if (type != 0x00 && type != 0x01 && type != 0x02)
+		return GN_ERR_INTERNALERROR;
+
+	req[4] = type;
 
 	if (data->calnote_list)
 		own_list = false;
@@ -4188,7 +4282,7 @@ static gn_error NK6510_DeleteCalendarNote_S40_30(gn_data *data, struct gn_statem
 	}
 
 	if (data->calnote_list->number == 0)
-		NK6510_GetCalendarNotesInfo(data, state);
+		NK6510_GetCalendarNotesInfo(data, state, type);
 
 	if (data->calnote->location < data->calnote_list->number + 1 &&
 	    data->calnote->location > 0) {
@@ -4202,6 +4296,11 @@ static gn_error NK6510_DeleteCalendarNote_S40_30(gn_data *data, struct gn_statem
 		data->calnote_list = NULL;
 	map_del(&location_map, "calendar");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 10);
+}
+
+static gn_error NK6510_DeleteCalendarNote_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+	return NK6510_DeleteCalTodo_S40_30(data, state, 0x00);
 }
 
 static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
@@ -4224,7 +4323,7 @@ static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 	}
 
 	if (data->calnote_list->number == 0)
-		NK6510_GetCalendarNotesInfo(data, state);
+		NK6510_GetCalendarNotesInfo(data, state, 0x00);
 
 	if (data->calnote->location < data->calnote_list->number + 1 &&
 	    data->calnote->location > 0) {
@@ -6269,6 +6368,15 @@ static gn_error NK6510_GetToDoLocations(gn_data *data, struct gn_statemachine *s
 	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10);
 }
 
+static gn_error NK6510_GetToDoLocations_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+	unsigned char req[] = {	FBUS_FRAME_HEADER, 0x79,
+				0x01, 0x00, 0x00,
+				0x00, 0x00, 0x00};
+
+	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10);
+}
+
 static gn_error NK6510_DeleteAllToDoLocations(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {	FBUS_FRAME_HEADER, 0x11 };
@@ -6283,14 +6391,25 @@ static gn_error GetNextFreeToDoLocation(gn_data *data, struct gn_statemachine *s
 	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 4);
 }
 
+static gn_error NK6510_GetToDo_S40_30(gn_data *data, struct gn_statemachine *state)
+{
+	gn_calnote_list cl;
+	gn_calnote cn;
+
+	memset(&cn, 0, sizeof(cn));
+	memset(&cl, 0, sizeof(cl));
+	cn.location = data->todo->location;
+	data->calnote = &cn;
+	data->calnote_list = &cl;
+	return NK6510_GetCalToDo_S40_30(data, state, 0x01);
+}
+
 static gn_error NK6510_GetToDo(gn_data *data, struct gn_statemachine *state)
 {
-#if 0
-	unsigned char req[] = {FBUS_FRAME_HEADER, 0x03,
-			       0x00, 0x00, 0x80, 0x00,
-			       0x00, 0x01};		/* Location */
-#endif
 	gn_error error;
+
+	if (DRVINSTANCE(state)->pm->flags & PM_EXTCALENDAR)
+		return NK6510_GetToDo_S40_30(data, state);
 
 	if (data->todo->location < 1) {
 		error = GN_ERR_INVALIDLOCATION;

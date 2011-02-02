@@ -11,6 +11,7 @@
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
+    o handle TODOs and Notes in series40 3rd+ Ed        (Paweł Kot)
  * gnokii updates
     o create path to gnokii-errors even on Windows      (Paweł Kot)
     o allow to specify custom path for gnokii-errors    (Paweł Kot)
