@@ -426,6 +426,7 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 	case GN_OP_DeleteSMS:
 		return at_sms_delete(data, state);
 	case GN_OP_GetSMSCenter:
+		snprintf(data->message_center->smsc.number, sizeof(data->message_center->smsc.number), "%s", "12345");
 		return GN_ERR_NONE;
 	case GN_OP_GetModel:
 		return at_get_model(data, state);
