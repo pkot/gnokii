@@ -135,7 +135,6 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 
 	vevent = icalcomponent_vanew(ICAL_VEVENT_COMPONENT,
 				     icalproperty_new_uid(compuid),
-				     icalproperty_new_dtstart(stime),
 				     icalproperty_new_categories("GNOKII"),
 				     0);
 	if (!vevent) {
@@ -188,6 +187,7 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 		icalcomponent_add_property(vevent, icalproperty_new_summary(calnote->text));
 		break;
 	}
+	icalcomponent_add_property(vevent, icalproperty_new_dtstart(stime));
 
 	if (calnote->recurrence) {
 		char rrule[64];
