@@ -206,6 +206,6 @@ gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state)
 	fprintf(stdout, _("LAC          : %04x (%d)\n"), lac, lac);
 	fprintf(stdout, _("Cell id      : %08x (%d)\n"), cid, cid);
 
-	return 0;
+	return GN_ERR_NONE;
 }
 
