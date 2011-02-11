@@ -113,7 +113,7 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 
 #ifdef HAVE_LIBICAL
 	icalcomponent *pIcal = NULL, *vevent;
-	struct icaltimetype stime = {0}, etime = {0};
+	struct icaltimetype stime, etime;
 	char compuid[64];
 
 	memset(&str, 0, sizeof (str));
@@ -121,7 +121,7 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 	/* In at least some Nokia phones it is possible to skip the year of
 	   birth, in this case year == 0xffff, so we set it to the arbitrary
 	   value of 1800 */
-
+	stime = icaltime_null_time();
 	stime.year = (calnote->time.year == 0xffff ? 1800 : calnote->time.year);
 	stime.month = calnote->time.month;
 	stime.day = calnote->time.day;
@@ -134,8 +134,8 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 	snprintf(compuid, sizeof(compuid), "guid.gnokii.org_%d_%d", calnote->location, rand());
 
 	vevent = icalcomponent_vanew(ICAL_VEVENT_COMPONENT,
-				     icalproperty_new_dtstart(stime),
 				     icalproperty_new_uid(compuid),
+				     icalproperty_new_dtstart(stime),
 				     icalproperty_new_categories("GNOKII"),
 				     0);
 	if (!vevent) {
@@ -144,6 +144,7 @@ GNOKII_API char *gn_calnote2icalstr(gn_calnote *calnote)
 	}
 
 	if (calnote->end_time.year) {
+		etime = icaltime_null_time();
 		etime.year = (calnote->end_time.year == 0xffff ? 1800 : calnote->end_time.year);
 		etime.month = calnote->end_time.month;
 		etime.day = calnote->end_time.day;
