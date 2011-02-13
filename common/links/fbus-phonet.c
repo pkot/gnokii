@@ -337,6 +337,7 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	state->link.loop = &phonet_loop;
 	state->link.send_message = &phonet_send_message;
 	state->link.reset = &phonet_reset;
+	state->link.cleanup = &phonet_cleanup;
 
 	if ((FBUSINST(state) = calloc(1, sizeof(phonet_incoming_message))) == NULL)
 		return GN_ERR_MEMORYFULL;
