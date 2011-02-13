@@ -75,6 +75,7 @@ smsd:			glib-2.0, gmodule-2.0
 smsd plugins:
 	mysql:		libmysqlclient
 	postgresql:	libpq
+	sqlite:		libsqlite3
 
 Please note that all libraries are autodetected by configure script.
 
@@ -247,15 +248,14 @@ Get the most packages possible for gnokii compile:
 
     $ sudo apt-get build-dep gnokii
 
-As of now build requirements are incomplete, hopefully will be fixed
-for the next version. For now you need to get some stuff manually:
+One additional dependency is missing to support sqlite backend for smsd:
 
-    $ sudo apt-get install flex libreadline6-dev
+    $ sudo apt-get install libsqlite3-dev
 
 If you want to play on git version you need to have git and additional
 tools:
 
-    $ sudo apt-get install git-core libtool automake autoconf intltool
+    $ sudo apt-get install git libtool
 
 Now you should be able to proceed with instructions described in previous
 sections.
