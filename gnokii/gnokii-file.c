@@ -420,7 +420,7 @@ int putfile_usage(FILE *f, int exitval)
 gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	gn_file fi;
-	gn_error error;
+	gn_error error = GN_ERR_FAILED;
 	FILE *f;
 
 	if (argc != optind + 1)
@@ -435,7 +435,7 @@ gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	f = fopen(optarg, "rb");
 	if (!f || fseek(f, 0, SEEK_END)) {
 		fprintf(stderr, _("Can't open file %s for reading!\n"), optarg);
-		return GN_ERR_FAILED;
+ 		goto err;
 	}
 	fi.file_length = ftell(f);
 	rewind(f);
@@ -452,5 +452,6 @@ out:
 	free(fi.file);
 	fclose(f);
 
+err:
 	return error;
 }

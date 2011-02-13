@@ -93,7 +93,7 @@ static gn_error load_from_file(const char *configfile, const char *configname)
 
 static gn_error load_from_memory(char **lines)
 {
-	return gn_cfg_memory_read(lines);
+	return gn_cfg_memory_read((const char **)lines);
 }
 
 static gn_error phoneprofile_load(const char *configname, gn_error error, struct gn_statemachine **state)

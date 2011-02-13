@@ -1168,7 +1168,7 @@ int shell(gn_data *data, struct gn_statemachine *state)
 			break;
 		do {
 			if (argc >= size) {
-				char *aux;
+				void *aux;
 				size += ARGV_CHUNK;
 				aux = realloc(argv, size * sizeof(char *));
 				if (aux)

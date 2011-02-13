@@ -1093,7 +1093,7 @@ static char **get_locations(int *retval)
 	while ((aux = strsep(&xdg_config_dirs, ":")) != NULL) {
 		xdg_config_dir[i++] = strdup(aux);
 		if (i >= xcd_size) {
-			char *aux;
+			void *aux;
 			xcd_size *= 2;
 			aux = realloc(xdg_config_dir, xcd_size);
 			if (aux)

@@ -312,7 +312,7 @@ gn_error gn_mms_dec_miscstring(const unsigned char *source, size_t source_len, u
 			/* A null terminated string */
 			*decoded_len = strlen(&source[i]);
 		}
-		*dest_length = asprintf((char **) dest_buffer, "%*s", *decoded_len, &source[i]);
+		*dest_length = asprintf((char **) dest_buffer, "%*s", (int)*decoded_len, &source[i]);
 	}
 	(*decoded_len) += i;
 
