@@ -66,6 +66,7 @@ typedef struct {
   gchar *db;
   gchar *host;
   gchar *schema;
+  gchar *clientEncoding;
 } DBConfig;
 
 extern SmsdConfig smsdConfig;

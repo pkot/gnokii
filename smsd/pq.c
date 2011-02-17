@@ -71,6 +71,14 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
     return (1);
   }
 
+  if (connect.clientEncoding[0] != '\0')
+    if (PQsetClientEncoding (connIn, connect.clientEncoding))
+    {
+      g_print (_("Setting client charset '%s' for database '%s' on host '%s' failed.\n"),
+               connect.clientEncoding, connect.db, connect.host);
+      g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+    }
+    
   if (schema == NULL)
     schema = g_strdup (connect.schema);
 
@@ -95,6 +103,14 @@ GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
     g_print (_("Error: %s\n"), PQerrorMessage (connOut));
     return (1);
   }
+
+  if (connect.clientEncoding[0] != '\0')
+    if (PQsetClientEncoding (connOut, connect.clientEncoding))
+    {
+      g_print (_("Setting client charset '%s' for database '%s' on host '%s' failed.\n"),
+               connect.clientEncoding, connect.db, connect.host);
+      g_print (_("Error: %s\n"), PQerrorMessage (connOut));
+    }
 
   if (schema == NULL)
     schema = g_strdup (connect.schema);

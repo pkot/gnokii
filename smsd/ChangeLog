@@ -1,3 +1,9 @@
+* Tue 15 Feb 2011 Jan Derfinak
+- Version changed to 1.4.6
+- New option -e, --encoding enables to specify client encoding for
+  database connection. Based on idea from Daniel Müller.
+
+
 * Thu 25 Sep 2010 Daniele Forsi
 - Add even more information to man page
 

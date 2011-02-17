@@ -121,6 +121,9 @@ Options:
 -s, --schema db_schema
 	Specify database schema.
 
+-e, --encoding client_encoding
+	Specify client encoding for database connection.
+
 -m, --module db_module
 	Specify which module to use for connection to DB server.
 	Currently supported are pq for PostgreSQL, mysql for MySQL, sqlite for 
