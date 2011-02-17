@@ -1602,6 +1602,10 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 	if (!data->sms)
 		return GN_ERR_INTERNALERROR;
 
+	if (data->sms->remote.number[0] == 0) {
+		dprintf("Recipient number cannot be NULL.\n");
+		return GN_ERR_WRONGDATAFORMAT;
+	}
 
 	dprintf("=====> ENTER gn_sms_send()\n");
 	/*
