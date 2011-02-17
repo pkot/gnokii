@@ -40,6 +40,8 @@ gn_error unimplemented(void)
 
 GNOKII_API gn_memory_type gn_str2memory_type(const char *s)
 {
+	if (!s)
+		return GN_MT_XX;
 #define X(a) if (!strcmp(s, #a)) return GN_MT_##a;
 	X(ME);
 	X(SM);
