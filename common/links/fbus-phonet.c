@@ -227,7 +227,11 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
 	gn_error	error = GN_ERR_INTERNALERROR;
-	unsigned char	buffer[BUFFER_SIZE + 16];
+	/*
+	  IMPORTANT: size of this buffer must be a multiple of 64 for USB compatibility
+	  See http://libusb.sourceforge.net/api-1.0/packetoverflow.html
+	*/
+	unsigned char	buffer[BUFFER_SIZE];
 	int		count, res;
 
 	res = device_select(timeout, state);
