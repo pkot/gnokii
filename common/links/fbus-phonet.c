@@ -228,8 +228,67 @@ static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *sta
 {
 	gn_error	error = GN_ERR_INTERNALERROR;
 	/*
-	  IMPORTANT: size of this buffer must be a multiple of 64 for USB compatibility
-	  See http://libusb.sourceforge.net/api-1.0/packetoverflow.html
+	 * IMPORTANT: size of this buffer must be a multiple of packet size for USB compatibility.
+	 * See http://libusb.sourceforge.net/api-1.0/packetoverflow.html
+	 * Packet size can be found in the lsusb output for the proper endpoint. In case of the
+	 * overruns validate this information.
+	    Interface Descriptor:
+	      bLength                 9
+	      bDescriptorType         4
+	      bInterfaceNumber       11
+	      bAlternateSetting       0
+	      bNumEndpoints           0
+	      bInterfaceClass         2 Communications
+	      bInterfaceSubClass    254 
+	      bInterfaceProtocol      0 
+	      iInterface              0 
+	      CDC Header:
+	        bcdCDC               1.10
+	      UNRECOGNIZED CDC:  05 24 ab 05 5c
+	      CDC Union:
+	        bMasterInterface        11
+	        bSlaveInterface         12 
+	    Interface Descriptor:
+	      bLength                 9
+	      bDescriptorType         4
+	      bInterfaceNumber       12
+	      bAlternateSetting       0
+	      bNumEndpoints           0
+	      bInterfaceClass        10 CDC Data
+	      bInterfaceSubClass      0 Unused
+	      bInterfaceProtocol      0 
+	      iInterface              0 
+	    Interface Descriptor:
+	      bLength                 9
+	      bDescriptorType         4
+	      bInterfaceNumber       12
+	      bAlternateSetting       1
+	      bNumEndpoints           2
+	      bInterfaceClass        10 CDC Data
+	      bInterfaceSubClass      0 Unused
+	      bInterfaceProtocol      0 
+	      iInterface              0 
+	      ** UNRECOGNIZED:  04 24 fd 01
+	      Endpoint Descriptor:
+	        bLength                 7
+	        bDescriptorType         5
+	        bEndpointAddress     0x88  EP 8 IN
+	        bmAttributes            2
+	          Transfer Type            Bulk
+	          Synch Type               None
+	          Usage Type               Data
+	        wMaxPacketSize     0x0040  1x 64 bytes		<==
+	        bInterval               0
+	      Endpoint Descriptor:
+	        bLength                 7
+	        bDescriptorType         5
+	        bEndpointAddress     0x08  EP 8 OUT
+	        bmAttributes            2
+	          Transfer Type            Bulk
+	          Synch Type               None
+	          Usage Type               Data
+	        wMaxPacketSize     0x0040  1x 64 bytes		<==
+	        bInterval               0
 	*/
 	unsigned char	buffer[BUFFER_SIZE];
 	int		count, res;
