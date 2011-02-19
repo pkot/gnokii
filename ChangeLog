@@ -17,6 +17,8 @@
  * gnokii updates
     o create path to gnokii-errors even on Windows      (Paweł Kot)
     o allow to specify custom path for gnokii-errors    (Paweł Kot)
+ * fake driver updates
+    o add multipart message to SMS inbox                (Paweł Kot)
 
 0.6.30
 ======
