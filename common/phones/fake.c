@@ -167,7 +167,9 @@ static gn_error at_sms_get_generic(gn_data *data, struct gn_statemachine *state,
 
 static gn_error at_sms_get_static(gn_data *data, struct gn_statemachine *state, int position)
 {
-	if (position > sizeof(sms_inbox)/sizeof(char *) || sms_inbox[position - 1] == NULL)
+	if (position < 1 || position > sizeof(sms_inbox)/sizeof(char *))
+		return GN_ERR_INVALIDLOCATION;
+	if (!sms_inbox[position - 1])
 		return GN_ERR_EMPTYLOCATION;
 
 	return at_sms_get_generic(data, state, sms_inbox[position - 1]);
@@ -186,7 +188,9 @@ static int at_sms_get_status_static(gn_data *data, struct gn_statemachine *state
 
 static gn_error at_sms_delete_static(gn_data *data, struct gn_statemachine *state, int position)
 {
-	if (position > sizeof(sms_inbox)/sizeof(char *) || !sms_inbox[position - 1])
+	if (position < 1 || position > sizeof(sms_inbox)/sizeof(char *))
+		return GN_ERR_INVALIDLOCATION;
+	if (!sms_inbox[position - 1])
 		return GN_ERR_EMPTYLOCATION;
 
 	sms_inbox[position - 1] = NULL;
@@ -205,6 +209,10 @@ static gn_error at_sms_get_from_file(gn_data *data, struct gn_statemachine *stat
 	char *sms_text;
 	struct stat buf;
 	char path[MAX_PATH_LEN];
+
+	/* Put an arbitrary limit to quit early from gnokii --getsms 1 end */
+	if (position < 1 || position > 100)
+		return GN_ERR_INVALIDLOCATION;
 
 	/* iterate to Nth position */
 	for (i = 0; i < position; i++) {
@@ -252,6 +260,10 @@ static gn_error at_sms_delete_from_file(gn_data *data, struct gn_statemachine *s
 	struct dirent *dent;
 	struct stat buf;
 	char path[MAX_PATH_LEN];
+
+	/* Put an arbitrary limit to quit early from gnokii --deletesms 1 end */
+	if (position < 1 || position > 100)
+		return GN_ERR_INVALIDLOCATION;
 
 	/* iterate to Nth position */
 	for (i = 0; i < position; i++) {
@@ -316,11 +328,6 @@ static gn_error at_sms_get(gn_data *data, struct gn_statemachine *state)
 		goto out;
 	}
 	position = data->raw_sms->number;
-	if (position < 1) {
-		e = GN_ERR_INVALIDLOCATION;
-		goto out;
-	}
-
 	path = gn_lib_cfg_get("fake_driver", "sms_inbox");
 	if (!path || (d = opendir(path)) == NULL)
 		e = at_sms_get_static(data, state, position);
@@ -382,11 +389,6 @@ static gn_error at_sms_delete(gn_data *data, struct gn_statemachine *state)
 		goto out;
 	}
 	position = data->raw_sms->number;
-	if (position < 1) {
-		e = GN_ERR_INVALIDLOCATION;
-		goto out;
-	}
-
 	path = gn_lib_cfg_get("fake_driver", "sms_inbox");
 	if (!path || (d = opendir(path)) == NULL)
 		e = at_sms_delete_static(data, state, position);
