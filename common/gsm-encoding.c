@@ -446,6 +446,12 @@ GNOKII_API int gn_char_def_alphabet(unsigned char *string)
 		return true;
 	ucs2len = ucs2_encode(ucs2str, 2 * inlen, string, inlen);
 
+	/* It means we couldn't encode the input string */
+	if (ucs2len < 0) {
+		dprintf("gn_char_def_alphabet: failed to encode input string\n");
+		return false;
+	}
+
 	for (i = 0; i < ucs2len / 2; i++) {
 		unsigned int a = 0xff & ucs2str[2 * i], b = 0xff & ucs2str[2 * i + 1];
 		/*
@@ -582,6 +588,12 @@ int char_7bit_pack(unsigned int offset, unsigned char *input,
 	if (!ucs2str)
 		return 0;
 	ucs2len = ucs2_encode(ucs2str, 2 * len, input, len);
+
+	/* Encoding failed */
+	if (ucs2len < 0) {
+		dprintf("gn_char_def_alphabet: failed to encode input string\n");
+		return 0;
+	}
 
 	bits = (7 + offset) % 8;
 
@@ -1256,6 +1268,7 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 	ICONV_CONST char *pin;
 	char *pout;
 	iconv_t cd;
+	int retval = -1;
 
 	outleft = outlen;
 	inleft = inlen;
@@ -1269,12 +1282,12 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
 	if (nconv == (size_t)-1)
 		perror("ucs2_encode/iconv");
+	else
+		retval = (char *)pout - outstring;
 	iconv_close(cd);
-	return (nconv < 0) ?  -1 : (char *)pout - outstring;
+	return retval;
 #else
-	size_t nconv = char_unicode_encode(outstring, instring, inlen);
-
-	return (nconv < 0) ?  -1 : nconv;
+	return char_unicode_encode(outstring, instring, inlen);
 #endif
 }
 
