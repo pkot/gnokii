@@ -1133,6 +1133,7 @@ char *char_bcd_number_get(u8 *number)
  */
 int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inlen)
 {
+	int retval = 1;
 	size_t nconv;
 
 #if defined(HAVE_ICONV)
@@ -1149,6 +1150,8 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
 	nconv = iconv(cd, &pin, &inlen, &pout, &outlen);
 	if (nconv == (size_t)-1)
 		perror("utf8_decode/iconv");
+	else
+		retval = 
 	iconv_close(cd);
 	*pout = 0;
 #else
@@ -1183,11 +1186,12 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
 		inlen -= nconv;
 		outlen--;
 		pin += nconv;
-		if (*pout++ == '\0') break;
+		if (*pout++ == '\0')
+			break;
 	}
-	nconv = 0;
+	retval = (char *)pout - outstring;
 #endif
-	return (nconv < 0) ?  -1 : (char *)pout - outstring;
+	return retval;
 }
 
 /**
@@ -1204,6 +1208,7 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
  */
 int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 {
+	int retval = -1;
 #if defined(HAVE_ICONV)
 	size_t outleft, inleft, nconv;
 	ICONV_CONST char *pin;
@@ -1222,6 +1227,8 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 	nconv = iconv(cd, &pin, &inleft, &pout, &outleft);
 	if (nconv == (size_t)-1)
 		perror("utf8_encode/iconv");
+	else
+		retval = (char *)pout - outstring;
 	*pout = 0;
 	iconv_close(cd);
 #else
@@ -1243,8 +1250,9 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 		pin++;
 		if (*pout++ == '\0') break;
 	}
+	retval = (char *)pout - outstring;
 #endif
-	return (nconv < 0) ?  -1 : (char *)pout - outstring;
+	return retval;
 }
 
 /* UCS-2 functions */
