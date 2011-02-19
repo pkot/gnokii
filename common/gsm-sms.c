@@ -1444,6 +1444,10 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 				dprintf("UCS-2\n");
 				rawsms->dcs |= 0x08;
 				length = ucs2_encode(rawsms->user_data + offset, GN_SMS_LONG_MAX_LENGTH, sms->user_data[i].u.text, length);
+				if (length < 0) {
+					dprintf("Failed to encode UCS2 message\n");
+					return GN_ERR_WRONGDATAFORMAT;
+				}
 				rawsms->user_data_length = rawsms->length = length + udh_length;
 				break;
 			default:
@@ -1749,6 +1753,8 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 		data->sms->udh.udh[isConcat].u.concatenated_short_message.maximum_number = count;
 		data->sms->udh.udh[isConcat].u.concatenated_short_message.current_number = i+1;
 		switch (data->sms->dcs.u.general.alphabet) {
+		/* Needed for ucs2_encode */
+		char buf[1000];
 		case GN_SMS_DCS_DefaultAlphabet:
 			start += copied;
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
@@ -1768,6 +1774,9 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state)
 			}
 			/* avoid off-by-one problem */
 			if (size > max_sms_len * 8 / 7)
+				copied--;
+			/* Make sure that we don't split input char in half */
+			while (ucs2_encode(buf, 1000, ud[0].u.text+start, copied) < 0)
 				copied--;
 			dprintf("\tnumber of processed characters: %d\n\tsize of the input: %d\n", copied, size);
 			data->sms->user_data[0].length = copied;

@@ -10,6 +10,8 @@
       could be used                                 (Daniele Forsi)
     o fix setting alarms for zero length events read from icalendar
       files (eg. birthdays)                         (Daniele Forsi)
+    o fix sms encoding: don't break multibyte characters when
+      creating multipart messages                       (Paweł Kot)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
