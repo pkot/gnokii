@@ -1,2 +1,2 @@
-# Send SMS with all chars of GSM Alphabet in the order they appear in the standard and add chars to fill 1 SMS (the following line is UTF-8)
+# Send a 2-parts multipart SMS with all chars of GSM Alphabet in the order they appear in the standard and fill up to 161 septets (the following line is UTF-8)
 echo -e "@£\x24¥èéùìòÇ\nØø\rÅåΔ_ΦΓΛΩΠΨΣΘΞ\xc2\xa0ÆæßÉ \x21\x22#¤%&'()*+,-./0123456789:;<=>?¡ABCDEFGHIJKLMNOPQRSTUVWXYZÄÖÑÜ§¿abcdefghijklmnopqrstuvwxyzäöñüà\x0c^{}\\[~]|€......fillerr" | $GNOKII --sendsms 123456789
