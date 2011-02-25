@@ -55,6 +55,8 @@
 extern const char *locale_charset(void); /* from ../intl/localcharset.c */
 #endif
 
+#include <glib.h>
+
 /**
  * base64_alphabet:
  *
@@ -505,6 +507,77 @@ unsigned int char_def_alphabet_decode(unsigned char value)
 	} else {
 		return 0x003f; /* '?' */
 	}
+}
+
+/**
+ * char_def_alphabet_string_stats:
+ * @str: string to get statistics encoded in utf8
+ * @enc_chars: calculated number of the characters from the input string
+ * @ext_chars: calculated number of the characters to be encoded in gsm extended default alphabet
+ *
+ * Returns: GN_SMS_DCS_DefaultAlphabet, if @str can be encoded in GSM default alphabet, GN_SMS_DCS_UCS2 otherwise.
+ *
+ * Calculates statistics and encoding of the input string.
+ */
+gn_sms_dcs_alphabet_type char_def_alphabet_string_stats(char *str, int *enc_chars, int *ext_chars)
+{
+	gn_sms_dcs_alphabet_type enc = GN_SMS_DCS_DefaultAlphabet;
+	char *iter = str;
+	gunichar chr;
+
+	*enc_chars = 0;
+	*ext_chars = 0;
+	if (!g_utf8_validate(iter, -1, NULL)) {
+		dprintf("Not valid UTF8 string\n");
+		return enc;
+	}
+	while ((iter = g_utf8_next_char(iter))) {
+		chr = g_utf8_get_char(iter);
+		if (!chr)
+			break;
+		if (char_def_alphabet_ext(chr))
+			(*ext_chars)++;
+		else if (!char_def_alphabet(chr))
+			enc = GN_SMS_DCS_UCS2;
+		(*enc_chars)++;
+	}
+	return enc;
+}
+
+/**
+ * char_def_alphabet_copy:
+ * @dest: room for the destination string
+ * @src: source utf-8 string to copy
+ * @len: number of utf-8 characters to copy
+ * @offset: number of utf-8 characters from input to skip
+ *
+ * Returns: number of characters copied
+ *
+ * Function copies @len characters from @src utf-8 string, starting at @offset character to @dest.
+ * 
+ */
+int char_def_alphabet_string_copy(char *dest, const char *src, int len, int offset)
+{
+	int i, to_copy = 0;
+	gunichar chr;
+	char *src_offset = g_utf8_offset_to_pointer(src, offset);
+	char *iter = src_offset;
+
+	if (!g_utf8_validate(iter, -1, NULL)) {
+		dprintf("Not valid UTF8 string\n");
+		return to_copy;
+	}
+	for (i = 0; i < len; i++) {
+		iter = g_utf8_next_char(iter);
+		chr = g_utf8_get_char(iter);
+		if (!chr)
+			break;
+		if (char_def_alphabet_ext(chr))
+			i++;
+		to_copy++;
+	}
+	g_utf8_strncpy(dest, src_offset, to_copy);
+	return to_copy;
 }
 
 #define GN_BYTE_MASK ((1 << bits) - 1)

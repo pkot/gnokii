@@ -111,6 +111,9 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen);
 int char_def_alphabet_ext_count(unsigned char *input, int length);
 bool char_def_alphabet_ext(unsigned int value);
 
+int char_def_alphabet_string_copy(char *dest, const char *src, int len, int offset);
+gn_sms_dcs_alphabet_type char_def_alphabet_string_stats(char *str, int *enc_chars, int *ext_chars);
+
 /* Ringtones */
 int vcal_time_get(gn_timestamp *dt, char *time);
 int calnote_fill(gn_calnote *note, char *type, char *text, char *desc,
