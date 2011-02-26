@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   S M S D
 
   A Linux/Unix tool for the mobile phones.
@@ -23,7 +21,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janik ml., Hugh Blemings
-  Copyright (C) 1999-2005 Jan Derfinak
+  Copyright (C) 1999-2011 Jan Derfinak
 
   Utils functions for SMSD plugins.
   

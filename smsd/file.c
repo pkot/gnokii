@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   S M S D
 
   A Linux/Unix tool for the mobile phones.
@@ -22,7 +20,7 @@
   along with gnokii; if not, write to the Free Software
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
-  Copyright (C) 2002-2005 Jan Derfinak
+  Copyright (C) 2002-2011 Jan Derfinak
   
   This file is a module to smsd for file access.
 
