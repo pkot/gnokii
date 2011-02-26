@@ -47,26 +47,26 @@ GNOKII_API void DB_Bye (void)
 }
 
 
-GNOKII_API gint DB_ConnectInbox (DBConfig connect)
+static gint Connect (const DBConfig connect, MYSQL *mysql)
 {
 #if MYSQL_VERSION_ID >= 50013
   my_bool reconnect = 1;
 #endif
 
-  mysql_init (&mysqlIn);
+  mysql_init (mysql);
   
   if (connect.clientEncoding[0] != '\0')
-    mysql_options (&mysqlIn, MYSQL_SET_CHARSET_NAME, connect.clientEncoding);
+    mysql_options (mysql, MYSQL_SET_CHARSET_NAME, connect.clientEncoding);
 #if MYSQL_VERSION_ID >= 50500
   else
-    mysql_options (&mysqlIn, MYSQL_SET_CHARSET_NAME, MYSQL_AUTODETECT_CHARSET_NAME);
+    mysql_options (mysql, MYSQL_SET_CHARSET_NAME, MYSQL_AUTODETECT_CHARSET_NAME);
 #endif
 
 #if MYSQL_VERSION_ID >= 50013
-  mysql_options (&mysqlIn, MYSQL_OPT_RECONNECT, &reconnect);
+  mysql_options (mysql, MYSQL_OPT_RECONNECT, &reconnect);
 #endif
 
-  if (!mysql_real_connect (&mysqlIn,
+  if (!mysql_real_connect (mysql,
                            connect.host[0] != '\0' ? connect.host : NULL,
                            connect.user[0] != '\0' ? connect.user : NULL,
                            connect.password[0] != '\0' ? connect.password : NULL,
@@ -74,7 +74,7 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
   {
      g_print (_("Connection to database '%s' on host '%s' failed.\n"),
               connect.db, connect.host);
-     g_print (_("Error: %s\n"), mysql_error (&mysqlIn));
+     g_print (_("Error: %s\n"), mysql_error (mysql));
      return (SMSD_NOK);
   }
 
@@ -82,38 +82,15 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
 }
 
 
-GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
+GNOKII_API gint DB_ConnectInbox (const DBConfig connect)
 {
-#if MYSQL_VERSION_ID >= 50013
-  my_bool reconnect = 1;
-#endif
+  return (Connect (connect, &mysqlIn));
+}
 
-  mysql_init (&mysqlOut);
 
-  if (connect.clientEncoding[0] != '\0')
-    mysql_options (&mysqlOut, MYSQL_SET_CHARSET_NAME, connect.clientEncoding);
-#if MYSQL_VERSION_ID >= 50500
-  else
-    mysql_options (&mysqlOut, MYSQL_SET_CHARSET_NAME, MYSQL_AUTODETECT_CHARSET_NAME);
-#endif
-
-#if MYSQL_VERSION_ID >= 50013
-  mysql_options (&mysqlOut, MYSQL_OPT_RECONNECT, &reconnect);
-#endif
-
-  if (!mysql_real_connect (&mysqlOut,
-                           connect.host[0] != '\0' ? connect.host : NULL,
-                           connect.user[0] != '\0' ? connect.user : NULL,
-                           connect.password[0] != '\0' ? connect.password : NULL,
-                           connect.db, 0, NULL, 0))
-  {
-     g_print (_("Connection to database '%s' on host '%s' failed.\n"),
-              connect.db, connect.host);
-     g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
-     return (SMSD_NOK);
-  }
-
-  return (SMSD_OK);
+GNOKII_API gint DB_ConnectOutbox (const DBConfig connect)
+{
+  return (Connect (connect, &mysqlOut));
 }
 
 

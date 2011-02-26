@@ -1,3 +1,8 @@
+* Sun 20 Feb 2011 Jan Derfinak
+- Simplify DB_Connect functions in pq and mysql modules by moving shared
+  code to the separate function. (Pawel Kot)
+
+
 * Sat 19 Feb 2011 Jan Derfinak
 - Version changed to 1.5.0
 - Added support for concatenated messages to pq module.
@@ -5,7 +10,7 @@
   new db from new schema and load data from backup.
 - Fixed bug #31222: smsd crashes in mysql module if a concatenated sms
   full of escapable characters is received.
- 
+
 
 * Tue 15 Feb 2011 Jan Derfinak
 - Version changed to 1.4.6

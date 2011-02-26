@@ -51,9 +51,9 @@ GNOKII_API void DB_Bye (void)
 }
 
 
-GNOKII_API gint DB_ConnectInbox (DBConfig connect)
+static gint Connect (const DBConfig connect, PGconn **conn)
 {
-  connIn = PQsetdbLogin (connect.host[0] != '\0' ? connect.host : NULL,
+  *conn = PQsetdbLogin (connect.host[0] != '\0' ? connect.host : NULL,
                          NULL,
                          NULL,
                          NULL,
@@ -61,20 +61,20 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
                          connect.user[0] != '\0' ? connect.user : NULL,
                          connect.password[0] != '\0' ? connect.password : NULL);
   
-  if (PQstatus (connIn) == CONNECTION_BAD)
+  if (PQstatus (*conn) == CONNECTION_BAD)
   {
     g_print (_("Connection to database '%s' on host '%s' failed.\n"),
              connect.db, connect.host);
-    g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+    g_print (_("Error: %s\n"), PQerrorMessage (*conn));
     return (SMSD_NOK);
   }
 
   if (connect.clientEncoding[0] != '\0')
-    if (PQsetClientEncoding (connIn, connect.clientEncoding))
+    if (PQsetClientEncoding (*conn, connect.clientEncoding))
     {
       g_print (_("Setting client charset '%s' for database '%s' on host '%s' failed.\n"),
                connect.clientEncoding, connect.db, connect.host);
-      g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+      g_print (_("Error: %s\n"), PQerrorMessage (*conn));
     }
     
   if (schema == NULL)
@@ -84,36 +84,15 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
 }
 
 
-GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
+GNOKII_API gint DB_ConnectInbox (const DBConfig connect)
 {
-  connOut = PQsetdbLogin (connect.host[0] != '\0' ? connect.host : NULL,
-                          NULL,
-                          NULL,
-                          NULL,
-                          connect.db,
-                          connect.user[0] != '\0' ? connect.user : NULL,
-                          connect.password[0] != '\0' ? connect.password : NULL);
+  return (Connect (connect, &connIn));
+}
 
-  if (PQstatus (connOut) == CONNECTION_BAD)
-  {
-    g_print (_("Connection to database '%s' on host '%s' failed.\n"),
-             connect.db, connect.host);
-    g_print (_("Error: %s\n"), PQerrorMessage (connOut));
-    return (SMSD_NOK);
-  }
 
-  if (connect.clientEncoding[0] != '\0')
-    if (PQsetClientEncoding (connOut, connect.clientEncoding))
-    {
-      g_print (_("Setting client charset '%s' for database '%s' on host '%s' failed.\n"),
-               connect.clientEncoding, connect.db, connect.host);
-      g_print (_("Error: %s\n"), PQerrorMessage (connOut));
-    }
-
-  if (schema == NULL)
-    schema = g_strdup (connect.schema);
-
-  return (SMSD_OK);
+GNOKII_API gint DB_ConnectOutbox (const DBConfig connect)
+{
+  return (Connect (connect, &connOut));
 }
 
 
