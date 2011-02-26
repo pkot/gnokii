@@ -531,7 +531,7 @@ gn_sms_dcs_alphabet_type char_def_alphabet_string_stats(char *str, int *enc_char
 		dprintf("Not valid UTF8 string\n");
 		return enc;
 	}
-	while ((iter = g_utf8_next_char(iter))) {
+	do {
 		chr = g_utf8_get_char(iter);
 		if (!chr)
 			break;
@@ -540,7 +540,7 @@ gn_sms_dcs_alphabet_type char_def_alphabet_string_stats(char *str, int *enc_char
 		else if (!char_def_alphabet(chr))
 			enc = GN_SMS_DCS_UCS2;
 		(*enc_chars)++;
-	}
+	} while (iter = g_utf8_next_char(iter));
 	return enc;
 }
 
@@ -568,13 +568,13 @@ int char_def_alphabet_string_copy(char *dest, const char *src, int len, int offs
 		return to_copy;
 	}
 	for (i = 0; i < len; i++) {
-		iter = g_utf8_next_char(iter);
 		chr = g_utf8_get_char(iter);
 		if (!chr)
 			break;
 		if (char_def_alphabet_ext(chr))
 			i++;
 		to_copy++;
+		iter = g_utf8_next_char(iter);
 	}
 	g_utf8_strncpy(dest, src_offset, to_copy);
 	return to_copy;
