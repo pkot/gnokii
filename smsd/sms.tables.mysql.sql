@@ -36,9 +36,9 @@ CREATE TABLE multipartinbox (
   text text,
   phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
-  refnum int(8) default NULL,
-  maxnum int(8) default NULL,
-  curnum int(8) default NULL,
+  refnum smallint default NULL,
+  maxnum smallint default NULL,
+  curnum smallint default NULL,
   PRIMARY KEY  (id)
 );
 

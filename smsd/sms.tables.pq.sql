@@ -14,7 +14,7 @@ CREATE TABLE "inbox" (
 	"number" character varying(20) NOT NULL,
 	"smsdate" timestamp NOT NULL,
 	"insertdate" timestamp DEFAULT now() NOT NULL,
-	"text" character varying(160),
+	"text" text,
 	"phone" integer,
 	"processed" bool DEFAULT 'false',
 	PRIMARY KEY ("id")
@@ -32,6 +32,20 @@ CREATE TABLE "outbox" (
 	"dreport" smallint DEFAULT '0' NOT NULL,
 	"not_before" time without time zone DEFAULT '00:00:00' NOT NULL,
         "not_after" time without time zone DEFAULT '23:59:59' NOT NULL,
+	PRIMARY KEY ("id")
+);
+
+CREATE TABLE "multipartinbox" (
+	"id" serial,
+	"number" character varying(20) NOT NULL,
+	"smsdate" timestamp NOT NULL DEFAULT 'epoch',
+	"insertdate" timestamp DEFAULT now() NOT NULL,
+	"text" character varying(160),
+	"phone" integer,
+	"processed" bool DEFAULT 'false',
+	"refnum" smallint DEFAULT NULL,
+	"maxnum" smallint DEFAULT NULL,
+	"curnum" smallint DEFAULT NULL,
 	PRIMARY KEY ("id")
 );
 

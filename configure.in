@@ -35,7 +35,7 @@ dnl xgnokii version
 XVERSION=1.0
 
 dnl smsd version
-SVERSION=1.4.6
+SVERSION=1.5.0
 
 AC_CANONICAL_SYSTEM
 AC_GNU_SOURCE

@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   S M S D
 
   A Linux/Unix tool for the mobile phones.
@@ -23,7 +21,7 @@
   Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
-  Copyright (C) 1999-2005 Jan Derfinak
+  Copyright (C) 1999-2011 Jan Derfinak
   
   This file is a module to smsd for PostgreSQL db server.
 
@@ -37,7 +35,7 @@
 #include "smsd.h"
 #include "gnokii.h"
 #include "compat.h"
-#include "utils.h"
+//#include "utils.h"
 
 static PGconn *connIn = NULL;
 static PGconn *connOut = NULL;
@@ -68,7 +66,7 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
     g_print (_("Connection to database '%s' on host '%s' failed.\n"),
              connect.db, connect.host);
     g_print (_("Error: %s\n"), PQerrorMessage (connIn));
-    return (1);
+    return (SMSD_NOK);
   }
 
   if (connect.clientEncoding[0] != '\0')
@@ -82,7 +80,7 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
   if (schema == NULL)
     schema = g_strdup (connect.schema);
 
-  return (0);
+  return (SMSD_OK);
 }
 
 
@@ -101,7 +99,7 @@ GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
     g_print (_("Connection to database '%s' on host '%s' failed.\n"),
              connect.db, connect.host);
     g_print (_("Error: %s\n"), PQerrorMessage (connOut));
-    return (1);
+    return (SMSD_NOK);
   }
 
   if (connect.clientEncoding[0] != '\0')
@@ -115,7 +113,7 @@ GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
   if (schema == NULL)
     schema = g_strdup (connect.schema);
 
-  return (0);
+  return (SMSD_OK);
 }
 
 
@@ -124,6 +122,8 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
   GString *buf, *phnStr;
   gchar *text;
   PGresult *res;
+  gint err;
+
 
   if (phone[0] == '\0')
     phnStr = g_string_new ("");
@@ -133,12 +133,210 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     g_string_printf (phnStr, "'%s',", phone);
   }
 
-  text = strEscape ((gchar *) data->user_data[0].u.text);
+  text = g_malloc (strlen ((gchar *)data->user_data[0].u.text) * 2 + 1);
+  PQescapeStringConn (connIn, text, (gchar *) data->user_data[0].u.text,
+                      strlen ((gchar *)data->user_data[0].u.text), &err);
+  if (err)
+  {
+    g_print (_("%d: Escaping string failed.\n"), __LINE__);
+    g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+    g_string_free (phnStr, TRUE);
+    g_free (text);
+    return (SMSD_NOK);
+  }
   
+//  text = strEscape ((gchar *) data->user_data[0].u.text);
   buf = g_string_sized_new (256);
+  
+  if (data->udh.udh[0].type == GN_SMS_UDH_ConcatenatedMessages)
+  { // Multipart Message !
+    gn_log_xdebug ("Multipart message\n");
+    /* Check for duplicates */
+    g_string_printf (buf, "SELECT count(id) FROM %s.multipartinbox \
+                           WHERE number = '%s' AND text = '%s' AND \
+                           refnum = %d AND maxnum = %d AND curnum = %d AND \
+                           smsdate = '%04d-%02d-%02d %02d:%02d:%02d'",
+                     schema, data->remote.number, text,
+                     data->udh.udh[0].u.concatenated_short_message.reference_number,
+                     data->udh.udh[0].u.concatenated_short_message.maximum_number,
+                     data->udh.udh[0].u.concatenated_short_message.current_number,
+                     data->smsc_time.year, data->smsc_time.month,
+                     data->smsc_time.day, data->smsc_time.hour,
+                     data->smsc_time.minute, data->smsc_time.second);
+    res = PQexec (connIn, buf->str);
+    if (!res || PQresultStatus (res) != PGRES_TUPLES_OK)
+    {
+      g_print (_("%d: SELECT FROM %s.multipart command failed.\n"), __LINE__, schema);
+      gn_log_xdebug ("%s\n", buf->str);
+      g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+      PQclear (res);
+      g_string_free (buf, TRUE);
+      g_string_free (phnStr, TRUE);
+      g_free (text);
+      return (SMSD_NOK);
+    }
+                                                       
+    if (atoi (PQgetvalue (res, 0, 0)) > 0)
+    {
+      gn_log_xdebug ("%d: SMS already stored in the database (refnum=%d, maxnum=%d, curnum=%d).\n", __LINE__,
+                     data->udh.udh[0].u.concatenated_short_message.reference_number,
+                     data->udh.udh[0].u.concatenated_short_message.maximum_number,
+                     data->udh.udh[0].u.concatenated_short_message.current_number);
+      PQclear (res);
+      g_string_free (buf, TRUE);
+      g_string_free (phnStr, TRUE);
+      g_free (text);
+      return (SMSD_DUPLICATE);
+    }
+
+    PQclear (res);
+    
+    /* insert into multipart */
+    g_string_printf (buf, "INSERT INTO %s.multipartinbox (number, smsdate, \
+                           text, refnum , maxnum , curnum, %s processed) VALUES ('%s', \
+                           '%04d-%02d-%02d %02d:%02d:%02d', '%s', %d, %d, %d, %s '0')",
+                     schema,
+                     phone[0] != '\0' ? "phone," : "", data->remote.number,
+                     data->smsc_time.year, data->smsc_time.month,
+                     data->smsc_time.day, data->smsc_time.hour,
+                     data->smsc_time.minute, data->smsc_time.second, text,
+                     data->udh.udh[0].u.concatenated_short_message.reference_number,
+                     data->udh.udh[0].u.concatenated_short_message.maximum_number,
+                     data->udh.udh[0].u.concatenated_short_message.current_number, phnStr->str);
+    res = PQexec (connIn, buf->str);
+    if (!res || PQresultStatus(res) != PGRES_COMMAND_OK)
+    {
+      g_print (_("%d: INSERT INTO %s.multipartinbox failed.\n"), __LINE__, schema);
+      gn_log_xdebug ("%s\n", buf->str);
+      g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+      PQclear (res);
+      g_string_free (buf, TRUE);
+      g_string_free (phnStr, TRUE);
+      g_free (text);
+      return (SMSD_NOK);   
+    }
+
+    PQclear (res);
+    
+    /* If all parts are already in multipart inbox, move it into inbox */
+    g_string_printf (buf, "SELECT text FROM %s.multipartinbox \
+                           WHERE number='%s' AND refnum=%d AND maxnum=%d \
+                           ORDER BY curnum",
+                     schema, data->remote.number,
+                     data->udh.udh[0].u.concatenated_short_message.reference_number,
+                     data->udh.udh[0].u.concatenated_short_message.maximum_number);
+    res = PQexec (connIn, buf->str);
+    if (!res || PQresultStatus (res) != PGRES_TUPLES_OK)
+    {
+      g_print (_("%d: SELECT FROM %s.multipart command failed.\n"), __LINE__, schema);
+      gn_log_xdebug ("%s\n", buf->str);
+      g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+      PQclear (res);
+      g_string_free (buf, TRUE);
+      g_string_free (phnStr, TRUE);
+      g_free (text);
+      return (SMSD_NOK);
+    }
+
+    gn_log_xdebug ("maxnumber: %d - count: %d\n", data->udh.udh[0].u.concatenated_short_message.maximum_number,  PQntuples (res));
+    if (PQntuples (res) == data->udh.udh[0].u.concatenated_short_message.maximum_number ) /* all parts collected */
+    {
+      gint i;
+      GString *mbuf = g_string_sized_new (256);
+
+      for (i = 0; i < PQntuples (res); i++)
+        g_string_append (mbuf, PQgetvalue (res, i, 0));
+        
+      PQclear (res);
+ 
+      g_string_printf(buf, "DELETE from %s.multipartinbox \
+                            WHERE number='%s' AND refnum=%d AND maxnum=%d",
+                      schema, data->remote.number,
+                      data->udh.udh[0].u.concatenated_short_message.reference_number,
+                      data->udh.udh[0].u.concatenated_short_message.maximum_number);
+      res = PQexec (connIn, buf->str);
+      if (!res || PQresultStatus (res) != PGRES_COMMAND_OK)
+      {
+        g_print (_("%d: DELETE FROM %s.multipartinbox command failed.\n"), __LINE__, schema);   
+        gn_log_xdebug ("%s\n", buf->str);
+        g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+        PQclear (res);
+        g_string_free (buf, TRUE);
+        g_string_free (mbuf, TRUE);
+        g_string_free (phnStr, TRUE);
+        g_free (text);
+        return (SMSD_NOK);
+      }
+    
+      PQclear (res);
+      g_free (text);
+
+      text = g_malloc (strlen ((gchar *)data->user_data[0].u.text) * 2 + 1);
+      PQescapeStringConn (connIn, text, mbuf->str, mbuf->len, &err);
+      if (err)
+      {
+        g_print (_("%d: Escaping string failed.\n"), __LINE__);
+        g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+        g_string_free (buf, TRUE);
+        g_string_free (mbuf, TRUE);
+        g_string_free (phnStr, TRUE);
+        g_free (text);
+        return (SMSD_NOK);
+      }
+
+//      text = strEscape (mbuf->str);
+      g_string_free (mbuf, TRUE);
+    } 
+    else
+    {
+      PQclear (res);
+      gn_log_xdebug ("Not whole message collected.\n");
+      g_string_free (buf, TRUE);
+      g_string_free (phnStr, TRUE);
+      g_free (text);
+      return (SMSD_WAITING);
+    }
+  }
+  
+  gn_log_xdebug ("Message: %s\n", text);
+  
+  /* Detect duplicates */
+  g_string_printf (buf, "SELECT count(id) FROM %s.inbox \
+                         WHERE number = '%s' AND text = '%s' AND \
+                         smsdate = '%04d-%02d-%02d %02d:%02d:%02d'",
+		   schema,
+                   data->remote.number, text, data->smsc_time.year,
+                   data->smsc_time.month, data->smsc_time.day,
+                   data->smsc_time.hour, data->smsc_time.minute,
+                   data->smsc_time.second);
+  res = PQexec (connIn, buf->str);
+  if (!res || PQresultStatus (res) != PGRES_TUPLES_OK)
+  {
+    g_print (_("%d: SELECT FROM %s.inbox command failed.\n"), __LINE__, schema);
+    gn_log_xdebug ("%s\n", buf->str);
+    g_print (_("Error: %s\n"), PQerrorMessage (connIn));
+    PQclear (res);
+    g_string_free (buf, TRUE);
+    g_string_free (phnStr, TRUE);
+    g_free (text);
+    return (SMSD_NOK);
+  }
+  
+  if (atoi (PQgetvalue (res, 0, 0)) > 0)
+  {
+    gn_log_xdebug ("%d: MSG already stored in database.\n", __LINE__);
+    PQclear (res);
+    g_string_free (buf, TRUE);
+    g_string_free (phnStr, TRUE);
+    g_free (text);
+    return (SMSD_DUPLICATE);
+  }
+  
+  PQclear (res);
+
   g_string_printf (buf, "INSERT INTO %s.inbox (\"number\", \"smsdate\", \"insertdate\",\
                          \"text\", %s \"processed\") VALUES ('%s', \
-                         '%02d-%02d-%02d %02d:%02d:%02d+01', 'now', '%s', %s 'f')",
+                         '%04d-%02d-%02d %02d:%02d:%02d', 'now', '%s', %s 'f')",
                    schema,
                    phone[0] != '\0' ? "\"phone\"," : "", data->remote.number,
                    data->smsc_time.year, data->smsc_time.month,
@@ -152,14 +350,15 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
   if (!res || PQresultStatus(res) != PGRES_COMMAND_OK)
   {
     g_print (_("%d: INSERT INTO %s.inbox failed.\n"), __LINE__, schema);
+    gn_log_xdebug ("%s\n", buf->str);
     g_print (_("Error: %s\n"), PQerrorMessage (connIn));
     PQclear (res);
-    return (1);
+    return (SMSD_NOK);
   }
   
   PQclear (res);
     
-  return (0);
+  return (SMSD_OK);
 }
 
 
@@ -180,9 +379,6 @@ GNOKII_API void DB_Look (const gchar * const phone)
 
   buf = g_string_sized_new (128);
 
-  res1 = PQexec (connOut, "BEGIN");
-  PQclear (res1);
-
   g_string_printf (buf, "SELECT id, number, text, dreport FROM %s.outbox \
                          WHERE processed='f' AND localtime(0) >= not_before \
                          AND localtime(0) <= not_after %s FOR UPDATE",
@@ -193,9 +389,8 @@ GNOKII_API void DB_Look (const gchar * const phone)
   if (!res1 || PQresultStatus (res1) != PGRES_TUPLES_OK)
   {
     g_print (_("%d: SELECT FROM %s.outbox command failed.\n"), __LINE__, schema);
+    gn_log_xdebug ("%s\n", buf->str);
     g_print (_("Error: %s\n"), PQerrorMessage (connOut));
-    PQclear (res1);
-    res1 = PQexec (connOut, "ROLLBACK TRANSACTION");
     PQclear (res1);
     g_string_free (buf, TRUE);
     return;
@@ -242,6 +437,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
     if (!res2 || PQresultStatus (res2) != PGRES_COMMAND_OK)
     {
       g_print (_("%d: UPDATE command failed.\n"), __LINE__);   
+      gn_log_xdebug ("%s\n", buf->str);
       g_print (_("Error: %s\n"), PQerrorMessage (connOut));
     }
 
@@ -250,8 +446,5 @@ GNOKII_API void DB_Look (const gchar * const phone)
 
   PQclear (res1);
 
-  res1 = PQexec(connOut, "COMMIT");
-
-  g_string_free(buf, TRUE);
-  PQclear (res1);
+  g_string_free (buf, TRUE);
 }
