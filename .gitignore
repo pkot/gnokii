@@ -24,3 +24,4 @@ Makefile.global
 Makefile.in
 missing
 mkinstalldirs
+*~
