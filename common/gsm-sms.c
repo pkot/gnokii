@@ -1773,7 +1773,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state, int 
 			memset(&data->sms->user_data[0], 0, sizeof(gn_sms_user_data));
 			data->sms->user_data[0].type = ud[0].type;
 			dprintf("%d %d %d\n", start, copied, max_sms_len);
-			copied = char_def_alphabet_string_copy(data->sms->user_data[0].u.text, ud[0].u.text, max_sms_len, start);
+			copied = char_def_alphabet_string_copy(data->sms->user_data[0].u.text, ud[0].u.text, max_sms_len * 8 / 7, start);
 			dprintf("\tnumber of processed characters: %d\n", copied);
 			break;
 		case GN_SMS_DCS_UCS2:
