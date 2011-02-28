@@ -1,3 +1,11 @@
+* Man 28 Feb 2011 Jan Derfinak
+- Changed type of column 'outbox.text' from 'varchar(160)' to 'text' to enable
+  sending long sms in PostgreSQL.
+- Added CHECK () constrain to outbox table definition for PostgreSQL and
+  MySQL to disable inserting of sms with empty phone number. It works only
+  for PostgreSQL, because it is parsed but not implemented in MySQL server.
+
+
 * Sun 20 Feb 2011 Jan Derfinak
 - Simplify DB_Connect functions in pq and mysql modules by moving shared
   code to the separate function. (Pawel Kot)

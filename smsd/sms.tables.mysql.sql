@@ -15,10 +15,11 @@ CREATE TABLE inbox (
 
 CREATE TABLE outbox (
   id int(10) unsigned NOT NULL auto_increment,
-  number varchar(20) NOT NULL default '',
+-- MySQL parses but ignores CHECK clause
+  number varchar(20) NOT NULL CHECK (number <> ''),
   processed_date timestamp DEFAULT 0,
   insertdate timestamp DEFAULT CURRENT_TIMESTAMP,
-  text varchar(160) default NULL,
+  text text default NULL,
   phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
   error tinyint(4) NOT NULL default '-1',
@@ -33,7 +34,7 @@ CREATE TABLE multipartinbox (
   number varchar(20) NOT NULL default '',
   smsdate datetime NOT NULL default '0000-00-00 00:00:00',
   insertdate timestamp DEFAULT CURRENT_TIMESTAMP,
-  text text,
+  text varchar(160),
   phone tinyint(4),
   processed tinyint(4) NOT NULL default '0',
   refnum smallint default NULL,

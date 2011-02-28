@@ -356,7 +356,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
     g_string_printf (phnStr, "AND phone = '%s'", phone);
   }
 
-  buf = g_string_sized_new (128);
+  buf = g_string_sized_new (256);
 
   g_string_printf (buf, "SELECT id, number, text, dreport FROM %s.outbox \
                          WHERE processed='f' AND localtime(0) >= not_before \

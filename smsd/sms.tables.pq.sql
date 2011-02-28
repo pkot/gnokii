@@ -22,10 +22,10 @@ CREATE TABLE "inbox" (
 
 CREATE TABLE "outbox" (
 	"id" serial,
-	"number" character varying(20) NOT NULL,
+	"number" character varying(20) NOT NULL CHECK (number <> ''),
 	"processed_date" timestamp DEFAULT now() NOT NULL,
 	"insertdate" timestamp DEFAULT now() NOT NULL,
-	"text" character varying(160),
+	"text" text,
 	"phone" integer,
 	"processed" bool DEFAULT 'false',
 	"error" smallint DEFAULT '-1' NOT NULL,

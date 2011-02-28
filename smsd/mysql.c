@@ -319,7 +319,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
     g_string_printf (phnStr, "AND phone = '%s'", phone);
   }
 
-  buf = g_string_sized_new (128);
+  buf = g_string_sized_new (256);
 
   g_string_printf (buf, "SELECT id, number, text, dreport FROM outbox \
                          WHERE processed='0' AND CURTIME() >= not_before \
