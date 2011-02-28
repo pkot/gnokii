@@ -573,7 +573,8 @@ int char_def_alphabet_string_copy(char *dest, const char *src, int len, int offs
 			break;
 		if (char_def_alphabet_ext(chr))
 			i++;
-		to_copy++;
+		if (i < len)
+			to_copy++;
 		iter = g_utf8_next_char(iter);
 	}
 	g_utf8_strncpy(dest, src_offset, to_copy);
