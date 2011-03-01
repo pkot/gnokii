@@ -46,4 +46,4 @@ AM_CFLAGS =				\
 
 man_MANS = man/smsd.8
 
-EXTRA_DIST = sqlite.c pq.c mysql.c README ChangeLog action README.MySQL sms.tables.mysql.sql sms.tables.pq.sql README.Tru64 $(man_MANS)
+EXTRA_DIST = sqlite.c pq.c mysql.c README ChangeLog action README.MySQL sms.tables.mysql.sql sms.tables.pq.sql sms.tables.sqlite.sql README.Tru64 $(man_MANS)
