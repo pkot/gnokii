@@ -26,6 +26,7 @@ common/links/m2bus.c
 common/misc.c
 common/nokia-decoding.c
 common/phones/atgen.c
+common/phones/fake.c
 common/phones/generic.c
 common/phones/nk3110.c
 common/phones/nk6100.c
@@ -59,6 +60,7 @@ smsd/lowlevel.c
 smsd/mysql.c
 smsd/pq.c
 smsd/smsd.c
+smsd/sqlite.c
 utils/mgnokiidev.c
 xgnokii/xgnokii.c
 xgnokii/xgnokii_calendar.c
