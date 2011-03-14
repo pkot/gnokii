@@ -139,7 +139,7 @@ static void Short_Version (void)
 
 static void Version (void)
 {
-  g_print (_("smsd - version %s from gnokii %s\nCopyright  Jan Derfinak  <ja@mail.upjs.sk>\n"), SVERSION, VERSION);
+  g_print (_("smsd - version %s from gnokii %s\nCopyright  Jan Derfinak 1999-2011\n"), SVERSION, VERSION);
 }
 
 
