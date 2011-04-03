@@ -336,7 +336,7 @@ reads specified memory location from phone.
 If \fIend_number\fR is not specified only one location \- \fIstart\fR is read.
 If instead of \fIend_number\fR the text \fIend\fR is specified then gnokii
 will read from \fIstart_number\fR until it encounters a non\-existant location.
-Valid \fImemory types\fR are: ME, SM, FD, ON, EN, DC, RC, MC, LD:
+Valid \fImemory types\fR are ME, SM, FD, ON, EN, DC, RC, MC, LD:
 .IP
 .B ME
 Internal memory of the mobile equipment
@@ -365,14 +365,18 @@ Missed calls
 .B LD
 Last dialed numbers 
 .PP
-Normally you get verbose output. 
+Normally you get human readable output. Please note, that it is not
+compatible with expected input by \fI\-\-writephonebook\fR.
 You can use \fI\-v\fR or \fI\-\-vcard\fR switch to get output in vCard format or \fI\-l\fR or \fI\-\-ldif\fR switch to get output in ldif format or \fI\-r\fR or \fI\-\-raw\fR switch to get the raw output which is explained below.
 You can use it then with \fI\-\-writephonebook\fR.
 .TP 
 .BR "\-\-writephonebook [\fI\-o|\-\-overwrite] [\-f|\-\-find\-free] [\-m|\-\-memory-type|\-\-memory memory_type] [\-n|\-\-memory-location|\-\-location number] [[\-v|\-\-vcard]|[\-l|\-\-ldif]\fP]"
 reads data from stdin and writes to phonebook.
-Uses the same format as provided by the output of the getphonebook command.
+Uses the format as provided by the output of the getphonebook command using
+\fI\-\-raw\fR or \fI\-\-vcard\fR or \fI\-\-ldif\fR.
 Default is raw format (see below for details) and alternate formats are vCard and ldif.
+Default \fI\-\-getphonebook\fR output format is not compatible with
+\fI\-\-writephonebook\fR.
 .PP
 With \fI\-\-memory-type memory_type\fP and \fI\-\-memory-location number\fP
 you can set a memory type and a location if the input data doesn't specify them.
