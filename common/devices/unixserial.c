@@ -312,6 +312,9 @@ void serial_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state)
 {
 	unsigned int flags;
 
+	if (!state->config.set_dtr_rts)
+		return;
+
 	flags = TIOCM_DTR;
 
 	if (dtr)
@@ -363,6 +366,9 @@ gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)
 	int new_speed = B9600;
 
 	switch (speed) {
+	case 0:
+		dprintf("Not setting port speed\n");
+		return;
 	case 2400:
 		new_speed = B2400;
 		break;

@@ -174,6 +174,7 @@ typedef struct {
 							/* Use with caution -- may break newer DCT4 phones */
 
 	unsigned int use_locking;			/* Should we use locking system or not */
+	int set_dtr_rts;				/* Should we set DTR and RTS bits on the serial line */
 	/* do not change the following values from userspace */
 	char m_model[GN_MODEL_MAX_LENGTH];
 	char m_manufacturer[GN_MANUFACTURER_MAX_LENGTH];

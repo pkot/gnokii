@@ -809,6 +809,14 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 		cfg->require_dcd = def->require_dcd;
 	}
 
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "set_dtr_rts")))
+		cfg->set_dtr_rts = def->set_dtr_rts;
+	else if (sscanf(val, " %d %c", &cfg->set_dtr_rts, &ch) != 1) {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "set_dtr_rts", val);
+		fprintf(stderr, _("Assuming: %d\n"), def->set_dtr_rts);
+		cfg->set_dtr_rts = def->set_dtr_rts;
+	}
+
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "smsc_timeout")))
 		cfg->smsc_timeout = def->smsc_timeout;
 	else if (sscanf(val, " %d %c", &cfg->smsc_timeout, &ch) == 1)
@@ -1207,6 +1215,7 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	gn_config_default.serial_write_usleep = -1;
 	gn_config_default.hardware_handshake = false;
 	gn_config_default.require_dcd = false;
+	gn_config_default.set_dtr_rts = true;
 	gn_config_default.smsc_timeout = -1;
 	gn_config_default.irda_string[0] = 0;
 	gn_config_default.connect_script[0] = 0;

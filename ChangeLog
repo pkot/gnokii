@@ -12,6 +12,8 @@
       files (eg. birthdays)                         (Daniele Forsi)
     o fix sms encoding: don't break multibyte characters when
       creating multipart messages                       (Paweł Kot)
+    o add possibility to disable setting serial port speed and
+      DTR and RTS bits                                  (Paweł Kot)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)

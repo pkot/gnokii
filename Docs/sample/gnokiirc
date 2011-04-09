@@ -128,6 +128,9 @@ use_locking = yes
 
 # Baudrate to use on serial port connections.
 # Currently used only by models AT and BIP/CIMD. Defaults to 19200.
+# Set to 0 to disable port speed setting. Try doing this when gnokii hangs
+# on opening the serial port:
+# > Serial device: opening device /dev/ttyACM0
 serial_baudrate = 19200
 
 # Force waiting after each sent character the specified usec time.
@@ -145,6 +148,11 @@ serial_baudrate = 19200
 # If defined (not commented out by '#') it will quit Gnokii anytime
 # when DCD line will drop.
 #require_dcd = 1
+
+# If set to 0, DTR and RTS will not be set on the serial line. Default is 1.
+# Try doing this when gnokii hangs on opening the serial port:
+# > Serial device: opening device /dev/ttyACM0
+#set_dtr_rts = 0
 
 # If you are using a bluetooth connection, you can specify the rfcomm
 # channel number here. If you don't specify the value, it is autodetected
