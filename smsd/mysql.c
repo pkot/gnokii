@@ -321,9 +321,11 @@ GNOKII_API void DB_Look (const gchar * const phone)
 
   buf = g_string_sized_new (256);
 
+  mysql_real_query (&mysqlOut, "BEGIN", strlen ("BEGIN"));
+  
   g_string_printf (buf, "SELECT id, number, text, dreport FROM outbox \
                          WHERE processed='0' AND CURTIME() >= not_before \
-                         AND CURTIME() <= not_after %s", phnStr->str);
+                         AND CURTIME() <= not_after %s LIMIT 1 FOR UPDATE", phnStr->str);
   g_string_free (phnStr, TRUE);
   
   if (mysql_real_query (&mysqlOut, buf->str, buf->len))
@@ -331,6 +333,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
     g_print (_("%d: SELECT FROM outbox command failed.\n"), __LINE__);
     gn_log_xdebug ("%s\n", buf->str);
     g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
+    mysql_real_query (&mysqlOut, "ROLLBACK TRANSACTION", strlen ("ROLLBACK TRANSACTION"));
     g_string_free (buf, TRUE);
     return;
   }
@@ -339,6 +342,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
   {
     g_print (_("%d: Store Mysql Result Failed.\n"), __LINE__);
     g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
+    mysql_real_query (&mysqlOut, "ROLLBACK TRANSACTION", strlen ("ROLLBACK TRANSACTION"));
     g_string_free (buf, TRUE);
     return;
   }
@@ -396,5 +400,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
 
   mysql_free_result (res1);
 
+  mysql_real_query (&mysqlOut, "COMMIT", strlen ("COMMIT"));
+  
   g_string_free (buf, TRUE);
 }

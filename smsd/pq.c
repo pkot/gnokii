@@ -358,9 +358,12 @@ GNOKII_API void DB_Look (const gchar * const phone)
 
   buf = g_string_sized_new (256);
 
+  res1 = PQexec (connOut, "BEGIN");
+  PQclear (res1);
+
   g_string_printf (buf, "SELECT id, number, text, dreport FROM %s.outbox \
                          WHERE processed='f' AND localtime(0) >= not_before \
-                         AND localtime(0) <= not_after %s FOR UPDATE",
+                         AND localtime(0) <= not_after %s LIMIT 1 FOR UPDATE",
                    schema, phnStr->str);
   g_string_free (phnStr, TRUE);
 
@@ -370,6 +373,8 @@ GNOKII_API void DB_Look (const gchar * const phone)
     g_print (_("%d: SELECT FROM %s.outbox command failed.\n"), __LINE__, schema);
     gn_log_xdebug ("%s\n", buf->str);
     g_print (_("Error: %s\n"), PQerrorMessage (connOut));
+    PQclear (res1);
+    res1 = PQexec (connOut, "ROLLBACK TRANSACTION");
     PQclear (res1);
     g_string_free (buf, TRUE);
     return;
@@ -423,6 +428,8 @@ GNOKII_API void DB_Look (const gchar * const phone)
     PQclear (res2);
   }
 
+  PQclear (res1);
+  res1 = PQexec (connOut, "COMMIT");
   PQclear (res1);
 
   g_string_free (buf, TRUE);

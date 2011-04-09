@@ -373,8 +373,6 @@ static void *SendSMS (void *a)
     pthread_mutex_unlock (&db_monitorMutex);
 
     (*DB_Look) (smsdConfig.phone);
-
-    sleep (3);
   }
 }
 

@@ -1,4 +1,10 @@
-* Man 28 Feb 2011 Jan Derfinak
+* Sat 09 Apr 2011 Jan Derfinak
+- Changed DB_Look() to use one trasaction per sms instead of one big
+  transaction for all sms in the outbox table.
+- Version changed to 1.5.1
+
+
+* Mon 28 Feb 2011 Jan Derfinak
 - Changed type of column 'outbox.text' from 'varchar(160)' to 'text' to enable
   sending long sms in PostgreSQL.
 - Added CHECK () constrain to outbox table definition for PostgreSQL and
