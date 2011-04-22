@@ -34,6 +34,7 @@
 #include "gnokii.h"
 #include "phones/generic.h"
 #include "gnokii-internal.h"
+#include "phones/atgen.h"
 
 /* Some globals */
 
@@ -420,6 +421,59 @@ static gn_error at_get_model(gn_data *data, struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
+size_t fake_encode(at_charset charset, char *dst, size_t dst_len, const char *src, size_t len)
+{
+	size_t ret;
+
+	switch (charset) {
+	case AT_CHAR_GSM:
+		ret = char_ascii_encode(dst, dst_len, src, len);
+		break;
+	case AT_CHAR_HEXGSM:
+		ret = char_hex_encode(dst, dst_len, src, len);
+		break;
+	case AT_CHAR_UCS2:
+		ret = char_ucs2_encode(dst, dst_len, src, len);
+		break;
+	default:
+		memcpy(dst, src, dst_len >= len ? len : dst_len);
+		ret = len;
+		break;
+	}
+	if (ret < dst_len)
+		dst[ret] = '\0';
+	return ret+1;
+}
+
+static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state)
+{
+	int len, ofs;
+	char req[256], *tmp;
+	char number[64];
+
+	memset(number, 0, sizeof(number));
+#if 1 
+	fake_encode(AT_CHAR_UCS2, number, sizeof(number),
+		data->phonebook_entry->number,
+		strlen(data->phonebook_entry->number));
+#else
+	strncpy(number, data->phonebook_entry->number, sizeof(number));
+#endif
+	ofs = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%s,\"",
+		       data->phonebook_entry->location,
+		       number,
+		       data->phonebook_entry->number[0] == '+' ? "145" : "129");
+	tmp = req + ofs;
+	len = fake_encode(AT_CHAR_UCS2, tmp, sizeof(req) - ofs,
+			data->phonebook_entry->name,
+			strlen(data->phonebook_entry->name));
+	tmp[len-1] = '"';
+	tmp[len++] = '\r';
+	len += ofs;
+	dprintf("%s\n", req);
+	return GN_ERR_NONE;
+}
+
 static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	switch (op) {
@@ -444,6 +498,10 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 		return at_get_model(data, state);
 	case GN_OP_GetSMSStatus:
 		return at_sms_get_sms_status(data, state);
+	case GN_OP_ReadPhonebook:
+		return GN_ERR_EMPTYLOCATION;
+	case GN_OP_WritePhonebook:
+		return fake_writephonebook(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}

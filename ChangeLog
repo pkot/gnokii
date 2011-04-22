@@ -26,6 +26,7 @@
     o allow to specify custom path for gnokii-errors    (Paweł Kot)
  * fake driver updates
     o add multipart message to SMS inbox                (Paweł Kot)
+    o add ability to use --writephonebook               (Paweł Kot)
 
 0.6.30
 ======
