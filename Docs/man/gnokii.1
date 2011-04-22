@@ -38,10 +38,9 @@ incompatible. DO NOT use \fImodel = 6110\fP or \fImodel = 3110\fP setting for th
 reads configuration from \fIfilename\fR instead of trying default locations.
 Normally gnokii looks for config file in
 \fI$XDG_CONFIG_HOME/gnokii/config\fR (which is usually
-\fI$HOME/.config/gnokii/config\fR),
+\fI$HOME/.config/gnokii/config\fR), \fI$HOME/.gnokiirc\fR (legacy),
 \fI$XDG_CONFIG_DIRS/gnokii/config\fR (which is usually
-\fI/etc/xdg/gnokii/config\fR),
-\fI$HOME/.gnokiirc\fR (legacy) and \fI/etc/gnokiirc\fR (legacy).
+\fI/etc/xdg/gnokii/config\fR) and \fI/etc/gnokiirc\fR (legacy).
 .TP 
 .BR "\-\-phone \fIname\fP"
 usees parameters from the given phone section of your config file. A phone section named 'foo' starts with [phone_foo] and is used as \-\-phone foo

@@ -1122,7 +1122,13 @@ static char **get_locations(int *retval)
 	config_file_locations = calloc(size, sizeof(char *));
 	config_file_locations[(*retval)++] = strdup(path);
 
-	/* 2. $XDG_CONFIG_DIRS/gnokii/config (/etc/xdg) */
+	/* old gnokii behaviour */
+	/* 2. $HOME/.gnokiirc */
+	snprintf(path, MAX_PATH_LEN, "%s/.gnokiirc", home);
+	config_file_locations[(*retval)++] = strdup(path);
+	CHECK_SIZE();
+
+	/* 3. $XDG_CONFIG_DIRS/gnokii/config (/etc/xdg) */
 	for (j = 0; j < i; j++) {
 		snprintf(path, MAX_PATH_LEN, "%s/gnokii/config", xdg_config_dir[j]);
 		config_file_locations[(*retval)++] = strdup(path);
@@ -1132,12 +1138,6 @@ static char **get_locations(int *retval)
 	free(xdg_config_dir);
 
 	/* old gnokii behaviour */
-
-	/* 3. $HOME/.gnokiirc */
-	snprintf(path, MAX_PATH_LEN, "%s/.gnokiirc", home);
-	config_file_locations[(*retval)++] = strdup(path);
-	CHECK_SIZE();
-
 	/* 4. /etc/gnokiirc */
 	snprintf(path, MAX_PATH_LEN, "/etc/gnokiirc");
 	config_file_locations[(*retval)++] = strdup(path);
