@@ -571,31 +571,16 @@ gn_error gn_mms_nokia2pdu(const unsigned char *source_buffer, size_t *source_len
  */
 gn_error gn_mms_nokia2mms(const unsigned char *source_buffer, size_t *source_length, gn_mms *mms)
 {
-	const unsigned char *nokia_header, *pdu_start;
-	size_t mms_length, total_length;
+	gn_error error;
+	const unsigned char *nokia_header;
 	char string[80];
 
-	if (*source_length < GN_MMS_NOKIA_HEADER_LEN)
-		return GN_ERR_WRONGDATAFORMAT;
+	error = gn_mms_nokia2pdu(source_buffer, source_length, &mms->buffer, &mms->buffer_length);
+	if (error != GN_ERR_NONE)
+		return error;
+	mms->buffer_format = GN_MMS_FORMAT_PDU;
 
 	nokia_header = source_buffer;
-	pdu_start = nokia_header + GN_MMS_NOKIA_HEADER_LEN;
-	mms_length = (nokia_header[4] << 24) + (nokia_header[5] << 16) + (nokia_header[6] << 8) + nokia_header[7];
-	total_length = (nokia_header[8] << 24) + (nokia_header[9] << 16) + (nokia_header[10] << 8) + nokia_header[11];
-
-	dprintf("Nokia header length %d\n", GN_MMS_NOKIA_HEADER_LEN);
-	dprintf("\tMMS length %d\n", mms_length);
-	dprintf("\tFooter length %d\n", total_length - mms_length - GN_MMS_NOKIA_HEADER_LEN);
-	dprintf("\tTotal length %d\n", total_length);
-
-	if (total_length != *source_length) {
-		dprintf("ERROR: total_length != source_length (%d != %d)\n", total_length, *source_length);
-		return GN_ERR_WRONGDATAFORMAT;
-	}
-	if (total_length <= mms_length) {
-		dprintf("ERROR: total_length <= mms_length (%d != %d)\n", total_length, mms_length);
-		return GN_ERR_WRONGDATAFORMAT;
-	}
 
 	/* Decode Nokia header */
 
