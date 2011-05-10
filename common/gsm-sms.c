@@ -1593,14 +1593,12 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 {
 	int i, total;
 	int enc_chars, ext_chars;
-	gn_sms sms;
 
 	dprintf("=====> ENTER gn_sms_send()\n");
 	/*
 	 * count -- number of SMS to be sent
 	 * total -- total number of octets to be sent
 	 */
-	sms = *data->sms;
 
 	/* Convert all the input strings to UTF-8 */
 	if (data->sms->dcs.u.general.alphabet != GN_SMS_DCS_8bit) {

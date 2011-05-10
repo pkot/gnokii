@@ -682,7 +682,6 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 	nk7110_driver_instance *drvinst = DRVINSTANCE(state);
 	unsigned char *blockstart;
 	unsigned char blocks;
-	unsigned char subblockcount;
 	int memtype, location, memtype_req;
 
 	switch (message[3]) {
@@ -752,8 +751,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 		dprintf("Received phonebook info\n");
 		blocks     = message[17];
 		blockstart = message + 18;
-		subblockcount = 0;
-		return phonebook_decode(message + 18, length - 17, data, blocks, message[11], 8);
+		return phonebook_decode(blockstart, length - 17, data, blocks, message[11], 8);
 	case 0x0c:
 		if (message[6] == 0x0f) {
 			switch (message[10]) {
@@ -1663,11 +1661,10 @@ static gn_error NK7110_SetAlarm(gn_data *data, struct gn_statemachine *state)
 static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	gn_error e = GN_ERR_NONE;
-	int i, year;
+	int i;
 
 	if (!data || !data->calnote) return GN_ERR_INTERNALERROR;
 
-	year = data->calnote->time.year;
 	switch (message[3]) {
 	case NK7110_SUBCAL_NOTE_RCVD:
 		calnote_decode(message, length, data);
@@ -2180,7 +2177,7 @@ static gn_error NK7110_IncomingSecurity(int messagetype, unsigned char *message,
 /*****************/
 static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	int string_length, pos, pad = 0;
+	int string_length, pos;
 
 	switch (message[3]) {
 	case 0x02:
@@ -2245,7 +2242,6 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 			char_unicode_decode(data->wap_setting->name, message + 5, string_length);
 		dprintf("Name: %s\n", data->wap_setting->name);
 		pos = string_length + 5;
-		if (!(string_length % 4)) pad = 1;
 
 		string_length = message[pos++] << 1;
 		if (!data->wap_setting->read_before_write)

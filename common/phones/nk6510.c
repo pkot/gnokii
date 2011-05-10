@@ -1462,6 +1462,8 @@ static gn_error NK6510_GetSMSnoValidate(gn_data *data, struct gn_statemachine *s
 	dprintf("Getting SMS (no validate) ...\n");
 
 	error = NK6510_GetSMSMessageStatus(data, state);
+	if (error)
+		return error;
 
 	if ((data->raw_sms->memory_type == GN_MT_IN) || (data->raw_sms->memory_type == GN_MT_OU)) {
 		if (data->raw_sms->number > 1024) {
@@ -2543,7 +2545,6 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 {
 	int i, j, frame_length;
 	gn_file *file = NULL;
-	gn_file_list *fll;
 	gn_error error = GN_ERR_NONE;
 
 	switch (message[3]) {
@@ -2580,7 +2581,6 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		/* frame length */
 		frame_length = 256 * message[8] + message[9];
 		file = data->file;
-		fll = data->file_list;
 		char_unicode_decode(file->name, message + 10, 184);
 		dprintf("Filename: %s\n", file->name);
 		if (message[196] != 0xff) {

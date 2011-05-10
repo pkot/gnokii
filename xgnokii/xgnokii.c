@@ -2142,8 +2142,6 @@ static void TopLevelWindow(void)
 {
 	GtkWidget *drawing_area;
 	GdkBitmap *mask;
-	GtkStyle *style;
-	GdkGC *gc;
 	struct sigaction act;
 
 	GUI_MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
@@ -2168,8 +2166,6 @@ static void TopLevelWindow(void)
 					 &GUI_MainWindow->style->white, (gchar **) XPM_background);
 
 //  gdk_window_set_icon_name (GUI_MainWindow->window, "XXX");
-	style = gtk_widget_get_default_style();
-	gc = style->black_gc;
 
 	/* Create the drawing area */
 	drawing_area = gtk_drawing_area_new();
@@ -2240,7 +2236,6 @@ static void SplashScreen(void)
 	GdkPixmap *gdk_pixmap;
 	GdkBitmap *mask;
 	GtkStyle *style;
-	GdkGC *gc;
 
 	SplashWindow = gtk_window_new(GTK_WINDOW_POPUP);
 	gtk_widget_realize(SplashWindow);
@@ -2249,7 +2244,6 @@ static void SplashScreen(void)
 	gtk_window_position(GTK_WINDOW(SplashWindow), GTK_WIN_POS_CENTER);
 
 	style = gtk_widget_get_default_style();
-	gc = style->black_gc;
 	gdk_pixmap = gdk_pixmap_create_from_xpm_d(SplashWindow->window, &mask,
 						  &style->bg[GTK_STATE_NORMAL], XPM_logo);
 	pixmap = gtk_pixmap_new(gdk_pixmap, mask);
