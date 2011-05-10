@@ -259,3 +259,19 @@ tools:
 
 Now you should be able to proceed with instructions described in previous
 sections.
+
+Fedora / RHEL
+=============
+
+Grab build environment. It will install autotools, the devel packages, git
+but not the compiler itself:
+
+    $ su -c 'yum-builddep gnokii'
+
+Grab the compiler and other tools:
+
+    $ su -c 'yum install gcc libtool'
+
+Now you should be able to proceed with instructions described in previous
+sections.
+
