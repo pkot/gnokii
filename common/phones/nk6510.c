@@ -1920,6 +1920,11 @@ err:
 		if (e != GN_ERR_NONE)
 			break;
 
+		if (!data->message_center) {
+			dprintf("SMSC received but not expected\n");
+			e = GN_ERR_INTERNALERROR;
+		}
+
 		data->message_center->id = message[8];
 		data->message_center->format = message[10];
 		data->message_center->validity = message[12];  /* due to changes in format */
