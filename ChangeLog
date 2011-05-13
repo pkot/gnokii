@@ -29,6 +29,8 @@
  * fake driver updates
     o add multipart message to SMS inbox                (Paweł Kot)
     o add ability to use --writephonebook               (Paweł Kot)
+ * smsd updates
+    o do not call GetSMSC every time SMS is sent        (Paweł Kot)
 
 0.6.30
 ======

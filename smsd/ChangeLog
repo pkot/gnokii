@@ -1,3 +1,7 @@
+* Fri 13 May 2011 Paweł Kot
+- Do not call GetSMSC every time SMS is being sent.
+
+
 * Sat 09 Apr 2011 Jan Derfinak
 - Changed DB_Look() to use one trasaction per sms instead of one big
   transaction for all sms in the outbox table.
