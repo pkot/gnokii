@@ -256,31 +256,31 @@ static gint A_SendSMSMessage (gpointer data)
   if (!d->sms->smsc.number[0])
   {
     /* keep the local cache of smsc information, it doesn't change too often */
-    static gn_gsm_number_type type = -1; /* -1: unititialized, -2: GetSMSCenter does not work */
-    static char number[GN_BCD_STRING_MAX_LENGTH];
+    static gn_gsm_number_type smsc_type = -1; /* -1: unititialized, -2: GetSMSCenter does not work */
+    static char smsc_number[GN_BCD_STRING_MAX_LENGTH];
 
-    if (type == -2)
+    if (smsc_type == -2)
       status = GN_ERR_FAILED;
     else
       status = GN_ERR_NONE;
 
-    if (type == -1)
+    if (smsc_type == -1)
     {
       dt->message_center = calloc (1, sizeof (gn_sms_message_center));
       dt->message_center->id = 1;
       if ((status = gn_sm_functions (GN_OP_GetSMSCenter, dt, sm)) == GN_ERR_NONE)
       {
-        strcpy (number, dt->message_center->smsc.number);
-        type = dt->message_center->smsc.type;
+        strcpy (smsc_number, dt->message_center->smsc.number);
+        smsc_type = dt->message_center->smsc.type;
       } else {
-        type = -2;
+        smsc_type = -2;
       }
       free (dt->message_center);
     }
     if (status == GN_ERR_NONE)
     {
-        strcpy (d->sms->smsc.number, number);
-        d->sms->smsc.type = type;
+        strcpy (d->sms->smsc.number, smsc_number);
+        d->sms->smsc.type = smsc_type;
     }
   }
   
