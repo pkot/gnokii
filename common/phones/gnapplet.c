@@ -98,8 +98,6 @@ static gn_error gnapplet_sms_message_write(gn_data *data, struct gn_statemachine
 static gn_error gnapplet_sms_message_send(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_message_delete_nv(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_message_delete(gn_data *data, struct gn_statemachine *state);
-static gn_error gnapplet_sms_message_move_nv(gn_data *data, struct gn_statemachine *state);
-static gn_error gnapplet_sms_message_move(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_sms_center_write(gn_data *data, struct gn_statemachine *state);
 static gn_error gnapplet_calendar_note_read(gn_data *data, struct gn_statemachine *state);
@@ -466,12 +464,6 @@ static gn_error gnapplet_functions(gn_operation op, gn_data *data, struct gn_sta
 		return gnapplet_sms_message_delete_nv(data, state);
 	case GN_OP_DeleteSMS:
 		return gnapplet_sms_message_delete(data, state);
-	/*
-	case GN_OP_MoveSMSnoValidate:
-		return gnapplet_sms_message_move_nv(data, state);
-	case GN_OP_MoveSMS:
-		return gnapplet_sms_message_move(data, state);
-	*/
 	case GN_OP_GetSMSCenter:
 		return gnapplet_sms_center_read(data, state);
 	case GN_OP_SetSMSCenter:
@@ -1087,7 +1079,7 @@ static gn_error gnapplet_sms_message_delete(gn_data *data, struct gn_statemachin
 	return gnapplet_sms_message_delete_nv(data, state);
 }
 
-
+#if 0
 static gn_error gnapplet_sms_message_move_nv(gn_data *data, struct gn_statemachine *state)
 {
 	REQUEST_DEF;
@@ -1114,7 +1106,7 @@ static gn_error gnapplet_sms_message_move(gn_data *data, struct gn_statemachine 
 
 	return gnapplet_sms_message_move_nv(data, state);
 }
-
+#endif
 
 static gn_error gnapplet_sms_center_read(gn_data *data, struct gn_statemachine *state)
 {
