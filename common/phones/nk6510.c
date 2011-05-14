@@ -261,7 +261,6 @@ static gn_error NK6510_PlayTone(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetProfile(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SetProfile(gn_data *data, struct gn_statemachine *state);
 
-static gn_error NK6510_GetAnykeyAnswer(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press);
 static gn_error NK6510_Subscribe(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetActiveCalls(gn_data *data, struct gn_statemachine *state);
@@ -4886,6 +4885,7 @@ static gn_error GetWelcomeNoteText(gn_data *data, struct gn_statemachine *state)
 	SEND_MESSAGE_BLOCK(NK6510_MSG_STLOGO, 6);
 }
 
+#if 0
 static gn_error NK6510_GetAnykeyAnswer(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x02, 0x05, 0x00, 0x7d};
@@ -4893,6 +4893,7 @@ static gn_error NK6510_GetAnykeyAnswer(gn_data *data, struct gn_statemachine *st
 	dprintf("See if anykey answer is set...\n");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_STLOGO, 7);
 }
+#endif
 
 static gn_error GetStartupBitmap(gn_data *data, struct gn_statemachine *state)
 {
@@ -6351,6 +6352,7 @@ static gn_error NK6510_GetToDoLocations(gn_data *data, struct gn_statemachine *s
 	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10);
 }
 
+#if 0
 static gn_error NK6510_GetToDoLocations_S40_30(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {	FBUS_FRAME_HEADER, 0x79,
@@ -6359,6 +6361,7 @@ static gn_error NK6510_GetToDoLocations_S40_30(gn_data *data, struct gn_statemac
 
 	SEND_MESSAGE_BLOCK(NK6510_MSG_TODO, 10);
 }
+#endif
 
 static gn_error NK6510_DeleteAllToDoLocations(gn_data *data, struct gn_statemachine *state)
 {
