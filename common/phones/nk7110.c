@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -34,7 +32,7 @@
   This file provides functions specific to the Nokia 7110 series.
   See README for more details on supported mobile phones.
 
-  The various routines are called P7110_(whatever).
+  The various routines are called NK7110_(whatever).
 
 */
 
@@ -99,7 +97,6 @@ static gn_error NK7110_SendSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_SaveSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetSMSnoValidate(gn_data *data, struct gn_statemachine *state);
-static gn_error NK7110_PollSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_DeleteSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_DeleteSMSnoValidate(gn_data *data, struct gn_statemachine *state);
 static gn_error NK7110_GetPictureList(gn_data *data, struct gn_statemachine *state);
@@ -146,7 +143,6 @@ static gn_error NK7110_IncomingCommstatus(int messagetype, unsigned char *messag
 
 static int get_memory_type(gn_memory_type memory_type);
 static gn_memory_type get_gn_memory_type(int memory_type);
-static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type);
 
 static gn_incoming_function_type nk7110_incoming_functions[] = {
 	{ NK7110_MSG_FOLDER,		NK7110_IncomingFolder },
@@ -262,7 +258,8 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 		}
 		break;
 	case GN_OP_PollSMS:
-		if (DRVINSTANCE(state)->new_sms) return GN_ERR_NONE; /* FIXME NK7110_GetIncomingSMS(data, state); */
+		if (DRVINSTANCE(state)->new_sms)
+			return GN_ERR_NONE; /* FIXME NK7110_GetIncomingSMS(data, state); */
 		break;
 	case GN_OP_SendSMS:
 		return NK7110_SendSMS(data, state);
@@ -1531,12 +1528,14 @@ static gn_error NK7110_GetSMSCenter(gn_data *data, struct gn_statemachine *state
 	SEND_MESSAGE_BLOCK(NK7110_MSG_SMS, 6);
 }
 
+#if 0
 static gn_error NK7110_PollSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0d, 0x00, 0x00, 0x02};
 	dprintf("Requesting for the notify of the incoming SMS\n");
 	SEND_MESSAGE_BLOCK(NK7110_MSG_SMS, 8);
 }
+#endif
 
 static gn_error NK7110_SendSMS(gn_data *data, struct gn_statemachine *state)
 {
@@ -3222,6 +3221,7 @@ static gn_memory_type get_gn_memory_type(int memory_type)
 	return result;
 }
 
+#if 0
 static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_data_type type)
 {
     unsigned char req[512] = {0x7c, 0x01, 0x00, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
@@ -3253,7 +3253,7 @@ static gn_error NBSUpload(gn_data *data, struct gn_statemachine *state, gn_sms_d
 
     return sm_message_send(n, 0x00, req, state);
 }
-
+#endif
 
 /*****************************/
 /******* COMM STATUS *********/
