@@ -231,10 +231,6 @@ static gn_error NK6510_GetWAPSetting(gn_data *data, struct gn_statemachine *stat
 static gn_error NK6510_ActivateWAPSetting(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_WriteWAPSetting(gn_data *data, struct gn_statemachine *state);
 
-/*
-static gn_error NK6510_PollSMS(gn_data *data, struct gn_statemachine *state);
-static gn_error NK6510_GetPicture(gn_data *data, struct gn_statemachine *state);
-*/
 static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state);
@@ -255,9 +251,6 @@ static gn_error NK6510_GetMMSList_S40_30(gn_data *data, struct gn_statemachine *
 static gn_error NK6510_DeleteMMS(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteMMS_S40_30(gn_data *data, struct gn_statemachine *state);
 
-/*
-static gn_error NK6510_CallDivert(gn_data *data, struct gn_statemachine *state);
-*/
 static gn_error NK6510_GetRingtoneList(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetRawRingtone(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_SetRawRingtone(gn_data *data, struct gn_statemachine *state);
@@ -306,9 +299,6 @@ static gn_error NK6510_IncomingSMS(int messagetype, unsigned char *buffer, int l
 static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingClock(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
-/*
-static gn_error NK6510_IncomingCallDivert(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
-*/
 static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingProfile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingKeypress(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -342,9 +332,6 @@ static gn_incoming_function_type nk6510_incoming_functions[] = {
 	{ NK6510_MSG_CLOCK,	NK6510_IncomingClock },
 	{ NK6510_MSG_IDENTITY,	NK6510_IncomingIdentify },
 	{ NK6510_MSG_STLOGO,	NK6510_IncomingStartup },
-	/*
-	{ NK6510_MSG_DIVERT,	NK6510_IncomingCallDivert },
-	*/
 	{ NK6510_MSG_PROFILE,    NK6510_IncomingProfile },
 	{ NK6510_MSG_RINGTONE,	NK6510_IncomingRingtone },
 	{ NK6510_MSG_KEYPRESS,	NK6510_IncomingKeypress },
@@ -467,21 +454,12 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		DRVINSTANCE(state)->call_notification = data->call_notification;
 		DRVINSTANCE(state)->call_callback_data = data->callback_data;
 		return NK6510_Subscribe(data, state);
-	/* case GN_OP_PollSMS:
-		break;
-	case GONK6510_GetPicture:
-		return NK6510_GetPicture(data, state);
-		*/
 	case GN_OP_DeleteSMS:
 		return NK6510_DeleteSMS(data, state);
 	case GN_OP_DeleteSMSnoValidate:
 		return NK6510_DeleteSMSnoValidate(data, state);
 	case GN_OP_GetSMSStatus:
 		return NK6510_GetSMSStatus(data, state);
-		/*
-	case GN_OP_CallDivert:
-		return NK6510_CallDivert(data, state);
-		*/
 	case GN_OP_SaveSMS:
 		return NK6510_SaveSMS(data, state);
 	case GN_OP_SendSMS:
@@ -1825,10 +1803,10 @@ static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
 	memset(req + 15, 0x00, sizeof(req) - 15);
 
 	len += sms_encode(data, state, req + 9);
-	/*
+#if 0
 	for (i = 0; i < len; i++) dprintf("%02x ", req[i]);
 	dprintf("\n");
-	*/
+#endif
 	fprintf(stdout, _("6510 series phones seem to be quite sensitive to malformed SMS messages\n"
 			  "It may have to be sent to Nokia Service if something fails!\n"
 			  "Do you really want to continue? "));
