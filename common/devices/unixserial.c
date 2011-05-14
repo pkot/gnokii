@@ -368,7 +368,7 @@ gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)
 	switch (speed) {
 	case 0:
 		dprintf("Not setting port speed\n");
-		return;
+		return GN_ERR_NOTSUPPORTED;
 	case 2400:
 		new_speed = B2400;
 		break;
