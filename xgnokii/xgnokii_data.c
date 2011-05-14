@@ -75,11 +75,6 @@ void GUI_ShowData(void)
 	gtk_window_present(GTK_WINDOW(GUI_DataWindow));
 }
 
-static void GUI_HideData(void)
-{
-	gtk_widget_hide(GUI_DataWindow);
-}
-
 static inline void DisableData(GtkWidget * widget, gpointer data)
 {
 	gn_vm_terminate();
