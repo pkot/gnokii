@@ -1,32 +1,42 @@
-.TH "gnokii" "1" "Jul 11, 2010" "Dag Wieers, Pawel Kot" "gnokii"
+.TH "gnokii" "1" "May 23, 2011" "Dag Wieers, Pawel Kot" "gnokii"
 .SH "NAME"
-gnokii \- modem/fax driver for the mobile phones
+gnokii \- tool suite for mobile phones
 .SH "SYNOPSIS"
 .B gnokii
 \fI[CONFIG OPTIONS]\fR [\fIOPTIONS\fR]
 .SH "DESCRIPTION"
 .PP 
 .B gnokii
-is a multiple systems tool suite and (eventually) modem/fax driver for the mobile phones.
+is a multiple systems tool suite and driver for mobile phones.
 .PP 
-.B gnokii 
-at the beginning was designed to support the proprietary protocols of Nokia phones and at the moment it also supports phones and GSM modems that understand AT commands, both from Nokia and from other vendors, and SIM cards in PC/SC compatible Smart Card readers.
+.B gnokii
+supports the AT protocol defined by the GSM standard (with workarounds for some vendor's quirks),
+some proprietary protocols of Nokia phones (the so called FBUS and FBUS2)
+and SIM cards in PC/SC compatible Smart Card readers.
 Limited support for the older and slow Nokia MBUS protocol is also available.
 .PP
-You can assume that your phone is supported, however there are rare cases
-that you will get very limited functionality with gnokii. If you have a
-fairly modern phone you should use the following model setting in your
-config file:
- - model = series40, if you have Nokia non-Symbian phone
- - model = gnapplet, if you have Nokia Symbian Series60 prior to 3rd Edition phone
- - model = AT, for all other
+You can assume that your phone will work with
+.B gnokii
+when using the AT protocol, however some phones implement only a subset of the protocol
+and in those cases you will get very limited functionality.
+The recommended model setting for your config file are:
+ - model = series40, if you have a fairly recent Nokia phone except Symbian phones prior to Series60 3rd Edition
+ - model = gnapplet, if you have a Nokia Symbian Series60 prior to 3rd Edition phone
+ - model = AT, for all other phones of any brand
  - if you have some older Nokia phone you may try using its brand name, eg. for Nokia 6210 use model = 6210.
 
-See also our <http://wiki.gnokii.org/index.php/Config> for configurations known to work.
+The recommended connection and port settings for your config file are:
+ - connection = bluetooth and port = phone address, for Bluetooth connections
+ - connection = dku2libusb and port = 1, for most Nokia USB cables
+ - connection = serial and port = /dev/..., for all other cables
 
-Symbian series60 3rd edition (most Nokia n and e series) are not
-supported by gnapplet driver due to changes in Symbian API. For now you
-can get some functionality using AT driver.
+See also the sample gnokiirc for a description of all configuration parameters
+and our <http://wiki.gnokii.org/index.php/Config> for configurations known to work.
+
+Symbian series60 3rd edition and later (most Nokia N and E series) are not
+supported by the gnapplet driver due to changes in Symbian API. For now you
+can get some functionality using the AT driver (with all connection types
+supported by the phone) or using the series40 driver (only with connection = dku2libusb).
 
 Please note that currently there are Nokia models with almost the same names
 as the old ones, like 6110c vs 6110 or 3110c vs 3110. They are completly
