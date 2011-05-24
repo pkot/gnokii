@@ -17,6 +17,8 @@
     o change the order of lookup for the config file
       (http://bugs.debian.org/cgi-bin/bugreport.cgi?bug=623694)
                                                         (Paweł Kot)
+    o add id for Nokia 3109c to misc.c only; use model=series40
+                                               (Alexandre A. Alves)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
