@@ -884,13 +884,14 @@ if (!gnokii_strcmpsep(#f, val, ',')) {\
 	dprintf("Flag PM_%s\n", #f);\
 	continue;\
 }
-/* Load phone flags (formerly a static array in misc.c) */
+/* Load phone flags from config or fallback to the static array in misc.c */
 gn_phone_model *gn_cfg_get_phone_model(struct gn_cfg_header *cfg, const char *product_name)
 {
 	struct gn_cfg_header *hdr;
 	char *val, *comma, *end, *section = "flags";
 	int count;
 	static gn_phone_model phone_model = {NULL, NULL, 0};
+	gn_phone_model *found_phone_model;
 	static char model[GN_MODEL_MAX_LENGTH] = "";
 
 	if (phone_model.model)
@@ -951,6 +952,10 @@ gn_phone_model *gn_cfg_get_phone_model(struct gn_cfg_header *cfg, const char *pr
 		return &phone_model;
 	}
 #undef SETFLAG
+
+	found_phone_model = gn_phone_model_get(product_name);
+	if (found_phone_model->model)
+		return found_phone_model;
 
 	/* Give the user some hint on why the product_name wasn't found */
 	hdr = cfg_header_get(cfg, (char *)section);
