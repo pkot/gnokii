@@ -304,12 +304,13 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
 }
 
 
-GNOKII_API void DB_Look (const gchar * const phone)
+GNOKII_API gint DB_Look (const gchar * const phone)
 {
   GString *buf, *phnStr;
   MYSQL_RES *res1;
   MYSQL_ROW row;
   gint numError, error;
+  gint empty = 1;
 
   if (phone[0] == '\0')
     phnStr = g_string_new ("");
@@ -335,7 +336,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
     g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
     mysql_real_query (&mysqlOut, "ROLLBACK TRANSACTION", strlen ("ROLLBACK TRANSACTION"));
     g_string_free (buf, TRUE);
-    return;
+    return (SMSD_NOK);
   }
 
   if (!(res1 = mysql_store_result (&mysqlOut)))
@@ -344,13 +345,14 @@ GNOKII_API void DB_Look (const gchar * const phone)
     g_print (_("Error: %s\n"), mysql_error (&mysqlOut));
     mysql_real_query (&mysqlOut, "ROLLBACK TRANSACTION", strlen ("ROLLBACK TRANSACTION"));
     g_string_free (buf, TRUE);
-    return;
+    return (SMSD_NOK);
   }
   
   while ((row = mysql_fetch_row (res1)))
   {
     gn_sms sms;
 
+    empty = 0;
     gn_sms_default_submit (&sms);    
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
     sms.delivery_report = atoi (row[3]);
@@ -403,4 +405,9 @@ GNOKII_API void DB_Look (const gchar * const phone)
   mysql_real_query (&mysqlOut, "COMMIT", strlen ("COMMIT"));
   
   g_string_free (buf, TRUE);
+  
+  if (empty)
+    return (SMSD_OUTBOXEMPTY);
+  else
+    return (SMSD_OK);
 }

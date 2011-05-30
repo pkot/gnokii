@@ -71,7 +71,7 @@ void (*DB_Bye) (void) = NULL;
 gint (*DB_ConnectInbox) (const DBConfig) = NULL;
 gint (*DB_ConnectOutbox) (const DBConfig) = NULL;
 gint (*DB_InsertSMS) (const gn_sms * const, const gchar * const) = NULL;
-void (*DB_Look) (const gchar * const) = NULL;
+gint (*DB_Look) (const gchar * const) = NULL;
 
 static pthread_t db_monitor_th;
 pthread_mutex_t db_monitorMutex;
@@ -372,7 +372,8 @@ static void *SendSMS (void *a)
     }
     pthread_mutex_unlock (&db_monitorMutex);
 
-    (*DB_Look) (smsdConfig.phone);
+    if ((*DB_Look) (smsdConfig.phone) == SMSD_OUTBOXEMPTY)
+      sleep (5);
   }
 }
 

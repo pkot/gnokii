@@ -36,6 +36,6 @@ GNOKII_API void (*DB_Bye) (void);
 GNOKII_API gint (*DB_ConnectInbox) (const DBConfig);
 GNOKII_API gint (*DB_ConnectOutbox) (const DBConfig);
 GNOKII_API gint (*DB_InsertSMS) (const gn_sms * const, const gchar * const);
-GNOKII_API void (*DB_Look) (const gchar * const);
+GNOKII_API gint (*DB_Look) (const gchar * const);
 
 #endif

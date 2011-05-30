@@ -1,3 +1,9 @@
+* Sat 28 May 2011 Jan Derfinak
+- After patch from 09 Apr 2011, the query interval for looking to outbox was
+  too small and smsd overloads db server. Added 5 seconds sleep if outbox
+  doesn't contain unprocessed sms. (Bug report from João Areias).
+
+
 * Fri 13 May 2011 Paweł Kot
 - Do not call GetSMSC every time SMS is being sent.
 

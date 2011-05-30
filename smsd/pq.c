@@ -341,12 +341,13 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
 }
 
 
-GNOKII_API void DB_Look (const gchar * const phone)
+GNOKII_API gint DB_Look (const gchar * const phone)
 {
   GString *buf, *phnStr;
   PGresult *res1, *res2;
   register int i;
   gint numError, error;
+  gint empty = 1;
 
   if (phone[0] == '\0')
     phnStr = g_string_new ("");
@@ -377,13 +378,14 @@ GNOKII_API void DB_Look (const gchar * const phone)
     res1 = PQexec (connOut, "ROLLBACK TRANSACTION");
     PQclear (res1);
     g_string_free (buf, TRUE);
-    return;
+    return (SMSD_NOK);
   }
 
   for (i = 0; i < PQntuples (res1); i++)
   {
     gn_sms sms;
     
+    empty = 0;
     gn_sms_default_submit (&sms);
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
     sms.delivery_report = atoi (PQgetvalue (res1, i, 3));
@@ -433,4 +435,9 @@ GNOKII_API void DB_Look (const gchar * const phone)
   PQclear (res1);
 
   g_string_free (buf, TRUE);
+  
+  if (empty)
+    return (SMSD_OUTBOXEMPTY);
+  else
+    return (SMSD_OK);
 }

@@ -142,13 +142,14 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
     return SMSD_OK;
 }
 
-GNOKII_API void DB_Look(const gchar * const phone)
+GNOKII_API gint DB_Look(const gchar * const phone)
 {
     GString *buf, *phnStr, *timebuf;
     gint ret1, numError, error;
     time_t rawtime;
     struct tm * timeinfo;
     sqlite3_stmt * stmt;
+    gint empty = 1;
 
     if (phone[0] == '\0')
         phnStr = g_string_new("");
@@ -180,7 +181,7 @@ GNOKII_API void DB_Look(const gchar * const phone)
     if (ret1 != SQLITE_OK) {
         g_print(_("%d: Parsing query %s failed!"), __LINE__, buf->str);
         g_print(_("Error: %s"), sqlite3_errmsg(ppDbInbox));
-        return;
+        return (SMSD_NOK);
     }
 
     g_string_printf(timebuf, "'%02d-%02d-%02d %02d:%02d:%02d'",
@@ -194,6 +195,7 @@ GNOKII_API void DB_Look(const gchar * const phone)
         int gerror = 0;
         gn_sms sms;
 
+        empty = 0;
         gn_sms_default_submit(&sms);
         memset(&sms.remote.number, 0, sizeof (sms.remote.number));
         sms.delivery_report = sqlite3_column_int(stmt, 3);
@@ -241,11 +243,16 @@ GNOKII_API void DB_Look(const gchar * const phone)
 
         g_string_free(timebuf, TRUE);
         g_string_free(buf, TRUE);
-        return;
+        return (SMSD_NOK);
     }
     sqlite3_finalize(stmt);
     sqlite3_exec(ppDbOutbox, "COMMIT;", NULL, NULL, NULL);
 
     g_string_free(timebuf, TRUE);
     g_string_free(buf, TRUE);
+    
+    if (empty)
+      return (SMSD_OUTBOXEMPTY);
+    else
+      return (SMSD_OK);
 }
