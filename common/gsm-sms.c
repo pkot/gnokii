@@ -1702,6 +1702,8 @@ static gn_error sms_send_single(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Sending\n");
 	error = gn_sm_functions(GN_OP_SendSMS, data, state);
+	if (error != GN_ERR_NONE)
+		return error;
 
 	/* We send SMS parts from the first part to last. */
 	if (!data->sms->reference)
@@ -1711,7 +1713,7 @@ static gn_error sms_send_single(gn_data *data, struct gn_statemachine *state)
 		i++;
 	data->sms->reference[i] = data->raw_sms->reference;
 
-	return error;
+	return GN_ERR_NONE;
 }
 
 static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state, int octets)
