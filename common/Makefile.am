@@ -19,7 +19,8 @@ pkgconfig_DATA = gnokii.pc
 pkgconfigdir = $(libdir)/pkgconfig
 
 libgnokii_la_CPPFLAGS = -DLIBDIR="\"$(libdir)\""
-libgnokii_la_CFLAGS = -I$(top_srcdir)/include $(GLIB_CFLAGS)
+libgnokii_la_CFLAGS = -I$(top_srcdir)/include $(GLIB_CFLAGS) \
+	$(ICAL_CFLAGS)
 
 libgnokii_la_SOURCES = \
 	libfunctions.c \
@@ -60,7 +61,8 @@ libgnokii_la_LIBADD = \
 	$(INTLLIBS) \
 	$(BLUETOOTH_LIBS) \
 	$(USB_LIBS) \
-	$(TCP_LIBS)
+	$(TCP_LIBS) \
+	$(ICAL_LIBS)
 
 libgnokii_la_LDFLAGS = 				\
 	-version-info $(GNOKII_LT_VERSION)	\

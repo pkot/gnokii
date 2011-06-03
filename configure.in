@@ -390,8 +390,10 @@ AC_ARG_ENABLE(libical,
        	      [enable_libical=yes])
 
 if test "$enable_libical" = "yes"; then
+	ICAL_LIBS="$ICAL_LIBS -lpthread -lical"
 	OLD_CFLAGS="$CFLAGS"
-	LIBS="$LIBS $ICAL_LIBS -lpthread -lical"
+	OLD_LIBS="$LIBS"
+	LIBS="$LIBS $ICAL_LIBS"
 	CFLAGS="$CFLAGS $ICAL_CFLAGS"
 	AC_MSG_CHECKING(whether libical is installed)
 	AC_TRY_LINK([
@@ -414,13 +416,16 @@ if test "$enable_libical" = "yes"; then
 	      AC_MSG_RESULT(yes)
 	      USE_LIBICAL="yes"
 	      AC_DEFINE([HAVE_LIBICAL],[1],[Use libical])
+	      AC_SUBST(ICAL_LIBS)
+	      AC_SUBST(ICAL_CFLAGS)
 	   ],
 	   [
 	      AC_MSG_RESULT(no)
-	      LIBS="$OLD_LIBS"
-	      CFLAGS="$OLD_CFLAGS"
+	      ICAL_LIBS=""
 	   ]
 	)
+	LIBS="$OLD_LIBS"
+	CFLAGS="$OLD_CFLAGS"
 fi
 
 dnl ======================== Check for libusb
