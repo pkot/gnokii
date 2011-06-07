@@ -885,7 +885,9 @@ int main()
 
 fi
 
-AC_DEFINE(USE_UNIX98PTYS, test x$have_unix98 = xyes, [Whether Unix98 support is available])
+if test x$have_unix98 = xyes; then
+	AC_DEFINE(USE_UNIX98PTYS, 1, [Whether Unix98 support is available])
+fi
 
 AC_TRY_COMPILE( [#define _XOPEN_SOURCE 500
 		 #include <sys/types.h>
