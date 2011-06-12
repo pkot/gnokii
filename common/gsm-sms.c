@@ -1739,7 +1739,7 @@ static gn_error sms_send_single(gn_data *data, struct gn_statemachine *state)
 	error = gn_sm_functions(GN_OP_SendSMS, data, state);
 
 	/* If there was an error, let's not put the reference into data->sms */
-	if (error == GN_ERR_NONE)
+	if (error == GN_ERR_NONE) {
 		/* In case of multipart message it is already allocated */
 		if (!data->sms->reference)
 			data->sms->reference = calloc(data->sms->parts, sizeof(unsigned int));
