@@ -4584,7 +4584,7 @@ msgstr "Fehler %d: %s\n"
 #: ../smsd/sqlite.c:135
 #, c-format
 msgid "Query: %s\n"
-msgstr "Abfrage"
+msgstr "Abfrage: %s\n"
 
 #: ../utils/mgnokiidev.c:176
 #, c-format
