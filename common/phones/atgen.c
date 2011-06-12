@@ -1932,8 +1932,7 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 				/* not a fatal error */
 				data->phonebook_entry->date.year = 0;
 			}
-			if (date_buf)
-				free(date_buf);
+			free(date_buf);
 		}
 	}
 	return GN_ERR_NONE;

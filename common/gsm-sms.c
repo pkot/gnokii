@@ -1969,7 +1969,7 @@ char *encode_indication(gn_wap_push *wp, int *data_len)
 	
 	if (!data) {
 		free(attr);
-	    return NULL;
+		return NULL;
 	}
 	
 	/* indication tag token */
@@ -2235,9 +2235,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 
 	return buf;
 error:
-	if (buf)
-		free(buf);
-	if (aux)
-		free(aux);
+	free(buf);
+	free(aux);
 	return NULL;
 }

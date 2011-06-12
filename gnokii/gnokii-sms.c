@@ -358,8 +358,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	} else
 		fprintf(stderr, _("SMS Send failed (%s)\n"), gn_error_print(error));
 
-        if (sms.reference)
-        	free(sms.reference);
+	free(sms.reference);
 	return error;
 }
 

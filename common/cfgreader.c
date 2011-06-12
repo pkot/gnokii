@@ -51,7 +51,7 @@ GNOKII_API struct gn_cfg_header *gn_cfg_info;
 static gn_config gn_config_default, gn_config_global;
 
 /* Handy macros */
-#define FREE(x)	do { if (x) free(x); (x) = NULL; } while (0)
+#define FREE(x)	do { free(x); (x) = NULL; } while (0)
 
 /*
  * Function to dump configuration pointed by @config
@@ -611,8 +611,7 @@ err_alloc:
 
 err_read:
 	fclose(handle);
-	if (lines)
-		free(lines);
+	free(lines);
 
 out:
 	return header;
@@ -1148,8 +1147,7 @@ static char **get_locations(int *retval)
 	config_file_locations[(*retval)++] = strdup(path);
 
 out:
-	if (free_xdg_config_home)
-		free(xdg_config_home);
+	free(xdg_config_home);
 
 	return config_file_locations;
 }

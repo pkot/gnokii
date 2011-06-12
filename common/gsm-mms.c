@@ -613,8 +613,7 @@ gn_error gn_mms_nokia2txt(const unsigned char *source_buffer, size_t *source_len
 		return error;
 
 	error = gn_mms_pdu2txt(pdu_buffer, &pdu_length, dest_buffer, dest_length);
-	if (pdu_buffer)
-		free(pdu_buffer);
+	free(pdu_buffer);
 
 	return error;
 }
@@ -640,8 +639,7 @@ gn_error gn_mms_nokia2mime(const unsigned char *source_buffer, size_t *source_le
 		return error;
 
 	error = gn_mms_pdu2mime(pdu_buffer, &pdu_length, dest_buffer, dest_length);
-	if (pdu_buffer)
-		free(pdu_buffer);
+	free(pdu_buffer);
 
 	return error;
 }

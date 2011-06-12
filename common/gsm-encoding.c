@@ -1457,8 +1457,7 @@ int base64_encode(char *outstring, int outlen, const char *instring, int inlen)
 	/* terminate the output string */
 	*pout = 0;
 
-	if (outtemp)
-		free(outtemp);
+	free(outtemp);
 
 	return pout - outstring;
 }

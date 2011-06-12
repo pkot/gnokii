@@ -2141,12 +2141,10 @@ static gn_error NK6510_GetMMS_S40_30(gn_data *data, struct gn_statemachine *stat
 		data->raw_mms->buffer_length = fi.file_length;
 		data->raw_mms->buffer = fi.file;
 
-		if (fi.id)
-			free(fi.id);
+		free(fi.id);
 	}
 	/* Do not free all fl.files[i] pointers because they are owned and shared by the cache */
-	if (fl.files)
-		free(fl.files);
+	free(fl.files);
 
 	return error;
 }

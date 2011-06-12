@@ -274,8 +274,7 @@ norecurrence:
 		}
 		ical_append_printf(&str, "%s\n", icalstr);
 		dprintf("%s\n", icalstr);
-		if (icalstrbuf)
-			free(icalstrbuf);
+		free(icalstrbuf);
 
 		icalcomponent_free(pIcal);
 		pIcal = NULL;
@@ -380,7 +379,7 @@ GNOKII_API int gn_calnote2ical(FILE *f, gn_calnote *calnote)
 	if (vcal == NULL)
 		return -1;
 	retval = fputs(vcal, f);
-	free (vcal);
+	free(vcal);
 	return retval;
 }
 

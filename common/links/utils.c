@@ -49,10 +49,8 @@ gn_error link_terminate(struct gn_statemachine *state)
 	/* device_close(&(state->Device)); */
 	if (state->link.cleanup)
 		state->link.cleanup(state);
-	if (state->link.link_instance) {
-		free(state->link.link_instance);
-		state->link.link_instance = NULL;
-	}
+	free(state->link.link_instance);
+	state->link.link_instance = NULL;
 	device_close(state);
 	return GN_ERR_NONE; /* FIXME */
 }

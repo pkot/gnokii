@@ -120,10 +120,8 @@ void device_close(struct gn_statemachine *state)
 		break;
 	}
 
-	if (state->device.device_instance) {
-		free(state->device.device_instance);
-		state->device.device_instance = NULL;
-	}
+	free(state->device.device_instance);
+	state->device.device_instance = NULL;
 }
 
 void device_reset(struct gn_statemachine *state)

@@ -107,8 +107,7 @@ static gn_error register_driver(gn_driver *driver, const char *model, char *setu
 	if (strstr(driver->phone.models, model) != NULL)
 		error = driver->functions(GN_OP_Init, p_data, sm);
 
-	if (data)
-		free(data);
+	free(data);
 	return error;
 }
 
