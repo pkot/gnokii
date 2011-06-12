@@ -1588,6 +1588,17 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state, int 
  * (gn_sms) in the higher level. This is converted to raw_sms here,
  * and then phone driver takes the fields it needs and sends it in the
  * phone specific way to the phone.
+ *
+ * In case of multipart message, sending is interrupted on the first
+ * failure.  It means that if message got split into 3 messages, and 2nd
+ * part fails to send, the 3rd part is not attepted to get sent.  There is
+ * no interface to retry multipart message from the failed part.
+ *
+ * data->sms->parts indicates how many parts were (or supposed to be) sent.
+ *
+ * data->sms->reference contains data->sms->parts reference numbers from the
+ * sent messages.  They might be used to relate the delivery reports.  If
+ * given element has reference 0, sending this part, falied.
  */
 GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 {
@@ -1599,9 +1610,14 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("=====> ENTER gn_sms_send()\n");
 	/*
-	 * count -- number of SMS to be sent
-	 * total -- total number of octets to be sent
+	 * Make sure that we will not get any corruption if it was not
+	 * initialized properly by the app.  Issue a warning that
+	 * application may leak the memory
 	 */
+	if (data->sms->reference) {
+		dprintf("data->sms->reference was not set to NULL. The app may not initialize it\nproperly or leak memory.\n");
+		data->sms->reference = NULL;
+	}
 
 	/*
 	 * We need to work on data->sms->user_data; let's have a copy of the
@@ -1671,23 +1687,14 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 
 	/* It will eventually get overwritten in sms_send_long() */
 	data->sms->parts = 1;
-	
-	/*
-	 * Make sure that we will not get any corruption if it was not
-	 * initialized properly by the app.  Issue a warning that
-	 * application may leak the memory
-	 */
-	if (data->sms->reference) {
-		dprintf("data->sms->reference was not set to NULL. The app may not initialize it\nproperly or leak memory.\n");
-		data->sms->reference = NULL;
-	}
 
 	if (total > MAX_SMS_PART)
-		retval =  sms_send_long(data, state, total);
+		retval = sms_send_long(data, state, total);
 	else
 		retval = sms_send_single(data, state);
 
 	data->sms = orig_sms;
+	/* Let's put back information about sent messages */
 	data->sms->reference = sms.reference;
 	data->sms->parts = sms.parts;
 
@@ -1731,17 +1738,27 @@ static gn_error sms_send_single(gn_data *data, struct gn_statemachine *state)
 	dprintf("Sending\n");
 	error = gn_sm_functions(GN_OP_SendSMS, data, state);
 
-	/* We send SMS parts from the first part to last. */
-	if (!data->sms->reference)
-		data->sms->reference = calloc(data->sms->parts, sizeof(unsigned int));
-	i = 0;
-	while (i < data->sms->parts-1 && data->sms->reference[i] != 0)
-		i++;
-	data->sms->reference[i] = data->raw_sms->reference;
+	/* If there was an error, let's not put the reference into data->sms */
+	if (error == GN_ERR_NONE)
+		/* In case of multipart message it is already allocated */
+		if (!data->sms->reference)
+			data->sms->reference = calloc(data->sms->parts, sizeof(unsigned int));
+
+		/* We send SMS parts from the first part to last. */
+		i = 0;
+		while (i < data->sms->parts-1 && data->sms->reference[i] != 0)
+			i++;
+		data->sms->reference[i] = data->raw_sms->reference;
+	}
 
 	return error;
 }
 
+/* 
+ * FIXME: we stop sending multipart message on first error. We may end up
+ * with few messages send, and few failed.  We're not able to resend only
+ * failed ones.
+ */
 static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state, int octets)
 {
 	int i, j, k, count, size, start, copied, refnum, is_concat = -1, max_sms_len = MAX_SMS_PART;
