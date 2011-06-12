@@ -19,6 +19,7 @@
                                                         (Paweł Kot)
     o add id for Nokia 3109c to misc.c only; use model=series40
                                                (Alexandre A. Alves)
+    o fix gn_sms_send() so the message could be resent  (Paweł Kot)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)

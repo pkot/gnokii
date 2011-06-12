@@ -1593,12 +1593,24 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 {
 	int i, total;
 	int enc_chars, ext_chars;
+	gn_error retval;
+	gn_sms sms;
+	gn_sms *orig_sms;
 
 	dprintf("=====> ENTER gn_sms_send()\n");
 	/*
 	 * count -- number of SMS to be sent
 	 * total -- total number of octets to be sent
 	 */
+
+	/*
+	 * We need to work on data->sms->user_data; let's have a copy of the
+	 * original request so message could be resubmitted.
+	 * FIXME: use for that only additional user_data structure
+	 */
+	orig_sms = data->sms;
+	memcpy(&sms, data->sms, sizeof(gn_sms));
+	data->sms = &sms;
 
 	/* Convert all the input strings to UTF-8 */
 	if (data->sms->dcs.u.general.alphabet != GN_SMS_DCS_8bit) {
@@ -1659,11 +1671,27 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 
 	/* It will eventually get overwritten in sms_send_long() */
 	data->sms->parts = 1;
+	
+	/*
+	 * Make sure that we will not get any corruption if it was not
+	 * initialized properly by the app.  Issue a warning that
+	 * application may leak the memory
+	 */
+	if (data->sms->reference) {
+		dprintf("data->sms->reference was not set to NULL. The app may not initialize it\nproperly or leak memory.\n");
+		data->sms->reference = NULL;
+	}
 
 	if (total > MAX_SMS_PART)
-		return sms_send_long(data, state, total);
+		retval =  sms_send_long(data, state, total);
 	else
-		return sms_send_single(data, state);
+		retval = sms_send_single(data, state);
+
+	data->sms = orig_sms;
+	data->sms->reference = sms.reference;
+	data->sms->parts = sms.parts;
+
+	return retval;
 }
 
 static gn_error sms_send_single(gn_data *data, struct gn_statemachine *state)
