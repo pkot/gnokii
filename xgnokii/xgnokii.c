@@ -818,6 +818,7 @@ static void _MainExit(void)
 void MainExit(gchar *ermsg)
 {
 	if (ermsg) {
+		gn_log_xdebug(ermsg);
 		/* Nasty workaround -- that's some race condition that makes sometimes xgnokii to hang on exit */
 		sleep(1);
 		gtk_label_set_text(GTK_LABEL(infoDialog.text), ermsg);
