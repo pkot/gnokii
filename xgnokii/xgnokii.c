@@ -2145,8 +2145,10 @@ static void TopLevelWindow(void)
 	GdkBitmap *mask;
 	struct sigaction act;
 
+#if GTK_CHECK_VERSION (2, 6, 0)
+	gtk_window_set_default_icon_name("phone");
+#endif
 	GUI_MainWindow = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	gtk_window_set_wmclass(GTK_WINDOW(GUI_MainWindow), "MainWindow", "Xgnokii");
 /*  gtk_window_set_decorated (GTK_WINDOW (GUI_MainWindow), GTK_FALSE); */
 	gtk_widget_realize(GUI_MainWindow);
 
@@ -2165,8 +2167,6 @@ static void TopLevelWindow(void)
 	Pixmap =
 	    gdk_pixmap_create_from_xpm_d(GUI_MainWindow->window, &mask,
 					 &GUI_MainWindow->style->white, (gchar **) XPM_background);
-
-//  gdk_window_set_icon_name (GUI_MainWindow->window, "XXX");
 
 	/* Create the drawing area */
 	drawing_area = gtk_drawing_area_new();

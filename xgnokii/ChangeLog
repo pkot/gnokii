@@ -1,3 +1,6 @@
+* Sat 18 Jun 2011 Daniele Forsi
+- Set "phone" as default window icon
+
 * Sun 26 Sep 2010 Matthias Mucks
 - On 64Bit Machines, while reading contacts from a mobile,
   'pbEntry->entry.caller_group' sometimes contains a large nubmer,
