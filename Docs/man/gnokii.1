@@ -91,9 +91,9 @@ On success print the \fIcallid\fP identifier to be used with the \-\-hangup comm
 The \-\-monitor command can be used to show the \fIcallid\fP.
 
 With \fImodel = AT\fP direct dialing from phonebooks is supported with careful use
-of shell escaping, for example:
+of shell quoting, for example:
  gnokii \-\-dialvoice ">SM42"   # dial the number in location 42 of SM memory
- gnokii \-\-dialvoice '>"Home"' # dial the number if string matches exactly a contact name
+ gnokii \-\-dialvoice '>"Home"' # dial the number if string matches exactly a contact name (note the use of single and double quotes)
 .TP 
 .BR "\-\-senddtmf \fIstring\fP"
 send DTMF sequence.
