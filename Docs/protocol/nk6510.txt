@@ -336,6 +336,12 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                               0x01 (type), 0x0c (length), 0x01, 0x03, year (2 octets), month, day, hour, minute, second, 0x00, 
                               0x04, 0x04, 0x01, 0x00 }
 
+    s Get alarm state       { 0x1f, 0x01, 0x00 }
+    r Get alarm state       { ... }
+                             offset 13: first repetition day mon=0x1b,tue=0x1c,wed=0x1d,thu=0x1e,fri=0x18,sat=0x19,sun=0x1a
+                                        if more than one day is set, only the first is reported here (seen on Series 60 3rd)
+                             offset 61: snooze time-out in minutes (seen on Series 60 3rd, max 60 minutes)
+
 0x1b: IDENTITY
 
     s Get IMEI              { 0x00, 0x41 }
