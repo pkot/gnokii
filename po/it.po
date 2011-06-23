@@ -5241,7 +5241,7 @@ msgstr "Funzione non implementata."
 #: ../xgnokii/xgnokii_calendar.c:194
 #, c-format
 msgid "%04d/%02d/%02d"
-msgstr "%02d/%02d/%04d"
+msgstr "%3$02d/%2$02d/%1$04d"
 
 #: ../xgnokii/xgnokii_calendar.c:197 ../xgnokii/xgnokii_calendar.c:203
 #, c-format
