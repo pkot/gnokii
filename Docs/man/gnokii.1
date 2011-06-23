@@ -120,7 +120,8 @@ specifies one of the operations:
 specifies one of the event types:
 .B busy noans outofreach notavail unconditional all
 
-\-\-call specifies one of the call types:
+.B \-\-call
+specifies one of the call types:
 .B voice fax data all
 
 .B \-\-timeout
@@ -162,14 +163,14 @@ Depending on phone, the \fIhard\fP option also deletes everything in the interna
 get the notes with numbers from \fIstart_number\fR to \fIend_number\fR from ToDo list.
 \fIend\fR is a keyword that denotes 'everything till the end'.
 
-.PP 
-\-v \- output in vCalendar 1.0 format
+\-v | \-\-vCal
+\- output in vCalendar 1.0 format
 .TP 
-.BR "\-\-writetodo \fIvCalendarfile\fR \fIstart_number\fP [\fIend_number\fP|\fIend\fP]"
-write the notes with numbers from \fIstart_number\fR to \fIend_number\fR from vCal file \fIvcalfile\fR to ToDo list.
+.BR "\-\-writetodo \fIvcalfile\fR \fIstart_number\fP [\fIend_number\fP|\fIend\fP]"
+write the notes with numbers from \fIstart_number\fR to \fIend_number\fR from vCalendar file \fIvcalfile\fR to ToDo list.
 More than one note a time can be saved.
 \fIend\fR is a keyword that denotes 'everything till the end'.
-.PP 
+
 number \- location of the note in the vCalendar file
 .TP 
 .BR "\-\-deletealltodos"
@@ -180,14 +181,15 @@ delete all notes from the ToDo list.
 .BR "\-\-getcalendarnote \fIstart_number\fP [\fIend_number\fP|\fIend\fP] [\-v|\-\-vCal]"
 get the notes with numbers from \fIstart_number\fR to \fIend_number\fR from calendar.
 \fIend\fR is a keyword that denotes 'everything till the end'.
-.PP 
-\-v \- output in vCalendar 1.0 format
+
+\-v | \-\-vCal
+\- output in vCalendar 1.0 format
 .TP 
 .BR "\-\-writecalendarnote \fIvcalfile\fR \fIstart_number\fP [\fIend_number\fP|\fIend\fd]"
-write the notes with numbers from \fIstart_number\fR to \fIend_number\fR from vCal file \fIvcalfile\fR to a phone calendar.
+write the notes with numbers from \fIstart_number\fR to \fIend_number\fR from vCalendar file \fIvcalfile\fR to a phone calendar.
 More than one note a time can be saved.
 \fIend\fR is a keyword that denotes 'everything till the end'.
-.PP
+
 number \- location of the note in the vCalendar file
 .TP 
 .BR "\-\-deletecalendarnote \fIstart_number\fP [\fIend_number\fP|\fIend\fP]"
@@ -232,21 +234,21 @@ sends an SMS message to \fIdestination\fR via \fImessage_center_number\fR or SMS
 If this argument is omitted SMSC number is taken from phone memory from location 1.
 Message text is taken from STDIN.
 Meaning of other optional parameters:
-.PP
+
 \-r | \-\-report \- request for delivery report
-.PP
+
 \-8 | \-\-8bit - set 8bit coding
-.PP 
+
 \-C | \-\-class \fIn\fR \- Class Message \fIn\fR, where \fIn\fR can be 0..3
-.PP 
+
 \-v | \-\-validity \fIn\fR \- validity in minutes
-.PP 
+
 \-i | \-\-imelody \- send iMelody within SMS
-.PP
+
 \-a | \-\-animation \fIfile;file;file;file\fR - send animation message
-.PP
+
 \-o | \-\-concat \fIthis;total;serial\fR - send \fIthis\fR part of all \fItotal\fR parts identified by \fIserial\fR
-.PP
+
 \-w | \-\-wappush \fIurl\fR - send wappush to the given \fIurl\fR
 .TP 
 Sample usage:
@@ -255,26 +257,28 @@ echo "This is a test message" | gnokii \-\-sendsms +48501123456 \-r
 .TP 
 .BR "\-\-savesms [\-\-sender \fIfrom\fP] [\-\-smsc \fImessage_center_number\fP | \-\-smscno \fImessage_center_index\fP] [\-\-folder \fIfolder_id\fP] [\-\-location \fInumber\fP] [\-\-sent | \-\-read] [\-\-deliver] [\-\-datetime \fIYYMMDDHHMMSS\fP]"
 saves SMS messages to phone. Messages are read from STDIN. You can specify the following optional arguments:
-.PP 
+
 \-\-sender \- set the sender number (only \fI\-\-deliver\fP)
-.PP 
+
 \-\-smsc \fImessage_center_number\fR \- set the SMSC number (only \fI\-\-deliver\fP)
-.PP 
+
 \-\-smscno \fImessage_center_index\fR \- SMSC number taken from phone memory from address \fImessage_center_index\fR (only \fI\-\-deliver\fP)
-.PP 
+
 \-\-folder \fIfolder_id\fR \- folder ID where to save the SMS to (only valid for newer phones, i.e. 6210/6510 series). For legal values see \fI\-\-getsms\fR.
-.PP 
+
 \-\-location \fInumber\fR \- save the message to location \fInumber\fR
-.PP 
+
 \-\-sent | \-\-read \- mark the message saved/read depending on \fI\-\-deliver\fP
-.PP 
+
 \-\-deliver \- set the message type to SMS_Deliver
-.PP
+
 \-\-datetime \fIYYMMDDHHMMSS\fR \- sets datetime of delivery, i.e. 031123185713 would set message delivery time to 23rd November 2003, 6:57:13 PM
 
 .TP 
 .BR "\-\-getsmsc [\fIstart_number\fP [\fIend_number\fP]] [\-r|\-\-raw]"
 show the SMSC parameters from specified location(s) or for all locations.
+
+\-r | \-\-raw \- output in a format suitable for \-\-setsmsc
 
 .TP
 .BR "\-\-setsmsc"
@@ -303,14 +307,13 @@ gets MMS messages from specified \fImemory type\fR starting at entry \fIstart\fR
 Default output format is human readable, alternative output formats are
 \-\-pdu which is the binary format of MMS as received by the phone from the network
 and \-\-raw which saves the data as read from the phone.
-.PP
+
 When the \-o or \-\-overwrite option is used, existing files are overwritten without asking.
 
 .TP 
 .BR "\-\-deletemms \fImemory_type\fP \fIstart\fP [\fIend\fP]"
 deletes MMS messages from specified \fImemory type\fR starting at entry \fIstart\fR and ending at \fIend\fR.
 If \fIend\fI is not specified only one location \- \fIstart\fR is deleted.
-.TP 
 
 .SS LOGOS
 .TP 
