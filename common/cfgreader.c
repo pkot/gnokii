@@ -1147,7 +1147,8 @@ static char **get_locations(int *retval)
 	config_file_locations[(*retval)++] = strdup(path);
 
 out:
-	free(xdg_config_home);
+	if (free_xdg_config_home)
+		free(xdg_config_home);
 
 	return config_file_locations;
 }
