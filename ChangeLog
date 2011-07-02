@@ -37,6 +37,9 @@
  * xgnokii updates
     o set icon "phone" for all windows when using gtk+ 2.6 or later
                                                     (Daniele Forsi)
+ * at driver updates
+    o correctly initialize memory type on WritePhonebookExt
+                                                          (r4ph431)
 
 0.6.30
 ======

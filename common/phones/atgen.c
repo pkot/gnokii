@@ -1141,6 +1141,7 @@ static gn_error AT_WritePhonebookExt(gn_data *data, struct gn_statemachine *stat
 		return ret;
 
 	gn_data_clear(&data2);
+	memstat.memory_type = entry->memory_type;
 	data2.memory_status = &memstat;
 	ret = state->driver.functions(GN_OP_GetMemoryStatus, &data2, state);
 	if (ret)
