@@ -69,6 +69,9 @@
 #include <sys/uio.h>
 #include <errno.h>
 #include <sys/param.h>
+#ifdef ENABLE_NLS
+#  include <locale.h>
+#endif
 
 static int gwrite(int fd, void *ptr, size_t nbytes, int sendfd)
 {
