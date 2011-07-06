@@ -16,8 +16,8 @@ http://www.musclecard.com/
 
 A typical configuration to use this driver is:
   port = 0
-  model = pcsc
-  connection = pcsc
+  model = APDU
+  connection = libpcsclite
 If you have more than one reader, you might find it useful to specify
 the name of you reader in the port parameter (look at the debug output
 from pcscd or gnokii if you don't know the exact string to use).
