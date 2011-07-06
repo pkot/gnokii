@@ -464,12 +464,12 @@ static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state
 		       number,
 		       data->phonebook_entry->number[0] == '+' ? "145" : "129");
 	tmp = req + ofs;
-	len = fake_encode(AT_CHAR_UCS2, tmp, sizeof(req) - ofs,
+	len = fake_encode(AT_CHAR_UCS2, tmp, sizeof(req) - ofs - 3,
 			data->phonebook_entry->name,
 			strlen(data->phonebook_entry->name));
 	tmp[len-1] = '"';
 	tmp[len++] = '\r';
-	len += ofs;
+	tmp[len] = '\0';
 	dprintf("%s\n", req);
 	return GN_ERR_NONE;
 }
