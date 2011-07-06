@@ -1248,7 +1248,8 @@ static LONG pcsc_cmd_read_record(PCSC_IOSTRUCT *ios, BYTE record, BYTE length)
 
 static LONG pcsc_file_get_contents(PCSC_IOSTRUCT *ios, LONG file_id)
 {
-/* copy file contents in a newly allocated buffer which must be freed by the caller
+/* copy file contents in a newly allocated buffer ios->pbRecvBuffer which must
+be freed by the caller also in case of error return.
 Note that this function overwrites ios->pbRecvBuffer and ios->dwRecvLength
 */
 	LONG ret;
@@ -1257,7 +1258,7 @@ Note that this function overwrites ios->pbRecvBuffer and ios->dwRecvLength
 
 	/* allocate a buffer for the "stat" command */
 	ios->dwRecvLength = MAX_BUFFER_SIZE;
-	ios->pbRecvBuffer = malloc(ios->dwRecvLength);  /* FIXME this memory is leaked after the following errors */
+	ios->pbRecvBuffer = malloc(ios->dwRecvLength);
 	if (!ios->pbRecvBuffer) return SCARD_E_NO_MEMORY;
 
 	ret = pcsc_stat_file(ios, file_id);
