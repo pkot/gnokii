@@ -206,7 +206,7 @@ GNOKII_API const char *gn_connection_type2str(gn_connection_type t)
 	case GN_CT_M2BUS:	return _("M2BUS");
 	case GN_CT_DKU2:	return _("DKU2 (kernel support)");
 	case GN_CT_DKU2LIBUSB:	return _("DKU2 (libusb support)");
-	case GN_CT_PCSC:	return _("Smart Card reader (libpcsc support)");
+	case GN_CT_PCSC:	return _("Smart Card reader (libpcsclite support)");
 	case GN_CT_SOCKETPHONET:	return _("Linux Phonet (kernel support)");
 	default:		return _("Unknown");
 	}
