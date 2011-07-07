@@ -1,4 +1,4 @@
-.TH "gnokii" "1" "Jun 23, 2011" "Dag Wieers, Pawel Kot" "gnokii"
+.TH "gnokii" "1" "Jul  7, 2011" "Dag Wieers, Pawel Kot" "gnokii"
 .SH "NAME"
 gnokii \- tool suite for mobile phones
 .SH "SYNOPSIS"
@@ -23,7 +23,8 @@ The recommended model setting for your config file are:
  - model = series40, if you have a fairly recent Nokia phone except Symbian phones prior to Series60 3rd Edition
  - model = gnapplet, if you have a Nokia Symbian Series60 prior to 3rd Edition phone
  - model = AT, for all other phones of any brand
- - if you have some older Nokia phone you may try using its brand name, eg. for Nokia 6210 use model = 6210.
+ - if you have some older Nokia phone that doesn't work with model = series40
+you may try using its brand name, eg. for Nokia 6210 use \fImodel = 6210\fP.
 
 The recommended connection and port settings for your config file are:
  - connection = bluetooth and port = phone address, for Bluetooth connections
@@ -40,7 +41,7 @@ supported by the phone) or using the series40 driver (only with connection = dku
 
 Please note that currently there are Nokia models with almost the same names
 as the old ones, like 6110c vs 6110 or 3110c vs 3110. They are completly
-incompatible. DO NOT use \fImodel = 6110\fP or \fImodel = 3110\fP setting for them.
+incompatible. DO NOT use \fImodel = 6110\fP or \fImodel = 3110\fP setting for them, use \fImodel = series40\fP instead.
 
 .SH "CONFIG OPTIONS"
 .TP 
