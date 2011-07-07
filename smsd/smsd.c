@@ -153,7 +153,7 @@ static void Usage (gchar *p)
              "            -c, --host db_hostname OR spool directory if -m file\n"
              "            -s, --schema db_schema\n"
              "            -e, --encoding client_encoding\n"
-             "            -m, --module db_module (pq, mysql, file)\n"
+             "            -m, --module db_module (pq, mysql, sqlite, file)\n"
              "            -l, --libdir path_to_db_module\n"
              "            -f, --logfile file\n"
              "            -t, --phone phone_number\n"
