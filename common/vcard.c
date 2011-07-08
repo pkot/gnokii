@@ -43,6 +43,42 @@ typedef struct {
 	unsigned int len;
 } vcard_string;
 
+/*
+  Copies at most @maxcount strings, each of @maxsize length to the given
+  pointers from a vCard property, such as
+  ADR;TYPE=HOME,PREF:PO Box;Ext Add;Street;Town;State;ZIP;Country
+
+  Returns: the number of strings copied
+ */
+int copy_fields(const char *str, int maxcount, size_t maxsize, ...)
+{
+	va_list ap;
+	int count;
+	size_t size;
+	char *dest;
+
+	va_start(ap, maxsize);
+
+	for (count = maxcount; count && *str; count--) {
+		dest = va_arg(ap, char *);
+
+		size = maxsize;
+		while (size && *str) {
+			if (*str == ';') {
+				str++;
+				break;
+			}
+			*dest++ = *str++;
+			size--;
+		}
+		*dest = '\0';
+	}
+
+	va_end(ap);
+
+	return maxcount - count;
+}
+
 /* Write a string to a file doing folding when needed (see RFC 2425) */
 static void vcard_append_printf(vcard_string *str, const char *fmt, ...)
 {
@@ -372,9 +408,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 			buf[--line_len] = '\0';
 
 		if (BEGINS("N:")) {
-			/* 64 is the value of GN_PHONEBOOK_PERSON_MAX_LENGTH */
-			/* FIXME sscanf() doesn't accept empty fields */
-			if (0 < sscanf(buf +2 , "%64[^;];%64[^;];%64[^;];%64[^;];%64[^;]\n",
+			if (0 < copy_fields(buf +2 , 5, GN_PHONEBOOK_PERSON_MAX_LENGTH,
 				entry->person.family_name,
 				entry->person.given_name,
 				entry->person.additional_names,
@@ -401,9 +435,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		STORE("TEL;TYPE=PREF:", entry->number);
 
 		if (BEGINS("ADR;TYPE=HOME,PREF:")) {
-			/* 64 is the value of GN_PHONEBOOK_ADDRESS_MAX_LENGTH */
-			/* FIXME sscanf() doesn't accept empty fields */
-			if (0 < sscanf(buf + 19, "%64[^;];%64[^;];%64[^;];%64[^;];%64[^;];%64[^;];%64[^;]\n",
+			if (0 < copy_fields(buf + 19, 7, GN_PHONEBOOK_ADDRESS_MAX_LENGTH,
 				entry->address.post_office_box,
 				entry->address.extended_address,
 				entry->address.street,
