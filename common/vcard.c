@@ -214,7 +214,7 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 			break;
 		default:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
-			vcard_append_printf(&str, "X-GNOKII-%d: %s", entry->subentries[i].entry_type, name);
+			vcard_append_printf(&str, "X-GNOKII-%d:%s", entry->subentries[i].entry_type, name);
 			break;
 		}
 	}
