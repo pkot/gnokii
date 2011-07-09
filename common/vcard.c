@@ -411,6 +411,9 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 
 		STORESUB("TITLE:", GN_PHONEBOOK_ENTRY_JobTitle);
 		STORESUB("ORG:", GN_PHONEBOOK_ENTRY_Company);
+		STORESUB("NICKNAME:", GN_PHONEBOOK_ENTRY_Nickname);
+		STORESUB("X-SIP;POC:", GN_PHONEBOOK_ENTRY_PTTAddress);
+		STORESUB("X-WV-ID:", GN_PHONEBOOK_ENTRY_UserID);
 
 #if 1
 		/* libgnokii 0.6.25 deprecates X_GSM_STORE_AT in favour of X-GSM-MEMORY and X-GSM-LOCATION and X_GSM_CALLERGROUP in favour of X-GSM-CALLERGROUP */
