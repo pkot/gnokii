@@ -255,6 +255,19 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 				entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
 				entry->subentries[entry->subentries_count].number_type = c);
 #define STOREMEMTYPE(a, memory_type) if (BEGINS(a)) { STRIP(a, memory_name); memory_type = gn_str2memory_type(memory_name); }
+#define STOREDATE(a, c) if (BEGINS(a)) { \
+				if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
+				memset(&entry->subentries[entry->subentries_count].data.date, 0, sizeof(entry->subentries[entry->subentries_count].data.date)); \
+				sscanf(buf+strlen(a), "%4u%2u%2uT%2u%2u%2u", \
+					&entry->subentries[entry->subentries_count].data.date.year, \
+					&entry->subentries[entry->subentries_count].data.date.month, \
+					&entry->subentries[entry->subentries_count].data.date.day, \
+					&entry->subentries[entry->subentries_count].data.date.hour, \
+					&entry->subentries[entry->subentries_count].data.date.minute, \
+					&entry->subentries[entry->subentries_count].data.date.second); \
+				entry->subentries[entry->subentries_count].entry_type = c; \
+				entry->subentries_count++; \
+			} while (0)
 
 #undef ERROR
 #define ERROR(a) fprintf(stderr, "%s\n", a)
@@ -414,6 +427,8 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		STORESUB("NICKNAME:", GN_PHONEBOOK_ENTRY_Nickname);
 		STORESUB("X-SIP;POC:", GN_PHONEBOOK_ENTRY_PTTAddress);
 		STORESUB("X-WV-ID:", GN_PHONEBOOK_ENTRY_UserID);
+
+		STOREDATE("BDAY:", GN_PHONEBOOK_ENTRY_Birthday);
 
 #if 1
 		/* libgnokii 0.6.25 deprecates X_GSM_STORE_AT in favour of X-GSM-MEMORY and X-GSM-LOCATION and X_GSM_CALLERGROUP in favour of X-GSM-CALLERGROUP */
