@@ -409,7 +409,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		STORESUB("ADR;TYPE=HOME:", GN_PHONEBOOK_ENTRY_Postal);
 		STORESUB("NOTE:", GN_PHONEBOOK_ENTRY_Note);
 
-		STORESUB("TILE:", GN_PHONEBOOK_ENTRY_JobTitle);
+		STORESUB("TITLE:", GN_PHONEBOOK_ENTRY_JobTitle);
 		STORESUB("ORG:", GN_PHONEBOOK_ENTRY_Company);
 
 #if 1
