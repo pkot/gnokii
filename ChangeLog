@@ -43,7 +43,8 @@
                                                     (Daniele Forsi)
  * at driver updates
     o correctly initialize memory type on WritePhonebookExt
-                                                          (r4ph431)
+                                                     (Raphaël Droz)
+    o Samsung SGH-U600 suppots extended phonebook    (Raphaël Droz)
 
 0.6.30
 ======

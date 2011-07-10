@@ -1,7 +1,5 @@
 /*
 
-  $Id$
-
   G N O K I I
 
   A Linux/Unix toolset and driver for the mobile phones.
@@ -50,15 +48,14 @@ static gn_error Unsupported(gn_data *data, struct gn_statemachine *state)
 	return GN_ERR_NOTSUPPORTED;
 }
 
-void at_samsung_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state) {
-	/* FIXME: some Samsung phones should have:
-	AT_DRVINST(state)->extended_phonebook = 1;
-	*/
-
+void at_samsung_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
+{
 	if (foundmodel && !strncasecmp("SGH-L760", foundmodel, 8))
 		AT_DRVINST(state)->ucs2_as_utf8 = 1;
+	if (foundmodel && !strncasecmp("SGH-U600", foundmodel, 8))
+		AT_DRVINST(state)->extended_phonebook = 1;
 
-	/* phone lacks many usefull commands :( */
+	/* phone lacks many useful commands :( */
 	at_insert_send_function(GN_OP_GetBatteryLevel, Unsupported, state);
 	at_insert_send_function(GN_OP_GetPowersource, Unsupported, state);
 	at_insert_send_function(GN_OP_GetRFLevel, Unsupported, state);
