@@ -398,7 +398,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 	fold = strstr(v, "\n\t");
 	while (fold != NULL) {
 		memmove(fold, fold + 2, strlen(fold) - 1);
-		fold = strstr(v, "\n\t");
+		fold = strstr(fold, "\n\t");
 	}
 
 	/* Count the number of lines */
