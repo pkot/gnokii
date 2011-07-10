@@ -238,17 +238,29 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
 			vcard_append_printf(&str, "X-WV-ID:%s", name);
 			break;
-		case GN_PHONEBOOK_ENTRY_Ringtone:
-		case GN_PHONEBOOK_ENTRY_Pointer:
+		case GN_PHONEBOOK_ENTRY_Date:
+		case GN_PHONEBOOK_ENTRY_FirstName:
+		case GN_PHONEBOOK_ENTRY_Group:
+		case GN_PHONEBOOK_ENTRY_Image:
+		case GN_PHONEBOOK_ENTRY_LastName:
+		case GN_PHONEBOOK_ENTRY_Location:
 		case GN_PHONEBOOK_ENTRY_Logo:
 		case GN_PHONEBOOK_ENTRY_LogoSwitch:
-		case GN_PHONEBOOK_ENTRY_Group:
-		case GN_PHONEBOOK_ENTRY_Location:
-		case GN_PHONEBOOK_ENTRY_Image:
+		case GN_PHONEBOOK_ENTRY_Pointer:
+		case GN_PHONEBOOK_ENTRY_Ringtone:
 		case GN_PHONEBOOK_ENTRY_RingtoneAdv:
+		case GN_PHONEBOOK_ENTRY_Video:
 			/* Ignore */
 			break;
-		default:
+		case GN_PHONEBOOK_ENTRY_City:
+		case GN_PHONEBOOK_ENTRY_Country:
+		case GN_PHONEBOOK_ENTRY_ExtendedAddress:
+		case GN_PHONEBOOK_ENTRY_FormalName:
+		case GN_PHONEBOOK_ENTRY_Name:
+		case GN_PHONEBOOK_ENTRY_PostalAddress:
+		case GN_PHONEBOOK_ENTRY_StateProvince:
+		case GN_PHONEBOOK_ENTRY_Street:
+		case GN_PHONEBOOK_ENTRY_ZipCode:
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
 			vcard_append_printf(&str, "X-GNOKII-%d:%s", entry->subentries[i].entry_type, name);
 			break;
