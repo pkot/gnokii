@@ -227,6 +227,12 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 				entry->subentries[i].data.date.year, entry->subentries[i].data.date.month, entry->subentries[i].data.date.day,
 				entry->subentries[i].data.date.hour, entry->subentries[i].data.date.minute, entry->subentries[i].data.date.second);
 			break;
+		case GN_PHONEBOOK_ENTRY_Date:
+			/* This is used when reading DC, MC, RC so the vcard *reader* won't read it back */
+			vcard_append_printf(&str, "REV:%04u%02u%02uT%02u%02u%02u",
+				entry->subentries[i].data.date.year, entry->subentries[i].data.date.month, entry->subentries[i].data.date.day,
+				entry->subentries[i].data.date.hour, entry->subentries[i].data.date.minute, entry->subentries[i].data.date.second);
+			break;
 		case GN_PHONEBOOK_ENTRY_ExtGroup:
 			vcard_append_printf(&str, "X-GSM-CALLERGROUPID:%d", entry->subentries[i].data.id);
 			break;
@@ -238,7 +244,6 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 			add_slashes(name, entry->subentries[i].data.number, sizeof(name), strlen(entry->subentries[i].data.number));
 			vcard_append_printf(&str, "X-WV-ID:%s", name);
 			break;
-		case GN_PHONEBOOK_ENTRY_Date:
 		case GN_PHONEBOOK_ENTRY_FirstName:
 		case GN_PHONEBOOK_ENTRY_Group:
 		case GN_PHONEBOOK_ENTRY_Image:
