@@ -390,6 +390,11 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 
 	/* Remove folding */
 	v = strdup(vcard);
+	fold = strstr(v, "\r\n");
+	while (fold != NULL) {
+		memmove(fold, fold + 1, strlen(fold));
+		fold = strstr(fold, "\r\n");
+	}
 	fold = strstr(v, "\n ");
 	while (fold != NULL) {
 		memmove(fold, fold + 2, strlen(fold) - 1);

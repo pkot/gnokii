@@ -29,6 +29,8 @@
     o make the vcard writer handle also the date property in DC,
       MC, RC (the reader will ignore it) and ignore X-GNOKII-70 and
       X-GNOKII-71 (they are part of the N property) (Daniele Forsi)
+    o make the vcard reader unfold correctly when lines end with CR
+      LF                                            (Daniele Forsi)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
