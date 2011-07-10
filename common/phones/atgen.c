@@ -1147,10 +1147,10 @@ static gn_error AT_WritePhonebookExt(gn_data *data, struct gn_statemachine *stat
 	if (ret)
 		return ret;
 
-	if(entry->location > memstat.used)
+	if (entry->memory_type != GN_MT_SM && entry->location > memstat.used)
 		ix = 0;
 	else
-		ix = entry->location+drvinst->memoryoffset;
+		ix = entry->location + drvinst->memoryoffset;
 
 	mobile = extpb_find_number_subentry(entry, GN_PHONEBOOK_NUMBER_Mobile);
 	home = extpb_find_number_subentry(entry, GN_PHONEBOOK_NUMBER_Home);

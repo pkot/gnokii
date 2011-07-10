@@ -45,6 +45,8 @@
     o correctly initialize memory type on WritePhonebookExt
                                                      (Raphaël Droz)
     o Samsung SGH-U600 suppots extended phonebook    (Raphaël Droz)
+    o AT+SBPW=0,... is not supported for SM memory   (Raphaël Droz,
+                                                         Paweł Kot)
 
 0.6.30
 ======
