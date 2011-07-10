@@ -432,9 +432,14 @@ static gn_error sms_data_decode(unsigned char *message, unsigned char *output, u
 				 unsigned int size, unsigned int udhlen, gn_sms_dcs dcs)
 {
 	/* Unicode */
+	if (dcs.type & 0x20) {
+		dprintf("Compressed message\n");
+		return GN_ERR_NOTIMPLEMENTED;
+	}
+	dprintf("%02x %02x %02x %02x %02x %02x %02x %02x\n", message[0], message[1], message[2], message[3], message[4], message[5], message[6], message[7]);
 	if ((dcs.type & 0x08) == 0x08) {
 		dprintf("Unicode message\n");
-		char_unicode_decode(output, message, length);
+		char_unicode_decode(output, message, 2 * length);
 	} else {
 		/* 8bit SMS */
 		if ((dcs.type & 0xf4) == 0xf4) {

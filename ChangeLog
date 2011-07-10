@@ -24,6 +24,8 @@
       X-SIP;POC and X-WV-ID                         (Daniele Forsi)
     o make the vcard reader handle also empty fields in N and in
       ADR (like in addresses without a PO Box)      (Daniele Forsi)
+    o support for compressed messages is not implemented yet
+                                                        (Paweł Kot)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
