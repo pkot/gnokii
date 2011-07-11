@@ -1,0 +1,8 @@
+- vcard-full-ascii.vcf
+contains all the properties read and written by libgnokii;
+this should be supported by all Nokia Series 40
+
+- vcard-minimal-ascii.vcf
+contains only the properties that can be read from a SIM card;
+this should be supported by all generic AT phones
+
