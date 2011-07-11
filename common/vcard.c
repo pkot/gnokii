@@ -84,41 +84,45 @@ static void vcard_append_printf(vcard_string *str, const char *fmt, ...)
 {
 	char buf[1024];
 	va_list ap;
-	int len, lines, l;
+	size_t len, to_copy;
+	int lines, l;
 	char *s = "\r\n";
 
 	va_start(ap, fmt);
 	vsnprintf(buf, sizeof(buf), fmt, ap);
 	va_end(ap);
 
-	/* Number of lines needed */
-	lines = strlen(buf) / 76 + 1;
-	/* 3 characters for each line beyond the first one,
-	 * plus the length of the buffer
-	 * plus the line feed and the nul byte to finish it off */
-	len = (lines - 1) * 3 + strlen(buf) + 3;
+	/* Split lines according to sections 5.8.1 and 5.8.2 of http://www.ietf.org/rfc/rfc2425.txt */
+	len = strlen(buf);
+	/* Number of lines needed after the first one:
+	 * at most 75 characters in the first line
+	 * at most space+74 characters in each line beyond the first */
+	if (len < 2)
+		lines = 0;
+	else
+		lines = (len - 75 + 73) / 74;
+	/* Current string length
+	 * plus length of the string to be appended
+	 * plus 2 characters for \r\n at the end of the first line,
+	 * plus 3 characters for space at the beginning and \r\n at the end of each line beyond the first
+	 * and a NUL byte to finish it off */
+	str->str = realloc(str->str, str->len + len + 2 + lines * 3 + 1);
+	str->end = str->str + str->len;
 
-	/* The first malloc must have a nul byte at the end */
-	if (str->str)
-		str->str = realloc(str->str, len + str->len);
-	else
-		str->str = realloc(str->str, len + 1);
-	if (str->end == NULL)
-		str->end = str->str;
-	else
-		str->end = str->str + str->len;
+	to_copy = GNOKII_MIN(75, len);
+	memcpy(str->end, buf, to_copy);
+	str->end += to_copy;
+	len -= to_copy;
 
 	for (l = 0; l < lines; l++) {
-		int to_copy;
+		char *s = "\r\n ";
 
-		to_copy = GNOKII_MIN(76, strlen(buf) - 76 * l);
-		memcpy(str->end,  buf + 76 * l, to_copy);
-		str->end = str->end + to_copy;
-		if (l != lines - 1) {
-			char *s = "\r\n ";
-			memcpy(str->end, s, 3);
-			str->end += 3;
-		}
+		memcpy(str->end, s, 3);
+		str->end += 3;
+		to_copy = GNOKII_MIN(74, len);
+		memcpy(str->end, buf + 75 + 74 * l, to_copy);
+		str->end += to_copy;
+		len -= to_copy;
 	}
 
 	memcpy(str->end, s, 2);
