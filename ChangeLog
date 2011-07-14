@@ -33,6 +33,9 @@
       LF                                            (Daniele Forsi)
     o make the vcard writer fold lines at the 75th character
                                                     (Daniele Forsi)
+    o add id for Nokia 1280 to misc.c only; it doesn't support many
+      commands because it's a Series 30; use model=series40
+                                                      (Peter Zotov)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
