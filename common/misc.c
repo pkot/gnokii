@@ -93,12 +93,12 @@ static gn_phone_model models[] = {
 	{"1100",  "RH-38",	PM_OLD_DEFAULT },
 	{"1100b", "RH-36",	PM_OLD_DEFAULT },
 	{"1101",  "RH-75",	PM_OLD_DEFAULT }, /* Yet another 1100 variant, untested */
-	{"1110",  "RH-93",	PM_DEFAULT },     /* Series 30, phone supports a very limited command set */
-	{"1209",  "RH-105",	PM_OLD_DEFAULT }, /* Series 30, phone supports a very limited command set */
+	{"1110",  "RH-93",	PM_DEFAULT_S30 },
+	{"1209",  "RH-105",	PM_DEFAULT_S30 },
 	{"1220",  "NKC-1",	PM_OLD_DEFAULT },
 	{"1260",  "NKW-1",	PM_OLD_DEFAULT },
 	{"1261",  "NKW-1C",	PM_OLD_DEFAULT },
-	{"1280",  "RM-647",	PM_DEFAULT },     /* Series 30, phone supports a very limited command set */
+	{"1280",  "RM-647",	PM_DEFAULT_S30 },
 	{"1610",  "NHE-5",	PM_OLD_DEFAULT },
 	{"1610",  "NHE-5NX",	PM_OLD_DEFAULT },
 	{"1611",  "NHE-5",	PM_OLD_DEFAULT },
