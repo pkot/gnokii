@@ -59,6 +59,7 @@
     o Samsung SGH-U600 suppots extended phonebook    (Raphaël Droz)
     o AT+SBPW=0,... is not supported for SM memory   (Raphaël Droz,
                                                          Paweł Kot)
+    o Samsung B2100 encodes phone numbers                  (grunge)
 
 0.6.30
 ======
