@@ -50,12 +50,14 @@ static gn_error Unsupported(gn_data *data, struct gn_statemachine *state)
 
 void at_samsung_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
-	if (foundmodel && !strncasecmp("SGH-L760", foundmodel, 8))
-		AT_DRVINST(state)->ucs2_as_utf8 = 1;
-	if (foundmodel && !strncasecmp("SGH-U600", foundmodel, 8))
-		AT_DRVINST(state)->extended_phonebook = 1;
-	if (foundmodel && !strncasecmp("SAMSUNG B2100", foundmodel, 13))
-		AT_DRVINST(state)->encode_number = 1;
+	if (foundmodel) {
+		if (!strncasecmp("SGH-L760", foundmodel, 8))
+			AT_DRVINST(state)->ucs2_as_utf8 = 1;
+		if (!strncasecmp("SGH-U600", foundmodel, 8))
+			AT_DRVINST(state)->extended_phonebook = 1;
+		if (!strncasecmp("SAMSUNG B2100", foundmodel, 13))
+			AT_DRVINST(state)->encode_number = 1;
+	}
 
 	/* phone lacks many useful commands :( */
 	at_insert_send_function(GN_OP_GetBatteryLevel, Unsupported, state);
