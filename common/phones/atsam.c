@@ -53,9 +53,9 @@ void at_samsung_init(char* foundmodel, char* setupmodel, struct gn_statemachine 
 	if (foundmodel) {
 		if (!strncasecmp("SGH-L760", foundmodel, 8))
 			AT_DRVINST(state)->ucs2_as_utf8 = 1;
-		if (!strncasecmp("SGH-U600", foundmodel, 8))
+		else if (!strncasecmp("SGH-U600", foundmodel, 8))
 			AT_DRVINST(state)->extended_phonebook = 1;
-		if (!strncasecmp("SAMSUNG B2100", foundmodel, 13))
+		else if (!strncasecmp("SAMSUNG B2100", foundmodel, 13))
 			AT_DRVINST(state)->encode_number = 1;
 	}
 
