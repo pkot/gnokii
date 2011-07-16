@@ -202,8 +202,10 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 				break;
 			case GN_PHONEBOOK_NUMBER_None:
 			case GN_PHONEBOOK_NUMBER_Common:
-			case GN_PHONEBOOK_NUMBER_General:
 				vcard_append_printf(&str, "TEL;TYPE=VOICE:%s", entry->subentries[i].data.number);
+				break;
+			case GN_PHONEBOOK_NUMBER_General:
+				vcard_append_printf(&str, "TEL;TYPE=PREF:%s", entry->subentries[i].data.number);
 				break;
 			default:
 				vcard_append_printf(&str, "TEL;TYPE=X-UNKNOWN-%d: %s", entry->subentries[i].number_type, entry->subentries[i].data.number);
