@@ -3201,6 +3201,7 @@ retry:
 					req[count++] = entry->subentries[i].data.date.day;
 					req[count++] = entry->subentries[i].data.date.hour;
 					req[count++] = entry->subentries[i].data.date.minute;
+					block++;
 					break;
 				default:
 					j = strlen(entry->subentries[i].data.number);
