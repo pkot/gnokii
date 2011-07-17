@@ -152,6 +152,8 @@ typedef enum {
 #define NK6510_MEMORY_EN		0x08	/* ?? SIM (or ME) emergency number */
 #define NK6510_MEMORY_MT		0x09	/* ?? combined ME and SIM phonebook */
 #define NK6510_MEMORY_VOICE		0x0b	/* Voice Mailbox */
+#define NK6510_MEMORY_EXTGROUPS		0x23	/* Extended Caller Groups */
+
 #define NK6510_MEMORY_IN		0x02	/* INBOX */
 #define NK6510_MEMORY_OU		0x03	/* OUTBOX */
 #define NK6510_MEMORY_AR		0x04	/* ARCHIVE */
