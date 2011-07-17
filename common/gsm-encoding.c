@@ -1373,7 +1373,6 @@ int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen)
 #endif
 }
 
-
 int ucs2_decode(char *outstring, int outlen, const char *instring, int inlen)
 {
 #if defined(HAVE_ICONV)
