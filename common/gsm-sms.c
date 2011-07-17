@@ -438,7 +438,12 @@ static gn_error sms_data_decode(unsigned char *message, unsigned char *output, u
 	}
 	if ((dcs.type & 0x08) == 0x08) {
 		dprintf("Unicode message\n");
-		char_unicode_decode(output, message, length);
+		/*
+		 * length is rawsms->length which is number of characters in
+		 * the decoded text. 3rd argument of char_unicode_decode is
+		 * number of bytes.
+		 */
+		char_unicode_decode(output, message, 2 * length);
 	} else {
 		/* 8bit SMS */
 		if ((dcs.type & 0xf4) == 0xf4) {
@@ -987,6 +992,11 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		return GN_ERR_INTERNALERROR;
 	}
 
+	/*
+	 * Unicode message has length in octets. We need length in characters: see comment in sms_pdu_decode().
+	 */
+	if ((rawsms->dcs & 0x08) == 0x08)
+		rawsms->length /= 2;
 out:
 	return ret;
 #undef COPY_USER_DATA
