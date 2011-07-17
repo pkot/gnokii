@@ -90,7 +90,7 @@ gn_error getspeeddial(char *number, gn_data *data, struct gn_statemachine *state
 
 	switch (error) {
 	case GN_ERR_NONE:
-		fprintf(stdout, _("SpeedDial nr. %d: %d:%d\n"), speeddial.number, speeddial.memory_type, speeddial.location);
+		fprintf(stdout, _("SpeedDial nr. %d %s %d\n"), speeddial.number, gn_memory_type2str(speeddial.memory_type), speeddial.location);
 		break;
 	default:
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));

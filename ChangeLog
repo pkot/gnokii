@@ -47,6 +47,9 @@
  * gnokii updates
     o create path to gnokii-errors even on Windows      (Paweł Kot)
     o allow to specify custom path for gnokii-errors    (Paweł Kot)
+    o make the output of --getspeeddial more readable (show SM or
+      ME instead of a number) and consistent with the arguments of
+      --setspeeddial                                (Daniele Forsi)
  * fake driver updates
     o add multipart message to SMS inbox                (Paweł Kot)
     o add ability to use --writephonebook               (Paweł Kot)
