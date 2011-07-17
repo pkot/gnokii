@@ -2904,8 +2904,8 @@ static gn_error NK6510_SetSpeedDial(gn_data *data, struct gn_statemachine *state
 	req[13] = data->speed_dial->number & 0xff;
 
 	string[0] = 0xff;
-	string[1] = 0x00;
-	string[2] = data->speed_dial->location;
+	string[1] = data->speed_dial->location >> 8;
+	string[2] = data->speed_dial->location & 0xff;
 	memcpy(string + 3, "\x00\x00\x00\x00", 4);
 
 	if (data->speed_dial->memory_type == GN_MT_SM)
