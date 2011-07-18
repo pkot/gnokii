@@ -155,7 +155,8 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 	else
 		vcard_append_printf(&str, "N:%s", name);
 
-	vcard_append_printf(&str, "TEL;TYPE=PREF,VOICE:%s", entry->number);
+	if (*entry->number)
+		vcard_append_printf(&str, "TEL;TYPE=PREF,VOICE:%s", entry->number);
 	vcard_append_printf(&str, "X-GSM-MEMORY:%s", gn_memory_type2str(entry->memory_type));
 	vcard_append_printf(&str, "X-GSM-LOCATION:%d", entry->location);
 	vcard_append_printf(&str, "X-GSM-CALLERGROUP:%d", entry->caller_group);
@@ -460,7 +461,6 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		}
 		STORE("FN:", entry->name);
 		STORE("TEL;TYPE=PREF,VOICE:", entry->number);
-		STORE("TEL;TYPE=PREF:", entry->number);
 
 		if (BEGINS("ADR;TYPE=HOME,PREF:")) {
 			if (0 < copy_fields(buf + 19, 7, GN_PHONEBOOK_ADDRESS_MAX_LENGTH,
