@@ -825,7 +825,8 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 		if (error)
 			return error;
 		error = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
-		drvinst->charset = AT_CHAR_HEXGSM;
+		if (!error)
+			drvinst->charset = AT_CHAR_HEXGSM;
 	}
 	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
@@ -836,9 +837,9 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 		if (error)
 			return error;
 		error = sm_block_no_retry(GN_OP_Init, &tmpdata, state);
-		drvinst->charset = AT_CHAR_GSM;
+		if (!error)
+			drvinst->charset = AT_CHAR_GSM;
 	}
-
 	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
 
