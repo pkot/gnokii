@@ -5,7 +5,7 @@ else
 SUBDIRS += gnokiid utils
 endif
 
-if HAVE_GTK
+if XGNOKII
 SUBDIRS += xgnokii
 endif
 

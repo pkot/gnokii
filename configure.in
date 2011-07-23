@@ -689,7 +689,7 @@ else
    fi
 fi
 
-AM_CONDITIONAL(HAVE_GTK, test "x$found_gtk" = "xyes")
+AM_CONDITIONAL(XGNOKII, test "x$_support" = "xyes")
 
 dnl ======================== Check for libsocket
 AC_CHECK_LIB(socket, socket)
