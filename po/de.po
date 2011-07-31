@@ -8,14 +8,14 @@ msgstr ""
 "Project-Id-Version: gnokii 0.6.28\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
 "POT-Creation-Date: 2011-05-27 22:17+0200\n"
-"PO-Revision-Date: 2011-05-27 22:38+0200\n"
+"PO-Revision-Date: 2011-07-24 18:20+0200\n"
 "Last-Translator: Carsten Grohmann <carstengrohmann@gmx.de>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"X-Generator: Lokalize 1.0\n"
+"X-Generator: Lokalize 1.2\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 
 #. Line not part of any heading
@@ -508,7 +508,7 @@ msgstr "DKU2 (Unterstützung durch libusb)"
 
 #: ../common/gsm-common.c:209
 msgid "Smart Card reader (libpcsc support)"
-msgstr ""
+msgstr "Kartenlesegerät (Unterstützung durch libpcsc)"
 
 #: ../common/gsm-common.c:210
 msgid "Linux Phonet (kernel support)"
@@ -717,9 +717,8 @@ msgid "Birthday"
 msgstr "Geburtstag"
 
 #: ../common/gsm-common.c:289
-#, fuzzy
 msgid "Caller group id"
-msgstr "Anrufgruppe"
+msgstr "Anrufgruppen-ID"
 
 #: ../common/gsm-common.c:350 ../common/nokia-decoding.c:349
 #: ../common/phones/nk6100.c:1007 ../xgnokii/xgnokii.c:221
@@ -1670,7 +1669,7 @@ msgstr "Offset: %04x\n"
 #: ../common/phones/pcsc.c:593
 #, c-format
 msgid "Phase %s SIM"
-msgstr ""
+msgstr "Phase %s SIM"
 
 #: ../common/vcal.lx:161
 #, c-format
@@ -1788,7 +1787,7 @@ msgid "GNOKII Version %s\n"
 msgstr "GNOKII Version %s\n"
 
 #: ../gnokii/gnokii.c:210
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 "Copyright (C) Pavel Janik ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
@@ -1806,16 +1805,14 @@ msgstr ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 "Copyright (C) Pavel Janik ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
-"Copyright (C) Pawel Kot <gnokii@gmail.com>, 2001-2009\n"
+"Copyright (C) Pawel Kot <gnokii@gmail.com>, 2001-2011\n"
 "Copyright (C) BORBELY Zoltan <bozo@andrews.hu>, 2002\n"
-"Copyright (C) Daniele Forsi <daniele@forsi.it>, 2004-2009\n"
-"gnokii ist freie Software, geschützt durch die GNU General Public License, "
-"Sie sind\n"
-"herzlich eingeladen gnokii zu verändern und/oder es zu verteilen unter "
-"Einhaltung\n"
-"bestehender Bedingungen.\n"
-"Es besteht absolut keine Garantie für gnokii. Details finden Sie in der "
-"GPL.\n"
+"Copyright (C) Daniele Forsi <daniele@forsi.it>, 2004-2011\n"
+"gnokii ist freie Software, unterliegt der GNU General Public License und Sie "
+"sind\n"
+"herzlich eingeladen gnokii zu verändern und/oder es unter Einhaltung\n"
+"bestehender Bedingungen zu verteilen.\n"
+"Es besteht absolut keine Garantie für gnokii. Details finden Sie in der GPL.\n"
 "Erstellt %s %s\n"
 
 #: ../gnokii/gnokii.c:238
@@ -2106,6 +2103,8 @@ msgid ""
 "usage: --getspeeddial location\n"
 "                        location - location in the speed dial memory\n"
 msgstr ""
+"Syntax: --getspeeddial Position\n"
+"                        Position - Position im Kurzwahlspeicher\n"
 
 #: ../gnokii/gnokii-dial.c:93
 #, c-format
@@ -2151,6 +2150,10 @@ msgid ""
 "                        memory_type - memory type for the speed dial\n"
 "                        location    - location in the speed dial memory\n"
 msgstr ""
+"Syntax: --setspeeddial Nummer Speichertyp Position\n"
+"                        Nummer      - Zu speichernde Telefonnummer\n"
+"                        Speichertyp - Speichertyp für die Kurzwahl\n"
+"                        Position     - Position im Kurzwahlspeicher\n"
 
 #: ../gnokii/gnokii-dial.c:128 ../gnokii/gnokii-phonebook.c:111
 #: ../gnokii/gnokii-phonebook.c:487
@@ -2353,7 +2356,7 @@ msgstr " Syntax: --putfile lokale_Datei entfernt_liegende_Datei\n"
 #: ../gnokii/gnokii-file.c:444
 #, c-format
 msgid "File %s corrupted!\n"
-msgstr ""
+msgstr "Datei %s ist beschädigt!\n"
 
 #: ../gnokii/gnokii-file.c:449
 #, c-format
@@ -2386,7 +2389,7 @@ msgstr "Betreiberlogo wird gesendet.\n"
 #: ../gnokii/gnokii-logo.c:98
 #, c-format
 msgid "Sending caller line identification logo.\n"
-msgstr "Anrufergruppenlogo wird gesendet.\n"
+msgstr ""
 
 #: ../gnokii/gnokii-logo.c:99
 #, c-format
@@ -2406,14 +2409,14 @@ msgstr "Versende EMS gemäße Animation.\n"
 #: ../gnokii/gnokii-logo.c:102
 #, c-format
 msgid "You should specify what kind of logo to send!\n"
-msgstr "Sie müssen angeben welchen Typ Logo Sie senden wollen!\n"
+msgstr "Sie müssen den zu sendenden Bildtyp angeben!\n"
 
 #: ../gnokii/gnokii-logo.c:118
 #, c-format
 msgid "Cannot send logo: specified and loaded bitmap type differ!\n"
 msgstr ""
-"Kann das Logo nicht senden: Angegebener und tatsächlicher Bildtyp sind "
-"verschieden!\n"
+"Logo kann nicht gesendet werden: Angegebener und tatsächlicher Bildtyp sind "
+"unterschiedlich!\n"
 
 #: ../gnokii/gnokii-logo.c:156 ../gnokii/gnokii-ringtone.c:148
 #: ../gnokii/gnokii-sms.c:352
@@ -2437,7 +2440,7 @@ msgstr "SMS senden fehlgeschlagen (%s)\n"
 #, c-format
 msgid "Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "
 msgstr ""
-"Speichere Logo. Datei \"%s\" existiert bereits. (E)rsetzen, (N)eue erstellen "
+"Logo speichern. Datei \"%s\" existiert bereits. (E)rsetzen, (N)eue erstellen "
 "oder Ü(b)erspringen? "
 
 #: ../gnokii/gnokii-logo.c:182
@@ -2503,22 +2506,22 @@ msgstr "Gnokii kennt das %s Netzwerk leider nicht!\n"
 #: ../gnokii/gnokii-logo.c:263
 #, c-format
 msgid "Startup logo got successfully\n"
-msgstr "Einschaltgrafik erfolgreich erhalten\n"
+msgstr "Startlogo erfolgreich erhalten\n"
 
 #: ../gnokii/gnokii-logo.c:274 ../gnokii/gnokii-logo.c:291
 #, c-format
 msgid "Your phone doesn't have logo uploaded !\n"
-msgstr "Ihr Telefon hat kein Logo gespeichert!\n"
+msgstr "Ihr Telefon hat kein Bild gespeichert!\n"
 
 #: ../gnokii/gnokii-logo.c:276
 #, c-format
 msgid "Caller logo got successfully\n"
-msgstr "Gruppenlogo erfolgreich erhalten\n"
+msgstr "Kontaktbild erfolgreich erhalten\n"
 
 #: ../gnokii/gnokii-logo.c:277
 #, c-format
 msgid "Caller group name: %s, ringing tone: %s (%d)\n"
-msgstr "Anrufgruppenname: %s, Ruftone: %s (%d)\n"
+msgstr "Namen der Anrufgruppe: %s, Ruftone: %s (%d)\n"
 
 #: ../gnokii/gnokii-logo.c:288
 #, c-format
@@ -2528,7 +2531,7 @@ msgstr "Unbekannter Bitmap-Typ.\n"
 #: ../gnokii/gnokii-logo.c:302
 #, c-format
 msgid "What kind of logo do you want to get ?\n"
-msgstr "Welche Art Logo wünschen sie zu holen?\n"
+msgstr "Welchen Bildtyp möchten sie haben?\n"
 
 #: ../gnokii/gnokii-logo.c:320
 #, c-format
@@ -2538,7 +2541,7 @@ msgstr "Fehler beim Lesen der Datei \"%s\": %s\n"
 #: ../gnokii/gnokii-logo.c:398
 #, c-format
 msgid "What kind of logo do you want to set ?\n"
-msgstr "Welche Art Logo möchten Sie setzen?\n"
+msgstr "Welchen Bildtyp möchten Sie setzen?\n"
 
 #: ../gnokii/gnokii-logo.c:434
 #, c-format
@@ -2563,7 +2566,7 @@ msgstr "zu lang, gekürzt zu \"%s\" (Länge: %zi)\n"
 #: ../gnokii/gnokii-logo.c:455
 #, c-format
 msgid "Error setting startup logo - SIM card and PIN is required\n"
-msgstr "Fehler beim Setzen des Betreiberlogos - SIM Karte und PIN benötigt\n"
+msgstr "Fehler beim Setzen des Startlogos - SIM Karte und PIN benötigt\n"
 
 #: ../gnokii/gnokii-logo.c:456
 #, c-format
@@ -3139,6 +3142,8 @@ msgid ""
 " usage: --deletephonebook memory_type start_number [end_number|end]\n"
 "\n"
 msgstr ""
+" Syntax: --deletephonebook Speichertyp Startnummer [Endnummer|end]\n"
+"\n"
 
 #: ../gnokii/gnokii-phonebook.c:505
 #, c-format
@@ -3309,7 +3314,7 @@ msgstr "Laden des Ruftones schlug fehl: %s\n"
 #: ../gnokii/gnokii-ringtone.c:162
 #, c-format
 msgid " usage: --getringtone rtttlfile [location] [-r|--raw]\n"
-msgstr ""
+msgstr " Syntax: --getringtone rtttl-Datei [Position] [-r|--raw]\n"
 
 #: ../gnokii/gnokii-ringtone.c:216
 #, c-format
@@ -3817,9 +3822,9 @@ msgid "%02d00"
 msgstr "%02d00"
 
 #: ../gnokii/gnokii-sms.c:762
-#, fuzzy, c-format
+#, c-format
 msgid "Delivery date/time: %02d/%02d/%04d %02d:%02d:%02d "
-msgstr "Datum/Zeit: %02d.%02d.%04d %02d:%02d:%02d "
+msgstr "Auslieferungszeit: %02d.%02d.%04d %02d:%02d:%02d "
 
 #: ../gnokii/gnokii-sms.c:772 ../gnokii/gnokii-sms.c:808
 #, c-format
@@ -3839,7 +3844,7 @@ msgstr "Datum/Zeit: %02d.%02d.%04d %02d:%02d:%02d "
 #: ../gnokii/gnokii-sms.c:788 ../gnokii/gnokii-sms.c:811
 #, c-format
 msgid "Sender: %s Msg Center: %s\n"
-msgstr "Absender: %s SMS Center: %s\n"
+msgstr "Absender: %s Nachrichtenzentrale: %s\n"
 
 #: ../gnokii/gnokii-sms.c:789
 #, c-format
@@ -3854,17 +3859,17 @@ msgstr "%s:\n"
 #: ../gnokii/gnokii-sms.c:822
 #, c-format
 msgid "GSM operator logo for %s (%s) network.\n"
-msgstr "GSM Betreiberlogo für Betreiber: %s (%s).\n"
+msgstr "GSM-Betreiberlogo für das Netz %s (%s).\n"
 
 #: ../gnokii/gnokii-sms.c:824
 #, c-format
 msgid "Saved by Logo Express\n"
-msgstr "Gespeichert von Logo Express\n"
+msgstr "Gespeichert von \"Logo Express\"\n"
 
 #: ../gnokii/gnokii-sms.c:826
 #, c-format
 msgid "Saved by Operator Logo Uploader by Thomas Kessler\n"
-msgstr "Gespeichert von Operator Logo aufgespielt von Thomas Kessler\n"
+msgstr "Gespeichert durch \"Operator Logo Uploader\" von Thomas Kessler\n"
 
 #: ../gnokii/gnokii-sms.c:838 ../gnokii/gnokii-utils.c:59
 #, c-format
@@ -3874,7 +3879,7 @@ msgstr "Datei %s existiert bereits.\n"
 #: ../gnokii/gnokii-sms.c:847
 #, c-format
 msgid "Couldn't save logofile %s!\n"
-msgstr "Konnte Logodatei nicht speichern %s!\n"
+msgstr "Konnte Bilddatei %s nicht speichern!\n"
 
 #: ../gnokii/gnokii-sms.c:855
 #, c-format
@@ -3931,7 +3936,7 @@ msgstr ""
 #: ../gnokii/gnokii-sms.c:1033
 #, c-format
 msgid "SMS center: location number must be greater than 0\n"
-msgstr ""
+msgstr "SMS-Zentrale: Positionsnummer muß größer als 0 sein\n"
 
 #: ../gnokii/gnokii-sms.c:1069
 #, c-format
@@ -4372,7 +4377,7 @@ msgstr ""
 #: ../smsd/lowlevel.c:456
 #, c-format
 msgid "Too many consecutive errors, restarting connection.\n"
-msgstr ""
+msgstr "Zuviele aufeinanderfolgende Fehler, Verbindungsneustart.\n"
 
 #: ../smsd/mysql.c:75 ../smsd/pq.c:66
 #, c-format
@@ -4425,14 +4430,16 @@ msgid "%d: UPDATE command failed.\n"
 msgstr "%d: Kommando \"UPDATE\" schlug fehl.\n"
 
 #: ../smsd/pq.c:75
-#, fuzzy, c-format
+#, c-format
 msgid "Setting client charset '%s' for database '%s' on host '%s' failed.\n"
-msgstr "Verbindung zur Datenbank '%s' auf dem Host '%s' schlug fehl.\n"
+msgstr ""
+"Das Setzen des Client Charsets '%s' für die Datenbank '%s' auf dem Host '%s' "
+"schlug fehl.\n"
 
 #: ../smsd/pq.c:120 ../smsd/pq.c:257
 #, c-format
 msgid "%d: Escaping string failed.\n"
-msgstr ""
+msgstr "%d: Entwerten der Zeichenkette schlug fehl.\n"
 
 #: ../smsd/pq.c:148 ../smsd/pq.c:210
 #, c-format
@@ -4564,7 +4571,7 @@ msgstr "Verbindung zur Datenbank '%s' schlug fehl.\n"
 #: ../smsd/sqlite.c:116 ../smsd/sqlite.c:181
 #, c-format
 msgid "%d: Parsing query %s failed!"
-msgstr ""
+msgstr "%d: Syntaxanalyse der Abfrage %s schlug fehl!"
 
 #: ../smsd/sqlite.c:117 ../smsd/sqlite.c:182
 #, c-format
@@ -4722,6 +4729,16 @@ msgid ""
 "certain conditions. There is absolutely no warranty for xgnokii.\n"
 "See GPL for details.\n"
 msgstr ""
+"xgnokii version: %s\n"
+"gnokii version: %s\n"
+"\n"
+"Copyright (C) 1999-2004 Pavel Janik ml.,\n"
+"Hugh Blemings, Jan Derfinak,\n"
+"Pawel Kot und andere\n"
+"gnokii ist freie Software, unterliegt der GNU General Public License und Sie\n"
+"sind herzlich eingeladen gnokii zu verändern und/oder es unter Einhaltung\n"
+"bestehender Bedingungen zu verteilen. Es besteht absolut keine Garantie\n"
+"für gnokii. Details finden Sie in der GPL.\n"
 
 #: ../xgnokii/xgnokii.c:1351
 msgid "Edit SMS Setting"
@@ -4913,7 +4930,7 @@ msgstr "Adresse:"
 #. **  Groups notebook  **
 #: ../xgnokii/xgnokii.c:2084
 msgid "Caller groups names"
-msgstr "Gruppenname"
+msgstr "Namen der Anrufgruppen"
 
 #: ../xgnokii/xgnokii.c:2091
 msgid "Groups"
@@ -5286,11 +5303,11 @@ msgstr "Notiz löschen"
 #: ../xgnokii/xgnokii_speed.c:624
 #, c-format
 msgid "Error: %s: line %d: Can't allocate memory!\n"
-msgstr ""
+msgstr "Fehler: %s: Zeile %d: Keine Speicherreservierung möglich!\n"
 
 #: ../xgnokii/xgnokii_calendar.c:1720 ../xgnokii/xgnokii_sms.c:1833
 msgid "couldn't allocate colour"
-msgstr ""
+msgstr "Farbe konnte nicht zugeordnet werden"
 
 #: ../xgnokii/xgnokii_cfg.c:117
 #, c-format
@@ -5409,7 +5426,7 @@ msgstr "Telefon"
 
 #: ../xgnokii/xgnokii_contacts.c:1336
 msgid "Caller group:"
-msgstr "Gruppe:"
+msgstr "Anrufgruppe:"
 
 #: ../xgnokii/xgnokii_contacts.c:1399
 msgid "Delete entries"
@@ -5771,7 +5788,7 @@ msgstr "Betreiberlogo"
 
 #: ../xgnokii/xgnokii_logos.c:1604
 msgid "Caller logo"
-msgstr ""
+msgstr "Kontaktbild"
 
 #: ../xgnokii/xgnokii_logos.c:1731
 msgid "Brush tool"
@@ -5779,15 +5796,15 @@ msgstr "Sprühpistole"
 
 #: ../xgnokii/xgnokii_logos.c:1742
 msgid "Line tool"
-msgstr ""
+msgstr "Linie zeichnen"
 
 #: ../xgnokii/xgnokii_logos.c:1752
 msgid "Rectangle tool"
-msgstr ""
+msgstr "Rechteck zeichnen"
 
 #: ../xgnokii/xgnokii_logos.c:1762
 msgid "Filled rectangle tool"
-msgstr ""
+msgstr "Gefülltes Rechteck zeichnen"
 
 #: ../xgnokii/xgnokii_logos.c:1771
 msgid "Invert logo"
@@ -5795,15 +5812,15 @@ msgstr "Logo invertieren"
 
 #: ../xgnokii/xgnokii_logos.c:1776
 msgid "Horizontal flip"
-msgstr ""
+msgstr "Horizontale Spiegeln"
 
 #: ../xgnokii/xgnokii_logos.c:1781
 msgid "Vertical flip"
-msgstr ""
+msgstr "Vertikale Spiegeln"
 
 #: ../xgnokii/xgnokii_logos.c:1836
 msgid "Load preview pixmap error, feature disabled."
-msgstr ""
+msgstr "Fehler beim Laden der Vorschau, Funktion deaktiviert."
 
 #: ../xgnokii/xgnokii_lowlevel.c:210
 #, c-format
@@ -5841,6 +5858,17 @@ msgid ""
 "in xgnokii section in your config file.\n"
 "See http://thread.gmane.org/gmane.linux.drivers.gnokii/3195 for details.\n"
 msgstr ""
+"Es wurde berichtet, daß Ihr Telefonmodell nicht problemlos mit xgnokii "
+"funktioniert.\n"
+"Die Anwendung wird beendet um einen Schaden zu vermeiden. Wenn Sie das "
+"Risiko\n"
+"tragen und xgnokii nutzen möchten, dann setzen Sie:\n"
+"\n"
+"\tallow_breakage = 1\n"
+"\n"
+"im Abschnitt \"[xgnokii]\" Ihrer Konfigurationsdatei.\n"
+"Mehr Details finden Sie unter http://thread.gmane.org/gmane.linux.drivers."
+"gnokii/3195.\n"
 
 #: ../xgnokii/xgnokii_lowlevel.c:1396
 msgid "Refreshing SMSes..."
@@ -5912,7 +5940,7 @@ msgstr "Akku, Ladestatus"
 
 #: ../xgnokii/xgnokii_netmon.c:404
 msgid "?Constant voltage charging display"
-msgstr ""
+msgstr "Anzeige der Ladespannung"
 
 #: ../xgnokii/xgnokii_netmon.c:407
 msgid "?Battery full detection"
@@ -6333,12 +6361,12 @@ msgstr "Lese Daten ..."
 #: ../xgnokii/xgnokii_speed.c:207
 #, c-format
 msgid "Cannot read speed dial key %d!\n"
-msgstr ""
+msgstr "Kurzwahl  für die Taste %d konnte nicht gelesen werden!\n"
 
 #: ../xgnokii/xgnokii_speed.c:268
 #, c-format
 msgid "Error writing speed dial for key %d!\n"
-msgstr ""
+msgstr "Fehler beim Schreiben der Kurzwahl für Taste %d!\n"
 
 #: ../xgnokii/xgnokii_speed.c:542
 msgid "Key"
