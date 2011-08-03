@@ -148,22 +148,23 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
 }
 
 
-GNOKII_API void DB_Look (const gchar * const phone)
+GNOKII_API gint DB_Look (const gchar * const phone)
 {
   DIR *dir;
   struct dirent *dirent;
   FILE *smsFile;
   GString *buf;
   gint numError, error;
+  gint empty = 1;
 
 
   if (spool[0] == '\0')  // if user don't set spool dir, sending is disabled
-    return;
+    return (SMSD_NOK);
     
   if ((dir = opendir (spool)) == NULL)
   {
     g_print (_("Cannot open directory %s\n"), spool);
-    return;
+    return (SMSD_NOK);
   }
 
   buf = g_string_sized_new (64);
@@ -185,6 +186,7 @@ GNOKII_API void DB_Look (const gchar * const phone)
       continue;
     }
     
+    empty = 0;
     gn_sms_default_submit (&sms);
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
 
@@ -261,4 +263,9 @@ GNOKII_API void DB_Look (const gchar * const phone)
   
   g_string_free (buf, TRUE);
   closedir (dir);
+
+  if (empty)
+    return (SMSD_OUTBOXEMPTY);
+  else
+    return (SMSD_OK);
 }

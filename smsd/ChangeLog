@@ -1,3 +1,8 @@
+* Wed 03 Aug 2011 Daniele Forsi
+- Apply the changes in patch from 28 May 2011 also to the file module. (Bug
+  report by tanker on #gnokii).
+
+
 * Sat 28 May 2011 Jan Derfinak
 - After patch from 09 Apr 2011, the query interval for looking to outbox was
   too small and smsd overloads db server. Added 5 seconds sleep if outbox
