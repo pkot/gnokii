@@ -1090,7 +1090,7 @@ static char **get_locations(int *retval)
 	if (!xdg_config_home) {
 		xdg_config_home = calloc(MAX_PATH_LEN, sizeof(char));
 		free_xdg_config_home = 1;
-		sprintf(xdg_config_home, "%s%s", home, XDG_CONFIG_HOME);
+		snprintf(xdg_config_home, MAX_PATH_LEN, "%s%s", home, XDG_CONFIG_HOME);
 	}
 
 	aux = getenv("XDG_CONFIG_DIRS");
