@@ -326,6 +326,7 @@ static gn_phone_model models[] = {
 	{"N70",   "RM-84",      PM_DEFAULT },
 	{"N73",   "RM-133",	PM_DEFAULT },
 	{"RPM-1", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
+	{"C1-01", "RM-607",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
 	{"Card Phone 1.0", "RPE-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"Card Phone 2.0", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"C110 Wireless LAN Card", "DTN-10",	PM_OLD_DEFAULT },
