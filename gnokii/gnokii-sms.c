@@ -779,10 +779,8 @@ parsefile:
 					message.smsc_time.day, message.smsc_time.month, message.smsc_time.year, \
 					message.smsc_time.hour, message.smsc_time.minute, message.smsc_time.second);
 				if (message.smsc_time.timezone) {
-					if (message.smsc_time.timezone > 0)
-						fprintf(stdout,_("+%02d00"), message.smsc_time.timezone);
-					else
-						fprintf(stdout,_("%02d00"), message.smsc_time.timezone);
+					/* Translators: this format is for printing a timezone with a leading +/- */
+					fprintf(stdout,_("%+03d00"), message.smsc_time.timezone);
 				}
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Sender: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
@@ -796,10 +794,8 @@ parsefile:
 					message.smsc_time.day, message.smsc_time.month, message.smsc_time.year, \
 					message.smsc_time.hour, message.smsc_time.minute, message.smsc_time.second);
 				if (message.smsc_time.timezone) {
-					if (message.smsc_time.timezone > 0)
-						fprintf(stdout,_("+%02d00"), message.smsc_time.timezone);
-					else
-						fprintf(stdout,_("%02d00"), message.smsc_time.timezone);
+					/* Translators: this format is for printing a timezone with a leading +/- */
+					fprintf(stdout,_("%+03d00"), message.smsc_time.timezone);
 				}
 				fprintf(stdout, "\n");
 				switch (message.type) {
