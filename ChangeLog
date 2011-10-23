@@ -36,6 +36,8 @@
     o add id for Nokia 1280 to misc.c only; it doesn't support many
       commands because it's a Series 30; use model=series40
                                                       (Peter Zotov)
+    o add id for Nokia 2700 clasic (series40)
+                                            (Alexander V. Lukyanov)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
