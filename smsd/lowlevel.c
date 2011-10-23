@@ -276,6 +276,7 @@ static gint A_SendSMSMessage (gpointer data)
         smsc_type = -2;
       }
       free (dt->message_center);
+      dt->message_center = NULL;
     }
     if (status == GN_ERR_NONE)
     {
@@ -293,6 +294,7 @@ static gint A_SendSMSMessage (gpointer data)
   status = d->status;
   /* we do not use sms reference numbers in smsd */
   free (dt->sms->reference);
+  dt->sms->reference = NULL;
   free (dt);
   pthread_cond_signal (&sendSMSCond);
   pthread_mutex_unlock (&sendSMSMutex);
