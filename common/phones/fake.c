@@ -63,6 +63,12 @@ gn_driver driver_fake = {
 	NULL
 };
 
+gn_phonebook_entry fake_phonebook[] = {
+	{ .location = 1, .empty = false, .name = "Test 1", .number = "1111", .subentries_count = 0 },
+	{ .location = 2, .empty = false, .name = "Test 2", .number = "2222", .subentries_count = 0 },
+	{ .location = 3, .empty = true },
+	{ .location = 4, .empty = false, .name = "Test 4", .number = "4444", .subentries_count = 0 },
+};
 
 /* Initialise is the only function allowed to 'use' state */
 static gn_error fake_initialise(struct gn_statemachine *state)
@@ -445,6 +451,23 @@ size_t fake_encode(at_charset charset, char *dst, size_t dst_len, const char *sr
 	return ret+1;
 }
 
+static gn_error fake_phonebookstatus(gn_data *data, struct gn_statemachine *state)
+{
+	int location, used, free;
+
+	for (location = 0, used = 0, free = 0; location < sizeof(fake_phonebook) / sizeof(gn_phonebook_entry); location++) {
+		if (fake_phonebook[location].empty)
+			free++;
+		else
+			used++;
+	}
+
+	data->memory_status->used = used;
+	data->memory_status->free = free;
+
+	return GN_ERR_NONE;
+}
+
 static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state)
 {
 	int len, ofs;
@@ -474,6 +497,26 @@ static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state
 	return GN_ERR_NONE;
 }
 
+static gn_error fake_readphonebook(gn_data *data, struct gn_statemachine *state)
+{
+	gn_phonebook_entry *pe = data->phonebook_entry;
+
+	if (pe->location < 1 || pe->location > sizeof(fake_phonebook) / sizeof(gn_phonebook_entry))
+		return GN_ERR_INVALIDLOCATION;
+
+	if (fake_phonebook[pe->location - 1].empty)
+#if 1
+		/* This is to emulate those phones that return error for empty locations */
+		return GN_ERR_INVALIDLOCATION;
+# else
+		return GN_ERR_EMPTYLOCATION;
+#endif
+
+	memcpy(pe, &fake_phonebook[pe->location - 1], sizeof(gn_phonebook_entry));
+
+	return GN_ERR_NONE;
+}
+
 static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	switch (op) {
@@ -498,8 +541,10 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 		return at_get_model(data, state);
 	case GN_OP_GetSMSStatus:
 		return at_sms_get_sms_status(data, state);
+	case GN_OP_GetMemoryStatus:
+		return fake_phonebookstatus(data, state);
 	case GN_OP_ReadPhonebook:
-		return GN_ERR_EMPTYLOCATION;
+		return fake_readphonebook(data, state);
 	case GN_OP_WritePhonebook:
 		return fake_writephonebook(data, state);
 	default:
