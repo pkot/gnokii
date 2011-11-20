@@ -1828,8 +1828,22 @@ static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int l
 	char *pos;
 	gn_error error;
 
-	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
-		return (error == GN_ERR_UNKNOWN) ? GN_ERR_INVALIDLOCATION : error;
+	error = at_error_get(buffer, state);
+	switch (error) {
+	case GN_ERR_NONE:
+		break;
+	case GN_ERR_FAILED:
+		/* Some phones return "+CME ERROR: 3" for invalid locations */
+		/* Fall through */
+	case GN_ERR_UNKNOWN:
+		/* Some phones return "+CME ERROR: 100" instead of "OK" for empty locations */
+		if (data->phonebook_entry->location >= drvinst->memoryoffset && data->phonebook_entry->location < drvinst->memoryoffset + drvinst->memorysize) {
+			return GN_ERR_EMPTYLOCATION;
+		}
+		return GN_ERR_INVALIDLOCATION;
+	default:
+		return error;
+	}
 
 	buf.line1 = buffer + 1;
 	buf.length = length;
