@@ -68,6 +68,8 @@
     o AT+SBPW=0,... is not supported for SM memory   (Raphaël Droz,
                                                          Paweł Kot)
     o Samsung B2100 encodes phone numbers                  (grunge)
+    o Return GN_ERR_EMPTYLOCATION also for phones that return error
+      for empty phonebook locations                 (Daniele Forsi)
 
 0.6.30
 ======
