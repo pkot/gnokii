@@ -38,6 +38,7 @@
                                                       (Peter Zotov)
     o add id for Nokia 2700 clasic (series40)
                                             (Alexander V. Lukyanov)
+    o add id for Nokia C2-03                        (shirish शिरीष)
  * nk6510 driver updates
     o fix calendar handling issues (few off-by-ones)    (Paweł Kot)
     o implement deletecalendarnote for series40 3rd+ Ed (Paweł Kot)
