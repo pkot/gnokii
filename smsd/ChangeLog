@@ -1,3 +1,7 @@
+* Thu 01 Dec 2011 Paweł Kot
+- Version chaned to 1.5.2
+
+
 * Wed 03 Aug 2011 Daniele Forsi
 - Apply the changes in patch from 28 May 2011 also to the file module. (Bug
   report by tanker on #gnokii).

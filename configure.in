@@ -12,7 +12,7 @@ dnl The first PKG_CHECK_MODULES call must not be conditional
 dnl
 
 AC_INIT([gnokii],
-	[0.6.31git],
+	[0.6.31],
 	[gnokii-users@nongnu.org],
 	[gnokii],
 	[http://www.gnokii.org/])
@@ -26,7 +26,7 @@ AC_INIT([gnokii],
 # - If the interface is the same as the previous version, change to C:R+1:A
 GNOKII_LT_VERSION_CURRENT=7
 GNOKII_LT_VERSION_REVISION=0
-GNOKII_LT_VERSION_AGE=1
+GNOKII_LT_VERSION_AGE=0
 AC_SUBST(GNOKII_LT_VERSION_CURRENT)
 AC_SUBST(GNOKII_LT_VERSION_REVISION)
 AC_SUBST(GNOKII_LT_VERSION_AGE)
@@ -35,7 +35,7 @@ dnl xgnokii version
 XVERSION=1.0
 
 dnl smsd version
-SVERSION=1.5.1
+SVERSION=1.5.2
 
 AC_CANONICAL_SYSTEM
 AC_GNU_SOURCE

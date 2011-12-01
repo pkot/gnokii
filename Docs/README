@@ -1,7 +1,7 @@
                               - G N O K I I -
               (C) 1999 - 2003 Hugh Blemings & Pavel Janik ml.
-                         (C) 2001 - 2010 Paweł Kot
-                Last update 23 January 2011  Version 0.6.30
+                         (C) 2001 - 2011 Paweł Kot
+               Last update XX December 2011  Version 0.6.31
 
 - Contents -
 
@@ -26,7 +26,7 @@
 
 - 1.0 Introduction -
 
-This is version 0.6.30 of gnokii, a multisystem tool suite and modem driver
+This is version 0.6.31 of gnokii, a multisystem tool suite and modem driver
 for the mobile phones, released under the GPL.  Please see COPYING for more
 details on license/copying issues, the lack of warranty and where to send a
 postcard if you like gnokii :).
@@ -407,6 +407,13 @@ those who have helped so far!
 
 
 - 15.0 Release Notes -
+201112XX Version 0.6.31
+Possibility to change the phone driver in runtime. Fixes to make it possible
+to resend the message without modifications to gn_sms structure. 
+Improvements to vcard handling. Improved handling of calendar, notes and
+todo for Series40 3rd Ed and later. Improved Samsung support. Avoid
+multiple overruns and segfaults.
+
 20110123 Version 0.6.30
 New phonet driver which is compatible with phonet (2.6.28) and cdc_phonet
 (2.6.30) linux kernel drivers (replacement for dku2libusb connection type). 
