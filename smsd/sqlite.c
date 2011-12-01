@@ -54,7 +54,7 @@ GNOKII_API gint DB_ConnectInbox(DBConfig connect)
     int rc;
     rc = sqlite3_open(connect.db, &ppDbInbox);
     if (rc != SQLITE_OK) {
-        g_print(_("Connection to database '%s' on failed.\n"), connect.db);
+        g_print(_("Connection to database '%s' failed.\n"), connect.db);
         g_print(_("Error: %s\n"), sqlite3_errmsg(ppDbInbox));
         return 1;
     }
@@ -66,7 +66,7 @@ GNOKII_API gint DB_ConnectOutbox(DBConfig connect)
     int rc;
     rc = sqlite3_open(connect.db, &ppDbOutbox);
     if (rc != SQLITE_OK) {
-        g_print(_("Connection to database '%s' on failed.\n"), connect.db);
+        g_print(_("Connection to database '%s' failed.\n"), connect.db);
         g_print(_("Error: %s\n"), sqlite3_errmsg(ppDbOutbox));
         return 1;
     }
