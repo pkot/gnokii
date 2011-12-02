@@ -63,12 +63,15 @@ gn_driver driver_fake = {
 	NULL
 };
 
+#if __STDC_VERSION__ >= 199901L
+#define HAVE_FAKE_PHONEBOOK 1
 gn_phonebook_entry fake_phonebook[] = {
 	{ .location = 1, .empty = false, .name = "Test 1", .number = "1111", .subentries_count = 0 },
 	{ .location = 2, .empty = false, .name = "Test 2", .number = "2222", .subentries_count = 0 },
 	{ .location = 3, .empty = true },
 	{ .location = 4, .empty = false, .name = "Test 4", .number = "4444", .subentries_count = 0 },
 };
+#endif
 
 /* Initialise is the only function allowed to 'use' state */
 static gn_error fake_initialise(struct gn_statemachine *state)
@@ -453,6 +456,7 @@ size_t fake_encode(at_charset charset, char *dst, size_t dst_len, const char *sr
 
 static gn_error fake_phonebookstatus(gn_data *data, struct gn_statemachine *state)
 {
+#if defined (HAVE_FAKE_PHONEBOOK)
 	int location, used, free;
 
 	for (location = 0, used = 0, free = 0; location < sizeof(fake_phonebook) / sizeof(gn_phonebook_entry); location++) {
@@ -466,6 +470,9 @@ static gn_error fake_phonebookstatus(gn_data *data, struct gn_statemachine *stat
 	data->memory_status->free = free;
 
 	return GN_ERR_NONE;
+#else
+	return GN_ERR_NOTIMPLEMENTED;
+#endif
 }
 
 static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state)
@@ -499,6 +506,7 @@ static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state
 
 static gn_error fake_readphonebook(gn_data *data, struct gn_statemachine *state)
 {
+#if defined (HAVE_FAKE_PHONEBOOK)
 	gn_phonebook_entry *pe = data->phonebook_entry;
 
 	if (pe->location < 1 || pe->location > sizeof(fake_phonebook) / sizeof(gn_phonebook_entry))
@@ -508,13 +516,16 @@ static gn_error fake_readphonebook(gn_data *data, struct gn_statemachine *state)
 #if 1
 		/* This is to emulate those phones that return error for empty locations */
 		return GN_ERR_INVALIDLOCATION;
-# else
+#else
 		return GN_ERR_EMPTYLOCATION;
 #endif
 
 	memcpy(pe, &fake_phonebook[pe->location - 1], sizeof(gn_phonebook_entry));
 
 	return GN_ERR_NONE;
+#else
+	return GN_ERR_NOTIMPLEMENTED;
+#endif	
 }
 
 static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
