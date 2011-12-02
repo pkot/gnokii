@@ -1,13 +1,13 @@
 # This is the Italian locale definition for Gnokii.
 # Copyright (C) 2000 Gabriele Stella <gstella@libero.it>
-#               2006-2010 Daniele Forsi <daniele@forsi.it>
+#               2006-2011 Daniele Forsi <daniele@forsi.it>
 #
 msgid ""
 msgstr ""
 "Project-Id-Version: it\n"
 "Report-Msgid-Bugs-To: feedback@gnokii.org\n"
 "POT-Creation-Date: 2011-12-01 21:36+0100\n"
-"PO-Revision-Date: 2010-03-10 10:41+0100\n"
+"PO-Revision-Date: 2011-12-02 16:47+0100\n"
 "Last-Translator: Daniele Forsi <daniele@forsi.it>\n"
 "Language-Team: Italian <tp@lists.linux.it>\n"
 "Language: it\n"
@@ -280,7 +280,6 @@ msgid "Emergency numbers"
 msgstr "Numeri di emergenza"
 
 #: ../common/gsm-common.c:153
-#, fuzzy
 msgid "Dialled numbers"
 msgstr "Chiamate effettuate"
 
@@ -293,17 +292,14 @@ msgid "Missed numbers"
 msgstr "Chiamate senza risposta"
 
 #: ../common/gsm-common.c:156
-#, fuzzy
 msgid "Last dialled"
 msgstr "Ultime chiamate effettuate"
 
 #: ../common/gsm-common.c:157
-#, fuzzy
 msgid "Barred dialling numbers"
 msgstr "Numeri bloccati"
 
 #: ../common/gsm-common.c:158
-#, fuzzy
 msgid "Service dialling numbers"
 msgstr "Numeri dei servizi"
 
@@ -429,7 +425,7 @@ msgstr "Cartella messaggi n° 20"
 
 #: ../common/gsm-common.c:189
 msgid "Cell Broadcast"
-msgstr ""
+msgstr "Cell broadcast"
 
 #: ../common/gsm-common.c:190 ../common/gsm-common.c:211
 #: ../common/gsm-common.c:222 ../common/gsm-common.c:235
@@ -509,12 +505,11 @@ msgstr "DKU2 (supportato da libusb)"
 
 #: ../common/gsm-common.c:209
 msgid "Smart Card reader (libpcsclite support)"
-msgstr ""
+msgstr "Lettore di Smart Card (supportato da libpcsclite)"
 
 #: ../common/gsm-common.c:210
-#, fuzzy
 msgid "Linux Phonet (kernel support)"
-msgstr "DKU2 (supportato dal kernel)"
+msgstr "Linux Phonet (supportato dal kernel)"
 
 #: ../common/gsm-common.c:218
 msgid "AC-DC"
@@ -1582,6 +1577,10 @@ msgid ""
 "You can get some clues from comments included in sample config file or give\n"
 "a try with gnokii-configure utility included in gnokii distribution.\n"
 msgstr ""
+"Sembra che gnokii non sia configurato. È necessario farlo prima di usarlo.\n"
+"Si possono ottenere alcuni suggerimenti dai commenti inclusi nel file di\n"
+"configurazione di esempio o si può provare il programma di utilità\n"
+"gnokii-configure incluso nella distribuzione di gnokii.\n"
 
 #: ../common/phones/nk6100.c:2092
 #, c-format
@@ -1799,7 +1798,7 @@ msgid "GNOKII Version %s\n"
 msgstr "GNOKII Versione %s\n"
 
 #: ../gnokii/gnokii.c:210
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 "Copyright (C) Pavel Janik ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
@@ -1817,12 +1816,12 @@ msgstr ""
 "Copyright (C) Hugh Blemings <hugh@blemings.org>, 1999, 2000\n"
 "Copyright (C) Pavel Janik ml. <Pavel.Janik@suse.cz>, 1999, 2000\n"
 "Copyright (C) Pavel Machek <pavel@ucw.cz>, 2001\n"
-"Copyright (C) Pawel Kot <gnokii@gmail.com>, 2001-2009\n"
+"Copyright (C) Pawel Kot <gnokii@gmail.com>, 2001-2011\n"
 "Copyright (C) BORBELY Zoltan <bozo@andrews.hu>, 2002\n"
-"Copyright (C) Daniele Forsi <daniele@forsi.it>, 2004-2009\n"
+"Copyright (C) Daniele Forsi <daniele@forsi.it>, 2004-2011\n"
 "gnokii è software libero, coperto dalla GNU General Public License e \n"
 "chiunque può modificarlo o distribuirne copie a certe condizioni.\n"
-"Non c'è assolutamente nessuna garanzia per gnokii. Vedere la GPL per i "
+"Non c'è assolutamente alcuna garanzia per gnokii. Vedere la GPL per i "
 "dettagli.\n"
 "Data di compilazione %s %s\n"
 
@@ -2172,9 +2171,9 @@ msgstr ""
 "rapide\n"
 
 #: ../gnokii/gnokii-dial.c:93
-#, fuzzy, c-format
+#, c-format
 msgid "SpeedDial nr. %d %s %d\n"
-msgstr "Chiamata veloce n° %d: %d:%d\n"
+msgstr "Chiamata veloce n° %d %s %d\n"
 
 #: ../gnokii/gnokii-dial.c:96 ../gnokii/gnokii-dial.c:146
 #: ../gnokii/gnokii-dial.c:186 ../gnokii/gnokii-dial.c:217
@@ -2457,7 +2456,7 @@ msgstr " Uso: --putfile file_locale file_remoto\n"
 #: ../gnokii/gnokii-file.c:444
 #, c-format
 msgid "File %s corrupted!\n"
-msgstr ""
+msgstr "Il file «%s» è corrotto.\n"
 
 #: ../gnokii/gnokii-file.c:449
 #, c-format
@@ -2703,7 +2702,7 @@ msgid "Could not load bitmap: %s\n"
 msgstr "Impossibile caricare l'immagine bitmap: %s\n"
 
 #: ../gnokii/gnokii-mms.c:46
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "MMS options:\n"
 "          --getmms memory_type start [end] [{--mime|--pdu|--raw} file]\n"
@@ -2712,7 +2711,7 @@ msgid ""
 msgstr ""
 "Opzioni MMS:\n"
 "          --getmms tipo_memoria inizio [fine] [{--mime|--pdu|--raw} file]\n"
-"                 [-d|--delete]\n"
+"                 [-d|--delete] [-o|--overwrite]\n"
 "          --deletemms tipo_memoria inizio [fine]\n"
 
 #: ../gnokii/gnokii-mms.c:56
@@ -4118,7 +4117,7 @@ msgstr "Data/ora di invio: %02d/%02d/%04d %d.%02d.%02d "
 #: ../gnokii/gnokii-sms.c:779 ../gnokii/gnokii-sms.c:794
 #, c-format
 msgid "%+03d00"
-msgstr ""
+msgstr "%+03d00"
 
 #: ../gnokii/gnokii-sms.c:760
 #, c-format
@@ -4762,34 +4761,34 @@ msgid "Connection to database '%s' on host '%s' failed.\n"
 msgstr "Impossibile connettersi al database «%s» sull'host «%s».\n"
 
 #: ../smsd/mysql.c:132
-#, fuzzy, c-format
+#, c-format
 msgid "%d: SELECT FROM multipart command failed.\n"
-msgstr "%d: il comando SELECT FROM outbox è fallito.\n"
+msgstr "%d: il comando SELECT FROM multipart è fallito.\n"
 
 #: ../smsd/mysql.c:169
-#, fuzzy, c-format
+#, c-format
 msgid "%d: INSERT INTO multipartinbox command failed.\n"
-msgstr "%d: INSERT INTO %s.inbox è fallito.\n"
+msgstr "%d: il comando INSERT INTO multipartinbox è fallito.\n"
 
 #: ../smsd/mysql.c:187
-#, fuzzy, c-format
+#, c-format
 msgid "%d: SELECT FROM multipartinbox command failed.\n"
-msgstr "%d: il comando SELECT FROM outbox è fallito.\n"
+msgstr "%d: il comando SELECT FROM multipartinbox è fallito.\n"
 
 #: ../smsd/mysql.c:223
-#, fuzzy, c-format
+#, c-format
 msgid "%d: DELETE FROM multipartinbox command failed.\n"
-msgstr "%d: il comando SELECT FROM outbox è fallito.\n"
+msgstr "%d: il comando DELETE FROM multipartinbox è fallito.\n"
 
 #: ../smsd/mysql.c:261
-#, fuzzy, c-format
+# c-format
 msgid "%d: SELECT FROM inbox command failed.\n"
-msgstr "%d: il comando SELECT FROM outbox è fallito.\n"
+msgstr "%d: il comando SELECT FROM inbox è fallito.\n"
 
 #: ../smsd/mysql.c:294
-#, fuzzy, c-format
+#, c-format
 msgid "%d: INSERT INTO inbox command failed.\n"
-msgstr "%d: INSERT INTO %s.inbox è fallito.\n"
+msgstr "%d: il comando INSERT INTO inbox è fallito.\n"
 
 #: ../smsd/mysql.c:334 ../smsd/sqlite.c:239
 #, c-format
@@ -4808,34 +4807,34 @@ msgstr "%d: il comando UPDATE è fallito.\n"
 
 # tradurre host con server non è il massimo
 #: ../smsd/pq.c:75
-#, fuzzy, c-format
+#, c-format
 msgid "Setting client charset '%s' for database '%s' on host '%s' failed.\n"
-msgstr "Impossibile connettersi al database «%s» sull'host «%s».\n"
+msgstr "Impostazione fallita del charset «%s» del client per il database «%s» sull'host «%s».\n"
 
 #: ../smsd/pq.c:120 ../smsd/pq.c:257
-#, fuzzy, c-format
+#, c-format
 msgid "%d: Escaping string failed.\n"
-msgstr "%d: il comando UPDATE è fallito.\n"
+msgstr "%d: l'escape della stringa è fallito.\n"
 
 #: ../smsd/pq.c:148 ../smsd/pq.c:210
-#, fuzzy, c-format
+#, c-format
 msgid "%d: SELECT FROM %s.multipart command failed.\n"
-msgstr "%d: il comando SELECT FROM %s.outbox è fallito.\n"
+msgstr "%d: il comando SELECT FROM %s.multipart è fallito.\n"
 
 #: ../smsd/pq.c:188
-#, fuzzy, c-format
+#, c-format
 msgid "%d: INSERT INTO %s.multipartinbox failed.\n"
-msgstr "%d: INSERT INTO %s.inbox è fallito.\n"
+msgstr "%d: INSERT INTO %s.multipartinbox è fallito.\n"
 
 #: ../smsd/pq.c:239
-#, fuzzy, c-format
+#, c-format
 msgid "%d: DELETE FROM %s.multipartinbox command failed.\n"
-msgstr "%d: il comando SELECT FROM %s.outbox è fallito.\n"
+msgstr "%d: il comando DELETE FROM %s.multipartinbox è fallito.\n"
 
 #: ../smsd/pq.c:294
-#, fuzzy, c-format
+#, c-format
 msgid "%d: SELECT FROM %s.inbox command failed.\n"
-msgstr "%d: il comando SELECT FROM %s.outbox è fallito.\n"
+msgstr "%d: il comando SELECT FROM %s.inbox è fallito.\n"
 
 #: ../smsd/pq.c:331
 #, c-format
@@ -4853,16 +4852,16 @@ msgid "smsd - version %s from gnokii %s\n"
 msgstr "smsd - versione %s da gnokii %s\n"
 
 #: ../smsd/smsd.c:142
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "smsd - version %s from gnokii %s\n"
 "Copyright  Jan Derfinak 1999-2011\n"
 msgstr ""
 "smsd - versione %s da gnokii %s\n"
-"Copyright  Jan Derfinak  <ja@mail.upjs.sk>\n"
+"Copyright  Jan Derfinak 1999-2011\n"
 
 #: ../smsd/smsd.c:149
-#, fuzzy, c-format
+#, c-format
 msgid ""
 "\n"
 "Usage:  %s [options]\n"
@@ -4891,7 +4890,7 @@ msgstr ""
 "            -c, --host nome_host_db OPPURE spool directory se si usa -m "
 "file\n"
 "            -s, --schema schema_db\n"
-"            -m, --module modulo_db (pq, mysql, file)\n"
+"            -m, --module modulo_db (pq, mysql, sqlite, file)\n"
 "            -l, --libdir percorso_per_modulo_db\n"
 "            -f, --logfile nome_del_file\n"
 "            -t, --phone numero_telefono\n"
@@ -4959,34 +4958,34 @@ msgstr ""
 
 # tradurre host con server non è il massimo
 #: ../smsd/sqlite.c:57 ../smsd/sqlite.c:69
-#, fuzzy, c-format
+#, c-format
 msgid "Connection to database '%s' failed.\n"
-msgstr "Impossibile connettersi al database «%s» sull'host «%s».\n"
+msgstr "Connessione fallita al database «%s».\n"
 
 #: ../smsd/sqlite.c:116 ../smsd/sqlite.c:182
 #, c-format
 msgid "%d: Parsing query %s failed!"
-msgstr ""
+msgstr "%d: analisi fallita della query %s"
 
 #: ../smsd/sqlite.c:117 ../smsd/sqlite.c:183
-#, fuzzy, c-format
+#, c-format
 msgid "Error: %s"
-msgstr "Errore: %s\n"
+msgstr "Errore: %s"
 
 #: ../smsd/sqlite.c:133
-#, fuzzy, c-format
+#, c-format
 msgid "%d: INSERT INTO inbox failed.\n"
-msgstr "%d: INSERT INTO %s.inbox è fallito.\n"
+msgstr "%d: INSERT INTO inbox è fallito.\n"
 
 #: ../smsd/sqlite.c:134
-#, fuzzy, c-format
+#, c-format
 msgid "Error %d: %s\n"
-msgstr "Errore: %s\n"
+msgstr "Errore %d: %s\n"
 
 #: ../smsd/sqlite.c:135
-#, fuzzy, c-format
+#, c-format
 msgid "Query: %s\n"
-msgstr "Interrogazione"
+msgstr "Query: %s\n"
 
 #: ../utils/mgnokiidev.c:179
 #, c-format
