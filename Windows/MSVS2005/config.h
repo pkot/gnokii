@@ -37,7 +37,7 @@
 #endif
 
 #undef VERSION
-#define VERSION "0.6.31"
+#define VERSION "0.6.32git"
 
 /* We support Bluetooth and IRDA on MSVS 2005 */
 #define HAVE_BLUETOOTH 1
