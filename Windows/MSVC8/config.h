@@ -37,7 +37,7 @@
 #endif
 
 #undef VERSION
-#define VERSION "0.6.31git"
+#define VERSION "0.6.31"
 
 /* We support Bluetooth and IRDA on MSVC8 */
 #define HAVE_BLUETOOTH 1
