@@ -1778,6 +1778,7 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state, int 
 	int i, j, k, count, size, start, copied, refnum, is_concat = -1, max_sms_len = MAX_SMS_PART;
 	gn_sms_user_data ud[GN_SMS_PART_MAX_NUMBER];
 	gn_error error = GN_ERR_NONE;
+	time_t t;
 
 	start = 0;
 	copied = 0;
@@ -1807,7 +1808,6 @@ static gn_error sms_send_long(gn_data *data, struct gn_statemachine *state, int 
 	data->sms->reference = calloc(count, sizeof(unsigned int));
 
 	/* Generate reference number */
-	time_t t;
 	time(&t);
 	srand(t);
 	refnum = (int)(255.0*rand()/(RAND_MAX+1.0));
