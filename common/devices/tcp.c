@@ -7,7 +7,8 @@
   This file is part of gnokii.
 
   Copyright (C) 2002      Jan Kratochvil, Pavel Machek, Manfred Jonsson, Ladis Michl
-  Copyright (C) 2002-2004 BORBELY Zoltan, Pawel Kot
+  Copyright (C) 2002-2004 BORBELY Zoltan
+  Copyright (C) 2002-2011 Pawel Kot
 
 */
 
@@ -54,10 +55,15 @@
 static int tcp_open(const char *file)
 {
 	int fd;
+#ifdef HAVE_GETADDRINFO
+	struct addrinfo hints, *result, *rp;
+#else
 	struct sockaddr_in addr;
-	char *filedup,*portstr,*end;
-	unsigned long portul;
 	struct hostent *hostent;
+#endif
+	int gai_errorcode;
+	char *filedup, *portstr, *end;
+	unsigned long portul;
 
 	fd = socket(PF_INET, SOCK_STREAM, IPPROTO_TCP);
 	if (fd == -1) {
@@ -65,15 +71,12 @@ static int tcp_open(const char *file)
 		return -1;
 	}
 	if (!(filedup = strdup(file))) {
-	fail_close:
-		close(fd);
-		return -1;
+		perror(_("Gnokii tcp_open: strdup()"));
+		goto fail_close;
 	}
 	if (!(portstr = strchr(filedup, ':'))) {
 		fprintf(stderr, _("Gnokii tcp_open: colon (':') not found in connect strings \"%s\"!\n"), filedup);
-	fail_free:
-		free(filedup);
-		goto fail_close;
+		goto fail_free;
 	}
 	*portstr++ = '\0';
 	portul = strtoul(portstr, &end, 0);
@@ -81,6 +84,35 @@ static int tcp_open(const char *file)
 		fprintf(stderr, _("Gnokii tcp_open: Port string \"%s\" not valid for IPv4 connection!\n"), portstr);
 		goto fail_free;
 	}
+
+#ifdef HAVE_GETADDRINFO
+	memset(&hints, 0, sizeof(struct addrinfo));
+	hints.ai_family = AF_UNSPEC;     /* Allow IPv4 or IPv6 */
+	hints.ai_socktype = SOCK_STREAM;
+	hints.ai_flags = 0;
+	hints.ai_protocol = IPPROTO_TCP;
+
+	gai_errorcode = getaddrinfo(filedup, portstr, &hints, &result);
+	if (gai_errorcode != 0) {
+		fprintf(stderr, "%s\n", gai_strerror(gai_errorcode));
+		goto fail_free;
+	}
+
+	for (rp = result; rp != NULL; rp = rp->ai_next) {
+		if ((rp->ai_family != PF_INET) &&
+		    (rp->ai_family != PF_INET6))
+			continue;
+		if (connect(fd, rp->ai_addr, rp->ai_addrlen) != -1)
+			break;
+	}
+
+	freeaddrinfo(result);
+
+	if (rp == NULL) {
+		fprintf(stderr, _("Gnokii tcp_open: Cannot connect!\n"));
+		goto fail_free;
+	}
+#else
 	if (!(hostent = gethostbyname(filedup))) {
 		fprintf(stderr, _("Gnokii tcp_open: Unknown host \"%s\"!\n"), filedup);
 		goto fail_free;
@@ -89,7 +121,6 @@ static int tcp_open(const char *file)
 		fprintf(stderr, _("Gnokii tcp_open: Address resolve for host \"%s\" not compatible!\n"), filedup);
 		goto fail_free;
 	}
-	free(filedup);
 
 	addr.sin_family = AF_INET;
 	addr.sin_port = htons(portul);
@@ -97,10 +128,19 @@ static int tcp_open(const char *file)
 
 	if (connect(fd, (struct sockaddr *)&addr, sizeof(addr))) {
 		perror(_("Gnokii tcp_open: connect()"));
-		goto fail_close;
+		goto fail_free;
 	}
+#endif
 
+	free(filedup);
 	return fd;
+
+fail_free:
+	free(filedup);
+
+fail_close:
+	close(fd);
+	return -1;
 }
 
 int tcp_close(int fd, struct gn_statemachine *state)
@@ -140,7 +180,7 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 
 #if !(__unices__)
 	retcode = fcntl(fd, F_SETOWN, getpid());
-	if (retcode == -1){
+	if (retcode == -1) {
 		perror(_("Gnokii tcp_opendevice: fcntl(F_SETOWN)"));
 		tcp_close(fd, state);
 		return -1;
