@@ -1,5 +1,3 @@
-$Id$
-
 Assembled by
         Andrew Kozin
 	... and other members of gnokii mailing list <gnokii-users@nongnu.org>

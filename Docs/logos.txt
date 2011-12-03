@@ -1,5 +1,3 @@
-$Id$
-
 ------------------------[ Tutorial about logos files ]-------------------------
 nol (operator logo) and ngg (caller logo) files include the header as few
 first bytes of their content. That is 16 or 20 bytes structure. Header

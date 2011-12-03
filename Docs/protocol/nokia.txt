@@ -1,5 +1,3 @@
-$Id$
-
 Document describing protocol used in Nokia phones.
 
 The data provided is for information purposes only. 

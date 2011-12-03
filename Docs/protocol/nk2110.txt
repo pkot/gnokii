@@ -1,5 +1,3 @@
-$Id$
-
 Assembled by
 	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)
         Pavel Machek <pavel@ucw.cz>

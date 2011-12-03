@@ -1,5 +1,3 @@
-$Id$
-
 Assembled by
 	Balazs Nagy (js@lsc.hu)
 	Marcin Wiacek (Marcin-Wiacek@TOPNET.PL)

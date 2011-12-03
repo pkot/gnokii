@@ -28,8 +28,6 @@
  ********************************************************************/
 
 /*
- * $Id$
- *
  * GNOKII modifications:
  * Fixes for Solaris compile (Artur Kubiak and Michael Wiedmann)
  * FIXME: does it have *ANY* chance to work under other OS than Linux?
