@@ -790,21 +790,17 @@ GNOKII_API gn_error gn_mms_delete(gn_data *data, struct gn_statemachine *state)
 
 /**
  * gn_mms_free - free an @mms
- * @mms: a pointer to a @gn_mms returned by gn_mms_alloc()
+ * @mms: a pointer to a @gn_mms returned by gn_mms_alloc() or #NULL
  *
  * Return value: a @gn_error code
  */
 GNOKII_API gn_error gn_mms_free(gn_mms *mms)
 {
 	if (mms) {
-		if (mms->tid)
-			free(mms->tid);
-		if (mms->from)
-			free(mms->from);
-		if (mms->to)
-			free(mms->to);
-		if (mms->buffer)
-			free(mms->buffer);
+		free(mms->tid);
+		free(mms->from);
+		free(mms->to);
+		free(mms->buffer);
 		free(mms);
 	}
 

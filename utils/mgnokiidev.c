@@ -213,6 +213,6 @@ int main(int argc, char **argv)
 	/* Done */
 	exit(0);
 error:
-	if (name) free(name);
+	free(name);
 	exit(-2);
 }
