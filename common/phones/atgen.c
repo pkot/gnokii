@@ -2423,7 +2423,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 {
 	at_line_buffer buf;
 	gn_error ret = GN_ERR_NONE;
-	unsigned int sms_len, pdu_flags;
+	unsigned int sms_len;
 	unsigned char *tmp;
 	gn_error error;
  	at_driver_instance *drvinst = AT_DRVINST(state);
@@ -2508,11 +2508,12 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 	hex2bin(tmp, buf.line3, sms_len);
 
 	if (drvinst->no_smsc) {
-		pdu_flags = GN_SMS_PDU_NOSMSC;
+		ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, GN_SMS_PDU_NOSMSC);
 	} else {
-		pdu_flags = GN_SMS_PDU_DEFAULT;
+		ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, GN_SMS_PDU_DEFAULT);
+		if (ret == GN_ERR_INTERNALERROR)
+			ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, GN_SMS_PDU_NOSMSC);
 	}
-	ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, pdu_flags);
 
 	free(tmp);
 	return ret;

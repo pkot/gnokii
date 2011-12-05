@@ -167,6 +167,8 @@ static gn_error at_sms_get_generic(gn_data *data, struct gn_statemachine *state,
 
 	hex2bin(tmp, sms, len);
 	e = gn_sms_pdu2raw(data->raw_sms, tmp, len, GN_SMS_PDU_DEFAULT);
+	if (e == GN_ERR_INTERNALERROR)
+		e = gn_sms_pdu2raw(data->raw_sms, tmp, len, GN_SMS_PDU_NOSMSC);
 	free(tmp);
 	return e;
 }
