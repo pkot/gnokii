@@ -119,6 +119,7 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 
 void at_nokia_init(char* foundmodel, char* setupmodel, struct gn_statemachine *state)
 {
+	dprintf("entering at_nokia_init\n");
 	/* block writing of phone memory on nokia phones other than */
 	/* 8210. if you write to the phonebook of a eg 7110 all extended */
 	/* information will be lost. */
@@ -127,8 +128,9 @@ void at_nokia_init(char* foundmodel, char* setupmodel, struct gn_statemachine *s
 
 	/* premicell does not want sms centers in PDU packets (send & */
 	/* receive) */
-	if (!strncasecmp("0301", foundmodel, 4))
+	if (!strncasecmp("0301", foundmodel, 4) || !strncasecmp("Nokia Cellular Data Adapter", foundmodel, 27)) {
 		AT_DRVINST(state)->no_smsc = 1;
+	}
 
 	/* Nokias support just mode 1 */
 	AT_DRVINST(state)->cnmi_mode = 1;

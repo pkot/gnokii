@@ -3308,6 +3308,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	if (ret)
 		goto out;
 
+	dprintf("Manufacturer: \"%s\"\n", manufacturer);
 	if (!at_manufacturer_compare("bosch"))
 		at_bosch_init(model, setupdata->model, state);
 	else if (!at_manufacturer_compare("ericsson"))
