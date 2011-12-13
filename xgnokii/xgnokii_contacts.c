@@ -2723,6 +2723,8 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 		}
 	}
 
+	fclose(f);
+
 	RefreshStatusInfo();
 	GUIEventSend(GUI_EVENT_CONTACTS_CHANGED);
 	GUIEventSend(GUI_EVENT_SMS_NUMBER_CHANGED);
