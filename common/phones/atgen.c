@@ -234,11 +234,11 @@ static int reply_simpletext(char *req, char *resp, const char *tmpl, char *dest,
 	if ((strncmp(req, tmpl, n - 2) == 0) || (strncmp(resp, tmpl, n) == 0)) {
 		/* Skip the prefix indicating to which command this response is responding, if present */
 		i = 0;
-		if (resp[i] == '+') {
+		if (resp[i] == '+' || resp[i] == ':' || !isalpha(resp[i])) {
 			while (resp[i] && resp[i++] != ':')
 				;
 		}
-		while (isspace(resp[i]))
+		while (isspace(resp[i]) || !isalpha(resp[i]))
 			i++;
 		snprintf(dest, maxlength, "%s", strip_quotes(resp + i));
 		return 1;
