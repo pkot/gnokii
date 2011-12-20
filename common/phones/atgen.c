@@ -2511,8 +2511,14 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 		ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, GN_SMS_PDU_NOSMSC);
 	} else {
 		ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, GN_SMS_PDU_DEFAULT);
-		if (ret == GN_ERR_INTERNALERROR)
+		if (ret == GN_ERR_INTERNALERROR) {
 			ret = gn_sms_pdu2raw(data->raw_sms, tmp, sms_len, GN_SMS_PDU_NOSMSC);
+			if (ret == GN_ERR_NONE) {
+				dprintf("Detected phone that must not have SMSC information in PDU SMS.\n");
+				dprintf("Report to gnokii-ml <gnokii-users@nongnu.org> your phone information as\nprinted by gnokii --identify\n");
+				drvinst->no_smsc = 1;
+			}
+		}
 	}
 
 	free(tmp);
