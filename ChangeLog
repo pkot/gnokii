@@ -8,6 +8,10 @@
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)
+    o fix parsing responses contining non-ascii characters
+                                                        (Paweł Kot)
+    o fix sending sms with Nokia Cellular Data Adapter; thanks to
+      Tristan Drinkwater for patient testing            (Paweł Kot)
  * fake driver updates
     o always autodetect if PDU SMS starts with SMSC (Daniele Forsi)
 
