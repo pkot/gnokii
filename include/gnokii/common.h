@@ -883,4 +883,11 @@ typedef struct {
 	int size;
 } gn_file_list;
 
+typedef enum {
+	GN_AUTH_TYPE_NONE = 0,
+	GN_AUTH_TYPE_INTERACTIVE,
+	GN_AUTH_TYPE_TEXT,
+	GN_AUTH_TYPE_BINARY
+} gn_auth_type;
+
 #endif	/* _gnokii_common_h */

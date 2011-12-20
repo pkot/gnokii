@@ -3301,6 +3301,12 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	SetEcho(&data, state);
 	SetExtendedError(&data, state);
 
+	if (state->config.auth_type != GN_AUTH_TYPE_NONE)
+		ret = do_auth(state->config.auth_type, state);
+
+	if (ret)
+		goto out;
+
 	/*
 	 * detect manufacturer and model for further initialization
 	 */

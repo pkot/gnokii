@@ -860,6 +860,27 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 		cfg->use_locking = def->use_locking;
 	}
 
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "authentication_type")))
+		cfg->auth_type = GN_AUTH_TYPE_NONE;
+	else if (!strcasecmp(val, "text"))
+		cfg->auth_type = GN_AUTH_TYPE_TEXT;
+	else if (!strcasecmp(val, "interactive"))
+		cfg->auth_type = GN_AUTH_TYPE_INTERACTIVE;
+	else if (!strcasecmp(val, "binary"))
+		cfg->auth_type = GN_AUTH_TYPE_BINARY;
+	else if (!strcasecmp(val, "none"))
+		cfg->auth_type = GN_AUTH_TYPE_NONE;
+	else {
+		fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "authentication_type", val);
+		fprintf(stderr, _("Assuming: %s\n"), "none");
+		cfg->auth_type = def->auth_type;
+	}
+
+	if (!(val = gn_cfg_get(gn_cfg_info, section, "auth_file")))
+		snprintf(cfg->auth_file, sizeof(cfg->auth_file), "%s", def->auth_file);
+	else
+		snprintf(cfg->auth_file, sizeof(cfg->auth_file), "%s", val);
+
 	return GN_ERR_NONE;
 }
 
@@ -1213,6 +1234,8 @@ static gn_error cfg_file_or_memory_read(const char *file, const char **lines)
 	gn_config_default.rfcomm_cn = 0;
 	gn_config_default.sm_retry = 0;
 	gn_config_default.use_locking = 0;
+	gn_config_default.auth_type = GN_AUTH_TYPE_NONE;
+	gn_config_default.auth_file[0] = 0;
 
 	if ((error = cfg_psection_load(&gn_config_global, "global", &gn_config_default)) != GN_ERR_NONE)
 		return error;

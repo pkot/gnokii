@@ -153,20 +153,27 @@ typedef struct {
 	int hardware_handshake;				/* Select between hardware and software handshake */
 	int require_dcd;				/* DCD signal check */
 	int smsc_timeout;				/* How many seconds should we wait for the SMSC response, defaults to 10 seconds */
-	char connect_script[256];			/* Script to run when device connection established */
-	char disconnect_script[256];			/* Script to run when device connection closed */
 	uint8_t rfcomm_cn;				/* RFCOMM channel number to connect */
 	unsigned int sm_retry;				/* Indicates whether statemachine should do retries. Defaults to off. */
 							/* Use with caution -- may break newer DCT4 phones */
-
 	unsigned int use_locking;			/* Should we use locking system or not */
 	int set_dtr_rts;				/* Should we set DTR and RTS bits on the serial line */
+	gn_auth_type auth_type;				/* Type of the initialization authentication for the AT driver */
+	char auth_file[256];				/* Location of the authentication information file */
+	char connect_script[256];			/* Script to run when device connection established */
+	char disconnect_script[256];			/* Script to run when device connection closed */
+	char auth_script[256];				/* Script to run after device connection established */
 	/* do not change the following values from userspace */
 	char m_model[GN_MODEL_MAX_LENGTH];
 	char m_manufacturer[GN_MANUFACTURER_MAX_LENGTH];
 	char m_revision[GN_REVISION_MAX_LENGTH];
 	char m_imei[GN_IMEI_MAX_LENGTH];
 } gn_config;
+
+typedef gn_error (*gn_auth_interactive_func_t)(struct gn_statemachine *state);
+typedef struct {
+	gn_auth_interactive_func_t auth_interactive;
+} gn_callback;
 
 typedef struct {
 	int fd;

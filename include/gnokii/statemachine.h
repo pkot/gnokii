@@ -58,6 +58,7 @@ struct gn_statemachine {
 	gn_link link;
 	gn_driver driver;
 	char *lockfile;
+	gn_callback callbacks;	/* We store all callbacks in here */
 	
 	/* Store last message for resend purposes */
 	unsigned char last_msg_type;

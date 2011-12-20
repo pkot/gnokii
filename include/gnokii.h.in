@@ -338,6 +338,9 @@ GNOKII_API gn_error gn_mms_convert(const gn_mms *source_mms, gn_mms *dest_mms);
 GNOKII_API gn_error gn_call_dial(int *call_id, gn_data *data, struct gn_statemachine *state);
 GNOKII_API gn_error gn_call_check_active(struct gn_statemachine *state);
 
+/* Callback registration */
+GNOKII_API void gn_auth_interactive_register(gn_auth_interactive_func_t auth_func, struct gn_statemachine *state);
+
 #ifdef __cplusplus
 }
 #endif

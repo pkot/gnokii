@@ -5,7 +5,6 @@
 # $HOME/.config/gnokii/config in most cases) and change port, connection and
 # model settings following the comments below.  See
 # http://wiki.gnokii.org/index.php/Config for working examples.
-#
 
 [global]
 
@@ -169,11 +168,53 @@ serial_baudrate = 19200
 # (sm_retry = 0)
 #sm_retry = 1
 
-# Run the specified script(s) right after opening and initializing the device
-# and before any communication (right before closing for disconnect_script).
-# You may find handy to use it to connect your modem to SMS Center
-# when using BIP or CIMD protocols
-# Non-absolute path is relative to the specific directory where gnokii is run!
+# The following settings allow to choose an authentication method upon the
+# initialization of the phone. It is effective only for AT driver.
+# Authentication type: none, interactive, text, binary, script
+authentication_type = none
+#   When 'none' type is selected, no additional action on initialization is
+#   taken
+#authentication_type = interactive
+#   When 'interactive' type is selected it allows the application to
+#   implement own authentication method.  When no authentication is
+#   implemented by the application, the type 'text' is assumed.
+#authentication_type = text
+#   When 'pin' type is selected gnokii will issue:
+#    AT+CPIN?
+#   Depending on the outcome different actions will be taken.
+#    +CPIN: READY - no action
+#    +CPIN: SIM PIN - authenticate using PIN
+#    +CPIN: SIM PUK - authenticate using PUK
+#    +CPIN: SIM PIN2 - authenticate using PIN2
+#    +CPIN: SIM PUK2 - authenticate using PUK2
+#   PIN/PUK will be read from the file pointed out by 'auth_file' variable.
+#   File must not be world or group readable/writable/exacutable.
+#   The syntax of the file is (see also Docs/sample/pin file):
+#    PIN:1234
+#    PUK:12345678
+#    PIN2:5678
+#    PUK2:0987654321
+#    SEC:12345
+#   Supported code types are: PIN, PIN2, PUK, PUK2, SEC
+#   If the path variable is empty or points to non existent file or to the
+#   file with wrong permissions, PIN/PUK will be read from the interactive
+#   prompt (stdin).
+#authentication_type = binary
+#   For future use. Reads binary authentication information from the file
+#   pointed out by 'auth_file' variable. Currently does nothing.
+
+# Location of the file that includes authentication information. Used by
+# authentication types text and binary.
+#auth_file = 
+
+# Location of the scripts to be run at specified moments.
+# connect_script: right after establishing connection with the device
+# disconnect_script: right before closing the connection
+# auth_script: right after establishing the connection with the device
+# You may find handy to use connect_script
+# or disconnect_script to connect your modem to SMS Center when using BIP or
+# CIMD protocols. Non-absolute path is relative to the specific directory
+# where gnokii is run!
 #connect_script = /absolute/path/to/gnokii/Docs/sample/cimd-connect
 #disconnect_script =
 
@@ -249,6 +290,7 @@ TELEPHONE = 12345678
 
 [disconnect_script]
 
+[auth_script]
 
 # The following parameters control how libgnokii handles the debugging messages.
 # Currently there are three categories: "debug" controls the libgnokii
@@ -265,6 +307,10 @@ rlpdebug = off
 
 # where to log X debug output (on: stderr, off: /dev/null)
 xdebug = off
+
+# In [phone_*] sections you can use all variables that were used in [global]
+# section.  Only the following sections are global: [flags], [gnokii],
+# [xgnokii], [gnokiid], [logging].
 
 # Fake-phone can be used for testing Gnokii functionality without
 # having a physical phone connected.
