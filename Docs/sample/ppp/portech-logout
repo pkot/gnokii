@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# This is sample logout script for Portech MW-370
+# http://www.portech.com.tw/p3-product1_1.asp?Pid=13
+
+echo "logout\r"

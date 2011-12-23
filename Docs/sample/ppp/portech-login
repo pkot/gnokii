@@ -1,0 +1,13 @@
+#!/usr/bin/expect
+
+# This is sample logout script for Portech MW-370
+# http://www.portech.com.tw/p3-product1_1.asp?Pid=13
+
+expect "username:"
+send "voip\r"
+expect "password:"
+send "1234\r"
+expect "command: logout, module1, module2, state1, state2, info."
+send "state1\r"
+expect "module 1: free."
+send "module1\r"
