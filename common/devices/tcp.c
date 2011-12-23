@@ -15,7 +15,6 @@
 #include "config.h"
 #include "misc.h"
 #include "devices/tcp.h"
-#include "devices/serial.h"
 
 #ifndef WIN32
 
@@ -145,11 +144,6 @@ fail_close:
 
 int tcp_close(int fd, struct gn_statemachine *state)
 {
-	/* handle config file disconnect_script:
-	 */
-	if (device_script(fd, "disconnect_script", state) == -1)
-		fprintf(stderr, _("Gnokii tcp_close: disconnect_script\n"));
-
 	return close(fd);
 }
 
@@ -168,17 +162,8 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 	if (fd < 0)
 		return fd;
 
-	/* handle config file connect_script:
-	 */
-	if (device_script(fd, "connect_script", state) == -1) {
-		fprintf(stderr, _("Gnokii tcp_opendevice: connect_script\n"));
-		tcp_close(fd, state);
-		return -1;
-	}
-
-	/* Allow process/thread to receive SIGIO */
-
 #if !(__unices__)
+	/* Allow process/thread to receive SIGIO */
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1) {
 		perror(_("Gnokii tcp_opendevice: fcntl(F_SETOWN)"));

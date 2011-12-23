@@ -9,7 +9,7 @@
   Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2001       Chris Kemp, Manfred Jonsson, Jank Kratochvil
   Copyright (C) 2002       Ladis Michl, Pavel Machek
-  Copyright (C) 2001-2004  Pawel Kot
+  Copyright (C) 2001-2011  Pawel Kot
   Copyright (C) 2002-2004  BORBELY Zoltan
   
 */
@@ -76,63 +76,8 @@ static int cfsetspeed(struct termios *t, int speed)
 /* Structure to backup the setting of the terminal. */
 struct termios serial_termios;
 
-/* Script handling: */
-static void device_script_cfgfunc(const char *section, const char *key, const char *value)
-{
-	setenv(key, value, 1); /* errors ignored */
-}
-
-int device_script(int fd, const char *section, struct gn_statemachine *state)
-{
-	pid_t pid;
-	const char *scriptname;
-	int status;
-
-	if (!strcmp(section, "connect_script"))
-		scriptname = state->config.connect_script;
-	else
-		scriptname = state->config.disconnect_script;
-	if (scriptname[0] == '\0')
-		return 0;
-
-	errno = 0;
-	switch ((pid = fork())) {
-	case -1:
-		fprintf(stderr, _("device_script(\"%s\"): fork() failure: %s!\n"), scriptname, strerror(errno));
-		return -1;
-
-	case 0: /* child */
-		cfg_foreach(section, device_script_cfgfunc);
-		errno = 0;
-		if (dup2(fd, 0) != 0 || dup2(fd, 1) != 1 || close(fd)) {
-			fprintf(stderr, _("device_script(\"%s\"): file descriptor preparation failure: %s\n"), scriptname, strerror(errno));
-			_exit(-1);
-		}
-		/* FIXME: close all open descriptors - how to track them?
-		 */
-		execl("/bin/sh", "sh", "-c", scriptname, NULL);
-		fprintf(stderr, _("device_script(\"%s\"): script execution failure: %s\n"), scriptname, strerror(errno));
-		_exit(-1);
-		/* NOTREACHED */
-
-	default:
-		if (pid == waitpid(pid, &status, 0 /* options */) && WIFEXITED(status) && !WEXITSTATUS(status))
-			return 0;
-		fprintf(stderr, _("device_script(\"%s\"): child script execution failure: %s, exit code=%d\n"), scriptname,
-			(WIFEXITED(status) ? _("normal exit") : _("abnormal exit")),
-			(WIFEXITED(status) ? WEXITSTATUS(status) : -1));
-		errno = EIO;
-		return -1;
-
-	}
-	/* NOTREACHED */
-}
-
-
-int serial_close(int fd, struct gn_statemachine *state);
-
-
-/* Open the serial port and store the settings.
+/*
+ * Open the serial port and store the settings.
  * Returns a file descriptor on success, or -1 if an error occurred.
  */
 int serial_open(const char *file, int oflag)
@@ -157,16 +102,12 @@ int serial_open(const char *file, int oflag)
 	return fd;
 }
 
-/* Close the serial port and restore old settings.
+/*
+ * Close the serial port and restore old settings.
  * Returns zero on success, -1 if an error occurred or fd was invalid.
  */
 int serial_close(int fd, struct gn_statemachine *state)
 {
-	/* handle config file disconnect_script:
-	 */
-	if (device_script(fd, "disconnect_script", state) == -1)
-		dprintf("Gnokii serial_close: disconnect_script\n");
-
 	if (fd >= 0) {
 		serial_termios.c_cflag |= HUPCL;	/* production == 1 */
 		tcsetattr(fd, TCSANOW, &serial_termios);
@@ -176,7 +117,8 @@ int serial_close(int fd, struct gn_statemachine *state)
 	return -1;
 }
 
-/* Open a device with standard options.
+/*
+ * Open a device with standard options.
  * Use value (-1) for "with_hw_handshake" if its specification is required from the user.
  */
 int serial_opendevice(const char *file, int with_odd_parity,
@@ -189,7 +131,8 @@ int serial_opendevice(const char *file, int with_odd_parity,
 
 	/* Open device */
 
-	/* O_NONBLOCK MUST be used here as the CLOCAL may be currently off
+	/*
+	 * O_NONBLOCK MUST be used here as the CLOCAL may be currently off
 	 * and if DCD is down the "open" syscall would be stuck waiting for DCD.
 	 */
 	fd = serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK);
@@ -235,28 +178,8 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	if (serial_changespeed(fd, state->config.serial_baudrate, state) != GN_ERR_NONE)
 		serial_changespeed(fd, 19200 /* default value */, state);
 
-	/* We need to turn off O_NONBLOCK now (we have CLOCAL set so it is safe).
-	 * When we run some device script it really doesn't expect NONBLOCK!
-	 */
-
-	retcode = fcntl(fd, F_SETFL, 0);
-	if (retcode == -1) {
-		perror("Gnokii serial_opendevice: fcntl(F_SETFL)");
-		serial_close(fd, state);
-		return -1;
-	}
-
-	/* handle config file connect_script:
-	 */
-	if (device_script(fd, "connect_script", state) == -1) {
-		dprintf("Gnokii serial_opendevice: connect_script\n");
-		serial_close(fd, state);
-		return -1;
-	}
-
-	/* Allow process/thread to receive SIGIO */
-
 #if !(__unices__)
+	/* Allow process/thread to receive SIGIO */
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1) {
 		perror("Gnokii serial_opendevice: fcntl(F_SETOWN)");
@@ -267,7 +190,8 @@ int serial_opendevice(const char *file, int with_odd_parity,
 
 	/* Make filedescriptor asynchronous. */
 	if (with_async) {
-		/* We need to supply FNONBLOCK (or O_NONBLOCK) again as it would get reset
+		/*
+		 * We need to supply FNONBLOCK (or O_NONBLOCK) again as it would get reset
 		 * by F_SETFL as a side-effect!
 		 */
 #ifdef FNONBLOCK
@@ -336,7 +260,8 @@ static int serial_wselect(int fd, struct timeval *timeout, struct gn_statemachin
 }
 
 
-/* Change the speed of the serial device.
+/*
+ * Change the speed of the serial device.
  * RETURNS: Success
  */
 gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)

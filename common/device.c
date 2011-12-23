@@ -8,7 +8,7 @@
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001      Chris Kemp
-  Copyrught (C) 2001-2004 Pawel Kot
+  Copyrught (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2003 BORBELY Zoltan
   Copyright (C) 2002      Pavel Machek, Marcin Wiacek
 
@@ -27,9 +27,63 @@
 #include "devices/dku2libusb.h"
 #include "devices/socketphonet.h"
 
+#include <errno.h>
+
 GNOKII_API int device_getfd(struct gn_statemachine *state)
 {
 	return state->device.fd;
+}
+
+/* Script handling: */
+static void device_script_cfgfunc(const char *section, const char *key, const char *value)
+{
+	setenv(key, value, 1); /* errors ignored */
+}
+
+int device_script(int fd, const char *section, struct gn_statemachine *state)
+{
+	pid_t pid;
+	const char *scriptname;
+	int status;
+
+	if (!strcmp(section, "connect_script"))
+		scriptname = state->config.connect_script;
+	else
+		scriptname = state->config.disconnect_script;
+	if (scriptname[0] == '\0')
+		return 0;
+
+	errno = 0;
+	switch ((pid = fork())) {
+	case -1:
+		fprintf(stderr, _("device_script(\"%s\"): fork() failure: %s!\n"), scriptname, strerror(errno));
+		return -1;
+
+	case 0: /* child */
+		cfg_foreach(section, device_script_cfgfunc);
+		errno = 0;
+		if (dup2(fd, 0) != 0 || dup2(fd, 1) != 1 || close(fd)) {
+			fprintf(stderr, _("device_script(\"%s\"): file descriptor preparation failure: %s\n"), scriptname, strerror(errno));
+			_exit(-1);
+		}
+		/* FIXME: close all open descriptors - how to track them?
+		 */
+		execl("/bin/sh", "sh", "-c", scriptname, NULL);
+		fprintf(stderr, _("device_script(\"%s\"): script execution failure: %s\n"), scriptname, strerror(errno));
+		_exit(-1);
+		/* NOTREACHED */
+
+	default:
+		if (pid == waitpid(pid, &status, 0 /* options */) && WIFEXITED(status) && !WEXITSTATUS(status))
+			return 0;
+		fprintf(stderr, _("device_script(\"%s\"): child script execution failure: %s, exit code=%d\n"), scriptname,
+			(WIFEXITED(status) ? _("normal exit") : _("abnormal exit")),
+			(WIFEXITED(status) ? WEXITSTATUS(status) : -1));
+		errno = EIO;
+		return -1;
+
+	}
+	/* NOTREACHED */
 }
 
 int device_open(const char *file, int with_odd_parity, int with_async,
@@ -39,7 +93,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	state->device.type = device_type;
 	state->device.device_instance = NULL;
 
-	dprintf("Serial device: opening device %s\n", (device_type == GN_CT_DKU2LIBUSB) ? "USB" : file);
+	dprintf("device: opening device %s\n", (device_type == GN_CT_DKU2LIBUSB) ? "USB" : file);
 
 	switch (state->device.type) {
 	case GN_CT_DKU2:
@@ -69,12 +123,27 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 		state->device.fd = -1;
 		break;
 	}
+	/*
+	 * handle config file connect_script:
+	 */
+	if (device_script(state->device.fd, "connect_script", state) == -1) {
+		dprintf("gnokii open device: connect_script\n");
+		device_close(state);
+		return 0;
+	}
+
 	return (state->device.fd >= 0);
 }
 
 void device_close(struct gn_statemachine *state)
 {
-	dprintf("Serial device: closing device\n");
+	dprintf("device: closing device\n");
+
+	/*
+	 * handle config file disconnect_script:
+	 */
+	if (device_script(state->device.fd, "disconnect_script", state) == -1)
+		dprintf("gnokii device close: disconnect_script\n");
 
 	switch (state->device.type) {
 	case GN_CT_DKU2:
@@ -119,7 +188,7 @@ void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		dprintf("Serial device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
+		dprintf("device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
 		serial_setdtrrts(state->device.fd, dtr, rts, state);
 		break;
 	case GN_CT_Irda:
@@ -139,11 +208,11 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		dprintf("Serial device: setting speed to %d\n", speed);
+		dprintf("device: setting speed to %d\n", speed);
 		serial_changespeed(state->device.fd, speed, state);
 		break;
 	case GN_CT_Tekram:
-		dprintf("Serial device: setting speed to %d\n", speed);
+		dprintf("device: setting speed to %d\n", speed);
 		tekram_changespeed(state->device.fd, speed, state);
 		break;
 	case GN_CT_Irda:

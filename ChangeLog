@@ -7,6 +7,9 @@
       driver                                            (Paweł Kot)
     o add optional authentication during the initialization phase
                                                         (Paweł Kot)
+    o move device_script() to generic device; it will cause ability
+      to execute connect_script and disconnect_script with all
+      connection types                                  (Paweł Kot)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)
