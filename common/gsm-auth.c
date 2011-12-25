@@ -57,28 +57,22 @@ static int get_password(const char *prompt, char *pass, int length)
 static gn_error auth_pin_interactive(gn_data *data, struct gn_statemachine *state)
 {
 	gn_security_code *security_code = data->security_code;
+	char prompt[64];
 
 	memset(&security_code->code, 0, sizeof(security_code->code));
 	switch (security_code->type) {
 	case GN_SCT_Pin:
-		get_password(_("Enter your PIN code: "), security_code->code, sizeof(security_code->code));
-		break;
 	case GN_SCT_Puk:
-		get_password(_("Enter your PUK code: "), security_code->code, sizeof(security_code->code));
-		break;
 	case GN_SCT_Pin2:
-		get_password(_("Enter your PIN2 code: "), security_code->code, sizeof(security_code->code));
-		break;
 	case GN_SCT_Puk2:
-		get_password(_("Enter your PUK2 code: "), security_code->code, sizeof(security_code->code));
-		break;
 	case GN_SCT_SecurityCode:
-		get_password(_("Enter your security code: "), security_code->code, sizeof(security_code->code));
+		snprintf(prompt, sizeof(prompt), _("Enter your %s (press Enter to cancel): "), gn_security_code_type2str(security_code->type));
+		if (get_password(prompt, security_code->code, sizeof(security_code->code)) < 1)
+			return GN_ERR_USERCANCELED;
 		break;
 	default:
 		return GN_ERR_NOTSUPPORTED;
 	}
-
 	return gn_sm_functions(GN_OP_EnterSecurityCode, data, state);
 }
 
