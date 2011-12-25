@@ -452,14 +452,14 @@ static int foogle(int argc, char *argv[])
 
 static int ping(gn_data *data, struct gn_statemachine *state)
 {
-        gn_error err;
+	gn_error err;
 
 	err = gn_sm_functions(GN_OP_Ping, data, state);
 	if (err == GN_ERR_NONE)
-	        fprintf(stdout, _("Device responded OK.\n"));
-        else
-                fprintf(stdout, _("Device did not respond.\n"));
-        return err;
+		fprintf(stdout, _("Device responded OK.\n"));
+	else
+		fprintf(stdout, _("Device did not respond.\n"));
+	return err;
 }
 
 static int parse_options(int argc, char *argv[])
