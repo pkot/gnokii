@@ -199,12 +199,27 @@ authentication_type = none
 #   If the path variable is empty or points to non existent file or to the
 #   file with wrong permissions, PIN/PUK will be read from the interactive
 #   prompt (stdin).
-#authentication_type = text_nointeractive
-#   This is the same as text but there is no attempt for interactive prompt
-#   if the auth_file is not found.
+#authentication_type = interactive
+#   When 'interactive' type is selected it allows the application to
+#   implement own authentication method.  When no authentication is
+#   implemented by the application, the type 'text' is assumed.
+#authentication_type = noninteractive
+#   When 'noninteractive' type is selected it allows the application to
+#   implement own authentication method.  When no authentication is
+#   implemented by the application, the type 'text' is assumed.  When
+#   auth_file cannot be found, interactive prompt is not used but error is
+#   returned.  This is recommended for libgnokii usage by any kind of
+#   daemons.
 #authentication_type = binary
 #   For future use. Reads binary authentication information from the file
 #   pointed out by 'auth_file' variable. Currently does nothing.
+#
+# Authentication procedures summary
+# Type           | Own regustered method | File method | Prompt method
+# --------------------------------------------------------------------
+# text           | N/A                   | 1st         | 2nd
+# interactive    | 1st                   | 2nd         | 3rd
+# noninteractive | 1st                   | 2nd         | N/A
 
 # Location of the file that includes authentication information. Used by
 # authentication types text and binary.
