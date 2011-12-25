@@ -281,6 +281,7 @@ typedef enum {
 	GN_OP_DeleteFileById,
 	GN_OP_GetMMS,
 	GN_OP_DeleteMMS,
+	GN_OP_Ping,
 	GN_OP_Max,	/* don't append anything after this entry */
 } gn_operation;
 

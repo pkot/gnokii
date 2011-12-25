@@ -177,7 +177,8 @@ typedef enum {
 	OPT_CONFIGMODEL,
 	OPT_SHELL,
 	OPT_GETMMS,			/* 340 */
-	OPT_DELETEMMS
+	OPT_DELETEMMS,
+	OPT_PING
 } opt_index;
 
 static FILE *logfile = NULL;
@@ -233,7 +234,8 @@ static int usage(FILE *f, int argc, char *argv[])
 			     "                 [dial] [profile] [settings] [wap] [logo] [ringtone]\n"
 			     "                 [security] [file] [other]\n"
 			     "          --version\n"
-			     "          --shell\n"));
+			     "          --shell\n"
+			     "          --ping\n"));
 
 	/* FIXME? throw an error if argv[i] is duplicated or unknown */
 	for (i = 1; i < argc; i++) {
@@ -447,6 +449,18 @@ static int foogle(int argc, char *argv[])
 	return GN_ERR_NONE;
 }
 #endif
+
+static int ping(gn_data *data, struct gn_statemachine *state)
+{
+        gn_error err;
+
+	err = gn_sm_functions(GN_OP_Ping, data, state);
+	if (err == GN_ERR_NONE)
+	        fprintf(stdout, _("Device responded OK.\n"));
+        else
+                fprintf(stdout, _("Device did not respond.\n"));
+        return err;
+}
 
 static int parse_options(int argc, char *argv[])
 {
@@ -700,7 +714,7 @@ static int parse_options(int argc, char *argv[])
 		/* Delete a file by id */
 		{ "deletefilebyid",     required_argument, NULL, OPT_DELETEFILEBYID },
 
-		/* shell like interface */
+		/* Shell like interface */
 		{ "shell",              no_argument, NULL, OPT_SHELL },
 
 		/* Get MMS message mode */
@@ -708,6 +722,9 @@ static int parse_options(int argc, char *argv[])
 
 		/* Delete MMS message mode */
 		{ "deletemms",          required_argument, NULL, OPT_DELETEMMS },
+
+		/* Check if the phone responds */
+		{ "ping",               no_argument, NULL, OPT_PING },
 
 		{ 0, 0, 0, 0 },
 	};
@@ -779,6 +796,7 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_GETMMS,            2, 6, 0 },
 		{ OPT_DELETEMMS,         2, 3, 0 },
 		{ OPT_FOOGLE,            0, 0, 0 },
+		{ OPT_PING,              0, 0, 0 },
 		{ 0, 0, 0, 0 },
 	};
 
@@ -1103,6 +1121,9 @@ static int parse_options(int argc, char *argv[])
 		break;
 	case OPT_SHELL:
 		rc = shell(data, state);
+		break;
+	case OPT_PING:
+		rc = ping(data, state);
 		break;
 #ifndef WIN32
 	case OPT_FOOGLE:

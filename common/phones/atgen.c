@@ -114,6 +114,7 @@ static gn_error AT_SendDTMF(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetActiveCalls(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_OnSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSMSMemorySize(gn_data *data, struct gn_statemachine *state);
+static gn_error AT_Ping(gn_data *data, struct gn_statemachine *state);
 
 typedef struct {
 	int gop;
@@ -167,6 +168,7 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_OnSMS,                 AT_OnSMS,                 Reply },
 	{ GN_OP_AT_IncomingSMS,        NULL,                     ReplyIncomingSMS },
 	{ GN_OP_AT_GetSMSMemorySize,   AT_GetSMSMemorySize,      ReplyGetSMSMemorySize },
+	{ GN_OP_Ping,                  AT_Ping,                  Reply },
 };
 
 /*
@@ -1797,6 +1799,14 @@ static gn_error AT_GetSMSMemorySize(gn_data *data, struct gn_statemachine *state
 		return GN_ERR_NOTREADY;
 
 	return sm_block_no_retry(GN_OP_AT_GetSMSMemorySize, data, state);
+}
+
+static gn_error AT_Ping(gn_data *data, struct gn_statemachine *state)
+{
+	if (sm_message_send(3, GN_OP_Ping, "AT\r", state))
+		return GN_ERR_NOTREADY;
+
+	return sm_block_no_retry(GN_OP_Ping, data, state);
 }
 
 static gn_error ReplyReadPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
