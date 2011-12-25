@@ -1048,7 +1048,7 @@ static gint A_GetNetworkInfo(gpointer data)
 
 	pthread_mutex_lock(&getNetworkInfoMutex);
 	gdat.network_info = d->info;
-	gdat.reg_notification = NULL;
+	statemachine->callbacks.reg_notification = NULL;
 	gdat.callback_data = NULL;
 	error = d->status = gn_sm_functions(GN_OP_GetNetworkInfo, &gdat, statemachine);
 	pthread_cond_signal(&getNetworkInfoCond);

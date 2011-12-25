@@ -1291,7 +1291,7 @@ gn_error smsreader(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
-	data->on_sms = smsslave;
+	state->callbacks.on_sms = smsslave;
 	data->callback_data = NULL;
 	error = gn_sm_functions(GN_OP_OnSMS, data, state);
 	if (!error) {
@@ -1308,7 +1308,7 @@ gn_error smsreader(gn_data *data, struct gn_statemachine *state)
 		fprintf(stderr, _("Shutting down\n"));
 
 		fprintf(stderr, _("Exiting sms reader mode...\n"));
-		data->on_sms = NULL;
+		state->callbacks.on_sms = NULL;
 
 		error = gn_sm_functions(GN_OP_OnSMS, data, state);
 		if (error != GN_ERR_NONE)

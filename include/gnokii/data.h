@@ -76,16 +76,11 @@ typedef struct {
 	gn_calnote_alarm *alarm;
 	gn_raw_data *raw_data;
 	gn_call_divert *call_divert;
-	gn_error (*on_sms)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
 	int *display_status;
-	void (*on_cell_broadcast)(gn_cb_message *message, struct gn_statemachine *state, void *callback_data);
 	gn_netmonitor *netmonitor;
 	gn_call_info *call_info;
-	void (*call_notification)(gn_call_status call_status, gn_call_info *call_info,
-				  struct gn_statemachine *state, void *callback_data);
 	gn_rlp_f96_frame *rlp_frame;
 	int rlp_out_dtx;
-	void (*rlp_rx_callback)(gn_rlp_f96_frame *frame);
 	gn_security_code *security_code;
 	const char *dtmf_string;
 	unsigned char reset_type;
@@ -103,16 +98,6 @@ typedef struct {
 	 * function.
 	 */
 	void *callback_data;
-	/*
-	 * This is a callback function for any changes related to the network
-	 * registration parameters changes: status, LAC, cell id.
-	 */
-	void (*reg_notification)(gn_network_info *info, void *callback_data);
-	/*
-	 * This is callback function for file download progress.
-	 * progress is value in range [0, 100].
-	 */
-	void (*progress_indication)(int progress, void *callback_data);
 	/*
 	 * This is for phone driver, application using libgnokii should not
 	 * touch this.
@@ -170,8 +155,32 @@ typedef struct {
 	char m_imei[GN_IMEI_MAX_LENGTH];
 } gn_config;
 
+/*
+ * Structure to keep all callbacks
+ */
+typedef gn_error (*gn_on_sms_func_t)(gn_sms *message, struct gn_statemachine *state, void *callback_data);
+typedef void (*gn_on_cell_broadcast_func_t)(gn_cb_message *message, struct gn_statemachine *state, void *callback_data);
+typedef void (*gn_call_notification_func_t)(gn_call_status call_status, gn_call_info *call_info,
+					  struct gn_statemachine *state, void *callback_data);
+typedef void (*gn_rlp_rx_callback_func_t)(gn_rlp_f96_frame *frame);
+typedef void (*gn_reg_notification_func_t)(gn_network_info *info, void *callback_data);
+typedef void (*gn_progress_indication_func_t)(int progress, void *callback_data);
 typedef gn_error (*gn_auth_interactive_func_t)(struct gn_statemachine *state);
 typedef struct {
+	gn_on_sms_func_t on_sms;
+	gn_on_cell_broadcast_func_t on_cell_broadcast;
+	gn_call_notification_func_t call_notification;
+	gn_rlp_rx_callback_func_t rlp_rx_callback;
+	/*
+	 * This is a callback function for any changes related to the network
+	 * registration parameters changes: status, LAC, cell id.
+	 */
+	gn_reg_notification_func_t reg_notification;
+	/*
+	 * This is callback function for file download progress.
+	 * progress is value in range [0, 100].
+	 */
+	gn_progress_indication_func_t progress_indication;
 	gn_auth_interactive_func_t auth_interactive;
 } gn_callback;
 

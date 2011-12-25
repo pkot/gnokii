@@ -426,11 +426,11 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 	case GN_OP_WriteWAPSetting:
 		return NK6510_WriteWAPSetting(data, state);
 	case GN_OP_OnSMS:
-		DRVINSTANCE(state)->on_sms = data->on_sms;
+		DRVINSTANCE(state)->on_sms = state->callbacks.on_sms;
 		DRVINSTANCE(state)->sms_callback_data = data->callback_data;
 		return NK6510_Subscribe(data, state);
 	case GN_OP_SetCallNotification:
-		DRVINSTANCE(state)->call_notification = data->call_notification;
+		DRVINSTANCE(state)->call_notification = state->callbacks.call_notification;
 		DRVINSTANCE(state)->call_callback_data = data->callback_data;
 		return NK6510_Subscribe(data, state);
 	case GN_OP_DeleteSMS:
@@ -2282,8 +2282,8 @@ static gn_error NK6510_GetFile(gn_data *data, struct gn_statemachine *state)
 	int i;
 
 	/* Register callback */
-	if (data->progress_indication) {
-		DRVINSTANCE(state)->progress_indication = data->progress_indication;
+	if (state->callbacks.progress_indication) {
+		DRVINSTANCE(state)->progress_indication = state->callbacks.progress_indication;
 		DRVINSTANCE(state)->progress_callback_data = data->callback_data;
 	}
 
@@ -2363,8 +2363,8 @@ static gn_error NK6510_GetFileById(gn_data *data, struct gn_statemachine *state)
 	int i, length;
 
 	/* Register callback */
-	if (data->progress_indication) {
-		DRVINSTANCE(state)->progress_indication = data->progress_indication;
+	if (state->callbacks.progress_indication) {
+		DRVINSTANCE(state)->progress_indication = state->callbacks.progress_indication;
 		DRVINSTANCE(state)->progress_callback_data = data->callback_data;
 	}
 

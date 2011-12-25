@@ -589,7 +589,7 @@ static gn_error P3110_SendRLPFrame(gn_data *data, struct gn_statemachine *state)
 
 static gn_error P3110_SetRLPRXCallback(gn_data *data, struct gn_statemachine *state)
 {
-	DRVINSTANCE(state)->rlp_rx_callback = data->rlp_rx_callback;
+	DRVINSTANCE(state)->rlp_rx_callback = state->callbacks.rlp_rx_callback;
 
 	return GN_ERR_NONE;
 }

@@ -246,7 +246,7 @@ gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	gn_data_clear(data);
 	data->file = &fi;
 
-	data->progress_indication = NULL;
+	state->callbacks.progress_indication = NULL;
 
 	if ((error = gn_sm_functions(GN_OP_GetFile, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get file %s: %s\n"), optarg, gn_error_print(error));
@@ -312,7 +312,7 @@ gn_error getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	data->file = &fi;
 	data->file_list = &fil;
 
-	data->progress_indication = NULL;
+	state->callbacks.progress_indication = NULL;
 
 	if ((error = gn_sm_functions(GN_OP_GetFileDetailsById, data, state)) != GN_ERR_NONE)
 		fprintf(stderr, _("Failed to get file: %s\n"), gn_error_print(error));

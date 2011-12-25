@@ -167,7 +167,7 @@ gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state)
 	memset(&networkinfo, 0, sizeof(networkinfo));
 
 	data->network_info = &networkinfo;
-	data->reg_notification = NULL;
+	state->callbacks.reg_notification = NULL;
 	data->callback_data = NULL;
 
 	if ((error = gn_sm_functions(GN_OP_GetNetworkInfo, data, state)) != GN_ERR_NONE) {

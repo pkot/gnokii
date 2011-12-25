@@ -142,7 +142,7 @@ bool gn_atem_initialise(int read_fd, int write_fd, struct gn_statemachine *vmsm)
 	MessageFormat = PDU_MODE;
 
 	/* Set the call passup so that we get notified of incoming calls */
-	data.call_notification = gn_atem_call_passup;
+	sm->callbacks.call_notification = gn_atem_call_passup;
 	gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 
 	/* query model, revision and imei */
@@ -195,7 +195,7 @@ static void  gn_atem_answer_phone(void)
 {
 	/* For now we'll also initialise the datapump + rlp code again */
 	dp_Initialise(PtyRDFD, PtyWRFD);
-	data.call_notification = dp_CallPassup;
+	sm->callbacks.call_notification = dp_CallPassup;
 	gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 	data.call_info->call_id = IncomingCallNo;
 	gn_sm_functions(GN_OP_AnswerCall, &data, sm);
@@ -372,7 +372,7 @@ void	gn_atem_at_parse(char *cmd_buffer)
 			buf++;
 			if (toupper(*buf) == 'T' || toupper(*buf) == 'P') buf++;
 			while (*buf == ' ') buf++;
-			data.call_notification = dp_CallPassup;
+			sm->callbacks.call_notification = dp_CallPassup;
 			gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 			snprintf(data.call_info->number, sizeof(data.call_info->number), "%s", buf);
 			if (ModemRegisters[S35] == 0)

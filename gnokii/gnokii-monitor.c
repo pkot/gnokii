@@ -221,9 +221,9 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	data->power_source = &powersource;
 	data->sms_status = &smsstatus;
 	data->network_info = &networkinfo;
-	data->on_cell_broadcast = storecbmessage;
-	data->call_notification = callnotifier;
-	data->reg_notification = networkinfo_print;
+	state->callbacks.on_cell_broadcast = storecbmessage;
+	state->callbacks.call_notification = callnotifier;
+	state->callbacks.reg_notification = networkinfo_print;
 	data->callback_data = NULL;
 
 	gn_sm_functions(GN_OP_SetCallNotification, data, state);
@@ -301,7 +301,7 @@ gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachi
 		sleep(d);
 	}
 
-	data->on_cell_broadcast = NULL;
+	state->callbacks.on_cell_broadcast = NULL;
 	error = gn_sm_functions(GN_OP_SetCellBroadcast, data, state);
 
 	fprintf(stderr, _("Leaving monitor mode...\n"));

@@ -1310,8 +1310,8 @@ static gn_error SetCellBroadcast(gn_data *data, struct gn_statemachine *state)
 	if (DRVINSTANCE(state)->capabilities & NK6100_CAP_NO_CB)
 		return GN_ERR_NOTSUPPORTED;
 
-	req = data->on_cell_broadcast ? req_ena : req_dis;
-	DRVINSTANCE(state)->on_cell_broadcast = data->on_cell_broadcast;
+	req = state->callbacks.on_cell_broadcast ? req_ena : req_dis;
+	DRVINSTANCE(state)->on_cell_broadcast = state->callbacks.on_cell_broadcast;
 	DRVINSTANCE(state)->cb_callback_data = data->callback_data;
 
 	if (sm_message_send(10, 0x02, req, state)) return GN_ERR_NOTREADY;
@@ -1407,8 +1407,8 @@ static void FlushLostSMSNotifications(struct gn_statemachine *state)
 
 static gn_error SetOnSMS(gn_data *data, struct gn_statemachine *state)
 {
-	if (data->on_sms) {
-		DRVINSTANCE(state)->on_sms = data->on_sms;
+	if (state->callbacks.on_sms) {
+		DRVINSTANCE(state)->on_sms = state->callbacks.on_sms;
 		DRVINSTANCE(state)->sms_callback_data = data->callback_data;
 		DRVINSTANCE(state)->sms_notification_lost = true;
 		FlushLostSMSNotifications(state);
@@ -3364,7 +3364,7 @@ static gn_error CancelCall1(gn_data *data, struct gn_statemachine *state)
 
 static gn_error SetCallNotification(gn_data *data, struct gn_statemachine *state)
 {
-	DRVINSTANCE(state)->call_notification = data->call_notification;
+	DRVINSTANCE(state)->call_notification = state->callbacks.call_notification;
 	DRVINSTANCE(state)->call_callback_data = data->callback_data;
 
 	return GN_ERR_NONE;
@@ -3599,7 +3599,7 @@ static gn_error SendRLPFrame(gn_data *data, struct gn_statemachine *state)
 
 static gn_error SetRLPRXCallback(gn_data *data, struct gn_statemachine *state)
 {
-	DRVINSTANCE(state)->rlp_rx_callback = data->rlp_rx_callback;
+	DRVINSTANCE(state)->rlp_rx_callback = state->callbacks.rlp_rx_callback;
 
 	return GN_ERR_NONE;
 }

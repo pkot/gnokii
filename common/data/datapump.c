@@ -60,7 +60,7 @@ bool dp_Initialise(int read_fd, int write_fd)
 	rlp_user_request_set(Attach_Req, true);
 	pluscount = 0;
 	connected = false;
-	data.rlp_rx_callback = rlp_f96_frame_display;
+	sm->callbacks.rlp_rx_callback = rlp_f96_frame_display;
 	gn_sm_functions(GN_OP_SetRLPRXCallback, &data, sm);
 
 	return true;
@@ -89,7 +89,7 @@ static int DP_CallBack(rlp_user_inds ind, unsigned char *buffer, int length)
 		if (CommandMode == false) gn_atem_modem_result(MR_NOCARRIER);
 		connected = false;
 		/* Set the call passup back to the at emulator */
-		data.call_notification = gn_atem_call_passup;
+		sm->callbacks.call_notification = gn_atem_call_passup;
 		gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 		CommandMode = true;
 		break;
@@ -124,7 +124,7 @@ static int DP_CallBack(rlp_user_inds ind, unsigned char *buffer, int length)
 			if (pluscount == 3) {
 				CommandMode = true;
 				/* Set the call passup back to the at emulator */
-				data.call_notification = gn_atem_call_passup;
+				sm->callbacks.call_notification = gn_atem_call_passup;
 				gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 				gn_atem_string_out("\r\n");
 				gn_atem_modem_result(MR_OK);
@@ -154,7 +154,7 @@ void dp_CallPassup(gn_call_status CallStatus, gn_call_info *CallInfo, struct gn_
 	case GN_CALL_RemoteHangup:
 		CommandMode = true;
 		/* Set the call passup back to the at emulator */
-		data.call_notification = gn_atem_call_passup;
+		sm->callbacks.call_notification = gn_atem_call_passup;
 		gn_sm_functions(GN_OP_SetCallNotification, &data, sm);
 		gn_atem_modem_result(MR_NOCARRIER);
 		rlp_user_request_set(Disc_Req, true);

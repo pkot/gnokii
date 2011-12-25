@@ -11,6 +11,8 @@
       to execute connect_script and disconnect_script with all
       connection types                                  (Paweł Kot)
     o implement GN_OP_Ping operation                    (Paweł Kot)
+    o move callbacks from gn_data to separate structure put into
+      gn_statemaching                                   (Paweł Kot)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)

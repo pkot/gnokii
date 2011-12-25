@@ -1589,7 +1589,7 @@ static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *st
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	gn_error err;
 
-	if (!drvinst->call_notification && !data->call_notification)
+	if (!drvinst->call_notification && !state->callbacks.call_notification)
 		return GN_ERR_NONE;
 
 	if (!drvinst->call_notification) {
@@ -1609,7 +1609,7 @@ static gn_error AT_SetCallNotification(gn_data *data, struct gn_statemachine *st
 		sm_block_no_retry(GN_OP_SetCallNotification, data, state);
 	}
 
-	drvinst->call_notification = data->call_notification;
+	drvinst->call_notification = state->callbacks.call_notification;
 	drvinst->call_callback_data = data->callback_data;
 
 	return GN_ERR_NONE;
@@ -1623,7 +1623,7 @@ static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state)
 	 * AT+CREG enables +CREG notifications, so register notification
 	 * callback.
 	 */
-	drvinst->reg_notification = data->reg_notification;
+	drvinst->reg_notification = state->callbacks.reg_notification;
 	drvinst->reg_callback_data = data->callback_data;
 
 	if (!data->network_info)
@@ -1787,7 +1787,7 @@ static gn_error AT_OnSMS(gn_data *data, struct gn_statemachine *state)
 		error = sm_block_no_retry(GN_OP_OnSMS, data, state);
 	} while (mode-- && error);
 	if (error == GN_ERR_NONE) {
-		AT_DRVINST(state)->on_sms = data->on_sms;
+		AT_DRVINST(state)->on_sms = state->callbacks.on_sms;
 		AT_DRVINST(state)->sms_callback_data = data->callback_data;
 	}
 	return error;

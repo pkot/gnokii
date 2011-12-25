@@ -235,10 +235,10 @@ static gn_error NK7110_Functions(gn_operation op, gn_data *data, struct gn_state
 		dprintf("Getting SMS (no validating)...\n");
 		return NK7110_GetSMSnoValidate(data, state);
 	case GN_OP_OnSMS:
-		DRVINSTANCE(state)->on_sms = data->on_sms;
+		DRVINSTANCE(state)->on_sms = state->callbacks.on_sms;
 		DRVINSTANCE(state)->sms_callback_data = data->callback_data;
 		/* Register notify when running for the first time */
-		if (data->on_sms) {
+		if (state->callbacks.on_sms) {
 			DRVINSTANCE(state)->new_sms = true;
 			return GN_ERR_NONE; /* FIXME NK7110_GetIncomingSMS(data, state); */
 		}
