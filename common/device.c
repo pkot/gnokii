@@ -8,7 +8,7 @@
 
   Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
   Copyright (C) 2001      Chris Kemp
-  Copyrught (C) 2001-2011 Pawel Kot
+  Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2003 BORBELY Zoltan
   Copyright (C) 2002      Pavel Machek, Marcin Wiacek
 
@@ -127,7 +127,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	 * handle config file connect_script:
 	 */
 	if (device_script(state->device.fd, "connect_script", state) == -1) {
-		dprintf("gnokii open device: connect_script\n");
+		dprintf("gnokii open device: connect_script failure\n");
 		device_close(state);
 		return 0;
 	}
@@ -143,7 +143,7 @@ void device_close(struct gn_statemachine *state)
 	 * handle config file disconnect_script:
 	 */
 	if (device_script(state->device.fd, "disconnect_script", state) == -1)
-		dprintf("gnokii device close: disconnect_script\n");
+		dprintf("gnokii device close: disconnect_script failure\n");
 
 	switch (state->device.type) {
 	case GN_CT_DKU2:
