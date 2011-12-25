@@ -129,8 +129,19 @@ static gn_error auth_pin(struct gn_statemachine *state)
 	data->security_code = &sc;
 
 	err = gn_sm_functions(GN_OP_GetSecurityCodeStatus, data, state);
-	if (err != GN_ERR_NONE)
+	/* GN_ERR_SIMPROBLEM can be returned in the following cases:
+	 *  - CME ERROR: 10 - SIM not inserted
+	 *  - CME ERROR: 13 - SIM failure
+	 *  - CME ERROR: 15 - SIM wrong
+	 * We should ignore these situations. If there is an real error the
+	 * next command will detect it anyway.  But if it is just SIM not
+	 * inserted (we cannot distinguish here between these three
+	 * situations), gnokii is still usable.
+	 */
+	if (err != GN_ERR_NONE || err == GN_ERR_SIMPROBLEM) {
+		err = GN_ERR_NONE;
 		goto out;
+	}
 
 	switch (sc.type) {
 	case GN_SCT_SecurityCode:
