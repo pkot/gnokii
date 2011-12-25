@@ -168,6 +168,16 @@ serial_baudrate = 19200
 # (sm_retry = 0)
 #sm_retry = 1
 
+# Location of the scripts to be run at specified moments.
+# connect_script: right after establishing connection with the device
+# disconnect_script: right before closing the connection
+# You may find handy to use connect_script
+# or disconnect_script to connect your modem to SMS Center when using BIP or
+# CIMD protocols. Non-absolute path is relative to the specific directory
+# where gnokii is run!
+#connect_script = /absolute/path/to/gnokii/Docs/sample/cimd-connect
+#disconnect_script =
+
 # The following settings allow to choose an authentication method upon the
 # initialization of the phone. It is effective only for AT driver.
 # Authentication type: none, interactive, text, binary, script
@@ -215,7 +225,7 @@ authentication_type = none
 #   pointed out by 'auth_file' variable. Currently does nothing.
 #
 # Authentication procedures summary
-# Type           | Own regustered method | File method | Prompt method
+# Type           | Own registered method | File method | Prompt method
 # --------------------------------------------------------------------
 # text           | N/A                   | 1st         | 2nd
 # interactive    | 1st                   | 2nd         | 3rd
@@ -225,16 +235,13 @@ authentication_type = none
 # authentication types text and binary.
 #auth_file = 
 
-# Location of the scripts to be run at specified moments.
-# connect_script: right after establishing connection with the device
-# disconnect_script: right before closing the connection
-# auth_script: right after establishing the connection with the device
-# You may find handy to use connect_script
-# or disconnect_script to connect your modem to SMS Center when using BIP or
-# CIMD protocols. Non-absolute path is relative to the specific directory
-# where gnokii is run!
-#connect_script = /absolute/path/to/gnokii/Docs/sample/cimd-connect
-#disconnect_script =
+# The order of executing scripts is as follows:
+# 1. open()
+# 2. connect_script()
+# 3. authentication()
+# ...
+# n-1. disconnect_script()
+# n. close()
 
 # When sending SMS you can experience timeouts. This is the feature of the
 # overloaded SMSCs. The phones waits for the response from the SMSC confirming
