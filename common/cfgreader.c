@@ -866,6 +866,8 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 		cfg->auth_type = GN_AUTH_TYPE_TEXT;
 	else if (!strcasecmp(val, "interactive"))
 		cfg->auth_type = GN_AUTH_TYPE_INTERACTIVE;
+	else if (!strcasecmp(val, "noninteractive"))
+		cfg->auth_type = GN_AUTH_TYPE_NONINTERACTIVE;
 	else if (!strcasecmp(val, "binary"))
 		cfg->auth_type = GN_AUTH_TYPE_BINARY;
 	else if (!strcasecmp(val, "none"))

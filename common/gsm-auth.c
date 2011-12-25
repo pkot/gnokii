@@ -82,11 +82,25 @@ static gn_error auth_pin_interactive(gn_data *data, struct gn_statemachine *stat
 	return gn_sm_functions(GN_OP_EnterSecurityCode, data, state);
 }
 
+/*
+ * Returns 1 on success and 0 on failure.
+ */
 static int read_security_code_from_file(const char *path, gn_security_code *sc)
 {
+	struct stat buf;
 	FILE *f;
 	char line[32];
 	int cnt = 0;
+
+	/* file handling */
+	if (stat(path, &buf) != 0) {
+		dprintf("File with the security code not found.\n");
+		return 0;
+	}
+	if ((buf.st_mode & S_IRWXG) != 0 || (buf.st_mode & S_IRWXO) != 0) {
+		dprintf("File with the security code cannot be world or group readable.\n");
+		return 0;
+	}
 
 	f = fopen(path, "r");
 	while (fgets(line, sizeof(line), f) != NULL) {
@@ -113,14 +127,16 @@ static int read_security_code_from_file(const char *path, gn_security_code *sc)
 			break;
 	}
 	fclose(f);
+
+	if (cnt == 0)
+		dprintf("Could not find %s in file %s.\n", gn_security_code_type2str(sc->type), path);
+
 	return cnt;
 }
 
-static gn_error auth_pin(struct gn_statemachine *state)
+static gn_error auth_pin(gn_auth_type auth_type, struct gn_statemachine *state)
 {
-	struct stat buf;
 	gn_error err;
-	char *str;
 	gn_data *data;
 	gn_security_code sc;
 	const char *path = state->config.auth_file;
@@ -145,19 +161,10 @@ static gn_error auth_pin(struct gn_statemachine *state)
 
 	switch (sc.type) {
 	case GN_SCT_SecurityCode:
-		str = "SEC";
-		break;
 	case GN_SCT_Pin:
-		str = "PIN";
-		break;
 	case GN_SCT_Pin2:
-		str = "PIN2";
-		break;
 	case GN_SCT_Puk:
-		str = "PUK";
-		break;
 	case GN_SCT_Puk2:
-		str = "PUK2";
 		break;
 	case GN_SCT_None:
 		/* err is GN_ERR_NONE but this is to make it explicit */
@@ -168,24 +175,13 @@ static gn_error auth_pin(struct gn_statemachine *state)
 		goto out;
 	}
 
-	/* file handling */
-	if (stat(path, &buf) != 0) {
-		dprintf("File with the security code not found.\n");
-		dprintf("Falling back to interactive mode.\n");
-		err = auth_pin_interactive(data, state);
-		goto out;
-	}
-	if ((buf.st_mode & S_IRWXG) != 0 || (buf.st_mode & S_IRWXO) != 0) {
-		dprintf("File with the security code cannot be world or group readable.\n");
-		dprintf("Falling back to interactive mode\n");
-		err = auth_pin_interactive(data, state);
-		goto out;
-	}
-
 	if (!read_security_code_from_file(path, data->security_code)) {
-		dprintf("Could not find %s in file %s.\n", str, path);
-		dprintf("Falling back to interactive mode.\n");
-		err = auth_pin_interactive(data, state);
+		if (auth_type != GN_AUTH_TYPE_NONINTERACTIVE) {
+			dprintf("Falling back to interactive mode.\n");
+			err = auth_pin_interactive(data, state);
+		} else {
+			err = GN_ERR_NOTAVAILABLE;
+		}
 		goto out;
 	}
 
@@ -199,10 +195,11 @@ gn_error do_auth(gn_auth_type auth_type, struct gn_statemachine *state)
 {
 	switch (auth_type) {
 	case GN_AUTH_TYPE_TEXT:
-		return auth_pin(state);
+		return auth_pin(auth_type, state);
 	case GN_AUTH_TYPE_INTERACTIVE:
+	case GN_AUTH_TYPE_NONINTERACTIVE:
 		if (!state->callbacks.auth_interactive)
-			return auth_pin(state);
+			return auth_pin(auth_type, state);
 		else
 			return state->callbacks.auth_interactive(state);
 	case GN_AUTH_TYPE_NONE:
