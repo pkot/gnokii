@@ -101,9 +101,6 @@
 #define XDEBUG 1
 #define RLP_DEBUG 1
 
-/* Decide if you want security options enabled */
-#define SECURITY
-
 /* Define if you have XPM components */
 #undef XPM
 

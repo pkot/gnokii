@@ -110,13 +110,10 @@ static gn_error get_imei(gn_data *data, struct gn_statemachine *state);
 static gn_error get_phone_info(gn_data *data, struct gn_statemachine *state);
 static gn_error get_hw(gn_data *data, struct gn_statemachine *state);
 static gn_error get_ringtone_list(gn_data *data, struct gn_statemachine *state);
-
-#ifdef SECURITY
 static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error ChangeSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error get_security_code(gn_data *data, struct gn_statemachine *state);
-#endif
 
 static gn_error IncomingPhoneInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error IncomingPhoneInfo2(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
@@ -134,10 +131,7 @@ static gn_error IncomingCallInfo(int messagetype, unsigned char *message, int le
 static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error IncomingKey(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error IncomingMisc(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
-
-#ifdef SECURITY
 static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
-#endif
 
 static int get_memory_type(gn_memory_type memory_type);
 static void FlushLostSMSNotifications(struct gn_statemachine *state);
@@ -149,9 +143,7 @@ static gn_incoming_function_type nk6100_incoming_functions[] = {
 	{ 0x04, IncomingPhoneStatus },
 	{ 0x05, IncomingProfile },
 	{ 0x06, pnok_call_divert_incoming },
-#ifdef SECURITY
 	{ 0x08, IncomingSecurityCode },
-#endif
 	{ 0x0a, IncomingNetworkInfo },
 	{ 0x0c, IncomingKey },
 	{ 0x0d, IncomingDisplay },
@@ -322,7 +314,6 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return SendRLPFrame(data, state);
 	case GN_OP_SetRLPRXCallback:
 		return SetRLPRXCallback(data, state);
-#ifdef SECURITY
 	case GN_OP_EnterSecurityCode:
 		return EnterSecurityCode(data, state);
 	case GN_OP_GetSecurityCodeStatus:
@@ -331,7 +322,6 @@ static gn_error Functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return ChangeSecurityCode(data, state);
 	case GN_OP_GetSecurityCode:
 		return get_security_code(data, state);
-#endif
 	case GN_OP_GetLocksInfo:
 		return pnok_get_locks_info(data, state);
 	case GN_OP_SendDTMF:
@@ -3104,7 +3094,6 @@ static gn_error get_hw(gn_data *data, struct gn_statemachine *state)
 	return sm_block(0x40, data, state);
 }
 
-#ifdef  SECURITY
 static gn_error get_security_code(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {0x00, 0x01, 0x6e, 0x01};
@@ -3119,7 +3108,6 @@ static gn_error get_security_code(gn_data *data, struct gn_statemachine *state)
 	if (sm_message_send(4, 0x40, req, state)) return GN_ERR_NOTREADY;
 	return sm_block(0x40, data, state);
 }
-#endif
 
 static gn_error IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
@@ -3134,7 +3122,6 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 		}
 		break;
 
-#ifdef SECURITY
 	/* get security code */
 	case 0x6e:
 		if (message[4] != 0x01) return GN_ERR_UNKNOWN;
@@ -3143,7 +3130,6 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 			snprintf(data->security_code->code, sizeof(data->security_code->code), "%s", message + 5);
 		}
 		break;
-#endif
 
 	/* Get bin ringtone */
 	case 0x9e:
@@ -3670,8 +3656,6 @@ static gn_error IncomingRLPFrame(int messagetype, unsigned char *message, int le
 	return GN_ERR_NONE;
 }
 
-
-#ifdef  SECURITY
 static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[32] = {FBUS_FRAME_HEADER, 0x0a};
@@ -3779,8 +3763,6 @@ static gn_error IncomingSecurityCode(int messagetype, unsigned char *message, in
 
 	return GN_ERR_NONE;
 }
-#endif
-
 
 static gn_error PressOrReleaseKey1(bool press, gn_data *data, struct gn_statemachine *state)
 {

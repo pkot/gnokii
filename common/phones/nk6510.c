@@ -266,10 +266,8 @@ static gn_error NK6510_DeleteFile(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteFileById(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_GetFileDetailsById(gn_data *data, struct gn_statemachine *state);
 
-#ifdef  SECURITY
 static gn_error NK6510_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
-#endif
 
 static gn_error NK6510_GetToDo(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteAllToDoLocations(gn_data *data, struct gn_statemachine *state);
@@ -296,9 +294,7 @@ static gn_error NK6510_IncomingReset(int messagetype, unsigned char *message, in
 static gn_error NK6510_IncomingRadio(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
-#ifdef  SECURITY
 static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
-#endif
 
 static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
 static int get_memory_type(gn_memory_type memory_type);
@@ -320,9 +316,7 @@ static gn_incoming_function_type nk6510_incoming_functions[] = {
 	{ NK6510_MSG_PROFILE,    NK6510_IncomingProfile },
 	{ NK6510_MSG_RINGTONE,	NK6510_IncomingRingtone },
 	{ NK6510_MSG_KEYPRESS,	NK6510_IncomingKeypress },
-#ifdef  SECURITY
 	{ NK6510_MSG_SECURITY,	NK6510_IncomingSecurity },
-#endif
 	{ NK6510_MSG_SUBSCRIBE,	NK6510_IncomingSubscribe },
 	{ NK6510_MSG_COMMSTATUS,	NK6510_IncomingCommStatus },
 	{ NK6510_MSG_WAP,	NK6510_IncomingWAP },
@@ -479,12 +473,10 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_CancelCall(data, state);
 	case GN_OP_AnswerCall:
 		return NK6510_AnswerCall(data, state);
-#ifdef  SECURITY
 	case GN_OP_GetSecurityCodeStatus:
 		return NK6510_GetSecurityCodeStatus(data, state);
 	case GN_OP_EnterSecurityCode:
 		return NK6510_EnterSecurityCode(data, state);
-#endif
 	case GN_OP_Subscribe:
 		return NK6510_Subscribe(data, state);
 	case GN_OP_GetRawRingtone:
@@ -5250,7 +5242,6 @@ static gn_error NK6510_PressOrReleaseKey(gn_data *data, struct gn_statemachine *
 	SEND_MESSAGE_BLOCK(NK6510_MSG_KEYPRESS, 10);
 }
 
-#ifdef  SECURITY
 /*****************/
 /*** SECURITY  ***/
 /*****************/
@@ -5359,7 +5350,6 @@ static gn_error NK6510_EnterSecurityCode(gn_data *data, struct gn_statemachine *
 
 	SEND_MESSAGE_BLOCK(NK6510_MSG_SECURITY, 6 + len);
 }
-#endif
 
 /*****************/
 /*** SUBSCRIBE ***/

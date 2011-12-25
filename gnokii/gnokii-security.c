@@ -43,15 +43,11 @@ void security_usage(FILE *f)
 		     "Security options:\n"
 		     "          --identify\n"
 		     "          --getlocksinfo\n"
-		));
-#ifdef SECURITY
-	fprintf(f, _(
 		     "          --entersecuritycode PIN|PIN2|PUK|PUK2|SEC [COMMAND]\n"
 		     "          --getsecuritycodestatus\n"
 		     "          --getsecuritycode\n"
 		     "          --changesecuritycode PIN|PIN2|PUK|PUK2\n"
 		));
-#endif
 }
 
 gn_error identify(struct gn_statemachine *state)
@@ -90,8 +86,6 @@ gn_error getlocksinfo(gn_data *data, struct gn_statemachine *state)
 	}
 	return GN_ERR_NONE;
 }
-
-#ifdef SECURITY
 
 gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state)
 {
@@ -285,5 +279,3 @@ gn_error changesecuritycode(char *type, gn_data *data, struct gn_statemachine *s
 
 	return error;
 }
-
-#endif

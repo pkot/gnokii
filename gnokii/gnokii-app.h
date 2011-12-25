@@ -182,13 +182,11 @@ extern void security_usage(FILE *f);
 extern gn_error identify(struct gn_statemachine *state);
 extern gn_error getlocksinfo(gn_data *data, struct gn_statemachine *state);
 extern gn_error getsecuritycode(gn_data *data, struct gn_statemachine *state);
-#ifdef SECURITY
 extern int entersecuritycode_usage(FILE *f, int exitval);
 extern gn_error entersecuritycode(char *type, gn_data *data, struct gn_statemachine *state);
 extern gn_error getsecuritycodestatus(gn_data *data, struct gn_statemachine *state);
 extern int changesecuritycode_usage(FILE *f, int exitval);
 extern gn_error changesecuritycode(char *type, gn_data *data, struct gn_statemachine *state);
-#endif
 
 /* File options */
 extern void file_usage(FILE *f);

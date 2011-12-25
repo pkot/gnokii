@@ -468,10 +468,9 @@ static int parse_options(int argc, char *argv[])
 
 		/* Alternate config file location */
 		{ "config",             required_argument, NULL, OPT_CONFIGFILE },
+
 		/* Alternate phone section from the config */
 		{ "phone",              required_argument, NULL, OPT_CONFIGMODEL },
-
-#ifdef SECURITY
 
 		/* Get Security Code */
 		{ "getsecuritycode",    no_argument,   	   NULL, OPT_GETSECURITYCODE },
@@ -484,8 +483,6 @@ static int parse_options(int argc, char *argv[])
 
 		/* Change Security Code */
 		{ "changesecuritycode", required_argument, NULL, OPT_CHANGESECURITYCODE },
-
-#endif
 
 		/* Set date and time */
 		{ "setdatetime",        optional_argument, NULL, OPT_SETDATETIME },
@@ -721,10 +718,8 @@ static int parse_options(int argc, char *argv[])
 		{ OPT_HELP,              1, 100, 0 },
 		{ OPT_CONFIGFILE,        1, 100, 0 },
 		{ OPT_CONFIGMODEL,       1, 100, 0 },
-#ifdef SECURITY
 		{ OPT_ENTERSECURITYCODE, 1, 100, 0 },
 		{ OPT_CHANGESECURITYCODE,1, 1, 0 },
-#endif
 		{ OPT_SETDATETIME,       0, 5, 0 },
 		{ OPT_SETALARM,          0, 2, 0 },
 		{ OPT_DIALVOICE,         1, 1, 0 },
@@ -1049,7 +1044,6 @@ static int parse_options(int argc, char *argv[])
 	case OPT_GETLOCKSINFO:
 		rc = getlocksinfo(data, state);
 		break;
-#ifdef SECURITY
 	case OPT_GETSECURITYCODE:
 		rc = getsecuritycode(data, state);
 		break;
@@ -1064,7 +1058,6 @@ static int parse_options(int argc, char *argv[])
 	case OPT_CHANGESECURITYCODE:
 		rc = changesecuritycode(optarg, data, state);
 			break;
-#endif
 
 	/* File options */
 	case OPT_GETFILELIST:

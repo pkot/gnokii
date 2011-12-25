@@ -35,10 +35,8 @@ static gn_error Initialise(struct gn_statemachine *state);
 static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error DeletePhonebook(gn_data *data, struct gn_statemachine *state);
 static gn_error Terminate(gn_data *data, struct gn_statemachine *state);
-#ifdef SECURITY
 static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
 static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
-#endif
 static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 
 /* prototypes for functions related to libpcsclite */
@@ -57,9 +55,7 @@ static LONG pcsc_read_file(PCSC_IOSTRUCT *ios, LONG dir_id, LONG file_id);
 static LONG pcsc_read_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE record);
 static LONG pcsc_stat_file(PCSC_IOSTRUCT *ios, LONG file_id);
 static LONG pcsc_update_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE record, BYTE *data, BYTE length);
-#ifdef SECURITY
 static LONG pcsc_verify_chv(PCSC_IOSTRUCT *ios, BYTE chv_id, BYTE *chv, BYTE chv_len);
-#endif
 
 /* prototypes for functions converting between the two libraries */
 
@@ -470,12 +466,10 @@ static gn_error functions(gn_operation op, gn_data *data, struct gn_statemachine
 		return DeletePhonebook(data, state);
 	case GN_OP_GetFile:
 		return GetFile(data, state);
-#ifdef SECURITY
 	case GN_OP_EnterSecurityCode:
 		return EnterSecurityCode(data, state);
 	case GN_OP_GetSecurityCodeStatus:
 		return GetSecurityCodeStatus(data, state);
-#endif
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -1048,8 +1042,6 @@ static gn_error DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	return get_gn_error(&IoStruct, ret);
 }
 
-#ifdef SECURITY
-
 static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state)
 {
 	LONG ret;
@@ -1119,8 +1111,6 @@ static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state)
 		error = GN_ERR_INVALIDSECURITYCODE;
 	return error;
 }
-
-#endif /* SECURITY */
 
 
 /* functions for libpcsc stuff */
@@ -1432,8 +1422,6 @@ static LONG pcsc_update_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE recor
 	return ret;
 }
 
-#ifdef SECURITY
-
 static LONG pcsc_verify_chv(PCSC_IOSTRUCT *ios, BYTE chv_id, BYTE *chv, BYTE chv_len)
 {
 	LONG ret = SCARD_S_SUCCESS;
@@ -1451,8 +1439,6 @@ static LONG pcsc_verify_chv(PCSC_IOSTRUCT *ios, BYTE chv_id, BYTE *chv, BYTE chv
  
 	return ret;
 }
-
-#endif /* SECURITY */
 
 static LONG pcsc_close_reader()
 {

@@ -64,9 +64,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 /* static gn_error ReplyDeleteSMS(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state); */
 static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetSMSCenter(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-#ifdef SECURITY
 static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
-#endif
 static gn_error ReplyGetNetworkInfo(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -102,10 +100,8 @@ static gn_error AT_DeleteSMS(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetCharset(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSMSCenter(gn_data *data, struct gn_statemachine *state);
-#ifdef SECURITY
 static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state);
-#endif
 static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_GetNetworkInfo(gn_data *data, struct gn_statemachine *state);
 static gn_error AT_AnswerCall(gn_data *data, struct gn_statemachine *state);
@@ -155,10 +151,8 @@ static at_function_init_type at_function_init[] = {
 	{ GN_OP_AT_GetCharset,         AT_GetCharset,            ReplyGetCharset },
 	{ GN_OP_AT_SetCharset,         AT_SetCharset,            Reply },
 	{ GN_OP_GetSMSCenter,          AT_GetSMSCenter,          ReplyGetSMSCenter },
-#ifdef SECURITY
 	{ GN_OP_GetSecurityCodeStatus, AT_GetSecurityCodeStatus, ReplyGetSecurityCodeStatus },
 	{ GN_OP_EnterSecurityCode,     AT_EnterSecurityCode,     Reply },
-#endif
 	{ GN_OP_MakeCall,              AT_DialVoice,             Reply },
 	{ GN_OP_AnswerCall,            AT_AnswerCall,            Reply },
 	{ GN_OP_CancelCall,            AT_CancelCall,            Reply },
@@ -1542,7 +1536,6 @@ static gn_error AT_GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 	return sm_block_no_retry(GN_OP_GetSMSCenter, data, state);
 }
 
-#ifdef SECURITY
 static gn_error AT_GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *state)
 {
  	if (sm_message_send(9, GN_OP_GetSecurityCodeStatus, "AT+CPIN?\r", state))
@@ -1562,7 +1555,6 @@ static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *stat
 		return GN_ERR_NOTREADY;
 	return sm_block_no_retry(GN_OP_EnterSecurityCode, data, state);
 }
-#endif
 
 static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state)
 {
@@ -2568,7 +2560,6 @@ static gn_error ReplyGetCharset(int messagetype, unsigned char *buffer, int leng
 	return GN_ERR_FAILED;
 }
 
-#ifdef SECURITY
 static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {
 	at_line_buffer buf;
@@ -2612,7 +2603,6 @@ static gn_error ReplyGetSecurityCodeStatus(int messagetype, unsigned char *buffe
 	}
 	return GN_ERR_NONE;
 }
-#endif
 
 static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state)
 {

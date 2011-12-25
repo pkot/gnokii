@@ -780,17 +780,6 @@ AM_CONDITIONAL(HAVE_MYSQL, test "x$have_mysql" = "xyes")
 
 dnl ======================== Additional switches
 
-AC_ARG_ENABLE(security,
-   [  --enable-security       enable all security features @<:@default=no@:>@],
-   [ if test x$enable_security = xyes; then
-	AC_DEFINE(SECURITY, 1, [Whether security features are enabled])
-     	security="yes"
-     else
-	security="no"
-     fi ],
-   [ security="no" ]
-)
-
 dnl ======================== Checks for libpcsclite
 USE_LIBPCSCLITE="no"
 AC_ARG_ENABLE(libpcsclite,
@@ -1115,7 +1104,6 @@ echo "
     phonet support:     $USE_SOCKETPHONET
     libpcsclite support:$USE_LIBPCSCLITE
     readline support:   $USE_READLINE
-    Security:           $security
     Build Shared Lib:   $enable_shared
     Build Static Lib:   $enable_static
     Windows:            $win32 
