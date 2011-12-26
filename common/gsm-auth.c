@@ -73,7 +73,7 @@ static gn_error auth_pin_interactive(gn_data *data, struct gn_statemachine *stat
 	default:
 		return GN_ERR_NOTSUPPORTED;
 	}
-	return gn_sm_functions(GN_OP_EnterSecurityCode, data, state);
+	return GN_ERR_NONE;
 }
 
 /*
@@ -128,12 +128,27 @@ static int read_security_code_from_file(const char *path, gn_security_code *sc)
 	return cnt;
 }
 
-static gn_error auth_pin(gn_auth_type auth_type, struct gn_statemachine *state)
+static gn_error auth_pin(gn_auth_type auth_type, gn_data *data, struct gn_statemachine *state)
+{
+	gn_error err = GN_ERR_NONE;
+	const char *path = state->config.auth_file;
+
+	if (!read_security_code_from_file(path, data->security_code)) {
+		if (auth_type != GN_AUTH_TYPE_NONINTERACTIVE) {
+			dprintf("Falling back to interactive mode.\n");
+			err = auth_pin_interactive(data, state);
+		} else {
+			err = GN_ERR_NOTAVAILABLE;
+		}
+	}
+	return err;
+}
+
+gn_error do_auth(gn_auth_type auth_type, struct gn_statemachine *state)
 {
 	gn_error err;
 	gn_data *data;
 	gn_security_code sc;
-	const char *path = state->config.auth_file;
 
 	data = calloc(1, sizeof(gn_data));
 	data->security_code = &sc;
@@ -148,8 +163,9 @@ static gn_error auth_pin(gn_auth_type auth_type, struct gn_statemachine *state)
 	 * inserted (we cannot distinguish here between these three
 	 * situations), gnokii is still usable.
 	 */
-	if (err == GN_ERR_NONE || err == GN_ERR_SIMPROBLEM) {
-		err = GN_ERR_NONE;
+	if (err != GN_ERR_NONE) {
+		if (err == GN_ERR_SIMPROBLEM)
+			err = GN_ERR_NONE;
 		goto out;
 	}
 
@@ -169,42 +185,33 @@ static gn_error auth_pin(gn_auth_type auth_type, struct gn_statemachine *state)
 		goto out;
 	}
 
-	if (!read_security_code_from_file(path, data->security_code)) {
-		if (auth_type != GN_AUTH_TYPE_NONINTERACTIVE) {
-			dprintf("Falling back to interactive mode.\n");
-			err = auth_pin_interactive(data, state);
-		} else {
-			err = GN_ERR_NOTAVAILABLE;
-		}
-		goto out;
+	switch (auth_type) {
+	case GN_AUTH_TYPE_TEXT:
+		err = auth_pin(auth_type, data, state);
+		break;
+	case GN_AUTH_TYPE_INTERACTIVE:
+	case GN_AUTH_TYPE_NONINTERACTIVE:
+		if (!state->callbacks.auth_interactive)
+			err = auth_pin(auth_type, data, state);
+		else
+			err = state->callbacks.auth_interactive(data, state);
+		break;
+	case GN_AUTH_TYPE_NONE:
+	case GN_AUTH_TYPE_BINARY:
+		err = GN_ERR_NONE;
+		break;
+	default:
+		err = GN_ERR_NOTSUPPORTED;
+		break;
 	}
-
-	err = gn_sm_functions(GN_OP_EnterSecurityCode, data, state);
+	if (err == GN_ERR_NONE)
+		err = gn_sm_functions(GN_OP_EnterSecurityCode, data, state);
 out:
 	free(data);
 	return err;
 }
 
-gn_error do_auth(gn_auth_type auth_type, struct gn_statemachine *state)
-{
-	switch (auth_type) {
-	case GN_AUTH_TYPE_TEXT:
-		return auth_pin(auth_type, state);
-	case GN_AUTH_TYPE_INTERACTIVE:
-	case GN_AUTH_TYPE_NONINTERACTIVE:
-		if (!state->callbacks.auth_interactive)
-			return auth_pin(auth_type, state);
-		else
-			return state->callbacks.auth_interactive(state);
-	case GN_AUTH_TYPE_NONE:
-	case GN_AUTH_TYPE_BINARY:
-		return GN_ERR_NONE;
-	default:
-		return GN_ERR_NOTSUPPORTED;
-	}
-}
-
-void gn_auth_interactive_register(gn_auth_interactive_func_t auth_func, struct gn_statemachine *state)
+GNOKII_API void gn_auth_interactive_register(gn_auth_interactive_func_t auth_func, struct gn_statemachine *state)
 {
 	state->callbacks.auth_interactive = auth_func;
 }

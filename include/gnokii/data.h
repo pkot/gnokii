@@ -165,7 +165,7 @@ typedef void (*gn_call_notification_func_t)(gn_call_status call_status, gn_call_
 typedef void (*gn_rlp_rx_callback_func_t)(gn_rlp_f96_frame *frame);
 typedef void (*gn_reg_notification_func_t)(gn_network_info *info, void *callback_data);
 typedef void (*gn_progress_indication_func_t)(int progress, void *callback_data);
-typedef gn_error (*gn_auth_interactive_func_t)(struct gn_statemachine *state);
+typedef gn_error (*gn_auth_interactive_func_t)(gn_data *data, struct gn_statemachine *state);
 typedef struct {
 	gn_on_sms_func_t on_sms;
 	gn_on_cell_broadcast_func_t on_cell_broadcast;
@@ -181,6 +181,12 @@ typedef struct {
 	 * progress is value in range [0, 100].
 	 */
 	gn_progress_indication_func_t progress_indication;
+	/*
+	 * data->security_code->type contains the type of the security code to be entered.
+	 * You need to put the code into data->security_code->code and return GN_ERR_NONE.
+	 * If any other return code will be returned the authentication information won't be
+	 * sent to the phone.
+	 */
 	gn_auth_interactive_func_t auth_interactive;
 } gn_callback;
 
