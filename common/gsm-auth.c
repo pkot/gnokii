@@ -148,7 +148,7 @@ static gn_error auth_pin(gn_auth_type auth_type, struct gn_statemachine *state)
 	 * inserted (we cannot distinguish here between these three
 	 * situations), gnokii is still usable.
 	 */
-	if (err != GN_ERR_NONE || err == GN_ERR_SIMPROBLEM) {
+	if (err == GN_ERR_NONE || err == GN_ERR_SIMPROBLEM) {
 		err = GN_ERR_NONE;
 		goto out;
 	}
