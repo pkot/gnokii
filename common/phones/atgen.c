@@ -3302,14 +3302,21 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	 * likely does not make sense.  Either the script resets the device
 	 * or resetting might not be good thing after intialization.
 	 */
-	if (!state->config.connect_script[0])
-		SoftReset(&data, state);
+	if (!state->config.connect_script[0]) {
+		ret = SoftReset(&data, state);
+		if (ret)
+			goto out;
+	}
 	/*
 	 * These might be done in the connect script as well, but gnokii
 	 * behaviour depends on it, so make sure these are issued.
 	 */
-	SetEcho(&data, state);
-	SetExtendedError(&data, state);
+	ret = SetEcho(&data, state);
+	if (ret)
+		goto out;
+	ret = SetExtendedError(&data, state);
+	if (ret)
+		goto out;
 
 	if (state->config.auth_type != GN_AUTH_TYPE_NONE)
 		ret = do_auth(state->config.auth_type, state);
