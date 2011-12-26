@@ -3297,7 +3297,17 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 
 	sm_initialise(state);
 
-	SoftReset(&data, state);
+	/*
+	 * If there is an initialization script, resetting the device most
+	 * likely does not make sense.  Either the script resets the device
+	 * or resetting might not be good thing after intialization.
+	 */
+	if (!state->config.connect_script[0])
+		SoftReset(&data, state);
+	/*
+	 * These might be done in the connect script as well, but gnokii
+	 * behaviour depends on it, so make sure these are issued.
+	 */
 	SetEcho(&data, state);
 	SetExtendedError(&data, state);
 
