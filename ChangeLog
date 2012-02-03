@@ -13,6 +13,8 @@
     o implement GN_OP_Ping operation                    (Paweł Kot)
     o move callbacks from gn_data to separate structure put into
       gn_statemaching                                   (Paweł Kot)
+    o add id for Nokia 3720c to misc.c only; use model=series40
+                                                     (Anders Jenbo)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)

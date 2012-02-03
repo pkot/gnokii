@@ -169,6 +169,7 @@ static gn_phone_model models[] = {
 	{"3620",  "NHM-10X",	PM_OLD_DEFAULT },
 	{"3650",  "NHL-8",	PM_DEFAULT | PM_NETMONITOR },
 	{"3660",  "NHL-8X",	PM_DEFAULT | PM_NETMONITOR },
+	{"3720c", "RM-518",	PM_DEFAULT_S40_3RD },
 	{"3810",  "0305" ,	PM_OLD_DEFAULT | PM_DATA }, /* NHE-9 */
 	{"3810",  "NHE-9",	PM_OLD_DEFAULT | PM_DATA },
 	{"5100",  "NPM-6",	PM_DEFAULT },
