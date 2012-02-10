@@ -101,6 +101,7 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
     if (error != SQLITE_OK) {
         g_print(_("%d: Parsing query %s failed!"), __LINE__, buf->str);
         g_print(_("Error: %s"), sqlite3_errmsg(ppDbInbox));
+        g_string_free(buf, TRUE);
         return SMSD_NOK;
     }
 
