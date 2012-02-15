@@ -15,6 +15,7 @@
 #include "config.h"
 #include "misc.h"
 #include "devices/tcp.h"
+#include "devices/serial.h"
 
 #ifndef WIN32
 
