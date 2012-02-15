@@ -103,8 +103,6 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 	else if (strstr(filename, ".mid")) filetype = GN_FT_MIDI;
 	else if (strstr(filename, ".raw")) filetype = GN_FT_NOKRAW_TONE;
 
-	error = GN_ERR_NONE;
-
 	rewind(file);  /* Not necessary for now but safer */
 
 	switch (filetype) {

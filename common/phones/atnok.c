@@ -57,8 +57,6 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	buf.length= length;
 	splitlines(&buf);
 
-	mem = GN_MT_XX;
-
 	if (strncmp(buf.line1, "+CMTI: ", 7))
 		return GN_ERR_UNSOLICITED;
 

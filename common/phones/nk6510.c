@@ -671,7 +671,6 @@ static gn_error NK6510_IncomingIdentify(int messagetype, unsigned char *message,
 		}
 		if (data->model) {
 			pos = 10;
-			string_length = 0;
 			while (message[pos++] != 0x0a) ;  /* skip revision */
 			pos++;
 			while (message[pos++] != 0x0a) ;  /* skip date */
