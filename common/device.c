@@ -18,6 +18,7 @@
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
+#include "gnokii-internal.h"
 #include "device.h"
 #include "devices/irda.h"
 #include "devices/unixbluetooth.h"
@@ -28,6 +29,7 @@
 #include "devices/socketphonet.h"
 
 #include <errno.h>
+#include <sys/wait.h>
 
 GNOKII_API int device_getfd(struct gn_statemachine *state)
 {
