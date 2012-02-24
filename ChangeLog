@@ -30,6 +30,9 @@
  * Documentation updates
     o samples for connect and disconnect scripts for Portech
       devices                                   (Guillermo Benitez)
+ * nk6510 driver updates
+    o store also the seconds in date fields when reading phonebook
+      entries from phone                            (Daniele Forsi)
 
 0.6.31
 ======
