@@ -123,8 +123,8 @@ GNOKII_API const char *gn_memory_type2str(gn_memory_type mt)
 	X(F19);
 	X(F20);
 	X(BM);
-	default: return NULL;
 	}
+	return NULL;
 #undef X
 }
 
@@ -173,8 +173,8 @@ GNOKII_API const char *gn_memory_type_print(gn_memory_type mt)
 	case GN_MT_F19: return _("SMS Folder 19");
 	case GN_MT_F20: return _("SMS Folder 20");
 	case GN_MT_BM: return _("Cell Broadcast");
-	default: return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_connection_type2str(gn_connection_type t)
@@ -194,8 +194,8 @@ GNOKII_API const char *gn_connection_type2str(gn_connection_type t)
 	case GN_CT_DKU2LIBUSB:	return _("DKU2 (libusb support)");
 	case GN_CT_PCSC:	return _("Smart Card reader (libpcsclite support)");
 	case GN_CT_SOCKETPHONET:	return _("Linux Phonet (kernel support)");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_power_source2str(gn_power_source s)
@@ -205,8 +205,8 @@ GNOKII_API const char *gn_power_source2str(gn_power_source s)
 	case GN_PS_BATTERY:	return _("Battery");
 	case GN_PS_NOBATTERY:	return _("No battery");
 	case GN_PS_FAULT:	return _("Power fault");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_security_code_type2str(gn_security_code_type t)
@@ -218,8 +218,8 @@ GNOKII_API const char *gn_security_code_type2str(gn_security_code_type t)
 	case GN_SCT_Puk:		return _("PUK");
 	case GN_SCT_Puk2:		return _("PUK2");
 	case GN_SCT_None:		return _("None");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 /* Phonebook */
@@ -234,8 +234,8 @@ GNOKII_API const char *gn_phonebook_number_type2str(gn_phonebook_number_type t)
 	case GN_PHONEBOOK_NUMBER_Fax:		return _("Fax number");
 	case GN_PHONEBOOK_NUMBER_Work:		return _("Work number");
 	case GN_PHONEBOOK_NUMBER_General:	return _("General number");
-	default:				return _("Unknown number");
 	}
+	return _("Unknown number");
 }
 
 GNOKII_API const char *gn_phonebook_entry_type2str(gn_phonebook_entry_type t)
@@ -273,8 +273,8 @@ GNOKII_API const char *gn_phonebook_entry_type2str(gn_phonebook_entry_type t)
 	case GN_PHONEBOOK_ENTRY_Nickname:		return _("Nickname");
 	case GN_PHONEBOOK_ENTRY_Birthday:		return _("Birthday");
 	case GN_PHONEBOOK_ENTRY_ExtGroup:		return _("Caller group id");
-	default:					return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_subentrytype2string(gn_phonebook_entry_type entry_type, gn_phonebook_number_type number_type)
@@ -325,9 +325,8 @@ GNOKII_API const char *gn_subentrytype2string(gn_phonebook_entry_type entry_type
 		default:
 			return _("Unknown number");
 		}
-	default:
-		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_phonebook_group_type2str(gn_phonebook_group_type t)
@@ -339,8 +338,8 @@ GNOKII_API const char *gn_phonebook_group_type2str(gn_phonebook_group_type t)
 	case GN_PHONEBOOK_GROUP_Work:	return _("Work");
 	case GN_PHONEBOOK_GROUP_Others:	return _("Others");
 	case GN_PHONEBOOK_GROUP_None:	return _("None");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 /* SMS */
@@ -364,8 +363,8 @@ GNOKII_API const char *gn_sms_udh_type2str(gn_sms_udh_type t)
 	case GN_SMS_UDH_WAPPush:		return _("WAP Push");
 	case GN_SMS_UDH_OtherMessage:		return _("Other Message");
 	case GN_SMS_UDH_Unknown:		return _("Unknown");
-	default:				return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_sms_message_type2str(gn_sms_message_type t)
@@ -381,8 +380,8 @@ GNOKII_API const char *gn_sms_message_type2str(gn_sms_message_type t)
 	case GN_SMS_MT_TextTemplate:	return _("Template");
 	case GN_SMS_MT_PictureTemplate:	return _("Picture Message Template");
 	case GN_SMS_MT_SubmitSent:	return _("MO Message");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_sms_message_status2str(gn_sms_message_status t)
@@ -392,8 +391,8 @@ GNOKII_API const char *gn_sms_message_status2str(gn_sms_message_status t)
 	case GN_SMS_Unread:	return _("Unread");
 	case GN_SMS_Sent:	return _("Sent");
 	case GN_SMS_Unsent:	return _("Unsent");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_sms_message_format2str(gn_sms_message_format t)
@@ -407,8 +406,8 @@ GNOKII_API const char *gn_sms_message_format2str(gn_sms_message_format t)
 	case GN_SMS_MF_UCI:	return _("Email message in 8110i");
 	case GN_SMS_MF_Email:	return _("Email");
 	case GN_SMS_MF_X400:	return _("X.400");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_sms_vp_time2str(gn_sms_vp_time t)
@@ -420,8 +419,8 @@ GNOKII_API const char *gn_sms_vp_time2str(gn_sms_vp_time t)
 	case GN_SMS_VP_72H:	return _("72 hours");
 	case GN_SMS_VP_1W:	return _("1 week");
 	case GN_SMS_VP_Max:	return _("Maximum time");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 /* Calendar and ToDo */
@@ -434,8 +433,8 @@ GNOKII_API const char *gn_calnote_type2str(gn_calnote_type t)
 	case GN_CALNOTE_BIRTHDAY:	return _("Birthday");
 	case GN_CALNOTE_REMINDER:	return _("Reminder");
 	case GN_CALNOTE_MEMO:		return _("Memo");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_calnote_recurrence2str(gn_calnote_recurrence r)
@@ -447,8 +446,8 @@ GNOKII_API const char *gn_calnote_recurrence2str(gn_calnote_recurrence r)
 	case GN_CALNOTE_2WEEKLY:return _("Every 2 weeks");
 	case GN_CALNOTE_MONTHLY:return _("Monthly");
 	case GN_CALNOTE_YEARLY:	return _("Yearly");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_todo_priority2str(gn_todo_priority p)
@@ -457,8 +456,8 @@ GNOKII_API const char *gn_todo_priority2str(gn_todo_priority p)
 	case GN_TODO_LOW:	return _("Low");
 	case GN_TODO_MEDIUM:	return _("Medium");
 	case GN_TODO_HIGH:	return _("High");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 /* WAP */
@@ -468,8 +467,8 @@ GNOKII_API const char *gn_wap_session2str(gn_wap_session p)
 	switch (p) {
 	case GN_WAP_SESSION_TEMPORARY:	return _("Temporary");
 	case GN_WAP_SESSION_PERMANENT:	return _("Permanent");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_wap_authentication2str(gn_wap_authentication p)
@@ -477,8 +476,8 @@ GNOKII_API const char *gn_wap_authentication2str(gn_wap_authentication p)
 	switch (p) {
 	case GN_WAP_AUTH_NORMAL:	return _("Normal");
 	case GN_WAP_AUTH_SECURE:	return _("Secure");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_wap_bearer2str(gn_wap_bearer p)
@@ -488,8 +487,8 @@ GNOKII_API const char *gn_wap_bearer2str(gn_wap_bearer p)
 	case GN_WAP_BEARER_GPRS:	return _("GPRS");
 	case GN_WAP_BEARER_SMS:		return _("SMS");
 	case GN_WAP_BEARER_USSD:	return _("USSD");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_wap_call_type2str(gn_wap_call_type p)
@@ -497,8 +496,8 @@ GNOKII_API const char *gn_wap_call_type2str(gn_wap_call_type p)
 	switch (p) {
 	case GN_WAP_CALL_ANALOGUE:	return _("Analogue");
 	case GN_WAP_CALL_ISDN:		return _("ISDN");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_wap_call_speed2str(gn_wap_call_speed p)
@@ -507,8 +506,8 @@ GNOKII_API const char *gn_wap_call_speed2str(gn_wap_call_speed p)
 	case GN_WAP_CALL_AUTOMATIC:	return _("Automatic");
 	case GN_WAP_CALL_9600:		return _("9600");
 	case GN_WAP_CALL_14400:		return _("14400");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_wap_login2str(gn_wap_login p)
@@ -516,8 +515,8 @@ GNOKII_API const char *gn_wap_login2str(gn_wap_login p)
 	switch (p) {
 	case GN_WAP_LOGIN_MANUAL:	return _("Manual");
 	case GN_WAP_LOGIN_AUTOLOG:	return _("Automatic");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_wap_gprs2str(gn_wap_gprs p)
@@ -525,8 +524,9 @@ GNOKII_API const char *gn_wap_gprs2str(gn_wap_gprs p)
 	switch (p) {
 	case GN_WAP_GPRS_ALWAYS:	return _("Always");
 	case GN_WAP_GPRS_WHENNEEDED:	return _("When needed");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
+
 }
 
 /* Profiles */
@@ -539,8 +539,8 @@ GNOKII_API const char *gn_profile_message_type2str(gn_profile_message_type p)
 	case GN_PROFILE_MESSAGE_Special:	return _("Special");
 	case GN_PROFILE_MESSAGE_BeepOnce:	return _("Beep once");
 	case GN_PROFILE_MESSAGE_Ascending:	return _("Ascending");
-	default:				return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_profile_warning_type2str(gn_profile_warning_type p)
@@ -548,8 +548,8 @@ GNOKII_API const char *gn_profile_warning_type2str(gn_profile_warning_type p)
 	switch (p) {
 	case GN_PROFILE_WARNING_Off:		return _("Off");
 	case GN_PROFILE_WARNING_On:		return _("On");
-	default:				return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_profile_vibration_type2str(gn_profile_vibration_type p)
@@ -557,8 +557,8 @@ GNOKII_API const char *gn_profile_vibration_type2str(gn_profile_vibration_type p
 	switch (p) {
 	case GN_PROFILE_VIBRATION_Off:		return _("Off");
 	case GN_PROFILE_VIBRATION_On:		return _("On");
-	default:				return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_profile_callalert_type2str(gn_profile_callalert_type p)
@@ -570,8 +570,8 @@ GNOKII_API const char *gn_profile_callalert_type2str(gn_profile_callalert_type p
 	case GN_PROFILE_CALLALERT_RingOnce:	return _("Ring once");
 	case GN_PROFILE_CALLALERT_Ascending:	return _("Ascending");
 	case GN_PROFILE_CALLALERT_CallerGroups:	return _("Caller groups");
-	default:				return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_profile_keyvol_type2str(gn_profile_keyvol_type p)
@@ -581,8 +581,8 @@ GNOKII_API const char *gn_profile_keyvol_type2str(gn_profile_keyvol_type p)
 	case GN_PROFILE_KEYVOL_Level1:	return _("Level 1");
 	case GN_PROFILE_KEYVOL_Level2:	return _("Level 2");
 	case GN_PROFILE_KEYVOL_Level3:	return _("Level 3");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_profile_volume_type2str(gn_profile_volume_type p)
@@ -593,8 +593,8 @@ GNOKII_API const char *gn_profile_volume_type2str(gn_profile_volume_type p)
 	case GN_PROFILE_VOLUME_Level3:	return _("Level 3");
 	case GN_PROFILE_VOLUME_Level4:	return _("Level 4");
 	case GN_PROFILE_VOLUME_Level5:	return _("Level 5");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 /* Call divert */
@@ -607,8 +607,8 @@ GNOKII_API const char *gn_call_divert_type2str(gn_call_divert_type p)
 	case GN_CDV_OutOfReach:		return _("Out of reach");
 	case GN_CDV_NotAvailable:	return _("Not available");
 	case GN_CDV_AllTypes:		return _("All");
-	default:			return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_call_divert_call_type2str(gn_call_divert_call_type p)
@@ -618,8 +618,8 @@ GNOKII_API const char *gn_call_divert_call_type2str(gn_call_divert_call_type p)
 	case GN_CDV_FaxCalls:	return _("Fax");
 	case GN_CDV_DataCalls:	return _("Data");
 	case GN_CDV_AllCalls:	return _("All");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 GNOKII_API const char *gn_call_divert_operation2str(gn_call_divert_operation p)
@@ -630,8 +630,8 @@ GNOKII_API const char *gn_call_divert_operation2str(gn_call_divert_operation p)
 	case GN_CDV_Query:	return _("Query");
 	case GN_CDV_Register:	return _("Register");
 	case GN_CDV_Erasure:	return _("Erasure");
-	default:		return _("Unknown");
 	}
+	return _("Unknown");
 }
 
 
