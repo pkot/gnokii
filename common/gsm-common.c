@@ -123,6 +123,7 @@ GNOKII_API const char *gn_memory_type2str(gn_memory_type mt)
 	X(F19);
 	X(F20);
 	X(BM);
+	X(XX);
 	}
 	return NULL;
 #undef X
@@ -173,6 +174,7 @@ GNOKII_API const char *gn_memory_type_print(gn_memory_type mt)
 	case GN_MT_F19: return _("SMS Folder 19");
 	case GN_MT_F20: return _("SMS Folder 20");
 	case GN_MT_BM: return _("Cell Broadcast");
+	case GN_MT_XX: return _("Unknown");
 	}
 	return _("Unknown");
 }
@@ -201,6 +203,7 @@ GNOKII_API const char *gn_connection_type2str(gn_connection_type t)
 GNOKII_API const char *gn_power_source2str(gn_power_source s)
 {
 	switch (s) {
+	case GN_PS_UNKNOWN:	return _("Unknown");
 	case GN_PS_ACDC:	return _("AC-DC");
 	case GN_PS_BATTERY:	return _("Battery");
 	case GN_PS_NOBATTERY:	return _("No battery");
@@ -273,6 +276,7 @@ GNOKII_API const char *gn_phonebook_entry_type2str(gn_phonebook_entry_type t)
 	case GN_PHONEBOOK_ENTRY_Nickname:		return _("Nickname");
 	case GN_PHONEBOOK_ENTRY_Birthday:		return _("Birthday");
 	case GN_PHONEBOOK_ENTRY_ExtGroup:		return _("Caller group id");
+	case GN_PHONEBOOK_ENTRY_Video:			return _("Video");
 	}
 	return _("Unknown");
 }
@@ -311,6 +315,7 @@ GNOKII_API const char *gn_subentrytype2string(gn_phonebook_entry_type entry_type
 	case GN_PHONEBOOK_ENTRY_Nickname:
 	case GN_PHONEBOOK_ENTRY_Birthday:
 	case GN_PHONEBOOK_ENTRY_ExtGroup:
+	case GN_PHONEBOOK_ENTRY_Video:
 		return gn_phonebook_entry_type2str(entry_type);
 	case GN_PHONEBOOK_ENTRY_Number:
 		switch (number_type) {
@@ -387,6 +392,7 @@ GNOKII_API const char *gn_sms_message_type2str(gn_sms_message_type t)
 GNOKII_API const char *gn_sms_message_status2str(gn_sms_message_status t)
 {
 	switch (t) {
+	case GN_SMS_Unknown:	return _("Unknown");
 	case GN_SMS_Read:	return _("Read");
 	case GN_SMS_Unread:	return _("Unread");
 	case GN_SMS_Sent:	return _("Sent");
@@ -602,6 +608,7 @@ GNOKII_API const char *gn_profile_volume_type2str(gn_profile_volume_type p)
 GNOKII_API const char *gn_call_divert_type2str(gn_call_divert_type p)
 {
 	switch (p) {
+	case GN_CDV_Unconditional:	return _("Unconditional");
 	case GN_CDV_Busy:		return _("Busy");
 	case GN_CDV_NoAnswer:		return _("No answer");
 	case GN_CDV_OutOfReach:		return _("Out of reach");
