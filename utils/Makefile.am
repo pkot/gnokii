@@ -3,7 +3,8 @@ DEFS = -DLOCALEDIR=\"$(localedir)\"
 sbin_PROGRAMS = mgnokiidev
 mgnokiidev_SOURCES = mgnokiidev.c
 mgnokiidev_LDADD = $(INTLLIBS) $(TCP_LIBS)
-mgnokiidev_CFLAGS = -I$(top_srcdir)/include
+mgnokiidev_LDFLAGS = $(SUID_LDFLAGS) $(AM_LDFLAGS)
+mgnokiidev_CFLAGS = -I$(top_srcdir)/include $(SUID_CFLAGS) $(AM_CFLAGS)
 
 scripts_DATA = sendsms
 scriptsdir = $(bindir)

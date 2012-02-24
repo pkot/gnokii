@@ -998,6 +998,11 @@ AC_DEFINE_UNQUOTED(SBINDIR, "$mgnokiidev_bindir", [Where mgnokiidev gets install
 AC_EXPAND_DIR(prefix_dir, "${prefix}")
 AC_DEFINE_UNQUOTED(PREFIX, "$prefix_dir", [Root dir for gnokii, xgnokii and smsd])
 
+AC_ARG_VAR([SUID_CFLAGS],
+           [CFLAGS used for binaries which are usually with the suid bit])
+AC_ARG_VAR([SUID_LDFLAGS],
+           [LDFLAGS used for binaries which are usually with the suid bit])
+
 AC_CONFIG_HEADERS([include/config.h])
 
 AC_SUBST(PACKAGE)
