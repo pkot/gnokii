@@ -36,6 +36,9 @@
     o add support for phonebook memories SD (Service Dialling
       Numbers), MR (Message Recipients) and CL (Call Log)
                                                     (Daniele Forsi)
+    o parse call duration subblock found in Dialled Calls (DC),
+      Received Calls (RC) and Call Log (CL) phonebook entries;
+      output format is subject to change            (Daniele Forsi)
  * xgnokii updates
     o fix bug that caused to forget subentries after the first one
       when editing the phonebook                    (Daniele Forsi)

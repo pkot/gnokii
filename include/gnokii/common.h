@@ -224,6 +224,7 @@ typedef enum {
 	GN_PHONEBOOK_ENTRY_UserID          = 0x38,
 	GN_PHONEBOOK_ENTRY_PTTAddress      = 0x3f,
 	GN_PHONEBOOK_ENTRY_ExtGroup        = 0x43,
+	GN_PHONEBOOK_ENTRY_CallDuration    = 0x44, /* Measured in seconds */
 	GN_PHONEBOOK_ENTRY_Video           = 0x45, /* File ID */
 	GN_PHONEBOOK_ENTRY_FirstName       = 0x46,
 	GN_PHONEBOOK_ENTRY_LastName        = 0x47,

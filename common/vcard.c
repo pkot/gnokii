@@ -246,6 +246,7 @@ GNOKII_API char * gn_phonebook2vcardstr(gn_phonebook_entry *entry)
 		case GN_PHONEBOOK_ENTRY_Ringtone:
 		case GN_PHONEBOOK_ENTRY_RingtoneAdv:
 		case GN_PHONEBOOK_ENTRY_Video:
+		case GN_PHONEBOOK_ENTRY_CallDuration:
 			/* Ignore */
 			break;
 		case GN_PHONEBOOK_ENTRY_City:

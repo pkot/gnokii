@@ -34,7 +34,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 	int subblock_count = 0, i;
 	gn_phonebook_entry *entry = data->phonebook_entry;
 	gn_phonebook_subentry* subentry = NULL;
-
+	unsigned int seconds;
 
 	dprintf("Parts: %d\n", blocks);
 	for (i = 0; i < blocks; i++) {
@@ -290,6 +290,15 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->number_type = 0;
 			subentry->id          = blockstart[4];
 			subentry->data.id     = blockstart[7];
+			subblock_count++;
+			data->phonebook_entry->subentries_count++;
+			break;
+		case GN_PHONEBOOK_ENTRY_CallDuration:
+			subentry->entry_type = blockstart[0];
+			seconds = blockstart[10] * 256 + blockstart[11];
+			dprintf("   CallDuration: related to seq %d seconds %d\n", blockstart[5], seconds);
+			snprintf(subentry->data.number, sizeof(subentry->data.number),
+				 "[%d] %d:%02d:%02d", blockstart[5], seconds / 3600, seconds / 60, seconds % 60);
 			subblock_count++;
 			data->phonebook_entry->subentries_count++;
 			break;
