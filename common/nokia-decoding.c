@@ -104,7 +104,8 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			}
 			break;
 		case GN_PHONEBOOK_ENTRY_Location:
-			dprintf("Location: %d\n", blockstart[7]);
+			/* msb is always set on S40 3rd */
+			dprintf("Location: %d\n", ((blockstart[6] & 0x7f) << 8) + blockstart[7]);
 			break;
 		case GN_PHONEBOOK_ENTRY_Image:
 			dprintf("Image\n");
