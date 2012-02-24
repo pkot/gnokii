@@ -253,7 +253,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->data.date.day    = blockstart[9];
 			subentry->data.date.hour   = blockstart[10];
 			subentry->data.date.minute = blockstart[11];
-			subentry->data.date.second = 0;
+			subentry->data.date.second = blockstart[12];
 			dprintf("   Date: %04u.%02u.%02u\n", subentry->data.date.year,
 				subentry->data.date.month, subentry->data.date.day);
 			dprintf("   Time: %02u:%02u:%02u\n", subentry->data.date.hour,
