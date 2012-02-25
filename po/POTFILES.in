@@ -1,12 +1,14 @@
 common/cfgreader.c
 common/data/rlp-common.c
 common/data/virtmodem.c
+common/device.c
 common/devices/tcp.c
 common/devices/unixbluetooth.c
 common/devices/unixirda.c
 common/devices/unixserial.c
 common/devices/winbluetooth.c
 common/devices/winirda.c
+common/gsm-auth.c
 common/gsm-bitmaps.c
 common/gsm-common.c
 common/gsm-error.c
