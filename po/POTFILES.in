@@ -1,5 +1,4 @@
 common/cfgreader.c
-common/data/rlp-common.c
 common/data/virtmodem.c
 common/device.c
 common/devices/tcp.c
@@ -9,12 +8,10 @@ common/devices/unixserial.c
 common/devices/winbluetooth.c
 common/devices/winirda.c
 common/gsm-auth.c
-common/gsm-bitmaps.c
 common/gsm-common.c
 common/gsm-error.c
 common/gsm-filetypes.c
 common/gsm-networks.c
-common/gsm-ringtones.c
 common/gsm-sms.c
 common/gsm-statemachine.c
 common/libfunctions.c
@@ -29,15 +26,12 @@ common/misc.c
 common/nokia-decoding.c
 common/phones/atgen.c
 common/phones/fake.c
-common/phones/generic.c
-common/phones/nk3110.c
 common/phones/nk6100.c
 common/phones/nk6510.c
 common/phones/nk7110.c
 common/phones/nokia.c
 common/phones/pcsc.c
 common/vcal.lx
-common/vcard.c
 getopt/getopt.c
 gnokiid/gnokiid.c
 gnokii/gnokii.c
