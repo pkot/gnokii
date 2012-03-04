@@ -6553,6 +6553,9 @@ static int get_memory_type(gn_memory_type memory_type)
 	case GN_MT_MC:
 		result = NK6510_MEMORY_MC;
 		break;
+	case GN_MT_SD:
+		result = NK6510_MEMORY_SD;
+		break;
 	case GN_MT_IN:
 		result = NK6510_MEMORY_IN;
 		break;
@@ -6628,6 +6631,12 @@ static int get_memory_type(gn_memory_type memory_type)
 	case GN_MT_F20:
 		result = NK6510_MEMORY_F20;
 		break;
+	case GN_MT_MR:
+		result = NK6510_MEMORY_MR;
+		break;
+	case GN_MT_CL:
+		result = NK6510_MEMORY_CL;
+		break;
 	default:
 		result = NK6510_MEMORY_XX;
 		break;
@@ -6640,6 +6649,15 @@ static gn_memory_type get_gn_memory_type(int memory_type)
 	int result;
 
 	switch (memory_type) {
+	case NK6510_MEMORY_SD:
+		result = GN_MT_SD;
+		break;
+	case NK6510_MEMORY_MR:
+		result = GN_MT_MR;
+		break;
+	case NK6510_MEMORY_CL:
+		result = GN_MT_CL;
+		break;
 	case NK6510_MEMORY_IN:
 		result = GN_MT_IN;
 		break;

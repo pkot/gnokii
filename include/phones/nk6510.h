@@ -130,9 +130,12 @@ typedef enum {
 #define NK6510_MEMORY_EN		0x08	/* ?? SIM (or ME) emergency number */
 #define NK6510_MEMORY_MT		0x09	/* ?? combined ME and SIM phonebook */
 #define NK6510_MEMORY_VOICE		0x0b	/* Voice Mailbox */
+#define NK6510_MEMORY_SD		0x0c	/* SIM Service Dialling Numbers */
 #define NK6510_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
 #define NK6510_MEMORY_GROUPS		0x10	/* Caller groups */
 #define NK6510_MEMORY_EXTGROUPS		0x23	/* Extended Caller Groups */
+#define NK6510_MEMORY_MR		0x27	/* Message Recipients */
+#define NK6510_MEMORY_CL		0x28	/* Call Log */
 
 /* SMS Memory types */
 #define NK6510_MEMORY_IN		0x02	/* INBOX */
