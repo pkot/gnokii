@@ -1,3 +1,7 @@
+* Sun 04 Mar 2012
+- Fix bug that caused to forget subentries after the first one when editing the
+  phonebook.
+
 * Sat 18 Jun 2011 Daniele Forsi
 - Set "phone" as default window icon
 

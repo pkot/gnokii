@@ -341,7 +341,6 @@ static PhonebookEntry *ChangeEntryMemoryType(PhonebookEntry *oldPbEntry)
 
 
 static PhonebookEntry *EditPhonebookEntry(EditEntryData *data) {
-	gchar **number;
 	PhonebookEntry *current_entry = data->pbEntry;
 	gn_memory_type chosen_memory_type;
 	gint max_name_length, max_number_length;
@@ -393,16 +392,7 @@ static PhonebookEntry *EditPhonebookEntry(EditEntryData *data) {
 	snprintf(current_entry->entry.name, max_name_length, "%s",
 			 gtk_entry_get_text(GTK_ENTRY(data->name)));
 
-	if (phoneMonitor.supported & PM_EXTPBK) {
-		number = g_malloc(sizeof(char) * max_number_length);
-		gtk_label_get(GTK_LABEL(data->number), number);
-		snprintf(current_entry->entry.number, max_number_length, "%s", number[0]);
-		snprintf(current_entry->entry.subentries[0].data.number, max_number_length, "%s", number[0]);
-		current_entry->entry.subentries[0].entry_type = GN_PHONEBOOK_ENTRY_Number;
-		current_entry->entry.subentries[0].number_type = GN_PHONEBOOK_NUMBER_General;
-		current_entry->entry.subentries_count = 1;
-		g_free(number);
-	} else {
+	if (!(phoneMonitor.supported & PM_EXTPBK)) {
 		snprintf(current_entry->entry.number, max_number_length, "%s",
 			 gtk_entry_get_text(GTK_ENTRY(data->number)));
 	}
