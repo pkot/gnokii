@@ -593,6 +593,8 @@ static gn_error GetMemoryStatus(gn_data *data, struct gn_statemachine *state)
 			/* FIXME: this is total space (should read all entries and subtract empty ones) */
 			data->memory_status->used = (IoStruct.pbRecvBuffer[2] * 256 + IoStruct.pbRecvBuffer[3]) / IoStruct.pbRecvBuffer[14];
 			data->memory_status->free = 0;
+			dprintf("Status of memory %d: used %d/%d\n", file, data->memory_status->used,
+				data->memory_status->used + data->memory_status->free);
 		}
 	}
 

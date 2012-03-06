@@ -2100,6 +2100,8 @@ static gn_error ReplyMemoryStatus(int messagetype, unsigned char *buffer, int le
 		} else {
 			return GN_ERR_UNKNOWN;
 		}
+		dprintf("Status of memory %d: used %d/%d\n", drvinst->memorytype,
+			data->memory_status->used, data->memory_status->used + data->memory_status->free);
 	}
 	return GN_ERR_NONE;
 }

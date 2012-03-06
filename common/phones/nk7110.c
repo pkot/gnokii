@@ -673,7 +673,8 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 			if (message[5] != 0xff) {
 				data->memory_status->used = (message[16] << 8) + message[17];
 				data->memory_status->free = ((message[14] << 8) + message[15]) - data->memory_status->used;
-				dprintf("Memory status - location = %d\n", (message[4] << 8) + message[5]);
+				dprintf("Status of memory %d: used %d/%d\n", (message[4] << 8) + message[5],
+					(message[16] << 8) + message[17], (message[14] << 8) + message[15]);
 			} else {
 				dprintf("Unknown error getting mem status\n");
 				return GN_ERR_UNHANDLEDFRAME;

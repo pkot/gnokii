@@ -934,9 +934,7 @@ static gn_error IncomingPhonebook(int messagetype, unsigned char *message, int l
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 	case 0x08:
-		dprintf("\tMemory location: %d\n", message[4]);
-		dprintf("\tUsed: %d\n", message[6]);
-		dprintf("\tFree: %d\n", message[5]);
+		dprintf("Status of memory %d: used %d/%d\n", message[4], message[6], message[5] + message[6]);
 		if (data->memory_status) {
 			data->memory_status->used = message[6];
 			data->memory_status->free = message[5];

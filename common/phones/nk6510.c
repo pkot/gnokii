@@ -2723,8 +2723,8 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			if (message[5] != 0xff) {
 				data->memory_status->used = (message[20] << 8) + message[21];
 				data->memory_status->free = ((message[18] << 8) + message[19]) - data->memory_status->used;
-				dprintf("Memory status - location = %d, Capacity: %d \n",
-					(message[4] << 8) + message[5], (message[18] << 8) + message[19]);
+				dprintf("Status of memory %d: used %d/%d\n", (message[4] << 8) + message[5],
+					(message[20] << 8) + message[21], (message[18] << 8) + message[19]);
 			} else {
 				return GN_ERR_INVALIDMEMORYTYPE;
 			}
