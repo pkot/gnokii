@@ -676,7 +676,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 				dprintf("Memory status - location = %d\n", (message[8] << 8) + message[9]);
 			} else {
 				dprintf("Unknown error getting mem status\n");
-				return GN_ERR_NOTIMPLEMENTED;
+				return GN_ERR_UNHANDLEDFRAME;
 			}
 		}
 		break;
@@ -1797,7 +1797,7 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		req[3] = 0x07;
 		break;
 	default:
-		return GN_ERR_NOTIMPLEMENTED;
+		return GN_ERR_UNHANDLEDFRAME;
 	}
 
 	req[8]  = calnote->time.year >> 8;
@@ -1934,7 +1934,7 @@ static gn_error NK7110_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 		break;
 
 	default:
-		return GN_ERR_NOTIMPLEMENTED;
+		return GN_ERR_UNHANDLEDFRAME;
 	}
 
 	/* padding */

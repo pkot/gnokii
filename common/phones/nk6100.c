@@ -3204,7 +3204,7 @@ static gn_error IncomingSecurity(int messagetype, unsigned char *message, int le
 			}
 			break;
 		default:
-			return GN_ERR_NOTIMPLEMENTED;
+			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
 

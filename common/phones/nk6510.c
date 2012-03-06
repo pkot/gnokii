@@ -5201,7 +5201,7 @@ static gn_error NK6510_IncomingRadio(int messagetype, unsigned char *message, in
 		break;
 	}
 
-	return GN_ERR_NOTIMPLEMENTED;
+	return GN_ERR_UNHANDLEDFRAME;
 }
 
 /*****************/
