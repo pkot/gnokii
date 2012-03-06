@@ -728,7 +728,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 			case 0x34:
 				return GN_ERR_INVALIDLOCATION;
 			default:
-				return GN_ERR_NOTIMPLEMENTED;
+				return GN_ERR_UNHANDLEDFRAME;
 			}
 		}
 		if (drvinst->ll_memtype != memtype || drvinst->ll_location != location) {
