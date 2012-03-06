@@ -39,6 +39,8 @@
  * xgnokii updates
     o fix bug that caused to forget subentries after the first one
       when editing the phonebook                    (Daniele Forsi)
+ * nk7110 driver updates
+    o add more error codes for GN_OP_ReadPhonebook  (Daniele Forsi)
 
 0.6.31
 ======

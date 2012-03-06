@@ -701,6 +701,9 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		if (message[6] == 0x0f) { /* not found */
 			switch (message[10]) {
+			case 0x27:
+				/* Phone is turned off */
+				return GN_ERR_NOTREADY;
 			case 0x30:
 				if (data->phonebook_entry)
 					memtype_req = data->phonebook_entry->memory_type;
@@ -717,6 +720,8 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 				default:
 					break;
 				}
+				return GN_ERR_INVALIDMEMORYTYPE;
+			case 0x31:
 				return GN_ERR_INVALIDMEMORYTYPE;
 			case 0x33:
 				return GN_ERR_EMPTYLOCATION;
