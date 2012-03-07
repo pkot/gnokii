@@ -767,6 +767,8 @@ static gn_error NK7110_GetMemoryStatus(gn_data *data, struct gn_statemachine *st
 
 	dprintf("Getting memory status...\n");
 	req[5] = get_memory_type(data->memory_status->memory_type);
+	if (req[5] == NK7110_MEMORY_XX)
+		return GN_ERR_INVALIDMEMORYTYPE;
 	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 6);
 }
 
@@ -959,6 +961,8 @@ static gn_error NK7110_ReadPhonebookLL(gn_data *data, struct gn_statemachine *st
 				   0x00, 0x00, /* location */
 				   0x00, 0x00};
 
+	if (drvinst->ll_memtype == NK7110_MEMORY_XX)
+		return GN_ERR_INVALIDMEMORYTYPE;
 	dprintf("Reading phonebook location (%d)\n", drvinst->ll_location);
 
 	req[9] = drvinst->ll_memtype;
