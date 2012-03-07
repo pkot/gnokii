@@ -45,6 +45,8 @@
  * nk7110 driver updates
     o return more specific error codes for GN_OP_ReadPhonebook and
       for GN_OP_GetSMSCenter failures               (Daniele Forsi)
+    o add support for phonebook memory SD (Service Dialling
+      Numbers)                                      (Daniele Forsi)
 
 0.6.31
 ======

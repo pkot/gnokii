@@ -3032,6 +3032,9 @@ static int get_memory_type(gn_memory_type memory_type)
 	case GN_MT_MC:
 		result = NK7110_MEMORY_MC;
 		break;
+	case GN_MT_SD:
+		result = NK7110_MEMORY_SD;
+		break;
 	case GN_MT_IN:
 		result = NK7110_MEMORY_IN;
 		break;
@@ -3139,6 +3142,9 @@ static gn_memory_type get_gn_memory_type(int memory_type)
 		break;
 	case NK7110_MEMORY_MC:
 		result = GN_MT_MC;
+		break;
+	case NK7110_MEMORY_SD:
+		result = GN_MT_SD;
 		break;
 	case NK7110_MEMORY_IN:
 		result = GN_MT_IN;
