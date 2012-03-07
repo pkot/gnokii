@@ -113,15 +113,7 @@ typedef enum {
 #define NK7110_NOTE_BIRTHDAY		0x04	/* Birthday */
 #define NK7110_NOTE_REMINDER		0x08	/* Reminder */
 
-/* Phone Memory types */
-#define NK7110_MEMORY_DIALLED		0x01	/* Dialled numbers */
-#define NK7110_MEMORY_MISSED		0x02	/* Missed calls */
-#define NK7110_MEMORY_RECEIVED		0x03	/* Received calls */
-#define NK7110_MEMORY_PHONE		0x05	/* Telephone phonebook */
-#define NK7110_MEMORY_SIM		0x06	/* SIM phonebook */
-#define NK7110_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
-#define NK7110_MEMORY_GROUPS		0x10	/* Caller groups */
-
+/* Phonebook Memory types */
 #define NK7110_MEMORY_DC		0x01	/* ME dialled calls list */
 #define NK7110_MEMORY_MC		0x02	/* ME missed (unanswered received) calls list */
 #define NK7110_MEMORY_RC		0x03	/* ME received calls list */
@@ -132,7 +124,10 @@ typedef enum {
 #define NK7110_MEMORY_EN		0x08	/* ?? SIM (or ME) emergency number */
 #define NK7110_MEMORY_MT		0x09	/* ?? combined ME and SIM phonebook */
 #define NK7110_MEMORY_VOICE		0x0b	/* Voice Mailbox */
+#define NK7110_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
+#define NK7110_MEMORY_GROUPS		0x10	/* Caller groups */
 
+/* SMS Memory types */
 #define NK7110_MEMORY_IN		0x08	/* INBOX */
 #define NK7110_MEMORY_OU		0x10	/* OUTBOX */
 #define NK7110_MEMORY_AR		0x18	/* ARCHIVE */
