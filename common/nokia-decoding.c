@@ -317,11 +317,13 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			}
 			break;
 		default:
-			dprintf("Unknown phonebook block %02x\n", blockstart[0]);
+			dprintf("   Unknown phonebook block %02x\n", blockstart[0]);
 			{
 				int j;
+
+				dprintf("  ");
 				for (j = 0; j < blockstart[3]; j++)
-					dprintf("%02x ", blockstart[j]);
+					dprintf(" %02x", blockstart[j]);
 				dprintf("\n");
 			}
 			break;
