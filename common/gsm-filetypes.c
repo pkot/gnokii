@@ -1621,7 +1621,7 @@ endloop:
 	return error;
 }
 
-GNOKII_API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, char *memory_type_string)
+GNOKII_API gn_error gn_file_phonebook_raw_write(FILE *f, gn_phonebook_entry *entry, const char *memory_type_string)
 {
 	char escaped_name[2 * GN_PHONEBOOK_NAME_MAX_LENGTH];
 	int i;

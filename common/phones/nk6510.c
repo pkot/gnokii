@@ -298,7 +298,8 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 
 static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
 static int get_memory_type(gn_memory_type memory_type);
-static gn_memory_type get_gn_memory_type(int memory_type);
+static gn_memory_type get_gn_memory_type_sms(int memory_type);
+static gn_memory_type get_gn_memory_type_phonebook(int memory_type);
 
 /* Some globals */
 
@@ -1086,7 +1087,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 
 			if (message[i] != 0x01)
 				return GN_ERR_UNHANDLEDFRAME;
-			data->sms_folder_list->folder_id[j] = get_gn_memory_type(message[i + 2]);
+			data->sms_folder_list->folder_id[j] = get_gn_memory_type_sms(message[i + 2]);
 			dprintf("folder_id[%d]=%d\n", j, data->sms_folder_list->folder_id[j]);
 			data->sms_folder_list->folder[j].folder_id = data->sms_folder_list->folder_id[j];
 			dprintf("folder_id[%d]=%d\n", j, data->sms_folder_list->folder[j].folder_id);
@@ -2782,6 +2783,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			}
 		}
 		dprintf("Received phonebook info\n");
+		data->phonebook_entry->memory_type = get_gn_memory_type_phonebook(message[11]);
 		blocks     = message[21];
 		return phonebook_decode(message + 22, length - 21, data, blocks, message[11], 12);
 
@@ -6644,20 +6646,11 @@ static int get_memory_type(gn_memory_type memory_type)
 	return (result);
 }
 
-static gn_memory_type get_gn_memory_type(int memory_type)
+static gn_memory_type get_gn_memory_type_sms(int memory_type)
 {
 	int result;
 
 	switch (memory_type) {
-	case NK6510_MEMORY_SD:
-		result = GN_MT_SD;
-		break;
-	case NK6510_MEMORY_MR:
-		result = GN_MT_MR;
-		break;
-	case NK6510_MEMORY_CL:
-		result = GN_MT_CL;
-		break;
 	case NK6510_MEMORY_IN:
 		result = GN_MT_IN;
 		break;
@@ -6739,6 +6732,52 @@ static gn_memory_type get_gn_memory_type(int memory_type)
 	}
 	return (result);
 }
+
+static gn_memory_type get_gn_memory_type_phonebook(int memory_type)
+{
+	int result;
+
+	switch (memory_type) {
+	case NK6510_MEMORY_DC:
+		result = GN_MT_DC;
+		break;
+	case NK6510_MEMORY_MC:
+		result = GN_MT_MC;
+		break;
+	case NK6510_MEMORY_RC:
+		result = GN_MT_RC;
+		break;
+	case NK6510_MEMORY_FD:
+		result = GN_MT_FD;
+		break;
+	case NK6510_MEMORY_ME:
+		result = GN_MT_ME;
+		break;
+	case NK6510_MEMORY_ON:
+		result = GN_MT_ON;
+		break;
+	case NK6510_MEMORY_EN:
+		result = GN_MT_EN;
+		break;
+	case NK6510_MEMORY_MT:
+		result = GN_MT_MT;
+		break;
+	case NK6510_MEMORY_SD:
+		result = GN_MT_SD;
+		break;
+	case NK6510_MEMORY_MR:
+		result = GN_MT_MR;
+		break;
+	case NK6510_MEMORY_CL:
+		result = GN_MT_CL;
+		break;
+	default:
+		result = GN_MT_XX;
+		break;
+	}
+	return (result);
+}
+
 /*
 01 33 00 17 05 01 05 08 04 00 01 00 00 00
 01 33 00 17 05 01 05 08 04 00 01 00 00 00
