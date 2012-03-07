@@ -1500,9 +1500,11 @@ static gn_error NK7110_IncomingSMS(int messagetype, unsigned char *message, int 
 	case NK7110_SUBSMS_READ_CELLBRD: /* 0x23 */
 	case NK7110_SUBSMS_SMSC_OK: /* 0x31 */
 	case NK7110_SUBSMS_SMSC_FAIL: /* 0x32 */
-	case NK7110_SUBSMS_SMSC_RCVFAIL: /* 0x35 */
 		dprintf("Subtype 0x%02x of type 0x%02x (SMS handling) not implemented\n", message[3], NK7110_MSG_SMS);
 		return GN_ERR_NOTIMPLEMENTED;
+
+	case NK7110_SUBSMS_SMSC_RCVFAIL: /* 0x35 */
+		return GN_ERR_INVALIDLOCATION;
 
 	default:
 		dprintf("Unknown subtype of type 0x%02x (SMS handling): 0x%02x\n", NK7110_MSG_SMS, message[3]);
