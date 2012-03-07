@@ -117,6 +117,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
                                      0x08: (1/0)
                                      0x09: (4) voice mailbox
                                      0x0e: (10) speed dials
+                                     0x0c: (10) SIM service dialling numbers
                                      0x10: (5) caller groups
                                   y: location
     r Read memory           { 0x0108, 0x00, 0x01,
