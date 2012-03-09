@@ -2795,6 +2795,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 								     block (with 0 length) */
 			case 0x23: return GN_ERR_WRONGDATAFORMAT; /* block size does not match a definition */
 			case 0x36: return GN_ERR_WRONGDATAFORMAT; /* name block is too long */
+			case 0x3c: return GN_ERR_WRONGDATAFORMAT; /* both name and number are missing */
 			case 0x3d: return GN_ERR_FAILED;
 			case 0x3e: return GN_ERR_FAILED;
 			case 0x43: return GN_ERR_WRONGDATAFORMAT; /* Probably there are incorrect
