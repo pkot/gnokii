@@ -2996,7 +2996,8 @@ static gn_error GetRawRingtone(gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 
 	if (!data || !data->ringtone || !data->raw_data) return GN_ERR_INTERNALERROR;
-	if (data->ringtone->location < 0) return GN_ERR_INVALIDLOCATION;
+	if (data->ringtone->location < 0 || data->ringtone->location > 255)
+		return GN_ERR_INVALIDLOCATION;
 
 	req[3] = data->ringtone->location - 17;
 
