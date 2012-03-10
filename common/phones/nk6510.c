@@ -6754,6 +6754,9 @@ static gn_memory_type get_gn_memory_type_phonebook(int memory_type)
 	case NK6510_MEMORY_ME:
 		result = GN_MT_ME;
 		break;
+	case NK6510_MEMORY_SM:
+		result = GN_MT_SM;
+		break;
 	case NK6510_MEMORY_ON:
 		result = GN_MT_ON;
 		break;
