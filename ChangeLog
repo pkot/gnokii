@@ -41,6 +41,9 @@
       output format is subject to change            (Daniele Forsi)
     o change the value used for phonebook memory ON (reading and
       deleting work, but writing fails)             (Daniele Forsi)
+    o change the value used for VOICE phonebook memory, containing
+      the phone number(s) to be used to listen to voicemail, which
+      was used for MT which now is unsupported      (Daniele Forsi)
  * xgnokii updates
     o fix bug that caused to forget subentries after the first one
       when editing the phonebook                    (Daniele Forsi)
@@ -49,6 +52,9 @@
       for GN_OP_GetSMSCenter failures               (Daniele Forsi)
     o add support for phonebook memory SD (Service Dialling
       Numbers)                                      (Daniele Forsi)
+    o change the value used for VOICE phonebook memory, containing
+      the phone number(s) to be used to listen to voicemail, which
+      was used for MT which now is unsupported      (Daniele Forsi)
 
 0.6.31
 ======

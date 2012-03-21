@@ -127,8 +127,7 @@ typedef enum {
 #define NK6510_MEMORY_ME		0x05	/* ME (Mobile Equipment) phonebook */
 #define NK6510_MEMORY_SM		0x06	/* SIM phonebook */
 #define NK6510_MEMORY_EN		0x08	/* ?? SIM (or ME) emergency number */
-#define NK6510_MEMORY_MT		0x09	/* ?? combined ME and SIM phonebook */
-#define NK6510_MEMORY_VOICE		0x0b	/* Voice Mailbox */
+#define NK6510_MEMORY_VOICE		0x09	/* Voice Mailbox */
 #define NK6510_MEMORY_SD		0x0c	/* SIM Service Dialling Numbers */
 #define NK6510_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
 #define NK6510_MEMORY_GROUPS		0x10	/* Caller groups */
