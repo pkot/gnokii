@@ -104,6 +104,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                                      0x0c: SIM Service Dialling Numbers
                                      0x0e: (10) speed dials
                                      0x10: (5) caller groups
+                                     0x17: Own Number
                                      0x23: Extended Caller Groups
                                      0x27: Message Recipients
                                      0x28: Call Log

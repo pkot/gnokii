@@ -39,6 +39,8 @@
     o parse call duration subblock found in Dialled Calls (DC),
       Received Calls (RC) and Call Log (CL) phonebook entries;
       output format is subject to change            (Daniele Forsi)
+    o change the value used for phonebook memory ON (reading and
+      deleting work, but writing fails)             (Daniele Forsi)
  * xgnokii updates
     o fix bug that caused to forget subentries after the first one
       when editing the phonebook                    (Daniele Forsi)
