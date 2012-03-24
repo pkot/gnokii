@@ -706,22 +706,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 				/* Phone is turned off */
 				return GN_ERR_NOTREADY;
 			case 0x30:
-				if (data->phonebook_entry)
-					memtype_req = data->phonebook_entry->memory_type;
-				else
-					memtype_req = GN_MT_XX;
-				/*
-				 * this message has two meanings: "invalid
-				 * location" and "memory is empty"
-				 */
-				switch (memtype_req) {
-				case GN_MT_SM:
-				case GN_MT_ME:
-					return GN_ERR_EMPTYLOCATION;
-				default:
-					break;
-				}
-				return GN_ERR_INVALIDMEMORYTYPE;
+				return GN_ERR_EMPTYLOCATION;
 			case 0x31:
 				return GN_ERR_INVALIDMEMORYTYPE;
 			case 0x33:

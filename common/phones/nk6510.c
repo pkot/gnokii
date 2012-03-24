@@ -2756,22 +2756,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		if (message[6] == 0x0f) { /* not found */
 			switch (message[10]) {
 			case 0x30:
-				if (data->phonebook_entry)
-					memtype = data->phonebook_entry->memory_type;
-				else
-					memtype = GN_MT_XX;
-				/*
-				 * this message has two meanings: "invalid
-				 * location" and "memory is empty"
-				 */
-				switch (memtype) {
-				case GN_MT_SM:
-				case GN_MT_ME:
-					return GN_ERR_EMPTYLOCATION;
-				default:
-					break;
-				}
-				return GN_ERR_INVALIDMEMORYTYPE;
+				return GN_ERR_EMPTYLOCATION;
 			case 0x33:
 				return GN_ERR_EMPTYLOCATION;
 			case 0x34:
