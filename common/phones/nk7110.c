@@ -732,12 +732,13 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 				return GN_ERR_UNHANDLEDFRAME;
 			}
 		}
-		if (drvinst->ll_memtype != memtype || drvinst->ll_location != location) {
+		if ((drvinst->ll_memtype != memtype && drvinst->ll_memtype != NK7110_MEMORY_CB) || drvinst->ll_location != location) {
 			dprintf("skipping entry: ll_memtype: %d, memtype: %d, ll_location: %d, location: %d\n",
 				drvinst->ll_memtype, memtype, drvinst->ll_location, location);
 			return GN_ERR_UNSOLICITED;
 		}
 		dprintf("Received phonebook info\n");
+		data->phonebook_entry->memory_type = get_gn_memory_type(message[11]);
 		blocks     = message[17];
 		blockstart = message + 18;
 		return phonebook_decode(blockstart, length - 17, data, blocks, message[11], 8);
@@ -3005,9 +3006,6 @@ static int get_memory_type(gn_memory_type memory_type)
 	int result;
 
 	switch (memory_type) {
-	case GN_MT_MT:
-		result = NK7110_MEMORY_MT;
-		break;
 	case GN_MT_ME:
 		result = NK7110_MEMORY_ME;
 		break;
@@ -3034,6 +3032,9 @@ static int get_memory_type(gn_memory_type memory_type)
 		break;
 	case GN_MT_SD:
 		result = NK7110_MEMORY_SD;
+		break;
+	case GN_MT_CB:
+		result = NK7110_MEMORY_CB;
 		break;
 	case GN_MT_IN:
 		result = NK7110_MEMORY_IN;
@@ -3119,9 +3120,6 @@ static gn_memory_type get_gn_memory_type(int memory_type)
 	int result;
 
 	switch (memory_type) {
-	case NK7110_MEMORY_MT:
-		result = GN_MT_MT;
-		break;
 	case NK7110_MEMORY_ME:
 		result = GN_MT_ME;
 		break;
@@ -3145,6 +3143,9 @@ static gn_memory_type get_gn_memory_type(int memory_type)
 		break;
 	case NK7110_MEMORY_SD:
 		result = GN_MT_SD;
+		break;
+	case NK7110_MEMORY_CB:
+		result = GN_MT_CB;
 		break;
 	case NK7110_MEMORY_IN:
 		result = GN_MT_IN;

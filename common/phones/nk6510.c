@@ -6529,9 +6529,6 @@ static int get_memory_type(gn_memory_type memory_type)
 	int result;
 
 	switch (memory_type) {
-	case GN_MT_MT:
-		result = NK6510_MEMORY_MT;
-		break;
 	case GN_MT_ME:
 		result = NK6510_MEMORY_ME;
 		break;
@@ -6558,6 +6555,9 @@ static int get_memory_type(gn_memory_type memory_type)
 		break;
 	case GN_MT_SD:
 		result = NK6510_MEMORY_SD;
+		break;
+	case GN_MT_CB:
+		result = NK6510_MEMORY_CB;
 		break;
 	case GN_MT_IN:
 		result = NK6510_MEMORY_IN;
@@ -6763,11 +6763,11 @@ static gn_memory_type get_gn_memory_type_phonebook(int memory_type)
 	case NK6510_MEMORY_EN:
 		result = GN_MT_EN;
 		break;
-	case NK6510_MEMORY_MT:
-		result = GN_MT_MT;
-		break;
 	case NK6510_MEMORY_SD:
 		result = GN_MT_SD;
+		break;
+	case NK6510_MEMORY_CB:
+		result = GN_MT_CB;
 		break;
 	case NK6510_MEMORY_MR:
 		result = GN_MT_MR;

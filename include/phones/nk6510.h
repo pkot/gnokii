@@ -135,6 +135,7 @@ typedef enum {
 #define NK6510_MEMORY_EXTGROUPS		0x23	/* Extended Caller Groups */
 #define NK6510_MEMORY_MR		0x27	/* Message Recipients */
 #define NK6510_MEMORY_CL		0x28	/* Call Log */
+#define NK6510_MEMORY_CB		0xfe	/* Currently selected memory (SIM, phone or both) */
 
 /* SMS Memory types */
 #define NK6510_MEMORY_IN		0x02	/* INBOX */

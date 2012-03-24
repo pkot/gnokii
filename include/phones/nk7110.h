@@ -126,6 +126,7 @@ typedef enum {
 #define NK7110_MEMORY_SD		0x0c	/* SIM Service Dialling Numbers */
 #define NK7110_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
 #define NK7110_MEMORY_GROUPS		0x10	/* Caller groups */
+#define NK7110_MEMORY_CB		0xfe	/* Currently selected memory (SIM, phone or both) */
 
 /* SMS Memory types */
 #define NK7110_MEMORY_IN		0x08	/* INBOX */

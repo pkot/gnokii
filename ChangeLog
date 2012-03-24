@@ -34,8 +34,8 @@
     o store also the seconds in date fields when reading phonebook
       entries from phone                            (Daniele Forsi)
     o add support for phonebook memories SD (Service Dialling
-      Numbers), MR (Message Recipients) and CL (Call Log)
-                                                    (Daniele Forsi)
+      Numbers), MR (Message Recipients), CL (Call Log) and
+      CB (Currently selected memory)                (Daniele Forsi)
     o parse call duration subblock found in Dialled Calls (DC),
       Received Calls (RC) and Call Log (CL) phonebook entries;
       output format is subject to change            (Daniele Forsi)
@@ -51,7 +51,7 @@
     o return more specific error codes for GN_OP_ReadPhonebook and
       for GN_OP_GetSMSCenter failures               (Daniele Forsi)
     o add support for phonebook memory SD (Service Dialling
-      Numbers)                                      (Daniele Forsi)
+      Numbers) and CB (Currently selected memory)   (Daniele Forsi)
     o change the value used for VOICE phonebook memory, containing
       the phone number(s) to be used to listen to voicemail, which
       was used for MT which now is unsupported      (Daniele Forsi)

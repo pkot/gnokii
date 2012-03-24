@@ -108,6 +108,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA/Bluetooth
                                      0x23: Extended Caller Groups
                                      0x27: Message Recipients
                                      0x28: Call Log
+                                     0xfe: Currently selected memory (SIM, phone or both)
 
     r Read memory           { 0x08, 0x00, 0x01,
                                     code, 0x00, 0x00, z, xH, xL, yH, yL, 0x00[7], no.of blocks, { block } * }

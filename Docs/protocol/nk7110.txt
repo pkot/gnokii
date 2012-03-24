@@ -119,6 +119,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
                                      0x0e: (10) speed dials
                                      0x0c: (10) SIM service dialling numbers
                                      0x10: (5) caller groups
+                                     0xfe: Currently selected memory (SIM, phone or both)
                                   y: location
     r Read memory           { 0x0108, 0x00, 0x01,
                              code,0x00, 0x00, z, xH, xL, yH, yL, 0x00, 0x00, 0x00, no.of blocks, { block } * }
