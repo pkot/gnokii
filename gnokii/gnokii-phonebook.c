@@ -154,7 +154,7 @@ gn_error getphonebook(int argc, char *argv[], gn_data *data, struct gn_statemach
 			num_entries--;
 			switch (type) {
 			case 1:
-				gn_file_phonebook_raw_write(stdout, &entry, memory_type_string);
+				gn_file_phonebook_raw_write(stdout, &entry, gn_memory_type2str(entry.memory_type));
 				break;
 			case 2: {
 					char *s;
