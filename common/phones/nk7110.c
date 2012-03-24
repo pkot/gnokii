@@ -665,7 +665,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 	nk7110_driver_instance *drvinst = DRVINSTANCE(state);
 	unsigned char *blockstart;
 	unsigned char blocks;
-	int memtype, location, memtype_req;
+	int memtype, location;
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */

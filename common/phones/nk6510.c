@@ -2715,7 +2715,6 @@ out:
 static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char blocks;
-	int memtype;
 	char *req = state->last_msg;
 
 	switch (message[3]) {
