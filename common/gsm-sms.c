@@ -636,6 +636,7 @@ static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 
 	/* Data Coding Scheme */
 	sms->dcs.type = rawsms->dcs;
+	dprintf("Data Coding Scheme 0x%02x\n", sms->dcs.type);
 
 	/* User Data Header */
 	if (rawsms->udh_indicator & 0x40) { /* UDH header available */
@@ -1371,7 +1372,6 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 		dprintf("Data Coding Scheme type 0x%02x isn't supported\n", sms->dcs.type);
 		return GN_ERR_WRONGDATAFORMAT;
 	}
-	dprintf("Data Coding Scheme 0x%02x\n", sms->dcs.type);
 
 	for (i = 0; i < GN_SMS_PART_MAX_NUMBER; i++) {
 		switch (sms->user_data[i].type) {
