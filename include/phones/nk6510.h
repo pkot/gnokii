@@ -185,6 +185,12 @@ typedef enum {
 #define NK6510_SUBSEC_ENABLE_EXTENDED_CMDS	0x64	/* Enable extended commands */
 #define NK6510_SUBSEC_NETMONITOR         	0x7e	/* Netmonitor */
 
+/* Series 40 3rd Ed. SMS and MMS */
+
+#define NK6510_S40MSG_HEADER_LEN	0xb0	/* 176 */
+
+/* Misc defines */
+
 #define	NK6510_RINGTONE_USERDEF_LOCATION	231
 
 #define NK6510_FILE_ID_LENGTH 6

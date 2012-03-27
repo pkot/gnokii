@@ -1661,15 +1661,13 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 
 	data->raw_sms->status = GetMessageStatus_S40_30(fl2.files[data->raw_sms->number - 1]->name);
 
-#define HEADER_LEN	0xb0	/* 176 */
-
 	bin = fi.file;
 
-	offset = HEADER_LEN;
 	/* content length */
 	cont_len = (bin[4] << 24) + (bin[5] << 16) + (bin[6] << 8) + bin[7];
 	/* total length */
 	tota_len = (bin[8] << 24) + (bin[9] << 16) + (bin[10] << 8) + bin[11];
+	offset = NK6510_S40MSG_HEADER_LEN;
 	error = gn_sms_pdu2raw(data->raw_sms, bin + offset, cont_len, GN_SMS_PDU_NOSMSC);
 
 	offset += data->raw_sms->length;
