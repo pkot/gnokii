@@ -217,9 +217,9 @@ static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine 
 		bi->rbuf_pos = 1;
 		bi->binlen = 1;
 		if (unsolicited)
-			sm_incoming_function(bi->rbuf[0], start, rbuf_pos - 1 - (start - bi->rbuf), sm);
+			sm_incoming_function(bi->rbuf[0], start, rbuf_pos - (start - bi->rbuf), sm);
 		else
-			sm_incoming_function(sm->last_msg_type, bi->rbuf, rbuf_pos - 1, sm);
+			sm_incoming_function(sm->last_msg_type, bi->rbuf, rbuf_pos, sm);
 		free(bi->rbuf);
 		bi->rbuf = NULL;
 		bi->rbuf_size = 0;
