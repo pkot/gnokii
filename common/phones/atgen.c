@@ -3444,21 +3444,21 @@ char *skipcrlf(unsigned char *str)
 
 /*
  * searches for <cr> or <lf> and returns the first
- * occurrence. if test is set, the gsm char @ which
+ * occurrence. If is_gsm is set, the gsm char @ which
  * is 0x00 is not considered as end of string.
  * return NULL if no <cr> or <lf> was found in the
  * range of max bytes.
  */
-char *findcrlf(unsigned char *str, int test, int max)
+char *findcrlf(unsigned char *str, int is_gsm, int max)
 {
 	if (str == NULL)
 		return str;
-	while ((max > 0) && (*str != '\n') && (*str != '\r') && ((*str != '\0') || test)) {
+	while (max > 0) {
+		if ((*str == '\r') || (*str == '\n') || ((*str == '\0') && !is_gsm))
+			return str;
 		str++;
 		max--;
 	}
-	if ((*str == '\0') || ((max == 0) && (*str != '\n') && (*str != '\r')))
-		return NULL;
-	return str;
+	return NULL;
 }
 
