@@ -176,7 +176,7 @@ static int get_iface_string(struct usb_dev_handle *usb_handle, char **string, in
 		*string[0] = '\0';
 		return usb_get_string_simple(usb_handle, id, *string, USB_MAX_STRING_SIZE);
 	}
-	return 0;
+	return -EINVAL;
 }
 
 /*
