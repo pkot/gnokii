@@ -286,6 +286,8 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 
 		DEVINSTANCE(state)->interface = current;
 		usb_handle = usb_open(current->device);
+		if (usb_handle == NULL)
+			goto cleanup_list;
 		get_iface_string(usb_handle, &DEVINSTANCE(state)->manufacturer, 
 			current->device->descriptor.iManufacturer);
 		get_iface_string(usb_handle, &DEVINSTANCE(state)->product, 
