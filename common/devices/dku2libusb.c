@@ -348,6 +348,15 @@ static int usbfbus_connect_request(struct gn_statemachine *state)
 
 	DEVINSTANCE(state)->interface->dev_data = usb_open(DEVINSTANCE(state)->interface->device);
 
+#ifdef __linux__
+	/* Ask to remove any driver bound to this interface (-ENODATA means no driver was bound) */
+	ret = usb_detach_kernel_driver_np(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->control_interface);
+	if (ret < 0 && ret != -ENODATA) {
+		dprintf("Can't detach kernel driver: %d\n", ret);
+		goto err1;
+	}
+#endif
+
 	ret = usb_set_configuration(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->configuration);
 	if (ret < 0) {
 		dprintf("Can't set configuration: %d\n", ret);
