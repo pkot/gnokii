@@ -53,10 +53,9 @@ GNOKII_API gn_state gn_sm_loop(int timeout, struct gn_statemachine *state)
 	struct timeval loop_timeout;
 	int i;
 
-	if (!state->link.loop) {
-		dprintf("No Loop function. Aborting.\n");
-		abort();
-	}
+	if (!state->link.loop)
+		return state->current_state;
+
 	for (i = 0; i < timeout; i++) {
 		/*
 		 * Some select() implementation (e.g. Linux) will modify the

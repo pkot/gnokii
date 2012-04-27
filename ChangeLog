@@ -27,6 +27,7 @@
     o implement GN_OP_Ping operation                    (Paweł Kot)
  * fake driver updates
     o always autodetect if PDU SMS starts with SMSC (Daniele Forsi)
+    o make it usable with gnome-phone-manager       (Daniele Forsi)
  * Documentation updates
     o samples for connect and disconnect scripts for Portech
       devices                                   (Guillermo Benitez)
