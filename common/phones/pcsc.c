@@ -98,7 +98,8 @@ gn_driver driver_pcsc = {
 SCARDCONTEXT hContext;
 SCARDHANDLE hCard;
 DWORD dwActiveProtocol;
-SCARD_IO_REQUEST *pioSendPci, pioRecvPci;
+const SCARD_IO_REQUEST *pioSendPci;
+SCARD_IO_REQUEST pioRecvPci;
 BYTE buf[MAX_BUFFER_SIZE];
 PCSC_IOSTRUCT IoStruct = { buf, sizeof(buf), 0, 0 };
 
