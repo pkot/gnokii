@@ -277,7 +277,7 @@ static void alpha_tag_decode(BYTE *dest, BYTE *buf, size_t alpha_length)
 			buf += 4;
 		}
 		dprintf("ucs2_base = 0x%04x\n", ucs2_base);
-		temp = (BYTE *) malloc(alpha_length * 2);
+		temp = malloc(alpha_length * 2);
 		if (!temp) {
 			dest[0] = '\0';
 			return;
@@ -1462,7 +1462,7 @@ static LONG pcsc_open_reader_number(LONG number)
 
 	/* first retrieve buffer length */
 	ret = SCardListReaders(hContext, NULL, NULL, &len);
-	buf = (BYTE *) malloc(len);
+	buf = malloc(len);
 	if (!buf) {
 		return SCARD_E_NO_MEMORY;
 	}
