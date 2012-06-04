@@ -1456,7 +1456,7 @@ static LONG pcsc_open_reader_number(LONG number)
 {
 /* connect to a reader by number, 0 is the first reader (as configured in /etc/reader.conf) */
 	LONG ret;
-	LONG len;
+	LONG len = 0;
 	BYTE *buf;
 	LPCSTR reader_name;
 
