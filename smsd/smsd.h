@@ -36,6 +36,7 @@ typedef struct {
   gchar *bindir;
   gchar *dbMod;
   gchar *libDir;
+  gchar *configFile;
   gchar *logFile;
   gchar *phone;
   gint   refreshInt;

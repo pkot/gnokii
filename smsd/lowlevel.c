@@ -91,19 +91,24 @@ static gn_error fbusinit (const char * const iname)
 {
   gn_error error;
 
-  error = gn_lib_phoneprofile_load(iname, &sm);
+  error = gn_lib_phoneprofile_load_from_file (smsdConfig.configFile, iname, &sm);
   if (error != GN_ERR_NONE)
   {
-    g_print (_("Cannot load phone %s!\nDo you have proper section in the config file?\n"), iname);
+    if (smsdConfig.configFile)
+      g_print (_("Cannot load phone %s from config file %s!\nDo you have proper section in the config file?\n"),
+               iname, smsdConfig.configFile);
+    else
+      g_print (_("Cannot load phone %s from default config file!\nDo you have proper section in the config file?\n"),
+               iname);
     g_print (_("Error: %s\n"), gn_error_print (error));
     exit (-1);
   }
 
   /* register cleanup function */
-  atexit(busterminate);
+  atexit (busterminate);
 
   /* Initialise the code for the GSM interface. */     
-  error = gn_lib_phone_open(sm);
+  error = gn_lib_phone_open (sm);
   gn_log_xdebug ("fbusinit: error %d\n", error);
   if (error != GN_ERR_NONE)
   {

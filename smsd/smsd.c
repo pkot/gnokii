@@ -141,6 +141,7 @@ static void Usage (gchar *p)
              "            -e, --encoding client_encoding\n"
              "            -m, --module db_module (pq, mysql, sqlite, file)\n"
              "            -l, --libdir path_to_db_module\n"
+             "            -C, --config path_to_config_file\n"
              "            -f, --logfile file\n"
              "            -t, --phone phone_number\n"
              "            -i, --interval polling_interval_for_incoming_sms's_in_seconds\n"
@@ -195,6 +196,7 @@ static void ReadConfig (gint argc, gchar *argv[])
   connection.clientEncoding = g_strdup ("");
   smsdConfig.dbMod = g_strdup ("file");
   smsdConfig.libDir = g_strdup (MODULES_DIR);
+  smsdConfig.configFile = NULL;
   smsdConfig.logFile = NULL;
   smsdConfig.phone = g_strdup ("");
   smsdConfig.refreshInt = 1;     // Phone querying interval in seconds
@@ -217,6 +219,7 @@ static void ReadConfig (gint argc, gchar *argv[])
       {"encoding", 1, 0, 'e'},
       {"module", 1, 0, 'm'},
       {"libdir", 1, 0, 'l'},
+      {"config", 1, 0, 'C'},
       {"logfile", 1, 0, 'f'},
       {"phone", 1, 0, 't'},
       {"version", 0, 0, 'v'},
@@ -228,7 +231,7 @@ static void ReadConfig (gint argc, gchar *argv[])
       {0, 0, 0, 0}
     };
     
-    c = getopt_long (argc, argv, "u:p:d:c:s:e:m:l:f:t:vi:S:b:0h", longOptions, &optionIndex);
+    c = getopt_long (argc, argv, "u:p:d:c:s:e:m:l:C:f:t:vi:S:b:0h", longOptions, &optionIndex);
     if (c == EOF)
       break;
     switch (c)
@@ -277,6 +280,12 @@ static void ReadConfig (gint argc, gchar *argv[])
       case 'l':
         g_free (smsdConfig.libDir);
         smsdConfig.libDir = g_strdup (optarg);
+        break;
+
+      case 'C':
+        if (smsdConfig.configFile)
+          g_free (smsdConfig.configFile);
+        smsdConfig.configFile = g_strdup (optarg);
         break;
 
       case 'f':
