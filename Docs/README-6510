@@ -86,6 +86,20 @@ When using this driver you may encounter the following errors:
   "Nokia mode" from phone's menu
 * "No route to host" - run as root "ifconfig usbpn0 up"
 
+* Series 30 *
+
+This driver also handles Series 30 phones using Series 40 commands (with
+configuration parameter model=series40) but some commands do not work. It is
+unknown if some functionality is not implemented in phone's firmware or if it is
+available using different commands.
+Series 30 phones for which --identify works with this driver so far are:
+ * 1110 RH-69 (--sendsms fails; --getsms fails)
+ * 1110 RH-93
+ * 1112 RH-92 (--sendsms fails; --getsms fails)
+ * 1208 RH-106 (--sendsms works; --getsms fails)
+ * 1209 RH-105
+ * 1280 RM-647
+
 * TODO *
 
  * implement further functionality

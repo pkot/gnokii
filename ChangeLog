@@ -15,6 +15,10 @@
       gn_statemachine                                   (Paweł Kot)
     o add id for Nokia 3720c to misc.c only; use model=series40
                                                      (Anders Jenbo)
+    o add another id for Nokia 1110 and ids for Nokia 1112 and 1208
+      to misc.c only; use model=series40; many commands don't work,
+      see the Series 30 section in Docs/README-6510
+                                                   (Gustavo Conrad)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)
