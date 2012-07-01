@@ -52,7 +52,7 @@ static int verify_max_message_len(int len, char **message_buffer)
 	static int max_message_len = 0;
 
 	if (len > max_message_len) {
-		dprintf("overrun: %d %d\n", len, max_message_len);
+		dprintf("overrun, reallocating: %d %d\n", len, max_message_len);
 		*message_buffer = realloc(*message_buffer, len + 1);
 		max_message_len = len + 1;
 	}
@@ -173,7 +173,6 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->buffer_count = 0;
 		if (!verify_max_message_len(i->message_length, &(i->message_buffer))) {
 			dprintf("PHONET: Failed to allocate memory for larger buffer\n");
-			dprintf("PHONET: Message buffer overrun - resetting (message length: %d, max: %d)\n", i->message_length, PHONET_FRAME_MAX_LENGTH);
 			i->message_corrupted = 1;
 		}
 		break;
@@ -391,8 +390,10 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	if ((FBUSINST(state) = calloc(1, sizeof(phonet_incoming_message))) == NULL)
 		return GN_ERR_MEMORYFULL;
 
-	if (!verify_max_message_len(PHONET_FRAME_MAX_LENGTH, &(FBUSINST(state)->message_buffer)))
+	if (!verify_max_message_len(PHONET_FRAME_MAX_LENGTH, &(FBUSINST(state)->message_buffer))) {
+		dprintf("PHONET: Failed to initalize initial incoming buffer for %d bytes\n", PHONET_FRAME_MAX_LENGTH);
 		return GN_ERR_MEMORYFULL;
+	}
 
 	switch (state->config.connection_type) {
 	case GN_CT_Infrared:
