@@ -253,7 +253,14 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			subentry->data.date.day    = blockstart[9];
 			subentry->data.date.hour   = blockstart[10];
 			subentry->data.date.minute = blockstart[11];
-			subentry->data.date.second = blockstart[12];
+			/* Birthday frames are shorter */
+			if (blockstart[3] >= 14) {
+				subentry->data.date.second = blockstart[12];
+				/* This is the date of a call from phone number stored at seq */
+				dprintf("   Related to seq %d\n", blockstart[13]);
+			} else {
+				subentry->data.date.second = 0;
+			}
 			dprintf("   Date: %04u.%02u.%02u\n", subentry->data.date.year,
 				subentry->data.date.month, subentry->data.date.day);
 			dprintf("   Time: %02u:%02u:%02u\n", subentry->data.date.hour,
