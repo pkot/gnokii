@@ -782,7 +782,7 @@ inline void GUI_ShowAbout(void)
 }
 
 
-inline void GUI_HideAbout(void)
+static inline void GUI_HideAbout(void)
 {
 	gtk_widget_hide(AboutDialog);
 }

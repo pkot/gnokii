@@ -1391,7 +1391,7 @@ static int get_next_token(char *src, int delim)
 #define GET_NEXT_TOKEN()	o = get_next_token(line + offset, ';')
 #define STORE_TOKEN(a)		strip_slashes(a, line + offset, sizeof(a) - 1, o - 1)
 
-inline int local_atoi(char *str, int len)
+static int local_atoi(char *str, int len)
 {
 	int retval;
 	char *aux = strndup(str, len);

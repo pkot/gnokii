@@ -19,6 +19,8 @@
       to misc.c only; use model=series40; many commands don't work,
       see the Series 30 section in Docs/README-6510
                                                    (Gustavo Conrad)
+    o remove inline from the local_atoi() function definition and
+      add static instead                                (Paweł Kot)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)
@@ -55,6 +57,8 @@
  * xgnokii updates
     o fix bug that caused to forget subentries after the first one
       when editing the phonebook                    (Daniele Forsi)
+    o change relevant inline defintion to static inline to follow
+      C99 standard                                      (Paweł Kot)
  * nk7110 driver updates
     o return more specific error codes for GN_OP_ReadPhonebook and
       for GN_OP_GetSMSCenter failures               (Daniele Forsi)

@@ -1288,7 +1288,7 @@ gint LogoTypeEvent(GtkWidget * widget)
 	return 0;
 }
 
-inline void CloseLogosWindow(void)
+static inline void CloseLogosWindow(void)
 {
 	gtk_widget_hide(GUI_LogosWindow);
 }

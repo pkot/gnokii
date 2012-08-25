@@ -41,7 +41,7 @@ inline void InsertEvent (PhoneEvent *event)
 }
 
 
-inline static PhoneEvent *RemoveEvent (void)
+static inline PhoneEvent *RemoveEvent (void)
 {
   GSList *list;
   PhoneEvent *event = NULL;
