@@ -2,6 +2,7 @@
 =========================
  * translation updates
     o updated Italian translation                   (Daniele Forsi)
+    o updated French translation                     (Raphaël Droz)
  * libgnokii updates
     o replace gethostbyname (deprecated) with getaddrinfo in tcp
       driver                                            (Paweł Kot)
