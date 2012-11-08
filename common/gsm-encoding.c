@@ -977,16 +977,16 @@ unsigned int char_unicode_decode(unsigned char* dest, const unsigned char* src, 
 unsigned int char_unicode_encode(unsigned char* dest, const unsigned char* src, int len)
 {
 	int pos = 0;
-	MBSTATE mbs;
 #ifndef HAVE_ICONV
+	MBSTATE mbs;
 	int length, offset = 0;
 	wchar_t  wc;
 #endif
 
-	MBSTATE_ENC_CLEAR(mbs);
 #ifdef HAVE_ICONV
 	pos = ucs2_encode(dest, 2 * len, src, len);
 #else
+	MBSTATE_ENC_CLEAR(mbs);
 	while (offset < len) {
 		length = char_uni_alphabet_encode(src + offset, len - offset, &wc, &mbs);
 		switch (length) {
