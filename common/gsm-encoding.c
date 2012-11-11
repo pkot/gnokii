@@ -1292,10 +1292,8 @@ int utf8_encode(char *outstring, int outlen, const char *instring, int inlen)
 	*pout = 0;
 	iconv_close(cd);
 #else
-	size_t nconv;
 	unsigned char *pin, *pout;
 
-	nconv = 0;
 	pin = (unsigned char *)instring;
 	pout = outstring;
 
