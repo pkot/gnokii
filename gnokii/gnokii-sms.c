@@ -236,7 +236,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		case 'v':
 			sms.validity = gnokii_atoi(optarg);
 			/* Maximum TP-VP in relative format is 63 weeks (TS 23.040 Section 9.2.3.12.1) */
-			if (errno || sms.validity < 0 || sms.validity > 60 * 60 * 24 * 7 * 63)
+			if (errno || sms.validity < 0 || sms.validity > 60 * 24 * 7 * 63)
 				return sendsms_usage(stderr, -1);
 			break;
 
