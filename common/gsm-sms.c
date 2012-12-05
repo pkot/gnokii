@@ -636,11 +636,11 @@ static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 
 	/* Data Coding Scheme */
 	sms->dcs.type = rawsms->dcs;
-	dprintf("Data Coding Scheme 0x%02x\n", sms->dcs.type);
+	dprintf("\tData Coding Scheme 0x%02x\n", sms->dcs.type);
 
 	/* User Data Header */
 	if (rawsms->udh_indicator & 0x40) { /* UDH header available */
-		dprintf("UDH found\n");
+		dprintf("\tUDH found\n");
 		return sms_udh_decode(rawsms->user_data, udh);
 	}
 
