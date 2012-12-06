@@ -260,6 +260,24 @@ unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
 	return number;
 }
 
+/**
+ * validity2minutes - converts from the PDU format to a number of minutes
+ * @minutes: the value encoded according to TS 23.040 Section 9.2.3.12.1 TP-VP (Relative format)
+ *
+ * Returns: the number of minutes
+ */
+static unsigned int validity2minutes(unsigned char value)
+{
+	if (value <= 143)
+		return (value + 1) * 5;
+	else if (value <= 167)
+		return 12 * 60 + (value - 143) * 30;
+	else if (value <= 196)
+		return (value - 166) * 60 * 24;
+	else /* if (value <= 255) */
+		return (value - 192) * 60 * 24 * 7;
+}
+
 /***
  *** DECODING SMS
  ***/
@@ -618,6 +636,23 @@ static gn_error sms_header_decode(gn_sms_raw *rawsms, gn_sms *sms, gn_sms_udh *u
 	/* Sending date */
 	sms_timestamp_unpack(rawsms->smsc_time, &(sms->smsc_time));
 	dprintf("\tDate: %s\n", sms_timestamp_print(rawsms->smsc_time));
+
+	/* TP-Validity-Period (TP-VP) */
+	if (sms->type == GN_SMS_MT_Submit || sms->type == GN_SMS_MT_SubmitSent) {
+		switch (rawsms->validity_indicator) {
+		case GN_SMS_VP_None:
+			break;
+		case GN_SMS_VP_RelativeFormat:
+			dprintf("\tValidity (relative format): %d minutes\n", validity2minutes(rawsms->validity[0]));
+			break;
+		case GN_SMS_VP_EnhancedFormat:
+			dprintf("\tValidity (enhanced format)\n");
+			break;
+		case GN_SMS_VP_AbsoluteFormat:
+			dprintf("\tValidity (absolute format)\n");
+			break;
+		}
+	}
 
 	/* Remote number */
 	rawsms->remote_number[0] = (rawsms->remote_number[0] + 1) / 2 + 1;
