@@ -22,6 +22,8 @@
                                                    (Gustavo Conrad)
     o remove inline from the local_atoi() function definition and
       add static instead                                (Paweł Kot)
+    o don't overwrite the validity value passed by the caller to
+      sms_prepare() with the default value          (Daniele Forsi)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)
@@ -35,9 +37,11 @@
  * fake driver updates
     o always autodetect if PDU SMS starts with SMSC (Daniele Forsi)
     o make it usable with gnome-phone-manager       (Daniele Forsi)
- * Documentation updates
+ * documentation updates
     o samples for connect and disconnect scripts for Portech
       devices                                   (Guillermo Benitez)
+    o update man page with allowed values for --validity option of
+      --sendsms                                     (Daniele Forsi)
  * nk6510 driver updates
     o store also the seconds in date fields when reading phonebook
       entries from phone                            (Daniele Forsi)

@@ -261,6 +261,30 @@ unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
 }
 
 /**
+ * minutes2validity - converts from a number of minutes to the PDU format
+ * @minutes: the number of minutes
+ *
+ * @minutes must be a multiple of 5 minutes between 5 minutes and 12 hours, a multiple of 30
+ * minutes between 12 1/2 hours and 24 hours, a multiple of 24 hours between 2 days and 30 days
+ * and a multiple of 1 week between 5 weeks and 63 weeks, else the return value is undefined.
+ *
+ * Returns: the value encoded according to TS 23.040 Section 9.2.3.12.1 TP-VP (Relative format)
+ */
+static unsigned char minutes2validity(unsigned int minutes)
+{
+	/* Relative format can encode only some values! */
+	if (minutes <= (143 + 1) * 5)
+		return minutes / 5 - 1;
+	else if (minutes <= 12 * 60 + (167 - 143) * 30)
+		return (minutes - 12 * 60) / 30 + 143;
+	else if (minutes <= (196 - 166) * 60 * 24)
+		return minutes / 24 / 60 + 166;
+	else if (minutes <= (255 - 192) * 60 * 24 * 7)
+		return minutes / 60 / 24 / 7 + 192;
+	else return 255;
+}
+
+/**
  * validity2minutes - converts from the PDU format to a number of minutes
  * @minutes: the value encoded according to TS 23.040 Section 9.2.3.12.1 TP-VP (Relative format)
  *
@@ -1577,7 +1601,7 @@ gn_error sms_prepare(gn_sms *sms, gn_sms_raw *rawsms)
 		return GN_ERR_ENTRYTOOLONG;
 	}
 	rawsms->validity_indicator = GN_SMS_VP_RelativeFormat;
-	rawsms->validity[0] = GN_SMS_VP_72H;
+	rawsms->validity[0] = minutes2validity(sms->validity);
 
 	for (i = 0; i < sms->udh.number; i++)
 		if (sms->udh.udh[i].type == GN_SMS_UDH_ConcatenatedMessages)

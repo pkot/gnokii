@@ -242,7 +242,12 @@ Meaning of other optional parameters:
 
 \-C | \-\-class \fIn\fR \- Class Message \fIn\fR, where \fIn\fR can be 0..3
 
-\-v | \-\-validity \fIn\fR \- validity in minutes
+\-v | \-\-validity \fIn\fR \- validity in minutes, where \fIn\fR
+must be a multiple of 5 minutes between 5 and 720 (12 hours),
+or a multiple of 30 minutes between 750 (12 hours and half) and 1440 (1 day),
+or a multiple of 1440 minutes (1 day) between 2880 (2 days) and 43200 (30 days),
+or a multiple of 10080 minutes (1 week) between 50400 (5 weeks) and 635040 (63 weeks),
+all other values can't be encoded with the relative format and are currently unsupported.
 
 \-i | \-\-imelody \- send iMelody within SMS
 
