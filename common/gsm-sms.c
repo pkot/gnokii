@@ -273,7 +273,9 @@ unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number)
 static unsigned char minutes2validity(unsigned int minutes)
 {
 	/* Relative format can encode only some values! */
-	if (minutes <= (143 + 1) * 5)
+	if (minutes <= 4)
+		return 0;
+	else if (minutes <= (143 + 1) * 5)
 		return minutes / 5 - 1;
 	else if (minutes <= 12 * 60 + (167 - 143) * 30)
 		return (minutes - 12 * 60) / 30 + 143;
