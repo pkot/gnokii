@@ -40,7 +40,7 @@ can get some functionality using the AT driver (with all connection types
 supported by the phone) or using the series40 driver (only with connection = dku2libusb).
 
 Please note that currently there are Nokia models with almost the same names
-as the old ones, like 6110c vs 6110 or 3110c vs 3110. They are completly
+as the old ones, like 6110c vs 6110 or 3110c vs 3110. They are completely
 incompatible. DO NOT use \fImodel = 6110\fP or \fImodel = 3110\fP setting for them, use \fImodel = series40\fP instead.
 
 .SH "CONFIG OPTIONS"
@@ -211,19 +211,19 @@ in any case the \fB\-\-showsmsfolderstatus\fR command shows the list of \fImemor
 with their descriptions and message counts (each part of multipart messages is counted separately).
 .TP
 .BR
--f | \-\-file \fIfile\fR
+\-f | \-\-file \fIfile\fR
 - save messages to \fIfile\fR in mbox format. If \fIfile\fR already exists, user is prompted whether to overwrite it
 .TP
 .BR
--F | \-\-force\-file \fIfile\fR
+\-F | \-\-force\-file \fIfile\fR
 - save messages to \fIfile\fR in mbox format. If \fIfile\fR already exists, it is overwritten without asking
 .TP
 .BR
--a | \-\-append\-file \fIfile\fR
+\-a | \-\-append\-file \fIfile\fR
 - save messages to \fIfile\fR in mbox format. If \fIfile\fR already exists, messages are added to the end
 .TP
 .BR
--d | \-\-delete
+\-d | \-\-delete
 - delete message after reading.
 .TP 
 .BR "\-\-deletesms \fImemory_type\fP \fIstart\fP [\fIend\fP]"
@@ -717,7 +717,7 @@ down
 .B +
 increase volume
 .IP
-.B -
+.B \-
 decrease volume
 .IP
 .B 0123456789#*
@@ -767,7 +767,7 @@ Manual page written by Dag Wieers <dag at mind dot be>, Pawel Kot <gnokii at gma
 See also Docs/CREDITS from gnokii sources.
 
 .SH "COPYING"
-This program is distributed under the GNU Public License Version 2, or (at your option) any later version.
+This program is distributed under the GNU General Public License Version 2, or (at your option) any later version.
 
 .SH "SEE ALSO"
 gnokiid, xgnokii, mgnokiidev, ppm2nokia, sendsms, todologo

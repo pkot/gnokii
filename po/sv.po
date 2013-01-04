@@ -3983,7 +3983,7 @@ msgstr "Kodning av WAP Push misslyckades!\n"
 #, c-format
 msgid ""
 "Cannot read the SMSC number from your phone. If the sms send will fail, "
-"please use --smsc option explicitely giving the number.\n"
+"please use --smsc option explicitly giving the number.\n"
 msgstr ""
 "Kunde inte läsa av SMSC-numret från din telefon. Om sändning av SMS "
 "misslyckas, vänligen använd flaggan --smsc och ange numret.\n"

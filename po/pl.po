@@ -3930,7 +3930,7 @@ msgstr "Nieudana próba zakodowania WAP Push!\n"
 #, c-format
 msgid ""
 "Cannot read the SMSC number from your phone. If the sms send will fail, "
-"please use --smsc option explicitely giving the number.\n"
+"please use --smsc option explicitly giving the number.\n"
 msgstr ""
 "Nie mogę odczytać numeru SMSC z telefonu. Jesli wysłanie SMS się nie "
 "powiedzie, użyj opcji --smsc do podania numeru SMSC wprost.\n"

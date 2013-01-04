@@ -41,8 +41,8 @@ date SMS was inserted into table
 SMS text
 .TP
 .B phone
-number of phone to use. If you use smsd without -t option you can ignore
-this column. See -t option below.
+number of phone to use. If you use smsd without \-t option you can ignore
+this column. See \-t option below.
 .TP
 .B processed
 smsd sets this always to FALSE. You can use it for another program which will parse SMSes.
@@ -75,8 +75,8 @@ SMS text
 
 .TP
 .B phone
-number of phone to use. If you use smsd without -t option you
-must not fill this column. See -t option below.
+number of phone to use. If you use smsd without \-t option you
+must not fill this column. See \-t option below.
 
 .TP
 .B processed
@@ -255,9 +255,9 @@ serial_baudrate = 38400
 smsc_timeout = 10
 .PD
 
-In this setup if you run smsd without -t option it will use config
-from global section. If you run smsd with -t 1 it will use config
-from phone_1 and likewise with -t 2 uses phone_2. In case of use -t
+In this setup if you run smsd without \-t option it will use config
+from global section. If you run smsd with \-t 1 it will use config
+from phone_1 and likewise with \-t 2 uses phone_2. In case of use \-t
 option smsd fills phone number for incoming sms's and in outbox it
 looks only for sms's with the specified phone number in column
 \&'phone'. This behaviour gives you possibility to run one instance
@@ -281,7 +281,7 @@ SM for all other phones).
 For debugging or for unusual setups you can use another memory type
 supported by your phone (eg. IN for the Inbox, OU for the Outbox, AR for the
 Archive, TE for the Templates and F1,...,F20 for your own folders).
-Use gnokii --showsmsfolderstatus for a list of such memory types.
+Use gnokii \-\-showsmsfolderstatus for a list of such memory types.
 
 .TP
 .BR -0,\ --firstpos0
@@ -311,7 +311,7 @@ None reported.
 See also Docs/CREDITS from the Gnokii sources.
 
 .SH "COPYING"
-This program is distributed under the GNU Public License.
+This program is distributed under the GNU General Public License.
 
 .SH "SEE ALSO"
 gnokii(1)

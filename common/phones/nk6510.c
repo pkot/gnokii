@@ -1440,7 +1440,7 @@ static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
-	/* Handle memory_type = 0 explicitely, because sms_folder->folder_id = 0 by default */
+	/* Handle memory_type = 0 explicitly, because sms_folder->folder_id = 0 by default */
 	if (data->raw_sms->memory_type == 0)
 		return GN_ERR_INVALIDMEMORYTYPE;
 
@@ -3655,10 +3655,10 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 		data->calnote->location = (((unsigned int)message[8]) << 8) + message[9];
 		break;
 	case NK6510_SUBCAL_DEL_NOTE_RESP: /* 0x0c */
-		dprintf("Succesfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
+		dprintf("Successfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
 		break;
 	case NK6510_SUBCAL_DEL_NOTE2_RESP: /* 0x70 */
-		dprintf("Succesfully deleted calendar note: %i!\n", message[8] * 256 + message[9]);
+		dprintf("Successfully deleted calendar note: %i!\n", message[8] * 256 + message[9]);
 		break;
 	case NK6510_SUBCAL_ADD_MEETING_RESP: /* 0x02 */
 	case NK6510_SUBCAL_ADD_CALL_RESP: /* 0x04 */

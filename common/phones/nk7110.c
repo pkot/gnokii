@@ -1219,7 +1219,7 @@ static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 	if (data->raw_sms->number < 1)
 		return GN_ERR_INVALIDLOCATION;
 
-	/* Handle memory_type = 0 explicitely, because sms_folder->folder_id = 0 by default */
+	/* Handle memory_type = 0 explicitly, because sms_folder->folder_id = 0 by default */
 	if (data->raw_sms->memory_type == 0) return GN_ERR_INVALIDMEMORYTYPE;
 
 	/* see if the message we want is from the last read folder, i.e. */
@@ -1670,7 +1670,7 @@ static gn_error NK7110_IncomingCalendar(int messagetype, unsigned char *message,
 		data->calnote->location = (((unsigned int)message[4]) << 8) + message[5];
 		break;
 	case NK7110_SUBCAL_DEL_NOTE_RESP:
-		dprintf("Succesfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
+		dprintf("Successfully deleted calendar note: %i!\n", message[4] * 256 + message[5]);
 		for (i = 0; i < length; i++) dprintf("%02x ", message[i]);
 		dprintf("\n");
 		break;
@@ -2088,7 +2088,7 @@ static gn_error NK7110_IncomingStartup(int messagetype, unsigned char *message, 
 		return GN_ERR_NONE;
 		break;
 	case 0x1c:
-		dprintf("Succesfully got security code: ");
+		dprintf("Successfully got security code: ");
 		memcpy(data->security_code->code, message + 6, 5);
 		dprintf("%s \n", data->security_code->code);
 		return GN_ERR_NONE;

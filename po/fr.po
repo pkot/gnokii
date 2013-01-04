@@ -2766,7 +2766,7 @@ msgstr ""
 
 #: gnokii/gnokii-sms.c:337
 #, fuzzy, c-format
-msgid "Cannot read the SMSC number from your phone. If the sms send will fail, please use --smsc option explicitely giving the number.\n"
+msgid "Cannot read the SMSC number from your phone. If the sms send will fail, please use --smsc option explicitly giving the number.\n"
 msgstr "Impossible de lire le numéro SMSC depuis le téléphone. Si l'envoi du sms échoue, utilisez explicitement l'option --smsc en spécifiant un numéro.\n"
 
 #: gnokii/gnokii-sms.c:376
