@@ -289,6 +289,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			dprintf("   Group: %d\n", blockstart[5] - 1);
 			break;
 		case GN_PHONEBOOK_ENTRY_ExtGroup: /* Extended caller group number: in Series40 3rd Ed and later groups are defined by users */
+			dprintf("   ExtGroup: %d\n", blockstart[7]);
 			if (!subentry) {
 				dprintf("ERROR!!!");
 				break;
