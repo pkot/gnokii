@@ -404,7 +404,7 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 							DUMP(*dest_buffer, &buffer[i], decoded_len);
 							i += decoded_len;
 						}
-						/* Docs say to ignore nEntries because entries can simply be iterated */
+						/* Docs say to ignore the nEntries field because entries can simply be iterated */
 						i++;
 						while (i < *length) {
 							/* 8.5.3 Multipart Entry */
@@ -634,7 +634,7 @@ gn_error gn_mms_nokia2mime(const unsigned char *source_buffer, size_t *source_le
  * @dest_mms: a pointer to a @gn_mms that will contain the converted MMS
  *
  * @dest_mms->buffer_format fields must set, @source_mms->buffer_format is
- * autodetected id unset, other fields of @source_mms must be valid depending
+ * autodetected if unset, other fields of @source_mms must be valid depending
  * on format, @dest_mms->buffer must be free()'d by the caller on success.
  *
  * Return value: a @gn_error code
