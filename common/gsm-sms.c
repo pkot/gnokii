@@ -846,7 +846,7 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 	unsigned int l, extraoffset, offset = 0;
 	int parameter_indicator;
 
-	if (!flags & GN_SMS_PDU_NOSMSC) {
+	if (!(flags & GN_SMS_PDU_NOSMSC)) {
 		l = pdu[offset] + 1;
 		if (l > pdu_len || l > GN_SMS_SMSC_NUMBER_MAX_LENGTH) {
 			dprintf("Invalid message center length (%d)\n", l);
