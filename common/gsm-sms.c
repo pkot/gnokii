@@ -608,6 +608,10 @@ static gn_error sms_udh_decode(unsigned char *message, gn_sms_udh *udh)
 		length -= (udh_length + 2);
 		pos += (udh_length + 2);
 		nr++;
+		if (nr == GN_SMS_UDH_MAX_NUMBER) {
+			dprintf("WARNING: UDH buffer has space for %d elements; further elements will be ignored\n", GN_SMS_UDH_MAX_NUMBER);
+			break;
+		}
 	}
 	udh->number = nr;
 
