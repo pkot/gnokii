@@ -465,8 +465,8 @@ static gn_error sms_data_decode(unsigned char *message, unsigned char *output, u
 
 	/*
 	 * Coding Group Bits. See Section 4 of ETSI TS 123 038
-	 * 7bit is 0xxx 00xx and 1111 00xx
-	 * 8bit is 0xxx 01xx and 1111 01xx
+	 * 7bit is 0xxx 00xx and 1111 x0xx
+	 * 8bit is 0xxx 01xx and 1111 x1xx
 	 * UCS2 is 0xxx 10xx
 	 * delete after reading is 0dxx xxxx
 	 * compressed is 0xcx xxxx
@@ -489,7 +489,7 @@ static gn_error sms_data_decode(unsigned char *message, unsigned char *output, u
 	} else if ((dcs.type & 0xf0) == 0xf0) {
 		dprintf("\tClass: %d\n", dcs.type & 0x03);
 		dcs.u.general.m_class = 1 + (dcs.type & 0x03);
-		alphabet = (dcs.type >> 2) & 0x03;
+		alphabet = (dcs.type >> 2) & 0x01;
 	} else {
 		dprintf("SMS Data Coding Scheme 0x%02x is not supported\n", dcs.type);
 		return GN_ERR_NOTIMPLEMENTED;
