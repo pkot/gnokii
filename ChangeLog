@@ -22,8 +22,8 @@
                                                    (Gustavo Conrad)
     o remove inline from the local_atoi() function definition and
       add static instead                                (Paweł Kot)
-    o don't overwrite the validity value passed by the caller to
-      sms_prepare() with the default value          (Daniele Forsi)
+    o don't overwrite user-provided TP-Validity-Period
+      in sms_prepare()                              (Daniele Forsi)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)
