@@ -216,7 +216,7 @@ gn_error getringtone(int argc, char *argv[], gn_data *data, struct gn_statemachi
 			error = -1;
 			goto out;
 		}
-		if (fwrite(rawdata.data, 1, rawdata.length, f) < 0) {
+		if (fwrite(rawdata.data, rawdata.length, 1, f) < 1) {
 			fprintf(stderr, _("Failed to write ringtone.\n"));
 			error = -1;
 		}
