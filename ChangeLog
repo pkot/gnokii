@@ -37,6 +37,8 @@
  * fake driver updates
     o always autodetect if PDU SMS starts with SMSC (Daniele Forsi)
     o make it usable with gnome-phone-manager       (Daniele Forsi)
+    o set TP-Validity-Period and update the testsuite to test is
+                                                    (Daniele Forsi)
  * documentation updates
     o samples for connect and disconnect scripts for Portech
       devices                                   (Guillermo Benitez)

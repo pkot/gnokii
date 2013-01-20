@@ -1,2 +1,2 @@
 # Send exactly 140 8-bit chars with 1 SMS
-$GNOKII --sendsms 0 --8bit <8bit-140.bin
+$GNOKII --sendsms 0 --validity 5 --8bit <8bit-140.bin

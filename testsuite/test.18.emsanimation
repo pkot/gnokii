@@ -1,2 +1,2 @@
 # Send EMS animations
-echo "Test" | $GNOKII --sendsms 0604343103 --animation "data/anim1.xpm;data/anim2.xpm;data/anim3.xpm;data/anim4.xpm"
+echo "Test" | $GNOKII --sendsms 0604343103 --validity 1440 --animation "data/anim1.xpm;data/anim2.xpm;data/anim3.xpm;data/anim4.xpm"

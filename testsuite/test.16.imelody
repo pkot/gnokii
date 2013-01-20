@@ -1,2 +1,2 @@
 # Testing imelody sending via SMS
-cat ../Docs/sample/ringtone/star.imelody | $GNOKII --sendsms 0604343103 -i
+cat ../Docs/sample/ringtone/star.imelody | $GNOKII --sendsms 0604343103 --validity 750 --imelody

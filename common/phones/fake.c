@@ -113,7 +113,7 @@ static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char*
 
 	req2[offset + 4] = data->raw_sms->pid;
 	req2[offset + 5] = data->raw_sms->dcs;
-	req2[offset + 6] = 0x00; /* Validity period */
+	req2[offset + 6] = data->raw_sms->validity[0];
 	req2[offset + 7] = data->raw_sms->length;
 	memcpy(req2 + offset + 8, data->raw_sms->user_data, data->raw_sms->user_data_length);
 
