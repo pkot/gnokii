@@ -461,35 +461,68 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 static gn_error sms_data_decode(unsigned char *message, unsigned char *output, unsigned int length,
 				 unsigned int size, unsigned int udhlen, gn_sms_dcs dcs)
 {
-	/* Unicode */
-	if (dcs.type & 0x20) {
-		dprintf("Compressed message\n");
+	gn_sms_dcs_alphabet_type alphabet;
+
+	/*
+	 * Coding Group Bits. See Section 4 of ETSI TS 123 038
+	 * 7bit is 0xxx 00xx and 1111 00xx
+	 * 8bit is 0xxx 01xx and 1111 01xx
+	 * UCS2 is 0xxx 10xx
+	 * delete after reading is 0dxx xxxx
+	 * compressed is 0xcx xxxx
+	 * class is 1111xxcc and 0xx1xxcc
+	*/
+	if ((dcs.type & 0x80) == 0x00) {
+		if (dcs.type & 0x40) {
+			/* TODO: add a field to struct gn_sms_dcs to store this bit */
+			dprintf("\tMessage Marked for Automatic Deletion\n");
+		}
+		if (dcs.type & 0x20) {
+			dprintf("\tCompressed message\n");
+			return GN_ERR_NOTIMPLEMENTED;
+		}
+		if (dcs.type & 0x10) {
+			dprintf("\tClass: %d\n", dcs.type & 0x03);
+			dcs.u.general.m_class = 1 + (dcs.type & 0x03);
+		}
+		alphabet = (dcs.type >> 2) & 0x03;
+	} else if ((dcs.type & 0xf0) == 0xf0) {
+		dprintf("\tClass: %d\n", dcs.type & 0x03);
+		dcs.u.general.m_class = 1 + (dcs.type & 0x03);
+		alphabet = (dcs.type >> 2) & 0x03;
+	} else {
+		dprintf("SMS Data Coding Scheme 0x%02x is not supported\n", dcs.type);
 		return GN_ERR_NOTIMPLEMENTED;
 	}
-	if ((dcs.type & 0x08) == 0x08) {
-		dprintf("Unicode message\n");
-		/*
-		 * length is rawsms->length which is number of characters in
-		 * the decoded text. 3rd argument of char_unicode_decode is
-		 * number of bytes.
-		 */
-		char_unicode_decode(output, message, 2 * length);
-	} else {
-		/* 8bit SMS */
-		if ((dcs.type & 0xf4) == 0xf4) {
-			dprintf("8bit message\n");
-			memcpy(output, message + udhlen, length);
-		/* 7bit SMS */
-		} else {
+	switch (alphabet) {
+	case GN_SMS_DCS_DefaultAlphabet:
+		{
 			char *aux;
 
-			dprintf("Default Alphabet\n");
+			dprintf("\tDefault Alphabet\n");
 			length = length - (udhlen * 8 + ((7-(udhlen%7))%7)) / 7;
 			aux = calloc(length + 1, 1);
 			char_7bit_unpack((7-udhlen)%7, size, length, message, aux);
 			char_default_alphabet_decode(output, aux, length);
 			free(aux);
 		}
+		break;
+	case GN_SMS_DCS_8bit:
+		dprintf("\t8bit message\n");
+		memcpy(output, message + udhlen, length);
+		break;
+	case GN_SMS_DCS_UCS2:
+		dprintf("\tUnicode message\n");
+		/*
+		 * length is rawsms->length which is number of characters in
+		 * the decoded text. 3rd argument of char_unicode_decode is
+		 * number of bytes.
+		 */
+		char_unicode_decode(output, message, 2 * length);
+		break;
+	case GN_SMS_DCS_Reserved:
+		dprintf("\tReserved alphabet in DCS\n");
+		return GN_ERR_NOTIMPLEMENTED;
 	}
 	dprintf("%s\n", output);
 	return GN_ERR_NONE;

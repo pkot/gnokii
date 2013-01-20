@@ -144,7 +144,8 @@ typedef enum {
 typedef enum {
 	GN_SMS_DCS_DefaultAlphabet = 0x00,
 	GN_SMS_DCS_8bit            = 0x01,
-	GN_SMS_DCS_UCS2            = 0x02
+	GN_SMS_DCS_UCS2            = 0x02,
+	GN_SMS_DCS_Reserved        = 0x03
 } gn_sms_dcs_alphabet_type;
 
 typedef enum {
