@@ -276,7 +276,7 @@ gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 			return GN_ERR_FAILED;
 		}
-		if (fwrite(fi.file, fi.file_length, 1, f) < 0) {
+		if (fwrite(fi.file, fi.file_length, 1, f) < 1) {
 			fprintf(stderr, _("Failed to write to file %s.\n"), filename2);
 			error = GN_ERR_FAILED;
 		}
@@ -331,7 +331,7 @@ gn_error getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachi
 				fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 				return GN_ERR_FAILED;
 			}
-			if (fwrite(fi.file, fi.file_length, 1, f) < 0) {
+			if (fwrite(fi.file, fi.file_length, 1, f) < 1) {
 				fprintf(stderr, _("Failed to write to file %s.\n"), filename2);
 				error = GN_ERR_FAILED;
 			}
@@ -382,7 +382,7 @@ gn_error getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 					fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 					return GN_ERR_FAILED;
 				}
-				if (fwrite(data->file->file, data->file->file_length, 1, f) < 0) {
+				if (fwrite(data->file->file, data->file->file_length, 1, f) < 1) {
 					fprintf(stderr, _("Failed to write to file %s.\n"), filename2);
 					fclose(f);
 					return GN_ERR_FAILED; 
