@@ -25,6 +25,9 @@
     o don't overwrite user-provided TP-Validity-Period
       in sms_prepare()                              (Daniele Forsi)
     o fix false detection of compressed SMS         (Daniele Forsi)
+    o add id for Nokia 100; use model=series40; many commands don't
+      work, see the Series 30 section in Docs/README-6510
+                                                   (Bruno Estieule)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)

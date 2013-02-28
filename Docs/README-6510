@@ -93,6 +93,7 @@ configuration parameter model=series40) but some commands do not work. It is
 unknown if some functionality is not implemented in phone's firmware or if it is
 available using different commands.
 Series 30 phones for which --identify works with this driver so far are:
+ * 100  RH-130 (--sendsms fails; --getsms fails)
  * 1110 RH-69 (--sendsms fails; --getsms fails)
  * 1110 RH-93
  * 1112 RH-92 (--sendsms fails; --getsms fails)

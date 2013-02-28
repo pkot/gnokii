@@ -67,6 +67,7 @@ static gn_phone_model models[] = {
 	{"22",    "TME-1",	PM_OLD_DEFAULT },
 	{"30",    "TME-3",	PM_OLD_DEFAULT },
 	{"100",   "THX-9L",	PM_OLD_DEFAULT },
+	{"100",   "RH-130",	PM_DEFAULT_S30 },
 	{"450",   "THF-9",	PM_OLD_DEFAULT },
 	{"505",   "NHX-8",	PM_OLD_DEFAULT },
 	{"540",   "THF-11",	PM_OLD_DEFAULT },
