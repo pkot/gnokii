@@ -3300,6 +3300,9 @@ reply: 0x19 / 0x0012
 			break;
 		}
 		break;
+	case 0xf0:
+		error = GN_ERR_NOTSUPPORTED;
+		break;
 	default:
 		dprintf("Unknown subtype of type 0x%02x (clock handling): 0x%02x\n", NK6510_MSG_CLOCK, message[3]);
 		error = GN_ERR_UNHANDLEDFRAME;
