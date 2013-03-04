@@ -338,12 +338,12 @@ static int VM_PtySetup(const char *bindir)
 
 	if (bindir) {
 		strncpy(mgnokiidev, bindir, sizeof(mgnokiidev));
-		strncat(mgnokiidev, "/", sizeof(mgnokiidev) - strlen(mgnokiidev));
+		strncat(mgnokiidev, "/", sizeof(mgnokiidev) - strlen(mgnokiidev) - 1);
 	} else {
 		mgnokiidev[0] = 0;
 	}
 
-	strncat(mgnokiidev, "mgnokiidev", sizeof(mgnokiidev) - strlen(mgnokiidev));
+	strncat(mgnokiidev, "mgnokiidev", sizeof(mgnokiidev) - strlen(mgnokiidev) - 1);
 
 	if (access(mgnokiidev, X_OK) != 0) {
 		fprintf(stderr, _("Cannot access %s, check the bindir in your config file!\n"), mgnokiidev);
