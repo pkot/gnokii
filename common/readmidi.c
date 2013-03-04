@@ -333,7 +333,7 @@ static int readtrack(struct MF *mf)
 			else
 				c1 = egetc(mf);
 			chanmessage(mf, status, c1, (needed > 1) ? egetc(mf) : 0);
-			continue;;
+			continue;
 		}
 
 		switch (c) {

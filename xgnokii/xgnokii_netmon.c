@@ -221,7 +221,7 @@ inline void GUI_ShowNetmon()
 
 	e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent));
 	e->event = Event_NetMonitor;
-	e->data = (gpointer) displayData.curDisp;;
+	e->data = (gpointer) displayData.curDisp;
 	GUI_InsertEvent(e);
 	gtk_window_present(GTK_WINDOW(GUI_NetmonWindow));
 }

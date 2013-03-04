@@ -767,7 +767,7 @@ void GUI_ShowOptions(void)
 	/* Mail */
 	if (phoneMonitor.supported & PM_SMS) {
 		gtk_widget_show(mail_option_frame);
-		gtk_entry_set_text(GTK_ENTRY(configDialogData.mailbox), xgnokiiConfig.mailbox);;
+		gtk_entry_set_text(GTK_ENTRY(configDialogData.mailbox), xgnokiiConfig.mailbox);
 	} else
 		gtk_widget_hide(mail_option_frame);
 
