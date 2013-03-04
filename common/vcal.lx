@@ -24,6 +24,7 @@
 #define YY_DECL int yylex(char *type, char *text, char *meeting_location, char *desc, char *time, char *endtime, char *alarm, char *todo_priority, int lexnumber)
 int veventcounter = 0, vtodocounter = 0, alarmtone = 0;
 
+#define YY_NO_INPUT
 %}
 
 %x vcalendar
