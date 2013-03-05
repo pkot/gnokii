@@ -45,6 +45,7 @@
                                                     (Daniele Forsi)
     o rewrite fake phonebook handling to work also on non C99
       compilers                                     (Daniele Forsi)
+    o implement GN_OP_DeletePhonebook               (Daniele Forsi)
  * documentation updates
     o samples for connect and disconnect scripts for Portech
       devices                                   (Guillermo Benitez)

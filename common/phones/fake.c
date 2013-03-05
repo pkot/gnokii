@@ -507,6 +507,21 @@ static gn_error fake_readphonebook(gn_data *data, struct gn_statemachine *state)
 	return gn_file_phonebook_raw_parse(pe, fake_phonebook[pe->location - 1]);
 }
 
+static gn_error fake_deletephonebook(gn_data *data, struct gn_statemachine *state)
+{
+	gn_phonebook_entry *pe = data->phonebook_entry;
+
+	if (pe->location < 1 || pe->location > sizeof(fake_phonebook) / sizeof(*fake_phonebook))
+		return GN_ERR_INVALIDLOCATION;
+
+	if (pe->memory_type != GN_MT_ME)
+		return GN_ERR_INVALIDMEMORYTYPE;
+
+	fake_phonebook[pe->location - 1] = NULL;
+
+	return GN_ERR_NONE;
+}
+
 static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statemachine *state)
 {
 	switch (op) {
@@ -537,6 +552,8 @@ static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statema
 		return fake_readphonebook(data, state);
 	case GN_OP_WritePhonebook:
 		return fake_writephonebook(data, state);
+	case GN_OP_DeletePhonebook:
+		return fake_deletephonebook(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
