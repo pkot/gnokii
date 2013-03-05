@@ -152,7 +152,7 @@ static char *sms_timestamp_print(u8 *number)
 			break;
 		}
 		snprintf(buf2, 4, "%d%d%c", number[i] & 0x0f, number[i] >> 4, c);
-		strncat(buffer, buf2, sizeof(buffer) - strlen(buffer));
+		strncat(buffer, buf2, sizeof(buffer) - strlen(buffer) - 1);
 	}
 
 	/* The GSM spec is not clear what is the sign of the timezone when the
@@ -161,12 +161,12 @@ static char *sms_timestamp_print(u8 *number)
 	 * sign disturbs you, change the sign here.
 	 */
 	if (number[6] & 0x08)
-		strncat(buffer, "-", sizeof(buffer) - strlen(buffer));
+		strncat(buffer, "-", sizeof(buffer) - strlen(buffer) - 1);
 	else
-		strncat(buffer, "+", sizeof(buffer) - strlen(buffer));
+		strncat(buffer, "+", sizeof(buffer) - strlen(buffer) - 1);
 	/* The timezone is given in quarters. The base is GMT. */
 	snprintf(buf, sizeof(buf), "%02d00", (10 * (number[6] & 0x07) + (number[6] >> 4)) / 4);
-	strncat(buffer, buf, sizeof(buffer) - strlen(buffer));
+	strncat(buffer, buf, sizeof(buffer) - strlen(buffer) - 1);
 
 	return buffer;
 #undef LOCAL_DATETIME_MAX_LENGTH
