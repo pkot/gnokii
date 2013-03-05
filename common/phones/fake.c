@@ -493,6 +493,9 @@ static gn_error fake_readphonebook(gn_data *data, struct gn_statemachine *state)
 	if (pe->location < 1 || pe->location > sizeof(fake_phonebook) / sizeof(*fake_phonebook))
 		return GN_ERR_INVALIDLOCATION;
 
+	if (pe->memory_type != GN_MT_ME)
+		return GN_ERR_INVALIDMEMORYTYPE;
+
 	if (!fake_phonebook[pe->location - 1])
 #if 1
 		/* This is to emulate those phones that return error for empty locations */
