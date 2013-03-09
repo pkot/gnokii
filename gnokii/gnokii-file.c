@@ -271,7 +271,7 @@ gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		} else {
 			snprintf(filename2, sizeof(filename2), "%s", argv[optind]);
 		}
-		f = fopen(filename2, "w");
+		f = fopen(filename2, "wb");
 		if (!f) {
 			fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 			return GN_ERR_FAILED;
@@ -326,7 +326,7 @@ gn_error getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachi
 			} else {
 				snprintf(filename2, sizeof(filename2), "%s", argv[optind]);
 			}
-			f = fopen(filename2, "w");
+			f = fopen(filename2, "wb");
 			if (!f) {
 				fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 				return GN_ERR_FAILED;
@@ -377,7 +377,7 @@ gn_error getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 				fprintf(stderr, _("Failed to get file %s: %s\n"), data->file->name, gn_error_print(error));
 			else {
 				fprintf(stderr, _("Got file %s.\n"), filename2);
-				f = fopen(filename2, "w");
+				f = fopen(filename2, "wb");
 				if (!f) {
 					fprintf(stderr, _("Can't open file %s for writing!\n"), filename2);
 					return GN_ERR_FAILED;

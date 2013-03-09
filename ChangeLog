@@ -81,6 +81,9 @@
     o change the value used for VOICE phonebook memory, containing
       the phone number(s) to be used to listen to voicemail, which
       was used for MT which now is unsupported      (Daniele Forsi)
+ * gnokii updates
+    o fix --getfile --getfilebyid --getallfiles and --getmms on
+      non-POSIX sistems (eg. Windows)               (Daniele Forsi)
 
 0.6.31
 ======

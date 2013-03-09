@@ -95,10 +95,10 @@ int writebuffer(const char *filename, const char *buffer, size_t nitems, int mod
 
 	/* append */
 	if (mode == 2)
-		file = fopen(filename, "a");
+		file = fopen(filename, "ab");
 	/* overwrite */
 	else
-		file = fopen(filename, "w");
+		file = fopen(filename, "wb");
 
 	if (!file) {
 		fprintf(stderr, _("Can't open file %s for writing!\n"),  filename);
