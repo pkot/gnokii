@@ -167,7 +167,7 @@ GNOKII_API gint DB_Look(const gchar * const phone)
     ret1 = sqlite3_prepare_v2(ppDbOutbox, buf->str, -1, &stmt, NULL);
     if (ret1 != SQLITE_OK) {
         g_print(_("%d: Parsing query %s failed!"), __LINE__, buf->str);
-        g_print(_("Error: %s"), sqlite3_errmsg(ppDbInbox));
+        g_print(_("Error: %s"), sqlite3_errmsg(ppDbOutbox));
         return (SMSD_NOK);
     }
 
