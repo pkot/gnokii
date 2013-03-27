@@ -369,7 +369,8 @@ GNOKII_API gint DB_Look (const gchar * const phone)
     numError = 0;
     do
     {
-      error = WriteSMS (&sms);
+      if ((error = WriteSMS (&sms)) == GN_ERR_NONE)
+        break;
       sleep (1);
     }
     while ((error == GN_ERR_TIMEOUT || error == GN_ERR_FAILED) && numError++ < 3);

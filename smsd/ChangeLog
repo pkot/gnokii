@@ -1,3 +1,8 @@
+* Wed 27 Mar 2013 Jan Derfinak
+- Removed one second sleep in resend loop after a successfull send. (Pedro
+  Aguilar)
+
+
 * Mon 11 Jun 2012 Jan Derfinak
 - Version 1.5.3
 - Added possibility to specify non default gnokii config file (alonso acuña).
