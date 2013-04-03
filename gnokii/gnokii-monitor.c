@@ -170,7 +170,7 @@ void networkinfo_print(gn_network_info *info, void *callback_data)
 gn_error monitormode(int argc, char *argv[], gn_data *data, struct gn_statemachine *state)
 {
 	float rflevel = -1, batterylevel = -1;
-	gn_power_source powersource = -1;
+	gn_power_source powersource = GN_PS_UNKNOWN;
 	gn_rf_unit rfunit = GN_RF_Arbitrary;
 	gn_battery_unit battunit = GN_BU_Arbitrary;
 	gn_error error;
