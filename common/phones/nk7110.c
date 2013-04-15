@@ -1365,6 +1365,7 @@ static gn_error NK7110_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 		req[4] = 0xf8; /* unread messages from INBOX */
 		if (sm_message_send(7, NK7110_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
 		error = sm_block(NK7110_MSG_FOLDER, data, state);
+		if (error != GN_ERR_NONE) return error;
 
 		for (i = 0; i < read.number; i++) {
 			data->sms_folder->locations[data->sms_folder->number] = read.locations[i];
