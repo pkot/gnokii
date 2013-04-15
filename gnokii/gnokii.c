@@ -315,7 +315,6 @@ static int install_log_handler(void)
 		}
 #endif
 		if (!basepath) {
-			basepath = ".";
 			path = ".";
 		} else {
 			path = calloc(MAX_PATH_LEN, sizeof(char));
@@ -331,15 +330,14 @@ static int install_log_handler(void)
 				snprintf(path, MAX_PATH_LEN, "%s/gnokii", basepath);
 			}
 #endif
+			st = stat(basepath, &buf);
+			if (st)
+				mkdir(basepath, S_IRWXU);
+	
+			st = stat(path, &buf);
+			if (st)
+				mkdir(path, S_IRWXU);
 		}
-
-		st = stat(basepath, &buf);
-		if (st)
-			mkdir(basepath, S_IRWXU);
-
-		st = stat(path, &buf);
-		if (st)
-			mkdir(path, S_IRWXU);
 	}
 
 	snprintf(logname, sizeof(logname), "%s/%s", path, file);
