@@ -129,7 +129,6 @@ int gn_vm_initialise(const char *iname, const char *bindir, int debug_mode, int 
 			return (false);
 		}
 	}
-	GSMInit = false;
 
 	if (VM_PtySetup(bindir) < 0) {
 		fprintf (stderr, _("gn_vm_initialise - VM_PtySetup failed!\n"));
