@@ -302,9 +302,13 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			data->phonebook_entry->subentries_count++;
 			break;
 		case GN_PHONEBOOK_ENTRY_CallDuration:
-			subentry->entry_type = blockstart[0];
 			seconds = blockstart[10] * 256 + blockstart[11];
 			dprintf("   CallDuration: related to seq %d seconds %d\n", blockstart[5], seconds);
+			if (!subentry) {
+				dprintf("ERROR!!!");
+				break;
+			}
+			subentry->entry_type = blockstart[0];
 			snprintf(subentry->data.number, sizeof(subentry->data.number),
 				 "[%d] %d:%02d:%02d", blockstart[5], seconds / 3600, seconds / 60, seconds % 60);
 			subblock_count++;
