@@ -522,7 +522,8 @@ static gint A_WriteMemoryLocation(gpointer data)
 	D_MemoryLocation *ml = (D_MemoryLocation *) data;
 	gn_data gdat;
 
-	if (!data) return GN_ERR_INTERNALERROR;
+	if (!ml)
+		return GN_ERR_INTERNALERROR;
 
 	gn_data_clear(&gdat);
 
