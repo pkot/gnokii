@@ -689,6 +689,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 			data->phonebook_entry->caller_group = 5; /* no group */
 			data->phonebook_entry->name[0] = '\0';
 			data->phonebook_entry->number[0] = '\0';
+			data->phonebook_entry->memory_type = get_gn_memory_type(message[11]);
 			data->phonebook_entry->subentries_count = 0;
 			data->phonebook_entry->date.year = 0;
 			data->phonebook_entry->date.month = 0;
@@ -723,7 +724,6 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 			return GN_ERR_UNSOLICITED;
 		}
 		dprintf("Received phonebook info\n");
-		data->phonebook_entry->memory_type = get_gn_memory_type(message[11]);
 		blocks     = message[17];
 		blockstart = message + 18;
 		return phonebook_decode(blockstart, length - 17, data, blocks, message[11], 8);

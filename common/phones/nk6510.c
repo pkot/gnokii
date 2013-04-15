@@ -2739,6 +2739,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			data->phonebook_entry->caller_group = GN_PHONEBOOK_GROUP_None;
 			data->phonebook_entry->name[0] = '\0';
 			data->phonebook_entry->number[0] = '\0';
+			data->phonebook_entry->memory_type = get_gn_memory_type_phonebook(message[11]);
 			data->phonebook_entry->subentries_count = 0;
 			data->phonebook_entry->date.year = 0;
 			data->phonebook_entry->date.month = 0;
@@ -2765,7 +2766,6 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			}
 		}
 		dprintf("Received phonebook info\n");
-		data->phonebook_entry->memory_type = get_gn_memory_type_phonebook(message[11]);
 		blocks     = message[21];
 		return phonebook_decode(message + 22, length - 21, data, blocks, message[11], 12);
 
