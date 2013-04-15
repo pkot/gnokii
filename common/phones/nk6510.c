@@ -1360,6 +1360,8 @@ static gn_error NK6510_GetSMSFolderStatus(gn_data *data, struct gn_statemachine 
 		req[4] = 0x01;
 		if (sm_message_send(10, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
 		error = sm_block(NK6510_MSG_FOLDER, data, state);
+		if (error != GN_ERR_NONE)
+			return error;
 
 		/* FIXME: make it dynamic buffer */
 		if (phone.number + data->sms_folder->number > GN_SMS_MESSAGE_MAX_NUMBER) {
@@ -1579,6 +1581,8 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 	dprintf("Getting SMS from location %d\n", data->raw_sms->number);
 
 	error = NK6510_GetSMSMessageStatus(data, state);
+	if (error != GN_ERR_NONE)
+		return error;
 
 	if ((data->raw_sms->memory_type == GN_MT_IN) || (data->raw_sms->memory_type == GN_MT_OU)) {
 		if (data->raw_sms->number > 1024) {
