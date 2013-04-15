@@ -943,7 +943,6 @@ bool	gn_atem_command_plusc(char **buf)
 	/* AT+CMGL is listing messages */
 	if (strncasecmp(*buf, "MGL", 3) == 0) {
 		buf[0] += 3;
-		status = -1;
 
 		switch (**buf) {
 		case 0:
