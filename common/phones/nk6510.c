@@ -1878,6 +1878,7 @@ err:
 		if (!data->message_center) {
 			dprintf("SMSC received but not expected\n");
 			e = GN_ERR_INTERNALERROR;
+			break;
 		}
 
 		data->message_center->id = message[8];
