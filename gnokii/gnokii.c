@@ -315,6 +315,7 @@ static int install_log_handler(void)
 		}
 #endif
 		if (!basepath)
+			basepath = ".";
 			path = ".";
 		else {
 			path = calloc(MAX_PATH_LEN, sizeof(char));
