@@ -334,7 +334,7 @@ static int install_log_handler(void)
 
 		st = stat(basepath, &buf);
 		if (st)
-	        mkdir(basepath, S_IRWXU);
+			mkdir(basepath, S_IRWXU);
 
 		st = stat(path, &buf);
 		if (st)
