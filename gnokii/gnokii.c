@@ -314,10 +314,10 @@ static int install_log_handler(void)
 			home = 1;
 		}
 #endif
-		if (!basepath)
+		if (!basepath) {
 			basepath = ".";
 			path = ".";
-		else {
+		} else {
 			path = calloc(MAX_PATH_LEN, sizeof(char));
 			free_path = 1;
 #ifdef WIN32 /* Windows */
