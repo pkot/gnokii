@@ -1748,6 +1748,7 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 				if (enc == GN_SMS_DCS_UCS2)
 					data->sms->dcs.u.general.alphabet = enc;
 				data->sms->user_data[i].chars = enc_chars;
+				dprintf("enc_chars: %d\next_chars: %d\n", enc_chars, ext_chars);
 			} else {
 				/* FIXME: that's wrong for Nokia Multipart Picture Message, does anybody still use it? */
 				data->sms->dcs.u.general.alphabet = GN_SMS_DCS_8bit;
@@ -1756,7 +1757,6 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 		}
 	}
 
-	dprintf("enc_chars: %d\next_chars: %d\n", enc_chars, ext_chars);
 	/* Count the total length of the message text octets to be sent */
 	total = 0;
 	i = 0;
