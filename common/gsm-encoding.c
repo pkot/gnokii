@@ -246,9 +246,8 @@ static int char_mbtowc(wchar_t *dst, const char *src, int maxlen, MBSTATE *mbs)
 
 	pin = (char *)src;
 	pout = (char *)dst;
-	/* Let's assume that we have at most 4-bytes wide characters */
 	inlen = maxlen;
-	outlen = maxlen * sizeof(wchar_t);
+	outlen = sizeof(wchar_t);
 
 	cd = iconv_open("WCHAR_T", gn_char_get_encoding());
 	if (cd == (iconv_t)-1)
@@ -922,12 +921,13 @@ size_t char_ucs2_encode(char *dest, size_t dest_len, const char *src, size_t len
 	MBSTATE mbs;
 
 	MBSTATE_ENC_CLEAR(mbs);
-	for (i = 0, o_len = 0; i < len && o_len < dest_len / UCS2_SIZE; o_len++, i++) {
+	for (i = 0, o_len = 0; i < len && o_len < dest_len / UCS2_SIZE; o_len++, i += length) {
 		/*
-		 * We read input by convertible chunks. 'length' is length of
-		 * the read chunk.
+		 * We need to pass the number of bytes remaining in the source
+		 * buffer so the function can read as many are needed to decode
+		 * a possibly multibyte character and return how many were used.
 		 */
-		length = char_uni_alphabet_encode(src + i, 1, &wc, &mbs);
+		length = char_uni_alphabet_encode(src + i, len - i, &wc, &mbs);
 		/* We stop reading after first unreadable input */
 		if (length < 1)
 			return o_len * UCS2_SIZE;
