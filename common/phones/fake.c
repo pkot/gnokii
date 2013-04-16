@@ -482,7 +482,8 @@ static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state
 	tmp[len-1] = '"';
 	tmp[len++] = '\r';
 	tmp[len] = '\0';
-	dprintf("%s\n", req);
+	fprintf(stdout, "%s\n", req);
+
 	return GN_ERR_NONE;
 }
 

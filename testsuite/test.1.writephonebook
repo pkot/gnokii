@@ -1,0 +1,2 @@
+# (the following line is UTF-8)
+echo "Test ÀàÈèÉéÌìÒòÙù;+12345678901234;ME;1;0" | $GNOKII --writephonebook --overwrite
