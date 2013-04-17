@@ -6,6 +6,7 @@ EXTRA_DIST = 			\
 	out.01.writephonebook	\
 	out.02.concatsms	\
 	out.03.ucs2sms		\
+	out.08.send161sms	\
 	out.10.oplogo		\
 	out.11.ringtone		\
 	out.12.picture		\
@@ -32,6 +33,7 @@ EXTRA_DIST = 			\
 	test.01.writephonebook	\
 	test.02.concatsms	\
 	test.03.ucs2sms		\
+	test.08.send161sms	\
 	test.10.oplogo		\
 	test.11.ringtone	\
 	test.12.picture		\
@@ -59,7 +61,7 @@ EXTRA_DIST = 			\
 	testit
 
 check: $(EXTRA_DIST)
-	$(srcdir)/testit $(srcdir)/ "$(top_builddir)/gnokii/gnokii --config $(srcdir)/.gnokiirc"
+	$(srcdir)/testit $(srcdir)/ "$(top_builddir)/gnokii/gnokii --config .gnokiirc"
 
 noinst_PROGRAMS = dump-vcard
 dump_vcard_LDADD = $(top_builddir)/common/libgnokii.la
