@@ -16,8 +16,7 @@ EXTRA_HEADERS =				\
 		 pkt.h			\
 		 sms-nokia.h		\
 		 localcharset.h		\
-		 map.h			\
-		 gsm-auth.h
+		 map.h
 
 CLEANFILES = gnokii.h
 
