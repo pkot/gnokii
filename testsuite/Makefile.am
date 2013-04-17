@@ -1,7 +1,9 @@
 SUBDIRS = data
 
 EXTRA_DIST = 			\
-	out.0.identify		\
+	out.00.identify		\
+	out.01.sms		\
+	out.02.concatsms	\
 	out.10.oplogo		\
 	out.11.ringtone		\
 	out.12.picture		\
@@ -12,12 +14,12 @@ EXTRA_DIST = 			\
 	out.17.picture2		\
 	out.18.emsanimation	\
 	out.19.emspicture3	\
-	out.1.sms		\
 	out.26.cimelody		\
 	out.27.cimelody2	\
 	out.28.cemsanimation	\
-	out.2.concatsms		\
-	test.0.identify		\
+	test.00.identify	\
+	test.01.sms		\
+	test.02.concatsms	\
 	test.10.oplogo		\
 	test.11.ringtone	\
 	test.12.picture		\
@@ -28,11 +30,9 @@ EXTRA_DIST = 			\
 	test.17.picture2	\
 	test.18.emsanimation	\
 	test.19.emspicture3	\
-	test.1.sms		\
 	test.26.cimelody	\
 	test.27.cimelody2	\
 	test.28.cemsanimation	\
-	test.2.concatsms	\
 	testit
 
 check: $(EXTRA_DIST)
@@ -41,5 +41,4 @@ check: $(EXTRA_DIST)
 noinst_PROGRAMS = dump-vcard
 dump_vcard_LDADD = $(top_builddir)/common/libgnokii.la
 dump_vcard_SOURCES = dump-vcard.c
-
-
+dump_vcard_CFLAGS = -I$(top_srcdir)/include
