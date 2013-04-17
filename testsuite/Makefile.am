@@ -48,7 +48,9 @@ EXTRA_DIST = 			\
 	test.29.sendsms		\
 	test.30.emptysms	\
 	test.33.send140sms8bit	\
+	8bit-140.bin		\
 	test.34.send141sms8bit	\
+	8bit-141.bin		\
 	test.40.getsms		\
 	test.41.getsms		\
 	test.42.getsms		\
