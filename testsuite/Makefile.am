@@ -36,7 +36,7 @@ EXTRA_DIST = 			\
 	testit
 
 check: $(EXTRA_DIST)
-	$(srcdir)/testit $(srcdir)/ $(top_builddir)/gnokii/gnokii
+	$(srcdir)/testit $(srcdir)/ "$(top_builddir)/gnokii/gnokii --config $(srcdir)/.gnokiirc"
 
 noinst_PROGRAMS = dump-vcard
 dump_vcard_LDADD = $(top_builddir)/common/libgnokii.la

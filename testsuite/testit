@@ -2,7 +2,7 @@
 
 if [ $# -eq 2 ] ; then
 	export TESTDIR=$1
-	export GNOKII=$2
+	export GNOKII=`pwd`/$2
 elif [ $# -eq 0 ] ; then
 	export TESTDIR=`pwd`
 	export GNOKII="../gnokii/gnokii --config $TESTDIR/.gnokiirc"
