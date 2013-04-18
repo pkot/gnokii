@@ -10,8 +10,10 @@ int main (int argc, char **argv)
 	char *buf, *vcard;
 	int is_stdin;
 
-	if (argc < 2)
+	if (argc != 2) {
+		fprintf (stderr, "Usage: %s \"stdin\"|FILENAME\n", argv[0]);
 		return 1;
+	}
 
 	if (strcmp (argv[1], "stdin") == 0)
 		is_stdin = 1;
