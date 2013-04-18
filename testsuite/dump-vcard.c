@@ -57,14 +57,14 @@ int main (int argc, char **argv)
 			fclose (f);
 			return 1;
 		}
-		count = fread (buf, 1, 1024 * 1024, f);
+		count = fread (buf, 1, 1024 * 1024 - 1, f);
 		if (count == 0) {
 			perror ("Failed to read");
 			free (buf);
 			fclose (f);
 			return 1;
 		}
-		buf[count - 1] = '\0';
+		buf[count] = '\0';
 
 		fclose (f);
 
