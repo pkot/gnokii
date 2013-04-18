@@ -41,6 +41,8 @@ int main (int argc, char **argv)
 	}
 
 	if (!is_stdin) {
+		size_t count;
+
 		/* Seek back to the beginning and read in memory */
 		if (fseek (f, 0, SEEK_SET) < 0) {
 			perror ("Seeking back failed");
@@ -55,12 +57,14 @@ int main (int argc, char **argv)
 			fclose (f);
 			return 1;
 		}
-		if (fread (buf, 1024 * 1024, 1, f) < 0) {
+		count = fread (buf, 1, 1024 * 1024, f);
+		if (count == 0) {
 			perror ("Failed to read");
 			free (buf);
 			fclose (f);
 			return 1;
 		}
+		buf[count - 1] = '\0';
 
 		fclose (f);
 
