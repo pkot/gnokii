@@ -35,6 +35,8 @@ int main (int argc, char **argv)
 	memset (&entry, 0, sizeof(entry));
 	if (gn_vcard2phonebook (f, &entry) < 0) {
 		fprintf (stderr, "Parsing '%s' failed\n", argv[1]);
+		if (!is_stdin)
+			fclose (f);
 		return 1;
 	}
 
@@ -42,6 +44,7 @@ int main (int argc, char **argv)
 		/* Seek back to the beginning and read in memory */
 		if (fseek (f, 0, SEEK_SET) < 0) {
 			perror ("Seeking back failed");
+			fclose (f);
 			return 1;
 		}
 
@@ -49,6 +52,7 @@ int main (int argc, char **argv)
 		buf = malloc (1024 * 1024);
 		if (buf == NULL) {
 			fprintf (stderr, "Couldn't allocate a meg of memory\n");
+			fclose (f);
 			return 1;
 		}
 		if (fread (buf, 1024 * 1024, 1, f) < 0) {
