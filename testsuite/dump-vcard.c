@@ -68,6 +68,7 @@ int main (int argc, char **argv)
 		memset (&entry, 0, sizeof(entry));
 		if (gn_vcardstr2phonebook (buf, &entry) < 0) {
 			fprintf (stderr, "Parsing '%s' failed\n", argv[1]);
+			free (buf);
 			return 1;
 		}
 		free (buf);
