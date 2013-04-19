@@ -16,7 +16,6 @@ LC_MES_TMP=$LC_MESSAGES
 export LC_MESSAGES=C
 
 RETVAL=0
-cd $TESTDIR
 # For now ignore the tests that are known to fail:
 #   - test.2.concatsms
 #   - test.17.picture2
@@ -33,12 +32,12 @@ for A in test.00.identify \
 	test.01.writephonebook; do
     echo -n "Doing $A... "
     B=`echo $A | sed s/test/out/`
-    source $A 2>&1 | grep -v ^GNOKII | grep -v '^Doing operation' > my$B
-    if cmp my$B $B > /dev/null 2>&1; then
+    ( cd $TESTDIR; source $A 2>&1 ) | grep -v ^GNOKII > my$B
+    if cmp $TESTDIR$B my$B >/dev/null 2>&1; then
 	echo ok
     else
 	echo '*** FAILED'
-	diff -u $B my$B
+	diff -u $TESTDIR$B my$B
 	RETVAL=1
     fi
 done

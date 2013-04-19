@@ -13,6 +13,8 @@ if SMSD
 SUBDIRS += smsd
 endif
 
+SUBDIRS += testsuite
+
 DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po smsd Windows testsuite getopt
 
 EXTRA_DIST =				\
