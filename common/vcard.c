@@ -315,9 +315,6 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 				entry->subentries_count++; \
 			} while (0)
 
-#undef ERROR
-#define ERROR(a) fprintf(stderr, "%s\n", a)
-
 static void str_append_printf(vcard_string *str, const char *s)
 {
 	int len;
