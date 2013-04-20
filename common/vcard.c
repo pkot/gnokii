@@ -295,7 +295,7 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 #define STORESUB(a, c) if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
 				STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
 				entry->subentries[entry->subentries_count].entry_type = c);
-#define STORENUM(a, c) if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
+#define STORESUBNUM(a, c) if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
 				STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
 				entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_Number; \
 				entry->subentries[entry->subentries_count].number_type = c);
@@ -404,7 +404,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		s = strstr(s + 1, "\n");
 	}
 
-	/* FIXME on error STORESUB() and STORENUM() leak memory allocated by gnokii_strsplit() */
+	/* FIXME on error STORESUB() and STORESUBNUM() leak memory allocated by gnokii_strsplit() */
 	lines = gnokii_strsplit(v, "\n", num_lines);
 
 	for (i = 0; i < num_lines; i++) {
@@ -491,12 +491,12 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 		STOREINT("X-GSM-LOCATION:", entry->location);
 		STOREINT("X-GSM-CALLERGROUP:", entry->caller_group);
 
-		STORENUM("TEL;TYPE=HOME:", GN_PHONEBOOK_NUMBER_Home);
-		STORENUM("TEL;TYPE=CELL:", GN_PHONEBOOK_NUMBER_Mobile);
-		STORENUM("TEL;TYPE=FAX:", GN_PHONEBOOK_NUMBER_Fax);
-		STORENUM("TEL;TYPE=WORK:", GN_PHONEBOOK_NUMBER_Work);
-		STORENUM("TEL;TYPE=PREF:", GN_PHONEBOOK_NUMBER_General);
-		STORENUM("TEL;TYPE=VOICE:", GN_PHONEBOOK_NUMBER_Common);
+		STORESUBNUM("TEL;TYPE=HOME:", GN_PHONEBOOK_NUMBER_Home);
+		STORESUBNUM("TEL;TYPE=CELL:", GN_PHONEBOOK_NUMBER_Mobile);
+		STORESUBNUM("TEL;TYPE=FAX:", GN_PHONEBOOK_NUMBER_Fax);
+		STORESUBNUM("TEL;TYPE=WORK:", GN_PHONEBOOK_NUMBER_Work);
+		STORESUBNUM("TEL;TYPE=PREF:", GN_PHONEBOOK_NUMBER_General);
+		STORESUBNUM("TEL;TYPE=VOICE:", GN_PHONEBOOK_NUMBER_Common);
 		if (BEGINS("X-GSM-CALLERGROUPID:")) {
 			entry->subentries[entry->subentries_count].data.id = atoi(buf + strlen("X-GSM-CALLERGROUPID:"));
 			entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_ExtGroup;
