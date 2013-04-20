@@ -292,6 +292,7 @@ GNOKII_API int gn_phonebook2vcard(FILE *f, gn_phonebook_entry *entry, char *loca
 #define STORE(a, b) STORE2(a, b, (void) 0)
 #define STOREINT(a, b) if (BEGINS(a)) { b = atoi(buf+strlen(a)); continue; }
 
+#define STORENUM(a, b) if (BEGINS(a)) { strip_slashes(b, buf + strlen(a), line_len - strlen(a), GN_PHONEBOOK_NUMBER_MAX_LENGTH); }
 #define STORESUB(a, c) if (entry->subentries_count == GN_PHONEBOOK_SUBENTRIES_MAX_NUMBER) return -1; \
 				STORE2(a, entry->subentries[entry->subentries_count++].data.number, \
 				entry->subentries[entry->subentries_count].entry_type = c);
@@ -445,7 +446,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 			continue;
 		}
 		STORE("FN:", entry->name);
-		STORE("TEL;TYPE=PREF,VOICE:", entry->number);
+		STORENUM("TEL;TYPE=PREF,VOICE:", entry->number);
 
 		if (BEGINS("ADR;TYPE=HOME,PREF:")) {
 			if (0 < copy_fields(buf + 19, 7, GN_PHONEBOOK_ADDRESS_MAX_LENGTH,
