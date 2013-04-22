@@ -25,6 +25,7 @@
 /* Some globals */
 
 static gn_error fake_functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
+static gn_error fake_deletephonebook(gn_data *data, struct gn_statemachine *state);
 
 gn_driver driver_fake = {
 	NULL,
@@ -48,6 +49,8 @@ gn_driver driver_fake = {
 	fake_functions,
 	NULL
 };
+
+static int encode_number = 1;
 
 /* Initialise is the only function allowed to 'use' state */
 static gn_error fake_initialise(struct gn_statemachine *state)
@@ -459,30 +462,38 @@ static gn_error fake_phonebookstatus(gn_data *data, struct gn_statemachine *stat
 
 static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state)
 {
-	int len, ofs;
-	char req[256], *tmp;
-	char number[64];
+	int len;
+	/* Each UCS-2 character takes 4 bytes when encoded as HEX */
+	char number[GN_PHONEBOOK_NUMBER_MAX_LENGTH * 4 + 1], name[GN_PHONEBOOK_NAME_MAX_LENGTH * 4 + 1];
+	char req[sizeof("AT+CPBW=00000,\"\",000,\"\"\r\n") - 1 + sizeof(name) - 1 + sizeof(number) - 1 + 1];
 
-	memset(number, 0, sizeof(number));
-#if 1 
-	fake_encode(AT_CHAR_UCS2, number, sizeof(number),
-		data->phonebook_entry->number,
-		strlen(data->phonebook_entry->number));
-#else
-	strncpy(number, data->phonebook_entry->number, sizeof(number));
-#endif
-	ofs = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%s,\"",
+	if (data->phonebook_entry->empty)
+		return fake_deletephonebook(data, state);
+
+	if (encode_number)
+		len = fake_encode(AT_CHAR_UCS2, number, sizeof(number),
+				  data->phonebook_entry->number,
+				  strlen(data->phonebook_entry->number)) - 1;
+	else
+		len = snprintf(number, sizeof(number), "%s", data->phonebook_entry->number);
+	if (len >= sizeof(number))
+		return GN_ERR_ENTRYTOOLONG;
+
+	len = fake_encode(AT_CHAR_UCS2, name, sizeof(name),
+			  data->phonebook_entry->name,
+			  strlen(data->phonebook_entry->name)) - 1;
+	if (len >= sizeof(name))
+		return GN_ERR_ENTRYTOOLONG;
+
+	len = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%d,\"%s\"\r\n",
 		       data->phonebook_entry->location,
 		       number,
-		       data->phonebook_entry->number[0] == '+' ? "145" : "129");
-	tmp = req + ofs;
-	len = fake_encode(AT_CHAR_UCS2, tmp, sizeof(req) - ofs - 3,
-			data->phonebook_entry->name,
-			strlen(data->phonebook_entry->name));
-	tmp[len-1] = '"';
-	tmp[len++] = '\r';
-	tmp[len] = '\0';
-	fprintf(stdout, "%s\n", req);
+		       data->phonebook_entry->number[0] == '+' ? GN_GSM_NUMBER_International : GN_GSM_NUMBER_Unknown,
+		       name);
+	if (len >= sizeof(req))
+		return GN_ERR_ENTRYTOOLONG;
+
+	fprintf(stdout, "%s", req);
 
 	return GN_ERR_NONE;
 }
@@ -498,7 +509,7 @@ static gn_error fake_readphonebook(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_INVALIDMEMORYTYPE;
 
 	if (!fake_phonebook[pe->location - 1])
-#if 1
+#if 0
 		/* This is to emulate those phones that return error for empty locations */
 		return GN_ERR_INVALIDLOCATION;
 #else
