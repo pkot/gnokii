@@ -22,7 +22,7 @@
 #include "misc.h"
 #include "gnokii.h"
 
-#define MAX_CALLER_GROUP_LENGTH	10
+#define MAX_CALLER_GROUP_LENGTH	16
 #define MAX_SMS_CENTER		10
 #define MAX_BUSINESS_CARD_LENGTH	139
 
