@@ -2148,12 +2148,7 @@ static gn_error SetStartupBitmap(gn_data *data, struct gn_statemachine *state)
 /*****************************/
 static gn_error NK7110_IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	switch(message[2]) {
-	default:
-		dprintf("Unknown security command\n");
-		return pnok_security_incoming(messagetype, message, length, data, state);
-	}
-	return GN_ERR_NONE;
+	return pnok_security_incoming(messagetype, message, length, data, state);
 }
 
 /*****************/
