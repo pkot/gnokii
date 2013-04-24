@@ -1463,6 +1463,8 @@ static LONG pcsc_open_reader_number(LONG number)
 
 	/* first retrieve buffer length */
 	ret = SCardListReaders(hContext, NULL, NULL, &len);
+	if (ret != SCARD_S_SUCCESS)
+		return ret;
 	buf = malloc(len);
 	if (!buf) {
 		return SCARD_E_NO_MEMORY;
