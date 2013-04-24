@@ -2267,6 +2267,9 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 			char_unicode_decode(data->wap_setting->sms_server_number, message + pos, string_length);
 			dprintf("   Server number: %s\n", data->wap_setting->sms_server_number);
 			pos += string_length;
+
+			if (length != pos)
+				dprintf("Unexpected frame length (expected %d got %d)\n", length, pos);
 			break;
 		case 0x01:
 			dprintf("GSM data:\n");
@@ -2295,6 +2298,9 @@ static gn_error NK7110_IncomingWAP(int messagetype, unsigned char *message, int 
 			char_unicode_decode(data->wap_setting->gsm_data_password, message + pos, string_length);
 			dprintf("   Password: %s\n", data->wap_setting->gsm_data_password);
 			pos += string_length;
+
+			if (length != pos)
+				dprintf("Unexpected frame length (expected %d got %d)\n", length, pos);
 			break;
 		default:
 			break;
