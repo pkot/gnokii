@@ -1671,11 +1671,7 @@ void GUI_CreateCalendarWindow()
 	gtk_clist_set_column_justification(GTK_CLIST(cal.notesClist), 0, GTK_JUSTIFY_RIGHT);
 
 	for (i = 0; i < ENTRY_COLUMNS; i++) {
-		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__,
-				__LINE__);
-			gtk_main_quit();
-		}
+		sColumn = g_malloc(sizeof(SortColumn));
 		sColumn->clist = cal.notesClist;
 		sColumn->column = i;
 		gtk_signal_connect(GTK_OBJECT(GTK_CLIST(cal.notesClist)->column[i].button),

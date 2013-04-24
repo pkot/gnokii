@@ -170,17 +170,10 @@ static void ReadSpeedDial(void)
 	gtk_clist_clear(GTK_CLIST(clist));
 
 	for (i = 2; i < 10; i++) {
-		if ((d = (D_SpeedDial *) g_malloc(sizeof(D_SpeedDial))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-			return;
-		}
+		d = g_malloc(sizeof(D_SpeedDial));
 		memset(d, 0, sizeof(D_SpeedDial));
 		d->entry.number = i;
-		if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-			g_free(d);
-			return;
-		}
+		e = g_malloc(sizeof(PhoneEvent));
 		e->event = Event_GetSpeedDial;
 		e->data = d;
 		GUI_InsertEvent(e);
@@ -236,11 +229,7 @@ static void SaveSpeedDial(void)
 				gn_log_xdebug("location: %i\n", d->entry.location);
 				if (d->entry.location == 0)
 					continue;
-				if ((e = (PhoneEvent *) g_malloc(sizeof(PhoneEvent))) == NULL) {
-					g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-					return;
-				}
-
+				e = g_malloc(sizeof(PhoneEvent));
 				e->event = Event_SendSpeedDial;
 				e->data = d;
 				GUI_InsertEvent(e);
@@ -320,13 +309,7 @@ static void OkImportDialog(GtkWidget * w, GtkFileSelection * fs)
 
 	i = 0;
 	while (fgets(buf, IO_BUF_LEN, f) && i++ < 9) {
-		if ((d = (D_SpeedDial *) g_malloc(sizeof(D_SpeedDial))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-			gtk_clist_clear(GTK_CLIST(clist));
-			gtk_clist_sort(GTK_CLIST(clist));
-			gtk_clist_thaw(GTK_CLIST(clist));
-			return;
-		}
+		d = g_malloc(sizeof(D_SpeedDial));
 		if (ParseLine(d, buf)) {
 			if (d->entry.number != i) {
 				g_free(d);
@@ -604,10 +587,7 @@ void GUI_CreateSpeedDialWindow(void)
 //  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, xgnokiiConfig.callerGroupsSupported);
 
 	for (i = 0; i < 3; i++) {
-		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-			gtk_main_quit();
-		}
+		sColumn = g_malloc(sizeof(SortColumn));
 		sColumn->clist = clist;
 		sColumn->column = i;
 		gtk_signal_connect(GTK_OBJECT(GTK_CLIST(clist)->column[i].button), "clicked",

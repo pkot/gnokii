@@ -2260,13 +2260,7 @@ static gint InsertPBEntryME(gn_phonebook_entry * entry)
 {
 	PhonebookEntry *pbEntry;
 
-	if ((pbEntry = (PhonebookEntry *) g_malloc(sizeof(PhonebookEntry))) == NULL) {
-		g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-		g_ptr_array_free(contactsMemory, TRUE);
-		gtk_widget_hide(progressDialog.dialog);
-		return (-1);
-	}
-
+	pbEntry = g_malloc(sizeof(PhonebookEntry));
 	pbEntry->entry = *entry;
 
 	if (*pbEntry->entry.name == '\0' && *pbEntry->entry.number == '\0')
@@ -2286,13 +2280,7 @@ static gint InsertPBEntrySM(gn_phonebook_entry * entry)
 {
 	PhonebookEntry *pbEntry;
 
-	if ((pbEntry = (PhonebookEntry *) g_malloc(sizeof(PhonebookEntry))) == NULL) {
-		g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__, __LINE__);
-		g_ptr_array_free(contactsMemory, TRUE);
-		gtk_widget_hide(progressDialog.dialog);
-		return (-1);
-	}
-
+	pbEntry = g_malloc(sizeof(PhonebookEntry));
 	pbEntry->entry = *entry;
 
 	if (*pbEntry->entry.name == '\0' && *pbEntry->entry.number == '\0')
@@ -2951,11 +2939,7 @@ SelectContactData *GUI_SelectContactDialog(void)
 					phoneMonitor.supported & PM_CALLERGROUP);
 
 	for (i = 0; i < 4; i++) {
-		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__,
-				__LINE__);
-			return NULL;
-		}
+		sColumn = g_malloc(sizeof(SortColumn));
 		sColumn->clist = selectContactData.clist;
 		sColumn->column = i;
 		gtk_signal_connect(GTK_OBJECT(GTK_CLIST(selectContactData.clist)->column[i].button),
@@ -3197,11 +3181,7 @@ void GUI_CreateContactsWindow(void)
 //  gtk_clist_set_column_visibility (GTK_CLIST (clist), 3, phoneMonitor.supported & PM_CALLERGROUP);
 
 	for (i = 0; i < 4; i++) {
-		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__,
-				__LINE__);
-			gtk_main_quit();
-		}
+		sColumn = g_malloc(sizeof(SortColumn));
 		sColumn->clist = clist;
 		sColumn->column = i;
 		gtk_signal_connect(GTK_OBJECT(GTK_CLIST(clist)->column[i].button), "clicked",

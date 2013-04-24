@@ -1779,11 +1779,7 @@ void GUI_CreateSMSWindow(void)
 	gtk_clist_set_column_justification (GTK_CLIST (SMS.smsClist), 2, GTK_JUSTIFY_CENTER);
 	*/
 	for (i = 0; i < 4; i++) {
-		if ((sColumn = g_malloc(sizeof(SortColumn))) == NULL) {
-			g_print(_("Error: %s: line %d: Can't allocate memory!\n"), __FILE__,
-				__LINE__);
-			gtk_main_quit();
-		}
+		sColumn = g_malloc(sizeof(SortColumn));
 		sColumn->clist = SMS.smsClist;
 		sColumn->column = i;
 		gtk_signal_connect(GTK_OBJECT(GTK_CLIST(SMS.smsClist)->column[i].button), "clicked",

@@ -97,11 +97,7 @@ void GUI_ReadXConfig()
 
 	g_free(rcfile);
 
-	if ((line = (char *) g_malloc(255)) == NULL) {
-		g_print(_("WARNING: Can't allocate memory for config reading!\n"));
-		fclose(file);
-		return;
-	}
+	line = g_malloc(255);
 
 	while (fgets(line, 255, file) != NULL) {
 		gint v;
