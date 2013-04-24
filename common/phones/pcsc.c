@@ -868,7 +868,7 @@ static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 	if (IoStruct.dwReceived < 178) return GN_ERR_INTERNALERROR;
  
 	/* do not check whether the record is already empty; this is
-	   intentional to make is possible to wipe deleted records */
+	   intentional to make it possible to wipe deleted records */
  
 	record_length = IoStruct.dwReceived - 2;
 	if (record_length > 255) return GN_ERR_INTERNALERROR;
@@ -1030,7 +1030,7 @@ static gn_error DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	if (IoStruct.dwReceived < 16) return GN_ERR_INTERNALERROR;
  
 	/* do not check whether the record is already empty; this is
-	   intentional to make is possible to wipe deleted records */
+	   intentional to make it possible to wipe deleted records */
  
 	if (IoStruct.pbRecvBuffer[IoStruct.dwReceived - 3] != 0xff) {
 		dprintf("Cannot erase a record with an extension field\n");
