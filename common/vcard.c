@@ -350,8 +350,8 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 		if (BEGINS("BEGIN:VCARD"))
 			break;
 	}
+	str_append_printf(&str, buf);
 
-	str_append_printf(&str, "BEGIN:VCARD\r\n");
 	while (fgets(buf, 1024, f)) {
 		str_append_printf(&str, buf);
 		if (BEGINS("END:VCARD"))
