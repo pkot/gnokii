@@ -352,13 +352,15 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	}
 	str_append_printf(&str, buf);
 
+	retval = -1;
 	while (fgets(buf, 1024, f)) {
 		str_append_printf(&str, buf);
-		if (BEGINS("END:VCARD"))
+		if (BEGINS("END:VCARD")) {
+			retval = gn_vcardstr2phonebook(str.str, entry);
 			break;
+		}
 	}
 
-	retval = gn_vcardstr2phonebook(str.str, entry);
 	free(str.str);
 
 	return retval;
