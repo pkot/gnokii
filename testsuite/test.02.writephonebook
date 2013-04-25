@@ -1,0 +1,1 @@
+echo -n | $GNOKII --writephonebook --overwrite --vcard

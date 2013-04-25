@@ -1,0 +1,8 @@
+AT+CPBW=1,"",129,""
+Write Succeeded: memory type: ME, loc: 1, name: , number: 
+AT+CPBW=2,"",129,""
+Write Succeeded: memory type: ME, loc: 2, name: , number: 
+AT+CPBW=3,"",129,""
+Write Succeeded: memory type: ME, loc: 3, name: , number: 
+AT+CPBW=4,"",129,""
+Write Succeeded: memory type: ME, loc: 4, name: , number: 

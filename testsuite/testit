@@ -29,7 +29,9 @@ for A in test.00.identify \
 	test.13.emspicture test.15.emspicture2 test.18.emsanimation \
 	test.16.imelody \
 	test.40.getsms test.41.getsms test.42.getsms test.43.getsms \
-	test.01.writephonebook; do
+	test.01.writephonebook test.02.writephonebook \
+	test.03.writephonebook test.04.writephonebook \
+	test.05.writephonebook; do
     echo -n "Doing $A... "
     B=`echo $A | sed s/test/out/`
     ( cd $TESTDIR; source $A 2>&1 ) | grep -v ^GNOKII > my$B
