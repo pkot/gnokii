@@ -347,8 +347,6 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 
 	total = current;
 	current = 0;
-	sent = 0;
-
 	do {
 		sent = device_write(out_buffer + current, total - current, state);
 		if (sent < 0) return GN_ERR_FAILED;
