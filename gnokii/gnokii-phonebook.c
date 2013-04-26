@@ -279,7 +279,7 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 				2 - LDIF
 			*/
 	char *line, oline[MAX_INPUT_LINE_LEN];
-	int i;
+	int i, c;
 
 	struct option options[] = {
 		{ "overwrite",		0,			NULL, 'o'},
@@ -436,6 +436,12 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 		} else
 			fprintf(stderr, _("Write failed (%s): memory type: %s, loc: %d, name: %s, number: %s\n"),
 				 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
+
+		/* gn_vcard2phonebook() gn_ldif2phonebook() return an error if input file contains trailing empty lines */
+		do {
+			c = fgetc(stdin);
+		} while (c == '\r' || c == '\n');
+		ungetc(c, stdin);
 	}
 out:
 	if (error != GN_ERR_NONE)
