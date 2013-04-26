@@ -189,7 +189,10 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 				t = strchr(s, ';');
 				if (t)
 					*t++ = 0;
-				loadbitmap(&sms.user_data[curpos].u.animation[i], s, i ? GN_BMP_EMSAnimation2 : GN_BMP_EMSAnimation, state);
+				error = loadbitmap(&sms.user_data[curpos].u.animation[i], s, \
+						   i ? GN_BMP_EMSAnimation2 : GN_BMP_EMSAnimation, state);
+				if (error != GN_ERR_NONE)
+					return error;
 				s = t;
 			}
 			sms.user_data[++curpos].type = GN_SMS_DATA_None;
