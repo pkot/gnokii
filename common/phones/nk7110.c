@@ -858,8 +858,8 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 	unsigned char req[500] = {FBUS_FRAME_HEADER, 0x0b, 0x00, 0x01, 0x01, 0x00, 0x00, 0x0c,
 				  0x00, 0x00,	/* memory type */
 				  0x00, 0x00,	/* location */
-				  0x00, 0x00, 0x00, 0x00};
-
+				  0x00, 0x00, 0x00,
+				  0x00}; /* blocks */
 	char string[500];
 	int block, i, j, defaultn;
 	unsigned int count = 18;
