@@ -68,6 +68,8 @@
     o use libusb to detach cdc_phonet or any other linux kernel
       module; modprobe blacklisting isn't needed anymore
                                                     (Daniele Forsi)
+    o write phone number read from TEL;TYPE=PREF,VOICE of a vCard
+      when there is no other number in subentries   (Daniele Forsi)
  * xgnokii updates
     o fix bug that caused to forget subentries after the first one
       when editing the phonebook                    (Daniele Forsi)
@@ -81,6 +83,8 @@
     o change the value used for VOICE phonebook memory, containing
       the phone number(s) to be used to listen to voicemail, which
       was used for MT which now is unsupported      (Daniele Forsi)
+    o write phone number read from TEL;TYPE=PREF,VOICE of a vCard
+      when there is no other number in subentries   (Daniele Forsi)
  * gnokii updates
     o fix --getfile --getfilebyid --getallfiles and --getmms on
       non-POSIX sistems (eg. Windows)               (Daniele Forsi)

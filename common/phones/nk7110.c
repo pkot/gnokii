@@ -886,28 +886,27 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 		/* We don't require the application to fill in any subentry.
 		 * if it is not filled in, let's take just one number we have.
 		 */
-		if (!entry->subentries_count) {
-			string[0] = GN_PHONEBOOK_ENTRY_Number;
-			string[1] = string[2] = string[3] = 0;
-			j = strlen(entry->number);
-			j = char_unicode_encode((string + 5), entry->number, j);
-			string[4] = j;
-			count += PackBlock(0x0b, j + 5, block++, string, req + count);
-		} else {
+		{
 			/* Default Number */
-			defaultn = 999;
+			const char *number;
+			defaultn = -1;
 			for (i = 0; i < entry->subentries_count; i++)
 				if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number)
 					if (!strcmp(entry->number, entry->subentries[i].data.number))
 						defaultn = i;
-			if (defaultn < i) {
+			if (defaultn >= 0) {
 				string[0] = entry->subentries[defaultn].number_type;
-				string[1] = string[2] = string[3] = 0;
-				j = strlen(entry->subentries[defaultn].data.number);
-				j = char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
-				string[4] = j;
-				count += PackBlock(0x0b, j + 5, block++, string, req + count);
+				number = entry->subentries[defaultn].data.number;
+			} else {
+				string[0] = GN_PHONEBOOK_ENTRY_Number;
+				number = entry->number;
 			}
+			string[1] = string[2] = string[3] = 0;
+			j = char_unicode_encode((string + 5), number, strlen(number));
+			string[4] = j;
+			count += PackBlock(0x0b, j + 5, block++, string, req + count);
+		}
+		if (entry->subentries_count) {
 			/* Rest of the numbers */
 			for (i = 0; i < entry->subentries_count; i++)
 				if (entry->subentries[i].entry_type == GN_PHONEBOOK_ENTRY_Number) {
