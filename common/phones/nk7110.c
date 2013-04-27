@@ -877,9 +877,8 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 		/* Name */
 		i = strlen(entry->name);
 		i = char_unicode_encode((string + 1), entry->name, i);
-		/* Length of the string + length field + terminating 0 */
-		string[0] = i + 2;
-		count += PackBlock(0x07, i + 2, block++, string, req + count);
+		string[0] = i;
+		count += PackBlock(0x07, i + 1, block++, string, req + count);
 		/* Group */
 		string[0] = entry->caller_group + 1;
 		string[1] = 0;
@@ -892,9 +891,8 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 			string[1] = string[2] = string[3] = 0;
 			j = strlen(entry->number);
 			j = char_unicode_encode((string + 5), entry->number, j);
-			string[j + 1] = 0;
 			string[4] = j;
-			count += PackBlock(0x0b, j + 6, block++, string, req + count);
+			count += PackBlock(0x0b, j + 5, block++, string, req + count);
 		} else {
 			/* Default Number */
 			defaultn = 999;
@@ -907,9 +905,8 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 				string[1] = string[2] = string[3] = 0;
 				j = strlen(entry->subentries[defaultn].data.number);
 				j = char_unicode_encode((string + 5), entry->subentries[defaultn].data.number, j);
-				string[j + 1] = 0;
 				string[4] = j;
-				count += PackBlock(0x0b, j + 6, block++, string, req + count);
+				count += PackBlock(0x0b, j + 5, block++, string, req + count);
 			}
 			/* Rest of the numbers */
 			for (i = 0; i < entry->subentries_count; i++)
@@ -919,14 +916,12 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 						string[1] = string[2] = string[3] = 0;
 						j = strlen(entry->subentries[i].data.number);
 						j = char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
-						string[j + 1] = 0;
 						string[4] = j;
 						count += PackBlock(0x0b, j + 6, block++, string, req + count);
 					}
 				} else {
 					j = strlen(entry->subentries[i].data.number);
 					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
-					string[j + 1] = 0;
 					string[0] = j;
 					count += PackBlock(entry->subentries[i].entry_type, j + 2, block++, string, req + count);
 				}
