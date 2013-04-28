@@ -916,7 +916,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("SMS saving failed: Incorrect folder\n");
 			return GN_ERR_INVALIDMEMORYTYPE;
 		default:
-			dprintf("ERROR: unknown (%02x)\n",message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
@@ -962,7 +962,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("SMS saving failed: Incorrect folder\n");
 			return GN_ERR_INVALIDLOCATION;
 		default:
-			dprintf("ERROR: unknown %i\n",message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
@@ -974,7 +974,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("Invalid location\n");
 			return GN_ERR_INVALIDLOCATION;
 		default:
-			dprintf("Unknown reason.\n");
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 
@@ -1064,6 +1064,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			break;
 		default:
 			dprintf("Failed to create SMS Folder! Reason unknown (%02x)!\n", message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_UNKNOWN;
 			break;
 		}
@@ -1113,6 +1114,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			return GN_ERR_FAILED;
 		default:
 			dprintf("SMS Folder could not be deleted! Reason unknown (%02x)\n", message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_FAILED;
 		}
 		break;
@@ -1871,7 +1873,7 @@ err:
 			e = GN_ERR_EMPTYLOCATION;
 			break;
 		default:
-			dprintf("Unknown response subtype: %02x\n", message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			e = GN_ERR_UNHANDLEDFRAME;
 			break;
 		}
@@ -2532,8 +2534,8 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		case 0x01: /* OK */
 			break;
 		default:
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			error = GN_ERR_UNKNOWN;
-			dprintf("error!\n");
 			goto out;
 		}
 		if (!data->file) {
@@ -4589,6 +4591,7 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 			dprintf("Ringtone too long. Max is 69 notes.\n");
 			return GN_ERR_ENTRYTOOLONG;
 		default:
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
