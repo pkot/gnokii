@@ -3173,6 +3173,7 @@ retry:
 					block++;
 					break;
 				default:
+					j = strlen(entry->subentries[i].data.number);
 					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 					string[j + 1] = 0;
 					string[0] = j;
