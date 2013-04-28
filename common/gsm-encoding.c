@@ -221,7 +221,7 @@ int char_mblen(const char *src)
 
 /**
  * char_mbtowc:
- * @wchar_t: buffer for the converted wide char string
+ * @dst: buffer for the converted wide char string
  * @src: buffer with the multibyte string to be converted
  * @maxlen: size of @wchar_t buffer
  * @mbs: pointer to a variable holding the shift state
