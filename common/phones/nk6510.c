@@ -685,7 +685,7 @@ static gn_error NK6510_IncomingIdentify(int messagetype, unsigned char *message,
 		}
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x2b (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
@@ -1145,7 +1145,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 		return GN_ERR_NOTSUPPORTED;
 
 	default:
-		dprintf("Message: Unknown message of type 14 : %02x  length: %d\n", message[3], length);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
@@ -1986,7 +1986,7 @@ err:
 		return GN_ERR_NOTIMPLEMENTED;
 
 	default:
-		dprintf("Unknown subtype of type 0x%02x (SMS handling): 0x%02x\n", NK6510_MSG_SMS, message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return e;
@@ -2803,7 +2803,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x03 (0x%02x)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
@@ -3309,7 +3309,7 @@ reply: 0x19 / 0x0012
 		error = GN_ERR_NOTSUPPORTED;
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x%02x (clock handling): 0x%02x\n", NK6510_MSG_CLOCK, message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		error = GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
@@ -3696,7 +3696,7 @@ static gn_error NK6510_IncomingCalendar(int messagetype, unsigned char *message,
 		e = GN_ERR_NOTSUPPORTED;
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x%02x (calendar handling): 0x%02x\n", NK6510_MSG_CALENDAR, message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		e = GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
@@ -4444,7 +4444,7 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 		dprintf("Op Logo Set OK\n");
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x0a (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
@@ -4526,7 +4526,7 @@ static gn_error NK6510_IncomingBattLevel(int messagetype, unsigned char *message
 		dprintf("Battery level %f\n\n", *(data->battery_level));
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x17 (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNKNOWN;
 	}
 	return GN_ERR_NONE;
@@ -4627,7 +4627,7 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 		return GN_ERR_INVALIDLOCATION;
 
 	default:
-		dprintf("Unknown subtype of type 0x1f (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
@@ -4816,7 +4816,7 @@ reply: 0x7a / 0x0036
 		}
 
 	default:
-		dprintf("Unknown subtype of type 0x7a (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
@@ -5017,7 +5017,7 @@ static gn_error NK6510_IncomingProfile(int messagetype, unsigned char *message, 
 		return GN_ERR_NONE;
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x39 (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
@@ -5212,7 +5212,7 @@ static gn_error NK6510_IncomingKeypress(int messagetype, unsigned char *message,
 		break;
 
 	default:
-		dprintf("Unknown subtype of type 0x3c (%d)\n", message[4]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
@@ -5301,7 +5301,7 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 		}
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x08 (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_NONE;
 		break;
 	}
@@ -5351,7 +5351,7 @@ static gn_error NK6510_IncomingSubscribe(int messagetype, unsigned char *message
 {
 	switch (message[3]) {
 	default:
-		dprintf("Unknown subtype of type 0x3c (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
@@ -5614,7 +5614,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		break;
 
 	default:
-		dprintf("Unknown subtype of type 0x01 (0x%02x)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		error = GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
@@ -5953,7 +5953,7 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 		dprintf("WAP setting successfully written!\n");
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x3f (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
@@ -6305,7 +6305,7 @@ static gn_error NK6510_IncomingToDo(int messagetype, unsigned char *message, int
 		error = GN_ERR_NOTSUPPORTED;
 		break;
 	default:
-		dprintf("Unknown subtype of type 0x01 (%d)\n", message[3]);
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		error = GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
