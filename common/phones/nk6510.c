@@ -2522,11 +2522,6 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		}
 		break;
 	case 0x15: /* Answer for GetFileDetailsById */
-		if (!data->file || !data->file_list) {
-			error = GN_ERR_INTERNALERROR;
-			dprintf("error!\n");
-			goto out;
-		}
 		switch (message[4]) {
 		case 0x04:
 			error = GN_ERR_EMPTYLOCATION;
@@ -2586,6 +2581,11 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			dprintf("unknown file\n");
 		}
 
+		if (!data->file_list) {
+			error = GN_ERR_INTERNALERROR;
+			dprintf("error!\n");
+			goto out;
+		}
 		data->file_list->file_count = 0;
 		j = 0;
 		if (length > 0xe8) {
