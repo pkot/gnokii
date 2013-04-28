@@ -2843,7 +2843,7 @@ static gn_error NK6510_GetSpeedDial(gn_data *data, struct gn_statemachine *state
 static unsigned char PackBlock(u8 id, u8 size, int *no, u8 *buf, u8 *block, unsigned int maxsize)
 {
 	if (size + 5 > maxsize) {
-		dprintf("Block packing failure -- not enough space\n");
+		dprintf("Block packing failure -- not enough space (please add %d bytes to req[])\n", size + 5 - maxsize);
 		return 0;
 	}
 	*(block++) = id;
