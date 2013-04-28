@@ -1187,7 +1187,7 @@ static gn_error NK7110_IncomingFolder(int messagetype, unsigned char *message, i
 		return GN_ERR_UNHANDLEDFRAME;
 
 	default:
-		dprintf("Message: Unknown message of type 14 : %02x  length: %d\n", message[3], length);
+		dprintf("Unknown subtype of type 0x14 (%d)\n", message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
