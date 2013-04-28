@@ -207,7 +207,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			}
 #endif
 			char_unicode_decode(subentry->data.number, (blockstart + 6), GNOKII_MIN(blockstart[5], GN_PHONEBOOK_NAME_MAX_LENGTH * 2));
-			dprintf("   Type: %d (%02x)\n", subentry->entry_type, subentry->entry_type);
+			dprintf("   Type: %d (0x%02x)\n", subentry->entry_type, subentry->entry_type);
 			dprintf("   Text: %s\n", subentry->data.number);
 			subblock_count++;
 			data->phonebook_entry->subentries_count++;
@@ -223,7 +223,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			char_unicode_decode(subentry->data.number, (blockstart + 10), blockstart[9]);
 			if (!subblock_count)
 				snprintf(data->phonebook_entry->number, sizeof(data->phonebook_entry->number), "%s", subentry->data.number);
-			dprintf("   Type: %d (%02x)\n", subentry->number_type, subentry->number_type);
+			dprintf("   Type: %d (0x%02x)\n", subentry->number_type, subentry->number_type);
 			dprintf("   Number: %s\n", subentry->data.number);
 			subblock_count++;
 			data->phonebook_entry->subentries_count++;
@@ -338,7 +338,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			}
 			break;
 		default:
-			dprintf("   Unknown phonebook block %02x\n", blockstart[0]);
+			dprintf("   Unknown phonebook block 0x%02x\n", blockstart[0]);
 			{
 				int j;
 

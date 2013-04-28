@@ -809,7 +809,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			data->raw_sms->type = GN_SMS_MT_Submit;
 			break;
 		default:
-			dprintf("Wrong type\n");
+			dprintf("Unknown SMS status 0x%02x\n", data->raw_sms->status);
 			break;
 		}
 		block = message + 8;
@@ -835,12 +835,12 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			memcpy(data->raw_sms->user_data, message + 50, data->raw_sms->length);
 			break;
 		default:
-			dprintf("Unknown picture message!\n");
+			dprintf("Unknown picture message type 0x%02x\n", message[2]);
 			break;
 		}
 		break;
 	default:
-		dprintf("Type %02x not yet handled!\n", message[1]);
+		dprintf("Unknown SMS type 0x%02x\n", message[1]);
 		break;
 	}
 	subblocks = block[0];
@@ -850,7 +850,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 	block = block + 1;
 	for (i = 0; i < subblocks; i++) {
 		/*
-		dprintf("  Type of subblock %i: %02x\n", i,  block[0]);
+		dprintf("  Type of subblock %i: 0x%02x\n", i,  block[0]);
 		dprintf("  Length of subblock %i: %i\n", i, block[1]);
 		*/
 		switch (block[0]) {
@@ -887,7 +887,7 @@ static void ParseLayout(unsigned char *message, gn_data *data)
 			}
 			break;
 		default:
-			dprintf("Unknown block of type: %02x!\n", block[0]);
+			dprintf("Unknown block of type: 0x%02x\n", block[0]);
 			break;
 		}
 		block = block + block[1];
@@ -1063,7 +1063,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("   Name: %s\n", data->sms_folder->name);
 			break;
 		default:
-			dprintf("Failed to create SMS Folder! Reason unknown (%02x)!\n", message[4]);
+			dprintf("Failed to create SMS Folder! Reason unknown (0x%02x)!\n", message[4]);
 			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_UNKNOWN;
 			break;
@@ -1113,7 +1113,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("SMS Folder could not be deleted! Not empty?\n");
 			return GN_ERR_FAILED;
 		default:
-			dprintf("SMS Folder could not be deleted! Reason unknown (%02x)\n", message[4]);
+			dprintf("SMS Folder could not be deleted! Reason unknown (0x%02x)\n", message[4]);
 			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_FAILED;
 		}
@@ -1913,7 +1913,7 @@ err:
 					data->message_center->smsc.type = message[offset + 5];
 					break;
 				default:
-					dprintf("Unknown subtype %02x. Ignoring\n", message[offset + 1]);
+					dprintf("Unknown subtype 0x%02x. Ignoring\n", message[offset + 1]);
 					break;
 				}
 				break;
@@ -1924,7 +1924,7 @@ err:
 				data->message_center->default_name = -1;
 				break;
 			default:
-				dprintf("Unknown subtype %02x. Ignoring\n", message[offset]);
+				dprintf("Unknown subtype 0x%02x. Ignoring\n", message[offset]);
 				break;
 			}
 			offset += message[offset + 1];
@@ -3173,7 +3173,6 @@ retry:
 					block++;
 					break;
 				default:
-					j = strlen(entry->subentries[i].data.number);
 					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 					string[j + 1] = 0;
 					string[0] = j;
@@ -4892,7 +4891,7 @@ static gn_error NK6510_IncomingProfile(int messagetype, unsigned char *message, 
 		for (i = 0; i < 11; i++) {
 			switch (blockstart[1]) {
 			case 0x00:
-				dprintf("type: %02x, keypad tone level: %i\n", blockstart[1], blockstart[7]);
+				dprintf("type: 0x%02x, keypad tone level: %i\n", blockstart[1], blockstart[7]);
 				switch (blockstart[7]) {
 				case 0x00:
 					data->profile->keypad_tone = 0xff;
@@ -4912,31 +4911,31 @@ static gn_error NK6510_IncomingProfile(int messagetype, unsigned char *message, 
 				}
 				break;
 			case 0x02:
-				dprintf("type: %02x, call alert: %i\n", blockstart[1], blockstart[7]);
+				dprintf("type: 0x%02x, call alert: %i\n", blockstart[1], blockstart[7]);
 				data->profile->call_alert = blockstart[7];
 				break;
 			case 0x03:
-				dprintf("type: %02x, ringtone: %i\n", blockstart[1], blockstart[7]);
+				dprintf("type: 0x%02x, ringtone: %i\n", blockstart[1], blockstart[7]);
 				data->profile->ringtone = blockstart[7];
 				break;
 			case 0x04:
-				dprintf("type: %02x, ringtone volume: %i\n", blockstart[1], blockstart[7]);
+				dprintf("type: 0x%02x, ringtone volume: %i\n", blockstart[1], blockstart[7]);
 				data->profile->volume = blockstart[7] + 6;
 				break;
 			case 0x05:
-				dprintf("type: %02x, message tone: %i\n", blockstart[1], blockstart[7]);
+				dprintf("type: 0x%02x, message tone: %i\n", blockstart[1], blockstart[7]);
 				data->profile->message_tone = blockstart[7];
 				break;
 			case 0x06:
-				dprintf("type: %02x, vibration: %i\n", blockstart[1], blockstart[7]);
+				dprintf("type: 0x%02x, vibration: %i\n", blockstart[1], blockstart[7]);
 				data->profile->vibration = blockstart[7];
 				break;
 			case 0x07:
-				dprintf("type: %02x, warning tone: %i\n", blockstart[1], blockstart[7]);
+				dprintf("type: 0x%02x, warning tone: %i\n", blockstart[1], blockstart[7]);
 				data->profile->warning_tone = blockstart[7];
 				break;
 			case 0x08:
-				dprintf("type: %02x, caller groups: %i\n", blockstart[1], blockstart[7]);
+				dprintf("type: 0x%02x, caller groups: %i\n", blockstart[1], blockstart[7]);
 				data->profile->caller_groups = blockstart[7];
 				break;
 			case 0x0c:
@@ -4944,7 +4943,7 @@ static gn_error NK6510_IncomingProfile(int messagetype, unsigned char *message, 
 				dprintf("Profile Name: %s\n", data->profile->name);
 				break;
 			default:
-				dprintf("Unknown profile subblock type %02x!\n", blockstart[1]);
+				dprintf("Unknown profile subblock type 0x%02x!\n", blockstart[1]);
 				break;
 			}
 			blockstart = blockstart + blockstart[0];
@@ -5012,7 +5011,7 @@ static gn_error NK6510_IncomingProfile(int messagetype, unsigned char *message, 
 					dprintf("failed to set name! error: %i\n", message[4]);
 				break;
 			default:
-				dprintf("Unknown profile subblock type %02x!\n", blockstart[1]);
+				dprintf("Unknown profile subblock type 0x%02x!\n", blockstart[1]);
 				break;
 			}
 			blockstart = blockstart + blockstart[1];
