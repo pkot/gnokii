@@ -117,7 +117,7 @@ gn_error readtext(gn_sms_user_data *udata)
 	/* The maximum length of an uncompressed concatenated short message is
 	   255 * 153 = 39015 default alphabet characters */
 	char message_buffer[255 * GN_SMS_MAX_LENGTH];
-	int chars_read;
+	size_t chars_read;
 
 #ifndef	WIN32
 	if (isatty(0))
@@ -126,16 +126,18 @@ gn_error readtext(gn_sms_user_data *udata)
 
 	/* Get message text from stdin. */
 	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
-	if (chars_read == 0 && ferror(stdin)) {
-		fprintf(stderr, _("Couldn't read from stdin!\n"));
-		return GN_ERR_FAILED;
-	}
-	if (udata->type != GN_SMS_DATA_iMelody && chars_read > 0 && message_buffer[chars_read - 1] == '\n')
-		message_buffer[--chars_read] = 0;
-	if (chars_read > (sizeof(udata->u.text) - 1)) {
- 		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, (int)(sizeof(udata->u.text) - 1));
-		return GN_ERR_ENTRYTOOLONG;
+	if (chars_read == 0) {
+		if (ferror(stdin)) {
+			fprintf(stderr, _("Couldn't read from stdin!\n"));
+			return GN_ERR_FAILED;
+		}
 	} else {
+		if (udata->type != GN_SMS_DATA_iMelody && message_buffer[chars_read - 1] == '\n')
+			chars_read--;
+		if (chars_read > (sizeof(udata->u.text) - 1)) {
+	 		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, (int)(sizeof(udata->u.text) - 1));
+			return GN_ERR_ENTRYTOOLONG;
+		}
 		message_buffer[chars_read] = '\0';
 	}
 
