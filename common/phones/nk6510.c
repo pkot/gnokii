@@ -2706,7 +2706,7 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		}
 		break;
 	default:
-		error =  GN_ERR_UNKNOWN;
+		error =  GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
 out:
@@ -4527,7 +4527,7 @@ static gn_error NK6510_IncomingBattLevel(int messagetype, unsigned char *message
 		break;
 	default:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
-		return GN_ERR_UNKNOWN;
+		return GN_ERR_UNHANDLEDFRAME;
 	}
 	return GN_ERR_NONE;
 }
