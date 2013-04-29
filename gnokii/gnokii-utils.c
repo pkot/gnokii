@@ -138,8 +138,8 @@ gn_error readtext(gn_sms_user_data *udata)
 	 		fprintf(stderr, _("Input too long! (%d, maximum is %d)\n"), chars_read, (int)(sizeof(udata->u.text) - 1));
 			return GN_ERR_ENTRYTOOLONG;
 		}
-		message_buffer[chars_read] = '\0';
 	}
+	message_buffer[chars_read] = '\0';
 
 	udata->length = snprintf(udata->u.text, sizeof(udata->u.text), "%s", message_buffer);
 
