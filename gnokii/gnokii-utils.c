@@ -126,6 +126,10 @@ gn_error readtext(gn_sms_user_data *udata)
 
 	/* Get message text from stdin. */
 	chars_read = fread(message_buffer, 1, sizeof(message_buffer), stdin);
+	if (chars_read == 0 && ferror(stdin)) {
+		fprintf(stderr, _("Couldn't read from stdin!\n"));
+		return GN_ERR_FAILED;
+	}
 	if (udata->type != GN_SMS_DATA_iMelody && chars_read > 0 && message_buffer[chars_read - 1] == '\n')
 		message_buffer[--chars_read] = 0;
 	if (chars_read > (sizeof(udata->u.text) - 1)) {
