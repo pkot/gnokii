@@ -5821,7 +5821,7 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 			dprintf("Invalid or empty\n");
 			return GN_ERR_INVALIDLOCATION;
 		default:
-			dprintf("ERROR: unknown %i\n",message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
