@@ -34,14 +34,14 @@
 #include "gnokii-app.h"
 #include "gnokii.h"
 
-int askoverwrite(const char *filename, int mode)
+gnokii_app_mode askoverwrite(const char *filename, gnokii_app_mode mode)
 {
 	int confirm = -1;
 	char ans[5];
 	struct stat buf;
 
 	/* Ask before overwriting */
-	if ((mode == 1) && (stat(filename, &buf) == 0)) {
+	if ((mode == GNOKII_APP_MODE_Ask) && (stat(filename, &buf) == 0)) {
 		fprintf(stdout, _("File %s exists.\n"), filename);
 		while (confirm < 0) {
 			fprintf(stdout, _("Overwrite? (yes/no) "));
@@ -52,24 +52,20 @@ int askoverwrite(const char *filename, int mode)
 				confirm = 0;
 		}
 		if (!confirm)
-			return -1;
+			return GNOKII_APP_MODE_Cancel;
 	}
 	return mode;
 }
 
 /* FIXME - this should not ask for confirmation here - I'm not sure what calls it though */
-/* mode == 0 -> overwrite
- * mode == 1 -> ask
- * mode == 2 -> append
- */
-int writefile(char *filename, char *text, int mode)
+gnokii_app_mode writefile(char *filename, char *text, gnokii_app_mode mode)
 {
 	FILE *file;
 
 	mode = askoverwrite(filename, mode);
 
 	/* append */
-	if (mode == 2)
+	if (mode == GNOKII_APP_MODE_Append)
 		file = fopen(filename, "a");
 	/* overwrite */
 	else
@@ -77,24 +73,24 @@ int writefile(char *filename, char *text, int mode)
 
 	if (!file) {
 		fprintf(stderr, _("Can't open file %s for writing!\n"),  filename);
-		return -1;
+		return GNOKII_APP_MODE_Cancel;
 	}
 	fprintf(file, "%s\n", text);
 	fclose(file);
 	/* Return value is used as new mode. Set it to append mode */
-	return 2;
+	return GNOKII_APP_MODE_Append;
 }
 
-int writebuffer(const char *filename, const char *buffer, size_t nitems, int mode)
+gnokii_app_mode writebuffer(const char *filename, const char *buffer, size_t nitems, gnokii_app_mode mode)
 {
 	/* Return value is used as new mode. Set it to append mode */
-	int retval = 2;
+	gnokii_app_mode retval = GNOKII_APP_MODE_Append;
 	FILE *file;
 
 	mode = askoverwrite(filename, mode);
 
 	/* append */
-	if (mode == 2)
+	if (mode == GNOKII_APP_MODE_Append)
 		file = fopen(filename, "ab");
 	/* overwrite */
 	else
@@ -102,11 +98,11 @@ int writebuffer(const char *filename, const char *buffer, size_t nitems, int mod
 
 	if (!file) {
 		fprintf(stderr, _("Can't open file %s for writing!\n"),  filename);
-		retval = -1;
+		retval = GNOKII_APP_MODE_Cancel;
 		goto out;
 	}
 	if (fwrite(buffer, 1, nitems, file) != nitems)
-		retval = -1;
+		retval = GNOKII_APP_MODE_Cancel;
 	fclose(file);
 out:
 	return retval;

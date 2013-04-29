@@ -77,7 +77,8 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	gn_sms_folder_list folderlist;
 	gn_mms *message;
 	char *memory_type_string;
-	int start_message, end_message, count, mode = 1;
+	int start_message, end_message, count;
+	gnokii_app_mode mode = GNOKII_APP_MODE_Ask;
 	char filename[64];
 	gn_error error = GN_ERR_NONE;
 	gn_mms_format output_format_type = GN_MMS_FORMAT_TEXT;
@@ -115,7 +116,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			break;
 		/* force mode -- don't ask to overwrite */
 		case 'o':
-			mode = 0;
+			mode = GNOKII_APP_MODE_Overwrite;
 			break;
 		case GN_MMS_FORMAT_MIME:
 			/* FALL THROUGH */
@@ -166,7 +167,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 				error = fprint_mms(stdout, message);
 				fprintf(stdout, "\n");
 			}
-			if (del && mode != -1) {
+			if (del && mode != GNOKII_APP_MODE_Cancel) {
 				if (GN_ERR_NONE != gn_mms_delete(data, state))
 					fprintf(stderr, _("(delete failed)\n"));
 				else
@@ -177,7 +178,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			if ((error == GN_ERR_INVALIDLOCATION) && (end_message == INT_MAX) && (count > start_message)) {
 				error = GN_ERR_NONE;
 				/* Force exit */
-				mode = -1;
+				mode = GNOKII_APP_MODE_Cancel;
 				break;
 			}
 			fprintf(stderr, _("Getting MMS failed (location %d from memory %s)! (%s)\n"), count, memory_type_string, gn_error_print(error));
@@ -190,7 +191,7 @@ gn_error getmms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			break;
 		}
 		gn_mms_free(message);
-		if (mode == -1)
+		if (mode == GNOKII_APP_MODE_Cancel)
 			break;
 	}
 
@@ -256,5 +257,4 @@ gn_error deletemms(int argc, char *argv[], gn_data *data, struct gn_statemachine
 	 */
 	return error;
 }
-
 

@@ -23,6 +23,13 @@
 
 #define MAX_INPUT_LINE_LEN 512
 
+typedef enum {
+	GNOKII_APP_MODE_Cancel = -1,
+	GNOKII_APP_MODE_Overwrite,
+	GNOKII_APP_MODE_Ask,
+	GNOKII_APP_MODE_Append
+} gnokii_app_mode;
+
 /* shared globals */
 extern volatile bool bshutdown;
 

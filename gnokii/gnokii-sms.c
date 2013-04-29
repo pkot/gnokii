@@ -621,7 +621,8 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 	gn_sms_folder_list folderlist;
 	gn_sms message;
 	char *memory_type_string;
-	int start_message, end_message, count, mode = 1;
+	int start_message, end_message, count;
+	gnokii_app_mode mode = GNOKII_APP_MODE_Ask;
 	int folder_count = -1;
 	int messages_read = 0;
 	char filename[64];
@@ -693,11 +694,11 @@ gn_error getsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *s
 			break;
 		/* append mode */
 		case 'a':
-			mode = 2;
+			mode = GNOKII_APP_MODE_Append;
 			goto parsefile;
 		/* force mode -- don't ask to overwrite */
 		case 'F':
-			mode = 0;
+			mode = GNOKII_APP_MODE_Overwrite;
 		case 'f':
 parsefile:
 			if (optarg) {
@@ -813,10 +814,7 @@ parsefile:
 					gn_bmp_print(&bitmap, stdout);
 					if (*filename) {
 						error = GN_ERR_NONE;
-						/* mode == 1, interactive mode
-						 * mode == 0, overwrite mode
-						 */
-						if (mode && (stat(filename, &buf) == 0)) {
+						if (mode == GNOKII_APP_MODE_Ask && (stat(filename, &buf) == 0)) {
 							fprintf(stdout, _("File %s exists.\n"), filename);
 							fprintf(stdout, _("Overwrite? (yes/no) "));
 							gn_line_get(stdin, ans, 4);
@@ -852,7 +850,7 @@ parsefile:
 			}
 			if (message_text) {
 				fprintf(stdout, "%s\n", message_text);
-				if ((mode != -1) && *filename) {
+				if ((mode != GNOKII_APP_MODE_Cancel) && *filename) {
 					char buf[1024];
 					char *mbox = gn_sms2mbox(&message, "gnokii");
 					snprintf(buf, 1023, "%s", filename);
@@ -860,7 +858,7 @@ parsefile:
 					free(mbox);
 				}
 			}
-			if (del && mode != -1) {
+			if (del && mode != GNOKII_APP_MODE_Cancel) {
 				data->sms = &message;
 				if (GN_ERR_NONE != gn_sms_delete(data, state))
 					fprintf(stderr, _("(delete failed)\n"));
@@ -876,7 +874,7 @@ parsefile:
 			}
 			break;
 		}
-		if (mode == -1)
+		if (mode == GNOKII_APP_MODE_Cancel)
 			cont = false;
 		if (count >= end_message)
 			cont = false;
