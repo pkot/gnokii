@@ -1,4 +1,5 @@
 # Both commands below should result in the same PDU (test also sending to longest allowed number)
 # Empty SMS are allowed on purpose since commit 8c4f263c6c8b99d042231caf3006b95d54128a99
 echo | $GNOKII --sendsms +12345678901234567890 --validity 43200
+# Empty input files are allowed on purpose since commit 4a7ec39382c0d80328e0c4036da6fcf6a7da373f
 $GNOKII --sendsms +12345678901234567890 --validity 43200 </dev/null
