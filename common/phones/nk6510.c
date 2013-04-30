@@ -2706,6 +2706,7 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		}
 		break;
 	default:
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		error =  GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
@@ -5192,10 +5193,12 @@ static gn_error NK6510_IncomingRadio(int messagetype, unsigned char *message, in
 		return GN_ERR_NONE;
 		break;
 	default:
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
+		return GN_ERR_UNHANDLEDFRAME;
 		break;
 	}
 
-	return GN_ERR_UNHANDLEDFRAME;
+	return GN_ERR_NONE;
 }
 
 /*****************/
@@ -5297,7 +5300,7 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 			data->security_code->type = GN_SCT_None;
 			break;
 		default:
-			dprintf("Unknown!\n");
+			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
@@ -6443,6 +6446,7 @@ static gn_error NK6510_IncomingSound(int messagetype, unsigned char *message, in
 		break;
 
 	default:
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
 
