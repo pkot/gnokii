@@ -5921,6 +5921,8 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 	case 0x19:
 		dprintf("WAP setting successfully written!\n");
 		break;
+	case 0xf0:
+		return GN_ERR_NOTSUPPORTED;
 	default:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
