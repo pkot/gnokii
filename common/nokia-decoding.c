@@ -28,6 +28,39 @@
 #include "nokia-decoding.h"
 #include "compat.h"
 
+/**
+ * nokia_phonebook_error:
+ * @message: pointer to a #NK6510_MSG_PHONEBOOK or to a #NK7110_MSG_PHONEBOOK FBUS frame
+ * @length: length of the FBUS frame
+ *
+ * Translates the FBUS error code returned by nk6510.c or nk7110.c into a #gn_error code.
+ */
+gn_error nokia_phonebook_error(unsigned char *message, int length)
+{
+	if (length < 11)
+		return GN_ERR_UNHANDLEDFRAME;
+	if (message[6] != 0x0f) /* not found */
+		return GN_ERR_NONE;
+
+	switch (message[10]) {
+	case 0x0f: return GN_ERR_WRONGDATAFORMAT;	/* I got this when sending incorrect block (with 0 length) */
+	case 0x23: return GN_ERR_WRONGDATAFORMAT;	/* Block size does not match a definition */
+	case 0x27: return GN_ERR_NOTREADY;		/* Phone is turned off */
+	case 0x30: return GN_ERR_EMPTYLOCATION;
+	case 0x31: return GN_ERR_INVALIDMEMORYTYPE;
+	case 0x33: return GN_ERR_EMPTYLOCATION;
+	case 0x34: return GN_ERR_INVALIDLOCATION;
+	case 0x36: return GN_ERR_WRONGDATAFORMAT;	/* Name block is too long */
+	case 0x3b: return GN_ERR_EMPTYLOCATION;
+	case 0x3c: return GN_ERR_WRONGDATAFORMAT;	/* Both name and number are missing */
+	case 0x3d: return GN_ERR_FAILED;
+	case 0x3e: return GN_ERR_FAILED;
+	case 0x43: return GN_ERR_WRONGDATAFORMAT;	/* Probably there are incorrect characters to be saved */
+	default:
+		return GN_ERR_UNHANDLEDFRAME;
+	}
+}
+
 gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			  int blocks, int memtype, int speeddial_pos)
 {

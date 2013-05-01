@@ -2722,6 +2722,7 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 {
 	unsigned char blocks;
 	char *req = state->last_msg;
+	gn_error error;
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */
@@ -2742,6 +2743,9 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 			dprintf("Got read memory response back at unexpected time\n");
 			return GN_ERR_UNSOLICITED;
 		}
+		error = nokia_phonebook_error(message, length);
+		if (error != GN_ERR_NONE)
+			return error;
 		if (data->phonebook_entry) {
 			data->phonebook_entry->empty = true;
 			data->phonebook_entry->caller_group = GN_PHONEBOOK_GROUP_None;
@@ -2759,52 +2763,13 @@ static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *message
 		if (data->bitmap) {
 			data->bitmap->text[0] = '\0';
 		}
-		if (message[6] == 0x0f) { /* not found */
-			switch (message[10]) {
-			case 0x30:
-				return GN_ERR_EMPTYLOCATION;
-			case 0x33:
-				return GN_ERR_EMPTYLOCATION;
-			case 0x34:
-				return GN_ERR_INVALIDLOCATION;
-			case 0x31:
-				return GN_ERR_INVALIDMEMORYTYPE;
-			default:
-				return GN_ERR_UNKNOWN;
-			}
-		}
 		dprintf("Received phonebook info\n");
 		blocks     = message[21];
 		return phonebook_decode(message + 22, length - 21, data, blocks, message[11], 12);
-
 	case 0x0c: /* Write memory location */
-		if (message[6] == 0x0f) {
-			dprintf("response 0x10 error 0x%x\n", message[10]);
-			switch (message[10]) {
-			case 0x0f: return GN_ERR_WRONGDATAFORMAT; /* I got this when sending incorrect
-								     block (with 0 length) */
-			case 0x23: return GN_ERR_WRONGDATAFORMAT; /* block size does not match a definition */
-			case 0x36: return GN_ERR_WRONGDATAFORMAT; /* name block is too long */
-			case 0x3c: return GN_ERR_WRONGDATAFORMAT; /* both name and number are missing */
-			case 0x3d: return GN_ERR_FAILED;
-			case 0x3e: return GN_ERR_FAILED;
-			case 0x43: return GN_ERR_WRONGDATAFORMAT; /* Probably there are incorrect
-								     characters to be saved */
-			default:   return GN_ERR_UNHANDLEDFRAME;
-			}
-		}
-		break;
+		return nokia_phonebook_error(message, length);
 	case 0x10:
-		if (message[6] == 0x0f) {
-			dprintf("response 0x10 error 0x%x\n", message[10]);
-			switch (message[10]) {
-			case 0x33: return GN_ERR_WRONGDATAFORMAT;
-			case 0x34: return GN_ERR_INVALIDLOCATION;
-			case 0x3b: return GN_ERR_EMPTYLOCATION;
-			default:   return GN_ERR_UNHANDLEDFRAME;
-			}
-		}
-		break;
+		return nokia_phonebook_error(message, length);
 	default:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;

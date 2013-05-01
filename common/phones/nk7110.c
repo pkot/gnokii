@@ -666,6 +666,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 	unsigned char *blockstart;
 	unsigned char blocks;
 	int memtype, location;
+	gn_error error;
 
 	switch (message[3]) {
 	case 0x04:  /* Get status response */
@@ -682,6 +683,9 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 		}
 		break;
 	case 0x08:  /* Read Memory response */
+		error = nokia_phonebook_error(message, length);
+		if (error != GN_ERR_NONE)
+			return error;
 		memtype = message[11];
 		location = (message[12] << 8) + message[13];
 		if (data->phonebook_entry) {
@@ -701,23 +705,6 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 		if (data->bitmap) {
 			data->bitmap->text[0] = '\0';
 		}
-		if (message[6] == 0x0f) { /* not found */
-			switch (message[10]) {
-			case 0x27:
-				/* Phone is turned off */
-				return GN_ERR_NOTREADY;
-			case 0x30:
-				return GN_ERR_EMPTYLOCATION;
-			case 0x31:
-				return GN_ERR_INVALIDMEMORYTYPE;
-			case 0x33:
-				return GN_ERR_EMPTYLOCATION;
-			case 0x34:
-				return GN_ERR_INVALIDLOCATION;
-			default:
-				return GN_ERR_UNHANDLEDFRAME;
-			}
-		}
 		if ((drvinst->ll_memtype != memtype && drvinst->ll_memtype != NK7110_MEMORY_CB) || drvinst->ll_location != location) {
 			dprintf("skipping entry: ll_memtype: %d, memtype: %d, ll_location: %d, location: %d\n",
 				drvinst->ll_memtype, memtype, drvinst->ll_location, location);
@@ -728,15 +715,7 @@ static gn_error NK7110_IncomingPhonebook(int messagetype, unsigned char *message
 		blockstart = message + 18;
 		return phonebook_decode(blockstart, length - 17, data, blocks, message[11], 8);
 	case 0x0c:
-		if (message[6] == 0x0f) {
-			switch (message[10]) {
-			case 0x34: return GN_ERR_FAILED; /* invalid location ? */
-			case 0x3d: return GN_ERR_FAILED;
-			case 0x3e: return GN_ERR_FAILED;
-			default:   return GN_ERR_UNHANDLEDFRAME;
-			}
-		}
-		break;
+		return nokia_phonebook_error(message, length);
 	case 0x10:
 		dprintf("Entry successfully deleted!\n");
 		break;

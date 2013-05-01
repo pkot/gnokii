@@ -142,6 +142,7 @@ gn_error file_xpm_load(char *filename, gn_bmp *bitmap);
 
 int ringtone_sms_encode(unsigned char *message, gn_ringtone *ringtone);
 int imelody_sms_encode(unsigned char *imelody, unsigned char *message);
+gn_error nokia_phonebook_error(unsigned char *message, int length);
 gn_error phonebook_decode(unsigned char *blockstart, int length,
 			  gn_data *data, int blocks, int memtype, int speeddial_pos);
 gn_error calnote_decode(unsigned char *message, int length, gn_data *data);
