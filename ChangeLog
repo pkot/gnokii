@@ -38,6 +38,9 @@
     o add optional authentication during the initialization phase
                                                         (Paweł Kot)
     o implement GN_OP_Ping operation                    (Paweł Kot)
+    o don't overwrite user-provided TP-Validity-Period; this means
+      that the default now is 3 days, like in other drivers,
+      instead of 4 days forced by the driver        (Daniele Forsi)
  * fake driver updates
     o always autodetect if PDU SMS starts with SMSC (Daniele Forsi)
     o make it usable with gnome-phone-manager       (Daniele Forsi)
