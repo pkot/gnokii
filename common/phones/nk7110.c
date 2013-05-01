@@ -916,13 +916,13 @@ static gn_error NK7110_WritePhonebookLocation(gn_data *data, struct gn_statemach
 						j = strlen(entry->subentries[i].data.number);
 						j = char_unicode_encode((string + 5), entry->subentries[i].data.number, j);
 						string[4] = j;
-						count += PackBlock(0x0b, j + 6, block++, string, req + count);
+						count += PackBlock(0x0b, j + 5, block++, string, req + count);
 					}
 				} else {
 					j = strlen(entry->subentries[i].data.number);
 					j = char_unicode_encode((string + 1), entry->subentries[i].data.number, j);
 					string[0] = j;
-					count += PackBlock(entry->subentries[i].entry_type, j + 2, block++, string, req + count);
+					count += PackBlock(entry->subentries[i].entry_type, j + 1, block++, string, req + count);
 				}
 		}
 		req[17] = block - 1;
