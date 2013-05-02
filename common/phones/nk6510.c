@@ -4484,12 +4484,13 @@ static gn_error SetOperatorBitmap(gn_data *data, struct gn_statemachine *state)
 
 static gn_error NK6510_IncomingBattLevel(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
+	dprintf("Incoming battery\n");
 	switch (message[3]) {
 	case 0x0B:
 		if (!data->battery_level) return GN_ERR_INTERNALERROR;
 		*(data->battery_unit) = GN_BU_Percentage;
 		*(data->battery_level) = message[9] * 100 / state->driver.phone.max_battery_level;
-		dprintf("Battery level %f\n\n", *(data->battery_level));
+		dprintf("Battery level %f\n", *(data->battery_level));
 		break;
 	default:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
