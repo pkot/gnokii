@@ -2705,6 +2705,9 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 			}
 		}
 		break;
+	case 0xf0:
+		error =  GN_ERR_NOTSUPPORTED;
+		break;
 	default:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		error =  GN_ERR_UNHANDLEDFRAME;
