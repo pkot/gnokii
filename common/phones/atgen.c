@@ -1028,7 +1028,6 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 	if (len >= sizeof(number))
 		return GN_ERR_ENTRYTOOLONG;
 
-
 	len = at_encode(drvinst->charset, name, sizeof(name),
 			data->phonebook_entry->name,
 			strlen(data->phonebook_entry->name)) - 1;
@@ -1036,7 +1035,7 @@ static gn_error AT_WritePhonebook(gn_data *data, struct gn_statemachine *state)
 		return GN_ERR_ENTRYTOOLONG;
 
 	len = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%d,\"%s\"\r\n",
-		       data->phonebook_entry->location,
+		       data->phonebook_entry->location + drvinst->memoryoffset,
 		       number,
 		       data->phonebook_entry->number[0] == '+' ? GN_GSM_NUMBER_International : GN_GSM_NUMBER_Unknown,
 		       name);
