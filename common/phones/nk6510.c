@@ -2677,7 +2677,12 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		if (message[4] == 0x0d)
 			error = GN_ERR_WAITING;
 		break;
-	case 0x73:
+	case 0x73: /* putfile */
+		if (message[4] == 0x06) {
+			dprintf("Invalid path\n");
+			error = GN_ERR_INVALIDLOCATION;
+			goto out;
+		}
 		if (data->file) {
 		        int i;
 			if (message[4] == 0x0c) {
