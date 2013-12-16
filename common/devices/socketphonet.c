@@ -134,6 +134,9 @@ size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemach
 	frame[3] = addr.spn_resource;
 	frame[4] = received >> 8;
 	frame[5] = received & 0xff;
+	/* The following bytes will be printed during debug so zero them to silence valgrind */
+	frame[6] = 0;
+	frame[7] = 0;
 	return received + 8;
 }
 
