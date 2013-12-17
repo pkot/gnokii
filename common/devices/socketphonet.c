@@ -126,7 +126,7 @@ size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemach
 	}
 
 	/* Hack!!! Rebuild header as expected by phonet_rx_statemachine() */
-	/* FIXME: why we need to add another 2 bytes? */
+	/* Need to add 2 bytes to re-add spn_obj and spn_dev that the kernel driver doesn't return as payload */
 	received += 2;
 	frame[0] = FBUS_PHONET_DKU2_FRAME_ID;
 	frame[1] = FBUS_PHONET_BLUETOOTH_DEVICE_PC;
