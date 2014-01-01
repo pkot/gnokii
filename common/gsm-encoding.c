@@ -1211,8 +1211,7 @@ int utf8_decode(char *outstring, size_t outlen, const char *instring, size_t inl
 	if (nconv == (size_t)-1)
 		perror("utf8_decode/iconv");
 	else
-		retval = 
-	iconv_close(cd);
+		retval = iconv_close(cd);
 	*pout = 0;
 #else
 	unsigned char *pin, *pout;
