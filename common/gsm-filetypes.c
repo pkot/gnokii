@@ -828,7 +828,7 @@ gn_error file_ngg_load(FILE *file, gn_bmp *bitmap, gn_phone *info)
 
 	/* Some programs writes here fileinfo */
 	if (fread(buffer, 1, 1, file) == 1) {
-	        dprintf("Fileinfo: %c",buffer[0]);
+		dprintf("Fileinfo: %c",buffer[0]);
 		while (fread(buffer, 1, 1, file) == 1) {
 			if (buffer[0] != 0x0A) dprintf("%c", buffer[0]);
 		}
@@ -1248,10 +1248,10 @@ void file_nsl_save(FILE *file, gn_bmp *bitmap, gn_phone *info)
 
 	gn_bmp_resize(bitmap, GN_BMP_StartupLogo, info);
 
-        header[4] = (bitmap->size + 6) / 256;
-        header[5] = (bitmap->size + 6) % 256;
-        header[10] = bitmap->size / 256;
-        header[11] = bitmap->size % 256;
+	header[4] = (bitmap->size + 6) / 256;
+	header[5] = (bitmap->size + 6) % 256;
+	header[10] = bitmap->size / 256;
+	header[11] = bitmap->size % 256;
 	fwrite(header, 1, sizeof(header), file);
 	
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);

@@ -65,7 +65,7 @@ int unsetenv(const char *name)
 	return setenv(name, "", 1);
 }
 #endif
-                  
+
 #ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #endif

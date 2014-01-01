@@ -1325,11 +1325,11 @@ static gn_error AT_GetSMSStatusInternal(gn_data *data, struct gn_statemachine *s
 	if (!data->sms_status)
 		return GN_ERR_INTERNALERROR;
 
-        if (data->memory_status) {
-                ret = AT_SetSMSMemoryType(data->memory_status->memory_type,  state);
-                if (ret != GN_ERR_NONE)
-                        return ret;
-        }
+	if (data->memory_status) {
+		ret = AT_SetSMSMemoryType(data->memory_status->memory_type,  state);
+		if (ret != GN_ERR_NONE)
+			return ret;
+	}
 
 	ret = sm_message_send(9, GN_OP_GetSMSStatus, "AT+CPMS?\r", state);
 	if (ret != GN_ERR_NONE)

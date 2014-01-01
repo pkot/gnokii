@@ -286,8 +286,8 @@ GNOKII_API gn_error gn_lib_addressbook_memstat( struct gn_statemachine *state,
 
 	gn_data_clear(data);
 	memset(&memstat, 0, sizeof(memstat));
-        memstat.memory_type = memory_type;
-        data->memory_status = &memstat;
+	memstat.memory_type = memory_type;
+	data->memory_status = &memstat;
 
 	error = gn_sm_functions(GN_OP_GetMemoryStatus, data, state);
 	if (error == GN_ERR_NONE) {

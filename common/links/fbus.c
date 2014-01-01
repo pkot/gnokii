@@ -93,7 +93,7 @@ static int send_command(char *cmd, int len, struct gn_statemachine *state)
 	/* Experimental timeout */
 	timeout.tv_sec	= 0;
 	timeout.tv_usec	= 500000;
-        
+
 	res = device_select(&timeout, state);
 	/* Read from the port only when select succeeds */
 	while (res > 0 && waitformore) {

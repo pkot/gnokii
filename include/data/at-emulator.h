@@ -40,7 +40,7 @@ extern struct gn_statemachine	*sm;
 extern gn_data		data;
 
 	/* Definition of modem result codes - these are returned to "terminal"
-       numerically or as a string depending on the setting of S12 */
+	   numerically or as a string depending on the setting of S12 */
 
 	/* FIX ME - Numeric values for everything except OK and ERROR
 	   are guesses as I've not got an AT reference handy.   HAB */

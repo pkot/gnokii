@@ -501,7 +501,7 @@ GNOKII_API int gn_vcardstr2phonebook(const char *vcard, gn_phonebook_entry *entr
 			entry->subentries[entry->subentries_count].data.id = atoi(buf + strlen("X-GSM-CALLERGROUPID:"));
 			entry->subentries[entry->subentries_count].entry_type = GN_PHONEBOOK_ENTRY_ExtGroup;
 			entry->subentries_count++;
-        		continue;
+			continue;
 		}
 
 		if (BEGINS("END:VCARD"))
