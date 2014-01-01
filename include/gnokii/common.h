@@ -893,4 +893,11 @@ typedef enum {
 	GN_AUTH_TYPE_BINARY
 } gn_auth_type;
 
+/* This is used with GN_OP_Passthrough */
+typedef struct {
+	int type;
+	int length;
+	unsigned char *buffer;
+} gn_raw_buffer;
+
 #endif	/* _gnokii_common_h */

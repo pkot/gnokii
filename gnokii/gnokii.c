@@ -443,9 +443,31 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_ar
 #ifdef DEBUG
 static int foogle(int argc, char *argv[])
 {
-	/* Fill in what you would like to test here... */
-	/* remember to call businit(); if you need to communicate with your phone */
-	return GN_ERR_NONE;
+	gn_error error;
+
+	/* For demonstration purposes we're going to send an "Identify" frame */
+	unsigned char req[] = {00, 01, 00, 07, 01, 00}; /* Identify nk6510 */
+	gn_raw_buffer write_buffer = {0x1b, sizeof(req), req};
+	gn_raw_buffer read_buffer = {0, 0, NULL}; /* if buffer==NULL libgnokii will allocate memory */
+
+	if (businit() != 0)
+		return GN_ERR_FAILED;
+
+	data->write_buffer = &write_buffer;
+	data->read_buffer = &read_buffer;
+	error = gn_sm_functions(GN_OP_Passthrough, data, state);
+	if (error == GN_ERR_NONE) {
+		dprintf("Foogle received a frame of type 0x%02x and length %d\n",
+			data->read_buffer->type, data->read_buffer->length);
+		/* Add here the code to parse the frame */
+	} else {
+		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
+	}
+
+	free(data->read_buffer->buffer);
+	data->read_buffer->buffer = NULL;
+
+	return error;
 }
 #endif
 

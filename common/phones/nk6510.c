@@ -273,6 +273,8 @@ static gn_error NK6510_GetToDo(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_DeleteAllToDoLocations(gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_WriteToDo(gn_data *data, struct gn_statemachine *state);
 
+static gn_error NK6510_Passthrough(gn_data *data, struct gn_statemachine *state);
+
 static gn_error NK6510_IncomingIdentify(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingPhonebook(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *buffer, int length, gn_data *data, struct gn_statemachine *state);
@@ -295,6 +297,8 @@ static gn_error NK6510_IncomingRadio(int messagetype, unsigned char *message, in
 static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+
+static gn_error NK6510_IncomingPassthrough(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
 static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
 static int get_memory_type(gn_memory_type memory_type);
@@ -516,6 +520,8 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_GetMMS(data, state);
 	case GN_OP_DeleteMMS:
 		return NK6510_DeleteMMS(data, state);
+	case GN_OP_Passthrough:
+		return NK6510_Passthrough(data, state);
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
@@ -6468,6 +6474,54 @@ static gn_error NK6510_PlayTone(gn_data *data, struct gn_statemachine *state)
 
 	dprintf("Playing tone\n");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_SOUND, 34);
+}
+
+/***************/
+/* PASSTHROUGH */
+/***************/
+
+static gn_error NK6510_IncomingPassthrough(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	dprintf("Incoming Passthrough\n");
+	if (!data || !data->read_buffer)
+		return GN_ERR_INTERNALERROR;
+
+	data->read_buffer->type = messagetype;
+	/*
+	  Always return actual frame length even if the caller provided a smaller buffer
+	  so that the caller can retry with a bigger buffer.
+	 */
+	data->read_buffer->length = length;
+	if (!data->read_buffer->buffer) {
+		data->read_buffer->buffer = malloc(length);
+		if (!data->read_buffer->buffer)
+			return GN_ERR_MEMORYFULL;
+	}
+	memcpy(data->read_buffer->buffer, message, GNOKII_MIN(data->read_buffer->length, length));
+
+	return GN_ERR_NONE;
+}
+
+static gn_error NK6510_Passthrough(gn_data *data, struct gn_statemachine *state)
+{
+	gn_error error;
+	gn_incoming_function_type *incoming_functions;
+	gn_incoming_function_type passthrough_functions[] = {
+		{data->write_buffer->type, NK6510_IncomingPassthrough},
+		{0, NULL}
+	};
+
+	incoming_functions = state->driver.incoming_functions;
+	state->driver.incoming_functions = passthrough_functions;
+
+	if (sm_message_send(data->write_buffer->length, data->write_buffer->type, data->write_buffer->buffer, state))
+		error = GN_ERR_NOTREADY;
+	else
+		error = sm_block(data->write_buffer->type, data, state);
+
+	state->driver.incoming_functions = incoming_functions;
+
+	return error;
 }
 
 /********************************/
