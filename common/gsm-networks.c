@@ -1327,7 +1327,7 @@ GNOKII_API char *gn_country_name_get(char *country_code)
 
 GNOKII_API char *gn_country_code_get(char *country_name)
 {
-	/* 
+	/*
 	 * If the iso-codes package is installed and NLS is enabled
 	 * @country_name must be given in the current language.
 	 */

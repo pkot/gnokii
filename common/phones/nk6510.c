@@ -3922,7 +3922,7 @@ static gn_error NK6510_WriteCalTodo_S40_30(gn_data *data, struct gn_statemachine
 	req[41] = calnote->recurrence % 256;
 
 	/* Occurrences */
-	/* FIXME: it doesn't work 
+	/* FIXME: it doesn't work
 	if (calnote->recurrence) {
 		req[46] = calnote->occurrences / 256;
 		req[47] = calnote->occurrences % 256;

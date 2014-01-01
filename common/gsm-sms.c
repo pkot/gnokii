@@ -11,7 +11,7 @@
   Copyright (C) 2002-2003 Ladis Michl
   Copyright (C) 2003-2004 BORBELY Zoltan
   Copyright (C) 2006      Igor Popik
-  
+
   Library for parsing and creating Short Messages (SMS).
 
 */
@@ -1853,7 +1853,7 @@ static gn_error sms_send_single(gn_data *data, struct gn_statemachine *state)
 	return error;
 }
 
-/* 
+/*
  * FIXME: we stop sending multipart message on first error. We may end up
  * with few messages send, and few failed.  We're not able to resend only
  * failed ones.

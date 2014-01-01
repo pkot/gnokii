@@ -694,9 +694,9 @@ GNOKII_API void gn_phonebook_entry_sanitize(gn_phonebook_entry *entry)
 	}
 }
 
-/* 
+/*
  * This very small function is just to make it easier to clear
- * the data struct every time one is created 
+ * the data struct every time one is created
  */
 GNOKII_API void gn_data_clear(gn_data *data)
 {

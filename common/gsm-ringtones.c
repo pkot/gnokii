@@ -10,7 +10,7 @@
   Copyright (C) 2001      Chris Kemp, Marcin Wiacek
   Copyright (C) 2002      Pavel Machek <pavel@ucw.cz>
   Copyright (C) 2002-2004 Pawel Kot
-  Copyright (C) 2002-2003 BORBELY Zoltan  
+  Copyright (C) 2002-2003 BORBELY Zoltan
 
   This file provides support for ringtones.
 

@@ -76,7 +76,7 @@
 
 /* Defines */
 
-#ifndef AF_LOCAL 
+#ifndef AF_LOCAL
 #  ifdef AF_UNIX
 #    define AF_LOCAL AF_UNIX
 #  else

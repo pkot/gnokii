@@ -57,7 +57,7 @@ int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state)
 #define	DEVINSTANCE(s) (*((fbus_usb_interface **)(&(s)->device.device_instance)))
 
 /*
- * Helper function to usbfbus_find_interfaces 
+ * Helper function to usbfbus_find_interfaces
  */
 static void find_eps(struct fbus_usb_interface_transport *iface,
 		     struct usb_interface_descriptor data_iface,
@@ -68,9 +68,9 @@ static void find_eps(struct fbus_usb_interface_transport *iface,
 	if (data_iface.bNumEndpoints == 2) {
 		ep0 = data_iface.endpoint;
 		ep1 = data_iface.endpoint + 1;
-		if ((ep0->bEndpointAddress & USB_ENDPOINT_IN) && 
-		    ((ep0->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK) && 
-		    !(ep1->bEndpointAddress & USB_ENDPOINT_IN) && 
+		if ((ep0->bEndpointAddress & USB_ENDPOINT_IN) &&
+		    ((ep0->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK) &&
+		    !(ep1->bEndpointAddress & USB_ENDPOINT_IN) &&
 		    ((ep1->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK)) {
 			*found_active = 1;
 			iface->data_active_setting = data_iface.bAlternateSetting;
@@ -78,9 +78,9 @@ static void find_eps(struct fbus_usb_interface_transport *iface,
 			iface->data_endpoint_read = ep0->bEndpointAddress;
 			iface->data_endpoint_write = ep1->bEndpointAddress;
 		}
-		if (!(ep0->bEndpointAddress & USB_ENDPOINT_IN) && 
-		    ((ep0->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK) && 
-		    (ep1->bEndpointAddress & USB_ENDPOINT_IN) && 
+		if (!(ep0->bEndpointAddress & USB_ENDPOINT_IN) &&
+		    ((ep0->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK) &&
+		    (ep1->bEndpointAddress & USB_ENDPOINT_IN) &&
 		    ((ep1->bmAttributes & USB_ENDPOINT_TYPE_MASK) == USB_ENDPOINT_TYPE_BULK)) {
 			*found_active = 1;
 			iface->data_active_setting = data_iface.bAlternateSetting;
@@ -97,7 +97,7 @@ static void find_eps(struct fbus_usb_interface_transport *iface,
 }
 
 /*
- * Helper function to usbfbus_find_interfaces 
+ * Helper function to usbfbus_find_interfaces
  */
 static int find_fbus_data_interface(unsigned char *buffer, int buflen,
 				    struct usb_config_descriptor config,
@@ -180,7 +180,7 @@ static int get_iface_string(struct usb_dev_handle *usb_handle, char **string, in
 }
 
 /*
- * Helper function to usbfbus_find_interfaces 
+ * Helper function to usbfbus_find_interfaces
  */
 static struct fbus_usb_interface_transport *check_iface(struct usb_device *dev, int c, int i, int a,
 					      struct fbus_usb_interface_transport *current)
@@ -272,7 +272,7 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 
 	/* Take N-th device on the list */
 	while (--n && current) {
-		tmp = current; 
+		tmp = current;
 		current = current->next;
 		/* free the previous element on the list -- won't be needed anymore */
 		free(tmp);
@@ -288,19 +288,19 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 		usb_handle = usb_open(current->device);
 		if (usb_handle == NULL)
 			goto cleanup_list;
-		get_iface_string(usb_handle, &DEVINSTANCE(state)->manufacturer, 
+		get_iface_string(usb_handle, &DEVINSTANCE(state)->manufacturer,
 			current->device->descriptor.iManufacturer);
-		get_iface_string(usb_handle, &DEVINSTANCE(state)->product, 
+		get_iface_string(usb_handle, &DEVINSTANCE(state)->product,
 			current->device->descriptor.iProduct);
-		get_iface_string(usb_handle, &DEVINSTANCE(state)->serial, 
+		get_iface_string(usb_handle, &DEVINSTANCE(state)->serial,
 			current->device->descriptor.iSerialNumber);
-		get_iface_string(usb_handle, &DEVINSTANCE(state)->configuration, 
+		get_iface_string(usb_handle, &DEVINSTANCE(state)->configuration,
 			current->configuration_description);
-		get_iface_string(usb_handle, &DEVINSTANCE(state)->control_interface, 
+		get_iface_string(usb_handle, &DEVINSTANCE(state)->control_interface,
 			current->control_interface_description);
-		get_iface_string(usb_handle, &DEVINSTANCE(state)->data_interface_idle, 
+		get_iface_string(usb_handle, &DEVINSTANCE(state)->data_interface_idle,
 			current->data_interface_idle_description);
-		get_iface_string(usb_handle, &DEVINSTANCE(state)->data_interface_active, 
+		get_iface_string(usb_handle, &DEVINSTANCE(state)->data_interface_active,
 			current->data_interface_active_description);
 		usb_close(usb_handle);
 		retval = 1;
@@ -412,10 +412,10 @@ static int usbfbus_disconnect_request(struct gn_statemachine *state)
 	if (ret < 0)
 		dprintf("Can't set data idle setting %d\n", ret);
 	ret = usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);
-	if (ret < 0) 
+	if (ret < 0)
 		dprintf("Can't release data interface %d\n", ret);
 	ret = usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->control_interface);
-	if (ret < 0) 
+	if (ret < 0)
 		dprintf("Can't release control interface %d\n", ret);
 	ret = usb_close(DEVINSTANCE(state)->interface->dev_data);
 	if (ret < 0)

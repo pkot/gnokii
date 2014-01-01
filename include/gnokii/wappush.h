@@ -8,8 +8,8 @@
 
   Copyright (C) 2006 Igor Popik
 
-  Include file for the binary SMS push functions. 
-  
+  Include file for the binary SMS push functions.
+
   Based on wapforum document WAP-167-ServiceInd-20010731-a
 
 */

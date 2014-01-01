@@ -110,7 +110,7 @@ typedef struct {
 	gn_mms *mms;
 } gn_data;
 
-/* 
+/*
  * A structure to hold information about the particular link
  * The link comes 'under' the phone
  */

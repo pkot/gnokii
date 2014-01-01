@@ -36,7 +36,7 @@
 /* ugly hack, but we need GN_OP_AT_Ring -- bozo */
 #include "phones/atgen.h"
 
-/* 
+/*
  * FIXME - when sending an AT command while another one is still in progress,
  * the old command is aborted and the new ignored. the result is _one_ error
  * message from the phone.
@@ -72,7 +72,7 @@ static bool atbus_open(int mode, char *device, struct gn_statemachine *sm)
 		return false;
 	}
 	if (mode) {
-		/* 
+		/*
 		 * make 7110 with dlr-3 happy. the nokia dlr-3 cable provides
 		 * hardware handshake lines but is, at least at initialization,
 		 * slow. to be properly detected, state changes must be longer
@@ -125,9 +125,9 @@ int numchar(unsigned char *str, unsigned char ch)
 	return count;
 }
 
-/* 
+/*
  * rx state machine for receive handling. called once for each character
- * received from the phone. 
+ * received from the phone.
  */
 static void atbus_rx_statemachine(unsigned char rx_char, struct gn_statemachine *sm)
 {

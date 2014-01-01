@@ -50,7 +50,7 @@
 #ifdef HAVE_BLUETOOTH_NETBT	/* FreeBSD / netbt */
 
 #include <bluetooth.h>
-#include <sdp.h> 
+#include <sdp.h>
 
 #define GNOKII_SERIAL_PORT_CLASS	SDP_SERVICE_CLASS_SERIAL_PORT
 #define GNOKII_DIALUP_NETWORK_CLASS	SDP_SERVICE_CLASS_DIALUP_NETWORKING
@@ -109,7 +109,7 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 	for (i = 0; i < values_len; i ++) {
 		values[i].flags = SDP_ATTR_INVALID;
 		values[i].attr = 0;
-		values[i].vlen = BSIZE; 
+		values[i].vlen = BSIZE;
 		values[i].value = buffer[i];
 	}
 

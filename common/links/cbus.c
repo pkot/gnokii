@@ -275,9 +275,9 @@ static bool cbus_open_serial(char *device, struct gn_statemachine *state)
 	return true;
 }
 
-/* 
+/*
  * This is the main loop function which must be called regularly
- * timeout can be used to make it 'busy' or not 
+ * timeout can be used to make it 'busy' or not
  */
 static gn_error cbus_loop(struct timeval *timeout, struct gn_statemachine *state)
 {

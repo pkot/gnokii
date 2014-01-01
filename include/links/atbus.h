@@ -9,7 +9,7 @@
   Copyright (C) 1999-2000 Hugh Blemings, Pavel Janik
   Copyright (C) 2001      Manfred Jonsson <manfred.jonsson@gmx.de>
   Copyright (C) 2002      Ladis Michl
-  
+
 */
 
 #ifndef _gnokii_atbus_h
@@ -19,9 +19,9 @@
 
 gn_error atbus_initialise(int mode, struct gn_statemachine *state);
 
-/* 
+/*
  * Define some result/error codes internal to the AT command functions.
- * Also define a code for an unterminated message. 
+ * Also define a code for an unterminated message.
  */
 typedef enum {
 	GN_AT_NONE,		/* NO or unknown result code */
@@ -36,7 +36,7 @@ typedef enum {
 
 typedef struct {
 	/* The buffer for phone responses not only holds the data from the
-	 * phone but also a byte which holds the compiled status of the 
+	 * phone but also a byte which holds the compiled status of the
 	 * response. it is placed at [0]. */
 	char *rbuf;
 	int rbuf_size;

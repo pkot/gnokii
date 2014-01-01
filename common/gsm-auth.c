@@ -7,7 +7,7 @@
   This file is part of gnokii.
 
   Copyright (C) 2011 Paweł Kot
-  
+
   Functions for initialization authentication.
 
 */

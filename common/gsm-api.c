@@ -43,17 +43,17 @@
 
 
 #if defined(WIN32) && defined(_USRDLL)
-/* 
+/*
  * Define the entry point for the DLL application.
  *	
  * We don't do anything special here (yet) but the code is needed
  * in order to create a DLL.
  */
-BOOL APIENTRY DllMain(HANDLE hModule, 
-		      DWORD  ul_reason_for_call, 
+BOOL APIENTRY DllMain(HANDLE hModule,
+		      DWORD  ul_reason_for_call,
 		      LPVOID lpReserved)
 {
-	/* 
+	/*
 	 * For now this is enough to satisfy the compiler and linker.
 	 * Currently no extra code is needed for initializing or
 	 * deinitializing of the DLL.

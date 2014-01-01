@@ -8,7 +8,7 @@
 
   Copyright (C) 2002 Markus Plail
 
-  This file provides decoding functions specific to the newer 
+  This file provides decoding functions specific to the newer
   Nokia 7110/6510 series.
 
 */

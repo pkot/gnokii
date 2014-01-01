@@ -42,7 +42,7 @@ typedef enum {
 
 /*
  * Content-Type
- * 
+ *
  * WAP-209-MMSEncapsulation-20020105-a - Chapter 7.2.4. "Content-Type field"
  * WAP-230-WSP-20010705-a Appendix A, Table 40 refers to http://www.wapforum.org/wina
  * See http://www.wapforum.org/wina/wsp-content-type.htm for full list

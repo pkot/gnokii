@@ -15,7 +15,7 @@
   Copyright (C) 2002-2004 BORBELY Zoltan
   Copyright (C) 2002      Marcin Wiacek
 
-  This file provides decoding functions specific to the newer 
+  This file provides decoding functions specific to the newer
   Nokia 7110/6510 series.
 
 */
@@ -23,7 +23,7 @@
 #include "config.h"
 
 #include <time.h>
-#include "gnokii-internal.h" 
+#include "gnokii-internal.h"
 #include "gnokii.h"
 #include "nokia-decoding.h"
 #include "compat.h"
@@ -91,7 +91,7 @@ gn_error phonebook_decode(unsigned char *blockstart, int length, gn_data *data,
 			else
 				dprintf("ERROR: no subentry allocated\n");
 		}
- 
+
 
 		switch ((gn_phonebook_entry_type)blockstart[0]) {
 		case GN_PHONEBOOK_ENTRY_Pointer:  /* Pointer */

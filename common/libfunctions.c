@@ -361,7 +361,7 @@ GNOKII_API int gn_lib_get_pb_num_subentries( struct gn_statemachine *state )
 }
 
 GNOKII_API gn_error gn_lib_get_pb_subentry( struct gn_statemachine *state, const int index,
-	gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, 
+	gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type,
 	const char **number )
 {
 	if (entry_type)	 *entry_type  = state->u.pb_entry.subentries[index].entry_type;
@@ -517,7 +517,7 @@ static struct { gn_connection_type ct; const char *str; } connectiontypes[] = {
 };
 
 GNOKII_API gn_connection_type gn_get_connectiontype(const char *connection_type_string)
-{ 
+{
 	int i;
 	for (i = 0; i < sizeof(connectiontypes)/sizeof(connectiontypes[0]); i++)
 		if (!strcasecmp(connection_type_string, connectiontypes[i].str))

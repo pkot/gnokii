@@ -1013,9 +1013,9 @@ static bool cfg_get_log_target(gn_log_target *t, const char *opt)
 /*
  * get_locations() returns the list of possible config file locations that
  * may be used on the given system.  It returns the array of paths to the
- * config files.  @retval parameter denotes how many locations are returned. 
+ * config files.  @retval parameter denotes how many locations are returned.
  * The resulting array needs to be freed afterwards.
- */ 
+ */
 #ifdef WIN32
 /* Windows version */
 static char **get_locations(int *retval)

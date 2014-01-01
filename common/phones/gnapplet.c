@@ -235,7 +235,7 @@ static gn_error gnapplet_sms_pdu_decode(gn_sms_raw *rawsms, const unsigned char 
 			case GN_SMS_VP_RelativeFormat: l = 1; break;
 			default: l = 7; break;
 			}
-			memcpy(rawsms->validity, pos, l); 
+			memcpy(rawsms->validity, pos, l);
 			pos += l;
 			break;
 		case 13:/* TP-DT */
@@ -346,7 +346,7 @@ static gn_error gnapplet_sms_pdu_encode(unsigned char *buf, int *len, const gn_s
 			case GN_SMS_VP_RelativeFormat: l = 1; break;
 			default: l = 7; break;
 			}
-			memcpy(pos, rawsms->validity, l); 
+			memcpy(pos, rawsms->validity, l);
 			pos += l;
 			break;
 		case 13:/* TP-DT */

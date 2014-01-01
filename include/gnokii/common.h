@@ -154,7 +154,7 @@ typedef struct {
 						      * - Position
 						      * - Aliasname
 						      * - DTMF
-						      * - User ID 
+						      * - User ID
 						      * - all postal fields:
 						      *  - PO Box
 						      *  - Addition
@@ -249,7 +249,7 @@ typedef enum {
 	GN_PHONEBOOK_GROUP_Vips,
 	GN_PHONEBOOK_GROUP_Friends,
 	GN_PHONEBOOK_GROUP_Work,
-	GN_PHONEBOOK_GROUP_Others, 
+	GN_PHONEBOOK_GROUP_Others,
 	GN_PHONEBOOK_GROUP_None,
 } gn_phonebook_group_type;
 

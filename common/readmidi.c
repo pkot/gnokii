@@ -159,8 +159,8 @@ void midifile(struct MF *mf);
 
 /*
  * midifile 1.11
- * 
- * Read and write a MIDI file.  Externally-assigned function pointers are 
+ *
+ * Read and write a MIDI file.  Externally-assigned function pointers are
  * called upon recognizing things in the file.
  *
  * Original release ?
@@ -178,7 +178,7 @@ void midifile(struct MF *mf);
  *          An in-depth description of the spec can also be found
  *          in the article "Introducing Standard MIDI Files", published
  *          in Electronic Musician magazine, April, 1989.
- * 
+ *
  */
 
 #include "config.h"
@@ -626,7 +626,7 @@ static void biggermsg(struct MF *mf)
  * format      0 - Single multi-channel track
  *             1 - Multiple simultaneous tracks
  *             2 - One or more sequentially independent
- *                 single track patterns                
+ *                 single track patterns
  * ntracks     The number of tracks in the file.
  * division    This is kind of tricky, it can represent two
  *             things, depending on whether it is positive or negative
@@ -645,7 +645,7 @@ static void biggermsg(struct MF *mf)
  *             Files 1.0 spec for more details.
  * fp          This should be the open file pointer to the file you
  *             want to write.  It will have be a global in order
- *             to work with Mf_putc.  
+ *             to work with Mf_putc.
  */
 void mfwrite(struct MF *mf, int format, int ntracks, int division)
 {
@@ -756,14 +756,14 @@ static void mf_write_header_chunk(struct MF *mf, int format, int ntracks, int di
 
 /*
  * mf_write_midi_event()
- * 
+ *
  * Library routine to mf_write a single MIDI track event in the standard MIDI
  * file format. The format is:
  *
  *                    <delta-time><event>
  *
  * In this case, event can be any multi-byte midi message, such as
- * "note on", "note off", etc.      
+ * "note on", "note off", etc.
  *
  * delta_time - the time in ticks since the last event.
  * type - the type of meta event.
@@ -922,7 +922,7 @@ unsigned long mf_sec2ticks(float secs, int division, unsigned int tempo)
 }
 
 
-/* 
+/*
  * This routine converts delta times in ticks into seconds. The
  * else statement is needed because the formula is different for tracks
  * based on notes and tracks based on SMPTE times.

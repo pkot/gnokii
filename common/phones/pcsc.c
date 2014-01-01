@@ -843,7 +843,7 @@ static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 	int record_length;
 	gn_sms_raw *rs;
 	gn_error error;
- 
+
 	if (!data || !data->raw_sms || !data->sms) {
 		return GN_ERR_INTERNALERROR;
 	}
@@ -856,26 +856,26 @@ static gn_error DeleteSMSMessage(gn_data *data, struct gn_statemachine *state)
 	if (rs->number < 1 || rs->number > 255) {
 		return GN_ERR_INVALIDLOCATION;
 	}
- 
+
 	dprintf("Erasing SMS storage number (%d/%d)\n", rs->memory_type, rs->number);
 	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
- 
+
 	ret = pcsc_read_file_record(&IoStruct, file, rs->number);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
 	if (IoStruct.dwReceived < 178) return GN_ERR_INTERNALERROR;
- 
+
 	/* do not check whether the record is already empty; this is
 	   intentional to make it possible to wipe deleted records */
- 
+
 	record_length = IoStruct.dwReceived - 2;
 	if (record_length > 255) return GN_ERR_INTERNALERROR;
 	buf[0] = 0x00;
 	memset(buf+1, 0xff, record_length-1);
 	ret = pcsc_update_file_record(&IoStruct, file, rs->number, buf, record_length);
- 
+
 	return get_gn_error(&IoStruct, ret);
 }
 
@@ -1007,9 +1007,9 @@ static gn_error DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	int record_length;
 	gn_phonebook_entry *pe;
 	gn_error error;
- 
+
 	if (!data || !data->phonebook_entry) return GN_ERR_INTERNALERROR;
- 
+
 	pe = data->phonebook_entry;
 	file = get_memory_type(pe->memory_type);
 	if (!file) {
@@ -1018,30 +1018,30 @@ static gn_error DeletePhonebook(gn_data *data, struct gn_statemachine *state)
 	if (pe->location < 1 || pe->location > 255) {
 		return GN_ERR_INVALIDLOCATION;
 	}
- 
+
 	dprintf("Erasing phonebook location (%d/%d)\n", pe->memory_type, pe->location);
 	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
- 
+
 	ret = pcsc_read_file_record(&IoStruct, file, pe->location);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
 	if (IoStruct.dwReceived < 16) return GN_ERR_INTERNALERROR;
- 
+
 	/* do not check whether the record is already empty; this is
 	   intentional to make it possible to wipe deleted records */
- 
+
 	if (IoStruct.pbRecvBuffer[IoStruct.dwReceived - 3] != 0xff) {
 		dprintf("Cannot erase a record with an extension field\n");
 		return GN_ERR_INTERNALERROR;
 	}
- 
+
 	record_length = IoStruct.dwReceived - 2;
 	if (record_length > 255) return GN_ERR_INTERNALERROR;
 	memset(buf, 0xff, record_length);
 	ret = pcsc_update_file_record(&IoStruct, file, pe->location, buf, record_length);
- 
+
 	return get_gn_error(&IoStruct, ret);
 }
 
@@ -1050,16 +1050,16 @@ static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *sta
 	LONG ret;
 	gn_error error;
 	BYTE fchars, chv1st;
- 
+
 	data->security_code->type = GN_SCT_None;
- 
+
 	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
 	ret = pcsc_stat_file(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
- 
+
 	if (IoStruct.dwReceived < 22) return GN_ERR_INTERNALERROR;
 	fchars = IoStruct.pbRecvBuffer[13];
 	chv1st = IoStruct.pbRecvBuffer[18];
@@ -1080,17 +1080,17 @@ static gn_error GetSecurityCodeStatus(gn_data *data, struct gn_statemachine *sta
 				return error;
 		}
 	}
- 
+
 	return GN_ERR_NONE;
 }
- 
+
 static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state)
 {
 	LONG ret;
 	gn_error error;
 	BYTE chv_id;
 	size_t chv_len;
- 
+
 	switch (data->security_code->type) {
 	case GN_SCT_Pin:
 		chv_id = 1;
@@ -1098,15 +1098,15 @@ static gn_error EnterSecurityCode(gn_data *data, struct gn_statemachine *state)
 	default:
 		return GN_ERR_NOTIMPLEMENTED;
 	}
- 
+
 	chv_len = strlen(data->security_code->code);
 	if (chv_len > 8)
 		return GN_ERR_INVALIDSECURITYCODE;
- 
+
 	ret = pcsc_change_dir(&IoStruct, GN_PCSC_FILE_DF_TELECOM);
 	error = get_gn_error(&IoStruct, ret);
 	if (error != GN_ERR_NONE) return error;
- 
+
 	ret = pcsc_verify_chv(&IoStruct, chv_id,
 			      (BYTE *)data->security_code->code, chv_len);
 	error = get_gn_error(&IoStruct, ret);
@@ -1376,16 +1376,16 @@ static LONG pcsc_cmd_update_record(PCSC_IOSTRUCT *ios, BYTE record, BYTE *data, 
 /* update a smart card "linear fixed file" contents from the provided buffer */
 	LONG ret = SCARD_S_SUCCESS;
 	BYTE pbSendBuffer[GN_PCSC_DATA_OFFSET + 256] = { GN_PCSC_CMD_UPDATE_RECORD, 0x00, GN_PCSC_FILE_READ_ABS, 0x00 };
- 
+
 	pbSendBuffer[GN_PCSC_PARAMETER_OFFSET_P1] = record;
 	/* pbSendBuffer[GN_PCSC_PARAMETER_OFFSET_P2] = GN_PCSC_FILE_READ_ABS; */ /* always
 use absolute/current mode */
 	pbSendBuffer[GN_PCSC_PARAMETER_OFFSET_P3] = length;
 	memcpy(&pbSendBuffer[GN_PCSC_DATA_OFFSET], data, length);
 	ios->dwReceived = ios->dwRecvLength;
- 
+
 	PCSC_TRANSMIT_WITH_LENGTH(ret, "cmd_update_record", pbSendBuffer, GN_PCSC_DATA_OFFSET + length, ios);
- 
+
 	return ret;
 }
 
@@ -1393,17 +1393,17 @@ static LONG pcsc_update_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE recor
 {
 /* copy contents of a record from the provided buffer to a file */
 	LONG ret;
- 
+
 	ret = pcsc_stat_file(ios, file_id);
 	if (ret != SCARD_S_SUCCESS) return ret;
 	if (ios->dwReceived < 2) return SCARD_F_UNKNOWN_ERROR;
 	/* "soft" failure that needs to be catched by the caller */
 	if (ios->pbRecvBuffer[ios->dwReceived - 2] != 0x90) return SCARD_S_SUCCESS;
- 
+
 	/* records can only be updated in EFs */
 	if (ios->dwReceived <= 6) return SCARD_F_UNKNOWN_ERROR;
 	if (ios->pbRecvBuffer[6] != GN_PCSC_FILE_TYPE_EF) return SCARD_E_INVALID_PARAMETER;
- 
+
 	if (ios->dwReceived <= 13) return SCARD_F_UNKNOWN_ERROR;
 	switch (ios->pbRecvBuffer[13]) {
 	case GN_PCSC_FILE_STRUCTURE_CYCLIC:
@@ -1417,11 +1417,11 @@ static LONG pcsc_update_file_record(PCSC_IOSTRUCT *ios, LONG file_id, BYTE recor
 	default:
 		ret = SCARD_E_INVALID_PARAMETER;
 	}
- 
+
 	if (ret != SCARD_S_SUCCESS) {
 		dprintf("%s error %lX: %s\n", __FUNCTION__, ret, pcsc_stringify_error(ret));
 	}
- 
+
 	return ret;
 }
 
@@ -1430,16 +1430,16 @@ static LONG pcsc_verify_chv(PCSC_IOSTRUCT *ios, BYTE chv_id, BYTE *chv, BYTE chv
 	LONG ret = SCARD_S_SUCCESS;
 	BYTE pbSendBuffer[] = { GN_PCSC_CMD_VERIFY_CHV, 0x00, 0x00, 0x08,
 				 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
- 
+
 	if (chv_len > 8)
 		return SCARD_E_INVALID_PARAMETER;
- 
+
 	pbSendBuffer[GN_PCSC_PARAMETER_OFFSET_P2] = chv_id;
 	memcpy(&pbSendBuffer[GN_PCSC_DATA_OFFSET], chv, chv_len);
 	ios->dwReceived = ios->dwRecvLength;
- 
+
 	PCSC_TRANSMIT(ret, "cmd_verify_chv", pbSendBuffer, ios);
- 
+
 	return ret;
 }
 

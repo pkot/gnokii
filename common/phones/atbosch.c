@@ -38,7 +38,7 @@ static gn_error Unsupported(gn_data *data, struct gn_statemachine *state)
 
 static at_recv_function_type replygetsms;
 
-/* 
+/*
  * Bosch 909 (and probably also Bosch 908) doesn't provide SMSC information
  * We insert it here to satisfy generic PDU SMS receiving function in atgen.c
  */

@@ -58,7 +58,7 @@ static gn_error ReplyGetSMSStatus(int type, unsigned char *buffer, int length,
 
 /*
  * FIXME: SMSs are not ready for text mode :-(
- * 
+ *
  * message looks like this one (stupid and lying advertisment by Eurotel):
  * +CMGR: "REC READ","999102",,"02/12/20,10:17:57+40"<cr><lf>Prejeme Vam vesele Vanoce a stastny novy rok 2003. I v pristim roce muzete ocekavat spoustu zajimavych nabidek a prekvapeni od Go Clubu.<cr><lf>
 */

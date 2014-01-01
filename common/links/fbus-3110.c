@@ -73,7 +73,7 @@ static bool fb3110_serial_open(struct gn_statemachine *state)
  * type. Frames are acknowledged if needed and information about them is
  * passed to the main statemachine.
  */
- 
+
 static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemachine *state)
 {
 	int count;
@@ -122,7 +122,7 @@ static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemach
 }
 
 
-/* 
+/*
  * RX_State machine for receive handling.
  * Called once for each character received from the phone.
  */
@@ -201,9 +201,9 @@ static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachin
 }
 
 
-/* 
+/*
  * This is the main loop function which must be called regularly
- * timeout can be used to make it 'busy' or not 
+ * timeout can be used to make it 'busy' or not
  */
 static gn_error fb3110_loop(struct timeval *timeout, struct gn_statemachine *state)
 {
@@ -226,10 +226,10 @@ static gn_error fb3110_loop(struct timeval *timeout, struct gn_statemachine *sta
 }
 
 
-/* 
+/*
  * Prepares the message header and sends it, prepends the message start
  * byte (0x01) and other values according the value specified when called.
- * Calculates checksum and then sends the lot down the pipe... 
+ * Calculates checksum and then sends the lot down the pipe...
  */
 static gn_error fb3110_tx_frame_send(u8 frame_type, u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state)
 {
@@ -277,8 +277,8 @@ static gn_error fb3110_tx_frame_send(u8 frame_type, u8 message_length, u8 messag
 }
 
 
-/* 
- * Main function to send an fbus message 
+/*
+ * Main function to send an fbus message
  */
 static gn_error fb3110_message_send(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
@@ -301,7 +301,7 @@ static gn_error fb3110_message_send(unsigned int messagesize, unsigned char mess
 }
 
 
-/* 
+/*
  * Sends the "standard" acknowledge message back to the phone in response to
  * a message it sent automatically or in response to a command sent to it.
  */
@@ -320,7 +320,7 @@ static void fb3110_reset(struct gn_statemachine *state)
 	FBUSINST(state)->i.state = FB3110_RX_Sync;
 }
 
-/* 
+/*
  * Initialise variables and start the link
  * newlink is actually part of state - but the link code should not
  * anything about state. State is only passed around to allow for
@@ -383,7 +383,7 @@ gn_error fb3110_initialise(struct gn_statemachine *state)
 /* Any command we originate must have a unique SequenceNumber. Observation to
  * date suggests that these values start at 0x10 and cycle up to 0x17
  * before repeating again. Perhaps more accurately, the numbers cycle
- * 0,1,2,3..7 with bit 4 of the byte premanently set. 
+ * 0,1,2,3..7 with bit 4 of the byte premanently set.
  */
 static void fb3110_sequence_number_update(struct gn_statemachine *state)
 {

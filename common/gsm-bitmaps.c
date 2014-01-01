@@ -132,7 +132,7 @@ GNOKII_API void gn_bmp_resize(gn_bmp *bitmap, gn_bmp_types target, gn_phone *inf
 		bitmap->height = info->startup_logo_height;
 		if (info->models && ((!strncmp(info->models, "6510", 4)) || (!strncmp(info->models, "7110", 4))))
 			bitmap->size = ceiling_to_octet(bitmap->height) * bitmap->width;
-		else 
+		else
 			bitmap->size = ceiling_to_octet(bitmap->height * bitmap->width);
 		break;
 	case GN_BMP_NewOperatorLogo:

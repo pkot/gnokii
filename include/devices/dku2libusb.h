@@ -34,8 +34,8 @@ struct fbus_usb_interface_transport {
 	int configuration_description;		/* Configuration string descriptor number */
 	int control_interface;			/* DKU2 FBUS master interface */
 	int control_setting;			/* DKU2 FBUS master interface setting */
-	int control_interface_description;	/* DKU2 FBUS master interface string descriptor number 
-						 * If non-zero, use usb_get_string_simple() from 
+	int control_interface_description;	/* DKU2 FBUS master interface string descriptor number
+						 * If non-zero, use usb_get_string_simple() from
 						 * libusb to retrieve human-readable description
 						 */
 	int data_interface;			/* DKU2 FBUS data/slave interface */

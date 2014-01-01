@@ -11,7 +11,7 @@
   Copyright (C) 2002       Ladis Michl, Pavel Machek
   Copyright (C) 2001-2011  Pawel Kot
   Copyright (C) 2002-2004  BORBELY Zoltan
-  
+
 */
 
 #include "config.h"

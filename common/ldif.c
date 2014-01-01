@@ -221,7 +221,7 @@ GNOKII_API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 			case GN_PHONEBOOK_NUMBER_None:
 			case GN_PHONEBOOK_NUMBER_Common:
 			case GN_PHONEBOOK_NUMBER_General:
-			case GN_PHONEBOOK_NUMBER_Work: 
+			case GN_PHONEBOOK_NUMBER_Work:
 			case GN_PHONEBOOK_NUMBER_Home:
 			case GN_PHONEBOOK_NUMBER_Mobile:
 				dprintf("setting default number to %s\n", entry->subentries[i].data.number);

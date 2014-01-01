@@ -280,75 +280,75 @@ norecurrence:
 	case GN_CALNOTE_REMINDER:
 		ical_append_printf(&str, "REMINDER\r\n");
 		break;
-	case GN_CALNOTE_CALL: 
+	case GN_CALNOTE_CALL:
 		ical_append_printf(&str, "PHONE CALL\r\n");
 		ical_append_printf(&str, "SUMMARY:%s\r\n", calnote->phone_number);
 		ical_append_printf(&str, "DESCRIPTION:%s\r\n", calnote->text);
-		break; 
-	case GN_CALNOTE_MEETING: 
-		ical_append_printf(&str, "MEETING\r\n"); 
+		break;
+	case GN_CALNOTE_MEETING:
+		ical_append_printf(&str, "MEETING\r\n");
 		if (calnote->mlocation[0])
 			ical_append_printf(&str, "LOCATION:%s\r\n", calnote->mlocation);
-		break; 
-	case GN_CALNOTE_BIRTHDAY: 
-		ical_append_printf(&str, "SPECIAL OCCASION\r\n"); 
-		break; 
-	default: 
-		ical_append_printf(&str, "UNKNOWN\r\n"); 
-		break; 
-	} 
+		break;
+	case GN_CALNOTE_BIRTHDAY:
+		ical_append_printf(&str, "SPECIAL OCCASION\r\n");
+		break;
+	default:
+		ical_append_printf(&str, "UNKNOWN\r\n");
+		break;
+	}
 	if (calnote->type != GN_CALNOTE_CALL)
 		ical_append_printf(&str, "SUMMARY:%s\r\n", calnote->text);
 	ical_append_printf(&str, "DTSTART:%04d%02d%02dT%02d%02d%02d\r\n", calnote->time.year,
-		calnote->time.month, calnote->time.day, calnote->time.hour, 
-		calnote->time.minute, calnote->time.second); 
+		calnote->time.month, calnote->time.day, calnote->time.hour,
+		calnote->time.minute, calnote->time.second);
 	if (calnote->end_time.year) {
-		ical_append_printf(&str, "DTEND:%04d%02d%02dT%02d%02d%02d\r\n", calnote->end_time.year, 
-			calnote->end_time.month, calnote->end_time.day, calnote->end_time.hour, 
-			calnote->end_time.minute, calnote->end_time.second); 
+		ical_append_printf(&str, "DTEND:%04d%02d%02dT%02d%02d%02d\r\n", calnote->end_time.year,
+			calnote->end_time.month, calnote->end_time.day, calnote->end_time.hour,
+			calnote->end_time.minute, calnote->end_time.second);
 	}
 	if (calnote->alarm.enabled) {
 		ical_append_printf(&str, "%sALARM:%04d%02d%02dT%02d%02d%02d\r\n",
 		(calnote->alarm.tone ? "A" : "D"),
-		calnote->alarm.timestamp.year, 
-		calnote->alarm.timestamp.month, calnote->alarm.timestamp.day, calnote->alarm.timestamp.hour, 
-		calnote->alarm.timestamp.minute, calnote->alarm.timestamp.second); 
-	} 
-	switch (calnote->recurrence) { 
-	case GN_CALNOTE_NEVER: 
-		break; 
-	case GN_CALNOTE_DAILY: 
+		calnote->alarm.timestamp.year,
+		calnote->alarm.timestamp.month, calnote->alarm.timestamp.day, calnote->alarm.timestamp.hour,
+		calnote->alarm.timestamp.minute, calnote->alarm.timestamp.second);
+	}
+	switch (calnote->recurrence) {
+	case GN_CALNOTE_NEVER:
+		break;
+	case GN_CALNOTE_DAILY:
 		calnote->occurrences ?
 			ical_append_printf(&str, "RRULE:FREQ=DAILY\r\n") :
 			ical_append_printf(&str, "RRULE:FREQ=DAILY;COUNT=%d\r\n", calnote->occurrences);
-		break; 
-	case GN_CALNOTE_WEEKLY: 
+		break;
+	case GN_CALNOTE_WEEKLY:
 		calnote->occurrences ?
 			ical_append_printf(&str, "RRULE:FREQ=WEEKLY\r\n") :
 			ical_append_printf(&str, "RRULE:FREQ=WEEKLY;COUNT=%d\r\n", calnote->occurrences);
-		break; 
-	case GN_CALNOTE_2WEEKLY: 
+		break;
+	case GN_CALNOTE_2WEEKLY:
 		calnote->occurrences ?
 			ical_append_printf(&str, "RRULE:FREQ=WEEKLY;INTERVAL=2\r\n") :
 			ical_append_printf(&str, "RRULE:FREQ=WEEKLY;INTERVAL=2;COUNT=%d\r\n", calnote->occurrences);
-		break; 
-	case GN_CALNOTE_MONTHLY: 
+		break;
+	case GN_CALNOTE_MONTHLY:
 		calnote->occurrences ?
 			ical_append_printf(&str, "RRULE:FREQ=MONTHLY\r\n") :
 			ical_append_printf(&str, "RRULE:FREQ=MONTHLY;COUNT=%d\r\n", calnote->occurrences);
-		break; 
-	case GN_CALNOTE_YEARLY: 
+		break;
+	case GN_CALNOTE_YEARLY:
 		calnote->occurrences ?
 			ical_append_printf(&str, "RRULE:FREQ=YEARLY\r\n") :
 			ical_append_printf(&str, "RRULE:FREQ=YEARLY;COUNT=%d\r\n", calnote->occurrences);
-		break; 
-	default: 
+		break;
+	default:
 		calnote->occurrences ?
 			ical_append_printf(&str, "RRULE:FREQ=HOURLY;INTERVAL=%d\r\n", calnote->recurrence) :
 			ical_append_printf(&str, "RRULE:FREQ=HOURLY;INTERVAL=%d;COUNT=%d\r\n", calnote->recurrence, calnote->occurrences);
-		break; 
-	} 
-	ical_append_printf(&str, "END:VEVENT\r\n"); 
+		break;
+	}
+	ical_append_printf(&str, "END:VEVENT\r\n");
 	ical_append_printf(&str, "END:VCALENDAR\r\n");
 	return str.str;
 #endif /* HAVE_LIBICAL */
@@ -673,11 +673,11 @@ GNOKII_API char * gn_todo2icalstr(gn_todo *ctodo)
 
 	memset(&str, 0, sizeof(str));
 	ical_append_printf(&str, "BEGIN:VCALENDAR\r\n");
-	ical_append_printf(&str, "VERSION:1.0\r\n"); 
-	ical_append_printf(&str, "BEGIN:VTODO\r\n"); 
-	ical_append_printf(&str, "PRIORITY:%i\r\n", ctodo->priority); 
-	ical_append_printf(&str, "SUMMARY:%s\r\n", ctodo->text); 
-	ical_append_printf(&str, "END:VTODO\r\n"); 
+	ical_append_printf(&str, "VERSION:1.0\r\n");
+	ical_append_printf(&str, "BEGIN:VTODO\r\n");
+	ical_append_printf(&str, "PRIORITY:%i\r\n", ctodo->priority);
+	ical_append_printf(&str, "SUMMARY:%s\r\n", ctodo->text);
+	ical_append_printf(&str, "END:VTODO\r\n");
 	ical_append_printf(&str, "END:VCALENDAR\r\n");
 
 	return str.str;

@@ -182,7 +182,7 @@ static const char *get_langinfo_codeset(void)
 GNOKII_API const char *gn_char_get_encoding()
 {
 	const char *coding;
-	if (*application_encoding) 
+	if (*application_encoding)
 		coding = application_encoding; /* app has overriden encoding setting */
 	else
 		coding = get_langinfo_codeset(); /* return default codeset */
@@ -539,7 +539,7 @@ gn_sms_dcs_alphabet_type char_def_alphabet_string_stats(char *str, int *enc_char
  * Returns: number of characters copied
  *
  * Function copies @len characters from @src utf-8 string, starting at @offset character to @dest.
- * 
+ *
  */
 int char_def_alphabet_string_copy(char *dest, const char *src, int len, int offset)
 {

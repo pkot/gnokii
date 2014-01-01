@@ -127,7 +127,7 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
- 
+
 	device_setdtrrts(0, 0, state);
 	usleep(1000000);
 	device_setdtrrts(1, 1, state);
@@ -144,14 +144,14 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
 		res = send_command("AT*NOKIAFBUS\r\n", 14, state);
 	device_changespeed(115200, state);
 
-	if (type != GN_CT_Bluetooth && type != GN_CT_TCP) { 
+	if (type != GN_CT_Bluetooth && type != GN_CT_TCP) {
 		for (count = 0; count < 32; count++) {
 			device_write(&init_char, 1, state);
 		}
 		device_write(&end_init_char, 1, state);
 		usleep(1000000);
 	}
- 
+
 	return true;
 }
 

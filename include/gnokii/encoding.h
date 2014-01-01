@@ -28,7 +28,7 @@ GNOKII_API int gn_char_def_alphabet(unsigned char *string);
  * LANG variable. This function can be used to override this behaviour. E.g.,
  * to make Gnokii always interpret and return string values using the UTF-8
  * charset, call gn_set_encoding("UTF-8").
- * 
+ *
  * This has nothing to do with the encoding used to communicate with the
  * phone itself, which is a totally different issue.
  *

@@ -160,7 +160,7 @@ typedef struct {
 	gn_sms_dcs_type type;
 	union {
 		struct {
-			/* Message class: 
+			/* Message class:
 			 * 0 - no class
 			 * 1 - Class 0
 			 * 2 - Class 1
@@ -500,7 +500,7 @@ typedef struct {
 	char *url;
     	char *text;
 	char *data;
-	int data_len; 
+	int data_len;
 } gn_wap_push;
 
 GNOKII_API void gn_wap_push_init(gn_wap_push *wp);
