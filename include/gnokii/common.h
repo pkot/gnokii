@@ -22,8 +22,7 @@
 
 #include <gnokii/rlp-common.h>
 
-/* Type of connection. Now we support serial connection with FBUS cable and
-   IR (only with 61x0 models) */
+/* Type of connection. */
 typedef enum {
 	GN_CT_NONE = -1,/* no connection type (error) */
 	GN_CT_Serial,   /* Serial connection. */
@@ -191,8 +190,7 @@ typedef struct {
 			      in the different ways. */
 } gn_timestamp;
 
-/* Some phones (at the moment 7110/6510 series) supports extended phonebook
-   with additional data.  Here we have structures for them */
+/* Some phones support extended phonebook with additional data. */
 typedef enum {
 	GN_PHONEBOOK_NUMBER_None    = 0x00,
 	GN_PHONEBOOK_NUMBER_Common  = 0x01,
@@ -205,6 +203,7 @@ typedef enum {
 
 GNOKII_API const char *gn_phonebook_number_type2str(gn_phonebook_number_type t);
 
+/* Definition of extended phonebook data. */
 typedef enum {
 	GN_PHONEBOOK_ENTRY_Name            = 0x07,
 	GN_PHONEBOOK_ENTRY_Email           = 0x08,
@@ -322,7 +321,7 @@ typedef struct {
 							     phonebook is not used */
 } gn_phonebook_entry;
 
-/* This define speed dialling entries. */
+/* This defines speed dialling entries. */
 typedef struct {
 	int number;                 /* Which number is used to dialling? */
 	gn_memory_type memory_type; /* Memory type of the number. */
