@@ -4436,7 +4436,7 @@ static gn_error NK6510_GetRFLevel(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x0B, 0x00, 0x02, 0x00, 0x00, 0x00};
 
-	dprintf("Getting network info ...\n");
+	dprintf("Getting RF level ...\n");
 	SEND_MESSAGE_BLOCK(NK6510_MSG_NETSTATUS, 9);
 }
 
