@@ -2903,7 +2903,7 @@ msgstr "Chiamata %d ripresa dall'attesa\n"
 #: ../gnokii/gnokii-monitor.c:135
 #, c-format
 msgid "CALL%d: IDLE\n"
-msgstr "Chiamata CALL%d: non attiva\n"
+msgstr "Chiamata %d: non attiva\n"
 
 #: ../gnokii/gnokii-monitor.c:143
 msgid "RINGING"
@@ -2928,7 +2928,7 @@ msgstr "STATO SCONOSCIUTO"
 #: ../gnokii/gnokii-monitor.c:164
 #, c-format
 msgid "CALL%d: %s %s (%s) (callid: %d, duration: %d sec)\n"
-msgstr "CALL%d: %s %s (%s) (callid: %d, durata: %d secondi)\n"
+msgstr "Chiamata %d: %s %s (%s) (callid: %d, durata: %d secondi)\n"
 
 #: ../gnokii/gnokii-monitor.c:182
 #, c-format
