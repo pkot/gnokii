@@ -5402,7 +5402,7 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 {
 	gn_error error = GN_ERR_NONE;
 	unsigned char *pos;
-	int i;
+	int block, i;
 	gn_call_active *ca;
 	gn_call_info cinfo;
 
@@ -5414,25 +5414,31 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 
 	case 0x03: /* Call status */
 		/* fall through */
+	case 0x0b: /* ??? */
+		/* fall through */
 	case 0x0f: /* Call status */
 		dprintf("Call status 0x%02x\n", message[3]);
 		memset(&cinfo, 0, sizeof(gn_call_info));
 		cinfo.type = GN_CALL_Voice; /* FIXME how to actually detect type? */
 		cinfo.call_id = message[4];
-		for (i = 6; i < length && message[i]; i += message[i + 1]) {
+		for (block = 0, i = 6; block < message[5]; block++, i += message[i + 1]) {
 			switch (message[i]) {
 			case 0x01: /* Phone number of incoming call */
 			case 0x03: /* Phone number of outgoing call */
+				dprintf("  [0x%02x] Phone number\n", message[i]);
 				/* message[i + 2] is type of number? 0x10 international? 0x01 network specific? */
 				char_unicode_decode(cinfo.number, message + i + 6, 2 * message[i + 5]);
 				break;
-			case 0x0e:
+			case 0x0e: /* Name from phonebook */
+				dprintf("  [0x%02x] Contact name\n", message[i]);
 				char_unicode_decode(cinfo.name, message + i + 8, 2 * message[i + 7]);
 				break;
+			case 0x0a: /* Call status? message[i + 2]: 1 dialing?, 2 incoming?, 3 ringing remote and local?, 4 remote hangup?, 5 incoming? 10 ?, 0 ? */
 			default:
-				dprintf("  Unknown call block type 0x%02x length %d\n",  message[i], message[i + 1]);
+				dprintf("  Unknown call block type 0x%02x length %d\n", message[i], message[i + 1]);
 			}
 		}
+		/* FIXME message[5] is the number of blocks, not the status, however it seems that mostly each status has a different number of blocks */
 		if (DRVINSTANCE(state)->call_notification)
 			DRVINSTANCE(state)->call_notification(NK6510_GetCallStatus_S40_30(message[5]), &cinfo, state, DRVINSTANCE(state)->call_callback_data);
 		break;
@@ -5583,8 +5589,13 @@ static gn_error NK6510_IncomingCommStatus(int messagetype, unsigned char *messag
 		break;
 
 	case 0x32:
-	case 0xd2:
-		dprintf("Unknown\n");
+	case 0x33: /* 01 7a 00 33 0x 00 */ /* during outgoing call */
+	case 0xa6: /* 01 7a 00 a6 0x 00 */ /* during outgoing call */
+	case 0xc9: /* 01 7a xx c9 55 55 */ /* during incoming call */
+	case 0xca: /* 01 7a xx ca 55 55 */ /* during incoming call */
+	case 0xd2: /* 01 7a xx d2 55 55 */ /* during outgoing call */
+	case 0xd3: /* 01 7a xx d3 55 55 */ /* during incoming and outgoing call */
+		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		break;
 
 	case 0xf0:
