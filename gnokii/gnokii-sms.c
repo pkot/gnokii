@@ -281,8 +281,8 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			wp.text = message_buffer;
 
 			if (gn_wap_push_encode(&wp) != GN_ERR_NONE) {
-			    fprintf(stderr, _("WAP Push encoding failed!\n"));
-			    return GN_ERR_FAILED;
+				fprintf(stderr, _("WAP Push encoding failed!\n"));
+				return GN_ERR_FAILED;
 			}
 
 			memcpy(sms.user_data[curpos].u.text, wp.data, wp.data_len);

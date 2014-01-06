@@ -139,7 +139,7 @@ gn_error setspeeddial(char *argv[], gn_data *data, struct gn_statemachine *state
 /* Voice dialing mode. */
 gn_error dialvoice(char *number, gn_data *data, struct gn_statemachine *state)
 {
-    	gn_call_info call_info;
+	gn_call_info call_info;
 	gn_error error;
 	int call_id;
 
@@ -186,7 +186,7 @@ int answercall_usage(FILE *f, int exitval)
 /* Answering incoming call */
 gn_error answercall(char *callid, gn_data *data, struct gn_statemachine *state)
 {
-    	gn_call_info callinfo;
+	gn_call_info callinfo;
 	gn_error error;
 
 	memset(&callinfo, 0, sizeof(callinfo));
@@ -217,7 +217,7 @@ int hangup_usage(FILE *f, int exitval)
 /* Hangup the call */
 gn_error hangup(char *callid, gn_data *data, struct gn_statemachine *state)
 {
-    	gn_call_info callinfo;
+	gn_call_info callinfo;
 	gn_error error;
 
 	memset(&callinfo, 0, sizeof(callinfo));
