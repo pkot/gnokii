@@ -108,25 +108,21 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 	switch (filetype) {
 	case GN_FT_RTTTL:
 		error = file_rtttl_load(file, ringtone);
-		fclose(file);
 		break;
 	case GN_FT_OTT:
 		error = file_ott_load(file, ringtone);
-		fclose(file);
 		break;
 	case GN_FT_MIDI:
 		error = file_midi_load(file, ringtone);
-		fclose(file);
 		break;
 	case GN_FT_NOKRAW_TONE:
 		error = file_nokraw_load(file, ringtone);
-		fclose(file);
 		break;
 	default:
 		error = GN_ERR_WRONGDATAFORMAT;
 		break;
 	}
-
+	fclose(file);
 	return error;
 }
 
