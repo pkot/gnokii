@@ -585,8 +585,7 @@ gn_error gn_file_bitmap_read(char *filename, gn_bmp *bitmap, gn_phone *info)
 		error = GN_ERR_WRONGDATAFORMAT;
 		break;
 	}
-
-	if (file) fclose(file);
+	fclose(file);
 	return error;
 }
 
