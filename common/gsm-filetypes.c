@@ -97,11 +97,15 @@ gn_error gn_file_ringtone_read(char *filename, gn_ringtone *ringtone)
 
 	/* FIXME: for now identify the filetype based on the extension */
 	/* I don't like this but I haven't got any .ott files to work out a better way */
-
-	filetype = GN_FT_RTTTL;
-	if (strstr(filename, ".ott")) filetype = GN_FT_OTT; /* OTT files saved by NCDS3 */
-	else if (strstr(filename, ".mid")) filetype = GN_FT_MIDI;
-	else if (strstr(filename, ".raw")) filetype = GN_FT_NOKRAW_TONE;
+	if (strstr(filename, ".ott")) {
+		filetype = GN_FT_OTT; /* OTT files saved by NCDS3 */
+	} else if (strstr(filename, ".mid")) {
+		filetype = GN_FT_MIDI;
+	} else if (strstr(filename, ".raw")) {
+		filetype = GN_FT_NOKRAW_TONE;
+	} else {
+		filetype = GN_FT_RTTTL;
+	}
 
 	rewind(file);  /* Not necessary for now but safer */
 
