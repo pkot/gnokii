@@ -77,10 +77,19 @@ typedef enum {
 #define NK6510_SUBCLO_GET_DATE		0x0a	/* Get date & time */
 #define NK6510_SUBCLO_GET_ALARM		0x02	/* Get alarm */
 /* Clock handling message subtypes (recv) */
+/* Unsolicited (UNS) frames are received when channel NK6510_MSG_CLOCK (0x19) is subscribed */
 #define NK6510_SUBCLO_DATE_RCVD		0x0b	/* Received date & time */
 #define NK6510_SUBCLO_SET_DATE_RCVD	0x02	/* Received date & time set OK */
+#define NK6510_SUBCLO_GMT_UPD_RCVD	0x04	/* (UNS) received if GMT offset is (manually) adjusted */
+#define NK6510_SUBCLO_DATE_UPD_RCVD	0x05	/* (UNS) received if time is (manually) adjusted */
+#define NK6510_SUBCLO_ALARM_ADD_RCVD	0x06	/* (UNS) alarm to add, received if alarm is enabled when date/time is (manually) adjusted */
+#define NK6510_SUBCLO_ALARM_OLD_RCVD	0x08	/* (UNS) alarm that didn't play because date/time was (manually) advanced skipping it */
+#define NK6510_SUBCLO_GMT_OFFSET_RCVD	0x09	/* (UNS) received when GMT offset is (manually) adjusted */
+#define NK6510_SUBCLO_DATE_SEC_UPD_RCVD	0x0e	/* (UNS) received every second only if the Time menu is open */
+#define NK6510_SUBCLO_DATE_MIN_UPD_RCVD	0x0f	/* (UNS) received every minute at 00 seconds, regardless of which menu is open */
 #define NK6510_SUBCLO_SET_ALARM_RCVD	0x12	/* Received alarm set OK */
-#define NK6510_SUBCLO_DATE_UPD_RCVD	0x0e	/* Received update on date & time */
+#define NK6510_SUBCLO_ALARM_DEL_RCVD	0x13	/* (UNS) alarm to delete, received if alarm is enabled when date/time is (manually) adjusted */
+#define NK6510_SUBCLO_ALARM_NOW_RCVD	0x16	/* (UNS) alarm is ringing now */
 #define NK6510_SUBCLO_ALARM_TIME_RCVD	0x1a	/* Received alarm time */
 #define NK6510_SUBCLO_ALARM_STATE_RCVD	0x20	/* Received alarm state (on/off) */
 /* Alarm on/off */

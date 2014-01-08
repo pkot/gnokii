@@ -3244,8 +3244,9 @@ reply: 0x19 / 0x0012
 01 56
 	*/
 
-	dprintf("Incoming clock!\n");
 	if (!data) return GN_ERR_INTERNALERROR;
+
+	/* FIXME: code below should handle subblocks but it works because frames seem to contain only 1 subblock */
 	switch (message[3]) {
 	case NK6510_SUBCLO_SET_DATE_RCVD:
 		dprintf("Date/Time successfully set!\n");
@@ -3253,23 +3254,47 @@ reply: 0x19 / 0x0012
 	case NK6510_SUBCLO_SET_ALARM_RCVD:
 		dprintf("Alarm successfully set!\n");
 		break;
+	case NK6510_SUBCLO_GMT_UPD_RCVD:
+	case NK6510_SUBCLO_DATE_UPD_RCVD:
+	case NK6510_SUBCLO_DATE_SEC_UPD_RCVD:
+	case NK6510_SUBCLO_DATE_MIN_UPD_RCVD:
 	case NK6510_SUBCLO_DATE_RCVD:
+		dprintf("Date/Time received! subtype 0x%02x date %04d/%02d/%02d time %02d:%02d:%02d\n",
+			message[3], (message[10] << 8) + message[11], message[12], message[13], message[14], message[15], message[16]);
+		switch (message[3]) {
+		case NK6510_SUBCLO_GMT_UPD_RCVD:
+			/* This is a signed value that shows the nominal adjustment, eg. if current time is 16:31:25, the phone UI allows
+			   you to advance the GMT 1 hour to 17:31, the number of seconds is 3600) */
+			/* Same length as subtype 0x05 but date is zeroed and number of seconds has a different endianess!!! */
+			dprintf("Date/Time adjusted by %d seconds\n", (((((message[25] << 8) + message[24]) << 8) + message[23]) << 8) + message[22]);
+			break;
+		case NK6510_SUBCLO_DATE_UPD_RCVD:
+			/* This is a signed value that shows the actual adjustment, eg. if current time is 16:31:25, the phone UI allows
+			   you to advance 1 hour to 17:31, the number of seconds is 3600 - 25 = 3575) */
+			dprintf("Date/Time adjusted by %d seconds\n", (((((message[22] << 8) + message[23]) << 8) + message[24]) << 8) + message[25]);
+			break;
+		}
 		if (!data->datetime) return GN_ERR_INTERNALERROR;
-		dprintf("Date/Time received!\n");
 		data->datetime->year = (((unsigned int)message[10]) << 8) + message[11];
 		data->datetime->month = message[12];
 		data->datetime->day = message[13];
 		data->datetime->hour = message[14];
 		data->datetime->minute = message[15];
 		data->datetime->second = message[16];
-
 		break;
+	case NK6510_SUBCLO_ALARM_DEL_RCVD:
+	case NK6510_SUBCLO_ALARM_ADD_RCVD:
+	case NK6510_SUBCLO_ALARM_OLD_RCVD:
+	case NK6510_SUBCLO_ALARM_NOW_RCVD:
 	case NK6510_SUBCLO_ALARM_TIME_RCVD:
+		dprintf("Alarm received! subtype 0x%02x date %04d/%02d/%02d time %02d:%02d:%02d\n",
+			message[3], (message[10] << 8) + message[11], message[12], message[13], message[14], message[15], message[16]);
 		if (!data->alarm) return GN_ERR_INTERNALERROR;
 		data->alarm->timestamp.hour = message[14];
 		data->alarm->timestamp.minute = message[15];
 		break;
 	case NK6510_SUBCLO_ALARM_STATE_RCVD:
+		dprintf("Alarm state received! state 0x%02x\n", message[8]);
 		if (!data->alarm) return GN_ERR_INTERNALERROR;
 		switch(message[37]) {
 		case NK6510_ALARM_ENABLED:
@@ -3285,6 +3310,19 @@ reply: 0x19 / 0x0012
 			break;
 		}
 		break;
+	case NK6510_SUBCLO_GMT_OFFSET_RCVD:
+		switch (message[8]) {
+		case 0x0a: /* 01 30 01 09 00 01 05 08 0a 00 00 8e 00 08 */
+			/* Offset is the sign-magnitude representation of the number of quarters of hour (ie. GMT-3:30 is 0x8e) */
+			dprintf("GMT offset change received!");
+			dprintf(" old GMT%c%02d:%02d", message[11] & 0x80 ? '-' : '+', (message[11] & 0x7f) / 4, (message[11] & 0x03) * 15);
+			dprintf(" new GMT%c%02d:%02d", message[13] & 0x80 ? '-' : '+', (message[13] & 0x7f) / 4, (message[13] & 0x03) * 15);
+			dprintf("\n");
+			break;
+		case 0x04: /* Sent just before an alarm is played 01 30 01 09 00 01 05 08 04 00 00 02 00 01 */
+		default:
+			error = GN_ERR_UNHANDLEDFRAME;
+		}
 	case 0xf0:
 		error = GN_ERR_NOTSUPPORTED;
 		break;
