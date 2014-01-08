@@ -91,6 +91,9 @@
  * gnokii updates
     o fix --getfile --getfilebyid --getallfiles and --getmms on
       non-POSIX sistems (eg. Windows)               (Daniele Forsi)
+ * build system updates
+    o rename configure.in as configure.ac since the former name is
+      deprecated                                    (Daniele Forsi)
 
 0.6.31
 ======
