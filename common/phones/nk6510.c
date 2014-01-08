@@ -6511,15 +6511,18 @@ static gn_error NK6510_Passthrough(gn_data *data, struct gn_statemachine *state)
 		{0, NULL}
 	};
 
-	incoming_functions = state->driver.incoming_functions;
-	state->driver.incoming_functions = passthrough_functions;
-
-	if (sm_message_send(data->write_buffer->length, data->write_buffer->type, data->write_buffer->buffer, state))
+	if (sm_message_send(data->write_buffer->length, data->write_buffer->type, data->write_buffer->buffer, state)) {
 		error = GN_ERR_NOTREADY;
-	else
+	} else if (data->read_buffer) {
+		/* If there is a read buffer it means that we expect a response */
+		incoming_functions = state->driver.incoming_functions;
+		state->driver.incoming_functions = passthrough_functions;
 		error = sm_block(data->write_buffer->type, data, state);
-
-	state->driver.incoming_functions = incoming_functions;
+		state->driver.incoming_functions = incoming_functions;
+	} else {
+		/* If there isn't a read buffer it means that we expect an ack */
+		error = sm_block_ack(state);
+	}
 
 	return error;
 }
