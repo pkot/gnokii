@@ -440,7 +440,7 @@ static int checkargs(int opt, struct gnokii_arg_len gals[], int argc, int has_ar
 
 /* This is a "convenience" function to allow quick test of new API stuff which
    doesn't warrant a "proper" command line function. */
-#ifndef WIN32
+#ifdef DEBUG
 static int foogle(int argc, char *argv[])
 {
 	/* Fill in what you would like to test here... */
@@ -1124,7 +1124,7 @@ static int parse_options(int argc, char *argv[])
 	case OPT_PING:
 		rc = ping(data, state);
 		break;
-#ifndef WIN32
+#ifdef DEBUG
 	case OPT_FOOGLE:
 		rc = foogle(argc, argv);
 		break;
