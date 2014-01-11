@@ -75,21 +75,22 @@ BOOL APIENTRY DllMain(HANDLE hModule,
    user must have write permission to the device. */
 static gn_error register_driver(gn_driver *driver, const char *model, char *setupmodel, struct gn_statemachine *sm)
 {
-	gn_data *data = NULL;
-	gn_data *p_data;
-	gn_error error = GN_ERR_UNKNOWNMODEL;
+	gn_data *data;
+	gn_error error;
+
+	if (strstr(driver->phone.models, model) == NULL)
+		return GN_ERR_UNKNOWNMODEL;
 
 	if (setupmodel) {
 		data = calloc(1, sizeof(gn_data));
 		if (!data)
 			return GN_ERR_INTERNALERROR;
 		data->model = setupmodel;
-		p_data = data;
 	} else {
-		p_data = NULL;
+		data = NULL;
 	}
-	if (strstr(driver->phone.models, model) != NULL)
-		error = driver->functions(GN_OP_Init, p_data, sm);
+
+	error = driver->functions(GN_OP_Init, data, sm);
 
 	free(data);
 	return error;
