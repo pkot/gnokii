@@ -75,6 +75,8 @@
     o write phone number read from TEL;TYPE=PREF,VOICE of a vCard
       when there is no other number in subentries   (Daniele Forsi)
     o implement GN_OP_Passthrough operation         (Daniele Forsi)
+    o implement GN_OP_PollSMS operation (copied form nk6100.c)
+                                                    (Daniele Forsi)
  * xgnokii updates
     o fix bug that caused to forget subentries after the first one
       when editing the phonebook                    (Daniele Forsi)

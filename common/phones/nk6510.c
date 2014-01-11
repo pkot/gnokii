@@ -462,6 +462,9 @@ static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_state
 		return NK6510_CreateSMSFolder(data, state);
 	case GN_OP_DeleteSMSFolder:
 		return NK6510_DeleteSMSFolder(data, state);
+	case GN_OP_PollSMS:
+		gn_sm_loop(1, state);
+		return GN_ERR_NONE;
 	case GN_OP_GetProfile:
 		return NK6510_GetProfile(data, state);
 	case GN_OP_SetProfile:
