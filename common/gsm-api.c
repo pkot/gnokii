@@ -144,7 +144,7 @@ GNOKII_API gn_error gn_gsm_initialise(struct gn_statemachine *sm)
 	REGISTER_DRIVER(nokia_6160, NULL);
 	REGISTER_DRIVER(gnapplet, NULL);
 #ifdef HAVE_PCSC
-	REGISTER_DRIVER(pcsc, sm->config.model);
+	REGISTER_DRIVER(pcsc, NULL);
 #endif
 
 	return GN_ERR_UNKNOWNMODEL;
