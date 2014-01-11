@@ -75,7 +75,7 @@ BOOL APIENTRY DllMain(HANDLE hModule,
    user must have write permission to the device. */
 static gn_error register_driver(gn_driver *driver, const char *model, char *setupmodel, struct gn_statemachine *sm)
 {
-	gn_data *data;
+	gn_data *data = NULL;
 	gn_error error;
 
 	if (strstr(driver->phone.models, model) == NULL)
@@ -86,8 +86,6 @@ static gn_error register_driver(gn_driver *driver, const char *model, char *setu
 		if (!data)
 			return GN_ERR_INTERNALERROR;
 		data->model = setupmodel;
-	} else {
-		data = NULL;
 	}
 
 	error = driver->functions(GN_OP_Init, data, sm);
