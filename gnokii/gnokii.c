@@ -1151,6 +1151,7 @@ static int parse_options(int argc, char *argv[])
 		rc = foogle(argc, argv);
 		break;
 #endif
+
 	/* MMS options */
 	case OPT_GETMMS:
 		rc = getmms(argc, argv, data, state);
