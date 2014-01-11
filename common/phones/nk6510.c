@@ -922,7 +922,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("SMS saving failed: Incorrect folder\n");
 			return GN_ERR_INVALIDMEMORYTYPE;
 		default:
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
@@ -968,7 +968,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("SMS saving failed: Incorrect folder\n");
 			return GN_ERR_INVALIDLOCATION;
 		default:
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
@@ -980,7 +980,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("Invalid location\n");
 			return GN_ERR_INVALIDLOCATION;
 		default:
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 
@@ -1070,7 +1070,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			break;
 		default:
 			dprintf("Failed to create SMS Folder! Reason unknown (0x%02x)!\n", message[4]);
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNKNOWN;
 			break;
 		}
@@ -1120,7 +1120,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			return GN_ERR_FAILED;
 		default:
 			dprintf("SMS Folder could not be deleted! Reason unknown (0x%02x)\n", message[4]);
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_FAILED;
 		}
 		break;
@@ -1879,7 +1879,7 @@ err:
 			e = GN_ERR_EMPTYLOCATION;
 			break;
 		default:
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			e = GN_ERR_UNHANDLEDFRAME;
 			break;
 		}
@@ -2535,7 +2535,7 @@ static gn_error NK6510_IncomingFile(int messagetype, unsigned char *message, int
 		case 0x01: /* OK */
 			break;
 		default:
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			error = GN_ERR_UNKNOWN;
 			goto out;
 		}
@@ -4608,7 +4608,7 @@ static gn_error NK6510_IncomingRingtone(int messagetype, unsigned char *message,
 			dprintf("Ringtone too long. Max is 69 notes.\n");
 			return GN_ERR_ENTRYTOOLONG;
 		default:
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
@@ -4816,7 +4816,7 @@ reply: 0x7a / 0x0036
 			return GN_ERR_NONE;
 			break;
 		default:
-			dprintf("Unknown sub-subtype of type 0x7a subtype 0x03(%d)\n", message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNHANDLEDFRAME;
 			break;
 		}
@@ -4830,7 +4830,7 @@ reply: 0x7a / 0x0036
 			return GN_ERR_NONE;
 			break;
 		default:
-			dprintf("Unknown sub-subtype of type 0x7a subtype 0x05 (%d)\n", message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNHANDLEDFRAME;
 			break;
 		}
@@ -5318,7 +5318,7 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 			data->security_code->type = GN_SCT_None;
 			break;
 		default:
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
@@ -5853,7 +5853,7 @@ static gn_error NK6510_IncomingWAP(int messagetype, unsigned char *message, int 
 			dprintf("Invalid or empty\n");
 			return GN_ERR_INVALIDLOCATION;
 		default:
-			dprintf("%s: Unknown sub-subtype 0x%02x\n", __FUNCTION__, message[4]);
+			dprintf("%s: Unknown sub-subtype 0x%02x of subtype 0x%02x\n", __FUNCTION__, message[4], message[3]);
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 		break;
