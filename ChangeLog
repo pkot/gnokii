@@ -96,6 +96,9 @@
  * build system updates
     o rename configure.in as configure.ac since the former name is
       deprecated                                    (Daniele Forsi)
+ * pcsc driver updates
+    o drop support for model=pcsc that was deprecated in libgnokii
+      0.6.28 and renamed as model=APDU              (Daniele Forsi)
 
 0.6.31
 ======
