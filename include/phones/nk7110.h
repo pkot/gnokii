@@ -25,9 +25,7 @@
 #include "gnokii.h"
 
 typedef enum {
-	GN_OP_NK7110_GetSMSFolders = GN_OP_Max,
-	GN_OP_NK7110_GetSMSFolderStatus,
-	GN_OP_NK7110_GetPictureList,
+	GN_OP_NK7110_GetPictureList = GN_OP_Max,
 	GN_OP_NK7110_Max       /* don't append anything after this entry */
 } gn_nk7100_operation;
 

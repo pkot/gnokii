@@ -22,14 +22,6 @@
 
 #include "gnokii.h"
 
-typedef enum {
-	GN_OP_NK6510_GetSMSFolders = GN_OP_Max,
-	GN_OP_NK6510_GetSMSFolderStatus,
-	GN_OP_NK6510_GetPicture,
-	GN_OP_NK6510_Subscribe,
-	GN_OP_NK6510_Max       /* don't append anything after this entry */
-} GSM6510_Operation;
-
 /* Message types */
 #define NK6510_MSG_COMMSTATUS	0x01	/* Communication status */
 #define NK6510_MSG_SMS		0x02	/* SMS handling */
