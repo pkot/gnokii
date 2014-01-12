@@ -30,7 +30,7 @@
 #define NK6510_MSG_SECURITY	0x08	/* PIN and stuff */
 #define NK6510_MSG_NETSTATUS	0x0a	/* Network status */
 #define NK6510_MSG_SOUND	0x0b	/* Sound */
-#define NK6510_MSG_KEYPRESS	0x0c	/* keypress emulation? */
+#define NK6510_MSG_KEYPRESS	0x0c	/* Keypress emulation */
 #define NK6510_MSG_SUBSCRIBE	0x10	/* subscribe to channels */
 #define NK6510_MSG_CALENDAR	0x13	/* Calendar notes */
 #define NK6510_MSG_FOLDER	0x14	/* Folders handling */
