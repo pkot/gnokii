@@ -186,6 +186,30 @@
 #define NK6510_SUBSEC_ENABLE_EXTENDED_CMDS	0x64	/* Enable extended commands */
 #define NK6510_SUBSEC_NETMONITOR         	0x7e	/* Netmonitor */
 
+/* Definitions for phone keys and buttons (Series 40 3rd Ed.) */
+/* Keys on phone keypad (0..9 * #) have the corresponding ASCII values */
+typedef enum {
+	NK6510_KEY_POWER	  = 0xe001,  /* power button */
+	NK6510_KEY_OPEN		  = 0xe002,  /* slider (pressed when opened, released when closed) */
+	NK6510_KEY_SELECTLEFT	  = 0xe003,  /* left soft button */
+	NK6510_KEY_SELECTRIGHT	  = 0xe004,  /* right soft button */
+	NK6510_KEY_GREEN	  = 0xe005,  /* green phone */
+	NK6510_KEY_RED		  = 0xe006,  /* red phone */
+	NK6510_KEY_UP		  = 0xe007,  /* cursor up */
+	NK6510_KEY_DOWN		  = 0xe008,  /* cursor down */
+
+	NK6510_KEY_PLUS		  = 0xe00a,  /* volume plus */
+	NK6510_KEY_MINUS	  = 0xe00b,  /* volume minus */
+	NK6510_KEY_MENU		  = 0xe00c,  /* middle soft button */
+	NK6510_KEY_LEFT		  = 0xe00d,  /* cursor left */
+	NK6510_KEY_RIGHT	  = 0xe00e,  /* cursor right */
+
+	NK6510_KEY_CAMERA	  = 0xe05c,  /* camera */
+	NK6510_KEY_FWD		  = 0xe05f,  /* fast forward */
+	NK6510_KEY_PLAY		  = 0xe060,  /* play/pause */
+	NK6510_KEY_REW		  = 0xe061,  /* rewind */
+} nk6510_key;
+
 /* Series 40 3rd Ed. SMS and MMS */
 
 #define NK6510_S40MSG_HEADER_LEN	0xb0	/* 176 */

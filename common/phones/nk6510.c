@@ -5245,7 +5245,53 @@ static gn_error NK6510_IncomingKeypress(int messagetype, unsigned char *message,
 	return GN_ERR_NONE;
 }
 
-static gn_error NK6510_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press)
+static gn_error NK6510_PressOrReleaseKey_S40_30(gn_data *data, struct gn_statemachine *state, bool press)
+{
+	gn_error error = GN_ERR_NONE;
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x11,
+			       0, /* Unknown */
+			       1, /* number of blocks*/
+			       1, /* block type */
+			       8, /* block length */
+			       0, 0, /* key code: ASCII or nk6510_keys enum */
+			       0, /* 1 = press, 0 = release */
+			       0, 0, 0}; /* Unknown */
+	nk6510_key keycode;
+
+	switch (data->key_code) {
+	case GN_KEY_1:			keycode = '1'; break;
+	case GN_KEY_2:			keycode = '2'; break;
+	case GN_KEY_3:			keycode = '3'; break;
+	case GN_KEY_4:			keycode = '4'; break;
+	case GN_KEY_5:			keycode = '5'; break;
+	case GN_KEY_6:			keycode = '6'; break;
+	case GN_KEY_7:			keycode = '7'; break;
+	case GN_KEY_8:			keycode = '8'; break;
+	case GN_KEY_9:			keycode = '9'; break;
+	case GN_KEY_0:			keycode = '0'; break;
+	case GN_KEY_HASH:		keycode = '#'; break;
+	case GN_KEY_ASTERISK:		keycode = '*'; break;
+	case GN_KEY_POWER:		keycode = NK6510_KEY_POWER; break;
+	case GN_KEY_GREEN:		keycode = NK6510_KEY_GREEN; break;
+	case GN_KEY_RED:		keycode = NK6510_KEY_RED; break;
+	case GN_KEY_INCREASEVOLUME: 	keycode = NK6510_KEY_PLUS; break;
+	case GN_KEY_DECREASEVOLUME: 	keycode = NK6510_KEY_MINUS; break;
+	case GN_KEY_UP:			keycode = NK6510_KEY_UP; break;
+	case GN_KEY_DOWN:		keycode = NK6510_KEY_DOWN; break;
+	case GN_KEY_MENU:		keycode = NK6510_KEY_MENU; break;
+	case GN_KEY_NAMES:		keycode = NK6510_KEY_SELECTRIGHT; break;
+	default:			error = GN_ERR_NOTSUPPORTED;
+	}
+	if (error != GN_ERR_NONE)
+		return error;
+
+	req[8] = keycode / 256;
+	req[9] = keycode % 256;
+	req[10] = press ? 0x01 : 0x00; /* Actually opposite WRT NK6510 */
+	SEND_MESSAGE_BLOCK(NK6510_MSG_KEYPRESS, sizeof(req));
+}
+
+static gn_error NK6510_PressOrReleaseKey_NK6510(gn_data *data, struct gn_statemachine *state, bool press)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, 0x11, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01};
 
@@ -5257,6 +5303,19 @@ static gn_error NK6510_PressOrReleaseKey(gn_data *data, struct gn_statemachine *
 	}
 
 	SEND_MESSAGE_BLOCK(NK6510_MSG_KEYPRESS, 10);
+}
+
+static gn_error NK6510_PressOrReleaseKey(gn_data *data, struct gn_statemachine *state, bool press)
+{
+	/*
+	 * Cannot autodetect here because the frame for GN_KEY_DOWN on NK6510 doesn't return
+	 * an error when used on Series 40 3rd and results in a key stuck which renders the
+	 * phone's keypad unusable until power cycled (GN_KEY_UP does return an error though)
+	 */
+	if (DRVINSTANCE(state)->pm->flags == PM_DEFAULT_S40_3RD)
+		return NK6510_PressOrReleaseKey_S40_30(data, state, press);
+	else
+		return NK6510_PressOrReleaseKey_NK6510(data, state, press);
 }
 
 /*****************/
