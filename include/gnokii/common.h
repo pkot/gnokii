@@ -796,8 +796,18 @@ typedef enum {
 	GN_KEY_DECREASEVOLUME,
 	GN_KEY_UP = 0x17,
 	GN_KEY_DOWN,
-	GN_KEY_MENU,
-	GN_KEY_NAMES
+	GN_KEY_MENU,		/* middle soft button on some phones */
+	GN_KEY_SELECTMIDDLE = GN_KEY_MENU,
+	GN_KEY_NAMES,		/* right soft button on some phones */
+	GN_KEY_SELECTRIGHT = GN_KEY_NAMES,
+	GN_KEY_OPEN,		/* slider ("press" to open, "release" to close) */
+	GN_KEY_SELECTLEFT,	/* left soft button */
+	GN_KEY_LEFT,		/* cursor left */
+	GN_KEY_RIGHT,		/* cursor right */
+	GN_KEY_CAMERA,		/* key to activate camera */
+	GN_KEY_FWD,		/* fast forward (skip to next song or tune radio up) */
+	GN_KEY_PLAY,		/* play/pause */
+	GN_KEY_REW,		/* rewind (skip to previous song or tune radio down) */
 } gn_key_code;
 
 typedef struct {

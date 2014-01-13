@@ -5279,7 +5279,15 @@ static gn_error NK6510_PressOrReleaseKey_S40_30(gn_data *data, struct gn_statema
 	case GN_KEY_UP:			keycode = NK6510_KEY_UP; break;
 	case GN_KEY_DOWN:		keycode = NK6510_KEY_DOWN; break;
 	case GN_KEY_MENU:		keycode = NK6510_KEY_MENU; break;
-	case GN_KEY_NAMES:		keycode = NK6510_KEY_SELECTRIGHT; break;
+	case GN_KEY_SELECTRIGHT:	keycode = NK6510_KEY_SELECTRIGHT; break;
+	case GN_KEY_OPEN:		keycode = NK6510_KEY_OPEN; break;
+	case GN_KEY_SELECTLEFT:		keycode = NK6510_KEY_SELECTLEFT; break;
+	case GN_KEY_LEFT:		keycode = NK6510_KEY_LEFT; break;
+	case GN_KEY_RIGHT:		keycode = NK6510_KEY_RIGHT; break;
+	case GN_KEY_CAMERA:		keycode = NK6510_KEY_CAMERA; break;
+	case GN_KEY_FWD:		keycode = NK6510_KEY_FWD; break;
+	case GN_KEY_PLAY:		keycode = NK6510_KEY_PLAY; break;
+	case GN_KEY_REW:		keycode = NK6510_KEY_REW; break;
 	default:			error = GN_ERR_NOTSUPPORTED;
 	}
 	if (error != GN_ERR_NONE)
