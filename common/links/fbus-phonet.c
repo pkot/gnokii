@@ -51,7 +51,7 @@ static int verify_max_message_len(int len, char **message_buffer)
 {
 	static int max_message_len = 0;
 
-	if (len > max_message_len) {
+	if (len > max_message_len || !*message_buffer) {
 		dprintf("overrun, reallocating: %d %d\n", len, max_message_len);
 		*message_buffer = realloc(*message_buffer, len + 1);
 		max_message_len = len + 1;
