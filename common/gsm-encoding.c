@@ -423,7 +423,8 @@ static unsigned char char_def_alphabet_ext_encode(unsigned int value)
  */
 GNOKII_API int gn_char_def_alphabet(unsigned char *string)
 {
-	unsigned int i, ucs2len, inlen = strlen(string);
+	int ucs2len;
+	unsigned int i, inlen = strlen(string);
 	char *ucs2str;
 
 	/* First, let's know the encoding. We convert it from something to UCS-2 */
@@ -639,7 +640,8 @@ int char_7bit_pack(unsigned int offset, unsigned char *input,
 	unsigned char *out_num = output; /* Current pointer to the output buffer */
 	unsigned int in_num;
 	int bits;		     /* Number of bits directly copied to output buffer */
-	unsigned int ucs2len, i = 0, len = strlen(input);
+	int ucs2len;
+	unsigned int i = 0, len = strlen(input);
 	char *ucs2str;
 
 	/* First, let's know the encoding. We convert it from something to UCS-2 */

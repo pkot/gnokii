@@ -1515,7 +1515,8 @@ static gn_error sms_data_encode(gn_sms *sms, gn_sms_raw *rawsms)
 		}
 
 		case GN_SMS_DATA_Text: {
-			unsigned int length, udh_length, offset = rawsms->user_data_length;
+			int length;
+			unsigned int udh_length, offset = rawsms->user_data_length;
 
 			length = sms->user_data[i].length;
 			if (sms->udh.length)
