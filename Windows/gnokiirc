@@ -13,9 +13,9 @@
 # Set port to the physical port used to connect to your phone.
 # For Win32 and ports from 1 to 9 you want to use:
 port = com1:
-# or similiar. For ports greater than 9 you want to use:
+# or similar. For ports greater than 9 you want to use:
 # port = \\.\COM10
-# or similiar.
+# or similar.
 #
 # Use this setting also for the Bluetooth connection:
 # port = aa:bb:cc:dd:ee:ff
@@ -83,7 +83,7 @@ connection = serial
 # connection = bluetooth
 # For infrared connection with phones other than Nokia 6110/6130/6150 use:
 # connection = irda
-# Don't forget to run: 'irattach irda0 -s' or similiar before running gnokii
+# Don't forget to run: 'irattach irda0 -s' or similar before running gnokii
 
 # Set this to 'yes' if you want gnokii to set and check the lock file in
 # /var/lock directory. It avoids potential conflicts with other serial
