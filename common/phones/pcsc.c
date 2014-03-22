@@ -144,7 +144,7 @@ static gn_error ios2gn_error(PCSC_IOSTRUCT *ios)
 		return GN_ERR_NONE;
 	case 0x92: /* 9.4.3 Memory management */
 		if (ios->pbRecvBuffer[ios->dwReceived - 1] < 16) {
-			dprintf("WARNING: command succeded after %d retries\n", ios->pbRecvBuffer[ios->dwReceived - 1]);
+			dprintf("WARNING: command succeeded after %d retries\n", ios->pbRecvBuffer[ios->dwReceived - 1]);
 			return GN_ERR_NONE;
 		} else {
 			return GN_ERR_FAILED;

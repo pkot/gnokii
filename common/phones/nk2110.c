@@ -372,7 +372,7 @@ DecodeIncomingSMS(GSM_SMSMessage *m)
 
 	/*
 	Originator address is at 15+i,
-	   followed by message center addres (?)
+	   followed by message center address (?)
 	*/
 	{
 		char *s = (char *) &SMSData[15+i];	/* We discard volatile. Make compiler quiet. */

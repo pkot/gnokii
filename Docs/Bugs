@@ -37,7 +37,7 @@ smsd/smsd
 Debug routines are compiled in by default and can be enabled in the
 [logging] section of the configuration file.  To enable the debug output for
 the drivers and for gnokii, set debug = on. To enable the debug output for
-higer level routines of smsd and xgnokii, set xdebug = on.
+higher level routines of smsd and xgnokii, set xdebug = on.
 
   [logging]
   debug = on

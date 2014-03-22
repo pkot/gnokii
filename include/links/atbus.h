@@ -26,7 +26,7 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state);
 typedef enum {
 	GN_AT_NONE,		/* NO or unknown result code */
 	GN_AT_PROMPT,		/* SMS command waiting for input */
-	GN_AT_OK,		/* Command succeded */
+	GN_AT_OK,		/* Command succeeded */
 	GN_AT_ERROR,		/* Command failed */
 	GN_AT_CMS,		/* SMS Command failed */
 	GN_AT_CME,		/* Extended error code found */

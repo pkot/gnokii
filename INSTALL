@@ -158,7 +158,7 @@ Alternatively, instead of writing these commands you can use:
 
 where options are the same as with configure script. Sometimes (it happens
 mainly with libintl and libiconv) some libraries may not be correctly
-recognized. You may want to set enviromental variables to let configure do
+recognized. You may want to set environmental variables to let configure do
 the work. The sample usage would be:
 
     $ CPPFLAGS="-I/usr/local/include -L/usr/local/lib" ./configure \
@@ -212,7 +212,7 @@ Calling
 
     $ make distclean
 
-additionaly cleans all ./configure outputs. After this command you must 
+additionally cleans all ./configure outputs. After this command you must 
 run ./configure again if you need to use any Makefile.
 
 
@@ -236,7 +236,7 @@ Ubuntu hints
 ============
 
 The hints most likely apply against any other Debian-based distribution and
-similiar steps need to be taken for any other distribution. The described
+similar steps need to be taken for any other distribution. The described
 steps were taken on fresh Ubuntu 9.10 installation.
 
 Grab build environment. It will install compiler, most important libraries

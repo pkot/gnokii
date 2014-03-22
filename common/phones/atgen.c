@@ -649,7 +649,7 @@ gn_error at_error_get(unsigned char *buffer, struct gn_statemachine *state)
  * above problem. but the GSM specification defines the default charset and
  * no "original" charset.
  * so what we do is to ask the phone (after a reset) for its original
- * charset and store the result for future referece. we don't do a full
+ * charset and store the result for future reference. we don't do a full
  * initialization for speed reason. at further processing we can chose
  * a working charset if needed.
  *
@@ -800,7 +800,7 @@ static gn_error AT_SetCharset(gn_data *data, struct gn_statemachine *state)
 	if (drvinst->charset != AT_CHAR_UNKNOWN)
 		return GN_ERR_NONE;
 
-	/* no UCS2 charset found or error occured */
+	/* no UCS2 charset found or error occurred */
 	if ((drvinst->availcharsets & AT_CHAR_HEXGSM) && (drvinst->charset != AT_CHAR_HEXGSM)) {
 		/* try to set HEX charset */
 		error = sm_message_send(14, GN_OP_Init, "AT+CSCS=\"HEX\"\r", state);
@@ -2261,7 +2261,7 @@ static gn_error ReplyGetRFLevel(int messagetype, unsigned char *buffer, int leng
 
 	splitlines(&buf);
 
-	if (data->rf_unit && !strncmp(buf.line1, "AT+CSQ", 6)) { /* FIXME realy needed? */
+	if (data->rf_unit && !strncmp(buf.line1, "AT+CSQ", 6)) { /* FIXME really needed? */
 		*(data->rf_unit) = GN_RF_CSQ;
 		pos1 = buf.line2 + 6;
 		pos2 = strchr(buf.line2, ',');
@@ -2538,7 +2538,7 @@ static gn_error ReplyGetSMS(int messagetype, unsigned char *buffer, int length, 
 
 /* ReplyGetCharset
  *
- * parses the reponse from a check for the actual charset or the
+ * parses the response from a check for the actual charset or the
  * available charsets. a bracket in the response is taken as a request
  * for available charsets.
  */
@@ -3307,7 +3307,7 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	/*
 	 * If there is an initialization script, resetting the device most
 	 * likely does not make sense.  Either the script resets the device
-	 * or resetting might not be good thing after intialization.
+	 * or resetting might not be good thing after initialization.
 	 */
 	if (!state->config.connect_script[0]) {
 		ret = SoftReset(&data, state);

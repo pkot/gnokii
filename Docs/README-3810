@@ -63,7 +63,7 @@ phones.
   message center number.
   
 - By way of a message in --monitor mode, receive notification 
-  of the following occuring;
+  of the following occurring;
   
   + Incoming call being received, answered and hung up.
   + Outgoing call being made, answered and hung up.

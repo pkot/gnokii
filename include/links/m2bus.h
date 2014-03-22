@@ -30,7 +30,7 @@
 #endif
 
 /* This byte is at the beginning of all GSM Frames sent over M2BUS to Nokia
-   phones.  This may have to become a phone dependant parameter... */
+   phones.  This may have to become a phone dependent parameter... */
 #define M2BUS_FRAME_ID 0x1f
 
 /* This byte is at the beginning of all GSM Frames sent over IR to Nokia phones. */

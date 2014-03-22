@@ -144,7 +144,7 @@ gnokii --monitor should now function.
 Possible problems
 =================
 
-- If you are absolutly sure you set up everything fine, you are using a
+- If you are absolutely sure you set up everything fine, you are using a
   FIR driver, your phone can be seen in the discovery log but you are not
   able to use either minicom or gnokii it can be a speed negotiation
   problem between your IrDA stack and your phone. Probably the reason is

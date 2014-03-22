@@ -93,7 +93,7 @@ void at_bosch_init(char* foundmodel, char* setupmodel, struct gn_statemachine *s
 	at_insert_send_function(GN_OP_AT_GetCharset, FakeCharset, state);
 	at_insert_send_function(GN_OP_AT_SetCharset, FakeCharset, state);
 	replygetsms = at_insert_recv_function(GN_OP_GetSMS, ReplyGetSMS, state);
-	/* phone lacks many usefull commands :( */
+	/* phone lacks many useful commands :( */
 	at_insert_send_function(GN_OP_GetBatteryLevel, Unsupported, state);
 	at_insert_send_function(GN_OP_GetRFLevel, Unsupported, state);
 	at_insert_send_function(GN_OP_GetSecurityCodeStatus, Unsupported, state);

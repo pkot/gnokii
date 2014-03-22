@@ -79,7 +79,7 @@ static gn_error ReplyIncomingSMS(int messagetype, unsigned char *buffer, int len
 	 * <memory> is the memory where the message is stored and can be "ME" or "SM".
 	 * <location> is a place in "MT" memory which consists of "SM" and "ME".
 	 * order is that "SM" memory goes first, "ME" memory goes second.
-	 * So if the memory is "ME" we need to substract from <location> size of "SM"
+	 * So if the memory is "ME" we need to subtract from <location> size of "SM"
 	 * memory to get the location (we cannot read from "MT" memory
 	 */
 	if (mem == GN_MT_ME) {

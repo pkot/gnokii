@@ -531,7 +531,7 @@ typedef struct {
 } gn_wap_setting;
 
 /* This structure is provided to allow common information about the particular
-   model to be looked up in a model independant way. Some of the values here
+   model to be looked up in a model independent way. Some of the values here
    define minimum and maximum levels for values retrieved by the various Get
    functions for example battery level. They are not defined as constants to
    allow model specific code to set them during initialisation */

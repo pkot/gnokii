@@ -17,7 +17,7 @@
   possible hiding the model specific details.
 
   The underlying code should run in it's own thread to allow communications to
-  the phone to be run independantly of mailing code that calls these API
+  the phone to be run independently of mailing code that calls these API
   functions.
 
   Unless otherwise noted, all functions herein block until they complete.  The

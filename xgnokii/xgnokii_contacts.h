@@ -25,7 +25,7 @@
 /* Structure to keep memory status information */
 typedef struct {
 	int MaxME;		/* Maximum Phone memory entries. */
-	int UsedME;		/* Actualy used Phone memory entries. */
+	int UsedME;		/* Actually used Phone memory entries. */
 	int FreeME;		/* FreeME = MaxME - UsedME */
 	int MaxSM;		/* Maximum SIM memory entries. */
 	int UsedSM;

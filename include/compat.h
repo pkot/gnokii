@@ -109,7 +109,7 @@
  * the GNOKIIDLL_EXPORTS symbol defined on the command line. this symbol should
  * not be defined on any project that uses this DLL. This way any other project
  * whose source files include this file see API functions as being imported
- * from a DLL, wheras this DLL sees symbols defined with this macro as being
+ * from a DLL, whereas this DLL sees symbols defined with this macro as being
  * exported.
  */
 #if defined(WIN32)
@@ -267,7 +267,7 @@ time_t timegm(struct tm *tm);
 	typedef unsigned int u32;
 #endif
 
-/* for Linux Bluetooth compability */
+/* for Linux Bluetooth compatibility */
 #if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
 	typedef unsigned char uint8_t;
 	typedef unsigned short uint16_t;

@@ -1789,7 +1789,7 @@ static gn_error IncomingSMS(int messagetype, unsigned char *message, int length,
 			return GN_ERR_UNHANDLEDFRAME;
 		}
 
-	/* sms status succeded */
+	/* sms status succeeded */
 	case 0x37:
 		dprintf("Message: SMS Status Received\n");
 		dprintf("\tThe number of messages: %d\n", message[10]);

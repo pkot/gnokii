@@ -1001,7 +1001,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 	/* getfolderstatus */
 	case 0x0b:
 		/*
-		 * Reponse:
+		 * Response:
 		 * 01 78 00 0b 00 00 01 00 00 00
 		 * apparently means "empty folder"
 		 */
@@ -1116,7 +1116,7 @@ static gn_error NK6510_IncomingFolder(int messagetype, unsigned char *message, i
 			dprintf("SMS Folder successfully deleted!\n");
 			break;
 		case 0x68:
-			dprintf("SMS Folder could not be deleted! Not existant?\n");
+			dprintf("SMS Folder could not be deleted! Not existent?\n");
 			return GN_ERR_INVALIDLOCATION;
 		case 0x6b:
 			dprintf("SMS Folder could not be deleted! Not empty?\n");
@@ -3268,7 +3268,7 @@ reply: 0x19 / 0x0012
 		case NK6510_SUBCLO_GMT_UPD_RCVD:
 			/* This is a signed value that shows the nominal adjustment, eg. if current time is 16:31:25, the phone UI allows
 			   you to advance the GMT 1 hour to 17:31, the number of seconds is 3600) */
-			/* Same length as subtype 0x05 but date is zeroed and number of seconds has a different endianess!!! */
+			/* Same length as subtype 0x05 but date is zeroed and number of seconds has a different endianness!!! */
 			dprintf("Date/Time adjusted by %d seconds\n", (((((message[25] << 8) + message[24]) << 8) + message[23]) << 8) + message[22]);
 			break;
 		case NK6510_SUBCLO_DATE_UPD_RCVD:

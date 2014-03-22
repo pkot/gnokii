@@ -23,16 +23,16 @@ port = none
 #
 # With Linux-IrDA you will want to use
 # port = /dev/ircomm0
-# or similiar.
+# or similar.
 #
 # Use this setting also for the Bluetooth connection:
 # port = aa:bb:cc:dd:ee:ff
 # when using it with AT driver set it to:
 # port = /dev/rfcomm0
-# or similiar.
+# or similar.
 #
 # For the Linux USB cables you will need one of the following settings (or
-# similiar)
+# similar)
 # port = /dev/ttyUSB0
 # port = /dev/tts/USB0
 # port = /dev/ttyACM0
@@ -112,7 +112,7 @@ connection = serial
 # connection = bluetooth
 # For infrared connection with phones other than Nokia 6110/6130/6150 use:
 # connection = irda
-# Don't forget to run: 'irattach irda0 -s' or similiar before running gnokii
+# Don't forget to run: 'irattach irda0 -s' or similar before running gnokii
 # For the nk6110 driver only connection=infrared is valid for IrDA.
 # See Docs/gnokii-ir-howto for more detailes on this.
 # For connection with a PC/SC compatible Smart Card reader use:

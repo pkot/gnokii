@@ -32,7 +32,7 @@ First of all, tested with this driver so far are:
 All Nokia Series40 phones should work with this driver.
 
 Code for the 6510 phones has been tested with DAU-9P and DLR-3P cables and
-IrDA connection. The following conection type values are recommended for the
+IrDA connection. The following connection type values are recommended for the
 various connection media:
 
 -----------------------------------------

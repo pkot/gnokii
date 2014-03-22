@@ -430,7 +430,7 @@ Correct format is FBUS version 2/MBUS version 2/IrDA
                                                0x08 = Colleagues
                                                0x10 = Others
                                      All logical OR among groups are valid, so if you select from one phone's profile
-                                     alert for Friends and Collegues, a 0x0c will return (because 0x04 OR 0x08 = 0x0c).
+                                     alert for Friends and Colleagues, a 0x0c will return (because 0x04 OR 0x08 = 0x0c).
                                  (*) If Callers==0xff, means "Alert for All calls". Then, in this case, you don't
                                      need to read other groups selection.
                             for number2==0x09: (Automatic answer)

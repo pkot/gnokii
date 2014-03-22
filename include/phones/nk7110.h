@@ -157,7 +157,7 @@ typedef enum {
 /* Entry Types for the enhanced phonebook */
 #define NK7110_ENTRYTYPE_POINTER	0x04	/* Pointer to other memory */
 #define NK7110_ENTRYTYPE_NAME		0x07	/* Name always the only one */
-#define NK7110_ENTRYTYPE_EMAIL		0x08	/* Email Adress (TEXT) */
+#define NK7110_ENTRYTYPE_EMAIL		0x08	/* Email Address (TEXT) */
 #define NK7110_ENTRYTYPE_POSTAL		0x09	/* Postal Address (Text) */
 #define NK7110_ENTRYTYPE_NOTE		0x0a	/* Note (Text) */
 #define NK7110_ENTRYTYPE_NUMBER		0x0b	/* Phonenumber */

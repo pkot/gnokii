@@ -314,7 +314,7 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		}
 		free(data->message_center);
 	}
-	/* Either GN_OP_GetSMSCenter failed or it succeded and read an empty number */
+	/* Either GN_OP_GetSMSCenter failed or it succeeded and read an empty number */
 	if (!sms.smsc.number[0]) {
 		fprintf(stderr, _("Cannot read the SMSC number from your phone. If the sms send will fail, please use --smsc option explicitly giving the number.\n"));
 	}

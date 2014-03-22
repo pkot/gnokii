@@ -36,7 +36,7 @@
 #define FBUS_CONTENT_MAX_LENGTH  120
 
 /* This byte is at the beginning of all GSM Frames sent over FBUS to Nokia
-   phones.  This may have to become a phone dependant parameter... */
+   phones.  This may have to become a phone dependent parameter... */
 #define FBUS_FRAME_ID 0x1e
 
 /* This byte is at the beginning of all GSM Frames sent over IR to Nokia phones. */

@@ -56,7 +56,7 @@
 #define gvasprintf		vasprintf
 
 /* This is for the bitmaps mostly, but may be useful also for the other
- * things. Counts how many octets we need to cover the given ammount of
+ * things. Counts how many octets we need to cover the given amount of
  * the bits.
  */
 #define ceiling_to_octet(x) ((x) + 7) / 8

@@ -634,7 +634,7 @@ static void biggermsg(struct MF *mf)
  *             bits 14 through 0 represent the number of delta-time
  *             "ticks" which make up a quarter note.  If bit  15 of
  *             division  is  a one, delta-times in a file correspond to
- *             subdivisions of a second similiar to  SMPTE  and  MIDI
+ *             subdivisions of a second similar to  SMPTE  and  MIDI
  *             time code.  In  this format bits 14 through 8 contain
  *             one of four values - 24, -25, -29, or -30,
  *             corresponding  to  the  four standard  SMPTE and MIDI

@@ -81,7 +81,7 @@ of the phones. The functions within should convert the gnokii internal
 structures into the frames (without the header) that can be sent to the
 phone and understood by it. It's obvious that this layer should be phone
 independent. All the phone specific stuff should be done in the phone layer.
-In the case when phone frames are similiar but not the same, the phone layer
+In the case when phone frames are similar but not the same, the phone layer
 can export some help structures to let be the code shared in the middle
 layer. Using the middle layer is optional. Currently almost no code does use
 it. Although it is recommended to use it to avoid the code duplication and
@@ -152,7 +152,7 @@ internally in the statemachine and go to state AnswerReady.
 When the phone code calls sm_get_answer, we pass up the stored answer and
 go back to Initialised.
 
-Note that all of this can, or can not be done as a seperate thread.  For
+Note that all of this can, or can not be done as a separate thread.  For
 now, we will have a gn_sm_loop function (which blocks for a required time and
 returns the current state) so that we can work within one thread.
 

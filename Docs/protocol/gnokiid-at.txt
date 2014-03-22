@@ -251,7 +251,7 @@ ATS<r>=<v> Set register <r> to value <v>
         <v>: 0..255
 To enable auto answer use ATS0=<v> where <v> is a number greater than zero;
 use ATS0=0 to disable auto answer.
-Note: when auto answer is enabled phone responds immediatly ignoring the value
+Note: when auto answer is enabled phone responds immediately ignoring the value
 of <v>.
 
 

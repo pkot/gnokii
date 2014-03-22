@@ -163,7 +163,7 @@ A. Make sure that you put in the config file "port = com1:", not
 Q. How do I enable debug output?
 
 A. Place the new section in your config file (or update existing section in
-   a similiar way):
+   a similar way):
 
    [logging]
    debug = on

@@ -171,7 +171,7 @@
 /* Entry Types for the enhanced phonebook */
 #define NK6510_ENTRYTYPE_POINTER	0x1a	/* Pointer to other memory */
 #define NK6510_ENTRYTYPE_NAME		0x07	/* Name always the only one */
-#define NK6510_ENTRYTYPE_EMAIL		0x08	/* Email Adress (TEXT) */
+#define NK6510_ENTRYTYPE_EMAIL		0x08	/* Email Address (TEXT) */
 #define NK6510_ENTRYTYPE_POSTAL		0x09	/* Postal Address (Text) */
 #define NK6510_ENTRYTYPE_NOTE		0x0a	/* Note (Text) */
 #define NK6510_ENTRYTYPE_NUMBER		0x0b	/* Phonenumber */

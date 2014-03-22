@@ -277,7 +277,7 @@ gn_error writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_stat
 		}
 #endif
 		if (error != GN_ERR_NONE) {
-			/* when reading until 'end' it's not an error if it tried to read a non existant note */
+			/* when reading until 'end' it's not an error if it tried to read a non existent note */
 			if ((last_location == INT_MAX) && (error == GN_ERR_EMPTYLOCATION)) {
 				error = GN_ERR_NONE;
 			} else {

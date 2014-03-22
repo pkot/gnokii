@@ -553,7 +553,7 @@ void	gn_atem_at_parse(char *cmd_buffer)
 			switch (toupper(*buf)) {
 			case 'C':
 				buf++;
-				/* Returns true if error occured */
+				/* Returns true if error occurred */
 				if (gn_atem_command_plusc(&buf) == true) {
 					gn_atem_modem_result(MR_ERROR);
 					return;
@@ -562,7 +562,7 @@ void	gn_atem_at_parse(char *cmd_buffer)
 
 			case 'G':
 				buf++;
-				/* Returns true if error occured */
+				/* Returns true if error occurred */
 				if (gn_atem_command_plusg(&buf) == true) {
 					gn_atem_modem_result(MR_ERROR);
 					return;
@@ -578,7 +578,7 @@ void	gn_atem_at_parse(char *cmd_buffer)
 		/* # is the precursor to another set of commands */
 		case '#':
 			buf++;
-			/* Returns true if error occured */
+			/* Returns true if error occurred */
 			if (gn_atem_command_diesis(&buf) == true) {
 				gn_atem_modem_result(MR_ERROR);
 				return;

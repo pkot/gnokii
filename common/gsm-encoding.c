@@ -204,7 +204,7 @@ void gn_char_set_encoding(const char* encoding)
  * char_mblen:
  * @src: the string to measure
  *
- * Returns: the lenght of the string
+ * Returns: the length of the string
  *
  * Detects the correct length of a string (also for multibyte chars like "umlaute").
  */

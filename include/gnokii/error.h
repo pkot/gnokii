@@ -26,7 +26,7 @@ typedef enum {
 	GN_ERR_FAILED,			/* Command failed. */
 	GN_ERR_UNKNOWNMODEL,		/* Model specified isn't known/supported. */
 	GN_ERR_INVALIDSECURITYCODE,	/* Invalid Security code. */
-	GN_ERR_INTERNALERROR,		/* Problem occured internal to model specific code. */
+	GN_ERR_INTERNALERROR,		/* Problem occurred internal to model specific code. */
 	GN_ERR_NOTIMPLEMENTED,		/* Command called isn't implemented in model. */
 	GN_ERR_NOTSUPPORTED,		/* Function not supported by the phone */
 	GN_ERR_USERCANCELED,		/* User aborted the action. */

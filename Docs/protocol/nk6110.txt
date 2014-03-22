@@ -285,7 +285,7 @@ Correct format is FBUS version 2/Direct IRDA/MBUS version 2
                    xx: 1: family
                        2: VIP
                        4: friends
-                       8: collegues
+                       8: colleagues
                       16: other
          0x09: automatic answer (what number in Nokia 3310 ?)
                xx, 0, 0, 1

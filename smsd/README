@@ -78,7 +78,7 @@ THE FILE MODULE
 This module doesn't need an SQL server to work. For incoming messages it
 work in a way that it calls a program giving phone number, date as parameter
 and the message text on stdin. In the smsd directory there is as example file
-action. It shows sms data to stdout. If you want something usefull you must
+action. It shows sms data to stdout. If you want something useful you must
 write your own action.
 For outgoing messages you can set spool directory where smsd looks
 regularly.
@@ -91,7 +91,7 @@ number
 text
 
 The name of file is unimportant but smsd ignores all files with prefix
-"ERR.". If smsd succesfuly sends sms, it removes file from spool directory.
+"ERR.". If smsd successfully sends sms, it removes file from spool directory.
 If smsd cannot sends sms prepend file with "ERR." prefix and ignores it.
 
 If you use -m file, -u (--user) and -c (--host) will have other meaning.
@@ -204,7 +204,7 @@ Options:
 
 -0, --firstpos0
 	SMSD starts messages reading from position 1. If your phone stores
-	sms's from postion 0, use this option.
+	sms's from position 0, use this option.
 
 -v, --version
 	Shows smsd version.
