@@ -20,22 +20,22 @@ port = com1:
 # Use this setting also for the Bluetooth connection:
 # port = aa:bb:cc:dd:ee:ff
 
-# Change it according to instructions:
-model = fake
-# Set model to the model number of your phone. For the
-# Symbian phones, install gnapplet.sis on the phone and use:
-# model = symbian
-#
-# For other non-Nokia phones and when you want to use AT
-# mode use:
-# model = AT
-#
+# Set model to the model number of your phone.
 # If you can't figure out what to put here read the FAQ.
 # If it still doesn't help, consult gnokii-ml or #gnokii at freenode.
-# For Nokia phones (non-Symbian), most likely you'll need:
+model = fake
+#
+# For most Nokia phones (non-Symbian) use:
 # model = 6510
-# There are few main models that when chosen should make use of the
-# appropriate drivers. These are: 6110, 7110, 6510, 3110, 2110, 6160.
+#
+# For non-Nokia phones and when you want to use AT mode use:
+# model = AT
+#
+# For Nokia phones built before year 2000 try one of the following values
+# for model: 6110, 7110, 6510, 3110, 2110, 6160.
+#
+# For Symbian phones, install gnapplet.sis on the phone and use:
+# model = symbian
 
 # Set IrDA device name.
 # If you use irda connection you may want gnokii to autodetect the irda
