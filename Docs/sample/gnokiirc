@@ -52,7 +52,7 @@ port = none
 # Change it according to instructions
 model = fake
 # Set model to the model number of your phone. For the
-# Symbian phones use:
+# Symbian phones, install gnapplet.sis on the phone and use:
 # model = symbian
 #
 # For other non-Nokia phones and when you want to use AT
