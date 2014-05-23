@@ -89,7 +89,7 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
             data->smsc_time.year, data->smsc_time.month,
             data->smsc_time.day, data->smsc_time.hour,
             data->smsc_time.minute, data->smsc_time.second,
-            timeinfo->tm_year + 1900, timeinfo->tm_mon,
+            timeinfo->tm_year + 1900, timeinfo->tm_mon + 1,
             timeinfo->tm_mday, timeinfo->tm_hour,
             timeinfo->tm_min, timeinfo->tm_sec,
             text->str, phnStr->str);
