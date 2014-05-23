@@ -1,3 +1,13 @@
+* Sat 24 May 2014 Jan Derfinak
+- SQLite module: added a function that escapes only single quotes by putting
+  two single quotes in a row as SQLite likes them. Author Pedro Aguilar.
+
+
+* Sat 24 May 2014 Jan Derfinak
+- SQLite module: fixed inserting the month number in inbox table.
+  Author Pedro Aguilar.
+
+
 * Wed 27 Mar 2013 Jan Derfinak
 - Removed one second sleep in resend loop after a successfull send. (Pedro
   Aguilar)

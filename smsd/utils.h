@@ -19,5 +19,6 @@
 #include <glib.h>
 
 extern gchar *strEscape (const gchar *const s);
+extern gchar *strEscapeSingleQuote (const gchar *const s);
 
 #endif /* __smsd_utils_h_ */

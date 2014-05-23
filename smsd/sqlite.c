@@ -75,7 +75,7 @@ GNOKII_API gint DB_InsertSMS(const gn_sms * const data, const gchar * const phon
     }
 
     text = g_string_sized_new(480);
-    g_string_append(text, strEscape((gchar *) data->user_data[0].u.text));
+    g_string_append(text, strEscapeSingleQuote((gchar *) data->user_data[0].u.text));
 
     time(&rawtime);
     timeinfo = localtime(&rawtime);
