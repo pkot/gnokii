@@ -319,6 +319,7 @@ static gn_phone_model models[] = {
 	{"N73",   "RM-133",	PM_DEFAULT },
 	{"RPM-1", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"C1-01", "RM-607",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
+	{"C1-02", "RM-643",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
 	{"C2-03", "RM-70",	PM_DEFAULT_S40_3RD },
 	{"Card Phone 1.0", "RPE-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"Card Phone 2.0", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },

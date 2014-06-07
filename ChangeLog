@@ -29,6 +29,8 @@
       work, see the Series 30 section in Docs/README-6510
                                                    (Bruno Estieule)
     o add GN_OP_Passthrough                         (Daniele Forsi)
+    o add id for Nokia C1-02 to misc.c only; use model=series40
+      partially supported because it's a 6th Edition phone   (GDR!)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)
