@@ -31,6 +31,9 @@
     o add GN_OP_Passthrough                         (Daniele Forsi)
     o add id for Nokia C1-02 to misc.c only; use model=series40
       partially supported because it's a 6th Edition phone   (GDR!)
+    o return GN_ERR_ENTRYTOOLONG if model or port in gnokiirc is
+      too long; closes http://savannah.nongnu.org/bugs/?42680
+                                                    (Daniele Forsi)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)

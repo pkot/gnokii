@@ -723,14 +723,22 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "model"))) {
 		fprintf(stderr, _("You need to define '%s' in the config file.\n"), "model");
 		return GN_ERR_NOMODEL;
-	} else
-		snprintf(cfg->model, sizeof(cfg->model), "%s", val);
+	} else {
+		if (snprintf(cfg->model, sizeof(cfg->model), "%s", val) >= sizeof(cfg->model)) {
+			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "model", val);
+			return GN_ERR_ENTRYTOOLONG;
+		}
+	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "port"))) {
 		fprintf(stderr, _("You need to define '%s' in the config file.\n"), "port");
 		return GN_ERR_NOPORT;
-	} else
-		snprintf(cfg->port_device, sizeof(cfg->port_device), "%s", val);
+	} else {
+		if (snprintf(cfg->port_device, sizeof(cfg->port_device), "%s", val) >= sizeof(cfg->port_device)) {
+			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "port", val);
+			return GN_ERR_ENTRYTOOLONG;
+		}
+	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "connection"))) {
 		fprintf(stderr, _("You need to define '%s' in the config file.\n"), "connection");
@@ -741,6 +749,8 @@ static gn_error cfg_psection_load(gn_config *cfg, const char *section, const gn_
 			fprintf(stderr, _("Unsupported [%s] %s value \"%s\"\n"), section, "connection", val);
 			return GN_ERR_NOCONNECTION;
 		}
+		if (!strcmp("pcsc", val))
+			fprintf(stderr, "WARNING: %s=%s is deprecated and will soon be removed. Use %s=%s instead.\n", "connection", val, "connection", "libpcsclite");
 	}
 
 	if (!(val = gn_cfg_get(gn_cfg_info, section, "initlength")))
