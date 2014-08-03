@@ -66,6 +66,11 @@ static gn_error auth_pin_interactive(gn_data *data, struct gn_statemachine *stat
 	case GN_SCT_Pin2:
 	case GN_SCT_Puk2:
 	case GN_SCT_SecurityCode:
+		/*
+		 * Translators: %s is replaced by the translation of "Security code",
+		 * "PIN", "PIN2", "PUK", "PUK2". The first "Enter" is a verb, the
+		 * second "Enter" is the noun of a key on a PC keyboard.
+		 */
 		snprintf(prompt, sizeof(prompt), _("Enter your %s (press Enter to cancel): "), gn_security_code_type2str(security_code->type));
 		if (get_password(prompt, security_code->code, sizeof(security_code->code)) < 1)
 			return GN_ERR_USERCANCELED;
