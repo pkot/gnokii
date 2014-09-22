@@ -34,6 +34,8 @@
     o return GN_ERR_ENTRYTOOLONG if model or port in gnokiirc is
       too long; closes http://savannah.nongnu.org/bugs/?42680
                                                     (Daniele Forsi)
+    o add ids for Nokia 7230 and 7230-1c to misc.c only; use
+      model=series40                                 (Raphaël Droz)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)
