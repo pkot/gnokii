@@ -180,7 +180,7 @@
 #define NK6510_ENTRYTYPE_LOGO		0x1b	/* Group logo */
 #define NK6510_ENTRYTYPE_LOGOSWITCH	0x1c	/* Group logo on/off */
 #define NK6510_ENTRYTYPE_GROUP		0x1e	/* Group number for phonebook entry */
-#define NK6510_ENTRYTYPE_URL		0x2c	/* Group number for phonebook entry */
+#define NK6510_ENTRYTYPE_URL		0x2c	/* Web Address */
 
 /* Entry types for the security commands */
 #define NK6510_SUBSEC_ENABLE_EXTENDED_CMDS	0x64	/* Enable extended commands */
