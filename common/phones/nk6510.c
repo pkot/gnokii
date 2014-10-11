@@ -25,6 +25,7 @@
 
 #include "compat.h"
 #include "misc.h"
+#include <time.h>
 
 #include "gnokii-internal.h"
 #include "nokia-decoding.h"
@@ -141,6 +142,36 @@ static gn_sms_message_status GetMessageStatus_S40_30(const char *filename)
 		dprintf("Unknown message status '%c'\n", filename[26]);
 		return GN_SMS_Unknown;
 	}
+}
+
+static void FindMessageDateTime_S40(char *time, const char *filename)
+{
+	if (!filename || strlen(filename) < 27)
+		return;
+
+	char ashex[9];
+	time_t asts;
+	gn_timestamp *asgts;
+
+	strncpy(ashex, &filename[8], 8);
+	ashex[8] = 0;
+
+	asts = (int)strtol(ashex, NULL, 16);
+	asgts = (gn_timestamp *)g_malloc(sizeof(gn_timestamp));
+	struct tm *ascp = gmtime(&asts);
+	// Nokia timestamp start in 1980
+	ascp->tm_year += 10;
+
+	dprintf("timestamp fetched from filename: 0x%s => %d => %s\n", ashex, asts, asctime(ascp));
+        asgts->second = ascp->tm_sec;
+        asgts->minute = ascp->tm_min;
+        asgts->hour = ascp->tm_hour;
+        asgts->day = ascp->tm_mday;
+        asgts->month = ascp->tm_mon + 1;
+        asgts->year = ascp->tm_year + 1900;
+        asgts->timezone = 0;
+
+	sms_timestamp_pack(asgts, time);
 }
 
 #define ALLOC_CHUNK	128
@@ -1686,6 +1717,14 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	error = gn_sms_pdu2raw(data->raw_sms, bin + offset, cont_len, GN_SMS_PDU_NOSMSC);
 
 	offset += data->raw_sms->length;
+
+	/* gn_sms_pdu2raw() should have obtained the time for GN_SMS_MT_Deliver, but for others
+	   message types we try to get it from the filename */
+	if(*data->raw_sms->smsc_time == 0) {
+		FindMessageDateTime_S40(data->raw_sms->smsc_time,
+				       fl2.files[data->raw_sms->number - 1]->name);
+	}
+
 	/* TODO: decode data in the footer? (e.g. SMSC, multiple recipients numbers */
 
 	return error;
