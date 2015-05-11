@@ -1550,9 +1550,6 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 		return error;
 	}
 
-	if (data->raw_sms->number < 1)
-		return GN_ERR_EMPTYLOCATION;
-
 	data->raw_sms->number = data->sms_folder->locations[data->raw_sms->number - 1];
 
 	if ((data->raw_sms->memory_type == GN_MT_IN) || (data->raw_sms->memory_type == GN_MT_OU)) {
@@ -1660,11 +1657,6 @@ static gn_error NK6510_GetSMS_S40_30(gn_data *data, struct gn_statemachine *stat
 	if (!data->raw_sms)
 		return GN_ERR_INTERNALERROR;
 
-	if (data->raw_sms->number < 1) {
-		dprintf("Getting SMS %d\n", data->raw_sms->number);
-		return GN_ERR_INVALIDLOCATION;
-	}
-
 	dprintf("Using GetSMS for Series40 3rd Ed\n");
 
 	/* Find path */
@@ -1746,11 +1738,6 @@ static gn_error NK6510_DeleteSMS_S40_30(gn_data *data, struct gn_statemachine *s
 
 	if (!data->raw_sms)
 		return GN_ERR_INTERNALERROR;
-
-	if (data->raw_sms->number < 1) {
-		dprintf("Deleting SMS %d\n", data->raw_sms->number);
-		return GN_ERR_INVALIDLOCATION;
-	}
 
 	dprintf("Using DeleteSMS for Series40 3rd Ed\n");
 
