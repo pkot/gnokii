@@ -86,6 +86,8 @@
                                                     (Daniele Forsi)
     o make GN_OP_PressPhoneKey and GN_OP_ReleasePhoneKey work on
       Series 40 3rd                                 (Daniele Forsi)
+    o first SMS number is 1. Fixes
+      http://savannah.nongnu.org/bugs/?45070        (Daniele Forsi)
  * xgnokii updates
     o fix bug that caused to forget subentries after the first one
       when editing the phonebook                    (Daniele Forsi)

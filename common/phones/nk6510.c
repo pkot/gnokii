@@ -1484,6 +1484,9 @@ static gn_error ValidateSMS(gn_data *data, struct gn_statemachine *state)
 {
 	gn_error error;
 
+	if (data->raw_sms->number < 1)
+		return GN_ERR_INVALIDLOCATION;
+
 	/* Handle memory_type = 0 explicitly, because sms_folder->folder_id = 0 by default */
 	if (data->raw_sms->memory_type == 0)
 		return GN_ERR_INVALIDMEMORYTYPE;
@@ -1531,6 +1534,8 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 		return NK6510_DeleteSMS_S40_30(data, state);
 
 	error = ValidateSMS(data, state);
+	if (error != GN_ERR_NONE && error != GN_ERR_NOTSUPPORTED)
+		return error;
 	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE || error == GN_ERR_NOTSUPPORTED) {
 		dprintf("NK6510_DeleteSMS: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file method */
@@ -1605,6 +1610,8 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 		return NK6510_GetSMS_S40_30(data, state);
 
 	error = ValidateSMS(data, state);
+	if (error != GN_ERR_NONE && error != GN_ERR_NOTSUPPORTED)
+		return error;
 	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE || error == GN_ERR_NOTSUPPORTED) {
 		dprintf("NK6510_GetSMS: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file method */
