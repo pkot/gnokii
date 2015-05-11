@@ -127,12 +127,25 @@
 #define NK6510_MEMORY_FD		0x04	/* ?? SIM fixdialling-phonebook */
 #define NK6510_MEMORY_ME		0x05	/* ME (Mobile Equipment) phonebook */
 #define NK6510_MEMORY_SM		0x06	/* SIM phonebook */
+#define NK6510_MEMORY_UNKNOWN07		0x07	/* ?? 0 used / 13 free */
 #define NK6510_MEMORY_EN		0x08	/* ?? SIM (or ME) emergency number */
 #define NK6510_MEMORY_VOICE		0x09	/* Voice Mailbox */
 #define NK6510_MEMORY_SD		0x0c	/* SIM Service Dialling Numbers */
 #define NK6510_MEMORY_SPEEDDIALS	0x0e	/* Speed dials */
 #define NK6510_MEMORY_GROUPS		0x10	/* Caller groups */
+#define NK6510_MEMORY_UNKNOWN13		0x13	/* ?? 0 used / 9472 free */
 #define NK6510_MEMORY_ON		0x17	/* SIM (or ME) own numbers list */
+#define NK6510_MEMORY_UNKNOWN18		0x18	/* ?? 0 used / 50 free */
+#define NK6510_MEMORY_UNKNOWN19		0x19	/* ?? 0 used / 50 free */
+#define NK6510_MEMORY_UNKNOWN1a		0x1a	/* ?? 0 used / 50 free */
+#define NK6510_MEMORY_UNKNOWN1b		0x1b	/* ?? 0 used / 20 free */
+#define NK6510_MEMORY_UNKNOWN1c		0x1c	/* ?? 0 used / 20 free */
+#define NK6510_MEMORY_UNKNOWN1d		0x1d	/* ?? 0 used / 20 free */
+#define NK6510_MEMORY_UNKNOWN1e		0x1e	/* ?? 0 used / 20 free */
+#define NK6510_MEMORY_UNKNOWN1f		0x1f	/* ?? 0 used / 50 free */
+#define NK6510_MEMORY_UNKNOWN20		0x20	/* ?? 0 used / 20 free */
+#define NK6510_MEMORY_UNKNOWN21		0x21	/* ?? 0 used / 50 free */
+#define NK6510_MEMORY_UNKNOWN22		0x22	/* ?? 0 used / 64 free */
 #define NK6510_MEMORY_EXTGROUPS		0x23	/* Extended Caller Groups */
 #define NK6510_MEMORY_MR		0x27	/* Message Recipients */
 #define NK6510_MEMORY_CL		0x28	/* Call Log */
