@@ -54,6 +54,7 @@ AC_PROG_CC
 AM_PROG_CC_C_O
 AC_PROG_CPP
 AC_PROG_LEX
+AC_PROG_OBJC
 # If there's no flex/lex utility and there's no generated common/gnvcal.c file, we won't be able to compile
 if test "x$LEX" = "x:" && test ! -f common/gnvcal.c; then
 	echo "You need one of the following:"
@@ -545,26 +546,20 @@ fi
 dnl ======================== Checks for MacOSX Bluetooth support
 if test `uname -s` = "Darwin" ; then
 	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
-		AC_MSG_NOTICE([checking for the MacOS X Bluetooth support])
-		AC_CHECK_HEADERS(CoreFoundation/CoreFoundation.h)
-		AC_CHECK_HEADERS(IOBluetooth/Bluetooth.h)
-		AC_CHECK_HEADERS([IOBluetooth/IOBluetoothUserLib.h], [], [],
-			[[#ifdef HAVE_COREFOUNDATION_COREFOUNDATION_H
-			  #  include <CoreFoundation/CoreFoundation.h>
-			  #endif
-			  #ifdef HAVE_IOBLUETOOTH_BLUETOOTH_H
-			  #  include <IOBluetooth/Bluetooth.h>
-			  #endif
-			]])
-		AC_TRY_COMPILE([#include <CoreFoundation/CoreFoundation.h>
-				#include <IOBluetooth/Bluetooth.h>
-				#include <IOBluetooth/IOBluetoothUserLib.h>],
-
-				[CFStringRef strDevice;
-				strDevice = CFStringCreateWithCString(NULL, NULL, NULL);
-				IOBluetoothNSStringToDeviceAddress(NULL, NULL);],
+		AC_LANG_PUSH([Objective C])
+		AC_CHECK_HEADERS(IOBluetooth/objc/IOBluetoothRFCOMMChannel.h)
+		AC_CHECK_HEADERS(IOBluetooth/objc/IOBluetoothDevice.h)
+		AC_MSG_CHECKING([for MacOS X Bluetooth support])
+		AC_TRY_COMPILE([#include <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
+		#include <IOBluetooth/objc/IOBluetoothDevice.h>],
+				[
+				IOBluetoothDevice* btDevice = [[IOBluetoothDevice deviceWithAddressString:@"00:00:00:00:00:00"] autorelease];
+			    ],
+			AC_MSG_RESULT(yes)
 			ac_cv_have_iobluetooth=yes,
+			AC_MSG_RESULT(no)
 			ac_cv_have_iobluetooth=no)
+		AC_LANG_POP([Objective C])
 
 		if test $ac_cv_have_iobluetooth = yes; then
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
@@ -575,6 +570,7 @@ if test `uname -s` = "Darwin" ; then
 		fi
 	fi
 fi
+AM_CONDITIONAL([FOR_MAC], [test x$ac_cv_have_iobluetooth = xyes])
 
 dnl ======================== Checks for FreeBSD/netgraph Bluetooth support
 if test `uname -s` = "FreeBSD" ; then

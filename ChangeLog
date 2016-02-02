@@ -36,6 +36,8 @@
                                                     (Daniele Forsi)
     o add ids for Nokia 7230 and 7230-1c to misc.c only; use
       model=series40                                 (Raphaël Droz)
+    o New MacOS X Bluetooth implementation: old one used has not
+      compiled since OS X 10.7 Lion              (Fabrizio Gennari)
  * at driver updates
     o in the default case autodetect if PDU SMS starts with SMSC
                                                     (Daniele Forsi)

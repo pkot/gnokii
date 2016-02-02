@@ -9,16 +9,20 @@ WIN32_FILES = \
 
 UNIX_FILES = \
 	unixserial.c \
-	unixbluetooth.c \
-	osxbluetooth.c \
 	unixirda.c \
 	tcp.c \
 	socketphonet.c
 
+if FOR_MAC
+UNIX_SPECIFIC_FILES = osxbluetooth.m
+else
+UNIX_SPECIFIC_FILES = unixbluetooth.c
+endif
+
 if WIN32
 PLATFORM_FILES = $(WIN32_FILES)
 else
-PLATFORM_FILES = $(UNIX_FILES)
+PLATFORM_FILES = $(UNIX_FILES) $(UNIX_SPECIFIC_FILES)
 endif
 
 libDEVICES_la_SOURCES = \
@@ -36,5 +40,5 @@ libDEVICES_la_LIBADD =		\
 	$(BLUETOOTH_LIBS)	\
 	$(TCP_LIBS)
 
-EXTRA_DIST = $(WIN32_FILES) $(UNIX_FILES)
+EXTRA_DIST = $(WIN32_FILES) $(UNIX_FILES) $(UNIX_SPECIFIC_FILES)
 
