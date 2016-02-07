@@ -4,6 +4,10 @@ EXTRA_DIST = 			\
 	out.00.identify		\
 	out.01.sms		\
 	out.01.writephonebook	\
+	out.02.writephonebook	\
+	out.03.writephonebook	\
+	out.04.writephonebook	\
+	out.05.writephonebook	\
 	out.02.concatsms	\
 	out.03.ucs2sms		\
 	out.08.send161sms	\
@@ -31,6 +35,10 @@ EXTRA_DIST = 			\
 	test.00.identify	\
 	test.01.sms		\
 	test.01.writephonebook	\
+	test.02.writephonebook	\
+	test.03.writephonebook	\
+	test.04.writephonebook	\
+	test.05.writephonebook	\
 	test.02.concatsms	\
 	test.03.ucs2sms		\
 	test.08.send161sms	\
