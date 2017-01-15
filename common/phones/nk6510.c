@@ -151,27 +151,26 @@ static void FindMessageDateTime_S40(char *time, const char *filename)
 
 	char ashex[9];
 	time_t asts;
-	gn_timestamp *asgts;
+	gn_timestamp asgts;
 
 	strncpy(ashex, &filename[8], 8);
 	ashex[8] = 0;
 
 	asts = (int)strtol(ashex, NULL, 16);
-	asgts = (gn_timestamp *)g_malloc(sizeof(gn_timestamp));
 	struct tm *ascp = gmtime(&asts);
-	// Nokia timestamp start in 1980
+	/* Nokia timestamp start in 1980 */
 	ascp->tm_year += 10;
 
 	dprintf("timestamp fetched from filename: 0x%s => %d => %s\n", ashex, asts, asctime(ascp));
-        asgts->second = ascp->tm_sec;
-        asgts->minute = ascp->tm_min;
-        asgts->hour = ascp->tm_hour;
-        asgts->day = ascp->tm_mday;
-        asgts->month = ascp->tm_mon + 1;
-        asgts->year = ascp->tm_year + 1900;
-        asgts->timezone = 0;
+	asgts.second = ascp->tm_sec;
+	asgts.minute = ascp->tm_min;
+	asgts.hour = ascp->tm_hour;
+	asgts.day = ascp->tm_mday;
+	asgts.month = ascp->tm_mon + 1;
+	asgts.year = ascp->tm_year + 1900;
+	asgts.timezone = 0;
 
-	sms_timestamp_pack(asgts, time);
+	sms_timestamp_pack(&asgts, time);
 }
 
 #define ALLOC_CHUNK	128
