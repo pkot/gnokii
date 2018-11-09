@@ -48,6 +48,7 @@ typedef struct {
 	int message_type;
 	int message_length;
 	char *message_buffer;
+	int message_buffer_size;
 	int message_corrupted;
 } phonet_incoming_message;
 
