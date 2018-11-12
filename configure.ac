@@ -81,31 +81,17 @@ AC_SUBST(GETTEXT_PACKAGE)
 AM_GLIB_GNU_GETTEXT
 AM_ICONV
 
-dnl -----------------------------
-dnl Checks for FreeBSD Build
-dnl -----------------------------
-AC_MSG_CHECKING(if building on FreeBSD)
 
-if test `uname -s` = "FreeBSD" ; then
-	AC_MSG_RESULT(yes)
+case x"$host_os" in
+xfreebsd)
 	CPPFLAGS="$CFLAGS -I/usr/local/include"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
-else
-	AC_MSG_RESULT(no)
-fi
-
-dnl -----------------------------
-dnl Checks for NetBSD Build
-dnl -----------------------------
-AC_MSG_CHECKING(if building on NetBSD)
-
-if test `uname -s` = "NetBSD" ; then
-        AC_MSG_RESULT(yes)
-        CPPFLAGS="$CFLAGS -I/usr/pkg/include/"
-        LDFLAGS="$LDFLAGS -L/usr/pkg/lib/"
-else
-        AC_MSG_RESULT(no)
-fi
+	;;
+xnetbsd*)
+	CPPFLAGS="$CFLAGS -I/usr/pkg/include/"
+	LDFLAGS="$LDFLAGS -L/usr/pkg/lib/"
+	;;
+esac
 
 dnl ======================== Libtool versioning
 AC_LIBTOOL_WIN32_DLL
@@ -522,8 +508,9 @@ AC_ARG_ENABLE(bluetooth,
                             ),,
               [enable_bluetooth=yes])
 
+case "$host_os" in
 dnl ======================== Checks for Linux Bluetooth support
-if test `uname -s` = "Linux" ; then
+linux*)
 	if test "$enable_bluetooth" = "yes"; then
 		AC_MSG_NOTICE([checking for the Linux Bluetooth support])
 		AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_sockaddr_rc,
@@ -541,10 +528,9 @@ if test `uname -s` = "Linux" ; then
 			AC_SUBST(BLUETOOTH_LIBS)
 		fi
 	fi
-fi
-
+	;;
 dnl ======================== Checks for MacOSX Bluetooth support
-if test `uname -s` = "Darwin" ; then
+darwin*)
 	if test "$enable_bluetooth" = "yes"; then
 		AC_LANG_PUSH([Objective C])
 		AC_CHECK_HEADERS(IOBluetooth/objc/IOBluetoothRFCOMMChannel.h)
@@ -569,11 +555,11 @@ if test `uname -s` = "Darwin" ; then
 			AC_SUBST(BLUETOOTH_LIBS)
 		fi
 	fi
-fi
-AM_CONDITIONAL([FOR_MAC], [test x$ac_cv_have_iobluetooth = xyes])
+	FOR_MAC=1
+	;;
 
 dnl ======================== Checks for FreeBSD/netgraph Bluetooth support
-if test `uname -s` = "FreeBSD" ; then
+freebsd)
 	if test "$enable_bluetooth" = "yes"; then
 		AC_MSG_NOTICE([checking for the FreeBSD/netgraph Bluetooth support])
 		AC_CACHE_CHECK(for the struct sockaddr_rfcomm from <bluetooth.h>, ac_cv_have_sockaddr_rfcomm,
@@ -596,10 +582,10 @@ if test `uname -s` = "FreeBSD" ; then
 			fi
 		fi
 	fi
-fi
+	;;
 
 dnl ======================== Checks for NetBSD/netbt Bluetooth support
-if test `uname -s` = "NetBSD" ; then
+netbsd*)
 	if test "$enable_bluetooth" = "yes"; then
 		AC_MSG_NOTICE([checking for the NetBSD/netbt Bluetooth support])
 		AC_CACHE_CHECK(for the struct sockaddr_bt from <bluetooth.h>, ac_cv_have_sockaddr_bt,
@@ -623,7 +609,21 @@ if test `uname -s` = "NetBSD" ; then
 			fi
 		fi
 	fi
-fi
+	;;
+
+cygwin32|cygwin|mingw32|mingw32msvc)
+	AC_CHECK_HEADER(af_irda.h, [AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available]) USE_IRDA="yes" LIBS="$LIBS -lwinmm"],, [#include <windows.h>])
+	AC_CHECK_HEADER(ws2bth.h, [AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available]) USE_BLUETOOTH="yes"],, [#include <windows.h>])
+	if test x"$USE_IRDA" = "xyes" -o x"$USE_BLUETOOTH" = "xyes"; then
+		LIBS="$LIBS -lws2_32"
+	fi
+	WIN32=1
+	;;
+
+esac
+
+AM_CONDITIONAL([WIN32], [test "x$WIN32" = "x1"])
+AM_CONDITIONAL([FOR_MAC], [test "x$FOR_MAC" = "x1"])
 
 dnl ======================== Checks for X base support
 
@@ -796,28 +796,6 @@ if test "$enable_libpcsclite" = "yes"; then
 		CFLAGS="$OLD_CFLAGS"
 	fi
 fi
-
-AC_ARG_ENABLE(win,
-   [  --enable-win            if you want Windows support ],
-   [ if test x$enable_win32 = xyes; then
-	AC_DEFINE(WIN32, 1, [Whether compiling on Windows])
-	WIN32=1
-	if test x$cross_compiling = xyes; then
-		AC_DEFINE(WIN32_CROSS, 1, [Define if you cross compile Windows.])
-		WIN32_CROSS=1
-		win32="cross"
-	else
- 		win32="yes"
-	fi
-	AC_CHECK_HEADER(af_irda.h, [AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available]) USE_IRDA="yes"])
-	AC_CHECK_HEADER(ws2bth.h, [AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available]) USE_BLUETOOTH="yes"],, [#include <windows.h>])
-     else
-	win32="no"
-     fi ],
-   [ win32="no"]
-)
-
-AM_CONDITIONAL(WIN32, test "x$WIN32" = "x1")
 
 AC_ARG_ENABLE(unix98test,
    [  --enable-unix98test     if you want to disable UNIX98 test and assume to
