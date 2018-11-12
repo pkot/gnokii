@@ -114,6 +114,9 @@
     o add local copy of codeset.m4 as it is gone from gettext 0.20
       distribution                                      (Paweł Kot)
     o upgrade config.rpath to the most recent version   (Paweł Kot)
+    o use the native Autoconf support for cross-compilation, that
+      is passing --host= to the configure script
+                                 (Ladislav Michl, Fabrizio Gennari)
  * pcsc driver updates
     o drop support for model=pcsc that was deprecated in libgnokii
       0.6.28 and renamed as model=APDU              (Daniele Forsi)
