@@ -114,6 +114,9 @@
  * pcsc driver updates
     o drop support for model=pcsc that was deprecated in libgnokii
       0.6.28 and renamed as model=APDU              (Daniele Forsi)
+ * build updates
+    o use the native Autoconf support for cross-compilation, that
+      is passing --host= to the configure script
 
 0.6.31
 ======
