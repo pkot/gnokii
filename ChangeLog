@@ -121,6 +121,9 @@
     o since Linux filesystems are case-sensitive, and MinGW-W64
       provides lower case names for Win32 header files, use lower
       case names in #include directives
+    o update snprintf.c (replacement of snprintf for systems where
+      it is not C99-compatible, such as Win32) to the latest
+      version from Samba's repository
 
 0.6.31
 ======
