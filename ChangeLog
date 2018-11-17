@@ -117,6 +117,10 @@
  * pcsc driver updates
     o drop support for model=pcsc that was deprecated in libgnokii
       0.6.28 and renamed as model=APDU              (Daniele Forsi)
+ * win32 updates
+    o since Linux filesystems are case-sensitive, and MinGW-W64
+      provides lower case names for Win32 header files, use lower
+      case names in #include directives
 
 0.6.31
 ======
