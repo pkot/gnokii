@@ -117,6 +117,10 @@
  * build updates
     o use the native Autoconf support for cross-compilation, that
       is passing --host= to the configure script
+ * win32 updates
+    o since Linux filesystems are case-sensitive, and MinGW-W64
+      provides lower case names for Win32 header files, use lower
+      case names in #include directives
 
 0.6.31
 ======
