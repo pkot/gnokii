@@ -12,10 +12,10 @@
 
 #ifdef HAVE_BLUETOOTH
 
-#include <Winsock2.h>
+#include <winsock2.h>
 #include <mmsystem.h>
-#include <Ws2bth.h>
-#include <BluetoothAPIs.h>
+#include <ws2bth.h>
+#include <bluetoothapis.h>
 
 #include "compat.h"
 #include "gnokii.h"
