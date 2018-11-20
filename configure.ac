@@ -906,6 +906,8 @@ AC_CHECK_FUNCS(asprintf vasprintf snprintf vsnprintf getpass setenv)
 AC_CHECK_FUNCS(isatty)
 AC_CHECK_FUNCS(geteuid getegid)
 AC_CHECK_FUNCS(getaddrinfo)
+AC_CHECK_FUNCS(posix_spawn)
+AM_CONDITIONAL([HAVE_POSIX_SPAWN], [test "x$ac_cv_func_posix_spawn" = xyes])
 AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf_c99,
 	[AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdlib.h>

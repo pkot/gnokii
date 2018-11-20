@@ -4,6 +4,10 @@ else
 DATA_DIR = data
 endif
 
+if HAVE_POSIX_SPAWN
+DEVICE_SCRIPT = posixscript.c
+endif
+
 lib_LTLIBRARIES = libgnokii.la
 
 SUBDIRS = phones \
@@ -52,7 +56,8 @@ libgnokii_la_SOURCES = \
 	misc.c \
 	localcharset.c \
 	map.c \
-	gsm-auth.c
+	gsm-auth.c \
+	$(DEVICE_SCRIPT)
 
 libgnokii_la_LIBADD = \
 	$(top_builddir)/snprintf/libsnprintf.la \
