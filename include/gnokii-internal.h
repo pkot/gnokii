@@ -179,4 +179,13 @@ int strip_slashes(char *dest, const char *src, int maxlen, int len);
 /* authentication for at driver */
 gn_error do_auth(gn_auth_type auth_type, struct gn_statemachine *state);
 
+#ifdef HAVE_POSIX_SPAWN
+int device_script(int fd, int connect, struct gn_statemachine *state);
+#else
+static int device_script(int fd, int connect, struct gn_statemachine *state)
+{
+	return 0;
+}
+#endif
+
 #endif /* _gnokii_internal_h */

@@ -927,6 +927,8 @@ AC_CHECK_FUNCS(mktime timegm gettimeofday select poll wcrtomb)
 AC_CHECK_FUNCS(strchr strdup strndup strstr strtol strtok strsep)
 AC_CHECK_FUNCS(asprintf vasprintf snprintf vsnprintf getpass setenv)
 AC_CHECK_FUNCS(getaddrinfo)
+AC_CHECK_FUNCS(posix_spawn)
+AM_CONDITIONAL([HAVE_POSIX_SPAWN], [test "x$ac_cv_func_posix_spawn" = xyes])
 AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf_c99,
 	[AC_TRY_RUN([
 #include <stdio.h>
