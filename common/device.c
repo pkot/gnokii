@@ -27,64 +27,9 @@
 #include "devices/dku2libusb.h"
 #include "devices/socketphonet.h"
 
-#include <errno.h>
-#include <sys/wait.h>
-
 GNOKII_API int device_getfd(struct gn_statemachine *state)
 {
 	return state->device.fd;
-}
-
-/* Script handling: */
-static void device_script_cfgfunc(const char *section, const char *key, const char *value)
-{
-	setenv(key, value, 1); /* errors ignored */
-}
-
-int device_script(int fd, const char *section, struct gn_statemachine *state)
-{
-	pid_t pid;
-	const char *scriptname;
-	int status;
-
-	if (!strcmp(section, "connect_script"))
-		scriptname = state->config.connect_script;
-	else
-		scriptname = state->config.disconnect_script;
-	if (scriptname[0] == '\0')
-		return 0;
-
-	errno = 0;
-	switch ((pid = fork())) {
-	case -1:
-		fprintf(stderr, _("device_script(\"%s\"): fork() failure: %s!\n"), scriptname, strerror(errno));
-		return -1;
-
-	case 0: /* child */
-		cfg_foreach(section, device_script_cfgfunc);
-		errno = 0;
-		if (dup2(fd, 0) != 0 || dup2(fd, 1) != 1 || close(fd)) {
-			fprintf(stderr, _("device_script(\"%s\"): file descriptor preparation failure: %s\n"), scriptname, strerror(errno));
-			_exit(-1);
-		}
-		/* FIXME: close all open descriptors - how to track them?
-		 */
-		execl("/bin/sh", "sh", "-c", scriptname, NULL);
-		fprintf(stderr, _("device_script(\"%s\"): script execution failure: %s\n"), scriptname, strerror(errno));
-		_exit(-1);
-		/* NOTREACHED */
-
-	default:
-		if (pid == waitpid(pid, &status, 0 /* options */) && WIFEXITED(status) && !WEXITSTATUS(status))
-			return 0;
-		fprintf(stderr, _("device_script(\"%s\"): child script execution failure: %s, exit code=%d\n"), scriptname,
-			(WIFEXITED(status) ? _("normal exit") : _("abnormal exit")),
-			(WIFEXITED(status) ? WEXITSTATUS(status) : -1));
-		errno = EIO;
-		return -1;
-
-	}
-	/* NOTREACHED */
 }
 
 int device_open(const char *file, int with_odd_parity, int with_async,
@@ -131,7 +76,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	/*
 	 * handle config file connect_script:
 	 */
-	if (device_script(state->device.fd, "connect_script", state) == -1) {
+	if (device_script(state->device.fd, 1, state)) {
 		dprintf("gnokii open device: connect_script failure\n");
 		device_close(state);
 		return 0;
@@ -147,7 +92,7 @@ void device_close(struct gn_statemachine *state)
 	/*
 	 * handle config file disconnect_script:
 	 */
-	if (device_script(state->device.fd, "disconnect_script", state) == -1)
+	if (device_script(state->device.fd, 0, state))
 		dprintf("gnokii device close: disconnect_script failure\n");
 
 	switch (state->device.type) {
