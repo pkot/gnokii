@@ -124,6 +124,10 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 		state->device.fd = -1;
 		break;
 	}
+
+	if (state->device.fd < 0)
+		return 0;
+
 	/*
 	 * handle config file connect_script:
 	 */
@@ -133,7 +137,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 		return 0;
 	}
 
-	return (state->device.fd >= 0);
+	return 1;
 }
 
 void device_close(struct gn_statemachine *state)
