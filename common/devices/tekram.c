@@ -13,7 +13,6 @@
  */
 
 #include "config.h"
-
 #include "misc.h"
 #include "gnokii.h"
 

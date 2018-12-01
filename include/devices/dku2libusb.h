@@ -16,15 +16,13 @@
 #ifndef _gnokii_dku2libusb_h
 #define _gnokii_dku2libusb_h
 
-#ifdef HAVE_LIBUSB
-#  include <usb.h>
-#endif
-
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
 
 #ifdef HAVE_LIBUSB
+
+#include <usb.h>
 
 /* Information about a USB DKU2 FBUS interface present on the system */
 struct fbus_usb_interface_transport {
@@ -102,12 +100,39 @@ struct cdc_union_desc {
 #define USB_MAX_STRING_SIZE		256
 #define USB_FBUS_TIMEOUT		10000 /* 10 seconds */
 
-#endif
-
 int fbusdku2usb_open(struct gn_statemachine *state);
 int fbusdku2usb_close(struct gn_statemachine *state);
 int fbusdku2usb_write(const __ptr_t bytes, int size, struct gn_statemachine *state);
 int fbusdku2usb_read(__ptr_t bytes, int size, struct gn_statemachine *state);
 int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state);
+
+#else
+
+int fbusdku2usb_open(struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int fbusdku2usb_close(struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int fbusdku2usb_write(const __ptr_t bytes, int size, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int fbusdku2usb_read(__ptr_t bytes, int size, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+#endif
 
 #endif /* _gnokii_dku2libusb_h */

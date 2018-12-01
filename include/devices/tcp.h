@@ -17,6 +17,8 @@
 #include "misc.h"
 #include "gnokii.h"
 
+#ifndef WIN32
+
 int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state);
 int tcp_close(int fd, struct gn_statemachine *state);
 
@@ -24,5 +26,35 @@ size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *stat
 size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state);
 
 int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
+
+#else
+
+int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int tcp_close(int fd, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+
+size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+#endif
 
 #endif  /* __devices_tcp_h */

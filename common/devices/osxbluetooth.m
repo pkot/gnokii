@@ -10,14 +10,10 @@
 
 */
 
-#include "config.h"
-
-#ifdef HAVE_BLUETOOTH_MACOSX
-
 #include <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
 #include <IOBluetooth/objc/IOBluetoothDevice.h>
 
-#include "devices/unixbluetooth.h"
+#include "devices/bluetooth.h"
 
 static NSMutableDictionary *queues;
 static int next_fd = 1;
@@ -179,5 +175,3 @@ int bluetooth_close(int fd, struct gn_statemachine *state)
     [queues removeObjectForKey:@(fd)];
     return 1;
 }
-
-#endif

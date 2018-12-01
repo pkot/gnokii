@@ -1,34 +1,38 @@
 noinst_LTLIBRARIES = libDEVICES.la
 
-WIN32_FILES = \
-	winserial.c \
-	winirda.c \
-	winbluetooth.c
-
-UNIX_FILES = \
-	unixserial.c \
-	unixirda.c \
-	tcp.c \
-	socketphonet.c
-
-if FOR_MAC
-UNIX_SPECIFIC_FILES = osxbluetooth.m
-else
-UNIX_SPECIFIC_FILES = unixbluetooth.c
+gnokii_devices	= tekram.c
+if LIBUSB
+gnokii_devices	+= dku2libusb.c
 endif
-
+if !WIN32
+gnokii_devices	+= tcp.c
+endif
+if SOCKETPHONET
+gnokii_devices	+= socketphonet.c
+endif
+if OSXBLUETOOTH
+gnokii_devices	+= osxbluetooth.m
+endif
+if UNIXBLUETOOTH
+gnokii_devices	+= unixbluetooth.c
+endif
+if UNIXIRDA
+gnokii_devices	+= unixirda.c
+endif
+if !WIN32
+gnokii_devices	+= unixserial.c
+endif
+if WINBLUETOOTH
+gnokii_devices	+= winbluetooth.c
+endif
+if WINIRDA
+gnokii_devices	+= winirda.c
+endif
 if WIN32
-PLATFORM_FILES = $(WIN32_FILES)
-else
-PLATFORM_FILES = $(UNIX_FILES) $(UNIX_SPECIFIC_FILES)
+gnokii_devices	+= winserial.c
 endif
 
-libDEVICES_la_SOURCES = \
-	$(PLATFORM_FILES) \
-	tekram.c \
-	irda.c \
-	dku2libusb.c \
-	bluetooth.c
+libDEVICES_la_SOURCES = $(gnokii_devices)
 
 libDEVICES_la_CFLAGS =		\
 	-I$(top_srcdir)/include
@@ -37,6 +41,3 @@ libDEVICES_la_LIBADD =		\
 	$(USB_LIBS)		\
 	$(BLUETOOTH_LIBS)	\
 	$(TCP_LIBS)
-
-EXTRA_DIST = $(WIN32_FILES) $(UNIX_FILES) $(UNIX_SPECIFIC_FILES)
-

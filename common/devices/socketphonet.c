@@ -15,49 +15,17 @@
 
 */
 
-#include "config.h"
-#include "compat.h" /* for __ptr_t definition */
-#include "gnokii.h"
-
-#ifndef HAVE_SOCKETPHONET
-
-int socketphonet_close(struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int socketphonet_open(const char *iface, int with_async, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t socketphonet_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int socketphonet_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-#else
-
 /* System header files */
 #include <sys/socket.h>
 #include <linux/phonet.h>
 
 /* Various header files */
+#include "config.h"
 #include "compat.h"
 #include "links/fbus-common.h"
 #include "links/fbus-phonet.h"
-#include "device.h"
 #include "devices/serial.h"
+#include "devices/socketphonet.h"
 #include "gnokii-internal.h"
 
 static struct sockaddr_pn addr = { .spn_family = AF_PHONET, .spn_dev = FBUS_DEVICE_PHONE };
@@ -159,5 +127,3 @@ int socketphonet_select(int fd, struct timeval *timeout, struct gn_statemachine 
 {
 	return serial_select(fd, timeout, state);
 }
-
-#endif /* HAVE_SOCKETPHONET */

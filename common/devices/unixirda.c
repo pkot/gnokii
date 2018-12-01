@@ -13,12 +13,6 @@
  *
  */
 
-#include "compat.h"
-#include "misc.h"
-#include "gnokii.h"
-
-#ifdef HAVE_IRDA
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -29,6 +23,8 @@
 #include <linux/types.h>
 #include <linux/irda.h>
 
+#include "compat.h"
+#include "misc.h"
 #include "devices/irda.h"
 
 #ifndef AF_IRDA
@@ -177,5 +173,3 @@ int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 
 	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
-
-#endif /* HAVE_IRDA */

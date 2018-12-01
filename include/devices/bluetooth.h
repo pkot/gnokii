@@ -11,12 +11,14 @@
 
 */
 
-#ifndef _gnokii_unix_bluetooth_h
-#define _gnokii_unix_bluetooth_h
+#ifndef _gnokii_bluetooth_h
+#define _gnokii_bluetooth_h
 
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
+
+#ifdef HAVE_BLUETOOTH
 
 int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state);
 int bluetooth_close(int fd, struct gn_statemachine *state);
@@ -24,4 +26,33 @@ int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachin
 int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);
 int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
 
-#endif /* _gnokii_unix_bluetooth_h */
+#else
+
+int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int bluetooth_close(int fd, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+{
+	return -1;
+}
+
+#endif
+
+#endif /* _gnokii_bluetooth_h */

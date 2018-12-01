@@ -12,13 +12,6 @@
 
 */
 
-#include "config.h"
-#include "misc.h"
-#include "devices/tcp.h"
-#include "devices/serial.h"
-
-#ifndef WIN32
-
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/ioctl.h>
@@ -33,6 +26,12 @@
 #include <sys/socket.h>
 #include <netdb.h>
 #include <termios.h>
+
+#include "config.h"
+#include "misc.h"
+#include "devices/tcp.h"
+#include "devices/serial.h"
+
 
 #ifdef HAVE_SYS_FILE_H
 #  include <sys/file.h>
@@ -49,8 +48,6 @@
 #ifndef O_NONBLOCK
 #  define O_NONBLOCK  0
 #endif
-
-/* Open the serial port and store the settings. */
 
 static int tcp_open(const char *file)
 {
@@ -148,16 +145,12 @@ int tcp_close(int fd, struct gn_statemachine *state)
 	return close(fd);
 }
 
-/* Open a device with standard options.
- * Use value (-1) for "with_hw_handshake" if its specification is required from the user
- */
 int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
 {
 	int fd;
 	int retcode;
 
 	/* Open device */
-
 	fd = tcp_open(file);
 
 	if (fd < 0)
@@ -203,46 +196,12 @@ int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 	return serial_select(fd, timeout, state);
 }
 
-
-/* Read from serial device. */
-
 size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 {
 	return read(fd, buf, nbytes);
 }
 
-/* Write to serial device. */
-
 size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
 	return write(fd, buf, n);
 }
-
-#else /* WIN32 */
-
-int tcp_close(int fd, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-#endif /* WIN32 */

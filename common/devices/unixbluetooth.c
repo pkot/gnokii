@@ -16,14 +16,6 @@
 
 */
 
-#include "config.h"
-#include "compat.h"
-#include "misc.h"
-#include "gnokii.h"
-#include "devices/unixbluetooth.h"
-
-#if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH) || defined(HAVE_BLUETOOTH_NETBT)
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
@@ -31,6 +23,9 @@
 #include <string.h>
 #include <sys/time.h>
 #include <sys/socket.h>
+
+#include "config.h"
+#include "devices/bluetooth.h"
 
 #ifdef HAVE_BLUETOOTH_NETGRAPH	/* FreeBSD / netgraph */
 
@@ -265,7 +260,7 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 		case SDP_ATTR_PRIMARY_LANGUAGE_BASE_ID + SDP_ATTR_SERVICE_NAME_OFFSET:
 			if (channel == -1)
 				break;
-			
+
 			SDP_GET8(type, start);
 			switch (type) {
 				case SDP_DATA_STR8:
@@ -303,7 +298,7 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 					break;
 				}
 			}
-			
+
 			if (strstr(name, "Nokia PC Suite") != NULL) {
 				channel = -1;
 				break;
@@ -509,7 +504,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 
 	dprintf("Using channel: %d\n", channel);
 	raddr.rc_channel = channel;
-	
+
 	if (connect(fd, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
 		perror(_("Can't connect"));
 		close(fd);
@@ -549,5 +544,3 @@ int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *st
 
 	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
-
-#endif	/* HAVE_BLUETOOTH_BLUEZ || HAVE_BLUETOOTH_NETGRAPH || HAVE_BLUETOOTH_NETBT */

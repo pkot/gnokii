@@ -14,45 +14,13 @@
 
 */
 
-#include "config.h"
-#include "compat.h"
-#include "misc.h"
-#include "gnokii.h"
-#include "devices/dku2libusb.h"
-
-#ifndef HAVE_LIBUSB
-int fbusdku2usb_open(struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int fbusdku2usb_close(struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int fbusdku2usb_write(const __ptr_t bytes, int size, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int fbusdku2usb_read(__ptr_t bytes, int size, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-#else
-
 #include <stdlib.h>
 #include <stdio.h>
 #include <fcntl.h>
 #include <errno.h>
 #include <string.h>
+
+#include "devices/dku2libusb.h"
 
 #define	DEVINSTANCE(s) (*((fbus_usb_interface **)(&(s)->device.device_instance)))
 
@@ -388,7 +356,7 @@ static int usbfbus_connect_request(struct gn_statemachine *state)
 	return 1;
 
 err3:
-	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);	
+	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);
 err2:
 	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->control_interface);
 err1:
@@ -420,7 +388,7 @@ static int usbfbus_disconnect_request(struct gn_statemachine *state)
 	ret = usb_close(DEVINSTANCE(state)->interface->dev_data);
 	if (ret < 0)
 		dprintf("Can't close data interface %d\n", ret);
-	return ret;	
+	return ret;
 }
 
 int fbusdku2usb_open(struct gn_statemachine *state)
@@ -459,5 +427,3 @@ int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state)
 {
 	return 1;
 }
-
-#endif

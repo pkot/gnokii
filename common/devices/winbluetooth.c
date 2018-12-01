@@ -8,18 +8,14 @@
  *
  */
 
-#include "config.h"
-
-#ifdef HAVE_BLUETOOTH
-
 #include <winsock2.h>
 #include <mmsystem.h>
 #include <ws2bth.h>
 #include <bluetoothapis.h>
 
+#include "config.h"
 #include "compat.h"
-#include "gnokii.h"
-#include "misc.h"
+#include "devices/bluetooth.h"
 
 /* QTTY by Davide Libenzi ( Terminal interface to Symbian QConsole )
  * Copyright (C) 2004  Davide Libenzi
@@ -109,5 +105,3 @@ int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *st
 
 	return select(0 /* ignored on Win32 */, &readfds, NULL, NULL, timeout);
 }
-
-#endif /* HAVE_BLUETOOTH */
