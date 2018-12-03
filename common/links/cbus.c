@@ -16,7 +16,6 @@
 
 #include <errno.h>
 
-#include "config.h"
 #include "compat.h"
 #include "device.h"
 #include "misc.h"
