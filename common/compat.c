@@ -16,13 +16,10 @@
 #include "config.h"
 #include "compat.h"
 
-#ifdef WIN32
-#  include <windows.h>
-#  include <sys/timeb.h>
-#  include <time.h>
-#  define ftime _ftime
-#  define timeb _timeb
+#ifndef HAVE_SETENV
 
+#  ifdef WIN32
+#    include <windows.h>
 int setenv(const char *name, const char *value, int overwrite)
 {
 	return (int)SetEnvironmentVariable(name, value);
@@ -33,11 +30,8 @@ int unsetenv(const char *name)
 	SetEnvironmentVariable(name, NULL);
 	return 0;
 }
-
-#endif
-
-#ifndef HAVE_SETENV
-#  include <stdlib.h>
+#  else /* !HAVE_SETENV && !WIN32 */
+#    include <stdlib.h>
 /* Implemented according to http://www.greenend.org.uk/rjk/2008/putenv.html and Linux manpage */
 int setenv(const char *envname, const char *envvalue, int overwrite)
 {
@@ -64,13 +58,22 @@ int unsetenv(const char *name)
 {
 	return setenv(name, "", 1);
 }
-#endif
+#  endif /* WIN32 */
+
+#endif /* SETENV */
 
 #ifdef HAVE_SYS_TIME_H
 #  include <sys/time.h>
 #endif
 
 #ifndef	HAVE_GETTIMEOFDAY
+
+#  ifdef WIN32
+#    include <sys/timeb.h>
+#    include <time.h>
+#    define ftime _ftime
+#    define timeb _timeb
+#  endif
 
 int gettimeofday(struct timeval *tv, void *tz)
 {
@@ -87,7 +90,6 @@ int gettimeofday(struct timeval *tv, void *tz)
 }
 
 #endif
-
 
 
 #ifndef HAVE_STRSEP
@@ -150,7 +152,7 @@ char *strsep(char **stringp, const char *delim)
 	register const char *spanp;
 	register int c, sc;
 	char *tok;
-	
+
 	if ((s = *stringp) == NULL)
 		return (NULL);
 	for (tok = s;;) {
@@ -207,4 +209,3 @@ char *strndup(const char *src, size_t n)
 	return (char *)memcpy(dst, src, n);
 }
 #endif
-
