@@ -1,4 +1,4 @@
-DEFS = -DLOCALEDIR=\"$(localedir)\"
+DEFS = -DLOCALEDIR=\"$(localedir)\" @DEFS@
 
 sbin_PROGRAMS = mgnokiidev
 mgnokiidev_SOURCES = mgnokiidev.c
