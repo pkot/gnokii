@@ -12,7 +12,6 @@
 
 */
 
-#include "config.h"
 #include "compat.h"
 #include "map.h"
 #include "misc.h"

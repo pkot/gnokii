@@ -13,10 +13,9 @@
  *
  */
 
-#include "config.h"
+#include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
-#include "compat.h"
 
 #ifdef HAVE_IRDA
 
