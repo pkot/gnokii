@@ -21,9 +21,8 @@
 
 */
 
-#include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
 #if defined(WIN32) && !defined(CYGWIN)
 #  include <process.h>

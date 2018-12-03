@@ -21,9 +21,8 @@
 
 */
 
-#include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
 #include <stdio.h>
 #ifndef _GNU_SOURCE

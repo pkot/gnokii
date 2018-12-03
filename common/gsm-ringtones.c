@@ -16,7 +16,6 @@
 
 */
 
-#include "config.h"
 #include "compat.h"
 #include "gnokii.h"
 #include "misc.h"

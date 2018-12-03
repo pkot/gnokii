@@ -16,8 +16,6 @@
 
 */
 
-#include "config.h"
-
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -34,9 +32,9 @@
 #  include <termios.h>
 #endif
 
+#include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "data/at-emulator.h"
 #include "data/datapump.h"
 
