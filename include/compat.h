@@ -199,6 +199,20 @@ int vasprintf(char **ptr, const char *format, va_list ap);
 time_t timegm(struct tm *tm);
 #endif
 
+#if HAVE_MKDIR
+# if MKDIR_TAKES_ONE_ARG
+   /* Mingw32 */
+#  define mkdir(a,b) mkdir(a)
+# endif
+#else
+# if HAVE__MKDIR
+   /* plain Win32 */
+#  define mkdir(a,b) _mkdir(a)
+# else
+#  error "Don't know how to create a directory on this system."
+# endif
+#endif
+
 /*
  * The following code was taken from W. Richard Stevens'
  * "UNIX Network Programming", Volume 1, Second Edition.
@@ -219,7 +233,6 @@ time_t timegm(struct tm *tm);
 #ifdef WIN32
 #  ifdef _MSC_VER
 #    define inline __inline
-#    define mkdir(dirname, accessrights) _mkdir(dirname)
 #    define strcasecmp _stricmp
 #    define strncasecmp _strnicmp
 #    define __const const
