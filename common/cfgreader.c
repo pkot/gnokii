@@ -651,29 +651,6 @@ int cfg_section_exists(struct gn_cfg_header *cfg, const char *section)
 	return false;
 }
 
-/*
- * Return all the entries of the given section.
- */
-void cfg_foreach(const char *section, cfg_foreach_func func)
-{
-	struct gn_cfg_header *h;
-	struct gn_cfg_entry *e;
-	struct gn_cfg_header *cfg = gn_cfg_info;
-
-	if ((cfg == NULL) || (section == NULL) || (func == NULL)) {
-		return;
-	}
-
-	/* Search for section name */
-	for (h = cfg; h != NULL; h = h->next) {
-		if (strcmp(section, h->section) == 0) {
-			/* Search for key within section */
-			for (e = h->entries; e != NULL; e = e->next)
-				(*func)(section, e->key, e->value);
-		}
-	}
-}
-
 /*  Set the value of a key in a config file.  Return the new value if
     the section/key can be found, else return NULL.  */
 char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key,

@@ -154,8 +154,6 @@ int sms_nokia_text_encode(unsigned char *text, unsigned char *message, bool firs
 int sms_nokia_bitmap_encode(gn_bmp *bitmap, unsigned char *message, bool first);
 
 struct gn_cfg_header *cfg_file_read(const char *filename);
-typedef void (*cfg_foreach_func)(const char *section, const char *key, const char *value);
-void cfg_foreach(const char *section, cfg_foreach_func func);
 char *cfg_set(struct gn_cfg_header *cfg, const char *section, const char *key, const char *value);
 int cfg_file_write(struct gn_cfg_header *cfg, const char *filename);
 /* Get some information about the given phone */
