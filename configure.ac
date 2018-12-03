@@ -919,6 +919,7 @@ AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
+AC_FUNC_MKDIR
 AC_CHECK_FUNCS(mktime timegm gettimeofday select poll wcrtomb)
 AC_CHECK_FUNCS(strchr strdup strndup strstr strtol strtok strsep)
 AC_CHECK_FUNCS(asprintf vasprintf snprintf vsnprintf getpass setenv)
