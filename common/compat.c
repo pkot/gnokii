@@ -30,6 +30,7 @@ int unsetenv(const char *name)
 	return 0;
 }
 #  else /* !HAVE_SETENV && !WIN32 */
+#    include <stdlib.h>
 /* Implemented according to http://www.greenend.org.uk/rjk/2008/putenv.html and Linux manpage */
 int setenv(const char *envname, const char *envvalue, int overwrite)
 {
