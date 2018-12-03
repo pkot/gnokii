@@ -1,5 +1,3 @@
-DEFS = -DCOMPILING_LIBGNOKII
-
 noinst_LTLIBRARIES = libDATA.la
 libDATA_la_SOURCES = \
 	at-emulator.c \
