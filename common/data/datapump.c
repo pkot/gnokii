@@ -18,8 +18,6 @@
 
 #define		__data_datapump_c
 
-#include "config.h"
-
 #include <stdio.h>
 #include <errno.h>
 #include <fcntl.h>
@@ -31,10 +29,9 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-
+#include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "device.h"
 #include "data/at-emulator.h"
 #include "data/datapump.h"

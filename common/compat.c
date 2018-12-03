@@ -13,7 +13,6 @@
 
 */
 
-#include "config.h"
 #include "compat.h"
 
 #ifdef WIN32

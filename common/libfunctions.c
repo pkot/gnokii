@@ -26,7 +26,6 @@
 # define GNOKII_DEPRECATED /* do not warn about deprecated functions here */
 #endif
 
-#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"

@@ -21,7 +21,6 @@
 
 */
 
-#include "config.h"
 #include "compat.h"
 
 #include <stdio.h>

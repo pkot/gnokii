@@ -18,6 +18,14 @@
 #ifndef	_gnokii_compat_h
 #define	_gnokii_compat_h
 
+#if defined(HAVE_CONFIG_H)
+#  include "config.h"
+
+#else
+#  error "compat.h requires config.h"
+
+#endif
+
 #include <stdlib.h>
 #include <stdio.h>
 

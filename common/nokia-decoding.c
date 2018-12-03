@@ -20,13 +20,12 @@
 
 */
 
-#include "config.h"
-
 #include <time.h>
+
+#include "compat.h"
 #include "gnokii-internal.h"
 #include "gnokii.h"
 #include "nokia-decoding.h"
-#include "compat.h"
 
 /**
  * nokia_phonebook_error:

@@ -17,8 +17,6 @@
 
 */
 
-#include "config.h"
-
 /* System header files */
 
 #include <stdio.h>
