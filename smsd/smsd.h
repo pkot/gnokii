@@ -14,7 +14,6 @@
 #ifndef SMSD_H
 #define SMSD_H
 
-#include "config.h"
 #include "compat.h"
 
 #include "gnokii.h"

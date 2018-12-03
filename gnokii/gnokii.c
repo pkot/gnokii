@@ -22,9 +22,8 @@
 
 */
 
-#include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
 #include <stdio.h>
 #ifdef HAVE_STDLIB_H
