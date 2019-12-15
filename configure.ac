@@ -681,7 +681,7 @@ AM_CONDITIONAL(XGNOKII, test "x$x_support" = "xyes")
 dnl ======================== Check for libsocket
 AC_CHECK_LIB(socket, socket)
 
-dnl ======================== Checks for glib support for libgnokii and smsd
+dnl ======================== Checks for glib support
 PKG_CHECK_MODULES(GLIB, glib-2.0)
 
 dnl ======================== Checks for gmodule support for smsd
