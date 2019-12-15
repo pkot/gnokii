@@ -36,8 +36,6 @@
 extern const char *locale_charset(void); /* from ../intl/localcharset.c */
 #endif
 
-#include <glib.h>
-
 /**
  * base64_alphabet:
  *
@@ -490,6 +488,91 @@ unsigned int char_def_alphabet_decode(unsigned char value)
 	}
 }
 
+/*
+ * The utf8_check() function scans the '\0'-terminated string starting
+ * at s. It returns a pointer to the first byte of the first malformed
+ * or overlong UTF-8 sequence found, or NULL if the string contains
+ * only correct UTF-8. It also spots UTF-8 sequences that could cause
+ * trouble if converted to UTF-16, namely surrogate characters
+ * (U+D800..U+DFFF) and non-Unicode positions (U+FFFE..U+FFFF). This
+ * routine is very likely to find a malformed sequence if the input
+ * uses any other encoding than UTF-8. It therefore can be used as a
+ * very effective heuristic for distinguishing between UTF-8 and other
+ * encodings.
+ *
+ * I wrote this code mainly as a specification of functionality; there
+ * are no doubt performance optimizations possible for certain CPUs.
+ *
+ * Markus Kuhn <http://www.cl.cam.ac.uk/~mgk25/> -- 2005-03-30
+ * License: http://www.cl.cam.ac.uk/~mgk25/short-license.html
+ */
+
+static const unsigned char *utf8_check(const unsigned char *s)
+{
+	while (*s) {
+		if (*s < 0x80)
+			/* 0xxxxxxx */
+			s++;
+		else if ((s[0] & 0xe0) == 0xc0) {
+			/* 110XXXXx 10xxxxxx */
+			if ((s[1] & 0xc0) != 0x80 ||
+			    (s[0] & 0xfe) == 0xc0)	/* overlong? */
+				return s;
+			else
+				s += 2;
+		} else if ((s[0] & 0xf0) == 0xe0) {
+			/* 1110XXXX 10Xxxxxx 10xxxxxx */
+			if ((s[1] & 0xc0) != 0x80 ||
+			    (s[2] & 0xc0) != 0x80 ||
+			    (s[0] == 0xe0 && (s[1] & 0xe0) == 0x80) ||	/* overlong? */
+			    (s[0] == 0xed && (s[1] & 0xe0) == 0xa0) ||	/* surrogate? */
+			    (s[0] == 0xef && s[1] == 0xbf &&
+			    (s[2] & 0xfe) == 0xbe))	/* U+FFFE or U+FFFF? */
+				return s;
+			else
+				s += 3;
+		} else if ((s[0] & 0xf8) == 0xf0) {
+			/* 11110XXX 10XXxxxx 10xxxxxx 10xxxxxx */
+			if ((s[1] & 0xc0) != 0x80 ||
+			    (s[2] & 0xc0) != 0x80 ||
+			    (s[3] & 0xc0) != 0x80 ||
+			    (s[0] == 0xf0 && (s[1] & 0xf0) == 0x80) ||    /* overlong? */
+			    (s[0] == 0xf4 && s[1] > 0x8f) || s[0] > 0xf4) /* > U+10FFFF? */
+				return s;
+			else
+				s += 4;
+		} else
+			return s;
+	}
+
+	return NULL;
+}
+
+/**
+ * utf8_get_char:
+ * @str: string to get utf-8 sequence
+ * @index: starting position
+ *
+ * Returns: the next utf-8 sequence out of a string, updating an index
+ */
+static unsigned int utf8_get_char(const char *str, int *index)
+{
+	static const unsigned int offsets[] = {
+		0x00000000, 0x00003080, 0x000e2080,
+		0x03c82080, 0xfa082080, 0x82082080,
+	};
+	int sz = 0;
+	unsigned int ch = 0;
+
+	do {
+		ch <<= 6;
+		ch += (unsigned char)str[(*index)++];
+		sz++;
+	} while (str[*index] && (((str[*index]) & 0xc0) == 0x80));
+
+	return ch - offsets[sz-1];
+}
+
 /**
  * char_def_alphabet_string_stats:
  * @str: string to get statistics encoded in utf8
@@ -502,26 +585,23 @@ unsigned int char_def_alphabet_decode(unsigned char value)
  */
 gn_sms_dcs_alphabet_type char_def_alphabet_string_stats(char *str, int *enc_chars, int *ext_chars)
 {
+	int index = 0;
 	gn_sms_dcs_alphabet_type enc = GN_SMS_DCS_DefaultAlphabet;
-	char *iter = str;
-	gunichar chr;
 
 	*enc_chars = 0;
 	*ext_chars = 0;
-	if (!g_utf8_validate(iter, -1, NULL)) {
-		dprintf("Not valid UTF8 string\n");
-		return enc;
+	if (utf8_check(str) == NULL) {
+		for (;;) {
+			unsigned int ch = utf8_get_char(str, &index);
+			if (!ch)
+				break;
+			if (char_def_alphabet_ext(ch))
+				(*ext_chars)++;
+			else if (!char_def_alphabet(ch))
+				enc = GN_SMS_DCS_UCS2;
+			(*enc_chars)++;
+		}
 	}
-	do {
-		chr = g_utf8_get_char(iter);
-		if (!chr)
-			break;
-		if (char_def_alphabet_ext(chr))
-			(*ext_chars)++;
-		else if (!char_def_alphabet(chr))
-			enc = GN_SMS_DCS_UCS2;
-		(*enc_chars)++;
-	} while (iter = g_utf8_next_char(iter));
 	return enc;
 }
 
@@ -535,31 +615,36 @@ gn_sms_dcs_alphabet_type char_def_alphabet_string_stats(char *str, int *enc_char
  * Returns: number of characters copied
  *
  * Function copies @len characters from @src utf-8 string, starting at @offset character to @dest.
- *
  */
 int char_def_alphabet_string_copy(char *dest, const char *src, int len, int offset)
 {
-	int i, to_copy = 0;
-	gunichar chr;
-	char *src_offset = g_utf8_offset_to_pointer(src, offset);
-	char *iter = src_offset;
+	unsigned int ch;
+	int start, index = 0, chars = 0;
 
-	if (!g_utf8_validate(iter, -1, NULL)) {
-		dprintf("Not valid UTF8 string\n");
-		return to_copy;
+	if (utf8_check(src) == NULL) {
+		while (offset--) {
+			ch = utf8_get_char(src, &index);
+			if (!ch)
+				return chars;
+		}
+		start = index;
+
+		for (;;) {
+			ch = utf8_get_char(src, &index);
+			if (!ch)
+				break;
+			if (char_def_alphabet_ext(ch))
+				len--;
+			len--;
+			chars++;
+			if (len <= 0)
+				break;
+		}
+		len = index - start;
+		memcpy(dest, src + start, len);
+		dest[len] = 0;
 	}
-	for (i = 0; i < len; i++) {
-		chr = g_utf8_get_char(iter);
-		if (!chr)
-			break;
-		if (char_def_alphabet_ext(chr))
-			i++;
-		if (i < len)
-			to_copy++;
-		iter = g_utf8_next_char(iter);
-	}
-	g_utf8_strncpy(dest, src_offset, to_copy);
-	return to_copy;
+	return chars;
 }
 
 #define GN_BYTE_MASK ((1 << bits) - 1)
