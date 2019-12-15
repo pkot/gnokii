@@ -19,7 +19,7 @@ SUBDIRS = phones \
 	devices \
 	$(DATA_DIR)
 
-LIBS   += $(LIBPCSCLITE_LIBS) $(GLIB_LIBS)
+LIBS   += $(LIBPCSCLITE_LIBS)
 
 pkgconfig_DATA = gnokii.pc
 pkgconfigdir = $(libdir)/pkgconfig
@@ -29,8 +29,7 @@ libgnokii_la_CPPFLAGS = \
 	@LIBGNOKII_DEFS@
 
 libgnokii_la_CFLAGS = \
-	-I$(top_srcdir)/include $(GLIB_CFLAGS) \
-	$(ICAL_CFLAGS)
+	-I$(top_srcdir)/include $(ICAL_CFLAGS)
 
 libgnokii_la_SOURCES = \
 	libfunctions.c \
