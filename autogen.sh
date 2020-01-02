@@ -12,7 +12,7 @@ if [ "`uname -s`"x = "FreeBSD"x ]; then
 	AC_LOCAL_FLAGS="${AC_LOCAL_FLAGS} -I /usr/local/share/aclocal"
 fi
 aclocal ${AC_LOCAL_FLAGS}
-autoheader -I m4/
+autoheader ${AC_LOCAL_FLAGS}
 automake --add-missing
 autoconf
 ./configure "$@"
