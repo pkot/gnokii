@@ -524,7 +524,7 @@ AC_ARG_ENABLE(bluetooth,
 
 dnl ======================== Checks for Linux Bluetooth support
 if test `uname -s` = "Linux" ; then
-	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
+	if test "$enable_bluetooth" = "yes"; then
 		AC_MSG_NOTICE([checking for the Linux Bluetooth support])
 		AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_sockaddr_rc,
 			[AC_TRY_COMPILE([#include <sys/socket.h>
@@ -545,7 +545,7 @@ fi
 
 dnl ======================== Checks for MacOSX Bluetooth support
 if test `uname -s` = "Darwin" ; then
-	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
+	if test "$enable_bluetooth" = "yes"; then
 		AC_LANG_PUSH([Objective C])
 		AC_CHECK_HEADERS(IOBluetooth/objc/IOBluetoothRFCOMMChannel.h)
 		AC_CHECK_HEADERS(IOBluetooth/objc/IOBluetoothDevice.h)
@@ -574,7 +574,7 @@ AM_CONDITIONAL([FOR_MAC], [test x$ac_cv_have_iobluetooth = xyes])
 
 dnl ======================== Checks for FreeBSD/netgraph Bluetooth support
 if test `uname -s` = "FreeBSD" ; then
-	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
+	if test "$enable_bluetooth" = "yes"; then
 		AC_MSG_NOTICE([checking for the FreeBSD/netgraph Bluetooth support])
 		AC_CACHE_CHECK(for the struct sockaddr_rfcomm from <bluetooth.h>, ac_cv_have_sockaddr_rfcomm,
 			[AC_TRY_COMPILE([#include <bluetooth.h>],
@@ -600,7 +600,7 @@ fi
 
 dnl ======================== Checks for NetBSD/netbt Bluetooth support
 if test `uname -s` = "NetBSD" ; then
-	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
+	if test "$enable_bluetooth" = "yes"; then
 		AC_MSG_NOTICE([checking for the NetBSD/netbt Bluetooth support])
 		AC_CACHE_CHECK(for the struct sockaddr_bt from <bluetooth.h>, ac_cv_have_sockaddr_bt,
 			[AC_TRY_COMPILE([#include <bluetooth.h>],
