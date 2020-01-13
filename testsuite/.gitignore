@@ -1,4 +1,7 @@
+.libs
+*.o
 .deps
 Makefile
 Makefile.in
 myout.*
+dump-vcard
