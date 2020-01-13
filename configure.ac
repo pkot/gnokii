@@ -810,6 +810,7 @@ AC_ARG_ENABLE(win,
  		win32="yes"
 	fi
 	AC_CHECK_HEADER(af_irda.h, [AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available]) USE_IRDA="yes"])
+	AC_CHECK_HEADER(ws2bth.h, [AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available]) USE_BLUETOOTH="yes"],, [#include <windows.h>])
      else
 	win32="no"
      fi ],
