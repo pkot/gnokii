@@ -50,24 +50,20 @@
  */
 #define _XOPEN_SOURCE 500
 
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <termios.h>
-#include <grp.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#ifdef HAVE_SYS_TIME_H
-#  include <sys/time.h>
+#include "compat.h"
+
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
 #endif
-#include <sys/socket.h>
+#include <grp.h>
 #include <sys/wait.h>
 #include <sys/uio.h>
 #include <sys/param.h>
 
-#include "compat.h"
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#endif
+
 #include "misc.h"
 #include "gnokii-internal.h"
 #include "data/at-emulator.h"
@@ -304,7 +300,9 @@ static int gopen(const char *command)
 	if ((status = WEXITSTATUS(status)) == 0) {
 		gread(sockfd[0], &c, 1, &fd);
 	} else {
+#ifdef HAVE_ERRNO_H
 		errno = status;
+#endif
 		fd = -1;
 	}
 	close(sockfd[0]);

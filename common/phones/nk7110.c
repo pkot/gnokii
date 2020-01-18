@@ -22,10 +22,6 @@
 
 */
 
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-
 #include "compat.h"
 #include "gnokii.h"
 #include "nokia-decoding.h"

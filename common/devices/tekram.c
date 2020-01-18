@@ -13,24 +13,16 @@
  */
 
 #include "config.h"
-
+#include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
 
 #include "devices/serial.h"
 #include "devices/tekram.h"
 
-#include <stdio.h>
-#ifdef HAVE_FCNTL_H
-#  include <fcntl.h>
-#endif
 #ifdef HAVE_SYS_IOCTL_H
 #  include <sys/ioctl.h>
 #endif
-#ifdef HAVE_TERMIOS_H
-#  include <termios.h>
-#endif
-#include <string.h>
 
 int tekram_open(const char *file, struct gn_statemachine *state)
 {

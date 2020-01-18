@@ -20,17 +20,16 @@
 
 */
 
+#include "config.h"
 #include "compat.h"
 #include "misc.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <ctype.h>
-#include <errno.h>
-
 #include "cfgreader.h"
 #include "gnokii-internal.h"
+
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#endif
 
 GNOKII_API struct gn_cfg_header *gn_cfg_info;
 static gn_config gn_config_default, gn_config_global;
@@ -489,7 +488,11 @@ struct gn_cfg_header *cfg_file_read(const char *filename)
 
 	/* Open file */
 	if ((handle = fopen(filename, "r")) == NULL) {
+#ifdef HAVE_ERRNO_H
 		dprintf("cfg_file_read - open %s: %s\n", filename, strerror(errno));
+#else
+		dprintf("cfg_file_read - open %s\n", filename);
+#endif
 		goto out;
 	} else {
 		dprintf("Opened configuration file %s\n", filename);

@@ -18,8 +18,6 @@
 
 */
 
-#include <string.h>
-
 #include "compat.h"
 #include "gnokii-internal.h"
 #include "gnokii.h"

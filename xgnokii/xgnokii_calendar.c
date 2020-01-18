@@ -13,10 +13,7 @@
 
 */
 
-#include "config.h"
-
-#include <time.h>
-#include <string.h>
+#include "compat.h"
 #include <gtk/gtk.h>
 #include "misc.h"
 #include "xgnokii_common.h"

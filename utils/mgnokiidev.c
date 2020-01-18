@@ -41,17 +41,12 @@
 /* See common/data/virtmodem.c for explanation */
 #define _XOPEN_SOURCE 500
 
+#include "compat.h"
+
 #include "misc.h"
 
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
 #include <sys/socket.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
 #include <sys/uio.h>
-#include <errno.h>
 #include <sys/param.h>
 #ifdef ENABLE_NLS
 #  include <locale.h>

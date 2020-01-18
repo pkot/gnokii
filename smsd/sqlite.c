@@ -13,14 +13,11 @@
 
  */
 
-#include "config.h"
-#include <string.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <sqlite3.h>
 #include <glib.h>
 #include "smsd.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "utils.h"
 
 static sqlite3 *ppDbInbox;

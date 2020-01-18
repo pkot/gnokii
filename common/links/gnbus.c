@@ -17,14 +17,6 @@
 
 */
 
-/* System header files */
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-/* Various header file */
-
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"

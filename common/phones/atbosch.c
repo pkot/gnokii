@@ -14,10 +14,7 @@
 */
 
 #include "config.h"
-
-#include <string.h>
-#include <stdlib.h>
-
+#include "compat.h"
 #include "gnokii-internal.h"
 #include "phones/generic.h"
 #include "phones/atgen.h"

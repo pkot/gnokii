@@ -19,15 +19,13 @@
 
 /* Written by Bruno Haible <bruno@clisp.org>.  */
 
-#include <config.h>
+#include "config.h"
+#include "compat.h"
 
 /* Specification.  */
 #include "localcharset.h"
 
 #include <stddef.h>
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
 
 #if defined _WIN32 || defined __WIN32__
 # define WIN32_NATIVE

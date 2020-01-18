@@ -24,10 +24,6 @@
 #include "compat.h"
 #include "gnokii.h"
 
-#ifdef WIN32
-#  include <sys/types.h>
-#endif
-
 #define FB3110_FRAME_MAX_LENGTH		256
 #define FB3110_MESSAGE_MAX_TYPES	128
 #define FB3110_TRANSMIT_MAX_LENGTH	256

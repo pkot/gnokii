@@ -182,11 +182,9 @@ void midifile(struct MF *mf);
  */
 
 #include "config.h"
+#include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #define NULLFUNC NULL
 

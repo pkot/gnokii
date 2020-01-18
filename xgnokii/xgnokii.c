@@ -16,33 +16,24 @@
 */
 
 #include "config.h"
-#ifdef HAVE_ASPRINTF
-#  ifndef _GNU_SOURCE 
-#    define _GNU_SOURCE 1
-#  endif
-#  include <stdio.h>
+#include "compat.h"
+
+#ifndef _GNU_SOURCE 
+#  define _GNU_SOURCE 1
 #endif
 
 #include <gdk/gdkkeysyms.h>
 #include <gtk/gtk.h>
 
-#include "compat.h"
 #include "misc.h"
 
-#include <stdlib.h>		/* for getenv */
-#include <locale.h>
-#include <string.h>
-#include <time.h>		/* for time   */
 #include <pthread.h>
 
-#ifdef HAVE_SYS_STAT_H
-#  include <sys/stat.h>
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
 #endif
 
-#ifndef WIN32
-#  include <signal.h>
-#else
-#  include <windows.h>
+#ifdef WIN32
 #  undef IN
 #  undef OUT
 #endif

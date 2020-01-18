@@ -21,13 +21,12 @@
 
 */
 
+#include "config.h"
 #include "compat.h"
 #include "misc.h"
 
-#include <stdio.h>
-#include <signal.h>
-#ifdef HAVE_SYS_STAT_H
-#  include <sys/stat.h>
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
 #endif
 
 #include "gnokii-app.h"

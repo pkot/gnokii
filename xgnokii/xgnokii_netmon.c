@@ -12,14 +12,8 @@
 
 */
 
-#include "config.h"
-
-#ifndef WIN32
-#  include <unistd.h>
-#endif
+#include "compat.h"
 #include <pthread.h>
-#include <stdlib.h>		/* for atoi */
-#include <string.h>
 #include <gtk/gtk.h>
 #include "misc.h"
 #include "xgnokii_common.h"

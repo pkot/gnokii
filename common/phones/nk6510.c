@@ -17,13 +17,8 @@
 
 */
 
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-
 #include "compat.h"
 #include "misc.h"
-#include <time.h>
 
 #include "gnokii-internal.h"
 #include "nokia-decoding.h"

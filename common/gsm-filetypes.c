@@ -20,11 +20,6 @@
 
 #include "compat.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <ctype.h>
-#include <sys/stat.h>
-
 #include "gnokii-internal.h"
 #include "gnokii.h"
 #include "gsm-filetypes.h"

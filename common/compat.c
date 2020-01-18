@@ -30,7 +30,6 @@ int unsetenv(const char *name)
 	return 0;
 }
 #  else /* !HAVE_SETENV && !WIN32 */
-#    include <stdlib.h>
 /* Implemented according to http://www.greenend.org.uk/rjk/2008/putenv.html and Linux manpage */
 int setenv(const char *envname, const char *envvalue, int overwrite)
 {
@@ -60,10 +59,6 @@ int unsetenv(const char *name)
 #  endif /* WIN32 */
 
 #endif /* SETENV */
-
-#ifdef HAVE_SYS_TIME_H
-#  include <sys/time.h>
-#endif
 
 #ifndef	HAVE_GETTIMEOFDAY
 
@@ -124,9 +119,6 @@ int gettimeofday(struct timeval *tv, void *tz)
  * SUCH DAMAGE.
  */
 
-
-#include <stdio.h>
-
 /*
 #if defined(LIBC_SCCS) && !defined(lint)
 static char sccsid[] = "@(#)strsep.c	8.1 (Berkeley) 6/4/93";
@@ -173,9 +165,6 @@ char *strsep(char **stringp, const char *delim)
 #endif
 
 #ifndef HAVE_TIMEGM
-
-#include <time.h>
-#include <stdlib.h>
 
 time_t timegm(struct tm *tm)
 {

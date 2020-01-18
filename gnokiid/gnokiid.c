@@ -17,18 +17,11 @@
 */
 
 #include "config.h"
+#include "compat.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <termios.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <string.h>
-
-#include "config.h"
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
 
 #ifdef ENABLE_NLS
 #  include <locale.h>

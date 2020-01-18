@@ -21,19 +21,18 @@
 
 */
 
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <signal.h>
-
+#include "config.h"
 #include "compat.h"
-
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
 #include "misc.h"
 #include "gnokii.h"
 #include "gnokii-internal.h"
+
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#endif
 
 GNOKII_API gn_log_target gn_log_debug_mask = GN_LOG_T_NONE;
 GNOKII_API gn_log_target gn_log_rlpdebug_mask = GN_LOG_T_NONE;
@@ -499,7 +498,11 @@ GNOKII_API char *gn_device_lock(const char* port)
 				buf[n] = 0;
 				sscanf(buf, "%d", &pid);
 			}
-			if (pid > 0 && kill((pid_t)pid, 0) < 0 && errno == ESRCH) {
+			if (pid > 0 && kill((pid_t)pid, 0) < 0
+#ifdef HAVE_ERRNO_H
+				&& errno == ESRCH
+#endif
+				) {
 				fprintf(stderr, _("Lockfile %s is stale. Overriding it...\n"), lock_file);
 				sleep(1);
 				if (unlink(lock_file) == -1) {
@@ -527,11 +530,13 @@ GNOKII_API char *gn_device_lock(const char* port)
 	/* Try to create a new file, with 0644 mode */
 	fd = open(lock_file, O_CREAT | O_EXCL | O_WRONLY, 0644);
 	if (fd == -1) {
+#ifdef HAVE_ERRNO_H
 		if (errno == EEXIST)
 			fprintf(stderr, _("Device seems to be locked by unknown process.\n"));
 		else if (errno == EACCES)
 			fprintf(stderr, _("Please check permission on lock directory.\n"));
 		else if (errno == ENOENT)
+#endif
 			fprintf(stderr, _("Cannot create lockfile %s. Please check for existence of the path.\n"), lock_file);
 		goto failed;
 	}
@@ -562,7 +567,11 @@ GNOKII_API int gn_device_unlock(char *lock_file)
 		err = unlink(lock_file);
 		free(lock_file);
 		if (err) {
+#ifdef HAVE_ERRNO_H
 			fprintf(stderr, _("Cannot unlock device: %s\n"), strerror(errno));
+#else
+			fprintf(stderr, _("Cannot unlock device\n"));
+#endif
 			return false;
 		}
 	}

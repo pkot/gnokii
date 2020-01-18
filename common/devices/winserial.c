@@ -12,11 +12,8 @@
 
 */
 
-#include "config.h"
+#include "compat.h"
 
-#include <windows.h>
-#include <string.h>
-#include <stdio.h>
 #include <io.h>
 #include <memory.h>
 

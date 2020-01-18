@@ -16,17 +16,9 @@
 */
 
 #include "config.h"
-
-#ifndef WIN32
-#  include <unistd.h>
-#endif
+#include "compat.h"
 #include <locale.h>
-#include <fcntl.h>
 #include <pthread.h>
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include "misc.h"

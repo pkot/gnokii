@@ -13,30 +13,20 @@
 */
 
 #include "config.h"
+#include "compat.h"
 #include "misc.h"
 #include "devices/tcp.h"
 #include "devices/serial.h"
 
 #ifndef WIN32
 
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <string.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <termios.h>
-
-#ifdef HAVE_SYS_FILE_H
-#  include <sys/file.h>
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
 #endif
+
+#include <limits.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
 #ifdef HAVE_SYS_IOCTL_COMPAT_H
 #  include <sys/ioctl_compat.h>

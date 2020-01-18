@@ -20,14 +20,9 @@
 #ifndef _gnokii_links_m2bus_h
 #define _gnokii_links_m2bus_h
 
-#include <time.h>
 #include "compat.h"
 
 #include "gnokii.h"
-
-#ifdef WIN32
-#  include <sys/types.h>
-#endif
 
 /* This byte is at the beginning of all GSM Frames sent over M2BUS to Nokia
    phones.  This may have to become a phone dependent parameter... */

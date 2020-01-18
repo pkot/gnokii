@@ -14,13 +14,7 @@
 
 */
 
-/* System header files */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-
-/* Various header file */
+#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "links/atbus.h"
@@ -30,6 +24,10 @@
 #include "gnokii.h"
 
 #include "device.h"
+
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#endif
 
 /* ugly hack, but we need GN_OP_AT_Ring -- bozo */
 #include "phones/atgen.h"
@@ -49,10 +47,14 @@ static int xwrite(unsigned char *d, size_t len, struct gn_statemachine *sm)
 	while (len) {
 		res = device_write(d, len, sm);
 		if (res == -1) {
+#ifdef HAVE_ERRNO_H
 			if (errno != EAGAIN) {
+#endif
 				perror(_("gnokii I/O error"));
 				return -1;
+#ifdef HAVE_ERRNO_H
 			}
+#endif
 		} else {
 			d += res;
 			len -= res;

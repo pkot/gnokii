@@ -22,49 +22,23 @@
 
 */
 
+#include "config.h"
 #include "compat.h"
 #include "misc.h"
 
-#include <stdio.h>
-#ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-#endif
-#include <signal.h>
-#ifdef HAVE_STRING_H
-#  include <string.h>
-#endif
-#ifdef HAVE_STRINGS_H
-#  include <strings.h>	/* for memset */
-#endif
-#include <time.h>
-#ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#  include <sys/stat.h>
-#endif
-#ifdef HAVE_CTYPE_H
-#  include <ctype.h>
-#endif
 #ifdef HAVE_LIMITS_H
 #  include <limits.h>
 #endif
 
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
 
 #ifdef WIN32
-
-#  include <windows.h>
 #  include <process.h>
-#  include <getopt.h>
-
-#else
-
-#  include <unistd.h>
-#  include <termios.h>
-#  include <fcntl.h>
-#  include <getopt.h>
-
 #endif
+
+#include <getopt.h>
 
 #ifdef ENABLE_NLS
 #  include <locale.h>

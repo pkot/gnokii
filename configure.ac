@@ -868,6 +868,7 @@ AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h sys/file.h)
 AC_CHECK_HEADERS(string.h strings.h ctype.h stdlib.h stdarg.h stdint.h)
 AC_CHECK_HEADERS(stddef.h sys/socket.h sys/modem.h termios.h sys/filio.h)
 AC_CHECK_HEADERS(inttypes.h wchar.h direct.h sys/param.h dirent.h sys/types.h)
+AC_CHECK_HEADERS(error.h errno.h signal.h)
 
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST

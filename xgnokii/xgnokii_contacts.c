@@ -16,21 +16,16 @@
 */
 
 #include "config.h"
+#include "compat.h"
 
 #include <gtk/gtk.h>
 #include "misc.h"
 
-#include <stdio.h>
 #include <pthread.h>
 
-#ifndef WIN32
-#  include <unistd.h>
-#else
+#ifdef WIN32
 #  include <windows.h>
 #endif
-
-#include <stdlib.h>
-#include <string.h>
 
 #include "gnokii.h"
 #include "xgnokii_contacts.h"

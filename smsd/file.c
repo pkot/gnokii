@@ -13,16 +13,11 @@
 */
 
 #include "config.h"
+#include "compat.h"
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <string.h>
 #include <glib.h>
 #include "smsd.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "utils.h"
 
 static gchar *action;

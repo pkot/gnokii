@@ -17,9 +17,6 @@
 #include "misc.h"
 #include "gnokii.h"
 
-#include <string.h>
-#include <stdlib.h>
-
 /*
  * @map_free
  * Frees all memory allocated for the map data structure.

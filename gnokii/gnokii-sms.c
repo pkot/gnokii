@@ -21,6 +21,7 @@
 
 */
 
+#include "config.h"
 #include "compat.h"
 #include "misc.h"
 
@@ -29,15 +30,18 @@
 #  define getpid _getpid
 #endif
 
-#include <stdio.h>
-#include <sys/stat.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
 #include <getopt.h>
-#include <time.h>
-#include <signal.h>
-#include <errno.h>
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#else
+#  define errno 0
+#endif
 
 #include "gnokii-app.h"
 #include "gnokii.h"

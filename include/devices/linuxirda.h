@@ -36,8 +36,8 @@
 #ifndef __gnokii_linuxirda_h
 #define __gnokii_linuxirda_h
 
-#include <sys/types.h>
-#include <inttypes.h>
+#include "config.h"
+#include "compat.h"
 
 /* Hint bit positions for first hint byte */
 #define HINT_PNP         0x01
