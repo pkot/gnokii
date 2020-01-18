@@ -12,22 +12,17 @@
 */
 
 #include "config.h"
-
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <pthread.h>
 #include <getopt.h>
-#include <time.h>
 
-#ifndef WIN32
-# include <unistd.h>  /* for usleep */
-# include <signal.h>
-#else
-# include <windows.h>
-# undef IN
-# undef OUT
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
+
+#ifdef WIN32
+#  undef IN
+#  undef OUT
 #endif
 
 #include <glib.h>

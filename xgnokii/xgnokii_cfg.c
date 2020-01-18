@@ -11,12 +11,7 @@
   Copyright (C) 2002      Pawel Kot
 */
 
-#include "config.h"
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
+#include "compat.h"
 
 #include "xgnokii_cfg.h"
 #include "xgnokii.h"

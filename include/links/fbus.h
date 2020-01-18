@@ -20,11 +20,6 @@
 #ifndef _gnokii_links_fbus_h
 #define _gnokii_links_fbus_h
 
-#include <time.h>
-#ifdef WIN32
-#  include <sys/types.h>
-#endif
-
 #include "compat.h"
 
 #include "fbus-common.h"

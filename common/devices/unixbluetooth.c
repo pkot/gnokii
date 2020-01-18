@@ -24,14 +24,6 @@
 
 #if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH) || defined(HAVE_BLUETOOTH_NETBT)
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/socket.h>
-
 #ifdef HAVE_BLUETOOTH_NETGRAPH	/* FreeBSD / netgraph */
 
 #include <bluetooth.h>

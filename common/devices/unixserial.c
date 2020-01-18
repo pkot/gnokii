@@ -15,22 +15,15 @@
 */
 
 #include "config.h"
-
+#include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
 #include "gnokii-internal.h"
 #include "devices/serial.h"
 
-#include <errno.h>
-#include <fcntl.h>
-#include <stdio.h>
-#include <limits.h>
-#include <string.h>
-#include <stdlib.h>
-#include <sys/ioctl.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <termios.h>
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
+#endif
 
 #ifdef HAVE_SYS_IOCTL_COMPAT_H
 #  include <sys/ioctl_compat.h>
@@ -46,6 +39,10 @@
 
 #ifdef HAVE_SYS_FILIO_H
 #  include <sys/filio.h>
+#endif
+
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
 #endif
 
 /* If the target operating system does not have cfsetspeed, we can emulate
@@ -368,11 +365,13 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine 
 		if (got == 0) {
 			dprintf("Serial write: oops, zero byte has written!\n");
 		} else if (got < 0) {
+#ifdef HAVE_ERRNO_H
 			if (errno == EINTR) continue;
 			if (errno != EAGAIN) {
 				dprintf("Serial write: write error %d\n", errno);
 				return -1;
 			}
+#endif
 			dprintf("Serial write: transmitter busy, waiting\n");
 			serial_wselect(fd, NULL, state);
 			dprintf("Serial write: transmitter ready\n");

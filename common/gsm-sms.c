@@ -20,9 +20,7 @@
 
 #include <glib.h>
 
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include "compat.h"
 
 #include "gnokii-internal.h"
 #include "gnokii.h"
