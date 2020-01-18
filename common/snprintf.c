@@ -1454,7 +1454,7 @@ static int add_cnk_list_entry(struct pr_chunk_x **list,
 			printf("length limit buf1 '%s' expected 'a'\n", buf1);
 			fail++;
 		}
-        }
+	}
 
 	buf1[0] = buf2[0] = '\0';
 	l1 = snprintf(buf1, sizeof(buf1), "%4$*1$d %2$s %3$*1$.*1$f", 3, "pos test", 12.3456, 9);
