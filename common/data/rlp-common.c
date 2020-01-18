@@ -18,11 +18,7 @@
 
 */
 
-#include <stdio.h>
-#include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-
+#include "config.h"
 #include "compat.h"
 #include "gnokii.h"
 #include "data/rlp-crc24.h"

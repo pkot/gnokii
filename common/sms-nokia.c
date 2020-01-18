@@ -15,8 +15,7 @@
 */
 
 #include "config.h"
-
-#include <string.h>
+#include "compat.h"
 #include "misc.h"
 #include "sms-nokia.h"
 

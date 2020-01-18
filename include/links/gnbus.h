@@ -20,14 +20,9 @@
 #ifndef _gnokii_links_gnbus_h
 #define _gnokii_links_gnbus_h
 
-#include <time.h>
 #include "compat.h"
 
 #include "gnokii.h"
-
-#ifdef WIN32
-#  include <sys/types.h>
-#endif
 
 #define GNBUS_MAGIC_BYTE	0x5a
 
