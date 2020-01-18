@@ -13,19 +13,13 @@
  *
  */
 
+#include "config.h"
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
 
 #ifdef HAVE_IRDA
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/socket.h>
 #include <linux/types.h>
 #include <linux/irda.h>
 

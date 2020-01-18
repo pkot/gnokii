@@ -14,13 +14,8 @@
 
 */
 
-#include "config.h"
-
-#ifndef WIN32
-#  include <unistd.h>
-#endif
+#include "compat.h"
 #include <pthread.h>
-#include <string.h>
 #include <glib.h>
 #include "misc.h"
 #include "gnokii.h"

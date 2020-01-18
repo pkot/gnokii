@@ -13,15 +13,11 @@
 
 */
 
-#include "config.h"
-#include <string.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <glib.h>
 #include <libpq-fe.h>
 #include "smsd.h"
 #include "gnokii.h"
-#include "compat.h"
-//#include "utils.h"
 
 static PGconn *connIn = NULL;
 static PGconn *connOut = NULL;

@@ -18,12 +18,10 @@
 #ifndef	_gnokii_compat_h
 #define	_gnokii_compat_h
 
-#if defined(HAVE_CONFIG_H)
+#ifdef HAVE_CONFIG_H
 #  include "config.h"
-
 #else
 #  error "compat.h requires config.h"
-
 #endif
 
 #include <stdlib.h>
@@ -79,8 +77,15 @@
 #  include <sys/file.h>
 #endif
 
-#ifdef HAVE_SYS_TIME_H
+#ifdef TIME_WITH_SYS_TIME
 #  include <sys/time.h>
+#  include <time.h>
+#else
+#  ifdef HAVE_SYS_TIME_H
+#    include <sys/time.h>
+#  else
+#    include <time.h>
+#  endif
 #endif
 
 #ifdef HAVE_SYS_SOCKET_H
@@ -105,6 +110,14 @@
 
 #ifdef HAVE_DIRENT_H
 #  include <dirent.h>
+#endif
+
+#ifdef HAVE_ERROR_H
+#  include <error.h>
+#endif
+
+#ifdef HAVE_FCNTL_H
+#  include <fcntl.h>
 #endif
 
 #if !defined(INT_MAX)
