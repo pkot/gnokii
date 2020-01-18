@@ -11,9 +11,8 @@
 
 */
 
-#include "config.h"
+#include "compat.h"
 
-#include <stdio.h>
 #include <gtk/gtk.h>
 #include "misc.h"
 #include "xgnokii_common.h"

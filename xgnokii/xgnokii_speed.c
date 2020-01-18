@@ -13,10 +13,7 @@
 
 */
 
-#include "config.h"
-
-#include <stdio.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <pthread.h>
 #include <gtk/gtk.h>
 #include "xgnokii_contacts.h"

@@ -13,15 +13,11 @@
   
 */
 
-#include "config.h"
-#include <string.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <glib.h>
 #include <mysql.h>
 #include "smsd.h"
 #include "gnokii.h"
-#include "compat.h"
-//#include "utils.h"
 
 static MYSQL mysqlIn;
 static MYSQL mysqlOut;

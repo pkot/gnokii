@@ -12,14 +12,10 @@
 */
 
 #include "config.h"
-
-#ifndef WIN32
-#  include <unistd.h>
-#  include <sys/types.h>
-#  include <sys/wait.h>
+#include "compat.h"
+#ifdef HAVE_SIGNAL_H
 #  include <signal.h>
 #endif
-#include <string.h>
 #include <gtk/gtk.h>
 #include "misc.h"		/* for _() */
 #include "xgnokii_common.h"

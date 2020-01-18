@@ -15,14 +15,11 @@
 */
 
 #include "config.h"
+#include "compat.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <string.h>
-#include <dirent.h>
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
 
 #include <gtk/gtk.h>
 

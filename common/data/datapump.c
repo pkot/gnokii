@@ -18,18 +18,13 @@
 
 #define		__data_datapump_c
 
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <termios.h>
-#include <grp.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
+#include "config.h"
 
 #include "compat.h"
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
+#include <grp.h>
 #include "misc.h"
 #include "gnokii.h"
 #include "device.h"
