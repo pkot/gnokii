@@ -15,10 +15,6 @@
 
 */
 
-#include <string.h>
-#include <stdlib.h>
-#include <ctype.h>
-
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"

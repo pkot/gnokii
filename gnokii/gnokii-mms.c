@@ -13,12 +13,17 @@
 
 */
 
+#include "config.h"
 #include "compat.h"
 #include "misc.h"
 
-#include <stdio.h>
 #include <getopt.h>
-#include <errno.h>
+
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#else
+#  define errno 0
+#endif
 
 #include "gnokii-app.h"
 #include "gnokii.h"

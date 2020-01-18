@@ -16,23 +16,13 @@
 
 */
 
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <grp.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <ctype.h>
-
-#ifndef WIN32
-#  include <termios.h>
-#endif
-
+#include "config.h"
 #include "compat.h"
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
+#include <grp.h>
+
 #include "misc.h"
 #include "gnokii.h"
 #include "data/at-emulator.h"

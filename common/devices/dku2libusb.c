@@ -20,6 +20,15 @@
 #include "gnokii.h"
 #include "devices/dku2libusb.h"
 
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#else
+#  define EINVAL	22
+#  define ENODEV	19
+#  define ENOMEM	12
+#  define ENODATA	61
+#endif
+
 #ifndef HAVE_LIBUSB
 int fbusdku2usb_open(struct gn_statemachine *state)
 {
@@ -47,12 +56,6 @@ int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state)
 }
 
 #else
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
 
 #define	DEVINSTANCE(s) (*((fbus_usb_interface **)(&(s)->device.device_instance)))
 

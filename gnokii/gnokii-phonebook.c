@@ -21,10 +21,10 @@
 
 */
 
+#include "config.h"
 #include "compat.h"
 #include "misc.h"
 
-#include <stdio.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
