@@ -542,55 +542,11 @@ GNOKII_API const char *gn_lib_get_connection_name(gn_connection_type ct)
 
 GNOKII_API int gn_lib_is_connectiontype_supported(gn_connection_type ct)
 {
-	switch (ct) {
-	case GN_CT_Serial:
-	case GN_CT_DAU9P:
-	case GN_CT_DLR3P:
-	case GN_CT_M2BUS:
-	case GN_CT_Tekram:
-		return 1;
-	case GN_CT_Infrared:
-	case GN_CT_Irda:
-#ifdef HAVE_IRDA
-		return 1;
-#else
-		return 0;
-#endif
-	case GN_CT_Bluetooth:
-#ifdef HAVE_BLUETOOTH
-		return 1;
-#else
-		return 0;
-#endif
-	case GN_CT_DKU2: /* FIXME: How to detect this? */
-		return 1;
-	case GN_CT_DKU2LIBUSB:
-#ifdef HAVE_LIBUSB
-		return 1;
-#else
-		return 0;
-#endif
-	case GN_CT_PCSC:
-#ifdef HAVE_PCSC
-		return 1;
-#else
-		return 0;
-#endif
-	case GN_CT_TCP:
-#ifndef WIN32
-		return 0;
-#else
-		return 1;
-#endif
-	case GN_CT_SOCKETPHONET:
-#ifndef HAVE_SOCKETPHONET
-		return 0;
-#else
-		return 1;
-#endif
-	default:
-		return 0;
-	}
+	int i;
+	for (i = 0; i < sizeof(connectiontypes)/sizeof(connectiontypes[0]); i++)
+		if (ct == connectiontypes[i].ct)
+			return 1;
+	return 0;
 }
 
 GNOKII_API gn_error gn_lib_search_one_connected_phone(struct gn_statemachine **state)
