@@ -127,11 +127,6 @@ void device_close(struct gn_statemachine *state)
 	state->device.device_instance = NULL;
 }
 
-void device_reset(struct gn_statemachine *state)
-{
-	return;
-}
-
 void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 {
 	switch (state->device.type) {
