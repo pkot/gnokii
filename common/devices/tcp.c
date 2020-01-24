@@ -40,8 +40,6 @@
 #  define O_NONBLOCK  0
 #endif
 
-/* Open the serial port and store the settings. */
-
 static int tcp_open(const char *file)
 {
 	int fd;
@@ -138,9 +136,6 @@ int tcp_close(int fd, struct gn_statemachine *state)
 	return close(fd);
 }
 
-/* Open a device with standard options.
- * Use value (-1) for "with_hw_handshake" if its specification is required from the user
- */
 int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
 {
 	int fd;
@@ -193,15 +188,10 @@ int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 	return serial_select(fd, timeout, state);
 }
 
-
-/* Read from serial device. */
-
 size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 {
 	return read(fd, buf, nbytes);
 }
-
-/* Write to serial device. */
 
 size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
