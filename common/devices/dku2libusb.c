@@ -469,7 +469,7 @@ static int usbfbus_connect_request(struct gn_statemachine *state)
 	return 1;
 
 err3:
-	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);	
+	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->data_interface);
 err2:
 	usb_release_interface(DEVINSTANCE(state)->interface->dev_data, DEVINSTANCE(state)->interface->control_interface);
 err1:
@@ -501,7 +501,7 @@ static int usbfbus_disconnect_request(struct gn_statemachine *state)
 	ret = usb_close(DEVINSTANCE(state)->interface->dev_data);
 	if (ret < 0)
 		dprintf("Can't close data interface %d\n", ret);
-	return ret;	
+	return ret;
 }
 
 int fbusdku2usb_open(struct gn_statemachine *state)
