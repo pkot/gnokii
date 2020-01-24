@@ -356,6 +356,26 @@ AC_ARG_WITH(readline,
 AC_SUBST(TERMLIBS)
 AC_SUBST(TERMLDFLAGS)
 
+dnl ======================== Checks for gethostbyname support
+AC_CHECK_FUNC(gethostbyname, ,
+	AC_CHECK_LIB(nsl, gethostbyname, TCP_LIBS="-lnsl"
+		     AC_SUBST(TCP_LIBS)))
+dnl Haiku requires -lnetwork for socket functions
+AC_CHECK_FUNC(gethostbyname, ,
+	AC_CHECK_LIB(network, gethostbyname, TCP_LIBS="-lnetwork"
+		     AC_SUBST(TCP_LIBS)))
+
+dnl ======================== Defines location for gettext
+AC_ARG_WITH(gettext,
+	[  --with-gettext=DIR      specifies the base gettext],
+	[ if test x$withval = xyes; then
+		AC_MSG_WARN(Usage is: --with-gettext=DIR)
+	  else
+		CFLAGS="$CFLAGS -I$withval"
+	  fi
+	]
+)
+
 dnl ======================== Check for libical
 AC_ARG_WITH(libical,
    [  --with-libical=DIR      specifies the base libical],
@@ -446,15 +466,6 @@ if test "$enable_phonet" = "yes"; then
 		 #include <linux/phonet.h>])
 fi
 
-dnl ======================== Checks for gethostbyname support
-AC_CHECK_FUNC(gethostbyname, ,
-	AC_CHECK_LIB(nsl, gethostbyname, TCP_LIBS="-lnsl"
-		     AC_SUBST(TCP_LIBS)))
-dnl Haiku requires -lnetwork for socket functions
-AC_CHECK_FUNC(gethostbyname, ,
-	AC_CHECK_LIB(network, gethostbyname, TCP_LIBS="-lnetwork"
-		     AC_SUBST(TCP_LIBS)))
-
 dnl ======================== Checks for Linux IrDA support
 USE_IRDA="no"
 AC_ARG_ENABLE(irda,
@@ -469,17 +480,6 @@ if test "$enable_irda" = "yes"; then
 		 #include <sys/ioctl.h>
 		 #include <linux/types.h>])
 fi
-
-dnl ======================== Defines location for gettext
-AC_ARG_WITH(gettext,
-	[  --with-gettext=DIR      specifies the base gettext],
-	[ if test x$withval = xyes; then
-		AC_MSG_WARN(Usage is: --with-gettext=DIR)
-	  else
-		CFLAGS="$CFLAGS -I$withval"
-	  fi
-	]
-)
 
 dnl ======================== Checks for Bluetooth support
 USE_BLUETOOTH="no"
