@@ -36,7 +36,6 @@
 #ifndef __gnokii_linuxirda_h
 #define __gnokii_linuxirda_h
 
-#include "config.h"
 #include "compat.h"
 
 /* Hint bit positions for first hint byte */
