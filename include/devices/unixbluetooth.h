@@ -14,8 +14,6 @@
 #ifndef _gnokii_unix_bluetooth_h
 #define _gnokii_unix_bluetooth_h
 
-#include "compat.h"
-#include "misc.h"
 #include "gnokii.h"
 
 int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state);
