@@ -152,6 +152,11 @@
 extern char *strndup(const char *src, size_t n);
 #endif
 
+#ifndef HAVE_SETENV
+extern int setenv(const char *name, cost char *value, int overwrite);
+extern int unsetenv(const char *name);
+#endif
+
 #ifndef	HAVE_TIMEOPS
 
 #undef timerisset
