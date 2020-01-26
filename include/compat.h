@@ -200,20 +200,36 @@ int gettimeofday(struct timeval *tv, void *tz);
 char *strsep(char **stringp, const char *delim);
 #endif
 
+#ifndef PRINTF_ATTRIBUTE
+#  ifdef HAVE___ATTRIVUTE__
+/** Use gcc attribute to check printf fns.  a1 is the 1-based index of
+ * the parameter containing the format. and a2 the index of the first
+ * argument. Not that some gcc 2.x versions don't handle this
+ * properly **/
+#    define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (__printf__, a1, a2)))
+#  else
+#    define PRTINF_ATTRIBUTE(a1, a2)
+#  endif
+#endif
+
 #if !defined(HAVE_SNPRINTF) || !defined(HAVE_C99_SNPRINTF)
-int snprintf(char *str, size_t size, const char *format, ...);
+#  define snprintf rep_snprintf
+int rep_snprintf(char *str, size_t size, const char *format, ...) PRINTF_ATTRIBUTE(3, 4);
 #endif
 
 #if !defined(HAVE_VSNPRINTF) || !defined(HAVE_C99_VSNPRINTF)
-int vsnprintf(char *str, size_t size, const char *format, va_list ap);
+#  define vnsprintf rep_vsnprintf
+int rep_vsnprintf(char *str, size_t size, const char *format, va_list ap) PRINTF_ATTRIBUTE(3, 0);
 #endif
 
 #ifndef HAVE_ASPRINTF
-int asprintf(char **ptr, const char *format, ...);
+#  define asprintf rep_asprintf
+int rep_asprintf(char **ptr, const char *format, ...) PRINTF_ATTRIBUTE(2, 3);
 #endif
 
 #ifndef HAVE_VASPRINTF
-int vasprintf(char **ptr, const char *format, va_list ap);
+#  define vasprintf rep_vasprintf
+int rep_vasprintf(char **ptr, const char *format, va_list ap) PRINTF_ATTRIBUTE(2, 0);
 #endif
 
 #ifndef HAVE_TIMEGM
