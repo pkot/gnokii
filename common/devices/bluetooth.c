@@ -22,7 +22,7 @@
 
 #ifndef HAVE_BLUETOOTH
 
-int bluetooth_open(const char *addr, struct gn_statemachine *state) { return -1; }
+int bluetooth_open(gn_config *cfg, struct gn_statemachine *state) { return -1; }
 int bluetooth_close(int fd, struct gn_statemachine *state) { return -1; }
 int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }
 int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state) { return -1; }

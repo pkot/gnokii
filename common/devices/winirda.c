@@ -32,7 +32,7 @@
 
 #define INVALID_DADDR	((DWORD)-1L)
 
-static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
+static DWORD irda_discover_device(const char *irda_string, SOCKET fd)
 {
 	DEVICELIST *list;
 	IRDA_DEVICE_INFO *dev;
@@ -48,7 +48,7 @@ static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
 
 	t1 = timeGetTime();
 
-	dprintf("Expecting: %s\n", state->config.irda_string);
+	dprintf("Expecting: %s\n", irda_string);
 
 	do {
 		s = len;
@@ -56,12 +56,12 @@ static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
 
 		if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &s) != SOCKET_ERROR) {
 			for (i = 0; (i < list->numDevice) && (daddr == INVALID_DADDR); i++) {
-				if (strlen(state->config.irda_string) == 0) {
+				if (strlen(irda_string) == 0) {
 					/* We take first entry */
 					daddr = *(DWORD*)dev[i].irdaDeviceID;
 					dprintf("Default: %s\t%x\n", dev[i].irdaDeviceName, *(DWORD*)dev[i].irdaDeviceID);
 				} else {
-					if (strncmp(dev[i].irdaDeviceName, state->config.irda_string, INFO_LEN) == 0) {
+					if (strncmp(dev[i].irdaDeviceName, irda_string, INFO_LEN) == 0) {
 						daddr = *(DWORD*)dev[i].irdaDeviceID;
 						dprintf("Matching: %s\t%x\n", dev[i].irdaDeviceName, *(DWORD*)dev[i].irdaDeviceID);
 					} else {
@@ -83,7 +83,7 @@ static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
 	return daddr;
 }
 
-int irda_open(struct gn_statemachine *state)
+int irda_open(gn_config *cfg, struct gn_statemachine *state)
 {
 	WSADATA wsaData;
 	SOCKADDR_IRDA peer;
@@ -104,7 +104,7 @@ int irda_open(struct gn_statemachine *state)
 		return -1;
 	}
 	/* Discover devices */
-	daddr = irda_discover_device(state, fd); /* discover the devices */
+	daddr = irda_discover_device(cfg->irda_string, fd); /* discover the devices */
 	if (daddr == INVALID_DADDR) {
 		dprintf("Failed to discover any irda device.\n");
 		closesocket(fd);
@@ -113,7 +113,7 @@ int irda_open(struct gn_statemachine *state)
 	/* Prepare socket structure for irda socket */
 	peer.irdaAddressFamily = AF_IRDA;
 	*(DWORD*)peer.irdaDeviceID = daddr;
-	if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
+	if (!strcasecmp(cfg->port_device, "IrDA:IrCOMM")) {
 		snprintf(peer.irdaServiceName, sizeof(peer.irdaServiceName), "IrDA:IrCOMM");
 		if (setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, (char *)&x, sizeof(x)) == SOCKET_ERROR) {
 			perror("setsockopt");

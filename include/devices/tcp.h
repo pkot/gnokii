@@ -16,7 +16,7 @@
 #include "compat.h"
 #include "gnokii.h"
 
-int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state);
+int tcp_opendevice(gn_config *cfg, int with_async, struct gn_statemachine *state);
 int tcp_close(int fd, struct gn_statemachine *state);
 
 size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state);

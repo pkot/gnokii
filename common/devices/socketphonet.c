@@ -26,7 +26,7 @@ int socketphonet_close(struct gn_statemachine *state)
 	return -1;
 }
 
-int socketphonet_open(const char *iface, int with_async, struct gn_statemachine *state)
+int socketphonet_open(gn_config *cfg, int with_async, struct gn_statemachine *state)
 {
 	return -1;
 }
@@ -67,7 +67,7 @@ int socketphonet_close(struct gn_statemachine *state)
 	return close(state->device.fd);
 }
 
-int socketphonet_open(const char *interface, int with_async, struct gn_statemachine *state)
+int socketphonet_open(gn_config *cfg, int with_async, struct gn_statemachine *state)
 {
 	int fd, retcode;
 
@@ -83,7 +83,7 @@ int socketphonet_open(const char *interface, int with_async, struct gn_statemach
 		return -1;
 	}
 
-	if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, interface, strlen(interface))) {
+	if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, cfg->port_device, strlen(cfg->port_device))) {
 		perror("setsockopt");
 		close(fd);
 		return -1;

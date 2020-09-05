@@ -120,12 +120,12 @@ static int next_fd = 1;
 }
 @end
 
-int bluetooth_open(const char* addr, struct gn_statemachine* state)
+int bluetooth_open(gn_config *cfg, struct gn_statemachine* state)
 {
     if (queues == nil)
         queues = [NSMutableDictionary dictionaryWithCapacity:1];
     GnokiiOSXBluetooth *q = [[GnokiiOSXBluetooth alloc] init];
-    if (![q connect:addr chid:(BluetoothRFCOMMChannelID)state->config.rfcomm_cn]) { // after connection it is established.. the delegates methoed are triggered.
+    if (![q connect:cfg->port_device chid:(BluetoothRFCOMMChannelID)cfg->rfcomm_cn]) { // after connection it is established.. the delegates methods are triggered.
         [q release];
         return -1;
     }
