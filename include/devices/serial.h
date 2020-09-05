@@ -19,7 +19,7 @@
 int serial_open(const char *file, int oflag);
 int serial_close(int fd, struct gn_statemachine *state);
 
-int serial_opendevice(const char *file, int with_odd_parity, int with_async, int with_hw_handshake, struct gn_statemachine *state);
+int serial_opendevice(const char *file, int with_odd_parity, int with_async, struct gn_statemachine *state);
 
 void serial_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state);
 gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state);

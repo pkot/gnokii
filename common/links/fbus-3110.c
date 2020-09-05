@@ -49,7 +49,7 @@ static bool fb3110_serial_open(struct gn_statemachine *state)
 		return false;
 
 	/* Open device. */
-	if (!device_open(state->config.port_device, false, false, false, GN_CT_Serial, state)) {
+	if (!device_open(state->config.port_device, false, false, GN_CT_Serial, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}

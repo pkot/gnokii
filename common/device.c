@@ -33,8 +33,7 @@ GNOKII_API int device_getfd(struct gn_statemachine *state)
 }
 
 int device_open(const char *file, int with_odd_parity, int with_async,
-		int with_hw_handshake, gn_connection_type device_type,
-		struct gn_statemachine *state)
+		gn_connection_type device_type, struct gn_statemachine *state)
 {
 	state->device.type = device_type;
 	state->device.device_instance = NULL;
@@ -45,7 +44,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		state->device.fd = serial_opendevice(file, with_odd_parity, with_async, with_hw_handshake, state);
+		state->device.fd = serial_opendevice(file, with_odd_parity, with_async, state);
 		break;
 	case GN_CT_Irda:
 		state->device.fd = irda_open(state);

@@ -793,7 +793,7 @@ bool OpenSerial(void)
 
 	ddprintf("Setting MBUS communication with 2110...\n");
 
-	result = device_open(PortDevice, true, false, false, GCT_Serial);
+	result = device_open(PortDevice, true, false, GCT_Serial);
 	if (!result) {
 		dprintf( "Failed to open %s ...\n", PortDevice);
 		return false;
