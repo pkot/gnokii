@@ -77,7 +77,7 @@ static bool phonet_open(struct gn_statemachine *state)
 	memset(&init_resp, 0, 7);
 
 	/* Open device. */
-	result = device_open(state->config.port_device, false, false, false,
+	result = device_open(state->config.port_device, false, false,
 			     state->config.connection_type, state);
 
 	if (!result) {
