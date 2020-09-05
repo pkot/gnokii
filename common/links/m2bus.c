@@ -50,7 +50,7 @@ static bool m2bus_serial_open(struct gn_statemachine *state)
 		type = GN_CT_Serial;
 
 	/* Open device. */
-	if (!device_open(state->config.port_device, true, false, false, type, state)) {
+	if (!device_open(state->config.port_device, true, false, type, state)) {
 		perror(_("Couldn't open M2BUS device"));
 		return false;
 	}

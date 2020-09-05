@@ -63,15 +63,15 @@ static int xwrite(unsigned char *d, size_t len, struct gn_statemachine *sm)
 	return 0;
 }
 
-static bool atbus_open(int mode, char *device, struct gn_statemachine *sm)
+static bool atbus_open(char *device, struct gn_statemachine *sm)
 {
-	int result = device_open(device, false, false, mode, sm->config.connection_type, sm);
+	int result = device_open(device, false, false, sm->config.connection_type, sm);
 
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
 		return false;
 	}
-	if (mode) {
+	if (sm->config.hardware_handshake) {
 		/*
 		 * make 7110 with dlr-3 happy. the nokia dlr-3 cable provides
 		 * hardware handshake lines but is, at least at initialization,
@@ -269,7 +269,7 @@ static void atbus_reset(struct gn_statemachine *state)
 /* Initialise variables and start the link */
 /* Fixme we allow serial and irda for connection to reduce */
 /* bug reports. this is pretty silly for /dev/ttyS?. */
-gn_error atbus_initialise(int mode, struct gn_statemachine *state)
+gn_error atbus_initialise(struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	atbus_instance *businst;
@@ -291,7 +291,7 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 	switch (state->config.connection_type) {
 	case GN_CT_Irda:
 		if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
-			if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
+			if (!device_open(state->config.port_device, false, false, state->config.connection_type, state)) {
 				error = GN_ERR_FAILED;
 				goto err;
 			}
@@ -300,13 +300,13 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 		/* FALLTHROUGH */
 	case GN_CT_Serial:
 	case GN_CT_TCP:
-		if (!atbus_open(mode, state->config.port_device, state)) {
+		if (!atbus_open(state->config.port_device, state)) {
 			error = GN_ERR_FAILED;
 			goto err;
 		}
 		break;
 	case GN_CT_Bluetooth:
-		if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
+		if (!device_open(state->config.port_device, false, false, state->config.connection_type, state)) {
 			error = GN_ERR_FAILED;
 			goto err;
 		}
