@@ -262,9 +262,9 @@ static gn_error bus_reset(struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
-static bool cbus_open_serial(char *device, struct gn_statemachine *state)
+static bool cbus_open_serial(struct gn_statemachine *state)
 {
-	int result = device_open(device, false, false, GN_CT_Serial, state);
+	int result = device_open(false, false, GN_CT_Serial, state);
 	if (!result) {
 		perror(_("Couldn't open CBUS device"));
 		return false;
@@ -319,7 +319,7 @@ gn_error cbus_initialise(struct gn_statemachine *state)
 	CBUSINST(state) = businst;
 
 	if (state->config.connection_type == GN_CT_Serial) {
-		if (!cbus_open_serial(state->config.port_device, state))
+		if (!cbus_open_serial(state))
 			error = GN_ERR_FAILED;
 	} else {
 		dprintf("Device not supported by C-bus\n");

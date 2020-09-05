@@ -62,7 +62,7 @@ static double d_sleep(double s)
 	return time;
 }
 
-static int irda_discover_device(struct gn_statemachine *state)
+static int irda_discover_device(const char *irda_string)
 {
 	struct irda_device_list *list;
 	struct irda_device_info *dev;
@@ -79,7 +79,7 @@ static int irda_discover_device(struct gn_statemachine *state)
 
 	t1 = d_time();
 
-	dprintf("Expecting: %s\n", state->config.irda_string);
+	dprintf("Expecting: %s\n", irda_string);
 
 	do {
 		s = len;
@@ -87,12 +87,12 @@ static int irda_discover_device(struct gn_statemachine *state)
 
 		if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, (socklen_t *)&s) == 0) {
 			for (i = 0; (i < list->len) && (daddr == -1); i++) {
-				if (strlen(state->config.irda_string) == 0) {
+				if (strlen(irda_string) == 0) {
 					/* We take first entry */
 					daddr = dev[i].daddr;
 					dprintf("Default: %s\t%x\n", dev[i].info, dev[i].daddr);
 				} else {
-					if (strncmp(dev[i].info, state->config.irda_string, INFO_LEN) == 0) {
+					if (strncmp(dev[i].info, irda_string, INFO_LEN) == 0) {
 						daddr = dev[i].daddr;
 						dprintf("Matching: %s\t%x\n", dev[i].info, dev[i].daddr);
 					} else {
@@ -115,15 +115,15 @@ static int irda_discover_device(struct gn_statemachine *state)
 	return daddr;
 }
 
-int irda_open(struct gn_statemachine *state)
+int irda_open(gn_config *cfg, struct gn_statemachine *state)
 {
 	struct sockaddr_irda peer;
 	int fd = -1, daddr;
 
-	daddr = irda_discover_device(state); /* discover the devices */
+	daddr = irda_discover_device(cfg->irda_string); /* discover the devices */
 
 	if (daddr != -1)  {
-		if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
+		if (!strcasecmp(cfg->port_device, "IrDA:IrCOMM")) {
 			fprintf(stderr, _("Virtual IrCOMM device unsupported under Linux\n"));
 			return -1;
 		}

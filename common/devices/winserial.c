@@ -92,7 +92,7 @@ int serial_close(int fd, struct gn_statemachine *state)
 
 /* Open a device with standard options.
  */
-int serial_opendevice(const char *file, int with_odd_parity,
+int serial_opendevice(gn_config *cfg, int with_odd_parity,
 		      int with_async,
 		      struct gn_statemachine *state)
 {
@@ -105,7 +105,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	dcb.DCBlength = sizeof(DCB);
 	GetCommState(hPhone, &dcb);
 	dcb.fOutxDsrFlow = 0;
-	if (state->config.hardware_handshake) {
+	if (cfg->hardware_handshake) {
 		dcb.fOutxCtsFlow = TRUE;
 		dcb.fRtsControl = RTS_CONTROL_HANDSHAKE;
 	} else {
@@ -118,7 +118,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 		return -1;
 	}
 
-	if (serial_changespeed(0, state->config.serial_baudrate, state) != GN_ERR_NONE)
+	if (serial_changespeed(0, cfg->serial_baudrate, state) != GN_ERR_NONE)
 		serial_changespeed(0, 19200 /* default value */, state);
 
 	return 0;

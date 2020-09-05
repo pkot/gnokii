@@ -118,8 +118,7 @@ int serial_close(int fd, struct gn_statemachine *state)
  * Open a device with standard options.
  * Use value (-1) for "with_hw_handshake" if its specification is required from the user.
  */
-int serial_opendevice(const char *file, int with_odd_parity,
-		      int with_async,
+int serial_opendevice(gn_config *cfg, int with_odd_parity, int with_async,
 		      struct gn_statemachine *state)
 {
 	int fd;
@@ -132,7 +131,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	 * O_NONBLOCK MUST be used here as the CLOCAL may be currently off
 	 * and if DCD is down the "open" syscall would be stuck waiting for DCD.
 	 */
-	fd = serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK);
+	fd = serial_open(cfg->port_device, O_RDWR | O_NOCTTY | O_NONBLOCK);
 
 	if (fd < 0) return fd;
 
@@ -147,7 +146,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 	} else
 		tp.c_iflag = IGNPAR;
 #ifdef CRTSCTS
-	if (state->config.hardware_handshake)
+	if (cfg->hardware_handshake)
 		tp.c_cflag |= CRTSCTS;
 	else
 		tp.c_cflag &= ~CRTSCTS;
@@ -172,7 +171,7 @@ int serial_opendevice(const char *file, int with_odd_parity,
 		return -1;
 	}
 
-	if (serial_changespeed(fd, state->config.serial_baudrate, state) != GN_ERR_NONE)
+	if (serial_changespeed(fd, cfg->serial_baudrate, state) != GN_ERR_NONE)
 		serial_changespeed(fd, 19200 /* default value */, state);
 
 #if !(__unices__)
@@ -216,9 +215,6 @@ int serial_opendevice(const char *file, int with_odd_parity,
 void serial_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state)
 {
 	unsigned int flags;
-
-	if (!state->config.set_dtr_rts)
-		return;
 
 	flags = TIOCM_DTR;
 

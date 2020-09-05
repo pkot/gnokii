@@ -15,7 +15,7 @@
 #include "compat.h"
 #include "gnokii.h"
 
-int irda_open(struct gn_statemachine *state);
+int irda_open(gn_config *cfg, struct gn_statemachine *state);
 int irda_close(int fd, struct gn_statemachine *state);
 int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state);
 int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);

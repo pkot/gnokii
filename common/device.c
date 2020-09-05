@@ -32,37 +32,40 @@ GNOKII_API int device_getfd(struct gn_statemachine *state)
 	return state->device.fd;
 }
 
-int device_open(const char *file, int with_odd_parity, int with_async,
+int device_open(int with_odd_parity, int with_async,
 		gn_connection_type device_type, struct gn_statemachine *state)
 {
+	gn_config *cfg = &state->config;
+
 	state->device.type = device_type;
 	state->device.device_instance = NULL;
 
-	dprintf("device: opening device %s\n", (device_type == GN_CT_DKU2LIBUSB) ? "USB" : file);
+	dprintf("device: opening device %s\n", (device_type == GN_CT_DKU2LIBUSB) ?
+		"USB" : cfg->port_device);
 
 	switch (state->device.type) {
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		state->device.fd = serial_opendevice(file, with_odd_parity, with_async, state);
+		state->device.fd = serial_opendevice(cfg, with_odd_parity, with_async, state);
 		break;
 	case GN_CT_Irda:
-		state->device.fd = irda_open(state);
+		state->device.fd = irda_open(cfg, state);
 		break;
 	case GN_CT_Bluetooth:
-		state->device.fd = bluetooth_open(state->config.port_device, state);
+		state->device.fd = bluetooth_open(cfg, state);
 		break;
 	case GN_CT_Tekram:
-		state->device.fd = tekram_open(file, state);
+		state->device.fd = tekram_open(cfg, state);
 		break;
 	case GN_CT_TCP:
-		state->device.fd = tcp_opendevice(file, with_async, state);
+		state->device.fd = tcp_opendevice(cfg, with_async, state);
 		break;
 	case GN_CT_DKU2LIBUSB:
-		state->device.fd = fbusdku2usb_open(state);
+		state->device.fd = fbusdku2usb_open(cfg, state);
 		break;
 	case GN_CT_SOCKETPHONET:
-		state->device.fd = socketphonet_open(file, with_async, state);
+		state->device.fd = socketphonet_open(cfg, with_async, state);
 		break;
 	default:
 		state->device.fd = -1;
@@ -132,8 +135,10 @@ void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		dprintf("device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
-		serial_setdtrrts(state->device.fd, dtr, rts, state);
+		if (state->config.set_dtr_rts) {
+			dprintf("device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
+			serial_setdtrrts(state->device.fd, dtr, rts, state);
+		}
 		break;
 	case GN_CT_Irda:
 	case GN_CT_Bluetooth:

@@ -24,14 +24,14 @@
 #  include <sys/ioctl.h>
 #endif
 
-int tekram_open(const char *file, struct gn_statemachine *state)
+int tekram_open(gn_config *cfg, struct gn_statemachine *state)
 {
 #if defined(O_NOCTTY) && defined(O_NONBLOCK) && defined (O_RDWR)
-	return serial_open(file, O_RDWR | O_NOCTTY | O_NONBLOCK);
+	return serial_open(cfg->port_device, O_RDWR | O_NOCTTY | O_NONBLOCK);
 #elif defined (O_RDWR)
-	return serial_open(file, O_RDWR);
+	return serial_open(cfg->port_device, O_RDWR);
 #else
-	return serial_open(file, 0);
+	return serial_open(cfg->port_device, 0);
 #endif
 }
 
