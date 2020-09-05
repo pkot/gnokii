@@ -23,7 +23,7 @@
 
 #define TEKRAM_PW      0x10 /* Pulse select bit */
 
-int tekram_open(const char *file, struct gn_statemachine *state);
+int tekram_open(gn_config *cfg, struct gn_statemachine *state);
 void tekram_close(int fd, struct gn_statemachine *state);
 
 void tekram_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state);

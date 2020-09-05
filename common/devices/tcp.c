@@ -136,14 +136,14 @@ int tcp_close(int fd, struct gn_statemachine *state)
 	return close(fd);
 }
 
-int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
+int tcp_opendevice(gn_config *cfg, int with_async, struct gn_statemachine *state)
 {
 	int fd;
 	int retcode;
 
 	/* Open device */
 
-	fd = tcp_open(file);
+	fd = tcp_open(cfg->port_device);
 
 	if (fd < 0)
 		return fd;
@@ -205,7 +205,7 @@ int tcp_close(int fd, struct gn_statemachine *state)
 	return -1;
 }
 
-int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
+int tcp_opendevice(gn_config *cfg, int with_async, struct gn_statemachine *state)
 {
 	return -1;
 }

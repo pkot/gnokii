@@ -42,7 +42,7 @@ static int str2ba(const char *straddr, BTH_ADDR *btaddr)
 	return 0;
 }
 
-int bluetooth_open(const char *addr, struct gn_statemachine *state)
+int bluetooth_open(gn_config *cfg, struct gn_statemachine *state)
 {
 	WSADATA wsd;
 	SOCKET fd = INVALID_SOCKET;
@@ -64,13 +64,13 @@ int bluetooth_open(const char *addr, struct gn_statemachine *state)
 	/* Prepare socket structure for the bluetooth socket */
 	memset(&sa, 0, sizeof(sa));
 	sa.addressFamily = AF_BTH;
-	if (str2ba(addr, &sa.btAddr)) {
+	if (str2ba(cfg->port_device, &sa.btAddr)) {
 		dprintf("Incorrect bluetooth address given in the config file\n");
 		closesocket(fd);
 		WSACleanup();
 		return -1;
 	}
-	sa.port = state->config.rfcomm_cn & 0xff;
+	sa.port = cfg->rfcomm_cn & 0xff;
 	/* Connect to the bluetooth socket */
 	if (connect(fd, (SOCKADDR *)&sa, sizeof(sa))) {
 		perror("socket");
