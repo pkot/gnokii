@@ -30,7 +30,7 @@
 #endif
 
 #ifndef HAVE_LIBUSB
-int fbusdku2usb_open(struct gn_statemachine *state)
+int fbusdku2usb_open(gn_config *cfg, struct gn_statemachine *state)
 {
 	return -1;
 }
@@ -303,7 +303,7 @@ static struct fbus_usb_interface_transport *check_iface(struct usb_device *dev, 
  *
  *    Find available USB DKU2 FBUS interfaces on the system
  */
-static int usbfbus_find_interfaces(struct gn_statemachine *state)
+static int usbfbus_find_interfaces(int index, struct gn_statemachine *state)
 {
 	struct usb_bus *busses;
 	struct usb_bus *bus;
@@ -312,15 +312,6 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 	struct fbus_usb_interface_transport *current = NULL;
 	struct fbus_usb_interface_transport *tmp = NULL;
 	struct usb_dev_handle *usb_handle;
-	int n;
-
-	/* For connection type dku2libusb port denotes number of DKU2 device */
-	n = atoi(state->config.port_device);
-	/* Assume default is first interface */
-	if (n < 1) {
-		n = 1;
-		dprintf("port = %s is not valid for connection = dku2libusb using port = %d instead\n", state->config.port_device, n);
-	}
 
 	usb_init();
 	usb_find_busses();
@@ -352,7 +343,7 @@ static int usbfbus_find_interfaces(struct gn_statemachine *state)
 		current = current->prev;
 
 	/* Take N-th device on the list */
-	while (--n && current) {
+	while (--index && current) {
 		tmp = current;
 		current = current->next;
 		/* free the previous element on the list -- won't be needed anymore */
@@ -504,11 +495,19 @@ static int usbfbus_disconnect_request(struct gn_statemachine *state)
 	return ret;
 }
 
-int fbusdku2usb_open(struct gn_statemachine *state)
+int fbusdku2usb_open(gn_config *cfg, struct gn_statemachine *state)
 {
-	int retval;
+	int n, retval;
 
-	retval = usbfbus_find_interfaces(state);
+	/* For connection type dku2libusb port denotes number of DKU2 device */
+	n = atoi(cfg->port_device);
+	/* Assume default is first interface */
+	if (n < 1) {
+		n = 1;
+		dprintf("port = %s is not valid for connection = dku2libusb using port = %d instead\n", cfg->port_device, n);
+	}
+
+	retval = usbfbus_find_interfaces(n, state);
 	if (retval)
 		retval = usbfbus_connect_request(state);
 	return (retval ? retval : -1);

@@ -463,15 +463,15 @@ static int setNonblocking(int fd)
 	return retcode;
 }
 
-int bluetooth_open(const char *addr, struct gn_statemachine *state)
+int bluetooth_open(gn_config *cfg, struct gn_statemachine *state)
 {
 	uint8_t channel;
 	bdaddr_t bdaddr;
 	struct sockaddr_rc raddr;
 	int fd;
 
-	if (str2ba((char *)addr, &bdaddr)) {
-		fprintf(stderr, _("Invalid bluetooth address \"%s\"\n"), addr);
+	if (str2ba(cfg->port_device, &bdaddr)) {
+		fprintf(stderr, _("Invalid bluetooth address \"%s\"\n"), cfg->port_device);
 		return -1;
 	}
 
@@ -483,11 +483,11 @@ int bluetooth_open(const char *addr, struct gn_statemachine *state)
 	memset(&raddr, 0, sizeof(raddr));
 	raddr.rc_family = AF_BLUETOOTH;
 	bacpy(&raddr.rc_bdaddr, &bdaddr);
-	channel = state->config.rfcomm_cn;
+	channel = cfg->rfcomm_cn;
 	dprintf("Channel: %d\n", channel);
 	if (channel < 1) {
-		if (!strcmp(state->config.model, "gnapplet") ||
-		    !strcmp(state->config.model, "symbian"))
+		if (!strcmp(cfg->model, "gnapplet") ||
+		    !strcmp(cfg->model, "symbian"))
 			channel = get_serial_channel(&bdaddr, 1);
 		else
 			channel = get_serial_channel(&bdaddr, 0);
