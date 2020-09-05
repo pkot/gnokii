@@ -3287,9 +3287,10 @@ static gn_error Initialise(gn_data *setupdata, struct gn_statemachine *state)
 	case GN_CT_Irda:
 	case GN_CT_TCP:
 		if (!strcmp(setupdata->model, "AT-HW"))
-			ret = atbus_initialise(true, state);
+			state->config.hardware_handshake = true;
 		else
-			ret = atbus_initialise(false, state);
+			state->config.hardware_handshake = false;
+		ret = atbus_initialise(state);
 		break;
 	default:
 		ret = GN_ERR_NOTSUPPORTED;

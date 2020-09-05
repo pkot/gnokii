@@ -277,7 +277,7 @@ gn_error gnbus_initialise(struct gn_statemachine *state)
 	else
 		conn_type = state->config.connection_type;
 
-	if (!device_open(state->config.port_device, false, false, false, conn_type, state)) {
+	if (!device_open(state->config.port_device, false, false, conn_type, state)) {
 		perror(_("Couldn't open GNBUS device"));
 		free(GNBUSINST(state));
 		GNBUSINST(state) = NULL;
