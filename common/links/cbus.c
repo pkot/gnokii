@@ -264,7 +264,7 @@ static gn_error bus_reset(struct gn_statemachine *state)
 
 static bool cbus_open_serial(char *device, struct gn_statemachine *state)
 {
-	int result = device_open(device, false, false, false, GN_CT_Serial, state);
+	int result = device_open(device, false, false, GN_CT_Serial, state);
 	if (!result) {
 		perror(_("Couldn't open CBUS device"));
 		return false;

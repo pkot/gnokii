@@ -57,7 +57,7 @@ static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 	if (dlr3)
 		dlr3 = 1;
 	/* Open device. */
-	if (!device_open(state->config.port_device, false, false, false, type, state)) {
+	if (!device_open(state->config.port_device, false, false, type, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -113,7 +113,7 @@ static bool at2fbus_serial_open(struct gn_statemachine *state, gn_connection_typ
 		return false;
 
 	/* Open device. */
-	if (!device_open(state->config.port_device, false, false, false, type, state)) {
+	if (!device_open(state->config.port_device, false, false, type, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}
@@ -156,7 +156,7 @@ static bool fbus_ir_open(struct gn_statemachine *state)
 	if (!state)
 		return false;
 
-	if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
+	if (!device_open(state->config.port_device, false, false, state->config.connection_type, state)) {
 		perror(_("Couldn't open FBUS device"));
 		return false;
 	}

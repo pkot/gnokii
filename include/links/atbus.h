@@ -17,7 +17,7 @@
 
 #include "gnokii.h"
 
-gn_error atbus_initialise(int mode, struct gn_statemachine *state);
+gn_error atbus_initialise(struct gn_statemachine *state);
 
 /*
  * Define some result/error codes internal to the AT command functions.
