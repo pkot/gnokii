@@ -185,7 +185,7 @@ int tcp_opendevice(gn_config *cfg, int with_async, struct gn_statemachine *state
 
 int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 {
-	return serial_select(fd, timeout, state);
+	return unix_select(fd, timeout);
 }
 
 size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
