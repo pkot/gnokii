@@ -463,8 +463,9 @@ static int setNonblocking(int fd)
 	return retcode;
 }
 
-int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state)
+int bluetooth_open(const char *addr, struct gn_statemachine *state)
 {
+	uint8_t channel;
 	bdaddr_t bdaddr;
 	struct sockaddr_rc raddr;
 	int fd;
@@ -482,6 +483,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	memset(&raddr, 0, sizeof(raddr));
 	raddr.rc_family = AF_BLUETOOTH;
 	bacpy(&raddr.rc_bdaddr, &bdaddr);
+	channel = state->config.rfcomm_cn;
 	dprintf("Channel: %d\n", channel);
 	if (channel < 1) {
 		if (!strcmp(state->config.model, "gnapplet") ||
@@ -490,7 +492,6 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 		else
 			channel = get_serial_channel(&bdaddr, 0);
 	}
-	dprintf("Channel: %d\n", channel);
 
 	/* If none channel found, fail. */
 	if (channel < 1) {

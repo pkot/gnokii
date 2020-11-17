@@ -50,7 +50,7 @@ int device_open(const char *file, int with_odd_parity, int with_async,
 		state->device.fd = irda_open(state);
 		break;
 	case GN_CT_Bluetooth:
-		state->device.fd = bluetooth_open(state->config.port_device, state->config.rfcomm_cn, state);
+		state->device.fd = bluetooth_open(state->config.port_device, state);
 		break;
 	case GN_CT_Tekram:
 		state->device.fd = tekram_open(file, state);
