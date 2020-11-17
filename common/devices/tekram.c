@@ -24,35 +24,35 @@
 #  include <sys/ioctl.h>
 #endif
 
-int tekram_open(gn_config *cfg, struct gn_statemachine *state)
+void* tekram_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
 #if defined(O_NOCTTY) && defined(O_NONBLOCK) && defined (O_RDWR)
-	return serial_open(cfg->port_device, O_RDWR | O_NOCTTY | O_NONBLOCK);
+	return serial_init(cfg->port_device, O_RDWR | O_NOCTTY | O_NONBLOCK);
 #elif defined (O_RDWR)
-	return serial_open(cfg->port_device, O_RDWR);
+	return serial_init(cfg->port_device, O_RDWR);
 #else
-	return serial_open(cfg->port_device, 0);
+	return serial_init(cfg->port_device, 0);
 #endif
 }
 
-void tekram_close(int fd, struct gn_statemachine *state)
+void tekram_close(void *instance)
 {
-	serial_setdtrrts(fd, 0, 0, state);
-	serial_close(fd, state);
+	serial_setdtrrts(instance, 0, 0);
+	serial_close(instance);
 }
 
-void tekram_reset(int fd, struct gn_statemachine *state)
+void tekram_reset(void *instance)
 {
-	serial_setdtrrts(fd, 0, 0, state);
+	serial_setdtrrts(instance, 0, 0);
 	usleep(50000);
-	serial_setdtrrts(fd, 1, 0, state);
+	serial_setdtrrts(instance, 1, 0);
 	usleep(1000);
-	serial_setdtrrts(fd, 1, 1, state);
+	serial_setdtrrts(instance, 1, 1);
 	usleep(50);
-	serial_changespeed(fd, 9600, state);
+	serial_changespeed(instance, 9600);
 }
 
-void tekram_changespeed(int fd, int speed, struct gn_statemachine *state)
+void tekram_changespeed(void *instance, int speed)
 {
 	unsigned char speedbyte;
 	switch (speed) {
@@ -63,26 +63,26 @@ void tekram_changespeed(int fd, int speed, struct gn_statemachine *state)
 	case 57600:	speedbyte = TEKRAM_PW | TEKRAM_B57600;  break;
 	case 115200:	speedbyte = TEKRAM_PW | TEKRAM_B115200; break;
 	}
-	tekram_reset(fd, state);
-	serial_setdtrrts(fd, 1, 0, state);
+	tekram_reset(instance);
+	serial_setdtrrts(instance, 1, 0);
 	usleep(7);
-	serial_write(fd, &speedbyte, 1, state);
+	serial_write(instance, &speedbyte, 1);
 	usleep(100000);
-	serial_setdtrrts(fd, 1, 1, state);
-	serial_changespeed(fd, speed, state);
+	serial_setdtrrts(instance, 1, 1);
+	serial_changespeed(instance, speed);
 }
 
-size_t tekram_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
+size_t tekram_read(void *instance, __ptr_t buf, size_t nbytes)
 {
-	return serial_read(fd, buf, nbytes, state);
+	return serial_read(instance, buf, nbytes);
 }
 
-size_t tekram_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
+size_t tekram_write(void *instance, const __ptr_t buf, size_t n)
 {
-	return serial_write(fd, buf, n, state);
+	return serial_write(instance, buf, n);
 }
 
-int tekram_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+int tekram_select(void *instance, struct timeval *timeout)
 {
-	return serial_select(fd, timeout, state);
+	return serial_select(instance, timeout);
 }
