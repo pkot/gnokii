@@ -157,7 +157,7 @@ size_t socketphonet_write(int fd, const __ptr_t buf, size_t n, struct gn_statema
 
 int socketphonet_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
 {
-	return serial_select(fd, timeout, state);
+	return unix_select(fd, timeout);
 }
 
 #endif /* HAVE_SOCKETPHONET */

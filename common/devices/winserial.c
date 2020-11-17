@@ -7,7 +7,7 @@
   This file is part of gnokii.
 
   Copyright (C) 1999-2000  Hugh Blemings & Pavel Janik ml.
-  Copyright (C) 2002       Ladis Michl
+  Copyright (C) 2002,2020  Ladislav Michl
   Copyright (C) 2002-2004  BORBELY Zoltan, Pawel Kot
 
 */
@@ -23,13 +23,18 @@
 
 #define USECOMM      /* yes, we need the COMM API */
 
-HANDLE hPhone;
-OVERLAPPED osWrite, osRead;
+struct instance_data {
+	HANDLE hPhone;
+};
+
+#define SELF(m) (((struct instance_data *)(instance))->m)
 
 /* Open the serial port and store the settings. */
-int serial_open(const char *file, int oflags)
+void* serial_init(const char *file, int oflags)
 {
-	COMMTIMEOUTS  CommTimeOuts;
+	HANDLE hPhone;
+	COMMTIMEOUTS CommTimeOuts;
+	struct instance_data *data;
 
 	if ((hPhone =
 	    CreateFile(file, GENERIC_READ | GENERIC_WRITE,
@@ -39,71 +44,57 @@ int serial_open(const char *file, int oflags)
 	    FILE_ATTRIBUTE_NORMAL |
 	    FILE_FLAG_OVERLAPPED, /* overlapped I/O */
 	    NULL)) == (HANDLE) -1)
-		return FALSE;
-	else {
-		/* get any early notifications */
-		SetCommMask(hPhone, EV_RXCHAR);
+		return NULL;
 
-		/* setup device buffers */
-		SetupComm(hPhone, 4096, 4096);
-
-		/* purge any information in the buffer */
-		PurgeComm(hPhone, PURGE_TXABORT | PURGE_RXABORT |
-			  PURGE_TXCLEAR | PURGE_RXCLEAR);
-
-		/* set up for overlapped I/O */
-		CommTimeOuts.ReadIntervalTimeout = 0xFFFFFFFF;
-		CommTimeOuts.ReadTotalTimeoutMultiplier = 0;
-		CommTimeOuts.ReadTotalTimeoutConstant = 1000;
-#if 0
-		/* CBR_9600 is approximately 1byte/ms. For our purposes, allow
-		 * double the expected time per character for a fudge factor.
-		 */
-		CommTimeOuts.WriteTotalTimeoutMultiplier = 2 * CBR_9600 / CBR_115200;
-#else
-		CommTimeOuts.WriteTotalTimeoutMultiplier = 10;
-#endif
-		CommTimeOuts.WriteTotalTimeoutConstant = 0;
-		SetCommTimeouts(hPhone, &CommTimeOuts);
+	data = calloc(sizeof(struct instance_data), 1);
+	if (data == NULL) {
+		CloseHandle(hPhone);
+		return NULL;
 	}
+	data->hPhone = hPhone;
 
-	return true;
-}
+	/* get any early notifications */
+	SetCommMask(hPhone, EV_RXCHAR);
 
-/* Close the serial port and restore old settings. */
-int serial_close(int fd, struct gn_statemachine *state)
-{
-	/* disable event notification and wait for thread
-	 * to halt
-	 */
-	SetCommMask(hPhone, 0);
+	/* setup device buffers */
+	SetupComm(hPhone, 4096, 4096);
 
-	/* drop DTR */
-	EscapeCommFunction(hPhone, CLRDTR);
-
-	/* purge any outstanding reads/writes and close device handle */
+	/* purge any information in the buffer */
 	PurgeComm(hPhone, PURGE_TXABORT | PURGE_RXABORT |
 		  PURGE_TXCLEAR | PURGE_RXCLEAR);
 
-	CloseHandle(hPhone);
+	/* set up for overlapped I/O */
+	CommTimeOuts.ReadIntervalTimeout = 0xFFFFFFFF;
+	CommTimeOuts.ReadTotalTimeoutMultiplier = 0;
+	CommTimeOuts.ReadTotalTimeoutConstant = 1000;
+#if 0
+	/* CBR_9600 is approximately 1byte/ms. For our purposes, allow
+	 * double the expected time per character for a fudge factor.
+	 */
+	CommTimeOuts.WriteTotalTimeoutMultiplier = 2 * CBR_9600 / CBR_115200;
+#else
+	CommTimeOuts.WriteTotalTimeoutMultiplier = 10;
+#endif
+	CommTimeOuts.WriteTotalTimeoutConstant = 0;
+	SetCommTimeouts(hPhone, &CommTimeOuts);
 
-	return true;
+	return data;
 }
 
 /* Open a device with standard options.
  */
-int serial_opendevice(gn_config *cfg, int with_odd_parity,
-		      int with_async,
-		      struct gn_statemachine *state)
+void* serial_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
 	DCB        dcb;
+	struct instance_data *data;
 
-	if (!serial_open(file, 0)) return -1;
+	data = (struct instance_data *)serial_init(cfg->port_device, 0);
+	if (!data)
+		return NULL;
 
 	/* set handshake */
-
 	dcb.DCBlength = sizeof(DCB);
-	GetCommState(hPhone, &dcb);
+	GetCommState(data->hPhone, &dcb);
 	dcb.fOutxDsrFlow = 0;
 	if (cfg->hardware_handshake) {
 		dcb.fOutxCtsFlow = TRUE;
@@ -112,27 +103,45 @@ int serial_opendevice(gn_config *cfg, int with_odd_parity,
 		dcb.fOutxCtsFlow = FALSE;
 		dcb.fRtsControl = RTS_CONTROL_ENABLE;
 	}
-	if (!SetCommState(hPhone, &dcb)) {
+	if (!SetCommState(data->hPhone, &dcb)) {
 		fprintf(stderr, _("Gnokii serial_opendevice: cannot set handshake\n"));
-		serial_close(0, state);
-		return -1;
+		serial_close(data);
+		free(data);
+		return NULL;
 	}
 
-	if (serial_changespeed(0, cfg->serial_baudrate, state) != GN_ERR_NONE)
-		serial_changespeed(0, 19200 /* default value */, state);
+	if (serial_changespeed(data, cfg->serial_baudrate) != GN_ERR_NONE)
+		serial_changespeed(data, 19200 /* default value */);
 
-	return 0;
+	return data;
+}
+
+/* Close the serial port and restore old settings. */
+void serial_close(void *instance)
+{
+	/* disable event notification and wait for thread
+	 * to halt
+	 */
+	SetCommMask(SELF(hPhone), 0);
+
+	/* drop DTR */
+	EscapeCommFunction(SELF(hPhone), CLRDTR);
+
+	/* purge any outstanding reads/writes and close device handle */
+	PurgeComm(SELF(hPhone), PURGE_TXABORT | PURGE_RXABORT |
+		  PURGE_TXCLEAR | PURGE_RXCLEAR);
+
+	CloseHandle(SELF(hPhone));
 }
 
 /* Set the DTR and RTS bit of the serial device. */
-void serial_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state)
+void serial_setdtrrts(void *instance, int dtr, int rts)
 {
-	BOOL       fRetVal;
-	DCB        dcb;
+	DCB dcb;
 
 	dcb.DCBlength = sizeof(DCB);
 
-	GetCommState(hPhone, &dcb);
+	GetCommState(SELF(hPhone), &dcb);
 
 	dcb.fOutxDsrFlow = 0;
 	if (dtr)
@@ -150,11 +159,11 @@ void serial_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state)
 
 	dcb.fInX = dcb.fOutX = 0;
 
-	fRetVal = SetCommState(hPhone, &dcb);
+	SetCommState(SELF(hPhone), &dcb);
 }
 
 
-int serial_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+int serial_select(void *instance, struct timeval *timeout)
 {
 	usleep(timeout->tv_sec * 60 + timeout->tv_usec);
 	return 1;
@@ -164,35 +173,35 @@ int serial_select(int fd, struct timeval *timeout, struct gn_statemachine *state
 /* Change the speed of the serial device.
  * RETURNS: Success
  */
-gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)
+gn_error serial_changespeed(void *instance, int speed)
 {
 	BOOL  fRetVal;
 	DCB   dcb;
 
 	dcb.DCBlength = sizeof(DCB);
 
-	GetCommState(hPhone, &dcb);
+	GetCommState(SELF(hPhone), &dcb);
 
 	dcb.BaudRate = speed;
 	dcb.ByteSize = 8;
 	dcb.Parity = NOPARITY;
 	dcb.StopBits = ONESTOPBIT;
 
-	fRetVal = SetCommState(hPhone, &dcb);
+	fRetVal = SetCommState(SELF(hPhone), &dcb);
 
-	if (fRetVal == 0) fRetVal = GetLastError();
-
-	return GN_ERR_NONE;
+	return fRetVal ? GN_ERR_NONE : GN_ERR_FAILED;
 }
 
 /* Read from serial device. */
-size_t serial_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
+size_t serial_read(void *instance, __ptr_t buf, size_t nbytes)
 {
 	BOOL    fReadStat;
 	COMSTAT ComStat;
 	DWORD   dwErrorFlags;
-	DWORD   dwLength=0;
+	DWORD   dwLength;
 	DWORD   dwError;
+	OVERLAPPED osRead;
+	HANDLE  hPhone = SELF(hPhone);
 
 	/* only try to read number of bytes in queue */
 	ClearCommError(hPhone, &dwErrorFlags, &ComStat);
@@ -223,7 +232,7 @@ size_t serial_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *s
 			} else {
 				/* some other error occurred */
 				dwLength = 0;
-				ClearCommError(hPhone, &dwErrorFlags, &ComStat);
+				ClearCommError(SELF(hPhone), &dwErrorFlags, &ComStat);
 			}
 		}
 	}
@@ -232,7 +241,7 @@ size_t serial_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *s
 }
 
 /* Write to serial device. */
-size_t serial_write(int fd, __ptr_t buf, size_t n, struct gn_statemachine *state)
+size_t serial_write(void *instance, __ptr_t buf, size_t n)
 {
 	BOOL    fWriteStat;
 	DWORD   dwBytesWritten;
@@ -240,6 +249,8 @@ size_t serial_write(int fd, __ptr_t buf, size_t n, struct gn_statemachine *state
 	DWORD   dwError;
 	DWORD   dwBytesSent = 0;
 	COMSTAT ComStat;
+	OVERLAPPED osWrite;
+	HANDLE  hPhone = SELF(hPhone);
 
 	fWriteStat = WriteFile(hPhone, buf, n, &dwBytesWritten, &osWrite);
 
@@ -294,12 +305,12 @@ size_t serial_write(int fd, __ptr_t buf, size_t n, struct gn_statemachine *state
 	return n;
 }
 
-gn_error serial_nreceived(int fd, int *n, struct gn_statemachine *state)
+gn_error serial_nreceived(void *instance, int *n)
 {
 	return GN_ERR_NONE;
 }
 
-gn_error serial_flush(int fd, struct gn_statemachine *state)
+gn_error serial_flush(void *instance)
 {
 	return GN_ERR_NONE;
 }

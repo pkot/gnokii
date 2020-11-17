@@ -47,7 +47,9 @@ int device_open(int with_odd_parity, int with_async,
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		state->device.fd = serial_opendevice(cfg, with_odd_parity, with_async, state);
+		state->device.device_instance = serial_open(cfg, with_odd_parity, with_async);
+		if (state->device.device_instance) /* TODO: remove after refactoring! */
+			state->device.fd = *(int *)state->device.device_instance;
 		break;
 	case GN_CT_Irda:
 		state->device.fd = irda_open(cfg, state);
@@ -56,7 +58,9 @@ int device_open(int with_odd_parity, int with_async,
 		state->device.fd = bluetooth_open(cfg, state);
 		break;
 	case GN_CT_Tekram:
-		state->device.fd = tekram_open(cfg, state);
+		state->device.device_instance = tekram_open(cfg, with_odd_parity, with_async);
+		if (state->device.device_instance) /* TODO: remove after refactoring! */
+			state->device.fd = *(int *)state->device.device_instance;
 		break;
 	case GN_CT_TCP:
 		state->device.fd = tcp_opendevice(cfg, with_async, state);
@@ -101,7 +105,7 @@ void device_close(struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		serial_close(state->device.fd, state);
+		serial_close(state->device.device_instance);
 		break;
 	case GN_CT_Irda:
 		irda_close(state->device.fd, state);
@@ -110,7 +114,7 @@ void device_close(struct gn_statemachine *state)
 		bluetooth_close(state->device.fd, state);
 		break;
 	case GN_CT_Tekram:
-		tekram_close(state->device.fd, state);
+		tekram_close(state->device.device_instance);
 		break;
 	case GN_CT_TCP:
 		tcp_close(state->device.fd, state);
@@ -137,7 +141,7 @@ void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 	case GN_CT_Infrared:
 		if (state->config.set_dtr_rts) {
 			dprintf("device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
-			serial_setdtrrts(state->device.fd, dtr, rts, state);
+			serial_setdtrrts(state->device.device_instance, dtr, rts);
 		}
 		break;
 	case GN_CT_Irda:
@@ -158,11 +162,11 @@ void device_changespeed(int speed, struct gn_statemachine *state)
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
 		dprintf("device: setting speed to %d\n", speed);
-		serial_changespeed(state->device.fd, speed, state);
+		serial_changespeed(state->device.device_instance, speed);
 		break;
 	case GN_CT_Tekram:
 		dprintf("device: setting speed to %d\n", speed);
-		tekram_changespeed(state->device.fd, speed, state);
+		tekram_changespeed(state->device.device_instance, speed);
 		break;
 	case GN_CT_Irda:
 	case GN_CT_Bluetooth:
@@ -180,13 +184,13 @@ size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		return serial_read(state->device.fd, buf, nbytes, state);
+		return serial_read(state->device.device_instance, buf, nbytes);
 	case GN_CT_Irda:
 		return irda_read(state->device.fd, buf, nbytes, state);
 	case GN_CT_Bluetooth:
 		return bluetooth_read(state->device.fd, buf, nbytes, state);
 	case GN_CT_Tekram:
-		return tekram_read(state->device.fd, buf, nbytes, state);
+		return tekram_read(state->device.device_instance, buf, nbytes);
 	case GN_CT_TCP:
 		return tcp_read(state->device.fd, buf, nbytes, state);
 	case GN_CT_DKU2LIBUSB:
@@ -205,13 +209,13 @@ size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		return serial_write(state->device.fd, buf, n, state);
+		return serial_write(state->device.device_instance, buf, n);
 	case GN_CT_Irda:
 		return irda_write(state->device.fd, buf, n, state);
 	case GN_CT_Bluetooth:
 		return bluetooth_write(state->device.fd, buf, n, state);
 	case GN_CT_Tekram:
-		return tekram_write(state->device.fd, buf, n, state);
+		return tekram_write(state->device.device_instance, buf, n);
 	case GN_CT_TCP:
 		return tcp_write(state->device.fd, buf, n, state);
 	case GN_CT_DKU2LIBUSB:
@@ -230,13 +234,13 @@ int device_select(struct timeval *timeout, struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		return serial_select(state->device.fd, timeout, state);
+		return serial_select(state->device.device_instance, timeout);
 	case GN_CT_Irda:
 		return irda_select(state->device.fd, timeout, state);
 	case GN_CT_Bluetooth:
 		return bluetooth_select(state->device.fd, timeout, state);
 	case GN_CT_Tekram:
-		return tekram_select(state->device.fd, timeout, state);
+		return tekram_select(state->device.device_instance, timeout);
 	case GN_CT_TCP:
 		return tcp_select(state->device.fd, timeout, state);
 	case GN_CT_DKU2LIBUSB:
@@ -257,7 +261,7 @@ gn_error device_nreceived(int *n, struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		return serial_nreceived(state->device.fd, n, state);
+		return serial_nreceived(state->device.device_instance, n);
 	default:
 		return GN_ERR_NOTSUPPORTED;
 	}
@@ -269,7 +273,7 @@ gn_error device_flush(struct gn_statemachine *state)
 	case GN_CT_DKU2:
 	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		return serial_flush(state->device.fd, state);
+		return serial_flush(state->device.device_instance);
 	default:
 		return GN_ERR_NOTSUPPORTED;
 	}
