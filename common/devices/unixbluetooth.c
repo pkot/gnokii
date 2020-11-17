@@ -257,7 +257,7 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 		case SDP_ATTR_PRIMARY_LANGUAGE_BASE_ID + SDP_ATTR_SERVICE_NAME_OFFSET:
 			if (channel == -1)
 				break;
-			
+
 			SDP_GET8(type, start);
 			switch (type) {
 				case SDP_DATA_STR8:
@@ -295,7 +295,7 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 					break;
 				}
 			}
-			
+
 			if (strstr(name, "Nokia PC Suite") != NULL) {
 				channel = -1;
 				break;
@@ -501,7 +501,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 
 	dprintf("Using channel: %d\n", channel);
 	raddr.rc_channel = channel;
-	
+
 	if (connect(fd, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
 		perror(_("Can't connect"));
 		close(fd);
