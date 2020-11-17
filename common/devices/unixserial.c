@@ -70,60 +70,59 @@ static int cfsetspeed(struct termios *t, int speed)
 #  define O_NONBLOCK  0
 #endif
 
-/* Structure to backup the setting of the terminal. */
-struct termios serial_termios;
+struct instance_data {
+	int fd;
+	int write_usleep;
+	struct termios ti;
+	bool require_dcd;
+};
+
+#define THIS(m) (((struct instance_data *)(instance))->m)
 
 /*
  * Open the serial port and store the settings.
- * Returns a file descriptor on success, or -1 if an error occurred.
+ * Returns instance data on success, or NULL if an error occurred.
  */
-int serial_open(const char *file, int oflag)
+void* serial_init(const char *file, int oflag)
 {
-	int fd;
-	int retcode;
+	int fd, ret;
+	struct instance_data *data;
 
 	fd = open(file, oflag);
 	if (fd == -1) {
 		perror("Gnokii serial_open: open");
-		return -1;
+		return NULL;
 	}
 
-	retcode = tcgetattr(fd, &serial_termios);
-	if (retcode == -1) {
-		perror("Gnokii serial_open: tcgetattr");
-		/* Don't call serial_close since serial_termios is not valid */
+	data = calloc(sizeof(struct instance_data), 1);
+	if (data == NULL) {
+		perror("Gnokii serial_open: calloc");
 		close(fd);
-		return -1;
+		return NULL;
 	}
 
-	return fd;
-}
-
-/*
- * Close the serial port and restore old settings.
- * Returns zero on success, -1 if an error occurred or fd was invalid.
- */
-int serial_close(int fd, struct gn_statemachine *state)
-{
-	if (fd >= 0) {
-		serial_termios.c_cflag |= HUPCL;	/* production == 1 */
-		tcsetattr(fd, TCSANOW, &serial_termios);
-		return close(fd);
+	/* Per instance backup of the terminal settings. */
+	ret = tcgetattr(fd, &data->ti);
+	if (ret == -1) {
+		perror("Gnokii serial_open: tcgetattr");
+		close(fd);
+		free(data);
+		return NULL;
 	}
+	data->fd = fd;
 
-	return -1;
+	return data;
 }
 
 /*
  * Open a device with standard options.
  * Use value (-1) for "with_hw_handshake" if its specification is required from the user.
  */
-int serial_opendevice(gn_config *cfg, int with_odd_parity, int with_async,
-		      struct gn_statemachine *state)
+void* serial_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
-	int fd;
-	int retcode;
+	int ret;
 	struct termios tp;
+	struct instance_data *data;
 
 	/* Open device */
 
@@ -131,12 +130,12 @@ int serial_opendevice(gn_config *cfg, int with_odd_parity, int with_async,
 	 * O_NONBLOCK MUST be used here as the CLOCAL may be currently off
 	 * and if DCD is down the "open" syscall would be stuck waiting for DCD.
 	 */
-	fd = serial_open(cfg->port_device, O_RDWR | O_NOCTTY | O_NONBLOCK);
-
-	if (fd < 0) return fd;
+	data = (struct instance_data *)serial_init(cfg->port_device, O_RDWR | O_NOCTTY | O_NONBLOCK);
+	if (data == NULL)
+		return NULL;
 
 	/* Initialise the port settings */
-	memcpy(&tp, &serial_termios, sizeof(struct termios));
+	memcpy(&tp, &data->ti, sizeof(struct termios));
 
 	/* Set port settings for canonical input processing */
 	tp.c_cflag = B0 | CS8 | CLOCAL | CREAD | HUPCL;
@@ -157,30 +156,30 @@ int serial_opendevice(gn_config *cfg, int with_odd_parity, int with_async,
 	tp.c_cc[VMIN] = 1;
 	tp.c_cc[VTIME] = 0;
 
-	retcode = tcflush(fd, TCIFLUSH);
-	if (retcode == -1) {
+	ret = tcflush(data->fd, TCIFLUSH);
+	if (ret == -1) {
 		perror("Gnokii serial_opendevice: tcflush");
-		serial_close(fd, state);
-		return -1;
+		serial_close(data);
+		return NULL;
 	}
 
-	retcode = tcsetattr(fd, TCSANOW, &tp);
-	if (retcode == -1) {
+	ret = tcsetattr(data->fd, TCSANOW, &tp);
+	if (ret == -1) {
 		perror("Gnokii serial_opendevice: tcsetattr");
-		serial_close(fd, state);
-		return -1;
+		serial_close(data);
+		return NULL;
 	}
 
-	if (serial_changespeed(fd, cfg->serial_baudrate, state) != GN_ERR_NONE)
-		serial_changespeed(fd, 19200 /* default value */, state);
+	if (serial_changespeed(data, cfg->serial_baudrate) != GN_ERR_NONE)
+		serial_changespeed(data, 19200 /* default value */);
 
 #if !(__unices__)
 	/* Allow process/thread to receive SIGIO */
-	retcode = fcntl(fd, F_SETOWN, getpid());
-	if (retcode == -1) {
+	ret = fcntl(data->fd, F_SETOWN, getpid());
+	if (ret == -1) {
 		perror("Gnokii serial_opendevice: fcntl(F_SETOWN)");
-		serial_close(fd, state);
-		return -1;
+		serial_close(data);
+		return NULL;
 	}
 #endif
 
@@ -191,48 +190,61 @@ int serial_opendevice(gn_config *cfg, int with_odd_parity, int with_async,
 		 * by F_SETFL as a side-effect!
 		 */
 #ifdef FNONBLOCK
-		retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | FNONBLOCK);
+		ret = fcntl(data->fd, F_SETFL, (with_async ? FASYNC : 0) | FNONBLOCK);
 #else
 #  ifdef FASYNC
-		retcode = fcntl(fd, F_SETFL, (with_async ? FASYNC : 0) | O_NONBLOCK);
+		ret = fcntl(data->fd, F_SETFL, (with_async ? FASYNC : 0) | O_NONBLOCK);
 #  else
-		retcode = fcntl(fd, F_SETFL, O_NONBLOCK);
-		if (retcode != -1)
-			retcode = ioctl(fd, FIOASYNC, &with_async);
+		ret = fcntl(data->fd, F_SETFL, O_NONBLOCK);
+		if (ret != -1)
+			ret = ioctl(data->fd, FIOASYNC, &with_async);
 #  endif
 #endif
-		if (retcode == -1) {
+		if (ret == -1) {
 			perror("Gnokii serial_opendevice: fcntl(F_SETFL)");
-			serial_close(fd, state);
-			return -1;
+			serial_close(data);
+			return NULL;
 		}
 	}
+	data->write_usleep = cfg->serial_write_usleep;
+	data->require_dcd = cfg->require_dcd;
 
-	return fd;
+	return data;
+}
+
+
+/*
+ * Close the serial port and restore old settings.
+ * Returns zero on success, -1 if an error occurred or fd was invalid.
+ */
+void serial_close(void *instance)
+{
+	THIS(ti).c_cflag |= HUPCL;	/* production == 1 */
+	tcsetattr(THIS(fd), TCSANOW, &THIS(ti));
+	close(THIS(fd));
 }
 
 /* Set the DTR and RTS bit of the serial device. */
-void serial_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state)
+void serial_setdtrrts(void *instance, int dtr, int rts)
 {
 	unsigned int flags;
 
 	flags = TIOCM_DTR;
 
 	if (dtr)
-		ioctl(fd, TIOCMBIS, &flags);
+		ioctl(THIS(fd), TIOCMBIS, &flags);
 	else
-		ioctl(fd, TIOCMBIC, &flags);
+		ioctl(THIS(fd), TIOCMBIC, &flags);
 
 	flags = TIOCM_RTS;
 
 	if (rts)
-		ioctl(fd, TIOCMBIS, &flags);
+		ioctl(THIS(fd), TIOCMBIS, &flags);
 	else
-		ioctl(fd, TIOCMBIC, &flags);
+		ioctl(THIS(fd), TIOCMBIC, &flags);
 }
 
-
-int serial_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+int unix_select(int fd, struct timeval *timeout)
 {
 	fd_set readfds;
 
@@ -242,7 +254,12 @@ int serial_select(int fd, struct timeval *timeout, struct gn_statemachine *state
 	return select(fd + 1, &readfds, NULL, NULL, timeout);
 }
 
-static int serial_wselect(int fd, struct timeval *timeout, struct gn_statemachine *state)
+int serial_select(void *instance, struct timeval *timeout)
+{
+	return unix_select(THIS(fd), timeout);
+}
+
+static int serial_wselect(int fd, struct timeval *timeout)
 {
 	fd_set writefds;
 
@@ -257,7 +274,7 @@ static int serial_wselect(int fd, struct timeval *timeout, struct gn_statemachin
  * Change the speed of the serial device.
  * RETURNS: Success
  */
-gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)
+gn_error serial_changespeed(void *instance, int speed)
 {
 	gn_error retcode = GN_ERR_NONE;
 #ifndef SGTTY
@@ -298,29 +315,29 @@ gn_error serial_changespeed(int fd, int speed, struct gn_statemachine *state)
 	}
 
 #ifndef SGTTY
-	if (tcgetattr(fd, &t)) retcode = GN_ERR_INTERNALERROR;
+	if (tcgetattr(THIS(fd), &t)) retcode = GN_ERR_INTERNALERROR;
 
 	if (cfsetspeed(&t, new_speed) == -1) {
 		dprintf("Serial port speed setting failed\n");
 		retcode = GN_ERR_INTERNALERROR;
 	}
 
-	tcsetattr(fd, TCSADRAIN, &t);
+	tcsetattr(THIS(fd), TCSADRAIN, &t);
 #else
-	if (ioctl(fd, TIOCGETP, &t)) retcode = GN_ERR_INTERNALERROR;
+	if (ioctl(THIS(fd), TIOCGETP, &t)) retcode = GN_ERR_INTERNALERROR;
 
 	t.sg_ispeed = new_speed;
 	t.sg_ospeed = new_speed;
 
-	if (ioctl(fd, TIOCSETN, &t)) retcode = GN_ERR_INTERNALERROR;
+	if (ioctl(THIS(fd), TIOCSETN, &t)) retcode = GN_ERR_INTERNALERROR;
 #endif
 	return retcode;
 }
 
 /* Read from serial device. */
-size_t serial_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
+size_t serial_read(void *instance, __ptr_t buf, size_t nbytes)
 {
-	return read(fd, buf, nbytes);
+	return read(THIS(fd), buf, nbytes);
 }
 
 #if !defined(TIOCMGET) && defined(TIOCMODG)
@@ -337,26 +354,22 @@ static void check_dcd(int fd)
 		exit(EXIT_FAILURE);		/* Hard quit of all threads */
 	}
 #else
-	/* Impossible!! (eg. Coherent) */
+	dprintf("WARNING: global/require_dcd argument was set but it is not supported on this system!\n");
 #endif
 }
 
 /* Write to serial device. */
-size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
+size_t serial_write(void *instance, const __ptr_t buf, size_t n)
 {
+	int fd = THIS(fd);
 	size_t r = 0, bs;
 	ssize_t got;
 
-#ifndef TIOCMGET
-	if (state->config.require_dcd)
-		dprintf("WARNING: global/require_dcd argument was set but it is not supported on this system!\n");
-#endif
-
-	if (state->config.require_dcd)
+	if (THIS(require_dcd))
 		check_dcd(fd);
 
 	while (n > 0) {
-		bs = (state->config.serial_write_usleep < 0) ? n : 1;
+		bs = (THIS(write_usleep) < 0) ? n : 1;
 		got = write(fd, buf + r, bs);
 		if (got == 0) {
 			dprintf("Serial write: oops, zero byte has written!\n");
@@ -369,22 +382,22 @@ size_t serial_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine 
 			}
 #endif
 			dprintf("Serial write: transmitter busy, waiting\n");
-			serial_wselect(fd, NULL, state);
+			serial_wselect(fd, NULL);
 			dprintf("Serial write: transmitter ready\n");
 			continue;
 		}
 
 		n -= got;
 		r += got;
-		if (state->config.serial_write_usleep > 0)
-			usleep(state->config.serial_write_usleep);
+		if (THIS(write_usleep) > 0)
+			usleep(THIS(write_usleep));
 	}
 	return r;
 }
 
-gn_error serial_nreceived(int fd, int *n, struct gn_statemachine *state)
+gn_error serial_nreceived(void *instance, int *n)
 {
-	if (ioctl(fd, FIONREAD, n)) {
+	if (ioctl(THIS(fd), FIONREAD, n)) {
 		dprintf("serial_nreceived: cannot get the received data size\n");
 		return GN_ERR_INTERNALERROR;
 	}
@@ -392,9 +405,9 @@ gn_error serial_nreceived(int fd, int *n, struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
-gn_error serial_flush(int fd, struct gn_statemachine *state)
+gn_error serial_flush(void *instance)
 {
-	if (tcdrain(fd)) {
+	if (tcdrain(THIS(fd))) {
 		dprintf("serial_flush: cannot flush serial device\n");
 		return GN_ERR_INTERNALERROR;
 	}
