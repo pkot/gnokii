@@ -42,7 +42,7 @@ static int str2ba(const char *straddr, BTH_ADDR *btaddr)
 	return 0;
 }
 
-int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state)
+int bluetooth_open(const char *addr, struct gn_statemachine *state)
 {
 	WSADATA wsd;
 	SOCKET fd = INVALID_SOCKET;
@@ -70,7 +70,7 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 		WSACleanup();
 		return -1;
 	}
-	sa.port = channel & 0xff;
+	sa.port = state->config.rfcomm_cn & 0xff;
 	/* Connect to the bluetooth socket */
 	if (connect(fd, (SOCKADDR *)&sa, sizeof(sa))) {
 		perror("socket");
