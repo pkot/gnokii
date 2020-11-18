@@ -29,31 +29,6 @@
 #  define ENODATA	61
 #endif
 
-#ifndef HAVE_LIBUSB
-void* fbusdku2usb_open(gn_config *cfg, int with_odd_parity, int with_async)
-{
-	return NULL;
-}
-
-void fbusdku2usb_close(void *instance) { }
-
-size_t fbusdku2usb_write(void *instance, const __ptr_t bytes, size_t size)
-{
-	return -1;
-}
-
-size_t fbusdku2usb_read(void *instance, __ptr_t bytes, size_t size)
-{
-	return -1;
-}
-
-int fbusdku2usb_select(void *instance, struct timeval *timeout)
-{
-	return -1;
-}
-
-#else
-
 #include <usb.h>
 
 /* Information about a USB DKU2 FBUS interface present on the system */
@@ -542,5 +517,3 @@ int fbusdku2usb_select(void *instance, struct timeval *timeout)
 {
 	return 1;
 }
-
-#endif
