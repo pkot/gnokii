@@ -17,8 +17,6 @@
 #include "misc.h"
 #include "devices/tcp.h"
 
-#ifndef WIN32
-
 #ifdef HAVE_SYS_IOCTL_H
 #  include <sys/ioctl.h>
 #endif
@@ -203,30 +201,3 @@ size_t tcp_write(void *instance, const __ptr_t buf, size_t n)
 {
 	return write(*(int *)instance, buf, n);
 }
-
-#else /* WIN32 */
-
-void* tcp_open(gn_config *cfg, int with_odd_parity, int with_async)
-{
-	return NULL;
-}
-
-void tcp_close(void *instance) { }
-
-
-size_t tcp_read(void *instance, __ptr_t buf, size_t nbytes)
-{
-	return -1;
-}
-
-size_t tcp_write(void *instance, const __ptr_t buf, size_t n)
-{
-	return -1;
-}
-
-int tcp_select(void *instance, struct timeval *timeout)
-{
-	return -1;
-}
-
-#endif /* WIN32 */
