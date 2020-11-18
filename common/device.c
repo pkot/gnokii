@@ -19,13 +19,100 @@
 #include "gnokii.h"
 #include "gnokii-internal.h"
 #include "device.h"
-#include "devices/irda.h"
+
+#ifdef HAVE_BLUETOOTH
 #include "devices/bluetooth.h"
-#include "devices/tcp.h"
-#include "devices/serial.h"
-#include "devices/tekram.h"
+const static gn_device_ops _bluetooth_ops = {
+	bluetooth_open,
+	bluetooth_close,
+	bluetooth_select,
+	bluetooth_read,
+	bluetooth_write,
+};
+#  define bluetooth_ops	&_bluetooth_ops
+#else
+#  define bluetooth_ops	NULL
+#endif
+
+#ifdef HAVE_LIBUSB
 #include "devices/dku2libusb.h"
+const static gn_device_ops _dku2libusb_ops = {
+	fbusdku2usb_open,
+	fbusdku2usb_close,
+	fbusdku2usb_select,
+	fbusdku2usb_read,
+	fbusdku2usb_write,
+};
+#  define dku2libusb_ops	&_dku2libusb_ops
+#else
+#  define dku2libusb_ops	NULL
+#endif
+
+#ifdef HAVE_IRDA
+#include "devices/irda.h"
+const static gn_device_ops _irda_ops = {
+	irda_open,
+	irda_close,
+	irda_select,
+	irda_read,
+	irda_write,
+};
+#  define irda_ops	&_irda_ops
+#else
+#  define irda_ops	NULL
+#endif
+
+#include "devices/serial.h"
+const static gn_device_ops _serial_ops = {
+	serial_open,
+	serial_close,
+	serial_select,
+	serial_read,
+	serial_write,
+	serial_nreceived,
+	serial_flush,
+	serial_changespeed,
+	serial_setdtrrts,
+};
+#define serial_ops	&_serial_ops
+
+#ifdef HAVE_SOCKETPHONET
 #include "devices/socketphonet.h"
+const static gn_device_ops _phonet_ops = {
+	socketphonet_open,
+	socketphonet_close,
+	socketphonet_select,
+	socketphonet_read,
+	socketphonet_write,
+};
+#  define phonet_ops	&_phonet_ops
+#else
+#  define phonet_ops	NULL
+#endif
+
+#ifndef WIN32
+#include "devices/tcp.h"
+const static gn_device_ops _tcp_ops = {
+	tcp_open,
+	tcp_close,
+	tcp_select,
+	tcp_read,
+	tcp_write,
+};
+#  define tcp_ops	&_tcp_ops
+#else
+#  define tcp_ops	NULL
+#endif
+
+#include "devices/tekram.h"
+const static gn_device_ops _tekram_ops = {
+	tekram_open,
+	tekram_close,
+	tekram_select,
+	tekram_read,
+	tekram_write,
+};
+#define tekram_ops	&_tekram_ops
 
 GNOKII_API int device_getfd(struct gn_statemachine *state)
 {
@@ -36,63 +123,60 @@ int device_open(int with_odd_parity, int with_async,
 		gn_connection_type device_type, struct gn_statemachine *state)
 {
 	gn_config *cfg = &state->config;
+	gn_device *device = &state->device;
 
-	state->device.type = device_type;
-	state->device.device_instance = NULL;
+	device->type = GN_CT_NONE;
+	device->instance = NULL;
 
 	dprintf("device: opening device %s\n", (device_type == GN_CT_DKU2LIBUSB) ?
 		"USB" : cfg->port_device);
 
-	switch (state->device.type) {
+	switch (device_type) {
+	case GN_CT_DAU9P:
+	case GN_CT_DLR3P:
 	case GN_CT_DKU2:
-	case GN_CT_Serial:
 	case GN_CT_Infrared:
-		state->device.device_instance = serial_open(cfg, with_odd_parity, with_async);
-		if (state->device.device_instance) /* TODO: remove after refactoring! */
-			state->device.fd = *(int *)state->device.device_instance;
+	case GN_CT_M2BUS:
+	case GN_CT_Serial:
+		device->ops = serial_ops;
 		break;
 	case GN_CT_Irda:
-		state->device.device_instance = irda_open(cfg, with_odd_parity, with_async);
-		if (state->device.device_instance) /* TODO: remove after refactoring! */
-			state->device.fd = *(int *)state->device.device_instance;
+		device->ops = irda_ops;
 		break;
 	case GN_CT_Bluetooth:
-		state->device.device_instance = bluetooth_open(cfg, with_odd_parity, with_async);
-		if (state->device.device_instance) /* TODO: remove after refactoring! */
-			state->device.fd = *(int *)state->device.device_instance;
+		device->ops = bluetooth_ops;
 		break;
 	case GN_CT_Tekram:
-		state->device.device_instance = tekram_open(cfg, with_odd_parity, with_async);
-		if (state->device.device_instance) /* TODO: remove after refactoring! */
-			state->device.fd = *(int *)state->device.device_instance;
+		device->ops = tekram_ops;
 		break;
 	case GN_CT_TCP:
-		state->device.device_instance = tcp_open(cfg, with_odd_parity, with_async);
-		if (state->device.device_instance) /* TODO: remove after refactoring! */
-			state->device.fd = *(int *)state->device.device_instance;
+		device->ops = tcp_ops;
 		break;
 	case GN_CT_DKU2LIBUSB:
-		state->device.device_instance = fbusdku2usb_open(cfg, with_odd_parity, with_async);
-		if (state->device.device_instance) /* TODO: remove after refactoring! */
-			state->device.fd = 1; /* FIXME: fake fd */
+		device->ops = dku2libusb_ops;
 		break;
 	case GN_CT_SOCKETPHONET:
-		state->device.device_instance = socketphonet_open(cfg, with_odd_parity, with_async);
-		if (state->device.device_instance) /* TODO: remove after refactoring! */
-			state->device.fd = *(int *)state->device.device_instance;
+		device->ops = phonet_ops;
 		break;
 	default:
-		state->device.fd = -1;
+		device->ops = NULL;
 		break;
 	}
 
-	if (state->device.fd < 0)
+	if (!device->ops)
 		return 0;
+
+	device->instance = device->ops->open(cfg, with_odd_parity, with_async);
+	if (!device->instance)
+		return 0;
+
+	device->type = device_type;
+	device->fd = *(int *)(device->instance);
 
 	/*
 	 * handle config file connect_script:
 	 */
-	if (device_script(state->device.fd, 1, state)) {
+	if (device_script(device->fd, 1, state)) {
 		dprintf("gnokii open device: connect_script failure\n");
 		device_close(state);
 		return 0;
@@ -103,188 +187,68 @@ int device_open(int with_odd_parity, int with_async,
 
 void device_close(struct gn_statemachine *state)
 {
+	gn_device *device = &state->device;
+
 	dprintf("device: closing device\n");
 
 	/*
 	 * handle config file disconnect_script:
 	 */
-	if (device_script(state->device.fd, 0, state))
+	if (device_script(device->fd, 0, state))
 		dprintf("gnokii device close: disconnect_script failure\n");
 
-	switch (state->device.type) {
-	case GN_CT_DKU2:
-	case GN_CT_Serial:
-	case GN_CT_Infrared:
-		serial_close(state->device.device_instance);
-		break;
-	case GN_CT_Irda:
-		irda_close(state->device.device_instance);
-		break;
-	case GN_CT_Bluetooth:
-		bluetooth_close(state->device.device_instance);
-		break;
-	case GN_CT_Tekram:
-		tekram_close(state->device.device_instance);
-		break;
-	case GN_CT_TCP:
-		tcp_close(state->device.device_instance);
-		break;
-	case GN_CT_DKU2LIBUSB:
-		fbusdku2usb_close(state->device.device_instance);
-		break;
-	case GN_CT_SOCKETPHONET:
-		socketphonet_close(state->device.device_instance);
-		break;
-	default:
-		break;
-	}
-
-	free(state->device.device_instance);
-	state->device.device_instance = NULL;
+	device->ops->close(device->instance);
+	free(device->instance);
+	device->instance = NULL;
+	device->type = GN_CT_NONE;
+	device->fd = -1;
 }
 
 void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)
 {
-	switch (state->device.type) {
-	case GN_CT_DKU2:
-	case GN_CT_Serial:
-	case GN_CT_Infrared:
-		if (state->config.set_dtr_rts) {
-			dprintf("device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
-			serial_setdtrrts(state->device.device_instance, dtr, rts);
-		}
-		break;
-	case GN_CT_Irda:
-	case GN_CT_Bluetooth:
-	case GN_CT_Tekram:
-	case GN_CT_TCP:
-	case GN_CT_DKU2LIBUSB:
-	case GN_CT_SOCKETPHONET:
-	default:
-		break;
+	if (state->device.ops->setdtrrts && state->config.set_dtr_rts) {
+		dprintf("device: setting RTS to %s and DTR to %s\n", rts ? "high" : "low", dtr ? "high" : "low");
+		state->device.ops->setdtrrts(state->device.instance, dtr, rts);
 	}
 }
 
 void device_changespeed(int speed, struct gn_statemachine *state)
 {
-	switch (state->device.type) {
-	case GN_CT_DKU2:
-	case GN_CT_Serial:
-	case GN_CT_Infrared:
+	if (state->device.ops->changespeed) {
 		dprintf("device: setting speed to %d\n", speed);
-		serial_changespeed(state->device.device_instance, speed);
-		break;
-	case GN_CT_Tekram:
-		dprintf("device: setting speed to %d\n", speed);
-		tekram_changespeed(state->device.device_instance, speed);
-		break;
-	case GN_CT_Irda:
-	case GN_CT_Bluetooth:
-	case GN_CT_TCP:
-	case GN_CT_DKU2LIBUSB:
-	case GN_CT_SOCKETPHONET:
-	default:
-		break;
+		state->device.ops->changespeed(state->device.instance, speed);
 	}
 }
 
 size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 {
-	switch (state->device.type) {
-	case GN_CT_DKU2:
-	case GN_CT_Serial:
-	case GN_CT_Infrared:
-		return serial_read(state->device.device_instance, buf, nbytes);
-	case GN_CT_Irda:
-		return irda_read(state->device.device_instance, buf, nbytes);
-	case GN_CT_Bluetooth:
-		return bluetooth_read(state->device.device_instance, buf, nbytes);
-	case GN_CT_Tekram:
-		return tekram_read(state->device.device_instance, buf, nbytes);
-	case GN_CT_TCP:
-		return tcp_read(state->device.device_instance, buf, nbytes);
-	case GN_CT_DKU2LIBUSB:
-		return fbusdku2usb_read(state->device.device_instance, buf, nbytes);
-	case GN_CT_SOCKETPHONET:
-		return socketphonet_read(state->device.device_instance, buf, nbytes);
-	default:
-		break;
-	}
-	return 0;
+	return state->device.ops->read(state->device.instance, buf, nbytes);
 }
 
 size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 {
-	switch (state->device.type) {
-	case GN_CT_DKU2:
-	case GN_CT_Serial:
-	case GN_CT_Infrared:
-		return serial_write(state->device.device_instance, buf, n);
-	case GN_CT_Irda:
-		return irda_write(state->device.device_instance, buf, n);
-	case GN_CT_Bluetooth:
-		return bluetooth_write(state->device.device_instance, buf, n);
-	case GN_CT_Tekram:
-		return tekram_write(state->device.device_instance, buf, n);
-	case GN_CT_TCP:
-		return tcp_write(state->device.device_instance, buf, n);
-	case GN_CT_DKU2LIBUSB:
-		return fbusdku2usb_write(state->device.device_instance, buf, n);
-	case GN_CT_SOCKETPHONET:
-		return socketphonet_write(state->device.device_instance, buf, n);
-	default:
-		break;
-	}
-	return 0;
+	return state->device.ops->write(state->device.instance, buf, n);
 }
 
 int device_select(struct timeval *timeout, struct gn_statemachine *state)
 {
-	switch (state->device.type) {
-	case GN_CT_DKU2:
-	case GN_CT_Serial:
-	case GN_CT_Infrared:
-		return serial_select(state->device.device_instance, timeout);
-	case GN_CT_Irda:
-		return irda_select(state->device.device_instance, timeout);
-	case GN_CT_Bluetooth:
-		return bluetooth_select(state->device.device_instance, timeout);
-	case GN_CT_Tekram:
-		return tekram_select(state->device.device_instance, timeout);
-	case GN_CT_TCP:
-		return tcp_select(state->device.device_instance, timeout);
-	case GN_CT_DKU2LIBUSB:
-		return fbusdku2usb_select(state->device.device_instance, timeout);
-	case GN_CT_SOCKETPHONET:
-		return socketphonet_select(state->device.device_instance, timeout);
-	default:
-		break;
-	}
-	return -1;
+	return state->device.ops->select(state->device.instance, timeout);
 }
 
 gn_error device_nreceived(int *n, struct gn_statemachine *state)
 {
 	*n = -1;
 
-	switch (state->device.type) {
-	case GN_CT_DKU2:
-	case GN_CT_Serial:
-	case GN_CT_Infrared:
-		return serial_nreceived(state->device.device_instance, n);
-	default:
-		return GN_ERR_NOTSUPPORTED;
-	}
+	if (state->device.ops->nreceived)
+		return state->device.ops->nreceived(state->device.instance, n);
+
+	return GN_ERR_NOTSUPPORTED;
 }
 
 gn_error device_flush(struct gn_statemachine *state)
 {
-	switch (state->device.type) {
-	case GN_CT_DKU2:
-	case GN_CT_Serial:
-	case GN_CT_Infrared:
-		return serial_flush(state->device.device_instance);
-	default:
-		return GN_ERR_NOTSUPPORTED;
-	}
+	if (state->device.ops->flush)
+		return state->device.ops->flush(state->device.instance);
+
+	return GN_ERR_NOTSUPPORTED;
 }
