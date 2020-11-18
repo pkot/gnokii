@@ -115,61 +115,67 @@ static int irda_discover_device(const char *irda_string)
 	return daddr;
 }
 
-int irda_open(gn_config *cfg, struct gn_statemachine *state)
+void* irda_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
 	struct sockaddr_irda peer;
-	int fd = -1, daddr;
+	int fd, daddr, *data;
 
-	daddr = irda_discover_device(cfg->irda_string); /* discover the devices */
-
-	if (daddr != -1)  {
-		if (!strcasecmp(cfg->port_device, "IrDA:IrCOMM")) {
-			fprintf(stderr, _("Virtual IrCOMM device unsupported under Linux\n"));
-			return -1;
-		}
-
-		fd = socket(AF_IRDA, SOCK_STREAM, 0);	/* Create socket */
-		peer.sir_family = AF_IRDA;
-		peer.sir_lsap_sel = LSAP_ANY;
-		peer.sir_addr = daddr;
-		snprintf(peer.sir_name, sizeof(peer.sir_name), "Nokia:PhoNet");
-
-		if (connect(fd, (struct sockaddr *)&peer, sizeof(peer))) {	/* Connect to service "Nokia:PhoNet" */
-			perror("connect");
-			close(fd);
-			fd = -1;
-/*		} else { FIXME: It does not work in most cases. Why? Or why it should work?
-			recv(fd, NULL, 0, 0);		 call recv first to make select work correctly */
-		}
+	if (!strcasecmp(cfg->port_device, "IrDA:IrCOMM")) {
+		fprintf(stderr, _("Virtual IrCOMM device unsupported under Linux\n"));
+		return NULL;
 	}
 
-	return fd;
+	daddr = irda_discover_device(cfg->irda_string); /* discover the devices */
+	if (daddr == -1)
+		return NULL;
+
+	fd = socket(AF_IRDA, SOCK_STREAM, 0);	/* Create socket */
+	peer.sir_family = AF_IRDA;
+	peer.sir_lsap_sel = LSAP_ANY;
+	peer.sir_addr = daddr;
+	snprintf(peer.sir_name, sizeof(peer.sir_name), "Nokia:PhoNet");
+
+	if (connect(fd, (struct sockaddr *)&peer, sizeof(peer))) {	/* Connect to service "Nokia:PhoNet" */
+		perror("connect");
+		close(fd);
+		return NULL;
+/*	} else { FIXME: It does not work in most cases. Why? Or why it should work?
+		recv(fd, NULL, 0, 0);		 call recv first to make select work correctly */
+	}
+
+	data = malloc(sizeof(int));
+	if (data == NULL) {
+		close(fd);
+		return NULL;
+	}
+	*data = fd;
+
+	return data;
 }
 
-int irda_close(int fd, struct gn_statemachine *state)
+void irda_close(void *instance)
 {
+	int fd = *(int *)instance;
+
 	shutdown(fd, 0);
-	return close(fd);
+	close(fd);
 }
 
-int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t irda_write(void *instance, const __ptr_t bytes, size_t size)
 {
-	return send(fd, bytes, size, 0);
+	return send(*(int *)instance, bytes, size, 0);
 }
 
-int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t irda_read(void *instance, __ptr_t bytes, size_t size)
 {
-	return recv(fd, bytes, size, 0);
+	return recv(*(int *)instance, bytes, size, 0);
 }
 
-int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+extern int unix_select(int fd, struct timeval *timeout);
+
+int irda_select(void *instance, struct timeval *timeout)
 {
-	fd_set readfds;
-
-	FD_ZERO(&readfds);
-	FD_SET(fd, &readfds);
-
-	return select(fd + 1, &readfds, NULL, NULL, timeout);
+	return unix_select(*(int *)instance, timeout);
 }
 
 #endif /* HAVE_IRDA */
