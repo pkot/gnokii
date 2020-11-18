@@ -463,21 +463,21 @@ static int setNonblocking(int fd)
 	return retcode;
 }
 
-int bluetooth_open(gn_config *cfg, struct gn_statemachine *state)
+void* bluetooth_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
 	uint8_t channel;
 	bdaddr_t bdaddr;
 	struct sockaddr_rc raddr;
-	int fd;
+	int fd, *data;
 
 	if (str2ba(cfg->port_device, &bdaddr)) {
 		fprintf(stderr, _("Invalid bluetooth address \"%s\"\n"), cfg->port_device);
-		return -1;
+		return NULL;
 	}
 
 	if ((fd = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0) {
 		perror(_("Can't create socket"));
-		return -1;
+		return NULL;
 	}
 
 	memset(&raddr, 0, sizeof(raddr));
@@ -497,7 +497,7 @@ int bluetooth_open(gn_config *cfg, struct gn_statemachine *state)
 	if (channel < 1) {
 		fprintf(stderr, _("Cannot find any appropriate rfcomm channel and none was specified in the config.\n"));
 		close(fd);
-		return -1;
+		return NULL;
 	}
 
 	dprintf("Using channel: %d\n", channel);
@@ -506,7 +506,7 @@ int bluetooth_open(gn_config *cfg, struct gn_statemachine *state)
 	if (connect(fd, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
 		perror(_("Can't connect"));
 		close(fd);
-		return -1;
+		return NULL;
 	}
 
 	/* Ignore errors. If the socket was not set in the async way,
@@ -514,33 +514,37 @@ int bluetooth_open(gn_config *cfg, struct gn_statemachine *state)
 	 */
 	setNonblocking(fd);
 
-	return fd;
+	data = malloc(sizeof(int));
+	if (data == NULL) {
+		close(fd);
+		return NULL;
+	}
+	*data = fd;
+
+	return data;
 }
 
-int bluetooth_close(int fd, struct gn_statemachine *state)
+void bluetooth_close(void *instance)
 {
 	sleep(2);
-	return close(fd);
+	close(*(int *)instance);
 }
 
-int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size)
 {
-	return write(fd, bytes, size);
+	return write(*(int *)instance, bytes, size);
 }
 
-int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t bluetooth_read(void *instance, __ptr_t bytes, size_t size)
 {
-	return read(fd, bytes, size);
+	return read(*(int *)instance, bytes, size);
 }
 
-int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+extern int unix_select(int fd, struct timeval *timeout);
+
+int bluetooth_select(void *instance, struct timeval *timeout)
 {
-	fd_set readfds;
-
-	FD_ZERO(&readfds);
-	FD_SET(fd, &readfds);
-
-	return select(fd + 1, &readfds, NULL, NULL, timeout);
+	return unix_select(*(int *)instance, timeout);
 }
 
 #endif	/* HAVE_BLUETOOTH_BLUEZ || HAVE_BLUETOOTH_NETGRAPH || HAVE_BLUETOOTH_NETBT */
