@@ -17,10 +17,10 @@
 #include "compat.h"
 #include "gnokii.h"
 
-int bluetooth_open(gn_config *cfg, struct gn_statemachine *state);
-int bluetooth_close(int fd, struct gn_statemachine *state);
-int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state);
-int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);
-int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
+void* bluetooth_open(gn_config *cfg, int with_odd_parity, int with_async);
+void bluetooth_close(void *instance);
+size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size);
+size_t bluetooth_read(void *instance, __ptr_t bytes, size_t size);
+int bluetooth_select(void *instance, struct timeval *timeout);
 
 #endif /* _gnokii_bluetooth_h */
