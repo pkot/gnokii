@@ -19,10 +19,10 @@
 #include "compat.h"
 #include "gnokii.h"
 
-int fbusdku2usb_open(gn_config *cfg, struct gn_statemachine *state);
-int fbusdku2usb_close(struct gn_statemachine *state);
-int fbusdku2usb_write(const __ptr_t bytes, int size, struct gn_statemachine *state);
-int fbusdku2usb_read(__ptr_t bytes, int size, struct gn_statemachine *state);
-int fbusdku2usb_select(struct timeval *timeout, struct gn_statemachine *state);
+void* fbusdku2usb_open(gn_config *cfg, int with_odd_parity, int with_async);
+void fbusdku2usb_close(void *instance);
+size_t fbusdku2usb_write(void *instance, const __ptr_t bytes, size_t size);
+size_t fbusdku2usb_read(void *instance, __ptr_t bytes, size_t size);
+int fbusdku2usb_select(void *instance, struct timeval *timeout);
 
 #endif /* _gnokii_dku2libusb_h */
