@@ -20,7 +20,7 @@
 #include "gnokii-internal.h"
 #include "device.h"
 #include "devices/irda.h"
-#include "devices/unixbluetooth.h"
+#include "devices/bluetooth.h"
 #include "devices/tcp.h"
 #include "devices/serial.h"
 #include "devices/tekram.h"

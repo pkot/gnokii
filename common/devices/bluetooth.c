@@ -18,7 +18,7 @@
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
-#include "devices/unixbluetooth.h"
+#include "devices/bluetooth.h"
 
 #ifndef HAVE_BLUETOOTH
 

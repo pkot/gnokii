@@ -5,7 +5,7 @@ EXTRA_HEADERS = \
 		linuxirda.h \
 		tcp.h \
 		tekram.h \
-		unixbluetooth.h \
+		bluetooth.h \
 		unixirda.h \
 		serial.h \
 		socketphonet.h
