@@ -22,8 +22,6 @@
 #include "gnokii.h"
 #include "devices/bluetooth.h"
 
-#if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH) || defined(HAVE_BLUETOOTH_NETBT)
-
 #ifdef HAVE_BLUETOOTH_NETGRAPH	/* FreeBSD / netgraph */
 
 #include <bluetooth.h>
@@ -546,5 +544,3 @@ int bluetooth_select(void *instance, struct timeval *timeout)
 {
 	return unix_select(*(int *)instance, timeout);
 }
-
-#endif	/* HAVE_BLUETOOTH_BLUEZ || HAVE_BLUETOOTH_NETGRAPH || HAVE_BLUETOOTH_NETBT */
