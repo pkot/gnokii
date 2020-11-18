@@ -77,7 +77,9 @@ int device_open(int with_odd_parity, int with_async,
 			state->device.fd = 1; /* FIXME: fake fd */
 		break;
 	case GN_CT_SOCKETPHONET:
-		state->device.fd = socketphonet_open(cfg, with_async, state);
+		state->device.device_instance = socketphonet_open(cfg, with_odd_parity, with_async);
+		if (state->device.device_instance) /* TODO: remove after refactoring! */
+			state->device.fd = *(int *)state->device.device_instance;
 		break;
 	default:
 		state->device.fd = -1;
@@ -131,7 +133,7 @@ void device_close(struct gn_statemachine *state)
 		fbusdku2usb_close(state->device.device_instance);
 		break;
 	case GN_CT_SOCKETPHONET:
-		socketphonet_close(state);
+		socketphonet_close(state->device.device_instance);
 		break;
 	default:
 		break;
@@ -204,7 +206,7 @@ size_t device_read(__ptr_t buf, size_t nbytes, struct gn_statemachine *state)
 	case GN_CT_DKU2LIBUSB:
 		return fbusdku2usb_read(state->device.device_instance, buf, nbytes);
 	case GN_CT_SOCKETPHONET:
-		return socketphonet_read(state->device.fd, buf, nbytes, state);
+		return socketphonet_read(state->device.device_instance, buf, nbytes);
 	default:
 		break;
 	}
@@ -229,7 +231,7 @@ size_t device_write(const __ptr_t buf, size_t n, struct gn_statemachine *state)
 	case GN_CT_DKU2LIBUSB:
 		return fbusdku2usb_write(state->device.device_instance, buf, n);
 	case GN_CT_SOCKETPHONET:
-		return socketphonet_write(state->device.fd, buf, n, state);
+		return socketphonet_write(state->device.device_instance, buf, n);
 	default:
 		break;
 	}
@@ -254,7 +256,7 @@ int device_select(struct timeval *timeout, struct gn_statemachine *state)
 	case GN_CT_DKU2LIBUSB:
 		return fbusdku2usb_select(state->device.device_instance, timeout);
 	case GN_CT_SOCKETPHONET:
-		return socketphonet_select(state->device.fd, timeout, state);
+		return socketphonet_select(state->device.device_instance, timeout);
 	default:
 		break;
 	}
