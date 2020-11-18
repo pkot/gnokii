@@ -10,8 +10,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_BLUETOOTH
-
 #include <winsock2.h>
 #include <mmsystem.h>
 #include <ws2bth.h>
@@ -114,5 +112,3 @@ int bluetooth_select(void *instance, struct timeval *timeout)
 
 	return select(0 /* ignored on Win32 */, &readfds, NULL, NULL, timeout);
 }
-
-#endif /* HAVE_BLUETOOTH */
