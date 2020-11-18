@@ -16,7 +16,6 @@
 #include "compat.h"
 #include "misc.h"
 #include "devices/tcp.h"
-#include "devices/serial.h"
 
 #ifndef WIN32
 
@@ -40,7 +39,7 @@
 #  define O_NONBLOCK  0
 #endif
 
-static int tcp_open(const char *file)
+static int tcp_opensocket(const char *file)
 {
 	int fd;
 #ifdef HAVE_GETADDRINFO
@@ -131,30 +130,23 @@ fail_close:
 	return -1;
 }
 
-int tcp_close(int fd, struct gn_statemachine *state)
+void* tcp_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
-	return close(fd);
-}
-
-int tcp_opendevice(gn_config *cfg, int with_async, struct gn_statemachine *state)
-{
-	int fd;
-	int retcode;
+	int fd, retcode, *data;
 
 	/* Open device */
 
-	fd = tcp_open(cfg->port_device);
-
+	fd = tcp_opensocket(cfg->port_device);
 	if (fd < 0)
-		return fd;
+		return NULL;
 
 #if !(__unices__)
 	/* Allow process/thread to receive SIGIO */
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1) {
 		perror(_("Gnokii tcp_opendevice: fcntl(F_SETOWN)"));
-		tcp_close(fd, state);
-		return -1;
+		close(fd);
+		return NULL;
 	}
 #endif
 
@@ -176,51 +168,63 @@ int tcp_opendevice(gn_config *cfg, int with_async, struct gn_statemachine *state
 #endif
 	if (retcode == -1) {
 		perror(_("Gnokii tcp_opendevice: fcntl(F_SETFL)"));
-		tcp_close(fd, state);
-		return -1;
+		close(fd);
+		return NULL;
 	}
 
-	return fd;
+	data = malloc(sizeof(int));
+	if (data == NULL) {
+		close(fd);
+		return NULL;
+	}
+	*data = fd;
+
+	return data;
 }
 
-int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+void tcp_close(void *instance)
 {
-	return unix_select(fd, timeout);
+	close(*(int *)instance);
 }
 
-size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
+extern int unix_select(int fd, struct timeval *timeout);
+
+int tcp_select(void *instance, struct timeval *timeout)
 {
-	return read(fd, buf, nbytes);
+	return unix_select(*(int *)instance, timeout);
 }
 
-size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
+size_t tcp_read(void *instance, __ptr_t buf, size_t nbytes)
 {
-	return write(fd, buf, n);
+	return read(*(int *)instance, buf, nbytes);
+}
+
+size_t tcp_write(void *instance, const __ptr_t buf, size_t n)
+{
+	return write(*(int *)instance, buf, n);
 }
 
 #else /* WIN32 */
 
-int tcp_close(int fd, struct gn_statemachine *state)
+void* tcp_open(gn_config *cfg, int with_odd_parity, int with_async)
+{
+	return NULL;
+}
+
+void tcp_close(void *instance) { }
+
+
+size_t tcp_read(void *instance, __ptr_t buf, size_t nbytes)
 {
 	return -1;
 }
 
-int tcp_opendevice(gn_config *cfg, int with_async, struct gn_statemachine *state)
+size_t tcp_write(void *instance, const __ptr_t buf, size_t n)
 {
 	return -1;
 }
 
-size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+int tcp_select(void *instance, struct timeval *timeout)
 {
 	return -1;
 }
