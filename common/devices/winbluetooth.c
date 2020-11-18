@@ -42,70 +42,75 @@ static int str2ba(const char *straddr, BTH_ADDR *btaddr)
 	return 0;
 }
 
-int bluetooth_open(gn_config *cfg, struct gn_statemachine *state)
+void* bluetooth_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
 	WSADATA wsd;
-	SOCKET fd = INVALID_SOCKET;
+	SOCKET fd, *data;
 	SOCKADDR_BTH sa;
 
+	/* Prepare socket structure for the bluetooth socket */
+	memset(&sa, 0, sizeof(sa));
+	sa.addressFamily = AF_BTH;
+	if (str2ba(cfg->port_device, &sa.btAddr)) {
+		dprintf("Incorrect bluetooth address given in the config file\n");
+		return NULL;
+	}
+	sa.port = cfg->rfcomm_cn & 0xff;
 	/* Initialize */
 	if (WSAStartup(MAKEWORD(2,0), &wsd)) {
 		dprintf("WSAStartup() failed.\n");
 		fprintf(stderr, _("Failed to initialize socket subsystem: need WINSOCK2. Please upgrade.\n"));
-		return -1;
+		return NULL;
 	}
 	/* Create a bluetooth socket */
 	if ((fd = socket(AF_BTH, SOCK_STREAM, BTHPROTO_RFCOMM)) == INVALID_SOCKET) {
 		perror("socket");
 		dprintf("Failed to create a bluetooth socket\n");
 		WSACleanup();
-		return -1;
+		return NULL;
 	}
-	/* Prepare socket structure for the bluetooth socket */
-	memset(&sa, 0, sizeof(sa));
-	sa.addressFamily = AF_BTH;
-	if (str2ba(cfg->port_device, &sa.btAddr)) {
-		dprintf("Incorrect bluetooth address given in the config file\n");
-		closesocket(fd);
-		WSACleanup();
-		return -1;
-	}
-	sa.port = cfg->rfcomm_cn & 0xff;
 	/* Connect to the bluetooth socket */
 	if (connect(fd, (SOCKADDR *)&sa, sizeof(sa))) {
 		perror("socket");
 		dprintf("Failed to connect to bluetooth socket\n");
 		closesocket(fd);
 		WSACleanup();
-		return -1;
+		return NULL;
 	}
-	return (int)fd;
+	data = malloc(sizeof(SOCKET));
+	if (data == NULL) {
+		closesocket(fd);
+		WSACleanup();
+		return NULL;
+	}
+	*data = fd;
+
+	return data;
 }
 
-int bluetooth_close(int fd, struct gn_statemachine *state)
+void bluetooth_close(void *instance)
 {
-	shutdown(fd, 0);
-	closesocket((SOCKET)fd);
+	shutdown(*(SOCKET *)instance, 0);
+	closesocket(*(SOCKET *)instance);
 	WSACleanup();
-	return 0;
 }
 
-int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size)
 {
-	return send((SOCKET)fd, bytes, size, 0);
+	return send(*(SOCKET *)instance, bytes, size, 0);
 }
 
-int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t bluetooth_read(void *instance, __ptr_t bytes, size_t size)
 {
-	return recv((SOCKET)fd, bytes, size, 0);
+	return recv(*(SOCKET *)instance, bytes, size, 0);
 }
 
-int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+int bluetooth_select(void *instance, struct timeval *timeout)
 {
 	fd_set readfds;
 
 	FD_ZERO(&readfds);
-	FD_SET((SOCKET)fd, &readfds);
+	FD_SET(*(SOCKET *)instance, &readfds);
 
 	return select(0 /* ignored on Win32 */, &readfds, NULL, NULL, timeout);
 }
