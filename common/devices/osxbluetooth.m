@@ -17,7 +17,7 @@
 #include <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
 #include <IOBluetooth/objc/IOBluetoothDevice.h>
 
-#include "devices/unixbluetooth.h"
+#include "devices/bluetooth.h"
 
 static NSMutableDictionary *queues;
 static int next_fd = 1;

@@ -20,7 +20,7 @@
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
-#include "devices/unixbluetooth.h"
+#include "devices/bluetooth.h"
 
 #if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH) || defined(HAVE_BLUETOOTH_NETBT)
 
