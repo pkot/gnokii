@@ -12,8 +12,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_BLUETOOTH_MACOSX
-
 #include <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
 #include <IOBluetooth/objc/IOBluetoothDevice.h>
 
@@ -155,5 +153,3 @@ void bluetooth_close(void *instance)
     GnokiiOSXBluetooth *q = instance;
     [q release];
 }
-
-#endif
