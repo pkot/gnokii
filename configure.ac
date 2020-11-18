@@ -454,37 +454,23 @@ if test "$enable_libusb" = "yes"; then
 		]
 	)
 fi
+AM_CONDITIONAL([LIBUSB], [test $USE_LIBUSB = yes])
 
-dnl ======================== Checks for Linux Phonet support
+dnl ======================== Phonet switch
 USE_SOCKETPHONET="no"
 AC_ARG_ENABLE(phonet,
               AS_HELP_STRING([--disable-phonet],
                              [disable phonet support (default is autodetected)]),,
               [enable_phonet=yes])
-if test "$enable_phonet" = "yes"; then
-	AC_CHECK_HEADER(linux/phonet.h,
-		[AC_DEFINE(HAVE_SOCKETPHONET, 1, [Whether Phonet is available])
-		 USE_SOCKETPHONET="yes"],,
-		[#include <sys/socket.h>
-		 #include <linux/phonet.h>])
-fi
 
-dnl ======================== Checks for Linux IrDA support
+dnl ======================== IrDA switch
 USE_IRDA="no"
 AC_ARG_ENABLE(irda,
               AS_HELP_STRING([--disable-irda],
                              [disable irda support (default is autodetected)]),,
               [enable_irda=yes])
-if test "$enable_irda" = "yes"; then
-	AC_CHECK_HEADER(linux/irda.h,
-		[AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available])
-		 USE_IRDA="yes"],,
-		[#include <sys/socket.h>
-		 #include <sys/ioctl.h>
-		 #include <linux/types.h>])
-fi
 
-dnl ======================== Checks for Bluetooth support
+dnl ======================== Bluetooth switch
 USE_BLUETOOTH="no"
 AC_ARG_WITH(bluetooth,
 	[  --with-bluetooth=DIR    specifies the base libbluetooth],
@@ -517,9 +503,25 @@ linux*)
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 			AC_DEFINE(HAVE_BLUETOOTH_BLUEZ,[],[Compile on Linux])
 			USE_BLUETOOTH="yes"
+			UNIX_BLUETOOTH="true"
 			BLUETOOTH_LIBS="-lbluetooth"
 			AC_SUBST(BLUETOOTH_LIBS)
 		fi
+	fi
+	if test "$enable_irda" = "yes"; then
+		AC_CHECK_HEADER(linux/irda.h,
+			[AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available])
+			[USE_IRDA="yes" UNIX_IRDA="true"]],,
+			[#include <sys/socket.h>
+			 #include <sys/ioctl.h>
+			 #include <linux/types.h>])
+	fi
+	if test "$enable_phonet" = "yes"; then
+		AC_CHECK_HEADER(linux/phonet.h,
+			[AC_DEFINE(HAVE_SOCKETPHONET, 1, [Whether Phonet is available])
+			 USE_SOCKETPHONET="yes"],,
+			[#include <sys/socket.h>
+			 #include <linux/phonet.h>])
 	fi
 	;;
 dnl ======================== Checks for MacOSX Bluetooth support
@@ -542,6 +544,7 @@ darwin*)
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 			AC_DEFINE(HAVE_BLUETOOTH_MACOSX,[],[Compile on Darwin / Mac OSX])
 			USE_BLUETOOTH="yes"
+			OSX_BLUETOOTH="true"
 			BLUETOOTH_LIBS="$PTHREAD_LIBS -Wl,-framework,CoreFoundation -Wl,-framework,IOBluetooth -Wl,-framework,Foundation"
 			AC_SUBST(BLUETOOTH_LIBS)
 		fi
@@ -563,6 +566,7 @@ freebsd)
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 			AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH, [], [Compile on FreeBSD])
 			USE_BLUETOOTH="yes"
+			UNIX_BLUETOOTH="true"
 			AC_CHECK_LIB(bluetooth, bt_aton,
 				[BLUETOOTH_LIBS="-lbluetooth" ac_cv_have_bt_lib=yes],
 				ac_cv_have_bt_lib=no)
@@ -589,6 +593,7 @@ netbsd*)
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 			AC_DEFINE(HAVE_BLUETOOTH_NETBT, [], [Compile on NetBSD])
 			USE_BLUETOOTH="yes"
+			UNIX_BLUETOOTH="true"
 			CFLAGS="$CFLAGS -DCOMPAT_BLUEZ"
 			AC_CHECK_LIB(bluetooth, bt_aton,
 				[BLUETOOTH_LIBS="-lbluetooth" ac_cv_have_bt_lib=yes],
@@ -602,19 +607,37 @@ netbsd*)
 	fi
 	;;
 
+dnl ======================== Checks for Windows devices
 cygwin32|cygwin|mingw32|mingw32msvc)
-	AC_CHECK_HEADER(af_irda.h, [AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available]) USE_IRDA="yes" LIBS="$LIBS -lwinmm"],, [#include <windows.h>])
-	AC_CHECK_HEADER(ws2bth.h, [AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available]) USE_BLUETOOTH="yes"],, [#include <windows.h>])
-	if test x"$USE_IRDA" = "xyes" -o x"$USE_BLUETOOTH" = "xyes"; then
-		LIBS="$LIBS -lws2_32"
+	if test "$enable_bluetooth" = "yes"; then
+		AC_CHECK_HEADER(ws2bth.h,
+				[AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available]) USE_BLUETOOTH="yes" WIN32_BLUETOOTH="true"],,
+				[#include <windows.h>])
 	fi
+	if test "$enable_irda" = "yes"; then
+		AC_CHECK_HEADER(af_irda.h,
+				[AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available]) USE_IRDA="yes" WIN32_IRDA="true"],,
+				[#include <windows.h>])
+	fi
+	BLUETOOTH_LIBS=""
+	if test x"$USE_IRDA" = "xyes" -o x"$USE_BLUETOOTH" = "xyes"; then
+		BLUETOOTH_LIBS="-lws2_32"
+	fi
+	if test x"$USE_IRDA" = "xyes"; then
+		BLUETOOTH_LIBS="$BLUETOOTH_LIBS -lwinmm"
+	fi
+	AC_SUBST(BLUETOOTH_LIBS)
 	WIN32=1
 	;;
-
 esac
 
 AM_CONDITIONAL([WIN32], [test "x$WIN32" = "x1"])
-AM_CONDITIONAL([FOR_MAC], [test "x$FOR_MAC" = "x1"])
+AM_CONDITIONAL([SOCKETPHONET], [test "x$USE_SOCKETPHONET" = "xyes"])
+AM_CONDITIONAL([OSXBLUETOOTH], [test "x$OSX_BLUETOOTH" = "xtrue"])
+AM_CONDITIONAL([UNIXBLUETOOTH], [test "x$UNIX_BLUETOOTH" = "xtrue"])
+AM_CONDITIONAL([UNIXIRDA], [test "x$UNIX_IRDA" = "xtrue"])
+AM_CONDITIONAL([WINBLUETOOTH], [test "x$WIN32_BLUETOOTH" = "xtrue"])
+AM_CONDITIONAL([WINIRDA], [test "x$WIN32_IRDA" = "xtrue"])
 
 dnl ======================== Checks for X base support
 
