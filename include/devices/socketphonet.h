@@ -21,10 +21,10 @@
 #include "compat.h"
 #include "gnokii.h"
 
-int socketphonet_close(struct gn_statemachine *state);
-int socketphonet_open(gn_config *cfg, int with_async, struct gn_statemachine *state);
-size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state);
-size_t socketphonet_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state);
-int socketphonet_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
+void* socketphonet_open(gn_config *cfg, int with_odd_parity, int with_async);
+void socketphonet_close(void *instance);
+size_t socketphonet_read(void *instance, __ptr_t buf, size_t nbytes);
+size_t socketphonet_write(void *instance, const __ptr_t buf, size_t n);
+int socketphonet_select(void *instance, struct timeval *timeout);
 
 #endif /* _gnokii_devices_linuxphonet_h */
