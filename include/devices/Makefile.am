@@ -6,7 +6,6 @@ EXTRA_HEADERS = \
 		tcp.h \
 		tekram.h \
 		bluetooth.h \
-		unixirda.h \
 		serial.h \
 		socketphonet.h
 
