@@ -192,9 +192,22 @@ typedef struct {
 } gn_callback;
 
 typedef struct {
+	void* (*open)(gn_config *cfg, int with_odd_parity, int with_async);
+	void (*close)(void *instance);
+	int (*select)(void *instance, struct timeval *timeout);
+	size_t (*read)(void *instance, __ptr_t buf, size_t nbytes);
+	size_t (*write)(void *instance, const __ptr_t buf, size_t n);
+	gn_error (*nreceived)(void *instance, int *n);
+	gn_error (*flush)(void *instance);
+	gn_error (*changespeed)(void *instance, int speed);
+	void (*setdtrrts)(void *instance, int dtr, int rts);
+} gn_device_ops;
+
+typedef struct {
 	int fd;
 	gn_connection_type type;
-	void *device_instance;
+	const gn_device_ops *ops;
+	void *instance;
 } gn_device;
 
 typedef enum {
