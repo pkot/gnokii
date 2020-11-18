@@ -10,8 +10,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_IRDA
-
 #define WIN32_LEAN_AND_MEAN
 #include <winsock.h>
 #include <mmsystem.h>
@@ -166,5 +164,3 @@ int irda_select(void *instance, struct timeval *timeout)
 
 	return select(0 /* ignored on Win32 */, &readfds, NULL, NULL, timeout);
 }
-
-#endif /* HAVE_IRDA */

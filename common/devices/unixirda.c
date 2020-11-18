@@ -18,8 +18,6 @@
 #include "misc.h"
 #include "gnokii.h"
 
-#ifdef HAVE_IRDA
-
 #include <linux/types.h>
 #include <linux/irda.h>
 
@@ -177,5 +175,3 @@ int irda_select(void *instance, struct timeval *timeout)
 {
 	return unix_select(*(int *)instance, timeout);
 }
-
-#endif /* HAVE_IRDA */
