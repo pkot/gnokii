@@ -982,6 +982,7 @@ AC_CONFIG_FILES([Makefile
 	  gnokii/Makefile
 	  gnokiid/Makefile
 	  smsd/Makefile
+	  snprintf/Makefile
 	  utils/Makefile
 	  xgnokii/xgnokii.pc
 	  xgnokii/Makefile
