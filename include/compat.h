@@ -124,29 +124,6 @@
 #  define INT_MAX 2147483647
 #endif
 
-/*
- * The following ifdef block is the standard way of creating macros which make
- * exporting from a DLL simpler. All files within this DLL are compiled with
- * the GNOKIIDLL_EXPORTS symbol defined on the command line. this symbol should
- * not be defined on any project that uses this DLL. This way any other project
- * whose source files include this file see API functions as being imported
- * from a DLL, whereas this DLL sees symbols defined with this macro as being
- * exported.
- */
-#if defined(WIN32)
-#  if defined(GNOKIIDLL_EXPORTS) || defined(_USRDLL) || defined(DLL_EXPORT)
-#    define GNOKII_API __declspec(dllexport)
-#  elif defined(GNOKIIDLL_IMPORTS)
-#    define GNOKII_API __declspec(dllimport)
-#  else
-#    define GNOKII_API
-#  endif
-#elif (__GNUC__ - 0 > 3 || __GNUC__ == 3 && __GNUC_MINOR__ > 3)
-#    define GNOKII_API __attribute__ ((visibility("default")))
-#else
-#    define GNOKII_API
-#endif /* WIN32 */
-
 /* I assume that HAVE_STRNDUP always implies HAVE_STRING_H */
 #ifndef HAVE_STRNDUP
 extern char *strndup(const char *src, size_t n);
@@ -299,7 +276,7 @@ time_t timegm(struct tm *tm);
 /* This one is for NLS. */
 #ifdef ENABLE_NLS
 #  include <libintl.h>
-#  ifdef COMPILING_LIBGNOKII
+#  ifdef LIBGNOKII_DLL_EXPORT
 #    define _(x) dgettext(GETTEXT_PACKAGE, x)
 #    define N_(x) dgettext_noop(GETTEXT_PACKAGE, x)
 #  else

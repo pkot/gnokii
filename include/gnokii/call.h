@@ -16,6 +16,7 @@
 #ifndef _gnokii_call_h
 #define _gnokii_call_h
 
+#include <gnokii/apidecl.h>
 #include <gnokii/error.h>
 
 typedef enum {
