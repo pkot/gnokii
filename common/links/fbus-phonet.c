@@ -290,7 +290,7 @@ static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *sta
 static gn_error phonet_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 
-	u8 out_buffer[PHONET_TRANSMIT_MAX_LENGTH + 5];
+	uint8_t out_buffer[PHONET_TRANSMIT_MAX_LENGTH + 5];
 	int current = 0;
 	int total, sent;
 

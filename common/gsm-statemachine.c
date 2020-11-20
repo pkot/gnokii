@@ -30,7 +30,7 @@ gn_error sm_initialise(struct gn_statemachine *state)
 	return GN_ERR_NONE;
 }
 
-gn_error sm_message_send(u16 messagesize, u8 messagetype, void *message, struct gn_statemachine *state)
+gn_error sm_message_send(uint16_t messagesize, uint8_t messagetype, void *message, struct gn_statemachine *state)
 {
 	if (state->current_state != GN_SM_Startup) {
 #ifdef	DEBUG
@@ -83,7 +83,7 @@ void sm_reset(struct gn_statemachine *state)
 	}
 }
 
-void sm_incoming_function(u8 messagetype, void *message, u16 messagesize, struct gn_statemachine *state)
+void sm_incoming_function(uint8_t messagetype, void *message, uint16_t messagesize, struct gn_statemachine *state)
 {
 	int c;
 	int temp = 1;

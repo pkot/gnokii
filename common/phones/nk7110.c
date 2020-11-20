@@ -746,7 +746,7 @@ static gn_error GetCallerBitmap(gn_data *data, struct gn_statemachine *state)
 	SEND_MESSAGE_BLOCK(NK7110_MSG_PHONEBOOK, 14);
 }
 
-static unsigned char PackBlock(u8 id, u8 size, u8 no, u8 *buf, u8 *block)
+static unsigned char PackBlock(uint8_t id, uint8_t size, uint8_t no, uint8_t *buf, uint8_t *block)
 {
 	*(block++) = id;
 	*(block++) = 0;

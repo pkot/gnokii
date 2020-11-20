@@ -18,7 +18,7 @@
 #include "misc.h"
 
 /* Prototypes for functions */
-void rlp_crc24checksum_calculate(u8 *data, int length, u8 *crc);
-bool rlp_crc24fcs_check(u8 *data, int length);
+void rlp_crc24checksum_calculate(uint8_t *data, int length, uint8_t *crc);
+bool rlp_crc24fcs_check(uint8_t *data, int length);
 
 #endif

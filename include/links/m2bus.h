@@ -65,7 +65,7 @@ typedef struct {
 
 typedef struct{
 	m2bus_incoming_message i;
-	u8 request_sequence_number;
+	uint8_t request_sequence_number;
 } m2bus_link;
 
 #define M2BUSINST(s) (*((m2bus_link **)(&(s)->link.link_instance)))

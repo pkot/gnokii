@@ -984,7 +984,7 @@ static gn_error ReadPhonebook(gn_data *data, struct gn_statemachine *state)
 	alpha_tag_decode(pe->name, IoStruct.pbRecvBuffer, alpha_length);
 
 	/* decode and copy the number */
-	snprintf(pe->number, GN_PHONEBOOK_NUMBER_MAX_LENGTH, "%s", char_bcd_number_get((u8 *)&IoStruct.pbRecvBuffer[number_start]));
+	snprintf(pe->number, GN_PHONEBOOK_NUMBER_MAX_LENGTH, "%s", char_bcd_number_get((uint8_t *)&IoStruct.pbRecvBuffer[number_start]));
 	if (IoStruct.pbRecvBuffer[IoStruct.dwReceived - 3] != 0xff) {
 		/* TODO: handle the extension identifier field for numbers or SSCs longer than 20 digits (do they really exist in the wild?) */
 		dprintf("WARNING: Ignoring extension identifier field\n");

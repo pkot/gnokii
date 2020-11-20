@@ -114,7 +114,7 @@ GNOKII_API void gn_sms_default_deliver(gn_sms *sms)
  * The function converts binary date time into an easily readable form.
  * It is Y2K compliant.
  */
-static char *sms_timestamp_print(u8 *number)
+static char *sms_timestamp_print(uint8_t *number)
 {
 #ifdef DEBUG
 #define LOCAL_DATETIME_MAX_LENGTH 26

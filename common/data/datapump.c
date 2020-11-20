@@ -41,7 +41,7 @@ extern bool CommandMode;
 /* Local variables */
 static int	PtyRDFD;	/* File descriptor for reading and writing to/from */
 static int	PtyWRFD;	/* pty interface - only different in debug mode. */
-u8 pluscount;
+uint8_t pluscount;
 bool connected;
 
 bool dp_Initialise(int read_fd, int write_fd)
