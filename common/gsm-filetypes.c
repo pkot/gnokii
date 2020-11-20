@@ -1236,7 +1236,7 @@ void file_nol_save(FILE *file, gn_bmp *bitmap, gn_phone *info)
 void file_nsl_save(FILE *file, gn_bmp *bitmap, gn_phone *info)
 {
 
-	u8 header[] = {'F','O','R','M', 0x01,0xFE,  /* File ID block,      size 1*256+0xFE=510*/
+	uint8_t header[] = {'F','O','R','M', 0x01,0xFE,  /* File ID block,      size 1*256+0xFE=510*/
 		       'N','S','L','D', 0x01,0xF8}; /* Startup Logo block, size 1*256+0xF8=504*/
 
 	gn_bmp_resize(bitmap, GN_BMP_StartupLogo, info);

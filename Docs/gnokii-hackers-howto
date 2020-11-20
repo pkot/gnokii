@@ -57,7 +57,7 @@ The gn_link structure is used to contain any information about the link
 which is required by the StateMachine.  Two vital functions in the link
 are sm_send_message and sm_loop:
 
-sm_send_message(u16 messagesize, u8 messagetype, void *message)
+sm_send_message(uint16_t messagesize, uint8_t messagetype, void *message)
    is the function called by the statemachine code to send a message 'down
    the pipe'.  The parameters are intended to be generic (though with 
    obvious origins :-)  For example 'at' commands could be enumerated and 

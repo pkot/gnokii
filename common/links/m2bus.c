@@ -30,7 +30,7 @@
 
 static void m2bus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error m2bus_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
-static gn_error m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state);
+static gn_error m2bus_tx_send_ack(uint8_t message_seq, struct gn_statemachine *state);
 
 /* FIXME - win32 stuff! */
 
@@ -292,9 +292,9 @@ static void m2bus_wait_for_idle(int timeout, bool reset, struct gn_statemachine 
 
 static gn_error m2bus_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
-	u8 *out_buffer;
+	uint8_t *out_buffer;
 	int count, i = 0;
-	u8 checksum;
+	uint8_t checksum;
 
 	if (!state)
 		return GN_ERR_FAILED;
@@ -387,9 +387,9 @@ static gn_error m2bus_send_message(unsigned int messagesize, unsigned char messa
 
 
 
-static gn_error m2bus_tx_send_ack(u8 message_seq, struct gn_statemachine *state)
+static gn_error m2bus_tx_send_ack(uint8_t message_seq, struct gn_statemachine *state)
 {
-	u8 out_buffer[6];
+	uint8_t out_buffer[6];
 
 	if (!state)
 		return GN_ERR_FAILED;

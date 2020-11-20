@@ -308,20 +308,6 @@ time_t timegm(struct tm *tm);
 #  define dgettext(y, x) (x)
 #endif /* ENABLE_NLS */
 
-/* Definitions for u8, u16 and u32, borrowed from
-   /usr/src/linux/include/asm-i386/types.h */
-#ifndef u8
-	typedef unsigned char u8;
-#endif
-
-#ifndef u16
-	typedef unsigned short u16;
-#endif
-
-#ifndef u32
-	typedef unsigned int u32;
-#endif
-
 /* for Linux Bluetooth compatibility */
 #if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
 	typedef unsigned char uint8_t;

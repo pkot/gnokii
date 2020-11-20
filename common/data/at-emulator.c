@@ -77,7 +77,7 @@ static char imei[GN_IMEI_MAX_LENGTH], model[GN_MODEL_MAX_LENGTH], revision[GN_RE
 static int	PtyRDFD;	/* File descriptor for reading and writing to/from */
 static int	PtyWRFD;	/* pty interface - only different in debug mode. */
 
-static u8	ModemRegisters[MAX_MODEM_REGISTERS];
+static uint8_t	ModemRegisters[MAX_MODEM_REGISTERS];
 static char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
 static int	CurrentCmdBuffer;
 static int	CurrentCmdBufferIndex;

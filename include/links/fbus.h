@@ -53,7 +53,7 @@ typedef struct {
 	int message_destination;
 	int message_type;
 	int frame_length;
-	u8 message_buffer[FBUS_FRAME_MAX_LENGTH];
+	uint8_t message_buffer[FBUS_FRAME_MAX_LENGTH];
 } fbus_incoming_frame;
 
 typedef struct {
@@ -64,21 +64,21 @@ typedef struct {
 } fbus_incoming_message;
 
 typedef struct {
-	u16 message_length;
-	u8 message_type;
-	u8 *buffer;
+	uint16_t message_length;
+	uint8_t message_type;
+	uint8_t *buffer;
 } fbus_outgoing_message;
 
 
 typedef struct {
 	fbus_incoming_frame i;
 	fbus_incoming_message messages[FBUS_MESSAGE_MAX_TYPES];
-	u8 request_sequence_number;
-	u8 init_frame;
+	uint8_t request_sequence_number;
+	uint8_t init_frame;
 } fbus_link;
 
 gn_error fbus_initialise(int attempt, struct gn_statemachine *state);
 
-int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer, struct gn_statemachine *state);
+int fbus_tx_send_frame(uint8_t message_length, uint8_t message_type, uint8_t *buffer, struct gn_statemachine *state);
 
 #endif /* #ifndef _gnokii_links_fbus_h */

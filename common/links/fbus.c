@@ -31,7 +31,7 @@
 
 static void fbus_rx_statemachine(unsigned char rx_byte, struct gn_statemachine *state);
 static gn_error fbus_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
-static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemachine *state);
+static int fbus_tx_send_ack(uint8_t message_type, uint8_t message_seq, struct gn_statemachine *state);
 
 /* FIXME - win32 stuff! */
 
@@ -486,9 +486,9 @@ static gn_error fbus_loop(struct timeval *timeout, struct gn_statemachine *state
 	   (0x1e) and other values according the value specified when called.
 	   Calculates checksum and then sends the lot down the pipe... */
 
-int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer, struct gn_statemachine *state)
+int fbus_tx_send_frame(uint8_t message_length, uint8_t message_type, uint8_t *buffer, struct gn_statemachine *state)
 {
-	u8 out_buffer[FBUS_TRANSMIT_MAX_LENGTH + 5];
+	uint8_t out_buffer[FBUS_TRANSMIT_MAX_LENGTH + 5];
 	int count, current = 0;
 	unsigned char checksum;
 
@@ -553,8 +553,8 @@ int fbus_tx_send_frame(u8 message_length, u8 message_type, u8 *buffer, struct gn
 
 static gn_error fbus_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
-	u8 seqnum, frame_buffer[FBUS_CONTENT_MAX_LENGTH + 2];
-	u8 nom, lml;		/* number of messages, last message len */
+	uint8_t seqnum, frame_buffer[FBUS_CONTENT_MAX_LENGTH + 2];
+	uint8_t nom, lml;	/* number of messages, last message len */
 	int i;
 
 	if (!FBUSINST(state))
@@ -609,7 +609,7 @@ static gn_error fbus_send_message(unsigned int messagesize, unsigned char messag
 }
 
 
-static int fbus_tx_send_ack(u8 message_type, u8 message_seq, struct gn_statemachine *state)
+static int fbus_tx_send_ack(uint8_t message_type, uint8_t message_seq, struct gn_statemachine *state)
 {
 	unsigned char request[2];
 

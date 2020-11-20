@@ -2852,7 +2852,7 @@ static gn_error NK6510_GetSpeedDial(gn_data *data, struct gn_statemachine *state
 	return NK6510_ReadPhonebookLocation(data, state, NK6510_MEMORY_SPEEDDIALS, data->speed_dial->number);
 }
 
-static unsigned char PackBlock(u8 id, u8 size, int *no, u8 *buf, u8 *block, unsigned int maxsize)
+static unsigned char PackBlock(uint8_t id, uint8_t size, int *no, uint8_t *buf, uint8_t *block, unsigned int maxsize)
 {
 	if (size + 5 > maxsize) {
 		dprintf("Block packing failure -- not enough space (please add %d bytes to req[])\n", size + 5 - maxsize);

@@ -198,7 +198,7 @@ static gn_error P3110_Initialise(struct gn_statemachine *state)
 {
 	gn_data data;
 	gn_error error = GN_ERR_NONE;
-	u8 init_sequence[20] = {0x02, 0x01, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x55, 0x63, 0xa8, 0x00, 0x00, 0x07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80};
+	uint8_t init_sequence[20] = {0x02, 0x01, 0x07, 0xa2, 0x88, 0x81, 0x21, 0x55, 0x63, 0xa8, 0x00, 0x00, 0x07, 0xa3, 0xb8, 0x81, 0x20, 0x15, 0x63, 0x80};
 
 	/* Copy in the phone info */
 	memcpy(&(state->driver), &driver_nokia_3110, sizeof(gn_driver));
@@ -943,8 +943,8 @@ static gn_error P3110_IncomingSMSDelete(int messagetype, unsigned char *message,
 static gn_error P3110_IncomingSMSDelivered(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
 	static gn_sms_raw sms;
-/*	u8 dest_length, smsc_length, l;*/
-	u8 U0, U1, U2;
+/*	uint8_t dest_length, smsc_length, l;*/
+	uint8_t U0, U1, U2;
 
 	data->raw_sms = &sms;
 
@@ -1006,8 +1006,8 @@ static gn_error P3110_IncomingNoSMSInfo(int messagetype, unsigned char *message,
 
 static gn_error P3110_IncomingSMSInfo(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
 {
-	u8 center_number_length;
-	u8 option_number_length;
+	uint8_t center_number_length;
+	uint8_t option_number_length;
 	int count;
 
 	if (!data) return GN_ERR_INTERNALERROR;
