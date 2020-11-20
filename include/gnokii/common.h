@@ -20,6 +20,7 @@
 #ifndef _gnokii_common_h
 #define _gnokii_common_h
 
+#include <gnokii/apidecl.h>
 #include <gnokii/rlp-common.h>
 
 /* Type of connection. */

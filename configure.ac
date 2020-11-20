@@ -50,6 +50,9 @@ AM_INIT_AUTOMAKE([1.8 dist-bzip2])
 
 AC_PREFIX_DEFAULT("/usr/local")
 
+LIBGNOKII_DEFS=-DLIBGNOKII_DLL_EXPORT
+AC_SUBST(LIBGNOKII_DEFS)
+
 dnl ======================== Checks for programs.
 AC_PROG_CC
 AC_PROG_CPP
