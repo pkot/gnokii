@@ -20,13 +20,3 @@ gnokii_LDADD += $(top_builddir)/getopt/libgetopt.a
 
 # snprintf.c comes with its own magic as well
 gnokii_LDADD += $(top_builddir)/snprintf/libsnprintf.la
-
-#FIXME cross compiling
-#if WIN32_CROSS
-#PRGNAME=gnokii.exe
-#TARGET=-mconsole
-#AM_CFLAGS=-DGNOKIIDLL_IMPORTS
-#else
-PRGNAME=gnokii
-#endif
-
