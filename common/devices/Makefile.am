@@ -1,5 +1,3 @@
-DEFS = -DCOMPILING_LIBGNOKII @DEFS@
-
 noinst_LTLIBRARIES = libDEVICES.la
 
 PLATFORM_FILES = \
@@ -33,6 +31,9 @@ libDEVICES_la_SOURCES = \
 	irda.c \
 	dku2libusb.c \
 	bluetooth.c
+
+libDEVICES_la_CPPFLAGS =	\
+	@LIBGNOKII_DEFS@
 
 libDEVICES_la_CFLAGS =		\
 	-I$(top_srcdir)/include

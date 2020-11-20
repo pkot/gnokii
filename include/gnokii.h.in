@@ -36,16 +36,6 @@ extern "C" {
 #endif
 
 #include <stdarg.h>
-	
-#ifndef GNOKII_API
-#  if defined(WIN32) && defined(GNOKIIDLL_IMPORTS)
-#    define GNOKII_API __declspec(dllimport)
-#  elif (__GNUC__ - 0 > 3 || __GNUC__ == 3 && __GNUC_MINOR__ > 3)
-#    define GNOKII_API __attribute__ ((visibility("default")))
-#  else
-#    define GNOKII_API
-#  endif
-#endif
 
 #define LIBGNOKII_VERSION_STRING "@LIBGNOKII_VERSION_STRING@"
 #define LIBGNOKII_VERSION_MAJOR @LIBGNOKII_VERSION_MAJOR@
@@ -58,6 +48,7 @@ extern "C" {
 
 struct gn_statemachine;
 
+#include <gnokii/apidecl.h>
 #include <gnokii/error.h>
 #include <gnokii/common.h>
 #include <gnokii/data.h>

@@ -18,6 +18,7 @@
 #ifndef _gnokii_sms_h
 #define _gnokii_sms_h
 
+#include <gnokii/apidecl.h>
 #include <gnokii/error.h>
 #include <gnokii/common.h>
 #include <gnokii/bitmaps.h>

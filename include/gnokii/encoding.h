@@ -16,6 +16,8 @@
 #ifndef _gnokii_encoding_h
 #define _gnokii_encoding_h
 
+#include <gnokii/apidecl.h>
+
 GNOKII_API int gn_char_def_alphabet(unsigned char *string);
 
 /*

@@ -17,6 +17,8 @@
 #ifndef _gnokii_virtmodem_h
 #define _gnokii_virtmodem_h
 
+#include <gnokii/apidecl.h>
+
 struct vm_queue {
 	int n;
 	int head;
