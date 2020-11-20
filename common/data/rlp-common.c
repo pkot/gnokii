@@ -22,7 +22,6 @@
 #include "compat.h"
 #include "gnokii.h"
 #include "data/rlp-crc24.h"
-#include "misc.h" /* For u8, u32 etc. */
 
 #ifdef WIN32
 #  define INLINE __inline
@@ -71,13 +70,13 @@ rlp_state_variable XID_C_State;
 rlp_state_variable XID_R_State;
 rlp_state_variable TEST_R_State;
 
-u8 VR=0;
-u8 VA=0;
-u8 VS=0;
-u8 VD=0;
-u8 DISC_Count;
+uint8_t VR=0;
+uint8_t VA=0;
+uint8_t VS=0;
+uint8_t VD=0;
+uint8_t DISC_Count;
 
-u8 DTX_VR;
+uint8_t DTX_VR;
 rlp_frame_types DTX_SF;
 
 #define RLP_M 62
@@ -90,7 +89,7 @@ int SABM_Count;
 
 rlp_user_request_store UserRequests;
 
-u8 Poll_Count = 0;
+uint8_t Poll_Count = 0;
 
 /* For now timing is done based on a frame reception rate of 20ms */
 /* Serge has measured it as 18.4ms */
@@ -110,18 +109,18 @@ bool RRReady = false;
 bool LRReady = true;   /* FIXME - not handled (as if we couldn't keep up with 9600bps :-) */
 bool DISC_PBit = false;
 
-u8 LastStatus = 0xff;   /* Last Status byte */
+uint8_t LastStatus = 0xff;   /* Last Status byte */
 
 
 /* RLP Parameters. FIXME: Reset these - e.g. when entering state 0 */
 
-u8 RLP_SEND_WS = RLP_M-1;
-u8 RLP_RCV_WS = RLP_M-1;
-u8 RLP_Timeout1_Limit = 55;
-u8 RLP_N2 = 15; /* Maximum number of retransmisions. GSM spec says 6 here, but
-		   Nokia will XID this. */
-u8 RLP_T2 = 0;
-u8 RLP_VersionNumber = 0;
+uint8_t RLP_SEND_WS = RLP_M-1;
+uint8_t RLP_RCV_WS = RLP_M-1;
+uint8_t RLP_Timeout1_Limit = 55;
+uint8_t RLP_N2 = 15; /* Maximum number of retransmisions. GSM spec says 6 here, but
+			Nokia will XID this. */
+uint8_t RLP_T2 = 0;
+uint8_t RLP_VersionNumber = 0;
 
 
 /****** Externally called functions ********/
@@ -234,7 +233,7 @@ void RLP_SetTimer(int *timer)
 
 
 /* Previous sequence number. */
-static INLINE u8 Decr(u8 x)
+static INLINE uint8_t Decr(uint8_t x)
 {
 	if (x == 0)
 		return (RLP_M-1);
@@ -243,7 +242,7 @@ static INLINE u8 Decr(u8 x)
 }
 
 /* Next sequence number. */
-static INLINE u8 Incr(u8 x)
+static INLINE uint8_t Incr(uint8_t x)
 {
 	if (x == RLP_M-1)
 		return 0;
@@ -254,7 +253,7 @@ static INLINE u8 Incr(u8 x)
 /* Difference between sequence numbers. */
 
 /* FIXME: Not used now, so I have commented it out. PJ
- * static INLINE u8 Diff(u8 x, u8 y)
+ * static INLINE uint8_t Diff(uint8_t x, uint8_t y)
  * {
  *   int result = x-y;
  *   return (result >= 0) ? result : result + RLP_M;
@@ -262,7 +261,7 @@ static INLINE u8 Incr(u8 x)
 */
 
 /* Check value is within range */
-static bool InWindow(u8 val, u8 lower, u8 upper)
+static bool InWindow(uint8_t val, uint8_t lower, uint8_t upper)
 {
 	/* allow for one level of wrapping round */
 	if (lower >= RLP_M) lower -= RLP_M;
@@ -303,7 +302,7 @@ void RLP_Init_link_vars(void)
 
 void RLP_AddRingBufferDataToSlots(void)
 {
-	u8 buffer[24];
+	uint8_t buffer[24];
 	int size;
 
 	while ((S[VD].State == _idle)
@@ -478,7 +477,7 @@ void X(gn_rlp_f96_frame *frame)
 	int i;
 
 	for (i = 0; i < 30; i++)
-		dprintf("byte[%2d]: %02x\n", i, *( (u8 *)frame + i));
+		dprintf("byte[%2d]: %02x\n", i, *( (uint8_t *)frame + i));
 }
 
 
@@ -492,8 +491,8 @@ void ResetAllT_RCVS(void)
 /* This function is used for sending RLP frames to the phone. */
 void RLP_SendF96Frame(rlp_frame_types FrameType,
 		      bool OutCR, bool OutPF,
-		      u8 OutNR, u8 OutNS,
-		      u8 *OutData, u8 OutDTX)
+		      uint8_t OutNR, uint8_t OutNS,
+		      uint8_t *OutData, uint8_t OutDTX)
 {
 
 	gn_rlp_f96_frame frame;
@@ -654,7 +653,7 @@ void RLP_SendF96Frame(rlp_frame_types FrameType,
 	}
 
 	/* Store FCS in the frame. */
-	rlp_crc24checksum_calculate((u8 *)&frame, 27, frame.FCS);
+	rlp_crc24checksum_calculate((uint8_t *)&frame, 27, frame.FCS);
 
 	/* X(&frame); */
 
@@ -679,7 +678,7 @@ void rlp_f96_frame_display(gn_rlp_f96_frame *frame)
 
 	if (!frame) {
 		/* no frame provided, drop through to state machine anyway */
-	} else if (rlp_crc24fcs_check((u8 *)frame, 30) == true) {
+	} else if (rlp_crc24fcs_check((uint8_t *)frame, 30) == true) {
 
 		/* Here we have correct RLP frame so we can parse the field of the header
 		   to out structure. */
@@ -815,9 +814,9 @@ void TEST_Handling()
 /* FIXME: better XID_handling - but this will answer a XID command. */
 bool XID_Handling (gn_rlp_f96_frame *frame, rlp_f96_header *header)
 {
-	u8 count;
-	u8 type;
-	u8 length;
+	uint8_t count;
+	uint8_t type;
+	uint8_t length;
 
 	if (CurrentFrameType == RLP_FT_U_XID) {
 		count = 0;
@@ -963,9 +962,9 @@ void RLP_DeliverAllInSeqIF()
 
 
 /* Mark any missing information frames between VR and Ns */
-void RLP_MarkMissingIF(u8 Ns)
+void RLP_MarkMissingIF(uint8_t Ns)
 {
-	u8 i;
+	uint8_t i;
 	for (i = VR; i != Ns; i = Incr(i)) {
 		if (R[i].State == _idle) R[i].State = _srej;  /* bug in spec, fig A.23 */
 	}
@@ -1002,7 +1001,7 @@ bool RLP_I_Handler(gn_rlp_f96_frame *frame, rlp_f96_header *header)
 
 
 /* Mark acknowledged send frames */
-void RLP_AdvanceVA(u8 Nr)
+void RLP_AdvanceVA(uint8_t Nr)
 {
 	while (VA != Nr) {
 		S[VA].State = _idle;
@@ -1012,7 +1011,7 @@ void RLP_AdvanceVA(u8 Nr)
 
 
 /* Decrease VS back down to Nr since these have not been acknowledged */
-void RLP_DecreaseVS(u8 Nr)
+void RLP_DecreaseVS(uint8_t Nr)
 {
 	while (VS != Nr) {
 		VS = Decr(VS);
@@ -1023,7 +1022,7 @@ void RLP_DecreaseVS(u8 Nr)
 /* Supervisory frame handling */
 void RLP_S_Handler(gn_rlp_f96_frame *frame, rlp_f96_header *header)
 {
-	u8 i;
+	uint8_t i;
 
 	if ((header->CR) && (header->PF)) {
 		/* Special exchange (ie. error) - counter? */
@@ -1073,9 +1072,9 @@ void RLP_S_Handler(gn_rlp_f96_frame *frame, rlp_f96_header *header)
 
 
 /* Find the first SREJ frame */
-bool RLP_SREJSlot(u8 *x)
+bool RLP_SREJSlot(uint8_t *x)
 {
-	u8 i;
+	uint8_t i;
 
 	for (i = Incr(VR); i != VR; i = Incr(i))
 		if (R[i].State == _srej) {
@@ -1088,9 +1087,9 @@ bool RLP_SREJSlot(u8 *x)
 
 
 /* Check if any SREJ frames need sending, if not send the next in line */
-bool RLP_PrepareDataToTransmit(u8 *p)
+bool RLP_PrepareDataToTransmit(uint8_t *p)
 {
-	u8 i;
+	uint8_t i;
 
 	for (i = VA; i != VS; i = Incr(i))
 		if (S[i].State == _send) {
@@ -1109,9 +1108,9 @@ bool RLP_PrepareDataToTransmit(u8 *p)
 
 
 /* Send a SREJ command */
-void RLP_SendSREJ(u8 x)
+void RLP_SendSREJ(uint8_t x)
 {
-	u8 k;
+	uint8_t k;
 
 	if ((Poll_xchg == _idle) && (Poll_State == _send)) {
 		rlpprintf("Sending SREJ with poll\n");
@@ -1140,7 +1139,7 @@ void RLP_SendSREJ(u8 x)
 /* Send a command */
 void RLP_Send_XX_Cmd(rlp_frame_types type)
 {
-	u8 k;
+	uint8_t k;
 
 	if ((Poll_xchg != _wait) && (Poll_State == _send)) {
 		RLP_SendF96Frame(type, true, true, VR, 0, NULL, false);
@@ -1169,7 +1168,7 @@ void RLP_Send_XX_Cmd(rlp_frame_types type)
 /* Send a Response */
 void RLP_Send_XX_Resp(rlp_frame_types type)
 {
-	u8 k;
+	uint8_t k;
 
 	if (RRReady && RLP_PrepareDataToTransmit(&k)) {
 		rlpprintf("Sending Resp %x with frame %d\n",type+4,k);
@@ -1189,7 +1188,7 @@ void RLP_Send_XX_Resp(rlp_frame_types type)
 /* Decide which frame to use and send it - currently only used in state 4 */
 void RLP_SendData()
 {
-	u8 x;
+	uint8_t x;
 
 	if (UA_State == _send) {
 		RLP_SendF96Frame(RLP_FT_U_UA, false, UA_FBit, 0, 0, NULL, false);
@@ -1683,10 +1682,10 @@ void MAIN_STATE_MACHINE(gn_rlp_f96_frame *frame, rlp_f96_header *header)
    in any order and are delimited by a zero type field. This function is the
    exact implementation of section 5.2.2.6, Exchange Identification, XID of
    the GSM specification 04.22. */
-void rlp_xid_display(u8 *frame)
+void rlp_xid_display(uint8_t *frame)
 {
 	int count = 25;  /* Sanity check */
-	u8  type, length;
+	uint8_t type, length;
 
 	fprintf(stdout, "XID: ");
 

@@ -30,9 +30,9 @@
 static bool fb3110_serial_open(struct gn_statemachine *state);
 static void fb3110_rx_frame_handle(fb3110_incoming_frame *i, struct gn_statemachine *state);
 static void fb3110_rx_state_machine(unsigned char rx_byte, struct gn_statemachine *state);
-static gn_error fb3110_tx_frame_send(u8 frame_type, u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state);
+static gn_error fb3110_tx_frame_send(uint8_t frame_type, uint8_t message_length, uint8_t message_type, uint8_t sequence_byte, uint8_t *buffer, struct gn_statemachine *state);
 static gn_error fb3110_message_send(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state);
-static void fb3110_tx_ack_send(u8 messagetype, u8 checksum, struct gn_statemachine *state);
+static void fb3110_tx_ack_send(uint8_t messagetype, uint8_t checksum, struct gn_statemachine *state);
 static void fb3110_sequence_number_update(struct gn_statemachine *state);
 static int fb3110_message_type_fold(int type);
 
@@ -221,10 +221,10 @@ static gn_error fb3110_loop(struct timeval *timeout, struct gn_statemachine *sta
  * byte (0x01) and other values according the value specified when called.
  * Calculates checksum and then sends the lot down the pipe...
  */
-static gn_error fb3110_tx_frame_send(u8 frame_type, u8 message_length, u8 message_type, u8 sequence_byte, u8 *buffer, struct gn_statemachine *state)
+static gn_error fb3110_tx_frame_send(uint8_t frame_type, uint8_t message_length, uint8_t message_type, uint8_t sequence_byte, uint8_t *buffer, struct gn_statemachine *state)
 {
 
-	u8 out_buffer[FB3110_TRANSMIT_MAX_LENGTH];
+	uint8_t out_buffer[FB3110_TRANSMIT_MAX_LENGTH];
 	int count, current = 0;
 	unsigned char checksum;
 
@@ -272,7 +272,7 @@ static gn_error fb3110_tx_frame_send(u8 frame_type, u8 message_length, u8 messag
  */
 static gn_error fb3110_message_send(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
-	u8 seqnum, frame_type;
+	uint8_t seqnum, frame_type;
 
 	/* Data (RLP) frame always have message type 0x01 */
 	if (messagetype == 0x01) {
@@ -295,7 +295,7 @@ static gn_error fb3110_message_send(unsigned int messagesize, unsigned char mess
  * Sends the "standard" acknowledge message back to the phone in response to
  * a message it sent automatically or in response to a command sent to it.
  */
-static void fb3110_tx_ack_send(u8 messagetype, u8 seqno, struct gn_statemachine *state)
+static void fb3110_tx_ack_send(uint8_t messagetype, uint8_t seqno, struct gn_statemachine *state)
 {
 	if (fb3110_tx_frame_send(FB3110_FRAME_TYPE_OUT_CMD, 0, messagetype, (seqno & 0x1f) - 0x08, NULL, state))
 		dprintf("Failed to acknowledge message type %02x.\n", messagetype);
