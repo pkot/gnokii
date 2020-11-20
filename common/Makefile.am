@@ -52,13 +52,13 @@ libgnokii_la_SOURCES = \
 	pkt.c \
 	compat.c \
 	misc.c \
-	snprintf.c \
 	localcharset.c \
 	map.c \
 	gsm-auth.c \
 	$(DEVICE_SCRIPT)
 
 libgnokii_la_LIBADD = \
+	$(top_builddir)/snprintf/libsnprintf.la \
 	$(top_builddir)/common/phones/libPHONES.la \
 	$(top_builddir)/common/links/libLINKS.la \
 	$(top_builddir)/common/devices/libDEVICES.la \
