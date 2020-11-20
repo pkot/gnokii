@@ -13,13 +13,3 @@ gnokii_CFLAGS = -I$(top_srcdir)/include
 # Compile getopt1.c and getopt.c unconditionally on all platforms, it
 # has its own magic for the platforms that already have it.
 gnokii_LDADD += $(top_builddir)/getopt/libgetopt.a
-
-#FIXME cross compiling
-#if WIN32_CROSS
-#PRGNAME=gnokii.exe
-#TARGET=-mconsole
-#AM_CFLAGS=-DGNOKIIDLL_IMPORTS
-#else
-PRGNAME=gnokii
-#endif
-

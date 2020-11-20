@@ -1090,7 +1090,6 @@ echo "
     readline support:   $USE_READLINE
     Build Shared Lib:   $enable_shared
     Build Static Lib:   $enable_static
-    Windows:            $win32 
     Prefix:             $prefix
 
   Type '${MAKE}' for compilation and then '${MAKE} install', to
