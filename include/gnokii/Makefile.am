@@ -1,6 +1,7 @@
 
 gnokiisubdir = $(includedir)/gnokii
 gnokiisub_HEADERS = \
+		apidecl.h \
 		bitmaps.h \
 		call.h \
 		common.h \
