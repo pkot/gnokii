@@ -54,16 +54,16 @@ typedef struct{
 } fb3110_incoming_frame;
 
 typedef struct {
-	u16 message_length;
-	u8 message_type;
-	u8 *buffer;
+	uint16_t message_length;
+	uint8_t message_type;
+	uint8_t *buffer;
 } fb3110_outgoing_message;
 
 
 typedef struct{
 	fb3110_incoming_frame i;
-	u8 request_sequence_number;
-	u8 last_incoming_sequence_number;
+	uint8_t request_sequence_number;
+	uint8_t last_incoming_sequence_number;
 } fb3110_link;
 
 gn_error fb3110_initialise(struct gn_statemachine *state);

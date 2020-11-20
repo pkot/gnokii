@@ -20,7 +20,7 @@
 
 /* CRC-24 table is used for computation of RLP checksum. */
 
-const u32 CRC24_Table[256] = {
+const uint32_t CRC24_Table[256] = {
 	0x00000000, 0x00D6A776, 0x00F64557, 0x0020E221, 0x00B78115, 0x00612663,
 	0x0041C442, 0x00976334, 0x00340991, 0x00E2AEE7, 0x00C24CC6, 0x0014EBB0,
 	0x00838884, 0x00552FF2, 0x0075CDD3, 0x00A36AA5, 0x00681322, 0x00BEB454,
@@ -66,11 +66,11 @@ const u32 CRC24_Table[256] = {
 	0x006D7F0C, 0x00BBD87A, 0x009B3A5B, 0x004D9D2D
 };
 
-void rlp_crc24polinomial_calculate(u8 *data, int length, u32 *polinomial)
+void rlp_crc24polinomial_calculate(uint8_t *data, int length, uint32_t *polinomial)
 {
 
 	int i;
-	u8 cur;
+	uint8_t cur;
 
 	*polinomial = 0x00ffffff;
 
@@ -83,9 +83,9 @@ void rlp_crc24polinomial_calculate(u8 *data, int length, u32 *polinomial)
 }
 
 
-void rlp_crc24checksum_calculate(u8 *data, int length, u8 *crc)
+void rlp_crc24checksum_calculate(uint8_t *data, int length, uint8_t *crc)
 {
-	u32 polinomial;
+	uint32_t polinomial;
 
 	rlp_crc24polinomial_calculate(data, length, &polinomial);
 	crc[0] = polinomial & 0x0000ffff;
@@ -94,10 +94,10 @@ void rlp_crc24checksum_calculate(u8 *data, int length, u8 *crc)
 
 }
 
-bool rlp_crc24fcs_check(u8 *data, int length)
+bool rlp_crc24fcs_check(uint8_t *data, int length)
 {
 
-	u8 crc[] = { 0x00, 0x00, 0x00 };
+	uint8_t crc[] = { 0x00, 0x00, 0x00 };
 
 	rlp_crc24checksum_calculate(data, length - 3, crc);
 
