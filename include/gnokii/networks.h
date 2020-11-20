@@ -16,6 +16,8 @@
 #ifndef _gnokii_networks_h
 #define _gnokii_networks_h
 
+#include <gnokii/apidecl.h>
+
 /* This type is used to hold information about various GSM networks. */
 typedef struct {
 	char *code; /* GSM network code */

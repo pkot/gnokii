@@ -16,6 +16,8 @@
 #ifndef _gnokii_error_h
 #define _gnokii_error_h
 
+#include <gnokii/apidecl.h>
+
 /*
  * Define standard GSM error/return code values. These codes are also used for
  * some internal functions such as SIM read/write in the model specific code.

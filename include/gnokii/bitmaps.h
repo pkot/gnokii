@@ -20,6 +20,7 @@
 
 #include <stdio.h>
 
+#include <gnokii/apidecl.h>
 #include <gnokii/error.h>
 #include <gnokii/common.h>
 
