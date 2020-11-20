@@ -1060,6 +1060,7 @@ AC_OUTPUT(
 	  gnokii/Makefile
 	  gnokiid/Makefile
 	  smsd/Makefile
+	  snprintf/Makefile
 	  utils/Makefile
 	  xgnokii/xgnokii.pc
 	  xgnokii/Makefile
