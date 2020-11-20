@@ -1136,7 +1136,7 @@ int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type
  * This function implements unpacking of numbers (SMS Center number and
  * destination number) for SMS receiving function.
  */
-char *char_bcd_number_get(u8 *number)
+char *char_bcd_number_get(uint8_t *number)
 {
 	static char buffer[GN_BCD_STRING_MAX_LENGTH] = "";
 	int length = number[0]; /* This is the length of BCD coded number */
