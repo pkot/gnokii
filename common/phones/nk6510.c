@@ -197,6 +197,12 @@ static void inc_filecount(gn_file_list *fl)
 	return;
 }
 
+static void announce_table_misconfiguration(struct gn_statemachine *state)
+{
+	dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
+	dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+}
+
 /* Functions prototypes */
 static gn_error NK6510_Functions(gn_operation op, gn_data *data, struct gn_statemachine *state);
 static gn_error NK6510_Initialise(struct gn_statemachine *state);
@@ -1274,8 +1280,7 @@ static gn_error NK6510_GetSMSFolders(gn_data *data, struct gn_statemachine *stat
 		/* Try file approach */
 		error = NK6510_GetSMSFolders_S40_30(data, state);
 		if (error == GN_ERR_NONE) {
-			dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
-			dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+			announce_table_misconfiguration(state);
 			DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
 		}
 	}
@@ -1532,13 +1537,11 @@ static gn_error NK6510_DeleteSMS(gn_data *data, struct gn_statemachine *state)
 		dprintf("NK6510_DeleteSMS: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file method */
 		error = NK6510_DeleteSMS_S40_30(data, state);
-		if (error != GN_ERR_NONE)
-			dprintf("%s\n", gn_error_print(error));
-		else {
-			dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
-			dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+		if (error == GN_ERR_NONE) {
+			announce_table_misconfiguration(state);
 			DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
-		}
+		} else
+			dprintf("%s\n", gn_error_print(error));
 		return error;
 	}
 
@@ -1605,13 +1608,12 @@ static gn_error NK6510_GetSMS(gn_data *data, struct gn_statemachine *state)
 		dprintf("NK6510_GetSMS: before switch to S40_30\nerror: %s (%d)\n", gn_error_print(error), error);
 		/* Try file method */
 		error = NK6510_GetSMS_S40_30(data, state);
-		if (error != GN_ERR_NONE)
-			dprintf("%s\n", gn_error_print(error));
-		else {
-			dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
-			dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+		if (error == GN_ERR_NONE) {
+			announce_table_misconfiguration(state);
 			DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
-		}
+		} else
+			dprintf("%s\n", gn_error_print(error));
+
 		return error;
 	}
 
@@ -3247,8 +3249,7 @@ retry:
 	error = sm_block(NK6510_MSG_PHONEBOOK, data, state);
 	if (error == GN_ERR_FAILED && !(DRVINSTANCE(state)->pm->flags & PM_EXTPBK2)) {
 		dprintf("Writing failed. Falling back to a new method.\n");
-		dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
-		dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+		announce_table_misconfiguration(state);
 		DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
 		goto retry;
 	}
@@ -4083,8 +4084,7 @@ static gn_error NK6510_WriteCalendarNote(gn_data *data, struct gn_statemachine *
 			 */
 			error = NK6510_WriteCalendarNote_S40_30(data, state);
 			if (error == GN_ERR_NONE) {
-				dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
-				dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+				announce_table_misconfiguration(state);
 				DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
 			}
 			return error;
@@ -4348,8 +4348,7 @@ static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 		 */
 		error = NK6510_DeleteCalendarNote_S40_30(data, state);
 		if (error == GN_ERR_NONE) {
-			dprintf("Misconfiguration in the phone table detected.\nPlease report to gnokii ml (gnokii-users@nongnu.org).\n");
-			dprintf("Model %s (%s) is series40 3rd+ Edition.\n", DRVINSTANCE(state)->pm->product_name, DRVINSTANCE(state)->pm->model);
+			announce_table_misconfiguration(state);
 			DRVINSTANCE(state)->pm->flags |= PM_DEFAULT_S40_3RD;
 		}
 	}
