@@ -41,7 +41,7 @@ void map_free(struct map **map)
  * operations, we'll try to free them.
  * map pointer gets modified with this operation.
  * retval:
- * 	0: OK
+ *	0: OK
  *	-1: invalid input data (key or data are NULL)
  *	-2: duplicated key
  *	-3: allocation failed
