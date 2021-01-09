@@ -175,7 +175,7 @@ gn_error getnetworkinfo(gn_data *data, struct gn_statemachine *state)
 	}
 
 	/* Ugly, ugly, ... */
-	if (networkinfo.cell_id[2] == 0 && networkinfo.cell_id[3] == 0)  
+	if (networkinfo.cell_id[2] == 0 && networkinfo.cell_id[3] == 0)
 		cid = (networkinfo.cell_id[0] << 8) + networkinfo.cell_id[1];
 	else
 		cid = (networkinfo.cell_id[0] << 24) + (networkinfo.cell_id[1] << 16) + (networkinfo.cell_id[2] << 8) + networkinfo.cell_id[3];

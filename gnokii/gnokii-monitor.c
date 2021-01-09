@@ -93,7 +93,7 @@ static gn_error readcbmessage(gn_cb_message *message)
 {
 	if (!cb_queue[cb_ridx].is_new)
 		return GN_ERR_NONEWCBRECEIVED;
-	
+
 	*message = cb_queue[cb_ridx];
 	cb_queue[cb_ridx].is_new = false;
 	cb_ridx = (cb_ridx + 1) % (sizeof(cb_queue) / sizeof(gn_cb_message));
@@ -458,7 +458,7 @@ gn_error getdisplaystatus(gn_data *data, struct gn_statemachine *state)
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 		break;
 	}
-	
+
 	return error;
 }
 

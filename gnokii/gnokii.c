@@ -306,7 +306,7 @@ static int install_log_handler(void)
 			st = stat(basepath, &buf);
 			if (st)
 				mkdir(basepath, S_IRWXU);
-	
+
 			st = stat(path, &buf);
 			if (st)
 				mkdir(path, S_IRWXU);
@@ -481,7 +481,7 @@ static int parse_options(int argc, char *argv[])
 		{ "phone",              required_argument, NULL, OPT_CONFIGMODEL },
 
 		/* Get Security Code */
-		{ "getsecuritycode",    no_argument,   	   NULL, OPT_GETSECURITYCODE },
+		{ "getsecuritycode",    no_argument,	   NULL, OPT_GETSECURITYCODE },
 
 		/* Enter Security Code mode */
 		{ "entersecuritycode",  required_argument, NULL, OPT_ENTERSECURITYCODE },
@@ -667,7 +667,7 @@ static int parse_options(int argc, char *argv[])
 		{ "getwapsetting",      required_argument, NULL, OPT_GETWAPSETTING },
 
 		/* Write WAP setting */
-		{ "writewapsetting",    no_argument, 	   NULL, OPT_WRITEWAPSETTING },
+		{ "writewapsetting",    no_argument,	   NULL, OPT_WRITEWAPSETTING },
 
 		/* Activate WAP setting */
 		{ "activatewapsetting", required_argument, NULL, OPT_ACTIVATEWAPSETTING },
@@ -1189,7 +1189,7 @@ int shell(gn_data *data, struct gn_statemachine *state)
 		} while (input);
 		argv[argc] = NULL;
 		if (!empty)
-        		parse_options(argc, argv);
+			parse_options(argc, argv);
 		for (i = 1; i < argc; i++)
 			free(argv[i]);
 		free(old);

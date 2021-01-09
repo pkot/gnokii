@@ -81,7 +81,7 @@ gn_error sendlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine 
 	case GN_BMP_PictureMessage: fprintf(stderr, _("Sending Multipart Message: Picture Message.\n")); break;
 	case GN_BMP_EMSPicture:     fprintf(stderr, _("Sending EMS-compliant Picture Message.\n")); break;
 	case GN_BMP_EMSAnimation:   fprintf(stderr, _("Sending EMS-compliant Animation.\n")); break;
-	default: 	            fprintf(stderr, _("You should specify what kind of logo to send!\n")); return -1;
+	default:	            fprintf(stderr, _("You should specify what kind of logo to send!\n")); return -1;
 	}
 
 	sms.user_data[0].type = GN_SMS_DATA_Bitmap;
@@ -331,7 +331,7 @@ gn_error setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		error = (argc > optind) ? ReadBitmapFileDialog(argv[optind], &bitmap, phone) : gn_bmp_null(&bitmap, phone);
 		if (error != GN_ERR_NONE)
 			return error;
-			
+
 		memset(&bitmap.netcode, 0, sizeof(bitmap.netcode));
 		/* FIXME: ugly as hell */
 		if (!strncmp(state->driver.phone.models, "6510", 4))
@@ -411,13 +411,13 @@ gn_error setlogo(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 					data->bitmap = &oldbit;
 					gn_sm_functions(GN_OP_SetBitmap, data, state);
 					gn_sm_functions(GN_OP_GetBitmap, data, state);
-					
+
 					if (bitmap.type == GN_BMP_DealerNoteText) {
 						fprintf(stderr, _("Error setting dealer welcome note - "));
 					} else {
 						fprintf(stderr, _("Error setting welcome note - "));
 					}
-					
+
 					if (oldbit.text[0] != '!') {
 						fprintf(stderr, _("SIM card and PIN is required\n"));
 						return GN_ERR_UNKNOWN;

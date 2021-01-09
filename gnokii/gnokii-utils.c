@@ -157,7 +157,7 @@ gn_error loadbitmap(gn_bmp *bitmap, char *s, int type, struct gn_statemachine *s
 	return GN_ERR_NONE;
 }
 
-/* 
+/*
  * Does almost the same as atoi().
  * Returns error in case when the string is not numerical or when strtol returns an error.
  * Modifies errno variable.

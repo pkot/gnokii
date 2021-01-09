@@ -10,7 +10,7 @@
   Copyright (C) 2000-2006  Pawel Kot
   Copyright (C) 2001       Jan Kratochvil
   Copyright (C) 2003       BORBELY Zoltan
-  
+
   Header file for gnokii utility.
 
 */
@@ -38,7 +38,7 @@ extern int shell(gn_data *data, struct gn_statemachine *state);
 /* Utils functions */
 int writefile(char *filename, char *text, int mode);
 int writebuffer(const char *filename, const char *buffer, size_t nitems, int mode);
-extern gn_error readtext(gn_sms_user_data *udata); 
+extern gn_error readtext(gn_sms_user_data *udata);
 extern gn_error loadbitmap(gn_bmp *bitmap, char *s, int type, struct gn_statemachine *state);
 extern int parse_end_value_option(int argc, char *argv[], int pos, int start_value);
 extern void interrupted(int sig);
