@@ -1246,7 +1246,7 @@ void file_nsl_save(FILE *file, gn_bmp *bitmap, gn_phone *info)
 	header[10] = bitmap->size / 256;
 	header[11] = bitmap->size % 256;
 	fwrite(header, 1, sizeof(header), file);
-	
+
 	fwrite(bitmap->bitmap, 1, bitmap->size, file);
 }
 
@@ -1486,7 +1486,7 @@ GNOKII_API gn_error gn_file_phonebook_raw_parse(gn_phonebook_entry *entry, char 
 		break;
 	}
 	offset += o;
-	
+
 	entry->empty = false;
 
 	for (entry->subentries_count = 0; offset < length; entry->subentries_count++) {

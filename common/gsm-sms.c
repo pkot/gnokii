@@ -1058,10 +1058,10 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		/* TP-Message-Number */
 		dprintf("TP-Message-Number 0x%02x\n", pdu[offset++]);
 		/* TP-Destination-Address */
-	l = (pdu[offset] % 2) ? pdu[offset] + 1 : pdu[offset];
-	l = l / 2 + 2;
-	memcpy(rawsms->remote_number, pdu + offset, l);
-	offset += l;
+		l = (pdu[offset] % 2) ? pdu[offset] + 1 : pdu[offset];
+		l = l / 2 + 2;
+		memcpy(rawsms->remote_number, pdu + offset, l);
+		offset += l;
 		/* TP-Command-Data-Length */
 		dprintf("TP-Command-Data-Length 0x%02x\n", pdu[offset++]);
 		/* TP-Command-Data */
@@ -1323,7 +1323,7 @@ GNOKII_API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemach
 		ERROR();
 
 		data->sms_folder->folder_id = i;	/* so we don't need to do a modulo 8 each time */
-			
+
 		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->sms_folder->number, i);
 		error = sms_get_read(data);
 		ERROR();
@@ -1737,11 +1737,11 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 
 			if (data->sms->user_data[i].type == GN_SMS_DATA_Text ||
 			    data->sms->user_data[i].type == GN_SMS_DATA_NokiaText) {
-			       	str = g_locale_to_utf8(data->sms->user_data[i].u.text, -1, &inlen, &outlen, NULL);
-			       	data->sms->user_data[i].chars = g_utf8_strlen(str, outlen);
-			       	memset(data->sms->user_data[i].u.text, 0, sizeof(data->sms->user_data[i].u.text));
-			       	g_utf8_strncpy(data->sms->user_data[i].u.text, str, data->sms->user_data[i].chars);
-			       	g_free(str);
+				str = g_locale_to_utf8(data->sms->user_data[i].u.text, -1, &inlen, &outlen, NULL);
+				data->sms->user_data[i].chars = g_utf8_strlen(str, outlen);
+				memset(data->sms->user_data[i].u.text, 0, sizeof(data->sms->user_data[i].u.text));
+				g_utf8_strncpy(data->sms->user_data[i].u.text, str, data->sms->user_data[i].chars);
+				g_free(str);
 				/* Let's make sure the encoding is correct */
 				enc = char_def_alphabet_string_stats(data->sms->user_data[i].u.text, &enc_chars, &ext_chars);
 				if (enc == GN_SMS_DCS_UCS2)
@@ -2030,7 +2030,7 @@ cleanup:
 char *encode_attr_inline_string(char token, char *string, int *data_len)
 {
 	char *data = NULL;
-	
+
 	/* we need 3 extra bytes for tags */
 	*data_len = strlen(string) + 3;
 	data = malloc(*data_len);
@@ -2038,7 +2038,7 @@ char *encode_attr_inline_string(char token, char *string, int *data_len)
 	if (!data) {
 	    return NULL;
 	}
-	
+
 	data[0] = token;
 	data[1] = TAG_INLINE;
 	memcpy(data + 2, string, strlen(string));
@@ -2053,26 +2053,26 @@ char *encode_indication(gn_wap_push *wp, int *data_len)
 	char *attr = NULL;
 	int attr_len = 0;
 	int offset = 0;
-	
+
 	/* encode tag attribute */
 	attr = encode_attr_inline_string(ATTR_HREF, wp->url, &attr_len);
-	
+
 	if (!attr || !attr_len) {
 	    return NULL;
 	}
-	
+
 	/* need 5 extra bytes for indication token & attributes */
 	*data_len = attr_len + strlen(wp->text) + 5;
 	data = malloc(*data_len);
-	
+
 	if (!data) {
 		free(attr);
 		return NULL;
 	}
-	
+
 	/* indication tag token */
 	data[offset++] = TOKEN_KNOWN_AC | TAG_INDICATION;
-	
+
 	/* attribute */
 	memcpy(data + offset, attr, attr_len);
 	offset += attr_len;
@@ -2083,7 +2083,7 @@ char *encode_indication(gn_wap_push *wp, int *data_len)
 	memcpy(data + offset, wp->text, strlen(wp->text));
 	offset += strlen(wp->text);
 	data[offset++] = 0x00;
-	
+
 	/* tag end */
 	data[offset++] = TAG_END;
 
@@ -2097,7 +2097,7 @@ char *encode_si(gn_wap_push *wp, int *data_len)
 	char *data = NULL;
 	char *child = NULL;
 	int child_len = 0;
-	
+
 	child = encode_indication(wp, &child_len);
 
 	if (!child || !data_len) {
@@ -2107,42 +2107,42 @@ char *encode_si(gn_wap_push *wp, int *data_len)
 	/* we need extra 2 bytes for si token */
 	*data_len = child_len + 2;
 	data = malloc(*data_len);
-	
+
 	if (!data) {
 	    free(child);
 	    return NULL;
 	}
-	
+
 	data[0] = TOKEN_KNOWN_C | TAG_SI;
 	memcpy(data + 1, child, child_len);
 	data[*data_len - 1] = TAG_END;
-	
+
 	free(child);
-	
+
 	return data;
 }
 
 GNOKII_API gn_error gn_wap_push_encode(gn_wap_push *wp)
 {
-	
+
 	char *data = NULL;
 	int data_len = 0;
-	
+
 	data = encode_si(wp, &data_len);
-	
+
 	if (!data || !data_len) {
 	    return GN_ERR_FAILED;
 	}
-	
+
 	wp->data = malloc(data_len + sizeof(gn_wap_push_header));
 
 	if (!wp->data) {
 	    return GN_ERR_FAILED;
 	}
-	
+
 	memcpy(wp->data, &wp->header, sizeof(gn_wap_push_header));
 	memcpy(wp->data + sizeof(gn_wap_push_header), data, data_len);
-	
+
 	wp->data_len = data_len + sizeof(gn_wap_push_header);
 
 	return GN_ERR_NONE;
@@ -2156,16 +2156,16 @@ GNOKII_API void gn_wap_push_init(gn_wap_push *wp)
 	}
 
 	memset(wp, 0, sizeof(gn_wap_push));
-	
-	wp->header.wsp_tid 		= 0x00;
-	wp->header.wsp_pdu 		= PDU_TYPE_Push;
-	wp->header.wsp_hlen 		= 0x01;
-	wp->header.wsp_content_type 	= CONTENT_TYPE;
 
-	wp->header.version 	= WBXML_VERSION;
-	wp->header.public_id 	= TAG_SI;
-	wp->header.charset 	= WAPPush_CHARSET;
-	wp->header.stl 		= 0x00; /* string table length */
+	wp->header.wsp_tid		= 0x00;
+	wp->header.wsp_pdu		= PDU_TYPE_Push;
+	wp->header.wsp_hlen		= 0x01;
+	wp->header.wsp_content_type	= CONTENT_TYPE;
+
+	wp->header.version	= WBXML_VERSION;
+	wp->header.public_id	= TAG_SI;
+	wp->header.charset	= WAPPush_CHARSET;
+	wp->header.stl		= 0x00; /* string table length */
 }
 
 static char *status2str(gn_sms_message_status status)
@@ -2285,7 +2285,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 		CONCAT(buf, tmp, size, "From %s@%s %s", sms->remote.number, from, asctime(loctime));
 		break;
 	}
-	
+
 	tmp = calloc(MAX_DATE_LENGTH, sizeof(char));
 	if (!tmp)
 		goto error;

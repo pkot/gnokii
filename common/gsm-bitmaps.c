@@ -44,7 +44,7 @@ GNOKII_API void gn_bmp_point_set(gn_bmp *bmp, int x, int y)
 	case GN_BMP_StartupLogo:
 		bmp->bitmap[((y / 8) * bmp->width) + x] |= 1 << (y % 8);
 		break;
-	/* Testing only! */	
+	/* Testing only! */
 	case GN_BMP_PictureMessage:
 		bmp->bitmap[9 * y + (x / 8)] |= 1 << (7 - (x % 8));
 		break;
@@ -66,7 +66,7 @@ GNOKII_API void gn_bmp_point_clear(gn_bmp *bmp, int x, int y)
 	case GN_BMP_NewOperatorLogo:
 		bmp->bitmap[((y / 8) * bmp->width) + x] &= ~(1 << (y % 8));
 		break;
-	/* Testing only! */	
+	/* Testing only! */
 	case GN_BMP_PictureMessage:
 		bmp->bitmap[9 * y + (x / 8)] &= ~(1 << (7 - (x % 8)));
 		break;
@@ -269,9 +269,9 @@ GNOKII_API int gn_bmp_sms_encode(gn_bmp *bitmap, unsigned char *message)
 	case GN_BMP_EMSAnimation:
 		dprintf("EMS animation\n");
 		message[current++] = 128 + 3;
-		message[current++] = 0x0e; 	/* Animation code */
+		message[current++] = 0x0e;	/* Animation code */
 		message[current++] = 128 + 1;   /* Picture size */;
-		message[current++] = 0x00; 	/* Position where to display */
+		message[current++] = 0x00;	/* Position where to display */
 	case GN_BMP_EMSAnimation2:
 		dprintf("(without header)\n");
 		if (bitmap->width != 16) {

@@ -78,15 +78,15 @@ void mferror(struct MF *mf, char *s);
 
 
 /* MIDI status commands most significant bit is 1 */
-#define note_off         	0x80
-#define note_on          	0x90
-#define poly_aftertouch  	0xa0
-#define control_change    	0xb0
-#define program_chng     	0xc0
+#define note_off		0x80
+#define note_on			0x90
+#define poly_aftertouch		0xa0
+#define control_change		0xb0
+#define program_chng		0xc0
 #define channel_aftertouch      0xd0
-#define pitch_wheel      	0xe0
-#define system_exclusive      	0xf0
-#define delay_packet	 	(1111)
+#define pitch_wheel		0xe0
+#define system_exclusive	0xf0
+#define delay_packet		(1111)
 
 /* 7 bit controllers */
 #define damper_pedal            0x40
@@ -116,12 +116,12 @@ void mferror(struct MF *mf, char *s);
 
 /* Standard MIDI Files meta event definitions */
 #define	meta_event		0xFF
-#define	sequence_number 	0x00
+#define	sequence_number		0x00
 #define	text_event		0x01
-#define copyright_notice 	0x02
-#define sequence_name    	0x03
-#define instrument_name 	0x04
-#define lyric	        	0x05
+#define copyright_notice	0x02
+#define sequence_name		0x03
+#define instrument_name		0x04
+#define lyric			0x05
 #define marker			0x06
 #define	cue_point		0x07
 #define channel_prefix		0x20

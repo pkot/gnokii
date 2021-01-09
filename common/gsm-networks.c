@@ -1288,7 +1288,7 @@ GNOKII_API char *gn_network_code_find(char *network_name, char *country_name)
 {
 	int index = 0;
 	char country_code[5];
-	
+
 	snprintf(country_code, 4, "%3s ", gn_country_code_get(country_name));
 	country_code[4] = 0;
 	while (networks[index].name &&
@@ -1354,7 +1354,7 @@ GNOKII_API int gn_country_get(gn_country *country, int index)
 GNOKII_API char *gn_network2country(char *network_code)
 {
 	char ccode[4];
-	
+
 	snprintf(ccode, sizeof(ccode), "%s", network_code);
 
 	return gn_country_name_get(ccode);
