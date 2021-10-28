@@ -367,17 +367,17 @@ static unsigned int char_def_alphabet_ext_decode(unsigned char value)
 {
 	dprintf("Default extended alphabet\n");
 	switch (value) {
-	case 0x0a: return 0x000c; break; /* form feed */
-	case 0x14: return 0x005e; break; /* ^ */
-	case 0x28: return 0x007b; break; /* { */
-	case 0x29: return 0x007d; break; /* } */
-	case 0x2f: return 0x005c; break; /* \ */
-	case 0x3c: return 0x005b; break; /* [ */
-	case 0x3d: return 0x007e; break; /* ~ */
-	case 0x3e: return 0x005d; break; /* ] */
-	case 0x40: return 0x007c; break; /* | */
-	case 0x65: return 0x20ac; break; /* € */
-	default:   return 0x003f; break; /* invalid character, set ? */
+	case 0x0a: return 0x000c; /* form feed */
+	case 0x14: return 0x005e; /* ^ */
+	case 0x28: return 0x007b; /* { */
+	case 0x29: return 0x007d; /* } */
+	case 0x2f: return 0x005c; /* \ */
+	case 0x3c: return 0x005b; /* [ */
+	case 0x3d: return 0x007e; /* ~ */
+	case 0x3e: return 0x005d; /* ] */
+	case 0x40: return 0x007c; /* | */
+	case 0x65: return 0x20ac; /* € */
+	default:   return 0x003f; /* invalid character, set ? */
 	}
 }
 
