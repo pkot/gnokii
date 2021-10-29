@@ -431,6 +431,27 @@ static void ReadSMS (gpointer d, gpointer userData)
 
   if (data->type == GN_SMS_MT_Deliver || data->type == GN_SMS_MT_StatusReport)
   {
+    /* Plugins expect delivery status as a text message */
+    if (data->user_data[0].type == GN_SMS_DATA_DRStatus) {
+      switch (data->user_data[0].u.dr_status) {
+      case GN_SMS_DR_Status_None:
+        strncpy(data->user_data[0].u.text, _("None"), sizeof(data->user_data[0].u.text));
+        break;
+      case GN_SMS_DR_Status_Invalid:
+        strncpy(data->user_data[0].u.text, _("Unknown"), sizeof(data->user_data[0].u.text));
+	break;
+      case GN_SMS_DR_Status_Delivered:
+        strncpy(data->user_data[0].u.text, _("Delivered"), sizeof(data->user_data[0].u.text));
+	break;
+      case GN_SMS_DR_Status_Pending:
+        strncpy(data->user_data[0].u.text, _("Pending"), sizeof(data->user_data[0].u.text));
+	break;
+      case GN_SMS_DR_Status_Failed_Temporary:
+      case GN_SMS_DR_Status_Failed_Permanent:
+        strncpy(data->user_data[0].u.text, _("Failed"), sizeof(data->user_data[0].u.text));
+        break;
+      }
+    }
     gn_log_xdebug ("%d. %s   ", data->number, data->remote.number);
     gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
                     data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
