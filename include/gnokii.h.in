@@ -13,7 +13,7 @@
   Copyright (C) 2002-2003 BORBELY Zoltan, Ladis Michl
   Copyright (C) 2004      Martin Goldhahn
   Copyright (C) 2006      Helge Deller
-  
+
   Main header file for gnokii. Include just this file in your app.
 */
 
@@ -141,7 +141,7 @@ GNOKII_API gn_memory_type          gn_lib_get_pb_memtype        (struct gn_state
 GNOKII_API int                     gn_lib_get_pb_location       (struct gn_statemachine *state); /* 1*/
 GNOKII_API gn_timestamp            gn_lib_get_pb_date           (struct gn_statemachine *state); /* */
 GNOKII_API int                     gn_lib_get_pb_num_subentries (struct gn_statemachine *state); /* */
-GNOKII_API gn_error	gn_lib_get_pb_subentry(struct gn_statemachine *state, const int index, 
+GNOKII_API gn_error	gn_lib_get_pb_subentry(struct gn_statemachine *state, const int index,
 			gn_phonebook_entry_type *entry_type, gn_phonebook_number_type *number_type, const char **number);
 
 /* How to write to a phonebook entry with 3 steps:
@@ -207,7 +207,6 @@ GNOKII_API void gn_timestamp_set(gn_timestamp *dt, int year, int month, int day,
 			int hour, int minute, int second, int timezone);
 GNOKII_API void gn_timestamp_get(gn_timestamp *dt, int *year, int *month, int *day,
 			int *hour, int *minute, int *second, int *timezone);
-
 
 
 /****************************************************************************/
