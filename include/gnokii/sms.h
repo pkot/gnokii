@@ -324,7 +324,8 @@ typedef enum {
 	GN_SMS_DATA_Animation = 0x07,
 	GN_SMS_DATA_Concat    = 0x08,
 	GN_SMS_DATA_WAPPush   = 0x09,
-	GN_SMS_DATA_Other     = 0x0a
+	GN_SMS_DATA_Other     = 0x0a,
+	GN_SMS_DATA_DRStatus  = 0x0b
 } gn_sms_data_type;
 
 /*** FOLDER INFO ***/
@@ -372,12 +373,8 @@ typedef struct {
 		gn_ringtone ringtone;
 		gn_bmp animation[4];
 		gn_sms_concat concat;
+		gn_sms_delivery_report_status dr_status;
 	} u;
-	/* That should be in the union, but for delivery reports we already
-	 * set text there. Currently we don't want to break API, so I put it here
-	 * Pawel Kot, 2007-11-21
-	 */
-	gn_sms_delivery_report_status dr_status;
 } gn_sms_user_data;
 
 /* Define datatype for SMS messages exported to the user applications. */
