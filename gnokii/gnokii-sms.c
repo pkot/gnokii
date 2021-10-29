@@ -761,7 +761,29 @@ parsefile:
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Recipient: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
 				fprintf(stdout, _("Text:\n"));
-				message_text = message.user_data[0].u.text;
+				if (message.user_data[0].type == GN_SMS_DATA_DRStatus) {
+					switch (message.user_data[0].u.dr_status) {
+					case GN_SMS_DR_Status_None:
+						fprintf(stdout, _("None"));
+						break;
+					case GN_SMS_DR_Status_Invalid:
+						fprintf(stdout, _("Unknown"));
+						break;
+					case GN_SMS_DR_Status_Delivered:
+						fprintf(stdout, _("Delivered"));
+						break;
+					case GN_SMS_DR_Status_Pending:
+						fprintf(stdout, _("Pending"));
+						break;
+					case GN_SMS_DR_Status_Failed_Temporary:
+					case GN_SMS_DR_Status_Failed_Permanent:
+						fprintf(stdout, _("Failed"));
+						break;
+					}
+					fprintf(stdout, "\n");
+				} else {
+					dprintf("Unexpected data type\n");
+				}
 				break;
 			case GN_SMS_MT_Picture:
 			case GN_SMS_MT_PictureTemplate:
