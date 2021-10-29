@@ -489,16 +489,16 @@ typedef struct {
 	unsigned char wsp_hlen;
 	unsigned char wsp_content_type;
 
-    	unsigned char version; /* wbxml version */
-    	unsigned char public_id;
-    	unsigned char charset; /* default 106 = UTF-8 */
-    	unsigned char stl;
+	unsigned char version; /* wbxml version */
+	unsigned char public_id;
+	unsigned char charset; /* default 106 = UTF-8 */
+	unsigned char stl;
 } gn_wap_push_header;
 
 typedef struct {
 	gn_wap_push_header header;
 	char *url;
-    	char *text;
+	char *text;
 	char *data;
 	int data_len;
 } gn_wap_push;

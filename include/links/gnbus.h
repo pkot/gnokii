@@ -28,7 +28,7 @@
 
 enum gnbus_rx_state {
 	GNBUS_RX_Discarding,
-    	GNBUS_RX_Sync,
+	GNBUS_RX_Sync,
 	GNBUS_RX_GetSequence,
 	GNBUS_RX_GetLength1,
 	GNBUS_RX_GetLength2,

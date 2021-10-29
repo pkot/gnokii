@@ -40,14 +40,14 @@ typedef enum {
 	GN_ERR_WAITING,			/* Waiting for the next part of the message. */
 	GN_ERR_NOTREADY,		/* Device not ready. */
 	GN_ERR_BUSY,			/* Command is still being executed. */
-	
+
 	/* Locations */
 	GN_ERR_INVALIDLOCATION,		/* The given memory location has not valid location. */
 	GN_ERR_INVALIDMEMORYTYPE,	/* Invalid type of memory. */
 	GN_ERR_EMPTYLOCATION,		/* The given location is empty. */
 
 	/* Format */
-	GN_ERR_ENTRYTOOLONG, 		/* The given entry is too long */
+	GN_ERR_ENTRYTOOLONG,		/* The given entry is too long */
 	GN_ERR_WRONGDATAFORMAT,		/* Data format is not valid */
 	GN_ERR_INVALIDSIZE,		/* Wrong size of the object */
 

@@ -39,7 +39,7 @@
 
 
 enum m2bus_rx_state {
-    	M2BUS_RX_Sync,
+	M2BUS_RX_Sync,
 	M2BUS_RX_Discarding,
 	M2BUS_RX_GetDestination,
 	M2BUS_RX_GetSource,

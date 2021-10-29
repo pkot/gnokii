@@ -140,17 +140,17 @@ typedef enum {
 #define NK7110_MEMORY_F7		0x59
 #define NK7110_MEMORY_F8		0x61
 #define NK7110_MEMORY_F9		0x69
-#define NK7110_MEMORY_F10	 	0x71
-#define NK7110_MEMORY_F11	 	0x79
-#define NK7110_MEMORY_F12	 	0x81
-#define NK7110_MEMORY_F13	 	0x89
-#define NK7110_MEMORY_F14	 	0x91
-#define NK7110_MEMORY_F15	 	0x99
-#define NK7110_MEMORY_F16	 	0xA1
-#define NK7110_MEMORY_F17	 	0xA9
-#define NK7110_MEMORY_F18	 	0xB1
-#define NK7110_MEMORY_F19	 	0xB9
-#define NK7110_MEMORY_F20	 	0xC1	/* MY FOLDERS 20 */
+#define NK7110_MEMORY_F10		0x71
+#define NK7110_MEMORY_F11		0x79
+#define NK7110_MEMORY_F12		0x81
+#define NK7110_MEMORY_F13		0x89
+#define NK7110_MEMORY_F14		0x91
+#define NK7110_MEMORY_F15		0x99
+#define NK7110_MEMORY_F16		0xA1
+#define NK7110_MEMORY_F17		0xA9
+#define NK7110_MEMORY_F18		0xB1
+#define NK7110_MEMORY_F19		0xB9
+#define NK7110_MEMORY_F20		0xC1	/* MY FOLDERS 20 */
 /* This is used when the memory type is unknown. */
 #define NK7110_MEMORY_XX 0xff
 
