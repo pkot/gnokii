@@ -559,7 +559,7 @@ typedef struct {
 	gn_datetime_support datetime_support;
 	gn_datetime_support alarm_support;
 	int maximum_alarms_number;
-	
+
 	unsigned int startup_logo_height;   /* Logo widths and heights - if supported */
 	unsigned int startup_logo_width;
 	unsigned int operator_logo_height;

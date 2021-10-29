@@ -13,7 +13,7 @@
   Copyright (C) 2002-2003 BORBELY Zoltan, Ladis Michl
   Copyright (C) 2004      Martin Goldhahn
   Copyright (C) 2006      Helge Deller
-  
+
   Main header file for gnokii. Include just this file in your app.
 */
 
@@ -37,7 +37,7 @@ typedef unsigned char uint8_t;
 #endif
 
 #include <stdarg.h>
-	
+
 #ifndef GNOKII_API
 #  if defined(WIN32) && defined(GNOKIIDLL_IMPORTS)
 #    define GNOKII_API __declspec(dllimport)
