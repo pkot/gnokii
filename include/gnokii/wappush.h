@@ -24,7 +24,7 @@ typedef enum {
 	TOKEN_KNOWN		= 0x00, /* token known */
 	TOKEN_KNOWN_C		= 0x40, /* token known with content */
 	TOKEN_KNOWN_A		= 0x80, /* token known with attributes */
-	TOKEN_KNOWN_AC		= 0xC0	/* token known with attr & content */	
+	TOKEN_KNOWN_AC		= 0xC0	/* token known with attr & content */
 } gn_wap_push_tokens_masks;
 
 /* Service indication tag tokens */
@@ -32,9 +32,9 @@ typedef enum {
 	TAG_END			= 0x01,		/* end of TAG,ATTR list */
 	TAG_INLINE		= 0x03,		/* inline string */
 	TAG_SI			= 0x05,		/* public ID */
-	TAG_INDICATION 		= 0x06, 	/* indication */
-	TAG_INFO 		= 0x07,		/* info */
-	TAG_ITEM 		= 0x08	 	/* item */
+	TAG_INDICATION		= 0x06,		/* indication */
+	TAG_INFO		= 0x07,		/* info */
+	TAG_ITEM		= 0x08		/* item */
 } gn_wap_push_tag_tokens;
 
 typedef enum {
