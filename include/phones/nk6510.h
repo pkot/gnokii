@@ -42,8 +42,8 @@
 #define NK6510_MSG_PROFILE	0x39	/* Profiles */
 #define NK6510_MSG_NOTKNOWN	0x3E	/*          */
 #define NK6510_MSG_WAP		0x3F	/* WAP */
-#define NK6510_MSG_RADIO    	0x43	/* Radio (6510/8310) + hard reset */
-#define NK6510_MSG_TODO    	0x55	/* ToDo */
+#define NK6510_MSG_RADIO	0x43	/* Radio (6510/8310) + hard reset */
+#define NK6510_MSG_TODO		0x55	/* ToDo */
 #define NK6510_MSG_FILE	        0x6d	/* File Handling */
 #define NK6510_MSG_STLOGO	0x7a	/* Startup logo */
 
@@ -197,7 +197,7 @@
 
 /* Entry types for the security commands */
 #define NK6510_SUBSEC_ENABLE_EXTENDED_CMDS	0x64	/* Enable extended commands */
-#define NK6510_SUBSEC_NETMONITOR         	0x7e	/* Netmonitor */
+#define NK6510_SUBSEC_NETMONITOR		0x7e	/* Netmonitor */
 
 /* Definitions for phone keys and buttons (Series 40 3rd Ed.) */
 /* Keys on phone keypad (0..9 * #) have the corresponding ASCII values */
