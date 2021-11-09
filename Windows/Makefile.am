@@ -4,6 +4,8 @@ EXTRA_DIST =						\
 	gnokiirc					\
 	MSVC6/config.h					\
 	MSVC6/gnokii.dsp				\
+	MSVC6/libgetopt.dsp				\
 	MSVC6/libgnokii.dsp				\
+	MSVC6/libsnprintf.dsp				\
 	MSVC6/gnokii.dsw				\
 	MSVC6/gnokii.sln
