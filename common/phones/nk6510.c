@@ -139,18 +139,19 @@ static gn_sms_message_status GetMessageStatus_S40_30(const char *filename)
 
 static void FindMessageDateTime_S40(char *time, const char *filename)
 {
+	gn_timestamp asgts;
+	struct tm *ascp;
+	time_t asts;
+	char ashex[9];
+
 	if (!filename || strlen(filename) < 27)
 		return;
-
-	char ashex[9];
-	time_t asts;
-	gn_timestamp asgts;
 
 	strncpy(ashex, &filename[8], 8);
 	ashex[8] = 0;
 
 	asts = (int)strtol(ashex, NULL, 16);
-	struct tm *ascp = gmtime(&asts);
+	ascp = gmtime(&asts);
 	/* Nokia timestamp start in 1980 */
 	ascp->tm_year += 10;
 
