@@ -3,7 +3,19 @@ Microsoft Developer Studio Workspace File, Format Version 6.00
 
 ###############################################################################
 
-Project: "gnokii"=.\gnokii.dsp - Package Owner=<4>
+Project: "getopt"=".\libgetopt.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+}}}
+
+###############################################################################
+
+Project: "gnokii"=".\gnokii.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{
@@ -14,11 +26,32 @@ Package=<4>
     Begin Project Dependency
     Project_Dep_Name libgnokii
     End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name snprintf
+    End Project Dependency
+    Begin Project Dependency
+    Project_Dep_Name getopt
+    End Project Dependency
 }}}
 
 ###############################################################################
 
-Project: "libgnokii"=.\libgnokii.dsp - Package Owner=<4>
+Project: "libgnokii"=".\libgnokii.dsp" - Package Owner=<4>
+
+Package=<5>
+{{{
+}}}
+
+Package=<4>
+{{{
+    Begin Project Dependency
+    Project_Dep_Name snprintf
+    End Project Dependency
+}}}
+
+###############################################################################
+
+Project: "snprintf"=".\libsnprintf.dsp" - Package Owner=<4>
 
 Package=<5>
 {{{

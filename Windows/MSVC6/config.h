@@ -30,12 +30,12 @@
 #ifndef _config_h
 #define _config_h
 
-#if defined(_MSC_VER) && defined(WIN32)
+#if defined(WIN32) && (_MSC_VER == 1200)
 #	pragma once
 #else
 #	error This config.h is only for MSVC6 compiler !!!
 #endif
-	
+
 #undef VERSION
 #define VERSION "0.6.32git"
 
@@ -54,10 +54,13 @@
 #undef HAVE_SYS_TIME_H
 #undef HAVE_UNISTD_H
 #define HAVE_CTYPE_H 1
+#define HAVE_BASETSD_H 1
 #define HAVE_STDLIB_H 1
 #define HAVE_DIRECT_H 1
 #define HAVE_LIMITS_H 1
 #define HAVE_SYS_STAT_H 1
+#define HAVE_ERRNO_H 1
+#define HAVE_SIGNAL_H 1
 
 /* Define if your compiler supports long long */
 #undef HAVE_LONG_LONG
@@ -65,8 +68,15 @@
 /* Define if your compiler supports long double */
 #undef HAVE_LONG_DOUBLE
 
-/* Define if you have timersub() */
-#undef HAVE_TIMEOPS
+/* Define if your compiler supports ssize_t */
+#undef HAVE_SSIZE_T
+
+/* Define to 1 if you have the 'mkdir' function. */
+#undef HAVE_MKDIR
+#define HAVE__MKDIR 1
+
+/* Define if you have isatty() */
+#undef HAVE_ISATTY
 
 /* Define if you have gettimeofday() */
 #undef HAVE_GETTIMEOFDAY
@@ -88,10 +98,10 @@
 #undef HAVE_C99_VSNPRINTF
 
 /* Define if you have asprintf */
-#define HAVE_ASPRINTF 1
+#undef HAVE_ASPRINTF
 
 /* Define if you have vasprintf */
-#define HAVE_VASPRINTF 1
+#undef HAVE_VASPRINTF
 
 /* Define if you have strsep */
 #undef HAVE_STRSEP
@@ -116,6 +126,10 @@
 /* Define if struct msghdr has msg_control field */
 #undef HAVE_MSGHDR_MSG_CONTROL
 
+/* Ungly hack to get read_security_from_file() compile */
+#define S_IRWXG 0
+#define S_IRWXO 0
+
 /* FIXME: Disable some odd warnings, comment these lines if u wanna fix the bad code lines */
 #pragma warning(disable : 4244) // conversion from 'int ' to 'float ', possible loss of data
 #pragma warning(disable : 4761) // integral size mismatch in argument; conversion supplied
@@ -125,5 +139,7 @@
 
 /* Suppress CRT warnings */
 #define _CRT_SECURE_NO_DEPRECATE
+
+#define __FUNCTION__ "???"
 
 #endif // _config_h
