@@ -1,5 +1,6 @@
 EXTRA_DIST =						\
 	gen_gnokii_h.bat				\
+	gen_gnokii_h.ps1				\
 	gnokiirc					\
 	MSVC6/config.h					\
 	MSVC6/gnokii.dsp				\
