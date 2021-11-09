@@ -15,7 +15,9 @@ EXTRA_DIST =						\
 	MSVS2008/libgnokii.vcproj			\
 	MSVC6/config.h					\
 	MSVC6/gnokii.dsp				\
+	MSVC6/libgetopt.dsp				\
 	MSVC6/libgnokii.dsp				\
+	MSVC6/libsnprintf.dsp				\
 	MSVC6/gnokii.dsw				\
 	MSVC8/gnokii.sln				\
 	MSVC8/config.h					\

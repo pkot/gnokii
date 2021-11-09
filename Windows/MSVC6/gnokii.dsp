@@ -42,7 +42,8 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "../../include" /I "../../getopt" /D "WIN32" /D "NDEBUG" /D "_CONSOLE" /D "_MBCS" /D "GNOKIIDLL_IMPORTS" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX- /O2 /I "." /I "../../include" /I "../../getopt" /D "NDEBUG" /D "GNOKIIDLL_IMPORTS" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /D "HAVE_CONFIG_H" /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
 # ADD RSC /l 0x407 /d "NDEBUG"
 BSC32=bscmake.exe
@@ -67,16 +68,16 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "." /I "../../include" /I "../../getopt" /D "WIN32" /D "_DEBUG" /D "_CONSOLE" /D "_MBCS" /D "GNOKIIDLL_IMPORTS" /FR /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /GX- /Zi /Od /I "." /I "../../include" /I "../../getopt" /D "_DEBUG" /D "HAVE_CONFIG_H" /D "WIN32" /D "_CONSOLE" /D "_MBCS" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE RSC /l 0x407 /d "_DEBUG"
-# ADD RSC /l 0x407 /d "_DEBUG"
+# ADD RSC /l 0x409 /d "_DEBUG"
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib /nologo /subsystem:console /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 Debug\gnokiid.lib msvcrtd.lib /nologo /subsystem:console /incremental:no /debug /machine:I386
+# ADD LINK32 Debug\gnokiid.lib /nologo /subsystem:console /incremental:no /debug /machine:I386
 # SUBTRACT LINK32 /verbose
 
 !ENDIF 
@@ -85,17 +86,6 @@ LINK32=link.exe
 
 # Name "gnokii - Win32 Release"
 # Name "gnokii - Win32 Debug"
-# Begin Group "Source Files"
-
-# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-# Begin Source File
-
-SOURCE=..\..\getopt\getopt.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\getopt\getopt1.c
-# End Source File
 # Begin Source File
 
 SOURCE="..\..\gnokii\gnokii-app.h"
@@ -167,8 +157,6 @@ SOURCE="..\..\gnokii\gnokii-wap.c"
 # Begin Source File
 
 SOURCE=..\..\gnokii\gnokii.c
-# ADD CPP /I "../../getopt"
 # End Source File
-# End Group
 # End Target
 # End Project
