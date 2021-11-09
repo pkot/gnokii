@@ -43,7 +43,8 @@ RSC=rc.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "." /I "../../include" /D "WIN32" /D "NDEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /c
+# ADD CPP /nologo /MD /W3 /GX- /O2 /I "." /I "../../include" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "HAVE_CONFIG_H" /D "LIBGNOKII_DLL_EXPORT" /FD /c
+# SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "NDEBUG" /mktyplib203 /win32
 # ADD BASE RSC /l 0x407 /d "NDEBUG"
@@ -70,7 +71,7 @@ LINK32=link.exe
 # PROP Ignore_Export_Lib 0
 # PROP Target_Dir ""
 # ADD BASE CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /YX /FD /GZ /c
-# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "." /I "../../include" /D "WIN32" /D "_DEBUG" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "GNOKIIDLL_EXPORTS" /D "HAVE_CONFIG_H" /FR /FD /GZ /c
+# ADD CPP /nologo /MDd /W3 /GX /Zi /Od /I "." /I "../../include" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_USRDLL" /D "HAVE_CONFIG_H" /D "LIBGNOKII_DLL_EXPORT" /FR /FD /GZ /c
 # SUBTRACT CPP /YX
 # ADD BASE MTL /nologo /D "_DEBUG" /mktyplib203 /win32
 # ADD MTL /nologo /D "_DEBUG" /mktyplib203 /win32
@@ -81,19 +82,8 @@ BSC32=bscmake.exe
 # ADD BSC32 /nologo
 LINK32=link.exe
 # ADD BASE LINK32 kernel32.lib user32.lib gdi32.lib winspool.lib comdlg32.lib advapi32.lib shell32.lib ole32.lib oleaut32.lib uuid.lib odbc32.lib odbccp32.lib winmm.lib ws2_32.lib /nologo /dll /debug /machine:I386 /pdbtype:sept
-# ADD LINK32 msvcrtd.lib /nologo /dll /incremental:no /debug /machine:I386 /out:"Debug/gnokiid.dll"
-# Begin Custom Build - Copying GNOKII DLL & LIB ...
-OutDir=.\Debug
-ProjDir=.
-InputPath=.\Debug\gnokiid.dll
-SOURCE="$(InputPath)"
-
-"$(ProjDir)\gnokiid.dll" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
-	echo on 
-	copy $(OutDir)\gnokiid.lib $(ProjDir)\gnokiid.lib 
-	copy $(OutDir)\gnokiid.dll $(ProjDir)\gnokiid.dll 
-	
-# End Custom Build
+# ADD LINK32 /nologo /dll /incremental:no /debug /machine:I386 /out:"Debug/gnokiid.dll"
+# SUBTRACT LINK32 /nodefaultlib
 
 !ENDIF 
 
@@ -101,16 +91,48 @@ SOURCE="$(InputPath)"
 
 # Name "libgnokii - Win32 Release"
 # Name "libgnokii - Win32 Debug"
-# Begin Group "Source Files"
+# Begin Group "links"
 
-# PROP Default_Filter "cpp;c;cxx;rc;def;r;odl;idl;hpj;bat"
-# Begin Source File
-
-SOURCE=..\..\common\phones\atbosch.c
-# End Source File
+# PROP Default_Filter ""
 # Begin Source File
 
 SOURCE=..\..\common\links\atbus.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\links\cbus.c
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\common\links\fbus-3110.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\common\links\fbus-phonet.c"
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\links\fbus.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\links\gnbus.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\links\m2bus.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\links\utils.c
+# End Source File
+# End Group
+# Begin Group "phones"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\phones\atbosch.c
 # End Source File
 # Begin Source File
 
@@ -154,8 +176,102 @@ SOURCE=..\..\common\phones\atsoer.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\devices\bluetooth.c
+SOURCE=..\..\common\phones\dc2711.c
 # End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\fake.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\generic.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\gnapplet.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\nk2110.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\nk3110.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\nk6100.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\nk6160.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\nk6510.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\nk7110.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\nokia.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\phones\pcsc.c
+# End Source File
+# End Group
+# Begin Group "devices"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\common\devices\tekram.c
+# End Source File
+# Begin Source File
+
+SOURCE=..\..\common\devices\winserial.c
+# End Source File
+# End Group
+# Begin Group "include"
+
+# PROP Default_Filter ""
+# Begin Source File
+
+SOURCE=..\..\include\gnokii.h.in
+
+!IF  "$(CFG)" == "libgnokii - Win32 Release"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Generating gnokii.h
+IntDir=.\Release
+ProjDir=.
+InputPath=..\..\include\gnokii.h.in
+
+"$(IntDir)\gnokii.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	$(ProjDir)\..\gen_gnokii_h.bat $(IntDir)\gnokii.h
+
+# End Custom Build
+
+!ELSEIF  "$(CFG)" == "libgnokii - Win32 Debug"
+
+# PROP Ignore_Default_Tool 1
+# Begin Custom Build - Generating gnokii.h
+IntDir=.\Debug
+ProjDir=.
+InputPath=..\..\include\gnokii.h.in
+
+"$(IntDir)\gnokii.h" : $(SOURCE) "$(INTDIR)" "$(OUTDIR)"
+	$(ProjDir)\..\gen_gnokii_h.bat $(IntDir)\gnokii.h
+
+# End Custom Build
+
+!ENDIF 
+
+# End Source File
+# End Group
 # Begin Source File
 
 SOURCE=..\..\common\cfgreader.c
@@ -170,39 +286,11 @@ SOURCE=..\..\common\device.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\devices\dku2libusb.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\phones\fake.c
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\common\links\fbus-3110.c"
-# End Source File
-# Begin Source File
-
-SOURCE="..\..\common\links\fbus-phonet.c"
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\links\fbus.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\phones\generic.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\phones\gnapplet.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\links\gnbus.c
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\common\gsm-api.c"
+# End Source File
+# Begin Source File
+
+SOURCE="..\..\common\gsm-auth.c"
 # End Source File
 # Begin Source File
 
@@ -250,10 +338,6 @@ SOURCE="..\..\common\gsm-statemachine.c"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\devices\irda.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\common\ldif.c
 # End Source File
 # Begin Source File
@@ -262,12 +346,7 @@ SOURCE=..\..\common\libfunctions.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\intl\localcharset.c
-# PROP Exclude_From_Build 1
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\links\m2bus.c
+SOURCE=..\..\common\localcharset.c
 # End Source File
 # Begin Source File
 
@@ -279,35 +358,7 @@ SOURCE=..\..\common\misc.c
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\phones\nk3110.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\phones\nk6100.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\phones\nk6160.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\phones\nk6510.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\phones\nk7110.c
-# End Source File
-# Begin Source File
-
 SOURCE="..\..\common\nokia-decoding.c"
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\phones\nokia.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\devices\osxbluetooth.c
 # End Source File
 # Begin Source File
 
@@ -323,40 +374,11 @@ SOURCE="..\..\common\sms-nokia.c"
 # End Source File
 # Begin Source File
 
-SOURCE=..\..\common\snprintf.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\devices\tcp.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\devices\tekram.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\devices\unixbluetooth.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\links\utils.c
-# End Source File
-# Begin Source File
-
 SOURCE=..\..\common\vcal.c
 # End Source File
 # Begin Source File
 
 SOURCE=..\..\common\vcard.c
 # End Source File
-# Begin Source File
-
-SOURCE=..\..\common\devices\winirda.c
-# End Source File
-# Begin Source File
-
-SOURCE=..\..\common\devices\winserial.c
-# End Source File
-# End Group
 # End Target
 # End Project
