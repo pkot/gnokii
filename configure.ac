@@ -861,12 +861,16 @@ AC_CHECK_HEADERS(error.h errno.h signal.h)
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
+AC_TYPE_INT8_T
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
 AC_STRUCT_TM
-AC_CHECK_TYPE([u_int8_t],
-    [AC_DEFINE([HAVE_U_INT8_T], 1,
-       [Define to 1 if the system has the type 'u_int8_t'.])])
 
 dnl we don't check for long double and long long int, only
 dnl ancient platforms don't have them

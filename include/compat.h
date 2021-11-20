@@ -312,20 +312,6 @@ time_t timegm(struct tm *tm);
 #  define dgettext(y, x) (x)
 #endif /* ENABLE_NLS */
 
-/* for Linux Bluetooth compatibility */
-#if !defined(HAVE_STDINT_H) && !defined(HAVE_INTTYPES_H)
-	typedef unsigned char uint8_t;
-	typedef unsigned short uint16_t;
-	typedef unsigned int uint32_t;
-	typedef char int8_t;
-	typedef short int16_t;
-	typedef int int32_t;
-#endif
-
-#ifndef HAVE_U_INT8_T
-	typedef unsigned char u_int8_t;
-#endif
-
 #ifdef HAVE_WCRTOMB
 #  define MBSTATE mbstate_t
 #  define MBSTATE_ENC_CLEAR(x) memset(&(x), 0, sizeof(mbstate_t))
