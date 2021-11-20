@@ -884,12 +884,16 @@ AC_CHECK_HEADERS(wchar.h direct.h sys/param.h dirent.h sys/types.h)
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
+AC_TYPE_INT8_T
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
+AC_TYPE_SSIZE_T
 AC_STRUCT_TM
-AC_CHECK_TYPE([u_int8_t],
-    [AC_DEFINE([HAVE_U_INT8_T], 1,
-       [Define to 1 if the system has the type 'u_int8_t'.])])
 
 if test "$ac_cv_type_ssize_t" = "yes"; then
 	AC_DEFINE(HAVE_SSIZE_T, 1, [Whether ssize_t is available])
