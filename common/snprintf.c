@@ -151,11 +151,6 @@
 #endif
 #endif
 
-#ifndef ssize_t
-#  include <basetsd.h>
-#  define ssize_t SSIZE_T
-#endif
-
 /*
  * dopr(): poor man's version of doprintf
  */
