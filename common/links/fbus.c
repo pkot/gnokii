@@ -72,7 +72,7 @@ static bool fbus_serial_open(bool dlr3, struct gn_statemachine *state)
 static int send_command(char *cmd, int len, struct gn_statemachine *state)
 {
 	struct timeval timeout;
-	unsigned char buffer[255];
+	char buffer[255];
 	int res, offset = 0, waitformore = 1;
 
 	/* Communication with the phone looks strange here. I am unable to
