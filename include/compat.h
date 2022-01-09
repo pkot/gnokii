@@ -153,7 +153,7 @@ extern char *strndup(const char *src, size_t n);
 #endif
 
 #ifndef HAVE_SETENV
-extern int setenv(const char *name, cost char *value, int overwrite);
+extern int setenv(const char *name, const char *value, int overwrite);
 extern int unsetenv(const char *name);
 #endif
 
@@ -206,14 +206,14 @@ char *strsep(char **stringp, const char *delim);
 #endif
 
 #ifndef PRINTF_ATTRIBUTE
-#  ifdef HAVE___ATTRIVUTE__
+#  ifdef HAVE___ATTRIBUTE__
 /** Use gcc attribute to check printf fns.  a1 is the 1-based index of
  * the parameter containing the format. and a2 the index of the first
  * argument. Not that some gcc 2.x versions don't handle this
  * properly **/
 #    define PRINTF_ATTRIBUTE(a1, a2) __attribute__ ((format (__printf__, a1, a2)))
 #  else
-#    define PRTINF_ATTRIBUTE(a1, a2)
+#    define PRINTF_ATTRIBUTE(a1, a2)
 #  endif
 #endif
 
