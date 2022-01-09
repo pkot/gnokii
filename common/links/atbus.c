@@ -38,7 +38,7 @@
  * message from the phone.
  */
 
-static int xwrite(unsigned char *d, size_t len, struct gn_statemachine *sm)
+static int xwrite(char *d, size_t len, struct gn_statemachine *sm)
 {
 	size_t res;
 
@@ -106,14 +106,14 @@ static gn_error at_send_message(unsigned int message_length, unsigned char messa
 	return xwrite(msg, message_length, sm) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
 }
 
-char *findcrlfbw(unsigned char *str, int len)
+char *findcrlfbw(char *str, int len)
 {
 	while (len-- && (*str != '\n') && (*str-1 != '\r'))
 		str--;
 	return len > 0 ? str+1 : NULL;
 }
 
-int numchar(unsigned char *str, unsigned char ch)
+int numchar(char *str, char ch)
 {
 	int count = 0;
 
