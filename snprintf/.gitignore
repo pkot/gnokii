@@ -1,8 +1,8 @@
-+Makefile.in
-+Makefile
-+.deps
-+.libs
-+*.o
-+*.a
-+*.la
-+*.lo
+Makefile.in
+Makefile
+.deps
+.libs
+*.o
+*.a
+*.la
+*.lo
