@@ -536,7 +536,7 @@ typedef struct {
    functions for example battery level. They are not defined as constants to
    allow model specific code to set them during initialisation */
 typedef struct {
-	unsigned char *models; /* Models covered by this type, pipe '|' delimited. */
+	char *models; /* Models covered by this type, pipe '|' delimited. */
 
 	/* Minimum and maximum levels for RF signal strength. Units are as per the
 	   setting of RFLevelUnits.  The setting of RFLevelUnits indicates the
