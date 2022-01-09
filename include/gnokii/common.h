@@ -6,7 +6,7 @@
 
   This file is part of gnokii.
 
-  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janik ml.
   Copyright (C) 2001-2004 Pawel Kot, BORBELY Zoltan
   Copyright (C) 2001      Manfred Jonsson, Marian Jancar, Chris Kemp, Marcin Wiacek
   Copyright (C) 2001-2002 Pavel Machek
@@ -536,7 +536,7 @@ typedef struct {
    functions for example battery level. They are not defined as constants to
    allow model specific code to set them during initialisation */
 typedef struct {
-	unsigned char *models; /* Models covered by this type, pipe '|' delimited. */
+	char *models; /* Models covered by this type, pipe '|' delimited. */
 
 	/* Minimum and maximum levels for RF signal strength. Units are as per the
 	   setting of RFLevelUnits.  The setting of RFLevelUnits indicates the
