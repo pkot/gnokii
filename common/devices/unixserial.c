@@ -116,7 +116,6 @@ int serial_close(int fd, struct gn_statemachine *state)
 
 /*
  * Open a device with standard options.
- * Use value (-1) for "with_hw_handshake" if its specification is required from the user.
  */
 int serial_opendevice(const char *file, int with_odd_parity,
 		      int with_async,
