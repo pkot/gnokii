@@ -290,7 +290,11 @@ time_t timegm(struct tm *tm);
 #endif
 
 /* Get rid of long defines. Use #if __unices__ */
-#define __unices__ defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
+#if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
+#  define __unices__ 1
+#else
+#  define __unices__ 0
+#endif
 
 /* This one is for NLS. */
 #ifdef ENABLE_NLS
