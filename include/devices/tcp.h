@@ -14,7 +14,6 @@
 #define __devices_tcp_h
 
 #include "compat.h"
-#include "misc.h"
 #include "gnokii.h"
 
 int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state);

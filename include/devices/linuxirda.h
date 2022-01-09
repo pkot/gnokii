@@ -21,7 +21,7 @@
  *     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
  *     GNU General Public License for more details.
  *
- *     Neither Dag Brattli nor University of Tromsø admit liability nor
+ *     Neither Dag Brattli nor University of Tromsï¿½ admit liability nor
  *     provide warranty for any of this software. This material is
  *     provided "AS-IS" and at no charge.
  *
@@ -36,7 +36,6 @@
 #ifndef __gnokii_linuxirda_h
 #define __gnokii_linuxirda_h
 
-#include "config.h"
 #include "compat.h"
 
 /* Hint bit positions for first hint byte */
