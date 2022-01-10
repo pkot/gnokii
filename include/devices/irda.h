@@ -12,6 +12,7 @@
 #ifndef __gnokii_irda_h_
 #define __gnokii_irda_h_
 
+#include "compat.h"
 #include "gnokii.h"
 
 int irda_open(struct gn_statemachine *state);
