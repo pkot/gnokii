@@ -3,6 +3,7 @@
 *.o
 *.lo
 *.la
+*.exe
 smsd
 Makefile
 Makefile.in

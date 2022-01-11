@@ -2,6 +2,7 @@
 *.o
 *.lo
 *.la
+*.exe
 gnokii
 Makefile
 Makefile.in
