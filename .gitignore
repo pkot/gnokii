@@ -19,6 +19,10 @@ intltool-update.in
 libtool
 ltmain.sh
 m4/*
+!m4/ac_expand_dir.m4
+!m4/ac_func_mkdir.m4
+!m4/acx_pthread.m4
+!m4/codeset.m4
 Makefile
 Makefile.global
 Makefile.in

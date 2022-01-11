@@ -1,5 +1,6 @@
 .libs
 *.o
+*.exe
 .deps
 Makefile
 Makefile.in
