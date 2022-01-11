@@ -39,7 +39,7 @@
 
 /* Maximal number of SMS folders */
 #define GN_SMS_FOLDER_MAX_NUMBER       64
-#define GN_SMS_MESSAGE_MAX_NUMBER    1024
+#define GN_SMS_MESSAGE_MAX_NUMBER    2048
 
 #define GN_SMS_DATETIME_MAX_LENGTH      7
 #define GN_SMS_SMSC_NUMBER_MAX_LENGTH  20
