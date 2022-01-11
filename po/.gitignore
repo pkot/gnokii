@@ -10,7 +10,4 @@ POTFILES
 Rules-quot
 gnokii.pot
 stamp-po
-Makefile
-Makefile.in
 stamp-it
-.intltool-merge-cache
