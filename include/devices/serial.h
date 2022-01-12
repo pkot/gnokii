@@ -13,6 +13,7 @@
 #ifndef __devices_serial_h
 #define __devices_serial_h
 
+#include "compat.h"
 #include "gnokii.h"
 
 int serial_open(const char *file, int oflag);

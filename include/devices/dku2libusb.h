@@ -17,7 +17,6 @@
 #define _gnokii_dku2libusb_h
 
 #include "compat.h"
-#include "misc.h"
 #include "gnokii.h"
 
 int fbusdku2usb_open(struct gn_statemachine *state);

@@ -12,13 +12,8 @@
 #ifndef __devices_tekram_h
 #define __devices_tekram_h
 
-#ifdef WIN32
-#  include <stddef.h>
-#else
-#  include <unistd.h>
-#endif	/* WIN32 */
-
-#include "misc.h"
+#include "compat.h"
+#include "gnokii.h"
 
 #define TEKRAM_B115200 0x00
 #define TEKRAM_B57600  0x01
