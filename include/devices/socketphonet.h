@@ -18,6 +18,7 @@
 #ifndef _gnokii_devices_linuxphonet_h
 #define _gnokii_devices_linuxphonet_h
 
+#include "compat.h"
 #include "gnokii.h"
 
 int socketphonet_close(struct gn_statemachine *state);
