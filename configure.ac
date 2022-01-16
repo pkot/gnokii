@@ -74,14 +74,14 @@ AC_PROG_INSTALL
 
 dnl ======================= Localisation and i18n
 
-IT_PROG_INTLTOOL([0.35.0])
 AM_LANGINFO_CODESET
+AM_GNU_GETTEXT_VERSION([0.21])
+AM_GNU_GETTEXT([external])
 
 dnl Add the languages which your application supports to po/LINGUAS
 GETTEXT_PACKAGE=gnokii
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [Define to the Gettext package name])
 AC_SUBST(GETTEXT_PACKAGE)
-AM_GLIB_GNU_GETTEXT
 AM_ICONV
 
 

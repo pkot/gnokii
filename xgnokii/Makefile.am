@@ -48,8 +48,10 @@ pkgconfigdir = $(libdir)/pkgconfig
 desktop_in_files = xgnokii.desktop.in
 desktopdir = $(datadir)/applications
 desktop_DATA = $(desktop_in_files:.desktop.in=.desktop)
-@INTLTOOL_DESKTOP_RULE@
 
 CLEANFILES = $(desktop_DATA)
 
 EXTRA_DIST = xgnokii.pc.in $(desktop_in_files) README.vcard
+
+xgnokii.desktop: xgnokii.desktop.in
+	$(AM_V_GEN)$(MSGFMT) --desktop --template $< -d $(top_srcdir)/po -o $@
