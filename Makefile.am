@@ -22,11 +22,8 @@ EXTRA_DIST =				\
 		COPYING			\
 		COPYRIGHT		\
 		MAINTAINERS		\
-		TODO			\
-		intltool-extract.in	\
-		intltool-merge.in	\
-		intltool-update.in
+		TODO
 
-DISTCLEANFILES = intltool-extract intltool-merge intltool-update
+DISTCLEANFILES =
 
 ACLOCAL_AMFLAGS = -I m4
