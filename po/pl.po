@@ -1867,7 +1867,7 @@ msgstr "Aby obejrzeć pomoc, użyj '%s --help'.\n"
 #: ../gnokii/gnokii.c:821
 #, c-format
 msgid "Use '--help' for usage information.\n"
-msgstr "Aby obejrzeć pomoc, użyj '%s --help'.\n"
+msgstr "Aby obejrzeć pomoc, użyj '--help'.\n"
 
 #: ../gnokii/gnokii.c:1142
 #, c-format
