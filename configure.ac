@@ -1,5 +1,5 @@
 dnl
-dnl Makefile for the GNOKII tool suite.
+dnl  Process this file with autoconf to produce a configure script.
 dnl
 dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janik ml.
 dnl                2000 Karel Zak, Pawel Kot
@@ -11,6 +11,7 @@ dnl IMPORTANT NOTE
 dnl The first PKG_CHECK_MODULES call must not be conditional
 dnl
 
+AC_PREREQ([2.69])
 AC_INIT([gnokii],
 	[0.6.32git],
 	[gnokii-users@nongnu.org],
@@ -54,9 +55,8 @@ AC_SUBST(LIBGNOKII_DEFS)
 
 dnl ======================== Checks for programs.
 AC_PROG_CC
-AM_PROG_CC_C_O
 AC_PROG_CPP
-AC_PROG_LEX
+AC_PROG_LEX(noyywrap)
 AC_PROG_OBJC
 # If there's no flex/lex utility and there's no generated common/gnvcal.c file, we won't be able to compile
 if test "x$LEX" = "x:" && test ! -f common/gnvcal.c; then
@@ -854,15 +854,13 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#define _XOPEN_SOURCE 500
 AC_PROG_EGREP
 
 dnl ======================== Checks for header files.
-AC_HEADER_STDC
+AC_INCLUDES_DEFAULT
 AC_HEADER_STDBOOL
 AC_HEADER_SYS_WAIT
-AC_HEADER_TIME
-AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h sys/file.h)
-AC_CHECK_HEADERS(string.h strings.h ctype.h stdlib.h stdarg.h stdint.h)
+AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h sys/file.h)
+AC_CHECK_HEADERS(ctype.h stdarg.h error.h errno.h signal.h)
 AC_CHECK_HEADERS(stddef.h sys/socket.h sys/modem.h termios.h sys/filio.h)
-AC_CHECK_HEADERS(inttypes.h wchar.h direct.h sys/param.h dirent.h sys/types.h)
-AC_CHECK_HEADERS(error.h errno.h signal.h)
+AC_CHECK_HEADERS(wchar.h direct.h sys/param.h dirent.h sys/types.h)
 
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
@@ -895,7 +893,6 @@ fi
 dnl ======================== Checks for library functions.
 AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
-AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
 AC_FUNC_MKDIR
 AC_CHECK_DECLS([getenv, getopt])
