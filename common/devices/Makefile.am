@@ -2,6 +2,10 @@ DEFS = -DCOMPILING_LIBGNOKII
 
 noinst_LTLIBRARIES = libDEVICES.la
 
+PLATFORM_FILES = \
+	socketphonet.c \
+	tcp.c
+
 WIN32_FILES = \
 	winserial.c \
 	winirda.c \
@@ -9,9 +13,7 @@ WIN32_FILES = \
 
 UNIX_FILES = \
 	unixserial.c \
-	unixirda.c \
-	tcp.c \
-	socketphonet.c
+	unixirda.c
 
 if FOR_MAC
 UNIX_SPECIFIC_FILES = osxbluetooth.m
@@ -20,9 +22,9 @@ UNIX_SPECIFIC_FILES = unixbluetooth.c
 endif
 
 if WIN32
-PLATFORM_FILES = $(WIN32_FILES)
+PLATFORM_FILES += $(WIN32_FILES)
 else
-PLATFORM_FILES = $(UNIX_FILES) $(UNIX_SPECIFIC_FILES)
+PLATFORM_FILES += $(UNIX_FILES) $(UNIX_SPECIFIC_FILES)
 endif
 
 libDEVICES_la_SOURCES = \
