@@ -290,6 +290,54 @@ time_t timegm(struct tm *tm);
 #  endif
 #endif
 
+#ifndef HAVE_INT8_T
+#  ifdef _MSC_VER
+     typedef __int8 int8_t;
+#  else
+     typedef signed char int8_t;
+#  endif
+#endif
+
+#ifndef HAVE_INT16_T
+#  ifdef _MSC_VER
+     typedef __int16 int16_t;
+#  else
+     typedef short int16_t;
+#  endif
+#endif
+
+#ifndef HAVE_INT32_T
+#  ifdef _MSC_VER
+     typedef __int32 int32_t;
+#  else
+     typedef int int32_t;
+#  endif
+#endif
+
+#ifndef HAVE_UINT8_T
+#  ifdef _MSC_VER
+     typedef unsigned __int8 uint8_t;
+#  else
+     typedef unsigned char uint8_t;
+#  endif
+#endif
+
+#ifndef HAVE_UINT16_T
+#  ifdef _MSC_VER
+     typedef unsigned __int16 uint16_t;
+#  else
+     typedef unsigned short uint16_t;
+#  endif
+#endif
+
+#ifndef HAVE_UINT32_T
+#  ifdef _MSC_VER
+     typedef unsigned __int32 uint32_t;
+#  else
+     typedef unsigned int uint32_t;
+#  endif
+#endif
+
 /* Get rid of long defines. Use #if __unices__ */
 #if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
 #  define __unices__ 1
