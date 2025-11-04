@@ -226,6 +226,15 @@ time_t timegm(struct tm *tm);
 # endif
 #endif
 
+#ifndef HAVE_ISATTY
+#  ifdef _MSC_VER
+#    include <io.h>
+#    define isatty _isatty
+#  else
+#    error "Don't know how to check fd is a tty on this system."
+#  endif
+#endif
+
 /*
  * The following code was taken from W. Richard Stevens'
  * "UNIX Network Programming", Volume 1, Second Edition.
