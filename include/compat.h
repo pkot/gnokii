@@ -260,6 +260,15 @@ time_t timegm(struct tm *tm);
 	typedef void * __ptr_t;
 #endif
 
+#ifndef HAVE_SSIZE_T
+#  ifdef HAVE_BASETSD_H
+#    include <basetsd.h>
+#    define ssize_t SSIZE_T
+#  else
+     typedef unsigned long ssize_t;
+#  endif
+#endif
+
 /* Get rid of long defines. Use #if __unices__ */
 #if defined(__svr4__) || defined(__FreeBSD__) || defined(__bsdi__) || defined(__MACH__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__HAIKU__)
 #  define __unices__ 1
