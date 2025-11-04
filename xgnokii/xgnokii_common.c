@@ -16,6 +16,9 @@
 #ifdef HAVE_SIGNAL_H
 #  include <signal.h>
 #endif
+#ifdef HAVE_SYS_WAIT_H
+#  include <sys/wait.h>
+#endif
 #include <gtk/gtk.h>
 #include "misc.h"		/* for _() */
 #include "xgnokii_common.h"
