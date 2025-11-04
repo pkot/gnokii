@@ -903,6 +903,8 @@ AC_CHECK_DECLS([getenv, getopt])
 AC_CHECK_FUNCS(mktime timegm gettimeofday select poll wcrtomb)
 AC_CHECK_FUNCS(strchr strdup strndup strstr strtol strtok strsep)
 AC_CHECK_FUNCS(asprintf vasprintf snprintf vsnprintf getpass setenv)
+AC_CHECK_FUNCS(isatty)
+AC_CHECK_FUNCS(geteuid getegid)
 AC_CHECK_FUNCS(getaddrinfo)
 AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf_c99,
 	[AC_RUN_IFELSE([AC_LANG_SOURCE([[
