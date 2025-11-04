@@ -10,7 +10,7 @@
   Copyright (C) 1999-2011 Jan Derfinak
 
   Utils functions for SMSD plugins.
-  
+
 */
 
 #ifndef __smsd_utils_h_
