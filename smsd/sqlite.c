@@ -8,7 +8,7 @@
 
   Copyright (C) 1999 Pavel Janik ml., Hugh Blemings
   Copyright (C) 1999-2005 Jan Derfinak
-  
+
   This file is a module to smsd for SQLite db server.
 
  */
@@ -235,7 +235,7 @@ GNOKII_API gint DB_Look(const gchar * const phone)
 
     g_string_free(timebuf, TRUE);
     g_string_free(buf, TRUE);
-    
+
     if (empty)
       return (SMSD_OUTBOXEMPTY);
     else
