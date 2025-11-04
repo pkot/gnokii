@@ -10,7 +10,7 @@
   Copyright (C) 1999-2011 Jan Derfinak
 
   Utils functions for SMSD plugins
-  
+
 */
 
 #include "config.h"
@@ -24,17 +24,17 @@ gchar *strEscape (const gchar *const s)
   GString *str = g_string_new (s);
   register gint i = 0;
   gchar *ret;
-  
+
   while (str->str[i] != '\0')
   {
     if (str->str[i] == '\\' || str->str[i] == '\'')
       g_string_insert_c (str, i++, '\\');
     i++;
   }
-  
+
   ret = str->str;
   g_string_free (str, FALSE);
-  
+
   return (ret);
 }
 
@@ -47,17 +47,17 @@ gchar *strEscapeSingleQuote (const gchar *const s)
   GString *str = g_string_new (s);
   register gint i = 0;
   gchar *ret;
-  
+
   while (str->str[i] != '\0')
   {
     if (str->str[i] == '\'')
       g_string_insert_c (str, i++, '\'');
     i++;
   }
-  
+
   ret = str->str;
   g_string_free (str, FALSE);
-  
+
   return (ret);
 }
 
