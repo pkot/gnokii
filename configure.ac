@@ -876,6 +876,25 @@ AC_TYPE_SIZE_T
 AC_TYPE_SSIZE_T
 AC_STRUCT_TM
 
+dnl autoheader does not define them, so do it manually
+if test "$ac_cv_c_int8_t" = "yes"; then
+	AC_DEFINE(HAVE_INT8_T, 1, [Whether int8_t is available])
+fi
+if test "$ac_cv_c_int16_t" = "yes"; then
+	AC_DEFINE(HAVE_INT16_T, 1, [Whether int16_t is available])
+fi
+if test "$ac_cv_c_int32_t" = "yes"; then
+	AC_DEFINE(HAVE_INT32_T, 1, [Whether int32_t is available])
+fi
+if test "$ac_cv_c_uint8_t" = "yes"; then
+	AC_DEFINE(HAVE_UINT8_T, 1, [Whether uint8_t is available])
+fi
+if test "$ac_cv_c_uint16_t" = "yes"; then
+	AC_DEFINE(HAVE_UINT16_T, 1, [Whether uint16_t is available])
+fi
+if test "$ac_cv_c_uint32_t" = "yes"; then
+	AC_DEFINE(HAVE_UINT32_T, 1, [Whether uint32_t is available])
+fi
 if test "$ac_cv_type_ssize_t" = "yes"; then
 	AC_DEFINE(HAVE_SSIZE_T, 1, [Whether ssize_t is available])
 fi
