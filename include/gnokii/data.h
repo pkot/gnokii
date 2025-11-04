@@ -139,7 +139,7 @@ typedef struct {
 	int hardware_handshake;				/* Select between hardware and software handshake */
 	int require_dcd;				/* DCD signal check */
 	int smsc_timeout;				/* How many seconds should we wait for the SMSC response, defaults to 10 seconds */
-	uint8_t rfcomm_cn;				/* RFCOMM channel number to connect */
+	unsigned char rfcomm_cn;			/* RFCOMM channel number to connect */
 	unsigned int sm_retry;				/* Indicates whether statemachine should do retries. Defaults to off. */
 							/* Use with caution -- may break newer DCT4 phones */
 	unsigned int use_locking;			/* Should we use locking system or not */
