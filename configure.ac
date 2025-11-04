@@ -877,8 +877,8 @@ AC_INCLUDES_DEFAULT
 AC_HEADER_STDBOOL
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h sys/file.h)
-AC_CHECK_HEADERS(ctype.h stdarg.h error.h errno.h signal.h)
-AC_CHECK_HEADERS(stddef.h sys/socket.h sys/modem.h termios.h sys/filio.h)
+AC_CHECK_HEADERS(basetsd.h ctype.h stddef.h stdarg.h error.h errno.h signal.h)
+AC_CHECK_HEADERS(sys/socket.h sys/modem.h termios.h sys/filio.h)
 AC_CHECK_HEADERS(wchar.h direct.h sys/param.h dirent.h sys/types.h)
 
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
@@ -890,6 +890,10 @@ AC_STRUCT_TM
 AC_CHECK_TYPE([u_int8_t],
     [AC_DEFINE([HAVE_U_INT8_T], 1,
        [Define to 1 if the system has the type 'u_int8_t'.])])
+
+if test "$ac_cv_type_ssize_t" = "yes"; then
+	AC_DEFINE(HAVE_SSIZE_T, 1, [Whether ssize_t is available])
+fi
 
 dnl we don't check for long double and long long int, only
 dnl ancient platforms don't have them
