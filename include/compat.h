@@ -235,6 +235,14 @@ time_t timegm(struct tm *tm);
 #  endif
 #endif
 
+#ifndef HAVE_GETEGID
+#  define getegid() 0
+#endif
+
+#ifndef HAVE_GETEUID
+#  define geteuid() 0
+#endif
+
 /*
  * The following code was taken from W. Richard Stevens'
  * "UNIX Network Programming", Volume 1, Second Edition.
