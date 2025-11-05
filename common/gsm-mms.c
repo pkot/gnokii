@@ -13,13 +13,12 @@
 */
 
 #include "config.h"
-#include <time.h> /* for ctime() */
+#include "compat.h"
+#include "gnokii-internal.h"
 
 #ifdef ENABLE_NLS
 #  include <locale.h>
 #endif
-
-#include "gnokii-internal.h"
 
 /**
  * mms_fields - mapping of all headers defined by the standard
@@ -178,7 +177,7 @@ do { \
 	size_t count, newsize; \
 	char *astring, *nbuf; \
 	count = asprintf(&astring, fmt, __VA_ARGS__); \
-	if (!astring) \
+	if (count < 0) \
 		return GN_ERR_MEMORYFULL; \
 	newsize = *dest_length + count; \
 	nbuf = realloc(buf, newsize + 1); \
@@ -188,7 +187,7 @@ do { \
 		return GN_ERR_MEMORYFULL; \
 	} \
 	buf = nbuf; \
-	strcat(buf + *dest_length, astring); \
+	memcpy(buf + *dest_length, astring, count + 1); \
 	free(astring); \
 	*dest_length = newsize; \
 } while (0)
