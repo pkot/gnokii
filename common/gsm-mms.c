@@ -13,13 +13,12 @@
 */
 
 #include "config.h"
-#include <time.h> /* for ctime() */
+#include "compat.h"
+#include "gnokii-internal.h"
 
 #ifdef ENABLE_NLS
 #  include <locale.h>
 #endif
-
-#include "gnokii-internal.h"
 
 /**
  * mms_fields - mapping of all headers defined by the standard
