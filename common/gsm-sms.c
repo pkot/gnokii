@@ -2179,65 +2179,45 @@ static char *status2str(gn_sms_message_status status)
 	}
 }
 
+static char *printf_append(char *buf, size_t *len, char *fmt, ...)
+{
+	size_t count, newsize;
+	char *str;
+	va_list ap;
+
+	va_start(ap, fmt);
+	count = vasprintf(&str, fmt, ap);
+	if (count < 0) {
+		free(buf);
+		return NULL;
+	}
+	newsize = *len + count;
+	buf = realloc(buf, newsize + 1);
+	if (!buf) {
+		free(str);
+		return NULL;
+	}
+	memcpy(buf + *len, str, count + 1);
+	free(str);
+	*len = newsize;
+
+	return buf;
+}
+
+#define BUFP	buf, &size
+
+#define APPEND(args) \
+do { \
+	char *res = printf_append args; \
+	if (!res) \
+		goto error; \
+	buf = res; \
+} while (0)
+
 #define MAX_TEXT_SUMMARY	20
 #define MAX_SUBJECT_LENGTH	25
 #define MAX_DATE_LENGTH		255
-
-/* From snprintf(3) manual */
-static char *allocate(char *fmt, ...)
-{
-	char *str, *nstr;
-	int len, size = 100;
-	va_list ap;
-
-	str = calloc(100, sizeof(char));
-	if (!str)
-		return NULL;
-
-	while (1) {
-		va_start(ap, fmt);
-		len = vsnprintf(str, size, fmt, ap);
-		va_end(ap);
-		if (len >= size) /* too small buffer */
-			size = len + 1;
-		else if (len > -1) /* buffer OK */
-			return str;
-		else /* let's try with larger buffer */
-			size *= 2;
-		nstr = realloc(str, size);
-		if (!nstr) {
-			free(str);
-			return NULL;
-		}
-		str = nstr;
-	}
-}
-
-/* Here we allocate place for the line to append and we append it.
- * We free() the appended line. */
-#define APPEND(dst, src, size) \
-do { \
-	char *ndst; \
-	int old = size; \
-	size += strlen(src); \
-	ndst = realloc(dst, size + 1); \
-	if (!ndst) { \
-		free(dst); \
-		goto error; \
-	} \
-	dst = ndst; \
-	dst[old] = 0; \
-	strcat(dst, src); \
-	free(src); \
-} while (0)
-
-#define CONCAT(dst, src, size, pattern, ...) \
-do { \
-	src = allocate(pattern, __VA_ARGS__); \
-	if (!src) \
-		goto error; \
-	APPEND(dst, src, size); \
-} while (0);
+#define MAX_STR_LENGTH		MAX_DATE_LENGTH
 
 /* Returns allocated space for mbox-compatible formatted SMS */
 /* TODO:
@@ -2248,12 +2228,12 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 {
 	struct tm t, *loctime;
 	time_t caltime;
-	int size = 0;
-	char *tmp;
+	size_t size = 0;
+	char str[MAX_STR_LENGTH + 1];
 #ifdef ENABLE_NLS
 	char *loc;
 #endif
-	char *buf = NULL, *aux = NULL;
+	char *buf = NULL;
 
 	t.tm_sec = sms->smsc_time.second;
 	t.tm_min = sms->smsc_time.minute;
@@ -2274,63 +2254,52 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	switch (sms->status) {
 	case GN_SMS_Sent:
 	case GN_SMS_Unsent:
-		CONCAT(buf, tmp, size, "From %s@%s %s", "+0", from, asctime(loctime));
+		APPEND((BUFP, "From %s@%s %s", "+0", from, asctime(loctime)));
 		break;
 	case GN_SMS_Read:
 	case GN_SMS_Unread:
 	default:
-		CONCAT(buf, tmp, size, "From %s@%s %s", sms->remote.number, from, asctime(loctime));
+		APPEND((BUFP, "From %s@%s %s", sms->remote.number, from, asctime(loctime)));
 		break;
 	}
 
-	tmp = calloc(MAX_DATE_LENGTH, sizeof(char));
-	if (!tmp)
-		goto error;
-	strftime(tmp, MAX_DATE_LENGTH - 1, "Date: %a, %d %b %Y %H:%M:%S %z (%Z)\n", loctime);
+	strftime(str, MAX_DATE_LENGTH, "Date: %a, %d %b %Y %H:%M:%S %z (%Z)", loctime);
 #ifdef ENABLE_NLS
 	setlocale(LC_ALL, loc);
 #endif
-	APPEND(buf, tmp, size);
+	APPEND((BUFP, "%s\n", str));
 
 	switch (sms->status) {
 	case GN_SMS_Sent:
 	case GN_SMS_Unsent:
-		CONCAT(buf, tmp, size, "To: %s@%s\n", sms->remote.number, from);
+		APPEND((BUFP, "To: %s@%s\n", sms->remote.number, from));
 		break;
 	case GN_SMS_Read:
 	case GN_SMS_Unread:
 	default:
-		CONCAT(buf, tmp, size, "From: %s@%s\n", sms->remote.number, from);
+		APPEND((BUFP, "From: %s@%s\n", sms->remote.number, from));
 		break;
 	}
 
-	CONCAT(buf, tmp, size, "X-GSM-SMSC: %s\n", sms->smsc.number);
-	CONCAT(buf, tmp, size, "X-GSM-Status: %s\n", status2str(sms->status));
-	CONCAT(buf, tmp, size, "X-GSM-Memory: %s\n", gn_memory_type2str(sms->memory_type));
+	APPEND((BUFP, "X-GSM-SMSC: %s\n", sms->smsc.number));
+	APPEND((BUFP, "X-GSM-Status: %s\n", status2str(sms->status)));
+	APPEND((BUFP, "X-GSM-Memory: %s\n", gn_memory_type2str(sms->memory_type)));
 
-	aux = calloc(16, sizeof(char)); /* assuming location will never have more than 15 digits */
-	if (!aux)
-		goto error;
-	snprintf(aux, 16, "%d", sms->number);
-	CONCAT(buf, tmp, size, "X-GSM-Location: %s\n", aux);
-	free(aux);
+	/* assuming location will never have more than 15 digits */
+	snprintf(str, 15, "%d", sms->number);
+	APPEND((BUFP, "X-GSM-Location: %s\n", str));
 
 	if (strlen(sms->user_data[0].u.text) < MAX_SUBJECT_LENGTH) {
-		CONCAT(buf, tmp, size, "Subject: %s\n\n", sms->user_data[0].u.text);
+		APPEND((BUFP, "Subject: %s\n\n", sms->user_data[0].u.text));
 	} else {
-		aux = calloc(MAX_TEXT_SUMMARY + 1, sizeof(char));
-		if (!aux)
-			goto error;
-		snprintf(aux, MAX_TEXT_SUMMARY, "%s", sms->user_data[0].u.text);
-		CONCAT(buf, tmp, size, "Subject: %s...\n\n", aux);
-		free(aux);
+		snprintf(str, MAX_TEXT_SUMMARY, "%s", sms->user_data[0].u.text);
+		APPEND((BUFP, "Subject: %s...\n\n", str));
 	}
 
-	CONCAT(buf, tmp, size, "%s\n\n", sms->user_data[0].u.text);
+	APPEND((BUFP, "%s\n\n", sms->user_data[0].u.text));
 
 	return buf;
 error:
 	free(buf);
-	free(aux);
 	return NULL;
 }
