@@ -15,14 +15,27 @@ endif
 
 SUBDIRS += testsuite
 
-DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po smsd Windows testsuite getopt
+DIST_SUBDIRS = 		\
+	common		\
+	Docs		\
+	getopt		\
+	gnokii		\
+	gnokiid		\
+	include		\
+	po		\
+	smsd		\
+	snprintf	\
+	testsuite	\
+	utils		\
+	Windows		\
+	xgnokii
 
-EXTRA_DIST =				\
-		ChangeLog		\
-		COPYING			\
-		COPYRIGHT		\
-		MAINTAINERS		\
-		TODO
+EXTRA_DIST =		\
+	ChangeLog	\
+	COPYING		\
+	COPYRIGHT	\
+	MAINTAINERS	\
+	TODO
 
 DISTCLEANFILES =
 
