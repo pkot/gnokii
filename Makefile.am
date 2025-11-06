@@ -15,18 +15,28 @@ endif
 
 SUBDIRS += testsuite
 
-DIST_SUBDIRS = include Docs common gnokii gnokiid utils xgnokii po smsd Windows testsuite getopt
+DIST_SUBDIRS = 		\
+	common		\
+	Docs		\
+	getopt		\
+	gnokii		\
+	gnokiid		\
+	include		\
+	po		\
+	smsd		\
+	snprintf	\
+	testsuite	\
+	utils		\
+	Windows		\
+	xgnokii
 
-EXTRA_DIST =				\
-		ChangeLog		\
-		COPYING			\
-		COPYRIGHT		\
-		MAINTAINERS		\
-		TODO			\
-		intltool-extract.in	\
-		intltool-merge.in	\
-		intltool-update.in
+EXTRA_DIST =		\
+	ChangeLog	\
+	COPYING		\
+	COPYRIGHT	\
+	MAINTAINERS	\
+	TODO
 
-DISTCLEANFILES = intltool-extract intltool-merge intltool-update
+DISTCLEANFILES =
 
 ACLOCAL_AMFLAGS = -I m4
