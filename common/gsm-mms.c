@@ -178,13 +178,13 @@ do { \
 	char *astring, *nbuf; \
 	count = asprintf(&astring, fmt, __VA_ARGS__); \
 	if (count < 0) \
-		return GN_ERR_MEMORYFULL; \
+		return GN_ERR_INTERNALERROR; \
 	newsize = *dest_length + count; \
 	nbuf = realloc(buf, newsize + 1); \
 	if (!nbuf) { \
 		free(buf); \
 		free(astring); \
-		return GN_ERR_MEMORYFULL; \
+		return GN_ERR_INTERNALERROR; \
 	} \
 	buf = nbuf; \
 	memcpy(buf + *dest_length, astring, count + 1); \
@@ -323,7 +323,7 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 	*dest_length = 0;
 	*dest_buffer = calloc(1, *dest_length + 1);
 	if (!*dest_buffer)
-		return GN_ERR_MEMORYFULL;
+		return GN_ERR_INTERNALERROR;
 	for (i = 0; i < *length; i++) {
 		if ((buffer[i] & 0x80) == 0x80) {
 			field = gn_mms_field_lookup(buffer[i]);
@@ -535,7 +535,7 @@ gn_error gn_mms_nokia2pdu(const unsigned char *source_buffer, size_t *source_len
 
 	*dest_buffer = malloc(mms_length);
 	if (!*dest_buffer)
-		return GN_ERR_MEMORYFULL;
+		return GN_ERR_INTERNALERROR;
 	*dest_length = mms_length;
 
 	memcpy(*dest_buffer, pdu_start, mms_length);
@@ -681,7 +681,7 @@ GNOKII_API gn_error gn_mms_convert(const gn_mms *source_mms, gn_mms *dest_mms)
 			if (dest_mms->buffer) {
 				memcpy(dest_mms->buffer, source_mms->buffer, source_length);
 			} else {
-				error = GN_ERR_MEMORYFULL;
+				error = GN_ERR_INTERNALERROR;
 			}
 			return error;
 		}
@@ -816,8 +816,5 @@ GNOKII_API gn_error gn_mms_alloc(gn_mms **mms)
 {
 	*mms = calloc(1, sizeof(gn_mms));
 
-	if (*mms)
-		return GN_ERR_NONE;
-
-	return GN_ERR_MEMORYFULL;
+	return (*mms) ? GN_ERR_NONE : GN_ERR_INTERNALERROR;
 }
