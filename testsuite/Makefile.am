@@ -65,11 +65,11 @@ EXTRA_DIST = 			\
 	test.41.getsms		\
 	test.42.getsms		\
 	test.43.getsms		\
-	.gnokiirc		\
+	gnokiirc		\
 	testit
 
 check: $(EXTRA_DIST)
-	$(srcdir)/testit $(srcdir)/ "$(top_builddir)/gnokii/gnokii --config .gnokiirc"
+	$(srcdir)/testit $(srcdir) "$(top_builddir)/gnokii/gnokii --config $(srcdir)/gnokiirc"
 
 clean-local:
 	-rm -f myout.*
