@@ -3,4 +3,8 @@ port = /dev/null
 model = fake
 initlength = default
 connection = serial
+
+[gnokii]
+errorlogpath = ./
+
 [flags]
