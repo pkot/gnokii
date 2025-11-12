@@ -69,7 +69,7 @@ EXTRA_DIST = 			\
 	testit
 
 check: $(EXTRA_DIST)
-	$(srcdir)/testit $(srcdir)/ "$(top_builddir)/gnokii/gnokii --config .gnokiirc"
+	$(srcdir)/testit $(srcdir) "$(top_builddir)/gnokii/gnokii --config $(srcdir)/.gnokiirc"
 
 clean-local:
 	-rm -f myout.*
