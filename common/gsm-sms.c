@@ -17,9 +17,6 @@
 */
 
 #include "config.h"
-
-#include <glib.h>
-
 #include "compat.h"
 
 #include "gnokii-internal.h"
@@ -1731,17 +1728,17 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 		i = 0;
 		data->sms->dcs.u.general.alphabet = GN_SMS_DCS_DefaultAlphabet;
 		while (data->sms->user_data[i].type != GN_SMS_DATA_None) {
-			gchar *str;
-			gsize inlen, outlen;
-			gn_sms_dcs_alphabet_type enc;
-
 			if (data->sms->user_data[i].type == GN_SMS_DATA_Text ||
 			    data->sms->user_data[i].type == GN_SMS_DATA_NokiaText) {
-				str = g_locale_to_utf8(data->sms->user_data[i].u.text, -1, &inlen, &outlen, NULL);
-				data->sms->user_data[i].chars = g_utf8_strlen(str, outlen);
-				memset(data->sms->user_data[i].u.text, 0, sizeof(data->sms->user_data[i].u.text));
-				g_utf8_strncpy(data->sms->user_data[i].u.text, str, data->sms->user_data[i].chars);
-				g_free(str);
+				gn_sms_dcs_alphabet_type enc;
+
+				int inlen = strlen(data->sms->user_data[i].u.text);
+				char *str = malloc(inlen * 2 + 1);
+				int outlen = utf8_encode(str, inlen * 2, data->sms->user_data[i].u.text, inlen);
+				memcpy(data->sms->user_data[i].u.text, str, outlen);
+				data->sms->user_data[i].u.text[outlen] = 0;
+				data->sms->user_data[i].length = outlen;
+				free(str);
 				/* Let's make sure the encoding is correct */
 				enc = char_def_alphabet_string_stats(data->sms->user_data[i].u.text, &enc_chars, &ext_chars);
 				if (enc == GN_SMS_DCS_UCS2)
