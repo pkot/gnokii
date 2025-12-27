@@ -27,8 +27,7 @@ jobs:
             autoconf automake libtool gettext intltool \
             pkg-config \
             flex \
-            libglib2.0-dev libgmodule2.0-dev \
-            libreadline-dev libbluetooth-dev \
+            libglib2.0-dev libreadline-dev libbluetooth-dev \
             libusb-dev libsqlite3-dev libpcsclite-dev
       - name: Configure
         run: |
@@ -60,8 +59,7 @@ jobs:
             autoconf automake libtool gettext intltool \
             pkg-config \
             flex \
-            libglib2.0-dev libgmodule2.0-dev \
-            libreadline-dev libbluetooth-dev \
+            libglib2.0-dev libreadline-dev libbluetooth-dev \
             libusb-dev libsqlite3-dev libpcsclite-dev
       - uses: actions/checkout@v6
       - name: Configure
