@@ -27,11 +27,13 @@ jobs:
             autoconf automake libtool gettext intltool \
             pkg-config \
             flex \
-            libglib2.0-dev libreadline-dev libbluetooth-dev \
-            libusb-dev libsqlite3-dev libpcsclite-dev
+            libgtk2.0-dev libglib2.0-dev \
+            libreadline-dev libbluetooth-dev libirda-dev \
+            libusb-dev libical-dev \
+            libsqlite3-dev libpcsclite-dev
       - name: Configure
         run: |
-          ./autogen.sh --enable-security
+          ./autogen.sh
       - name: Build
         run: |
           make -j"$(nproc)"
