@@ -90,7 +90,7 @@ jobs:
       - name: Configure
         env:
           PKG_CONFIG_PATH: /opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/libusb/lib/pkgconfig:/opt/homebrew/opt/readline/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/opt/libusb/lib/pkgconfig:/usr/local/opt/readline/lib/pkgconfig
-          ACLOCAL_PATH: /opt/homebrew/opt/gettext/share/aclocal:/usr/local/opt/gettext/share/aclocal
+          ACLOCAL_PATH: /opt/homebrew/opt/gettext/share/gettext/m4:/opt/homebrew/opt/gettext/share/aclocal:/usr/local/opt/gettext/share/aclocal
         run: |
           echo "/opt/homebrew/opt/gettext/bin" >> "$GITHUB_PATH"
           echo "/usr/local/opt/gettext/bin" >> "$GITHUB_PATH"
