@@ -89,10 +89,10 @@ jobs:
           brew install glib readline libusb
       - name: Configure
         env:
-          PATH: /opt/homebrew/opt/gettext/bin:/usr/local/opt/gettext/bin:${{ env.PATH }}
           PKG_CONFIG_PATH: /opt/homebrew/lib/pkgconfig:/opt/homebrew/opt/libusb/lib/pkgconfig:/opt/homebrew/opt/readline/lib/pkgconfig:/usr/local/lib/pkgconfig:/usr/local/opt/libusb/lib/pkgconfig:/usr/local/opt/readline/lib/pkgconfig
         run: |
-          echo $PATH
+          echo "/opt/homebrew/opt/gettext/bin" >> "$GITHUB_PATH"
+          echo "/usr/local/opt/gettext/bin" >> "$GITHUB_PATH"
           ./autogen.sh
       - name: Build
         run: |
