@@ -64,7 +64,7 @@ jobs:
             libglib2.0-dev libgtk2.0-dev \
             libreadline-dev libbluetooth-dev \
             libusb-dev libical-dev \
-            libsqlite3-dev libpq-dev libmariadb-dev \
+            libsqlite3-dev libpq-dev libmariadb-dev-compat \
             libpcsclite-dev
       - uses: actions/checkout@v6
       - name: Configure
