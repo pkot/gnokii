@@ -25,7 +25,7 @@ jobs:
             build-essential \
             git \
             autoconf automake libtool gettext intltool \
-            pkg-config \
+            autopoint pkg-config \
             flex \
             libgtk2.0-dev libglib2.0-dev \
             libreadline-dev libbluetooth-dev \
@@ -59,7 +59,7 @@ jobs:
             git \
             build-essential \
             autoconf automake libtool gettext intltool \
-            pkg-config \
+            autopoint pkg-config \
             flex \
             libglib2.0-dev libgtk2.0-dev \
             libreadline-dev libbluetooth-dev \
@@ -125,6 +125,7 @@ jobs:
             automake
             libtool
             gettext
+            gettext-devel
             intltool
             flex
             pkgconf
