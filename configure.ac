@@ -128,6 +128,13 @@ dnl ======================== Default setting
 dnl Let us have $prefix variable available here
 test x"$prefix" = xNONE && prefix="$ac_default_prefix"
 
+dnl Set gcc CFLAGS if we use gcc
+if test "x$GCC" = "xyes"; then
+   AX_APPEND_COMPILE_FLAGS([-Wall])
+dnl Set some gcc CFLAGS to reduce build warnings
+   AX_APPEND_COMPILE_FLAGS([-Wno-pointer-sign -fvisibility=hidden -fno-strict-aliasing])
+fi
+
 debug="yes"
 xdebug="yes"
 rlpdebug="yes"
@@ -136,7 +143,7 @@ AC_ARG_ENABLE(fulldebug,
 	[  --enable-fulldebug      compile with full debugging support],
 	[ if test x$enable_fulldebug = xyes; then
 		if test "x$GCC" = "xyes"; then
-			CFLAGS="$CFLAGS -ggdb3 -Wall"
+			AX_APPEND_COMPILE_FLAGS([-ggdb3])
 		fi
 	  fi ]
 )
@@ -169,49 +176,6 @@ fi
 if test $rlpdebug = "yes"; then
 	AC_DEFINE(RLP_DEBUG, 1, [Whether rlpdebug is turned on])
 fi
-
-dnl ======================== Set gcc CFLAGS if we use gcc
-if test "x$GCC" = "xyes"; then
-	CFLAGS="$CFLAGS -Wall"
-fi
-
-dnl ======================== Set some gcc CFLAGS to reduce build warnings
-if test "x$GCC" = "xyes"; then
-  OLD_CFLAGS="$CFLAGS"
-
-  CFLAGS="-Wno-pointer-sign"
-  AC_MSG_CHECKING(if gcc supports $CFLAGS compiler option)
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[ int main() { return 0; } ]])],
-			[ac_cv_have_no_pointer_sign=yes],
-			[ac_cv_have_no_pointer_sign=no])
-  AC_MSG_RESULT($ac_cv_have_no_pointer_sign)
-  CFLAGS="-fvisibility=hidden"
-  AC_MSG_CHECKING(if gcc supports $CFLAGS compiler option)
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[ int main() { return 0; } ]])],
-			[ac_cv_have_hidden_visibility=yes],
-			[ac_cv_have_hidden_visibility=no])
-  AC_MSG_RESULT($ac_cv_have_hidden_visibility)
-  CFLAGS="-fno-strict-aliasing"
-  AC_MSG_CHECKING(if gcc supports $CFLAGS compiler option)
-  AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[ int main() { return 0; } ]])],
-			[ac_cv_have_strict_aliasing=yes],
-			[ac_cv_have_strict_aliasing=no])
-  AC_MSG_RESULT($ac_cv_have_strict_aliasing)
-
-  CFLAGS="$OLD_CFLAGS"
-  if test $ac_cv_have_no_pointer_sign = yes; then
-    CFLAGS="$CFLAGS -Wno-pointer-sign"
-  fi
-  if test $ac_cv_have_hidden_visibility = yes; then
-    CFLAGS="$CFLAGS -fvisibility=hidden"
-  fi
-  if test $ac_cv_have_strict_aliasing = yes; then
-    CFLAGS="$CFLAGS -fno-strict-aliasing"
-  fi
-fi
-
-dnl ======================== avoid deprecated warnings here
-# CFLAGS="$CFLAGS -DGNOKII_DEPRECATED=''"
 
 dnl ======================== Checks for libraries.
 
