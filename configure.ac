@@ -133,6 +133,9 @@ if test "x$GCC" = "xyes"; then
    AX_APPEND_COMPILE_FLAGS([-Wall])
 dnl Set some gcc CFLAGS to reduce build warnings
    AX_APPEND_COMPILE_FLAGS([-Wno-pointer-sign -fvisibility=hidden -fno-strict-aliasing])
+dnl Since gcc-15 Werror=incompatible-pointer-types is the default,
+dnl which troubles gtk-2 code, so disable it
+   AX_APPEND_COMPILE_FLAGS([-Wno-error=incompatible-pointer-types])
 fi
 
 debug="yes"
