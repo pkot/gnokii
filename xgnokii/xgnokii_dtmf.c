@@ -191,7 +191,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, "<control>O", LoadFileDialog, 0, NULL},
 	{NULL, "<control>S", SaveFileDialog, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
-	{NULL, "<control>W", CloseDTMF, 0, NULL},
+	{NULL, "<control>W", (GtkItemFactoryCallback) CloseDTMF, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };

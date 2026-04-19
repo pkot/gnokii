@@ -222,10 +222,10 @@ inline void GUI_ShowNetmon()
 
 static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Branch>"},
-	{NULL, "<control>W", CloseNetmon, 0, NULL},
+	{NULL, "<control>W", (GtkItemFactoryCallback) CloseNetmon, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
-	{NULL, NULL, NetmonOnOff, 1, NULL},
-	{NULL, NULL, NetmonOnOff, 0, NULL},
+	{NULL, NULL, (GtkItemFactoryCallback) NetmonOnOff, 1, NULL},
+	{NULL, NULL, (GtkItemFactoryCallback) NetmonOnOff, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };

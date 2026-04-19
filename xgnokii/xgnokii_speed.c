@@ -467,7 +467,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, "<control>I", ImportSpeedDial, 0, NULL},
 	{NULL, "<control>E", ExportSpeedDial, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
-	{NULL, "<control>W", CloseSpeedDial, 0, NULL},
+	{NULL, "<control>W", (GtkItemFactoryCallback) CloseSpeedDial, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
 	{NULL, NULL, EditKey, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},

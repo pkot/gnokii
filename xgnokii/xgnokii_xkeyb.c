@@ -207,7 +207,7 @@ static gint ButtonEvent(GtkWidget * widget, GdkEventButton * event)
 
 static GtkItemFactoryEntry menu_items[] = {
 	{NULL, NULL, NULL, 0, "<Branch>"},
-	{NULL, "<control>W", CloseXkeyb, 0, NULL},
+	{NULL, "<control>W", (GtkItemFactoryCallback) CloseXkeyb, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };
