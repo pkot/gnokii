@@ -853,7 +853,7 @@ AC_PROG_EGREP
 dnl ======================== Checks for header files.
 AC_INCLUDES_DEFAULT
 AC_HEADER_STDBOOL
-AC_HEADER_SYS_WAIT
+AC_CHECK_HEADERS([sys/wait.h])
 AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h sys/file.h)
 AC_CHECK_HEADERS(basetsd.h ctype.h stddef.h stdarg.h error.h errno.h signal.h)
 AC_CHECK_HEADERS(sys/socket.h sys/modem.h termios.h sys/filio.h)
