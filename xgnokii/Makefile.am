@@ -5,7 +5,8 @@ bin_PROGRAMS = xgnokii
 AM_CFLAGS = \
 	$(PTHREAD_CFLAGS) \
 	$(GTK_CFLAGS) -DGTK_ENABLE_BROKEN \
-	-DLOCALEDIR=\"$(localedir)\"
+	-DLOCALEDIR=\"$(localedir)\" \
+	-Wno-error=incompatible-pointer-types
 
 xgnokii_LDADD = \
 	$(PTHREAD_LIBS) $(GTK_LIBS) $(INTLLIBS) \
