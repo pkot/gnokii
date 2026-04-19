@@ -1456,7 +1456,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, "<control>I", FunctionNotImplemented, 0, NULL},
 	{NULL, "<control>E", FunctionNotImplemented, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
-	{NULL, "<control>W", (GtkItemFactoryCallback) CloseCalendar, 0, NULL},
+	{NULL, "<control>W", CloseCalendar, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
 	{NULL, "<control>N", AddReminder, 0, NULL},
 	{NULL, "<control>C", AddCall, 0, NULL},
