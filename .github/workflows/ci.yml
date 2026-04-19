@@ -128,7 +128,6 @@ jobs:
             intltool
             flex
             pkgconf
-            autopoint
             mingw-w64-x86_64-glib2
             mingw-w64-x86_64-readline
       - name: Configure
