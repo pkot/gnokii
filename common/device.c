@@ -6,7 +6,7 @@
 
   This file is part of gnokii.
 
-  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janík ml.
+  Copyright (C) 1999-2000 Hugh Blemings & Pavel Janï¿½k ml.
   Copyright (C) 2001      Chris Kemp
   Copyright (C) 2001-2011 Pawel Kot
   Copyright (C) 2002-2003 BORBELY Zoltan
@@ -28,7 +28,6 @@
 #include "devices/socketphonet.h"
 
 #include <errno.h>
-#include <sys/wait.h>
 
 GNOKII_API int device_getfd(struct gn_statemachine *state)
 {
