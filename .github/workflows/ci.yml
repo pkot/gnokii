@@ -125,6 +125,7 @@ jobs:
             automake
             libtool
             gettext
+            gettext-devel
             intltool
             flex
             pkgconf
