@@ -324,7 +324,6 @@ static int install_log_handler(void)
 	snprintf(logname, sizeof(logname), "%s/%s", path, file);
 
 	if ((logfile = fopen(logname, "a")) == NULL) {
-		fprintf(stderr, _("Cannot open logfile %s\n"), logname);
 		retval = -1;
 		goto out;
 	}
@@ -367,9 +366,7 @@ static int businit(void)
 	atexit(busterminate);
 	/* signal(SIGINT, bussignal); */
 
-	if (install_log_handler()) {
-		fprintf(stderr, _("WARNING: cannot open logfile, logs will be directed to stderr\n"));
-	}
+	install_log_handler();
 
 	if ((err = gn_lib_phone_open(state)) != GN_ERR_NONE) {
 		fprintf(stderr, "%s\n", gn_error_print(err));
