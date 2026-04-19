@@ -1210,7 +1210,7 @@ static GtkItemFactoryEntry send_menu_items[] = {
 	{NULL, "<control>N", CheckAddress, 0, NULL},
 	{NULL, "<control>C", ShowSelectContactsDialog, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
-	{NULL, "<control>W", CloseSMSSend, 0, NULL},
+	{NULL, "<control>W", (GtkItemFactoryCallback) CloseSMSSend, 0, NULL},
 	{NULL, NULL, NULL, 0, "<LastBranch>"},
 	{NULL, NULL, GUI_ShowAbout, 0, NULL},
 };
@@ -1588,7 +1588,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, "<control>M", SaveSMStoMailbox, 0, NULL},
 	{NULL, "<control>T", SaveSMStoMailbox_dialog, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
-	{NULL, "<control>W", CloseSMS, 0, NULL},
+	{NULL, "<control>W", (GtkItemFactoryCallback) CloseSMS, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
 	{NULL, "<control>A", ActivateSMS, 0, "<CheckItem>"},
 	{NULL, "<control>N", NewSMS, 0, NULL},

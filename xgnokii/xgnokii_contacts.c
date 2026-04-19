@@ -3011,7 +3011,7 @@ static GtkItemFactoryEntry menu_items[] = {
 	{NULL, "<control>I", ImportContacts, 0, NULL},
 	{NULL, "<control>E", ExportContacts, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Separator>"},
-	{NULL, "<control>W", CloseContacts, 0, NULL},
+	{NULL, "<control>W", (GtkItemFactoryCallback) CloseContacts, 0, NULL},
 	{NULL, NULL, NULL, 0, "<Branch>"},
 	{NULL, "<control>N", NewEntry, 0, NULL},
 	{NULL, "<control>U", DuplicateEntry, 0, NULL},
