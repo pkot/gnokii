@@ -32,7 +32,7 @@ GNOKII_API void DB_Bye (void)
 static gint Connect (const DBConfig connect, MYSQL *mysql)
 {
 #if MYSQL_VERSION_ID >= 50013
-  my_bool reconnect = 1;
+  bool reconnect = 1;
 #endif
 
   mysql_init (mysql);
