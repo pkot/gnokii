@@ -306,7 +306,15 @@ static int install_log_handler(void)
 			st = stat(basepath, &buf);
 			if (st)
 				mkdir(basepath, S_IRWXU);
-	
+#if !defined WIN32 && !defined __MACH__
+			if (home) {
+				char parent[MAX_PATH_LEN];
+				snprintf(parent, sizeof(parent), "%s%s", basepath, XDG_CACHE_HOME);
+				st = stat(parent, &buf);
+				if (st)
+					mkdir(parent, S_IRWXU);
+			}
+#endif
 			st = stat(path, &buf);
 			if (st)
 				mkdir(path, S_IRWXU);
