@@ -40,9 +40,7 @@
 
 #include <getopt.h>
 
-#ifdef ENABLE_NLS
-#  include <locale.h>
-#endif
+#include <locale.h>
 
 #ifdef HAVE_READLINE
 #  include <readline/readline.h>
@@ -1214,9 +1212,8 @@ int main(int argc, char *argv[])
 {
 	int rc;
 
-	/* For GNU gettext */
-#ifdef ENABLE_NLS
 	setlocale(LC_ALL, "");
+#ifdef ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 	textdomain(GETTEXT_PACKAGE);
 #endif
