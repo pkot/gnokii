@@ -29,8 +29,29 @@
 #  include <signal.h>
 #endif
 
+#ifdef WIN32
+#  include <io.h>
+#  include <windows.h>
+#endif
+
 #include "gnokii-app.h"
 #include "gnokii.h"
+
+static int stdin_is_console(void)
+{
+#ifdef WIN32
+	/* isatty() returns true for NUL on Windows because NUL is a character
+	   device. Ask the console subsystem directly to distinguish an
+	   interactive console from a redirected character device. */
+	DWORD mode;
+	HANDLE h = (HANDLE)_get_osfhandle(_fileno(stdin));
+	if (h == INVALID_HANDLE_VALUE)
+		return 0;
+	return GetConsoleMode(h, &mode) ? 1 : 0;
+#else
+	return isatty(0);
+#endif
+}
 
 gnokii_app_mode askoverwrite(const char *filename, gnokii_app_mode mode)
 {
@@ -113,9 +134,7 @@ gn_error readtext(gn_sms_user_data *udata)
 	char message_buffer[255 * GN_SMS_MAX_LENGTH];
 	size_t chars_read;
 
-#ifndef	WIN32
-	if (isatty(0))
-#endif
+	if (stdin_is_console())
 		fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:\n"));
 
 	/* Get message text from stdin. */

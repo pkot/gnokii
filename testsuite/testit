@@ -15,6 +15,13 @@ fi
 LC_MES_TMP=$LC_MESSAGES
 export LC_MESSAGES=C
 
+# Probe whether gnokii was compiled with XPM support (test.14 needs it).
+HAVE_XPM=yes
+if $GNOKII --sendlogo op 0800123456 "$TESTDIR/../Docs/sample/logo/gnokiiop.xpm" "203 01" 2>&1 | \
+	grep -q "not compiled with XPM support"; then
+	HAVE_XPM=no
+fi
+
 RETVAL=0
 # For now ignore the tests that are known to fail:
 #   - test.2.concatsms
@@ -33,9 +40,13 @@ for A in test.00.identify \
 	test.03.writephonebook test.04.writephonebook \
 	test.05.writephonebook; do
     echo -n "Doing $A... "
+    if [ "$HAVE_XPM" = "no" ] && grep -q '\.xpm' "$TESTDIR/$A" 2>/dev/null; then
+	echo "skipped (no XPM support)"
+	continue
+    fi
     B=`echo $A | sed s/test/out/`
     ( cd $TESTDIR; source $TESTDIR/$A 2>&1 ) | grep -v ^GNOKII > $TESTDIR/my$B
-    if cmp $TESTDIR/$B $TESTDIR/my$B >/dev/null 2>&1; then
+    if diff -q --strip-trailing-cr $TESTDIR/$B $TESTDIR/my$B >/dev/null 2>&1; then
 	echo ok
     else
 	echo '*** FAILED'

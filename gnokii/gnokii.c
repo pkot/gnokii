@@ -35,6 +35,8 @@
 #endif
 
 #ifdef WIN32
+#  include <fcntl.h>
+#  include <io.h>
 #  include <process.h>
 #endif
 
@@ -1216,6 +1218,24 @@ int main(int argc, char *argv[])
 #ifdef ENABLE_NLS
 	bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 	textdomain(GETTEXT_PACKAGE);
+#endif
+
+#ifdef WIN32
+	/* On Windows, locale_charset() reads the ANSI codepage via GetACP(),
+	   ignoring LC_ALL/LANG. Honor those env vars manually so tests and
+	   scripts can select UTF-8 regardless of the system codepage. */
+	{
+		const char *enc = getenv("LC_ALL");
+		if (!enc || !*enc) enc = getenv("LC_CTYPE");
+		if (!enc || !*enc) enc = getenv("LANG");
+		if (enc && (strstr(enc, "UTF-8") || strstr(enc, "utf-8") ||
+			    strstr(enc, "UTF8")  || strstr(enc, "utf8")))
+			gn_char_set_encoding("UTF-8");
+	}
+	/* Keep stdin/stdout in binary mode so LF/CRLF translation does not
+	   corrupt piped SMS payloads (e.g. iMelody files) or hexdumped output. */
+	_setmode(_fileno(stdin),  _O_BINARY);
+	_setmode(_fileno(stdout), _O_BINARY);
 #endif
 
 	opterr = 0;
