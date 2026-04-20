@@ -76,6 +76,9 @@ jobs:
         run: |
           make -j"$(nproc)"
       - name: Test
+        env:
+          LANG: C.UTF-8
+          LC_ALL: C.UTF-8
         run: |
           make check
 
