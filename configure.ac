@@ -66,8 +66,6 @@ if test "x$LEX" = "x:" && test ! -f common/gnvcal.c; then
 	exit 1
 fi
 
-AC_PATH_PROG(RM, rm, no)
-AC_PATH_PROG(FIND, find, no)
 AC_CHECK_PROGS(MAKE, gmake make)
 AC_CHECK_PROGS(AR, ar)
 AC_PROG_INSTALL
