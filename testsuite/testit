@@ -37,7 +37,7 @@ for A in test.00.identify \
 	test.05.writephonebook; do
     echo -n "Doing $A... "
     B=`echo $A | sed s/test/out/`
-    ( cd $TESTDIR; source $TESTDIR/$A 2>&1 ) | grep -v ^GNOKII > $TESTDIR/my$B
+    ( cd $TESTDIR; source $TESTDIR/$A 2>&1 ) | grep -U -v ^GNOKII > $TESTDIR/my$B
     if cmp $TESTDIR/$B $TESTDIR/my$B >/dev/null 2>&1; then
 	echo ok
     else
