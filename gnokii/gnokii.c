@@ -40,7 +40,7 @@
 
 #include <getopt.h>
 
-#ifdef ENABLE_NLS
+#ifdef HAVE_LOCALE_H
 #  include <locale.h>
 #endif
 
@@ -1209,9 +1209,43 @@ int main(int argc, char *argv[])
 {
 	int rc;
 
-	/* For GNU gettext */
-#ifdef ENABLE_NLS
+#if defined(WIN32) && !defined(__CYGWIN__)
+	/*
+	 * Allow the charset used for text conversions to be forced via the
+	 * environment. In some environment C library cannot derive a usable
+	 * codeset from the locale (e.g. native Windows, which ignores POSIX
+	 * LC_* values) so attept to do it here.
+	 */
+	static const char *const vars[] = { "LC_ALL", "LC_CTYPE", "LANG" };
+	size_t i, len;
+
+	for (i = 0; i < ARRAY_LEN(vars); i++) {
+		const char *loc = getenv(vars[i]);
+		if (loc && *loc) {
+			const char *dot = strchr(loc, '.');
+			if (dot) {
+				const char *end;
+				char codeset[32];
+				dot++;
+				end = strchr(dot, '@');
+				len = end ? (size_t)(end - dot) : strlen(dot);
+				if (len > 0 && len < sizeof(codeset)) {
+					memcpy(codeset, dot, len);
+					codeset[len] = '\0';
+					gn_char_set_encoding(codeset);
+					break;
+				}
+			}
+		}
+	}
+#endif
+
+#ifdef HAVE_SETLOCALE
 	setlocale(LC_ALL, "");
+#endif
+
+#ifdef ENABLE_NLS
+	/* For GNU gettext */
 	bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 	textdomain(GETTEXT_PACKAGE);
 #endif
