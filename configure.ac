@@ -914,6 +914,8 @@ AC_CHECK_FUNCS(getaddrinfo)
 AC_CHECK_FUNCS(posix_spawn fork waitpid)
 AM_CONDITIONAL([HAVE_POSIX_SPAWN], [test "x$ac_cv_func_posix_spawn" = xyes])
 AM_CONDITIONAL([HAVE_FORK], [test "x$ac_cv_func_fork" = xyes && test "x$ac_cv_func_waitpid" = xyes])
+AC_CHECK_HEADERS([locale.h])
+AC_CHECK_FUNCS([setlocale], [], [AC_MSG_WARN([charset conversion may not work])])
 AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf_c99,
 	[AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #include <stdlib.h>

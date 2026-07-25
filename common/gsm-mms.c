@@ -16,10 +16,6 @@
 #include "compat.h"
 #include "gnokii-internal.h"
 
-#ifdef ENABLE_NLS
-#  include <locale.h>
-#endif
-
 /**
  * mms_fields - mapping of all headers defined by the standard
  *

@@ -24,7 +24,7 @@
 
 #include "sms-nokia.h"
 
-#ifdef ENABLE_NLS
+#ifdef HAVE_LOCALE_H
 #  include <locale.h>
 #endif
 
@@ -2220,7 +2220,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	time_t caltime;
 	size_t size = 0;
 	char str[MAX_STR_LENGTH + 1];
-#ifdef ENABLE_NLS
+#ifdef HAVE_SETLOCALE
 	char *loc;
 #endif
 	char *buf = NULL;
@@ -2238,7 +2238,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	caltime = mktime(&t);
 	loctime = localtime(&caltime);
 
-#ifdef ENABLE_NLS
+#ifdef HAVE_SETLOCALE
 	loc = setlocale(LC_ALL, "C");
 #endif
 	switch (sms->status) {
@@ -2254,7 +2254,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	}
 
 	strftime(str, MAX_DATE_LENGTH, "Date: %a, %d %b %Y %H:%M:%S %z (%Z)", loctime);
-#ifdef ENABLE_NLS
+#ifdef HAVE_SETLOCALE
 	setlocale(LC_ALL, loc);
 #endif
 	APPEND((BUFP, "%s\n", str));
