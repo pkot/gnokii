@@ -11,9 +11,12 @@ else
 	exit 1
 fi
 
-# Backup LC_MESSAGES value
-LC_MES_TMP=$LC_MESSAGES
+# The tests exercise charset conversion (SMS/UCS2/vcard), which obviously
+# fails under the POSIX/C locale, so set something with a chance to pass.
+LC_MESSAGES_BAK=$LC_MESSAGES
+LC_CTYPE_BAK=$LC_CTYPE
 export LC_MESSAGES=C
+export LC_CTYPE=C.UTF-8
 
 RETVAL=0
 # For now ignore the tests that are known to fail:
@@ -44,7 +47,8 @@ for A in test.00.identify \
     fi
 done
 
-# Restore LC_MESSAGES value
-export LC_MESSAGES=$LC_MES_TMP
+# Restore previous locale setting
+export LC_MESSAGES=$LC_MESSAGES_BAK
+export LC_CTYPE=$LC_CTYPE_BAK
 
 exit $RETVAL
