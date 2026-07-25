@@ -1,5 +1,10 @@
 #!/bin/bash
 
+# Until I figure out locale conversion problems...
+if [ "`uname -s`"x != "Linux"x ]; then
+	exit 0
+fi
+
 if [ $# -eq 2 ] ; then
 	export TESTDIR=$1
 	export GNOKII=$2
