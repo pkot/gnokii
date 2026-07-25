@@ -111,7 +111,7 @@ static gn_error at_sms_write(gn_data *data, struct gn_statemachine *state, char*
 	length = data->raw_sms->user_data_length + offset + 8;
 
 	/* Length in AT mode is the length of the full message minus SMSC field length */
-	fprintf(stdout, "AT+%s=%d\n", cmd, length - 1);
+	fprintf(stdout, "AT+%s=%d\r", cmd, length - 1);
 
 	bin2hex(req, req2, length);
 	req[length * 2] = 0x1a;
@@ -483,7 +483,7 @@ static gn_error fake_writephonebook(gn_data *data, struct gn_statemachine *state
 	if (len >= sizeof(name))
 		return GN_ERR_ENTRYTOOLONG;
 
-	len = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%d,\"%s\"\r\n",
+	len = snprintf(req, sizeof(req), "AT+CPBW=%d,\"%s\",%d,\"%s\"\r",
 		       data->phonebook_entry->location,
 		       number,
 		       data->phonebook_entry->number[0] == '+' ? GN_GSM_NUMBER_International : GN_GSM_NUMBER_Unknown,
