@@ -10,18 +10,14 @@
   Copyright (C) 1999-2011 Jan Derfinak
 
   This file is a module to smsd for MySQL db server.
-  
+
 */
 
-#include "config.h"
-#include <string.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <glib.h>
 #include <mysql.h>
 #include "smsd.h"
 #include "gnokii.h"
-#include "compat.h"
-//#include "utils.h"
 
 static MYSQL mysqlIn;
 static MYSQL mysqlOut;
@@ -36,11 +32,15 @@ GNOKII_API void DB_Bye (void)
 static gint Connect (const DBConfig connect, MYSQL *mysql)
 {
 #if MYSQL_VERSION_ID >= 50013
+# if MYSQL_VERSION_ID >= 80001
+  bool reconnect = 1;
+# else
   my_bool reconnect = 1;
+# endif
 #endif
 
   mysql_init (mysql);
-  
+
   if (connect.clientEncoding[0] != '\0')
     mysql_options (mysql, MYSQL_SET_CHARSET_NAME, connect.clientEncoding);
 #if MYSQL_VERSION_ID >= 50500
@@ -98,7 +98,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
   text = g_malloc (strlen ((gchar *)data->user_data[0].u.text) * 2 + 1);
   mysql_real_escape_string (&mysqlIn, text, data->user_data[0].u.text, strlen ((gchar *)data->user_data[0].u.text));
   buf = g_string_sized_new (256);
-  
+
   if (data->udh.udh[0].type == GN_SMS_UDH_ConcatenatedMessages)
   { // Multipart Message !
     gn_log_xdebug ("Multipart message\n");
@@ -123,7 +123,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
       g_free (text);
       return (SMSD_NOK);
     }
-    
+
     res = mysql_store_result (&mysqlIn);
     row = mysql_fetch_row (res);
     mysql_free_result (res);
@@ -153,7 +153,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     if (mysql_real_query (&mysqlIn, buf->str, buf->len))
     {
       g_print (_("%d: INSERT INTO multipartinbox command failed.\n"), __LINE__);
-      gn_log_xdebug ("%s\n", buf->str);      
+      gn_log_xdebug ("%s\n", buf->str);
       g_print (_("Error: %s\n"), mysql_error (&mysqlIn));
       g_string_free (buf, TRUE);
       g_string_free (phnStr, TRUE);
@@ -193,12 +193,12 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     if (mysql_num_rows (res) == data->udh.udh[0].u.concatenated_short_message.maximum_number ) /* all parts collected */
     {
       GString *mbuf = g_string_sized_new (256);
-      
+
       while ((row = mysql_fetch_row (res)))
         g_string_append (mbuf, row[0]);
 
       mysql_free_result (res);
-      
+
       g_string_printf(buf, "DELETE from multipartinbox \
                             WHERE number='%s' AND refnum=%d AND maxnum=%d",
                       data->remote.number,
@@ -215,12 +215,12 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
         g_free (text);
         return (SMSD_NOK);
       }
-      
+
       g_free (text);
       text = g_malloc (mbuf->len * 2 + 1);
       mysql_real_escape_string (&mysqlIn, text, mbuf->str, mbuf->len);
       g_string_free (mbuf, TRUE);
-    } 
+    }
     else
     {
       mysql_free_result (res);
@@ -233,7 +233,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
   }
 
   gn_log_xdebug ("Message: %s\n", text);
-  
+
   /* Detect duplicates */
   g_string_printf (buf, "SELECT count(id) FROM inbox \
                          WHERE number = '%s' AND text = '%s' AND \
@@ -252,7 +252,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     g_free (text);
     return (SMSD_NOK);
   }
-  
+
   res = mysql_store_result (&mysqlIn);
   row = mysql_fetch_row (res);
   mysql_free_result (res);
@@ -309,12 +309,12 @@ GNOKII_API gint DB_Look (const gchar * const phone)
   buf = g_string_sized_new (256);
 
   mysql_real_query (&mysqlOut, "BEGIN", strlen ("BEGIN"));
-  
+
   g_string_printf (buf, "SELECT id, number, text, dreport FROM outbox \
                          WHERE processed='0' AND CURTIME() >= not_before \
                          AND CURTIME() <= not_after %s LIMIT 1 FOR UPDATE", phnStr->str);
   g_string_free (phnStr, TRUE);
-  
+
   if (mysql_real_query (&mysqlOut, buf->str, buf->len))
   {
     g_print (_("%d: SELECT FROM outbox command failed.\n"), __LINE__);
@@ -333,13 +333,13 @@ GNOKII_API gint DB_Look (const gchar * const phone)
     g_string_free (buf, TRUE);
     return (SMSD_NOK);
   }
-  
+
   while ((row = mysql_fetch_row (res1)))
   {
     gn_sms sms;
 
     empty = 0;
-    gn_sms_default_submit (&sms);    
+    gn_sms_default_submit (&sms);
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
     sms.delivery_report = atoi (row[3]);
 
@@ -352,7 +352,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
       sms.remote.type = GN_GSM_NUMBER_International;
     else
       sms.remote.type = GN_GSM_NUMBER_Unknown;
-    
+
     if (row[2] != NULL)
       strncpy((gchar *)sms.user_data[0].u.text, row[2], 10 * GN_SMS_MAX_LENGTH + 1);
     else
@@ -365,7 +365,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
        sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2;
 
     gn_log_xdebug ("Sending SMS: %s, %s\n", sms.remote.number, sms.user_data[0].u.text);
-    
+
     numError = 0;
     do
     {
@@ -378,7 +378,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
     g_string_printf (buf, "UPDATE outbox SET processed='1', error='%d', \
                            processed_date=NULL WHERE id='%s'",
                      error, row[0]);
-                        
+
     if (mysql_real_query (&mysqlOut, buf->str, buf->len))
     {
       g_print (_("%d: UPDATE command failed.\n"), __LINE__);
@@ -390,9 +390,9 @@ GNOKII_API gint DB_Look (const gchar * const phone)
   mysql_free_result (res1);
 
   mysql_real_query (&mysqlOut, "COMMIT", strlen ("COMMIT"));
-  
+
   g_string_free (buf, TRUE);
-  
+
   if (empty)
     return (SMSD_OUTBOXEMPTY);
   else

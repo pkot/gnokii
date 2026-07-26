@@ -17,19 +17,14 @@
 */
 
 #include "config.h"
-
-#include <glib.h>
-
-#include <stdlib.h>
-#include <string.h>
-#include <time.h>
+#include "compat.h"
 
 #include "gnokii-internal.h"
 #include "gnokii.h"
 
 #include "sms-nokia.h"
 
-#ifdef ENABLE_NLS
+#ifdef HAVE_LOCALE_H
 #  include <locale.h>
 #endif
 
@@ -116,7 +111,7 @@ GNOKII_API void gn_sms_default_deliver(gn_sms *sms)
  * The function converts binary date time into an easily readable form.
  * It is Y2K compliant.
  */
-static char *sms_timestamp_print(u8 *number)
+static char *sms_timestamp_print(uint8_t *number)
 {
 #ifdef DEBUG
 #define LOCAL_DATETIME_MAX_LENGTH 26
@@ -322,11 +317,10 @@ static unsigned int validity2minutes(unsigned char value)
  */
 static gn_error sms_status(unsigned char status, gn_sms *sms)
 {
-	sms->user_data[0].type = GN_SMS_DATA_Text;
+	sms->user_data[0].type = GN_SMS_DATA_DRStatus;
 	sms->user_data[1].type = GN_SMS_DATA_None;
 	if (status < 0x03) {
-		sms->user_data[0].dr_status = GN_SMS_DR_Status_Delivered;
-		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Delivered"));
+		sms->user_data[0].u.dr_status = GN_SMS_DR_Status_Delivered;
 		switch (status) {
 		case 0x00:
 			dprintf("SM received by the SME");
@@ -339,11 +333,9 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			break;
 		}
 	} else if (status & 0x40) {
-		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Failed"));
-		/* more detailed reason only for debug */
 		if (status & 0x20) {
+			sms->user_data[0].u.dr_status = GN_SMS_DR_Status_Failed_Permanent;
 			dprintf("Temporary error, SC is not making any more transfer attempts\n");
-			sms->user_data[0].dr_status = GN_SMS_DR_Status_Failed_Permanent;
 			switch (status) {
 			case 0x60:
 				dprintf("Congestion");
@@ -368,8 +360,8 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 				break;
 			}
 		} else {
+			sms->user_data[0].u.dr_status = GN_SMS_DR_Status_Failed_Temporary;
 			dprintf("Permanent error, SC is not making any more transfer attempts\n");
-			sms->user_data[0].dr_status = GN_SMS_DR_Status_Failed_Temporary;
 			switch (status) {
 			case 0x40:
 				dprintf("Remote procedure error");
@@ -407,9 +399,7 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			}
 		}
 	} else if (status & 0x20) {
-		sms->user_data[0].dr_status = GN_SMS_DR_Status_Pending;
-		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Pending"));
-		/* more detailed reason only for debug */
+		sms->user_data[0].u.dr_status = GN_SMS_DR_Status_Pending;
 		dprintf("Temporary error, SC still trying to transfer SM\n");
 		switch (status) {
 		case 0x20:
@@ -435,14 +425,10 @@ static gn_error sms_status(unsigned char status, gn_sms *sms)
 			break;
 		}
 	} else {
-		sms->user_data[0].dr_status = GN_SMS_DR_Status_Invalid;
-		snprintf(sms->user_data[0].u.text, sizeof(sms->user_data[0].u.text), "%s", _("Unknown"));
-
-		/* more detailed reason only for debug */
+		sms->user_data[0].u.dr_status = GN_SMS_DR_Status_Invalid;
 		dprintf("Reserved/Specific to SC: 0x%02x", status);
 	}
 	dprintf("\n");
-	sms->user_data[0].length = strlen(sms->user_data[0].u.text);
 	return GN_ERR_NONE;
 }
 
@@ -760,7 +746,6 @@ static gn_error sms_pdu_decode(gn_sms_raw *rawsms, gn_sms *sms)
 
 	error = sms_header_decode(rawsms, sms, &sms->udh);
 	ERROR();
-	sms->user_data[0].dr_status = GN_SMS_DR_Status_None;
 	switch (sms->type) {
 	case GN_SMS_MT_DeliveryReport:
 	case GN_SMS_MT_StatusReport:
@@ -1060,10 +1045,10 @@ gn_error gn_sms_pdu2raw(gn_sms_raw *rawsms, unsigned char *pdu, int pdu_len, int
 		/* TP-Message-Number */
 		dprintf("TP-Message-Number 0x%02x\n", pdu[offset++]);
 		/* TP-Destination-Address */
-	l = (pdu[offset] % 2) ? pdu[offset] + 1 : pdu[offset];
-	l = l / 2 + 2;
-	memcpy(rawsms->remote_number, pdu + offset, l);
-	offset += l;
+		l = (pdu[offset] % 2) ? pdu[offset] + 1 : pdu[offset];
+		l = l / 2 + 2;
+		memcpy(rawsms->remote_number, pdu + offset, l);
+		offset += l;
 		/* TP-Command-Data-Length */
 		dprintf("TP-Command-Data-Length 0x%02x\n", pdu[offset++]);
 		/* TP-Command-Data */
@@ -1325,7 +1310,7 @@ GNOKII_API gn_error gn_sms_get_folder_changes(gn_data *data, struct gn_statemach
 		ERROR();
 
 		data->sms_folder->folder_id = i;	/* so we don't need to do a modulo 8 each time */
-			
+
 		dprintf("GetFolderChanges: Reading read messages (%i) for folder #%i\n", data->sms_folder->number, i);
 		error = sms_get_read(data);
 		ERROR();
@@ -1733,17 +1718,17 @@ GNOKII_API gn_error gn_sms_send(gn_data *data, struct gn_statemachine *state)
 		i = 0;
 		data->sms->dcs.u.general.alphabet = GN_SMS_DCS_DefaultAlphabet;
 		while (data->sms->user_data[i].type != GN_SMS_DATA_None) {
-			gchar *str;
-			gsize inlen, outlen;
-			gn_sms_dcs_alphabet_type enc;
-
 			if (data->sms->user_data[i].type == GN_SMS_DATA_Text ||
 			    data->sms->user_data[i].type == GN_SMS_DATA_NokiaText) {
-			       	str = g_locale_to_utf8(data->sms->user_data[i].u.text, -1, &inlen, &outlen, NULL);
-			       	data->sms->user_data[i].chars = g_utf8_strlen(str, outlen);
-			       	memset(data->sms->user_data[i].u.text, 0, sizeof(data->sms->user_data[i].u.text));
-			       	g_utf8_strncpy(data->sms->user_data[i].u.text, str, data->sms->user_data[i].chars);
-			       	g_free(str);
+				gn_sms_dcs_alphabet_type enc;
+
+				int inlen = strlen(data->sms->user_data[i].u.text);
+				char *str = malloc(inlen * 2 + 1);
+				int outlen = utf8_encode(str, inlen * 2, data->sms->user_data[i].u.text, inlen);
+				memcpy(data->sms->user_data[i].u.text, str, outlen);
+				data->sms->user_data[i].u.text[outlen] = 0;
+				data->sms->user_data[i].length = outlen;
+				free(str);
 				/* Let's make sure the encoding is correct */
 				enc = char_def_alphabet_string_stats(data->sms->user_data[i].u.text, &enc_chars, &ext_chars);
 				if (enc == GN_SMS_DCS_UCS2)
@@ -2032,7 +2017,7 @@ cleanup:
 char *encode_attr_inline_string(char token, char *string, int *data_len)
 {
 	char *data = NULL;
-	
+
 	/* we need 3 extra bytes for tags */
 	*data_len = strlen(string) + 3;
 	data = malloc(*data_len);
@@ -2040,7 +2025,7 @@ char *encode_attr_inline_string(char token, char *string, int *data_len)
 	if (!data) {
 	    return NULL;
 	}
-	
+
 	data[0] = token;
 	data[1] = TAG_INLINE;
 	memcpy(data + 2, string, strlen(string));
@@ -2055,26 +2040,26 @@ char *encode_indication(gn_wap_push *wp, int *data_len)
 	char *attr = NULL;
 	int attr_len = 0;
 	int offset = 0;
-	
+
 	/* encode tag attribute */
 	attr = encode_attr_inline_string(ATTR_HREF, wp->url, &attr_len);
-	
+
 	if (!attr || !attr_len) {
 	    return NULL;
 	}
-	
+
 	/* need 5 extra bytes for indication token & attributes */
 	*data_len = attr_len + strlen(wp->text) + 5;
 	data = malloc(*data_len);
-	
+
 	if (!data) {
 		free(attr);
 		return NULL;
 	}
-	
+
 	/* indication tag token */
 	data[offset++] = TOKEN_KNOWN_AC | TAG_INDICATION;
-	
+
 	/* attribute */
 	memcpy(data + offset, attr, attr_len);
 	offset += attr_len;
@@ -2085,7 +2070,7 @@ char *encode_indication(gn_wap_push *wp, int *data_len)
 	memcpy(data + offset, wp->text, strlen(wp->text));
 	offset += strlen(wp->text);
 	data[offset++] = 0x00;
-	
+
 	/* tag end */
 	data[offset++] = TAG_END;
 
@@ -2099,7 +2084,7 @@ char *encode_si(gn_wap_push *wp, int *data_len)
 	char *data = NULL;
 	char *child = NULL;
 	int child_len = 0;
-	
+
 	child = encode_indication(wp, &child_len);
 
 	if (!child || !data_len) {
@@ -2109,42 +2094,42 @@ char *encode_si(gn_wap_push *wp, int *data_len)
 	/* we need extra 2 bytes for si token */
 	*data_len = child_len + 2;
 	data = malloc(*data_len);
-	
+
 	if (!data) {
 	    free(child);
 	    return NULL;
 	}
-	
+
 	data[0] = TOKEN_KNOWN_C | TAG_SI;
 	memcpy(data + 1, child, child_len);
 	data[*data_len - 1] = TAG_END;
-	
+
 	free(child);
-	
+
 	return data;
 }
 
 GNOKII_API gn_error gn_wap_push_encode(gn_wap_push *wp)
 {
-	
+
 	char *data = NULL;
 	int data_len = 0;
-	
+
 	data = encode_si(wp, &data_len);
-	
+
 	if (!data || !data_len) {
 	    return GN_ERR_FAILED;
 	}
-	
+
 	wp->data = malloc(data_len + sizeof(gn_wap_push_header));
 
 	if (!wp->data) {
 	    return GN_ERR_FAILED;
 	}
-	
+
 	memcpy(wp->data, &wp->header, sizeof(gn_wap_push_header));
 	memcpy(wp->data + sizeof(gn_wap_push_header), data, data_len);
-	
+
 	wp->data_len = data_len + sizeof(gn_wap_push_header);
 
 	return GN_ERR_NONE;
@@ -2158,16 +2143,16 @@ GNOKII_API void gn_wap_push_init(gn_wap_push *wp)
 	}
 
 	memset(wp, 0, sizeof(gn_wap_push));
-	
-	wp->header.wsp_tid 		= 0x00;
-	wp->header.wsp_pdu 		= PDU_TYPE_Push;
-	wp->header.wsp_hlen 		= 0x01;
-	wp->header.wsp_content_type 	= CONTENT_TYPE;
 
-	wp->header.version 	= WBXML_VERSION;
-	wp->header.public_id 	= TAG_SI;
-	wp->header.charset 	= WAPPush_CHARSET;
-	wp->header.stl 		= 0x00; /* string table length */
+	wp->header.wsp_tid		= 0x00;
+	wp->header.wsp_pdu		= PDU_TYPE_Push;
+	wp->header.wsp_hlen		= 0x01;
+	wp->header.wsp_content_type	= CONTENT_TYPE;
+
+	wp->header.version	= WBXML_VERSION;
+	wp->header.public_id	= TAG_SI;
+	wp->header.charset	= WAPPush_CHARSET;
+	wp->header.stl		= 0x00; /* string table length */
 }
 
 static char *status2str(gn_sms_message_status status)
@@ -2184,65 +2169,45 @@ static char *status2str(gn_sms_message_status status)
 	}
 }
 
+static char *printf_append(char *buf, size_t *len, char *fmt, ...)
+{
+	size_t count, newsize;
+	char *str;
+	va_list ap;
+
+	va_start(ap, fmt);
+	count = vasprintf(&str, fmt, ap);
+	if (count < 0) {
+		free(buf);
+		return NULL;
+	}
+	newsize = *len + count;
+	buf = realloc(buf, newsize + 1);
+	if (!buf) {
+		free(str);
+		return NULL;
+	}
+	memcpy(buf + *len, str, count + 1);
+	free(str);
+	*len = newsize;
+
+	return buf;
+}
+
+#define BUFP	buf, &size
+
+#define APPEND(args) \
+do { \
+	char *res = printf_append args; \
+	if (!res) \
+		goto error; \
+	buf = res; \
+} while (0)
+
 #define MAX_TEXT_SUMMARY	20
 #define MAX_SUBJECT_LENGTH	25
 #define MAX_DATE_LENGTH		255
-
-/* From snprintf(3) manual */
-static char *allocate(char *fmt, ...)
-{
-	char *str, *nstr;
-	int len, size = 100;
-	va_list ap;
-
-	str = calloc(100, sizeof(char));
-	if (!str)
-		return NULL;
-
-	while (1) {
-		va_start(ap, fmt);
-		len = vsnprintf(str, size, fmt, ap);
-		va_end(ap);
-		if (len >= size) /* too small buffer */
-			size = len + 1;
-		else if (len > -1) /* buffer OK */
-			return str;
-		else /* let's try with larger buffer */
-			size *= 2;
-		nstr = realloc(str, size);
-		if (!nstr) {
-			free(str);
-			return NULL;
-		}
-		str = nstr;
-	}
-}
-
-/* Here we allocate place for the line to append and we append it.
- * We free() the appended line. */
-#define APPEND(dst, src, size) \
-do { \
-	char *ndst; \
-	int old = size; \
-	size += strlen(src); \
-	ndst = realloc(dst, size + 1); \
-	if (!ndst) { \
-		free(dst); \
-		goto error; \
-	} \
-	dst = ndst; \
-	dst[old] = 0; \
-	strcat(dst, src); \
-	free(src); \
-} while (0)
-
-#define CONCAT(dst, src, size, pattern, ...) \
-do { \
-	src = allocate(pattern, __VA_ARGS__); \
-	if (!src) \
-		goto error; \
-	APPEND(dst, src, size); \
-} while (0);
+#define MAX_STR_LENGTH		MAX_DATE_LENGTH
 
 /* Returns allocated space for mbox-compatible formatted SMS */
 /* TODO:
@@ -2253,12 +2218,12 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 {
 	struct tm t, *loctime;
 	time_t caltime;
-	int size = 0;
-	char *tmp;
-#ifdef ENABLE_NLS
+	size_t size = 0;
+	char str[MAX_STR_LENGTH + 1];
+#ifdef HAVE_SETLOCALE
 	char *loc;
 #endif
-	char *buf = NULL, *aux = NULL;
+	char *buf = NULL;
 
 	t.tm_sec = sms->smsc_time.second;
 	t.tm_min = sms->smsc_time.minute;
@@ -2273,69 +2238,58 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	caltime = mktime(&t);
 	loctime = localtime(&caltime);
 
-#ifdef ENABLE_NLS
+#ifdef HAVE_SETLOCALE
 	loc = setlocale(LC_ALL, "C");
 #endif
 	switch (sms->status) {
 	case GN_SMS_Sent:
 	case GN_SMS_Unsent:
-		CONCAT(buf, tmp, size, "From %s@%s %s", "+0", from, asctime(loctime));
+		APPEND((BUFP, "From %s@%s %s", "+0", from, asctime(loctime)));
 		break;
 	case GN_SMS_Read:
 	case GN_SMS_Unread:
 	default:
-		CONCAT(buf, tmp, size, "From %s@%s %s", sms->remote.number, from, asctime(loctime));
+		APPEND((BUFP, "From %s@%s %s", sms->remote.number, from, asctime(loctime)));
 		break;
 	}
-	
-	tmp = calloc(MAX_DATE_LENGTH, sizeof(char));
-	if (!tmp)
-		goto error;
-	strftime(tmp, MAX_DATE_LENGTH - 1, "Date: %a, %d %b %Y %H:%M:%S %z (%Z)\n", loctime);
-#ifdef ENABLE_NLS
+
+	strftime(str, MAX_DATE_LENGTH, "Date: %a, %d %b %Y %H:%M:%S %z (%Z)", loctime);
+#ifdef HAVE_SETLOCALE
 	setlocale(LC_ALL, loc);
 #endif
-	APPEND(buf, tmp, size);
+	APPEND((BUFP, "%s\n", str));
 
 	switch (sms->status) {
 	case GN_SMS_Sent:
 	case GN_SMS_Unsent:
-		CONCAT(buf, tmp, size, "To: %s@%s\n", sms->remote.number, from);
+		APPEND((BUFP, "To: %s@%s\n", sms->remote.number, from));
 		break;
 	case GN_SMS_Read:
 	case GN_SMS_Unread:
 	default:
-		CONCAT(buf, tmp, size, "From: %s@%s\n", sms->remote.number, from);
+		APPEND((BUFP, "From: %s@%s\n", sms->remote.number, from));
 		break;
 	}
 
-	CONCAT(buf, tmp, size, "X-GSM-SMSC: %s\n", sms->smsc.number);
-	CONCAT(buf, tmp, size, "X-GSM-Status: %s\n", status2str(sms->status));
-	CONCAT(buf, tmp, size, "X-GSM-Memory: %s\n", gn_memory_type2str(sms->memory_type));
+	APPEND((BUFP, "X-GSM-SMSC: %s\n", sms->smsc.number));
+	APPEND((BUFP, "X-GSM-Status: %s\n", status2str(sms->status)));
+	APPEND((BUFP, "X-GSM-Memory: %s\n", gn_memory_type2str(sms->memory_type)));
 
-	aux = calloc(16, sizeof(char)); /* assuming location will never have more than 15 digits */
-	if (!aux)
-		goto error;
-	snprintf(aux, 16, "%d", sms->number);
-	CONCAT(buf, tmp, size, "X-GSM-Location: %s\n", aux);
-	free(aux);
+	/* assuming location will never have more than 15 digits */
+	snprintf(str, 15, "%d", sms->number);
+	APPEND((BUFP, "X-GSM-Location: %s\n", str));
 
 	if (strlen(sms->user_data[0].u.text) < MAX_SUBJECT_LENGTH) {
-		CONCAT(buf, tmp, size, "Subject: %s\n\n", sms->user_data[0].u.text);
+		APPEND((BUFP, "Subject: %s\n\n", sms->user_data[0].u.text));
 	} else {
-		aux = calloc(MAX_TEXT_SUMMARY + 1, sizeof(char));
-		if (!aux)
-			goto error;
-		snprintf(aux, MAX_TEXT_SUMMARY, "%s", sms->user_data[0].u.text);
-		CONCAT(buf, tmp, size, "Subject: %s...\n\n", aux);
-		free(aux);
+		snprintf(str, MAX_TEXT_SUMMARY, "%s", sms->user_data[0].u.text);
+		APPEND((BUFP, "Subject: %s...\n\n", str));
 	}
 
-	CONCAT(buf, tmp, size, "%s\n\n", sms->user_data[0].u.text);
+	APPEND((BUFP, "%s\n\n", sms->user_data[0].u.text));
 
 	return buf;
 error:
 	free(buf);
-	free(aux);
 	return NULL;
 }

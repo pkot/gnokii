@@ -12,12 +12,13 @@
 #ifndef __gnokii_irda_h_
 #define __gnokii_irda_h_
 
+#include "compat.h"
 #include "gnokii.h"
 
-int irda_open(struct gn_statemachine *state);
-int irda_close(int fd, struct gn_statemachine *state);
-int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state);
-int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state);
-int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
+void* irda_open(gn_config *cfg, int with_odd_parity, int with_async);
+void irda_close(void *instance);
+size_t irda_write(void *instance, const __ptr_t bytes, size_t size);
+size_t irda_read(void *instance, __ptr_t bytes, size_t size);
+int irda_select(void *instance, struct timeval *timeout);
 
 #endif /* __gnokii_irda_h_ */

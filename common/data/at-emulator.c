@@ -17,26 +17,14 @@
 */
 
 #include "config.h"
-
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <grp.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <time.h>
-#include <ctype.h>
-
-#ifndef WIN32
-#  include <termios.h>
+#include "compat.h"
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
 #endif
+#include <grp.h>
 
 #include "misc.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "data/at-emulator.h"
 #include "data/datapump.h"
 
@@ -89,7 +77,7 @@ static char imei[GN_IMEI_MAX_LENGTH], model[GN_MODEL_MAX_LENGTH], revision[GN_RE
 static int	PtyRDFD;	/* File descriptor for reading and writing to/from */
 static int	PtyWRFD;	/* pty interface - only different in debug mode. */
 
-static u8	ModemRegisters[MAX_MODEM_REGISTERS];
+static uint8_t	ModemRegisters[MAX_MODEM_REGISTERS];
 static char	CmdBuffer[MAX_CMD_BUFFERS][CMD_BUFFER_LENGTH];
 static int	CurrentCmdBuffer;
 static int	CurrentCmdBufferIndex;

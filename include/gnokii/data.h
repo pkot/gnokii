@@ -139,7 +139,7 @@ typedef struct {
 	int hardware_handshake;				/* Select between hardware and software handshake */
 	int require_dcd;				/* DCD signal check */
 	int smsc_timeout;				/* How many seconds should we wait for the SMSC response, defaults to 10 seconds */
-	uint8_t rfcomm_cn;				/* RFCOMM channel number to connect */
+	unsigned char rfcomm_cn;			/* RFCOMM channel number to connect */
 	unsigned int sm_retry;				/* Indicates whether statemachine should do retries. Defaults to off. */
 							/* Use with caution -- may break newer DCT4 phones */
 	unsigned int use_locking;			/* Should we use locking system or not */
@@ -192,9 +192,22 @@ typedef struct {
 } gn_callback;
 
 typedef struct {
+	void* (*open)(gn_config *cfg, int with_odd_parity, int with_async);
+	void (*close)(void *instance);
+	int (*select)(void *instance, struct timeval *timeout);
+	size_t (*read)(void *instance, __ptr_t buf, size_t nbytes);
+	size_t (*write)(void *instance, const __ptr_t buf, size_t n);
+	gn_error (*nreceived)(void *instance, int *n);
+	gn_error (*flush)(void *instance);
+	gn_error (*changespeed)(void *instance, int speed);
+	void (*setdtrrts)(void *instance, int dtr, int rts);
+} gn_device_ops;
+
+typedef struct {
 	int fd;
 	gn_connection_type type;
-	void *device_instance;
+	const gn_device_ops *ops;
+	void *instance;
 } gn_device;
 
 typedef enum {

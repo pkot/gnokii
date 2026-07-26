@@ -46,9 +46,9 @@ unsigned char *sms_timestamp_pack(gn_timestamp *dt, unsigned char *number);
 
 /* Statemachine */
 gn_error sm_initialise(struct gn_statemachine *state);
-gn_error sm_message_send(u16 messagesize, u8 messagetype, void *message, struct gn_statemachine *state);
+gn_error sm_message_send(uint16_t messagesize, uint8_t messagetype, void *message, struct gn_statemachine *state);
 gn_error sm_wait_for(unsigned char messagetype, gn_data *data, struct gn_statemachine *state);
-void sm_incoming_function(u8 messagetype, void *message, u16 messagesize, struct gn_statemachine *state);
+void sm_incoming_function(uint8_t messagetype, void *message, uint16_t messagesize, struct gn_statemachine *state);
 void sm_incoming_acknowledge(struct gn_statemachine *state);
 void sm_reset(struct gn_statemachine *state);
 gn_error sm_error_get(unsigned char messagetype, struct gn_statemachine *state);
@@ -88,7 +88,7 @@ unsigned int char_def_alphabet_decode(unsigned char value);
 size_t char_uni_alphabet_encode(const char *value, size_t n, wchar_t *dest, MBSTATE *mbs);
 int char_uni_alphabet_decode(wchar_t value, unsigned char *dest, MBSTATE *mbs);
 
-extern char *char_bcd_number_get(u8 *number);
+extern char *char_bcd_number_get(uint8_t *number);
 extern int char_semi_octet_pack(char *number, unsigned char *output, gn_gsm_number_type type);
 
 int ucs2_encode(char *outstring, int outlen, const char *instring, int inlen);
@@ -178,5 +178,14 @@ int strip_slashes(char *dest, const char *src, int maxlen, int len);
 
 /* authentication for at driver */
 gn_error do_auth(gn_auth_type auth_type, struct gn_statemachine *state);
+
+#if defined(HAVE_POSIX_SPAWN) || (defined(HAVE_FORK) && defined(HAVE_WAITPID))
+int device_script(int fd, int connect, struct gn_statemachine *state);
+#else
+static inline int device_script(int fd, int connect, struct gn_statemachine *state)
+{
+	return 0;
+}
+#endif
 
 #endif /* _gnokii_internal_h */

@@ -1,9 +1,15 @@
-DEFS = -DLOCALEDIR=\"$(localedir)\" -DCOMPILING_LIBGNOKII
-
 if WIN32
 DATA_DIR = 
 else
 DATA_DIR = data
+endif
+
+if HAVE_POSIX_SPAWN
+DEVICE_SCRIPT = script-posixspawn.c
+else
+if HAVE_FORK
+DEVICE_SCRIPT = script-fork.c
+endif
 endif
 
 lib_LTLIBRARIES = libgnokii.la
@@ -13,14 +19,17 @@ SUBDIRS = phones \
 	devices \
 	$(DATA_DIR)
 
-LIBS   += $(LIBPCSCLITE_LIBS) $(GLIB_LIBS)
+LIBS   += $(LIBPCSCLITE_LIBS)
 
 pkgconfig_DATA = gnokii.pc
 pkgconfigdir = $(libdir)/pkgconfig
 
-libgnokii_la_CPPFLAGS = -DLIBDIR="\"$(libdir)\""
-libgnokii_la_CFLAGS = -I$(top_srcdir)/include $(GLIB_CFLAGS) \
-	$(ICAL_CFLAGS)
+libgnokii_la_CPPFLAGS = \
+	-DLIBDIR=\"$(libdir)\" -DLOCALEDIR=\"$(localedir)\" \
+	@LIBGNOKII_DEFS@
+
+libgnokii_la_CFLAGS = \
+	-I$(top_srcdir)/include $(ICAL_CFLAGS)
 
 libgnokii_la_SOURCES = \
 	libfunctions.c \
@@ -48,12 +57,13 @@ libgnokii_la_SOURCES = \
 	pkt.c \
 	compat.c \
 	misc.c \
-	snprintf.c \
 	localcharset.c \
 	map.c \
-	gsm-auth.c
+	gsm-auth.c \
+	$(DEVICE_SCRIPT)
 
 libgnokii_la_LIBADD = \
+	$(top_builddir)/snprintf/libsnprintf.la \
 	$(top_builddir)/common/phones/libPHONES.la \
 	$(top_builddir)/common/links/libLINKS.la \
 	$(top_builddir)/common/devices/libDEVICES.la \

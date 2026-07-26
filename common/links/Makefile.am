@@ -1,5 +1,3 @@
-DEFS = -DCOMPILING_LIBGNOKII
-
 noinst_LTLIBRARIES = libLINKS.la
 libLINKS_la_SOURCES = \
 	atbus.c \
@@ -10,7 +8,10 @@ libLINKS_la_SOURCES = \
 	gnbus.c \
 	utils.c
 
-libLINKS_la_CFLAGS =		\
+libLINKS_la_CPPFLAGS = \
+	@LIBGNOKII_DEFS@
+
+libLINKS_la_CFLAGS = \
 	-I$(top_srcdir)/include
 
 EXTRA_DIST = cbus.c

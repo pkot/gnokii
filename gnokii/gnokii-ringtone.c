@@ -22,15 +22,16 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#include <stdio.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
 #include <getopt.h>
-#include <signal.h>
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
 
 #include "gnokii-app.h"
 #include "gnokii.h"

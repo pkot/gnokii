@@ -1,30 +1,11 @@
 EXTRA_DIST =						\
 	gen_gnokii_h.bat				\
+	gen_gnokii_h.ps1				\
 	gnokiirc					\
-	mingw-cross/mingw-cross.sh			\
-	MSVS2005/Gnokii_setup/Gnokii_setup.vdproj	\
-	MSVS2005/gnokii.sln				\
-	MSVS2005/config.h				\
-	MSVS2005/gnokii.vcproj				\
-	MSVS2005/libgnokii.vcproj			\
-	MSVS2008/Gnokii_setup/Gnokii_setup-Win32.vdproj	\
-	MSVS2008/Gnokii_setup/Gnokii_setup-x64.vdproj	\
-	MSVS2008/gnokii.sln				\
-	MSVS2008/config.h				\
-	MSVS2008/gnokii.vcproj				\
-	MSVS2008/libgnokii.vcproj			\
 	MSVC6/config.h					\
 	MSVC6/gnokii.dsp				\
+	MSVC6/libgetopt.dsp				\
 	MSVC6/libgnokii.dsp				\
+	MSVC6/libsnprintf.dsp				\
 	MSVC6/gnokii.dsw				\
-	MSVC8/gnokii.sln				\
-	MSVC8/config.h					\
-	MSVC8/gnokii.vcproj				\
-	MSVC8/libgnokii.vcproj				\
-	MSVC2010Express/gnokii.sln			\
-	MSVC2010Express/config.h			\
-	MSVC2010Express/README				\
-	MSVC2010Express/gnokii/gnokii.vcxproj		\
-	MSVC2010Express/gnokii/gnokii.vcxproj.filters	\
-	MSVC2010Express/libgnokii/libgnokii.vcxproj	\
-	MSVC2010Express/libgnokii/libgnokii.vcxproj.filters
+	MSVC6/gnokii.dsw

@@ -22,11 +22,9 @@
 
 GNOKII_API int device_getfd(struct gn_statemachine *state);
 
-int device_open(const char *file, int with_odd_parity, int with_async,
-		int with_hw_handshake, gn_connection_type device_type,
-		struct gn_statemachine *state);
+int device_open(int with_odd_parity, int with_async,
+		gn_connection_type device_type, struct gn_statemachine *state);
 void device_close(struct gn_statemachine *state);
-void device_reset(struct gn_statemachine *state);
 
 void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state);
 void device_changespeed(int speed, struct gn_statemachine *state);

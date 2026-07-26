@@ -20,14 +20,9 @@
 #ifndef _gnokii_links_m2bus_h
 #define _gnokii_links_m2bus_h
 
-#include <time.h>
 #include "compat.h"
 
 #include "gnokii.h"
-
-#ifdef WIN32
-#  include <sys/types.h>
-#endif
 
 /* This byte is at the beginning of all GSM Frames sent over M2BUS to Nokia
    phones.  This may have to become a phone dependent parameter... */
@@ -44,7 +39,7 @@
 
 
 enum m2bus_rx_state {
-    	M2BUS_RX_Sync,
+	M2BUS_RX_Sync,
 	M2BUS_RX_Discarding,
 	M2BUS_RX_GetDestination,
 	M2BUS_RX_GetSource,
@@ -70,7 +65,7 @@ typedef struct {
 
 typedef struct{
 	m2bus_incoming_message i;
-	u8 request_sequence_number;
+	uint8_t request_sequence_number;
 } m2bus_link;
 
 #define M2BUSINST(s) (*((m2bus_link **)(&(s)->link.link_instance)))

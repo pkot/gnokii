@@ -12,12 +12,11 @@
 */
 
 #include "config.h"
+#include "compat.h"
 #include <pthread.h>
-#include <string.h>
 #include <glib.h>
 #include "misc.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "smsd.h"
 #include "lowlevel.h"
 
@@ -107,7 +106,7 @@ static gn_error fbusinit (const char * const iname)
   /* register cleanup function */
   atexit (busterminate);
 
-  /* Initialise the code for the GSM interface. */     
+  /* Initialise the code for the GSM interface. */
   error = gn_lib_phone_open (sm);
   gn_log_xdebug ("fbusinit: error %d\n", error);
   if (error != GN_ERR_NONE)
@@ -170,7 +169,6 @@ static void RefreshSMS (const gint number)
   static gn_sms_folder folder;
   static gn_sms_folder_list folderlist;
   register gint i;
-  
 
   if (number < 1)
   {
@@ -178,7 +176,7 @@ static void RefreshSMS (const gint number)
 This should not happen.\nSkipping.");
     return;
   }
-  
+
   gn_log_xdebug ("RefreshSMS is running...\nNumber of messages: %d\n", number);
 
   FreeArray (&(phoneMonitor.sms.messages));
@@ -241,7 +239,7 @@ static gint A_SendSMSMessage (gpointer data)
 
   if (!d)
     return (GN_ERR_UNKNOWN);
-    
+
   pthread_mutex_lock (&sendSMSMutex);
   dt = calloc (1, sizeof (gn_data));
   if (!d->sms->smsc.number[0])
@@ -275,10 +273,10 @@ static gint A_SendSMSMessage (gpointer data)
         d->sms->smsc.type = smsc_type;
     }
   }
-  
+
   if (!d->sms->smsc.type)
     d->sms->smsc.type = GN_GSM_NUMBER_Unknown;
-    
+
   gn_data_clear (dt);
   dt->sms = d->sms;
   d->status = gn_sms_send (dt, sm);
@@ -327,7 +325,7 @@ static gint A_DeleteSMSMessage (gpointer data)
     phoneMonitor.sms.number--;
     FreeElement (data, NULL);
 //    pthread_mutex_unlock (&smsMutex);
-  } 
+  }
   else
     gn_log_xdebug ("Internal error: dt->sms == NULL\n");
 
@@ -360,7 +358,7 @@ static void RealConnect (void *phone)
   int consecutive_errors = 0;
 
   data = calloc (1, sizeof (gn_data));
-  
+
   gn_log_xdebug ("Initializing connection...\n");
 
   if (fbusinit ((gchar *)phone) != GN_ERR_NONE)
@@ -381,7 +379,7 @@ static void RealConnect (void *phone)
   while (1)
   {
     pthread_mutex_lock (&smsMutex);
-    
+
     /* The event queue must be processed before RefreshSMS ()! */
     while ((event = RemoveEvent ()) != NULL)
     {
@@ -391,7 +389,7 @@ static void RealConnect (void *phone)
           g_print (_("Event %d failed with return code %d!\n"), event->event, error);
       g_free (event);
     }
-  
+
     if (phoneMonitor.supported & PM_FOLDERS)
     {
       data->sms_folder = &SMSFolder;
@@ -430,9 +428,9 @@ static void RealConnect (void *phone)
 //        phoneMonitor.sms.unRead = SMSStatus.unread;
       }
     }
-    
+
     pthread_mutex_unlock (&smsMutex);
-    
+
     if (error != GN_ERR_NONE)
     {
       if (error == GN_ERR_TIMEOUT)
@@ -472,4 +470,4 @@ void *Connect (void *phone)
     busterminate ();
     sleep (1);
   }
-} 
+}

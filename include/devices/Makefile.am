@@ -2,11 +2,9 @@
 EXTRA_HEADERS = \
 		dku2libusb.h \
 		irda.h \
-		linuxirda.h \
 		tcp.h \
 		tekram.h \
-		unixbluetooth.h \
-		unixirda.h \
+		bluetooth.h \
 		serial.h \
 		socketphonet.h
 

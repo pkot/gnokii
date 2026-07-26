@@ -22,8 +22,8 @@
 #define LM_SMS_COMMAND	0x38
 #define   LM_SMS_READ_STORED_DATA	0x02		/* These are really subcommands of LM_SMS_COMMAND */
 #define   LM_SMS_RECEIVED_PP_DATA	0x06
-#define   LM_SMS_FORWARD_STORED_DATA 	0x0b
-#define   LM_SMS_RESERVE_PP 		0x12
+#define   LM_SMS_FORWARD_STORED_DATA	0x0b
+#define   LM_SMS_RESERVE_PP		0x12
 #define	    LN_SMS_NORMAL_RESERVE 1
 #define     LN_SMS_NEW_MSG_INDICATION 2
 #define   LM_SMS_UNRESERVE_PP		0x14

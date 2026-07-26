@@ -20,6 +20,7 @@
 #ifndef _gnokii_common_h
 #define _gnokii_common_h
 
+#include <gnokii/apidecl.h>
 #include <gnokii/rlp-common.h>
 
 /* Type of connection. */
@@ -536,7 +537,7 @@ typedef struct {
    functions for example battery level. They are not defined as constants to
    allow model specific code to set them during initialisation */
 typedef struct {
-	unsigned char *models; /* Models covered by this type, pipe '|' delimited. */
+	char *models; /* Models covered by this type, pipe '|' delimited. */
 
 	/* Minimum and maximum levels for RF signal strength. Units are as per the
 	   setting of RFLevelUnits.  The setting of RFLevelUnits indicates the
@@ -559,7 +560,7 @@ typedef struct {
 	gn_datetime_support datetime_support;
 	gn_datetime_support alarm_support;
 	int maximum_alarms_number;
-	
+
 	unsigned int startup_logo_height;   /* Logo widths and heights - if supported */
 	unsigned int startup_logo_width;
 	unsigned int operator_logo_height;

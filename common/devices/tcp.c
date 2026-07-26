@@ -13,30 +13,17 @@
 */
 
 #include "config.h"
+#include "compat.h"
 #include "misc.h"
 #include "devices/tcp.h"
-#include "devices/serial.h"
 
-#ifndef WIN32
-
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/ioctl.h>
-#include <string.h>
-#include <limits.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/ioctl.h>
-#include <netinet/in.h>
-#include <sys/socket.h>
-#include <netdb.h>
-#include <termios.h>
-
-#ifdef HAVE_SYS_FILE_H
-#  include <sys/file.h>
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
 #endif
+
+#include <limits.h>
+#include <netinet/in.h>
+#include <netdb.h>
 
 #ifdef HAVE_SYS_IOCTL_COMPAT_H
 #  include <sys/ioctl_compat.h>
@@ -50,9 +37,7 @@
 #  define O_NONBLOCK  0
 #endif
 
-/* Open the serial port and store the settings. */
-
-static int tcp_open(const char *file)
+static int tcp_opensocket(const char *file)
 {
 	int fd;
 #ifdef HAVE_GETADDRINFO
@@ -143,33 +128,23 @@ fail_close:
 	return -1;
 }
 
-int tcp_close(int fd, struct gn_statemachine *state)
+void* tcp_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
-	return close(fd);
-}
-
-/* Open a device with standard options.
- * Use value (-1) for "with_hw_handshake" if its specification is required from the user
- */
-int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
-{
-	int fd;
-	int retcode;
+	int fd, retcode, *data;
 
 	/* Open device */
 
-	fd = tcp_open(file);
-
+	fd = tcp_opensocket(cfg->port_device);
 	if (fd < 0)
-		return fd;
+		return NULL;
 
 #if !(__unices__)
 	/* Allow process/thread to receive SIGIO */
 	retcode = fcntl(fd, F_SETOWN, getpid());
 	if (retcode == -1) {
 		perror(_("Gnokii tcp_opendevice: fcntl(F_SETOWN)"));
-		tcp_close(fd, state);
-		return -1;
+		close(fd);
+		return NULL;
 	}
 #endif
 
@@ -191,58 +166,38 @@ int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *sta
 #endif
 	if (retcode == -1) {
 		perror(_("Gnokii tcp_opendevice: fcntl(F_SETFL)"));
-		tcp_close(fd, state);
-		return -1;
+		close(fd);
+		return NULL;
 	}
 
-	return fd;
+	data = malloc(sizeof(int));
+	if (data == NULL) {
+		close(fd);
+		return NULL;
+	}
+	*data = fd;
+
+	return data;
 }
 
-int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+void tcp_close(void *instance)
 {
-	return serial_select(fd, timeout, state);
+	close(*(int *)instance);
 }
 
+extern int unix_select(int fd, struct timeval *timeout);
 
-/* Read from serial device. */
-
-size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
+int tcp_select(void *instance, struct timeval *timeout)
 {
-	return read(fd, buf, nbytes);
+	return unix_select(*(int *)instance, timeout);
 }
 
-/* Write to serial device. */
-
-size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
+size_t tcp_read(void *instance, __ptr_t buf, size_t nbytes)
 {
-	return write(fd, buf, n);
+	return read(*(int *)instance, buf, nbytes);
 }
 
-#else /* WIN32 */
-
-int tcp_close(int fd, struct gn_statemachine *state)
+size_t tcp_write(void *instance, const __ptr_t buf, size_t n)
 {
-	return -1;
+	return write(*(int *)instance, buf, n);
 }
-
-int tcp_opendevice(const char *file, int with_async, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t tcp_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t tcp_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int tcp_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-#endif /* WIN32 */

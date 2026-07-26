@@ -16,17 +16,9 @@
 */
 
 #include "config.h"
-
-#ifndef WIN32
-#  include <unistd.h>
-#endif
+#include "compat.h"
 #include <locale.h>
-#include <fcntl.h>
 #include <pthread.h>
-#include <time.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include <gtk/gtk.h>
 #include <gdk/gdkkeysyms.h>
 #include "misc.h"
@@ -348,10 +340,34 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 		row[2] = GUI_GetName(data->remote.number);
 		if (row[2] == NULL)
 			row[2] = data->remote.number;
-		if ((data->type == GN_SMS_MT_Picture) || (data->type == GN_SMS_MT_PictureTemplate))
+
+		if ((data->type == GN_SMS_MT_Picture) || (data->type == GN_SMS_MT_PictureTemplate)) {
 			row[3] = g_strdup_printf(_("Picture Message: %s"), data->user_data[1].u.text);
-		else
-			row[3] = data->user_data[0].u.text;
+		} else if (data->user_data[0].type == GN_SMS_DATA_DRStatus) {
+			switch (data->user_data[0].u.dr_status) {
+			case GN_SMS_DR_Status_None:
+				row[3] = g_strdup(_("None"));
+				break;
+			case GN_SMS_DR_Status_Invalid:
+				row[3] = g_strdup(_("Unknown"));
+				break;
+			case GN_SMS_DR_Status_Delivered:
+				row[3] = g_strdup(_("Delivered"));
+				break;
+			case GN_SMS_DR_Status_Pending:
+				row[3] = g_strdup(_("Pending"));
+				break;
+			case GN_SMS_DR_Status_Failed_Temporary:
+			case GN_SMS_DR_Status_Failed_Permanent:
+				row[3] = g_strdup(_("Failed"));
+				break;
+			default:
+				row[3] = g_strdup(_("Unexpected"));
+				break;
+			}
+		} else {
+			row[3] = g_strdup(data->user_data[0].u.text);
+		}
 
 		gtk_clist_append(GTK_CLIST(SMS.smsClist), row);
 
@@ -368,6 +384,7 @@ static void InsertFolderElement(gpointer d, gpointer userData)
 					    msgPtrs, DestroyMsgPtrs);
 		g_free(row[0]);
 		g_free(row[1]);
+		g_free(row[3]);
 	}
 }
 

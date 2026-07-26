@@ -20,17 +20,7 @@
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
-#include "devices/unixbluetooth.h"
-
-#if defined(HAVE_BLUETOOTH_BLUEZ) || defined(HAVE_BLUETOOTH_NETGRAPH) || defined(HAVE_BLUETOOTH_NETBT)
-
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
-#include <sys/time.h>
-#include <sys/socket.h>
+#include "devices/bluetooth.h"
 
 #ifdef HAVE_BLUETOOTH_NETGRAPH	/* FreeBSD / netgraph */
 
@@ -265,7 +255,7 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 		case SDP_ATTR_PRIMARY_LANGUAGE_BASE_ID + SDP_ATTR_SERVICE_NAME_OFFSET:
 			if (channel == -1)
 				break;
-			
+
 			SDP_GET8(type, start);
 			switch (type) {
 				case SDP_DATA_STR8:
@@ -303,7 +293,7 @@ static int find_service_channel(bdaddr_t *adapter, bdaddr_t *device, int only_gn
 					break;
 				}
 			}
-			
+
 			if (strstr(name, "Nokia PC Suite") != NULL) {
 				channel = -1;
 				break;
@@ -471,49 +461,50 @@ static int setNonblocking(int fd)
 	return retcode;
 }
 
-int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *state)
+void* bluetooth_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
+	uint8_t channel;
 	bdaddr_t bdaddr;
 	struct sockaddr_rc raddr;
-	int fd;
+	int fd, *data;
 
-	if (str2ba((char *)addr, &bdaddr)) {
-		fprintf(stderr, _("Invalid bluetooth address \"%s\"\n"), addr);
-		return -1;
+	if (str2ba(cfg->port_device, &bdaddr)) {
+		fprintf(stderr, _("Invalid bluetooth address \"%s\"\n"), cfg->port_device);
+		return NULL;
 	}
 
 	if ((fd = socket(PF_BLUETOOTH, SOCK_STREAM, BTPROTO_RFCOMM)) < 0) {
 		perror(_("Can't create socket"));
-		return -1;
+		return NULL;
 	}
 
 	memset(&raddr, 0, sizeof(raddr));
 	raddr.rc_family = AF_BLUETOOTH;
 	bacpy(&raddr.rc_bdaddr, &bdaddr);
+	channel = cfg->rfcomm_cn;
 	dprintf("Channel: %d\n", channel);
 	if (channel < 1) {
-		if (!strcmp(state->config.model, "gnapplet") ||
-		    !strcmp(state->config.model, "symbian"))
+		if (!strcmp(cfg->model, "gnapplet") ||
+		    !strcmp(cfg->model, "symbian"))
 			channel = get_serial_channel(&bdaddr, 1);
 		else
 			channel = get_serial_channel(&bdaddr, 0);
 	}
-	dprintf("Channel: %d\n", channel);
 
 	/* If none channel found, fail. */
 	if (channel < 1) {
 		fprintf(stderr, _("Cannot find any appropriate rfcomm channel and none was specified in the config.\n"));
 		close(fd);
-		return -1;
+		return NULL;
 	}
 
 	dprintf("Using channel: %d\n", channel);
 	raddr.rc_channel = channel;
-	
+
 	if (connect(fd, (struct sockaddr *)&raddr, sizeof(raddr)) < 0) {
 		perror(_("Can't connect"));
 		close(fd);
-		return -1;
+		return NULL;
 	}
 
 	/* Ignore errors. If the socket was not set in the async way,
@@ -521,33 +512,35 @@ int bluetooth_open(const char *addr, uint8_t channel, struct gn_statemachine *st
 	 */
 	setNonblocking(fd);
 
-	return fd;
+	data = malloc(sizeof(int));
+	if (data == NULL) {
+		close(fd);
+		return NULL;
+	}
+	*data = fd;
+
+	return data;
 }
 
-int bluetooth_close(int fd, struct gn_statemachine *state)
+void bluetooth_close(void *instance)
 {
 	sleep(2);
-	return close(fd);
+	close(*(int *)instance);
 }
 
-int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size)
 {
-	return write(fd, bytes, size);
+	return write(*(int *)instance, bytes, size);
 }
 
-int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t bluetooth_read(void *instance, __ptr_t bytes, size_t size)
 {
-	return read(fd, bytes, size);
+	return read(*(int *)instance, bytes, size);
 }
 
-int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+extern int unix_select(int fd, struct timeval *timeout);
+
+int bluetooth_select(void *instance, struct timeval *timeout)
 {
-	fd_set readfds;
-
-	FD_ZERO(&readfds);
-	FD_SET(fd, &readfds);
-
-	return select(fd + 1, &readfds, NULL, NULL, timeout);
+	return unix_select(*(int *)instance, timeout);
 }
-
-#endif	/* HAVE_BLUETOOTH_BLUEZ || HAVE_BLUETOOTH_NETGRAPH || HAVE_BLUETOOTH_NETBT */

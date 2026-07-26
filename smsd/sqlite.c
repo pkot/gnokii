@@ -8,19 +8,16 @@
 
   Copyright (C) 1999 Pavel Janik ml., Hugh Blemings
   Copyright (C) 1999-2005 Jan Derfinak
-  
+
   This file is a module to smsd for SQLite db server.
 
  */
 
-#include "config.h"
-#include <string.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <sqlite3.h>
 #include <glib.h>
 #include "smsd.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "utils.h"
 
 static sqlite3 *ppDbInbox;
@@ -238,7 +235,7 @@ GNOKII_API gint DB_Look(const gchar * const phone)
 
     g_string_free(timebuf, TRUE);
     g_string_free(buf, TRUE);
-    
+
     if (empty)
       return (SMSD_OUTBOXEMPTY);
     else

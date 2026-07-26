@@ -25,12 +25,6 @@
 
 */
 
-#include "config.h"
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
@@ -45,7 +39,7 @@
 #if defined(WIN32) && defined(_USRDLL)
 /*
  * Define the entry point for the DLL application.
- *	
+ *
  * We don't do anything special here (yet) but the code is needed
  * in order to create a DLL.
  */

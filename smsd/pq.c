@@ -8,20 +8,16 @@
 
   Copyright (C) 1999 Pavel Janík ml., Hugh Blemings
   Copyright (C) 1999-2011 Jan Derfinak
-  
+
   This file is a module to smsd for PostgreSQL db server.
 
 */
 
-#include "config.h"
-#include <string.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <glib.h>
 #include <libpq-fe.h>
 #include "smsd.h"
 #include "gnokii.h"
-#include "compat.h"
-//#include "utils.h"
 
 static PGconn *connIn = NULL;
 static PGconn *connOut = NULL;
@@ -46,7 +42,7 @@ static gint Connect (const DBConfig connect, PGconn **conn)
                          connect.db,
                          connect.user[0] != '\0' ? connect.user : NULL,
                          connect.password[0] != '\0' ? connect.password : NULL);
-  
+
   if (PQstatus (*conn) == CONNECTION_BAD)
   {
     g_print (_("Connection to database '%s' on host '%s' failed.\n"),
@@ -62,7 +58,7 @@ static gint Connect (const DBConfig connect, PGconn **conn)
                connect.clientEncoding, connect.db, connect.host);
       g_print (_("Error: %s\n"), PQerrorMessage (*conn));
     }
-    
+
   if (schema == NULL)
     schema = g_strdup (connect.schema);
 
@@ -109,10 +105,10 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     g_free (text);
     return (SMSD_NOK);
   }
-  
+
 //  text = strEscape ((gchar *) data->user_data[0].u.text);
   buf = g_string_sized_new (256);
-  
+
   if (data->udh.udh[0].type == GN_SMS_UDH_ConcatenatedMessages)
   { // Multipart Message !
     gn_log_xdebug ("Multipart message\n");
@@ -140,7 +136,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
       g_free (text);
       return (SMSD_NOK);
     }
-                                                       
+
     if (atoi (PQgetvalue (res, 0, 0)) > 0)
     {
       gn_log_xdebug ("%d: SMS already stored in the database (refnum=%d, maxnum=%d, curnum=%d).\n", __LINE__,
@@ -155,7 +151,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     }
 
     PQclear (res);
-    
+
     /* insert into multipart */
     g_string_printf (buf, "INSERT INTO %s.multipartinbox (number, smsdate, \
                            text, refnum , maxnum , curnum, %s processed) VALUES ('%s', \
@@ -178,11 +174,11 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
       g_string_free (buf, TRUE);
       g_string_free (phnStr, TRUE);
       g_free (text);
-      return (SMSD_NOK);   
+      return (SMSD_NOK);
     }
 
     PQclear (res);
-    
+
     /* If all parts are already in multipart inbox, move it into inbox */
     g_string_printf (buf, "SELECT text FROM %s.multipartinbox \
                            WHERE number='%s' AND refnum=%d AND maxnum=%d \
@@ -211,9 +207,9 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
 
       for (i = 0; i < PQntuples (res); i++)
         g_string_append (mbuf, PQgetvalue (res, i, 0));
-        
+
       PQclear (res);
- 
+
       g_string_printf(buf, "DELETE from %s.multipartinbox \
                             WHERE number='%s' AND refnum=%d AND maxnum=%d",
                       schema, data->remote.number,
@@ -222,7 +218,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
       res = PQexec (connIn, buf->str);
       if (!res || PQresultStatus (res) != PGRES_COMMAND_OK)
       {
-        g_print (_("%d: DELETE FROM %s.multipartinbox command failed.\n"), __LINE__, schema);   
+        g_print (_("%d: DELETE FROM %s.multipartinbox command failed.\n"), __LINE__, schema);
         gn_log_xdebug ("%s\n", buf->str);
         g_print (_("Error: %s\n"), PQerrorMessage (connIn));
         PQclear (res);
@@ -232,7 +228,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
         g_free (text);
         return (SMSD_NOK);
       }
-    
+
       PQclear (res);
       g_free (text);
 
@@ -251,7 +247,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
 
 //      text = strEscape (mbuf->str);
       g_string_free (mbuf, TRUE);
-    } 
+    }
     else
     {
       PQclear (res);
@@ -262,9 +258,9 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
       return (SMSD_WAITING);
     }
   }
-  
+
   gn_log_xdebug ("Message: %s\n", text);
-  
+
   /* Detect duplicates */
   g_string_printf (buf, "SELECT count(id) FROM %s.inbox \
                          WHERE number = '%s' AND text = '%s' AND \
@@ -286,7 +282,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     g_free (text);
     return (SMSD_NOK);
   }
-  
+
   if (atoi (PQgetvalue (res, 0, 0)) > 0)
   {
     gn_log_xdebug ("%d: MSG already stored in database.\n", __LINE__);
@@ -296,7 +292,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     g_free (text);
     return (SMSD_DUPLICATE);
   }
-  
+
   PQclear (res);
 
   g_string_printf (buf, "INSERT INTO %s.inbox (\"number\", \"smsdate\", \"insertdate\",\
@@ -309,7 +305,7 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
                    data->smsc_time.minute, data->smsc_time.second, text, phnStr->str);
   g_free (text);
   g_string_free (phnStr, TRUE);
-  
+
   res = PQexec (connIn, buf->str);
   g_string_free (buf, TRUE);
   if (!res || PQresultStatus(res) != PGRES_COMMAND_OK)
@@ -320,9 +316,9 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
     PQclear (res);
     return (SMSD_NOK);
   }
-  
+
   PQclear (res);
-    
+
   return (SMSD_OK);
 }
 
@@ -370,7 +366,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
   for (i = 0; i < PQntuples (res1); i++)
   {
     gn_sms sms;
-    
+
     empty = 0;
     gn_sms_default_submit (&sms);
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
@@ -382,7 +378,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
       sms.remote.type = GN_GSM_NUMBER_International;
     else
       sms.remote.type = GN_GSM_NUMBER_Unknown;
-    
+
     strncpy ((gchar *) sms.user_data[0].u.text, PQgetvalue (res1, i, 2), 10 * GN_SMS_MAX_LENGTH + 1);
     sms.user_data[0].u.text[10 * GN_SMS_MAX_LENGTH] = '\0';
     sms.user_data[0].length = strlen ((gchar *) sms.user_data[0].u.text);
@@ -392,7 +388,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
        sms.dcs.u.general.alphabet = GN_SMS_DCS_UCS2;
 
     gn_log_xdebug ("Sending SMS: %s, %s\n", sms.remote.number, sms.user_data[0].u.text);
-    
+
     numError = 0;
     do
     {
@@ -409,7 +405,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
     res2 = PQexec (connOut, buf->str);
     if (!res2 || PQresultStatus (res2) != PGRES_COMMAND_OK)
     {
-      g_print (_("%d: UPDATE command failed.\n"), __LINE__);   
+      g_print (_("%d: UPDATE command failed.\n"), __LINE__);
       gn_log_xdebug ("%s\n", buf->str);
       g_print (_("Error: %s\n"), PQerrorMessage (connOut));
     }
@@ -422,7 +418,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
   PQclear (res1);
 
   g_string_free (buf, TRUE);
-  
+
   if (empty)
     return (SMSD_OUTBOXEMPTY);
   else

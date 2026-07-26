@@ -15,14 +15,6 @@
 */
 
 #include "config.h"
-
-/* System header files */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-#include <errno.h>
-
-/* Various header file */
 #include "compat.h"
 #include "misc.h"
 #include "links/atbus.h"
@@ -33,6 +25,10 @@
 
 #include "device.h"
 
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#endif
+
 /* ugly hack, but we need GN_OP_AT_Ring -- bozo */
 #include "phones/atgen.h"
 
@@ -42,7 +38,7 @@
  * message from the phone.
  */
 
-static int xwrite(unsigned char *d, size_t len, struct gn_statemachine *sm)
+static int xwrite(char *d, size_t len, struct gn_statemachine *sm)
 {
 	size_t res;
 
@@ -51,10 +47,14 @@ static int xwrite(unsigned char *d, size_t len, struct gn_statemachine *sm)
 	while (len) {
 		res = device_write(d, len, sm);
 		if (res == -1) {
+#ifdef HAVE_ERRNO_H
 			if (errno != EAGAIN) {
+#endif
 				perror(_("gnokii I/O error"));
 				return -1;
+#ifdef HAVE_ERRNO_H
 			}
+#endif
 		} else {
 			d += res;
 			len -= res;
@@ -63,15 +63,15 @@ static int xwrite(unsigned char *d, size_t len, struct gn_statemachine *sm)
 	return 0;
 }
 
-static bool atbus_open(int mode, char *device, struct gn_statemachine *sm)
+static bool atbus_open(struct gn_statemachine *sm)
 {
-	int result = device_open(device, false, false, mode, sm->config.connection_type, sm);
+	int result = device_open(false, false, sm->config.connection_type, sm);
 
 	if (!result) {
 		perror(_("Couldn't open ATBUS device"));
 		return false;
 	}
-	if (mode) {
+	if (sm->config.hardware_handshake) {
 		/*
 		 * make 7110 with dlr-3 happy. the nokia dlr-3 cable provides
 		 * hardware handshake lines but is, at least at initialization,
@@ -106,14 +106,14 @@ static gn_error at_send_message(unsigned int message_length, unsigned char messa
 	return xwrite(msg, message_length, sm) ? GN_ERR_UNKNOWN : GN_ERR_NONE;
 }
 
-char *findcrlfbw(unsigned char *str, int len)
+char *findcrlfbw(char *str, int len)
 {
 	while (len-- && (*str != '\n') && (*str-1 != '\r'))
 		str--;
 	return len > 0 ? str+1 : NULL;
 }
 
-int numchar(unsigned char *str, unsigned char ch)
+int numchar(char *str, char ch)
 {
 	int count = 0;
 
@@ -269,7 +269,7 @@ static void atbus_reset(struct gn_statemachine *state)
 /* Initialise variables and start the link */
 /* Fixme we allow serial and irda for connection to reduce */
 /* bug reports. this is pretty silly for /dev/ttyS?. */
-gn_error atbus_initialise(int mode, struct gn_statemachine *state)
+gn_error atbus_initialise(struct gn_statemachine *state)
 {
 	gn_error error = GN_ERR_NONE;
 	atbus_instance *businst;
@@ -291,7 +291,7 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 	switch (state->config.connection_type) {
 	case GN_CT_Irda:
 		if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
-			if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
+			if (!device_open(false, false, state->config.connection_type, state)) {
 				error = GN_ERR_FAILED;
 				goto err;
 			}
@@ -300,13 +300,13 @@ gn_error atbus_initialise(int mode, struct gn_statemachine *state)
 		/* FALLTHROUGH */
 	case GN_CT_Serial:
 	case GN_CT_TCP:
-		if (!atbus_open(mode, state->config.port_device, state)) {
+		if (!atbus_open(state)) {
 			error = GN_ERR_FAILED;
 			goto err;
 		}
 		break;
 	case GN_CT_Bluetooth:
-		if (!device_open(state->config.port_device, false, false, false, state->config.connection_type, state)) {
+		if (!device_open(false, false, state->config.connection_type, state)) {
 			error = GN_ERR_FAILED;
 			goto err;
 		}

@@ -1,5 +1,3 @@
-DEFS = -DCOMPILING_LIBGNOKII
-
 noinst_LTLIBRARIES = libDATA.la
 libDATA_la_SOURCES = \
 	at-emulator.c \
@@ -8,5 +6,8 @@ libDATA_la_SOURCES = \
 	rlp-crc24.c \
 	virtmodem.c
 
-libDATA_la_CFLAGS =		\
+libDATA_la_CPPFLAGS = \
+	@LIBGNOKII_DEFS@
+
+libDATA_la_CFLAGS = \
 	-I$(top_srcdir)/include
