@@ -16,77 +16,38 @@
 */
 
 #include "config.h"
-#include "compat.h" /* for __ptr_t definition */
-#include "gnokii.h"
-
-#ifndef HAVE_SOCKETPHONET
-
-int socketphonet_close(struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int socketphonet_open(const char *iface, int with_async, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-size_t socketphonet_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-int socketphonet_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
-{
-	return -1;
-}
-
-#else
-
-/* System header files */
-#include <sys/socket.h>
-#include <linux/phonet.h>
-
-/* Various header files */
 #include "compat.h"
 #include "links/fbus-common.h"
 #include "links/fbus-phonet.h"
 #include "device.h"
-#include "devices/serial.h"
+#include "devices/socketphonet.h"
 #include "gnokii-internal.h"
+
+#include <sys/socket.h>
+#include <linux/phonet.h>
 
 static struct sockaddr_pn addr = { .spn_family = AF_PHONET, .spn_dev = FBUS_DEVICE_PHONE };
 
-int socketphonet_close(struct gn_statemachine *state)
+void* socketphonet_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
-	return close(state->device.fd);
-}
-
-int socketphonet_open(const char *interface, int with_async, struct gn_statemachine *state)
-{
-	int fd, retcode;
+	int fd, retcode, *data;
 
 	fd = socket(PF_PHONET, SOCK_DGRAM, 0);
 	if (fd == -1) {
 		perror("socket");
-		return -1;
+		return NULL;
 	}
 
 	if (bind(fd, (struct sockaddr *)&addr, sizeof(addr))) {
 		perror("bind");
 		close(fd);
-		return -1;
+		return NULL;
 	}
 
-	if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, interface, strlen(interface))) {
+	if (setsockopt(fd, SOL_SOCKET, SO_BINDTODEVICE, cfg->port_device, strlen(cfg->port_device))) {
 		perror("setsockopt");
 		close(fd);
-		return -1;
+		return NULL;
 	}
 
 	/* Make filedescriptor asynchronous. */
@@ -108,18 +69,31 @@ int socketphonet_open(const char *interface, int with_async, struct gn_statemach
 	if (retcode == -1) {
 		perror("fcntl");
 		close(fd);
-		return -1;
+		return NULL;
 	}
 
-	return fd;
+	data = malloc(sizeof(int));
+	if (data == NULL) {
+		close(fd);
+		return NULL;
+	}
+	*data = fd;
+
+	return data;
 }
 
-size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state)
+void socketphonet_close(void *instance)
+{
+	close(*(int *)instance);
+}
+
+
+size_t socketphonet_read(void *instance, __ptr_t buf, size_t nbytes)
 {
 	int received;
 	unsigned char *frame = buf;
 
-	received = recvfrom(fd, buf + 8, nbytes - 8, 0, NULL, NULL);
+	received = recvfrom(*(int *)instance, buf + 8, nbytes - 8, 0, NULL, NULL);
 	if (received == -1) {
 		perror("recvfrom");
 		return -1;
@@ -139,14 +113,14 @@ size_t socketphonet_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemach
 	return received + 8;
 }
 
-size_t socketphonet_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state)
+size_t socketphonet_write(void *instance, const __ptr_t buf, size_t n)
 {
 	int sent;
 	const unsigned char *frame = buf;
 
 	addr.spn_resource = frame[3];
 
-	sent = sendto(fd, buf + 8, n - 8, 0, (struct sockaddr *)&addr, sizeof(addr));
+	sent = sendto(*(int *)instance, buf + 8, n - 8, 0, (struct sockaddr *)&addr, sizeof(addr));
 	if (sent == -1) {
 		perror("sendto");
 		return -1;
@@ -155,9 +129,9 @@ size_t socketphonet_write(int fd, const __ptr_t buf, size_t n, struct gn_statema
 	return sent + 8;
 }
 
-int socketphonet_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
-{
-	return serial_select(fd, timeout, state);
-}
+extern int unix_select(int fd, struct timeval *timeout);
 
-#endif /* HAVE_SOCKETPHONET */
+int socketphonet_select(void *instance, struct timeval *timeout)
+{
+	return unix_select(*(int *)instance, timeout);
+}

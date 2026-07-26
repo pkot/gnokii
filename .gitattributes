@@ -1,0 +1,26 @@
+# Line-ending policy for the testsuite fixtures.
+#
+# gnokii terminates AT commands with a bare CR (the V.250 line-termination
+# character) and separates human-readable output with newlines. The AT-command
+# CR and the SMS end marker (0x1a) are protocol bytes and are preserved as-is;
+# the newlines are an ordinary text stream and take the platform's native line
+# ending. The expected outputs are therefore text and must be checked out with
+# native EOLs so they match gnokii's stdout (LF on Unix, CRLF on Windows).
+testsuite/out.*				text
+
+# The test drivers are sourced by shell; keep them LF so they run under the
+# MSYS2/Cygwin bash on Windows regardless of the platform's autocrlf setting.
+testsuite/test.*			text eol=lf
+testsuite/testit			text eol=lf
+
+# Byte-exact fixtures: raw protocol data and CRLF-sensitive formats must never
+# be converted on checkout.
+testsuite/*.bin				binary
+testsuite/sms/*				binary
+testsuite/vcard/*.vcf			binary
+
+# The iMelody sample is a newline-delimited text file; its line endings are an
+# ordinary text stream and take the platform's native EOL.
+Docs/sample/ringtone/star.imelody	text
+
+

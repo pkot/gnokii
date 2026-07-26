@@ -10,8 +10,6 @@
 
 #include "config.h"
 
-#ifdef HAVE_IRDA
-
 #define WIN32_LEAN_AND_MEAN
 #include <winsock.h>
 #include <mmsystem.h>
@@ -32,7 +30,7 @@
 
 #define INVALID_DADDR	((DWORD)-1L)
 
-static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
+static DWORD irda_discover_device(const char *irda_string, SOCKET fd)
 {
 	DEVICELIST *list;
 	IRDA_DEVICE_INFO *dev;
@@ -48,7 +46,7 @@ static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
 
 	t1 = timeGetTime();
 
-	dprintf("Expecting: %s\n", state->config.irda_string);
+	dprintf("Expecting: %s\n", irda_string);
 
 	do {
 		s = len;
@@ -56,12 +54,12 @@ static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
 
 		if (getsockopt(fd, SOL_IRLMP, IRLMP_ENUMDEVICES, buf, &s) != SOCKET_ERROR) {
 			for (i = 0; (i < list->numDevice) && (daddr == INVALID_DADDR); i++) {
-				if (strlen(state->config.irda_string) == 0) {
+				if (strlen(irda_string) == 0) {
 					/* We take first entry */
 					daddr = *(DWORD*)dev[i].irdaDeviceID;
 					dprintf("Default: %s\t%x\n", dev[i].irdaDeviceName, *(DWORD*)dev[i].irdaDeviceID);
 				} else {
-					if (strncmp(dev[i].irdaDeviceName, state->config.irda_string, INFO_LEN) == 0) {
+					if (strncmp(dev[i].irdaDeviceName, irda_string, INFO_LEN) == 0) {
 						daddr = *(DWORD*)dev[i].irdaDeviceID;
 						dprintf("Matching: %s\t%x\n", dev[i].irdaDeviceName, *(DWORD*)dev[i].irdaDeviceID);
 					} else {
@@ -83,11 +81,11 @@ static DWORD irda_discover_device(struct gn_statemachine *state, SOCKET fd)
 	return daddr;
 }
 
-int irda_open(struct gn_statemachine *state)
+void* irda_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
 	WSADATA wsaData;
 	SOCKADDR_IRDA peer;
-	SOCKET fd = INVALID_SOCKET;
+	SOCKET fd, *data;
 	DWORD daddr = INVALID_DADDR;
 	int x = 1;
 
@@ -95,31 +93,31 @@ int irda_open(struct gn_statemachine *state)
 	if (WSAStartup(MAKEWORD(2,0), &wsaData) != 0) {
 		dprintf("WSAStartup() failed.\n");
 		fprintf(stderr, _("Failed to initialize socket subsystem: need WINSOCK2. Please upgrade.\n"));
-		return -1;
+		return NULL;
 	}
 	/* Create an irda socket */
 	if ((fd = socket(AF_IRDA, SOCK_STREAM, 0)) < 0) {
 		perror("socket");
 		dprintf("Failed to create an irda socket.\n");
-		return -1;
+		return NULL;
 	}
 	/* Discover devices */
-	daddr = irda_discover_device(state, fd); /* discover the devices */
+	daddr = irda_discover_device(cfg->irda_string, fd); /* discover the devices */
 	if (daddr == INVALID_DADDR) {
 		dprintf("Failed to discover any irda device.\n");
 		closesocket(fd);
-		return -1;
+		return NULL;
 	}
 	/* Prepare socket structure for irda socket */
 	peer.irdaAddressFamily = AF_IRDA;
 	*(DWORD*)peer.irdaDeviceID = daddr;
-	if (!strcasecmp(state->config.port_device, "IrDA:IrCOMM")) {
+	if (!strcasecmp(cfg->port_device, "IrDA:IrCOMM")) {
 		snprintf(peer.irdaServiceName, sizeof(peer.irdaServiceName), "IrDA:IrCOMM");
 		if (setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, (char *)&x, sizeof(x)) == SOCKET_ERROR) {
 			perror("setsockopt");
 			dprintf("Failed to set irda socket options.\n");
 			closesocket(fd);
-			return -1;
+			return NULL;
 		}
 	} else
 		snprintf(peer.irdaServiceName, sizeof(peer.irdaServiceName), "Nokia:PhoNet");
@@ -128,37 +126,41 @@ int irda_open(struct gn_statemachine *state)
 		perror("connect");
 		dprintf("Failed to connect to irda socket\n");
 		closesocket(fd);
-		return -1;
+		return NULL;
 	}
-	return (int)fd;
+	data = malloc(sizeof(SOCKET));
+	if (data == NULL) {
+		closesocket(fd);
+		return NULL;
+	}
+	*data = fd;
+
+	return data;
 }
 
-int irda_close(int fd, struct gn_statemachine *state)
+void irda_close(void *instance)
 {
-	shutdown(fd, 0);
-	closesocket((SOCKET)fd);
+	shutdown(*(SOCKET *)instance, 0);
+	closesocket(*(SOCKET *)instance);
 	WSACleanup();
-	return 0;
 }
 
-int irda_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t irda_write(void *instance, const __ptr_t bytes, size_t size)
 {
-	return send((SOCKET)fd, bytes, size, 0);
+	return send(*(SOCKET *)instance, bytes, size, 0);
 }
 
-int irda_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t irda_read(void *instance, __ptr_t bytes, size_t size)
 {
-	return recv((SOCKET)fd, bytes, size, 0);
+	return recv(*(SOCKET *)instance, bytes, size, 0);
 }
 
-int irda_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+int irda_select(void *instance, struct timeval *timeout)
 {
 	fd_set readfds;
 
 	FD_ZERO(&readfds);
-	FD_SET((SOCKET)fd, &readfds);
+	FD_SET(*(SOCKET *)instance, &readfds);
 
 	return select(0 /* ignored on Win32 */, &readfds, NULL, NULL, timeout);
 }
-
-#endif /* HAVE_IRDA */

@@ -22,10 +22,9 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#include <stdio.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
@@ -426,8 +425,8 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 		error = gn_sm_functions(GN_OP_WritePhonebook, data, state);
 
 		if (error == GN_ERR_NONE) {
-			fprintf(stderr, 
-				 _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"), 
+			fprintf(stderr,
+				 _("Write Succeeded: memory type: %s, loc: %d, name: %s, number: %s\n"),
 				 gn_memory_type2str(entry.memory_type), entry.location, entry.name, entry.number);
 			/* If the location was not specified and there are
 			 * multiple entries, don't write them to the same
@@ -492,14 +491,14 @@ gn_error deletephonebook(int argc, char *argv[], gn_data *data, struct gn_statem
 		error = gn_sm_functions(GN_OP_DeletePhonebook, data, state);
 		switch (error) {
 		case GN_ERR_NONE:
-			fprintf (stderr, _("Phonebook entry removed: memory type: %s, loc: %d\n"), 
+			fprintf (stderr, _("Phonebook entry removed: memory type: %s, loc: %d\n"),
 				 gn_memory_type2str(entry.memory_type), entry.location);
 			break;
 		default:
 			if (last_location == INT_MAX)
 				last_location = 0;
 			else
-				fprintf (stderr, _("Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"), 
+				fprintf (stderr, _("Phonebook entry removal FAILED (%s): memory type: %s, loc: %d\n"),
 					 gn_error_print(error), gn_memory_type2str(entry.memory_type), entry.location);
 			break;
 		}

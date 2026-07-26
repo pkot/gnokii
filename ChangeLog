@@ -114,9 +114,19 @@
     o add local copy of codeset.m4 as it is gone from gettext 0.20
       distribution                                      (Paweł Kot)
     o upgrade config.rpath to the most recent version   (Paweł Kot)
+    o use the native Autoconf support for cross-compilation, that
+      is passing --host= to the configure script
+                                 (Ladislav Michl, Fabrizio Gennari)
  * pcsc driver updates
     o drop support for model=pcsc that was deprecated in libgnokii
       0.6.28 and renamed as model=APDU              (Daniele Forsi)
+ * win32 updates
+    o since Linux filesystems are case-sensitive, and MinGW-W64
+      provides lower case names for Win32 header files, use lower
+      case names in #include directives
+    o update snprintf.c (replacement of snprintf for systems where
+      it is not C99-compatible, such as Win32) to the latest
+      version from Samba's repository
 
 0.6.31
 ======

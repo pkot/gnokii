@@ -12,15 +12,11 @@
 
 #include "config.h"
 
-#ifdef HAVE_BLUETOOTH_MACOSX
-
 #include <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
 #include <IOBluetooth/objc/IOBluetoothDevice.h>
 
-#include "devices/unixbluetooth.h"
-
-static NSMutableDictionary *queues;
-static int next_fd = 1;
+#include "compat.h"
+#include "devices/bluetooth.h"
 
 @interface GnokiiOSXBluetooth : NSObject <IOBluetoothRFCOMMChannelDelegate> {
 @private
@@ -120,64 +116,40 @@ static int next_fd = 1;
 }
 @end
 
-int bluetooth_open(const char* addr, uint8_t channel_num, struct gn_statemachine* state)
+void* bluetooth_open(gn_config *cfg, int with_odd_parity, int with_async)
 {
-    if (queues == nil)
-        queues = [NSMutableDictionary dictionaryWithCapacity:1];
     GnokiiOSXBluetooth *q = [[GnokiiOSXBluetooth alloc] init];
-    if (![q connect:addr chid:(BluetoothRFCOMMChannelID)channel_num]) { // after connection it is established.. the delegates methoed are triggered.
+    if (![q connect:cfg->port_device chid:(BluetoothRFCOMMChannelID)cfg->rfcomm_cn]) { // after connection it is established.. the delegates methods are triggered.
         [q release];
-        return -1;
+        return NULL;
     }
-    int ret = next_fd++;
-    [queues setObject:q forKey:@(ret)];
-    return ret;
+    return q;
 }
 
-int bluetooth_write(int fd, const __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size)
 {
-    if (queues == nil)
-        return -1;
-    GnokiiOSXBluetooth *q = [queues objectForKey:@(fd)];
+    GnokiiOSXBluetooth *q = instance;
     sleep(2);
-    if (q == nil
-        || ![q write:bytes length:size])
+    if (![q write:bytes length:size])
         return -1;
 
     return size;
 }
 
-int bluetooth_read(int fd, __ptr_t bytes, int size, struct gn_statemachine *state)
+size_t bluetooth_read(void *instance, __ptr_t bytes, size_t size)
 {
-    if (queues == nil)
-        return -1;
-    GnokiiOSXBluetooth *q = [queues objectForKey:@(fd)];
-    if (q == nil)
-        return -1;
+    GnokiiOSXBluetooth *q = instance;
     return [q read:bytes size:size];
 }
 
-int bluetooth_select(int fd, struct timeval *timeout, struct gn_statemachine *state)
+int bluetooth_select(void *instance, struct timeval *timeout)
 {
-    if (queues == nil)
-        return -1;
-    GnokiiOSXBluetooth *q = [queues objectForKey:@(fd)];
-    if (q == nil)
-        return -1;
-
+    GnokiiOSXBluetooth *q = instance;
     return [q select:(NSTimeInterval)(timeout->tv_sec + timeout->tv_usec / 1000000.0)];
 }
 
-int bluetooth_close(int fd, struct gn_statemachine *state)
+void bluetooth_close(void *instance)
 {
-    if (queues == nil)
-        return -1;
-    GnokiiOSXBluetooth *q = [queues objectForKey:@(fd)];
-    if (q == nil)
-        return -1;
+    GnokiiOSXBluetooth *q = instance;
     [q release];
-    [queues removeObjectForKey:@(fd)];
-    return 1;
 }
-
-#endif

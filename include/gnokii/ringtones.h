@@ -19,6 +19,7 @@
 #ifndef _gnokii_ringtones_h
 #define _gnokii_ringtones_h
 
+#include <gnokii/apidecl.h>
 #include <gnokii/error.h>
 
 /* NoteValue is encoded as octave(scale)*14 + note */

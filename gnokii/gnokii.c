@@ -23,51 +23,24 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#include <stdio.h>
-#ifdef HAVE_STDLIB_H
-#  include <stdlib.h>
-#endif
-#include <signal.h>
-#ifdef HAVE_STRING_H
-#  include <string.h>
-#endif
-#ifdef HAVE_STRINGS_H
-#  include <strings.h>	/* for memset */
-#endif
-#include <time.h>
-#ifdef HAVE_SYS_TYPES_H
-#  include <sys/types.h>
-#endif
-#ifdef HAVE_SYS_STAT_H
-#  include <sys/stat.h>
-#endif
-#ifdef HAVE_CTYPE_H
-#  include <ctype.h>
-#endif
 #ifdef HAVE_LIMITS_H
 #  include <limits.h>
 #endif
 
-
-#ifdef WIN32
-
-#  include <windows.h>
-#  include <process.h>
-#  include <getopt.h>
-
-#else
-
-#  include <unistd.h>
-#  include <termios.h>
-#  include <fcntl.h>
-#  include <getopt.h>
-
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
 #endif
 
-#ifdef ENABLE_NLS
+#ifdef WIN32
+#  include <process.h>
+#endif
+
+#include <getopt.h>
+
+#ifdef HAVE_LOCALE_H
 #  include <locale.h>
 #endif
 
@@ -333,7 +306,7 @@ static int install_log_handler(void)
 			st = stat(basepath, &buf);
 			if (st)
 				mkdir(basepath, S_IRWXU);
-	
+
 			st = stat(path, &buf);
 			if (st)
 				mkdir(path, S_IRWXU);
@@ -508,7 +481,7 @@ static int parse_options(int argc, char *argv[])
 		{ "phone",              required_argument, NULL, OPT_CONFIGMODEL },
 
 		/* Get Security Code */
-		{ "getsecuritycode",    no_argument,   	   NULL, OPT_GETSECURITYCODE },
+		{ "getsecuritycode",    no_argument,	   NULL, OPT_GETSECURITYCODE },
 
 		/* Enter Security Code mode */
 		{ "entersecuritycode",  required_argument, NULL, OPT_ENTERSECURITYCODE },
@@ -694,7 +667,7 @@ static int parse_options(int argc, char *argv[])
 		{ "getwapsetting",      required_argument, NULL, OPT_GETWAPSETTING },
 
 		/* Write WAP setting */
-		{ "writewapsetting",    no_argument, 	   NULL, OPT_WRITEWAPSETTING },
+		{ "writewapsetting",    no_argument,	   NULL, OPT_WRITEWAPSETTING },
 
 		/* Activate WAP setting */
 		{ "activatewapsetting", required_argument, NULL, OPT_ACTIVATEWAPSETTING },
@@ -1216,7 +1189,7 @@ int shell(gn_data *data, struct gn_statemachine *state)
 		} while (input);
 		argv[argc] = NULL;
 		if (!empty)
-        		parse_options(argc, argv);
+			parse_options(argc, argv);
 		for (i = 1; i < argc; i++)
 			free(argv[i]);
 		free(old);
@@ -1236,9 +1209,43 @@ int main(int argc, char *argv[])
 {
 	int rc;
 
-	/* For GNU gettext */
-#ifdef ENABLE_NLS
+#if defined(WIN32) && !defined(__CYGWIN__)
+	/*
+	 * Allow the charset used for text conversions to be forced via the
+	 * environment. In some environment C library cannot derive a usable
+	 * codeset from the locale (e.g. native Windows, which ignores POSIX
+	 * LC_* values) so attept to do it here.
+	 */
+	static const char *const vars[] = { "LC_ALL", "LC_CTYPE", "LANG" };
+	size_t i, len;
+
+	for (i = 0; i < ARRAY_LEN(vars); i++) {
+		const char *loc = getenv(vars[i]);
+		if (loc && *loc) {
+			const char *dot = strchr(loc, '.');
+			if (dot) {
+				const char *end;
+				char codeset[32];
+				dot++;
+				end = strchr(dot, '@');
+				len = end ? (size_t)(end - dot) : strlen(dot);
+				if (len > 0 && len < sizeof(codeset)) {
+					memcpy(codeset, dot, len);
+					codeset[len] = '\0';
+					gn_char_set_encoding(codeset);
+					break;
+				}
+			}
+		}
+	}
+#endif
+
+#ifdef HAVE_SETLOCALE
 	setlocale(LC_ALL, "");
+#endif
+
+#ifdef ENABLE_NLS
+	/* For GNU gettext */
 	bindtextdomain(GETTEXT_PACKAGE, LOCALEDIR);
 	textdomain(GETTEXT_PACKAGE);
 #endif

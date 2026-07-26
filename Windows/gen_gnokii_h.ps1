@@ -27,12 +27,11 @@
 
 $GNOKII_H_IN_PATH = "..\include"
 
-# .bat: findstr /r /c:"^GNOKII_LT_VERSION_" ..\configure.in
-if (!(Test-Path -path "..\configure.in")) {
+if (!(Test-Path -path "..\configure.ac")) {
 	Write-Error "Please run this in Gnokii\Windows directory!"
 	exit 1
 }
-$versions = Get-Content "..\configure.in" | Select-String "^GNOKII_LT_VERSION_"
+$versions = Get-Content "..\configure.ac" | Select-String "^GNOKII_LT_VERSION_"
 
 [string]$line = ""
 foreach ($line in $versions) {

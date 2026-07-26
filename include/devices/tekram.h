@@ -12,13 +12,8 @@
 #ifndef __devices_tekram_h
 #define __devices_tekram_h
 
-#ifdef WIN32
-#  include <stddef.h>
-#else
-#  include <unistd.h>
-#endif	/* WIN32 */
-
-#include "misc.h"
+#include "compat.h"
+#include "gnokii.h"
 
 #define TEKRAM_B115200 0x00
 #define TEKRAM_B57600  0x01
@@ -28,15 +23,15 @@
 
 #define TEKRAM_PW      0x10 /* Pulse select bit */
 
-int tekram_open(const char *file, struct gn_statemachine *state);
-void tekram_close(int fd, struct gn_statemachine *state);
+void* tekram_open(gn_config *cfg, int with_odd_parity, int with_async);
+void tekram_close(void *instance);
 
-void tekram_setdtrrts(int fd, int dtr, int rts, struct gn_statemachine *state);
-void tekram_changespeed(int fd, int speed, struct gn_statemachine *state);
+void tekram_setdtrrts(void *instance, int dtr, int rts);
+void tekram_changespeed(void *instance, int speed);
 
-size_t tekram_read(int fd, __ptr_t buf, size_t nbytes, struct gn_statemachine *state);
-size_t tekram_write(int fd, const __ptr_t buf, size_t n, struct gn_statemachine *state);
+size_t tekram_read(void *instance, __ptr_t buf, size_t nbytes);
+size_t tekram_write(void *instance, const __ptr_t buf, size_t n);
 
-int tekram_select(int fd, struct timeval *timeout, struct gn_statemachine *state);
+int tekram_select(void *instance, struct timeval *timeout);
 
 #endif  /* __devices_tekram_h */

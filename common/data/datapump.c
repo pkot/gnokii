@@ -20,21 +20,13 @@
 
 #include "config.h"
 
-#include <stdio.h>
-#include <errno.h>
-#include <fcntl.h>
-#include <signal.h>
-#include <termios.h>
+#include "compat.h"
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
 #include <grp.h>
-#include <stdlib.h>
-#include <string.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-
-
 #include "misc.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "device.h"
 #include "data/at-emulator.h"
 #include "data/datapump.h"
@@ -49,7 +41,7 @@ extern bool CommandMode;
 /* Local variables */
 static int	PtyRDFD;	/* File descriptor for reading and writing to/from */
 static int	PtyWRFD;	/* pty interface - only different in debug mode. */
-u8 pluscount;
+uint8_t pluscount;
 bool connected;
 
 bool dp_Initialise(int read_fd, int write_fd)

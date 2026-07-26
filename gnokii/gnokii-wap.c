@@ -22,10 +22,9 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#include <stdio.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
@@ -252,16 +251,16 @@ gn_error writewapsetting(gn_data *data, struct gn_statemachine *state)
 		if (n > 0 && line[n-1] == '\n') {
 			line[--n] = 0;
 		}
-		
-		n = sscanf(line, "%d;%50[^;];%256[^;];%d;%d;%d;%d;%d;%d;%d;%50[^;];%50[^;];%32[^;];%20[^;];%d;%d;%d;%100[^;];%20[^;];%32[^;];%20[^;];%20[^;];%20[^;];", 
+
+		n = sscanf(line, "%d;%50[^;];%256[^;];%d;%d;%d;%d;%d;%d;%d;%50[^;];%50[^;];%32[^;];%20[^;];%d;%d;%d;%100[^;];%20[^;];%32[^;];%20[^;];%20[^;];%20[^;];",
 		/*
-		n = sscanf(line, "%d;%s;%s;%d;%d;%d;%d;%d;%d;%d;%s;%s;%s;%s;%d;%d;%d;%s;%s;%s;%s;%s;%s;", 
+		n = sscanf(line, "%d;%s;%s;%d;%d;%d;%d;%d;%d;%d;%s;%s;%s;%s;%d;%d;%d;%s;%s;%s;%s;%s;%s;",
 		*/
 			   &wapsetting.location, wapsetting.name, wapsetting.home, (int*)&wapsetting.session, (int*)&wapsetting.security,
 			   (int*)&wapsetting.bearer, (int*)&wapsetting.gsm_data_authentication, (int*)&wapsetting.call_type,
 			   (int*)&wapsetting.call_speed, (int*)&wapsetting.gsm_data_login, wapsetting.gsm_data_ip,
-			   wapsetting.number, wapsetting.gsm_data_username, wapsetting.gsm_data_password, 
-			   (int*)&wapsetting.gprs_connection, (int*)&wapsetting.gprs_authentication, (int*)&wapsetting.gprs_login, 
+			   wapsetting.number, wapsetting.gsm_data_username, wapsetting.gsm_data_password,
+			   (int*)&wapsetting.gprs_connection, (int*)&wapsetting.gprs_authentication, (int*)&wapsetting.gprs_login,
 			   wapsetting.access_point_name, wapsetting.gprs_ip,  wapsetting.gprs_username, wapsetting.gprs_password,
 			   wapsetting.sms_service_number, wapsetting.sms_server_number);
 
@@ -272,7 +271,7 @@ gn_error writewapsetting(gn_data *data, struct gn_statemachine *state)
 		}
 
 		error = gn_sm_functions(GN_OP_WriteWAPSetting, data, state);
-		if (error != GN_ERR_NONE) 
+		if (error != GN_ERR_NONE)
 			fprintf(stderr, _("Cannot write WAP setting: %s\n"), gn_error_print(error));
 	}
 	return error;

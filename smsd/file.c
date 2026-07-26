@@ -7,22 +7,17 @@
   This file is part of gnokii.
 
   Copyright (C) 2002-2011 Jan Derfinak
-  
+
   This file is a module to smsd for file access.
 
 */
 
 #include "config.h"
+#include "compat.h"
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <dirent.h>
-#include <string.h>
 #include <glib.h>
 #include "smsd.h"
 #include "gnokii.h"
-#include "compat.h"
 #include "utils.h"
 
 static gchar *action;
@@ -37,7 +32,7 @@ GNOKII_API void DB_Bye (void)
 GNOKII_API gint DB_ConnectInbox (DBConfig connect)
 {
   struct stat status;
-  
+
   if (connect.user[0] != '\0')
   {
     if ((stat (connect.user, &status)) != 0)
@@ -45,8 +40,8 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
       g_print (_("Cannot stat file %s!\n"), connect.user);
       return (1);
     }
-    
-    if (!((S_IFREG & status.st_mode) && 
+
+    if (!((S_IFREG & status.st_mode) &&
         (((status.st_uid == geteuid ()) && (S_IXUSR & status.st_mode)) ||
          ((status.st_gid == getegid ()) && (S_IXGRP & status.st_mode)) ||
          (S_IXGRP & status.st_mode))))
@@ -56,9 +51,9 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
       return (2);
     }
   }
-  
+
   action = connect.user;
-  
+
   return (0);
 }
 
@@ -66,7 +61,7 @@ GNOKII_API gint DB_ConnectInbox (DBConfig connect)
 GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
 {
   struct stat status;
-  
+
   if (connect.host[0] == '\0')
     g_print (_("You have not set spool directory, sms sending is disabled!\n"));
   else
@@ -76,8 +71,8 @@ GNOKII_API gint DB_ConnectOutbox (DBConfig connect)
       g_print (_("Cannot stat file %s!\n"), connect.host);
       return (1);
     }
-    
-    if (!((S_IFDIR & status.st_mode) && 
+
+    if (!((S_IFDIR & status.st_mode) &&
         (((status.st_uid == geteuid ()) && (S_IRUSR & status.st_mode) && (S_IWUSR & status.st_mode)) ||
          ((status.st_gid == getegid ()) && (S_IRGRP & status.st_mode) && (S_IWGRP & status.st_mode)) ||
          ((S_IROTH & status.st_mode) && (S_IWOTH & status.st_mode)))))
@@ -99,9 +94,9 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
   FILE *p;
   GString *buf;
   gchar *text;
-    
+
   text = strEscape ((gchar *) data->user_data[0].u.text);
-  
+
   if (action[0] == '\0')
     g_print ("Number: %s, Date: %02d-%02d-%02d %02d:%02d:%02d\nText:\n%s\n", \
              data->remote.number, data->smsc_time.year, data->smsc_time.month, \
@@ -121,13 +116,13 @@ GNOKII_API gint DB_InsertSMS (const gn_sms * const data, const gchar * const pho
       g_string_free (buf, TRUE);
       return (1);
     }
-    
+
     g_string_free (buf, TRUE);
-    
+
     fprintf (p, "%s", text);
     pclose (p);
   }
-  
+
   g_free (text);
 
   return (0);
@@ -146,7 +141,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
 
   if (spool[0] == '\0')  // if user don't set spool dir, sending is disabled
     return (SMSD_NOK);
-    
+
   if ((dir = opendir (spool)) == NULL)
   {
     g_print (_("Cannot open directory %s\n"), spool);
@@ -154,24 +149,24 @@ GNOKII_API gint DB_Look (const gchar * const phone)
   }
 
   buf = g_string_sized_new (64);
-  
+
   while ((dirent = readdir (dir)))
   {
     gn_sms sms;
     gint slen = 0;
-    
+
     if (strcmp (dirent->d_name, ".") == 0 || strcmp (dirent->d_name, "..") == 0 ||
         strncmp (dirent->d_name, "ERR.", 4) == 0)
       continue;
-    
+
     g_string_printf (buf, "%s/%s", spool, dirent->d_name);
-    
+
     if ((smsFile = fopen (buf->str, "r")) == NULL)
     {
       g_print (_("Can't open file %s for reading!\n"), buf->str);
       continue;
     }
-    
+
     empty = 0;
     gn_sms_default_submit (&sms);
     memset (&sms.remote.number, 0, sizeof (sms.remote.number));
@@ -185,26 +180,26 @@ GNOKII_API gint DB_Look (const gchar * const phone)
       g_print (_("Remote number is empty in %s!\n"), buf->str);
       goto handle_file;
     }
-    
+
     if (sms.remote.number[slen - 1] == '\n')
       sms.remote.number[slen - 1] = '\0';
-    
+
     /* Initialize SMS text */
     memset (&sms.user_data[0].u.text, 0, sizeof (sms.user_data[0].u.text));
-    
+
     slen = fread ((gchar *) sms.user_data[0].u.text, 1, GN_SMS_MAX_LENGTH, smsFile);
     if (slen > 0 && sms.user_data[0].u.text[slen - 1] == '\n')
       sms.user_data[0].u.text[slen - 1] = '\0';
-     
+
     fclose (smsFile);
-    
+
 //    sms.delivery_report = (smsdConfig.smsSets & SMSD_READ_REPORTS);
 
     if (sms.remote.number[0] == '+')
       sms.remote.type = GN_GSM_NUMBER_International;
     else
       sms.remote.type = GN_GSM_NUMBER_Unknown;
-    
+
     sms.user_data[0].length = strlen ((gchar *) sms.user_data[0].u.text);
     sms.user_data[0].type = GN_SMS_DATA_Text;
     sms.user_data[1].type = GN_SMS_DATA_None;
@@ -213,7 +208,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
 
 
     gn_log_xdebug ("Sending SMS: %s, %s\n", sms.remote.number, sms.user_data[0].u.text);
-    
+
     numError = 0;
     do
     {
@@ -232,10 +227,10 @@ GNOKII_API gint DB_Look (const gchar * const phone)
     else
     {
       GString *buf2;
-      
+
       buf2 = g_string_sized_new (64);
       g_string_printf (buf2, "%s/ERR.%s", spool, dirent->d_name);
-      
+
       g_print (_("Cannot send sms from file %s\n"), buf->str);
       if (rename (buf->str, buf2->str))
       {
@@ -247,7 +242,7 @@ GNOKII_API gint DB_Look (const gchar * const phone)
       g_string_free (buf2, TRUE);
     }
   }
-  
+
   g_string_free (buf, TRUE);
   closedir (dir);
 

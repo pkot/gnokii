@@ -12,9 +12,7 @@
 
 */
 
-#include "config.h"
-
-#include <string.h>
+#include "compat.h"
 #include <gtk/gtk.h>
 #include "misc.h"
 #include "gnokii.h"

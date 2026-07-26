@@ -20,14 +20,6 @@
 
 */
 
-#include "config.h"
-
-/* System header files */
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-/* Various header file */
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
@@ -47,19 +39,18 @@ static gn_error phonet_send_message(unsigned int messagesize, unsigned char mess
 
 /*--------------------------------------------*/
 
-static int verify_max_message_len(int len, char **message_buffer)
+static int verify_max_message_len(int len, phonet_incoming_message *i)
 {
-	static int max_message_len = 0;
-
-	if (len > max_message_len || !*message_buffer) {
-		dprintf("overrun, reallocating: %d %d\n", len, max_message_len);
-		*message_buffer = realloc(*message_buffer, len + 1);
-		max_message_len = len + 1;
+	if (len > i->message_buffer_size || !i->message_buffer) {
+		dprintf("overrun, reallocating: %d %d\n", len, i->message_buffer_size);
+		i->message_buffer_size = len + 1;
+		i->message_buffer = realloc(i->message_buffer, i->message_buffer_size);
 	}
-	if (*message_buffer)
-		return max_message_len;
-	else
-		return 0;
+	if (i->message_buffer)
+		return i->message_buffer_size;
+
+	i->message_buffer_size = 0;
+	return 0;
 }
 
 
@@ -86,7 +77,7 @@ static bool phonet_open(struct gn_statemachine *state)
 	memset(&init_resp, 0, 7);
 
 	/* Open device. */
-	result = device_open(state->config.port_device, false, false, false,
+	result = device_open(false, false,
 			     state->config.connection_type, state);
 
 	if (!result) {
@@ -171,7 +162,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_length = i->message_length + rx_byte;
 		i->state = FBUS_RX_GetMessage;
 		i->buffer_count = 0;
-		if (!verify_max_message_len(i->message_length, &(i->message_buffer))) {
+		if (!verify_max_message_len(i->message_length, i)) {
 			dprintf("PHONET: Failed to allocate memory for larger buffer\n");
 			i->message_corrupted = 1;
 		}
@@ -299,7 +290,7 @@ static gn_error phonet_loop(struct timeval *timeout, struct gn_statemachine *sta
 static gn_error phonet_send_message(unsigned int messagesize, unsigned char messagetype, unsigned char *message, struct gn_statemachine *state)
 {
 
-	u8 out_buffer[PHONET_TRANSMIT_MAX_LENGTH + 5];
+	uint8_t out_buffer[PHONET_TRANSMIT_MAX_LENGTH + 5];
 	int current = 0;
 	int total, sent;
 
@@ -369,6 +360,7 @@ static void phonet_cleanup(struct gn_statemachine *state)
 {
 	free(FBUSINST(state)->message_buffer);
 	FBUSINST(state)->message_buffer = NULL;
+	FBUSINST(state)->message_buffer_size = 0;
 }
 
 /* Initialise variables and start the link */
@@ -388,7 +380,7 @@ gn_error phonet_initialise(struct gn_statemachine *state)
 	if ((FBUSINST(state) = calloc(1, sizeof(phonet_incoming_message))) == NULL)
 		return GN_ERR_MEMORYFULL;
 
-	if (!verify_max_message_len(PHONET_FRAME_MAX_LENGTH, &(FBUSINST(state)->message_buffer))) {
+	if (!verify_max_message_len(PHONET_FRAME_MAX_LENGTH, FBUSINST(state))) {
 		dprintf("PHONET: Failed to initalize initial incoming buffer for %d bytes\n", PHONET_FRAME_MAX_LENGTH);
 		return GN_ERR_MEMORYFULL;
 	}

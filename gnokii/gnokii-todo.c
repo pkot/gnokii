@@ -22,10 +22,9 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#include <stdio.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
@@ -194,7 +193,7 @@ gn_error writetodo(int argc, char *argv[], gn_data *data, struct gn_statemachine
 		}
 
 		error = gn_sm_functions(GN_OP_WriteToDo, data, state);
-	
+
 		if (error == GN_ERR_NONE) {
 			fprintf(stderr, _("Successfully written!\n"));
 			fprintf(stderr, _("Priority %d. %s\n"), data->todo->priority, data->todo->text);

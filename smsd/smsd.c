@@ -12,22 +12,17 @@
 */
 
 #include "config.h"
-
-#include <stdio.h>
-#include <stdarg.h>
-#include <string.h>
-#include <stdlib.h>
+#include "compat.h"
 #include <pthread.h>
 #include <getopt.h>
-#include <time.h>
 
-#ifndef WIN32
-# include <unistd.h>  /* for usleep */
-# include <signal.h>
-#else
-# include <windows.h>
-# undef IN
-# undef OUT
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
+
+#ifdef WIN32
+#  undef IN
+#  undef OUT
 #endif
 
 #include <glib.h>
@@ -73,9 +68,9 @@ gint LoadDB (void)
   full_name = g_strdup_printf ("smsd_%s", smsdConfig.dbMod);
   buf = g_module_build_path (smsdConfig.libDir, full_name);
   g_free (full_name);
-  
+
   gn_log_xdebug ("Trying to load module %s\n", buf);
-    
+
   handle = g_module_open (buf, G_MODULE_BIND_LAZY);
   g_free (buf);
   if (!handle)
@@ -83,7 +78,7 @@ gint LoadDB (void)
     g_print ("g_module_open error: %s!\n", g_module_error ());
     return (1);
   }
-    
+
   if (g_module_symbol (handle, "DB_Bye", (gpointer *)&DB_Bye) == FALSE)
   {
     g_print ("Error getting symbol 'DB_Bye': %s\n", g_module_error ());
@@ -159,7 +154,7 @@ static void LogFile (gchar *str, ...)
   va_list ap;
   time_t cas;
   gchar buf[50];
-  
+
   if (smsdConfig.logFile == NULL)
     return;
 
@@ -230,7 +225,7 @@ static void ReadConfig (gint argc, gchar *argv[])
       {"help", 0, 0, 'h'},
       {0, 0, 0, 0}
     };
-    
+
     c = getopt_long (argc, argv, "u:p:d:c:s:e:m:l:C:f:t:vi:S:b:0h", longOptions, &optionIndex);
     if (c == EOF)
       break;
@@ -241,25 +236,25 @@ static void ReadConfig (gint argc, gchar *argv[])
         connection.user = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
-      
+
       case 'p':
         g_free (connection.password);
         connection.password = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
-        
+
       case 'd':
         g_free (connection.db);
         connection.db = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
-        
+
       case 'c':
         g_free (connection.host);
         connection.host = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
-      
+
       case 's':
         g_free (connection.schema);
         connection.schema = g_strdup (optarg);
@@ -271,12 +266,12 @@ static void ReadConfig (gint argc, gchar *argv[])
         connection.clientEncoding = g_strdup (optarg);
         memset (optarg, 'x', strlen (optarg));
         break;
-        
+
       case 'm':
         g_free (smsdConfig.dbMod);
         smsdConfig.dbMod = g_strdup (optarg);
         break;
-        
+
       case 'l':
         g_free (smsdConfig.libDir);
         smsdConfig.libDir = g_strdup (optarg);
@@ -315,7 +310,7 @@ static void ReadConfig (gint argc, gchar *argv[])
       case '0':
         smsdConfig.firstSMS = 0;
         break;
-        
+
       case 'v':
         Version ();
         exit (0);
@@ -331,7 +326,7 @@ static void ReadConfig (gint argc, gchar *argv[])
         g_print ("getopt returned 0%o\n", c);
     }
   }
-  
+
   if ((argc - optind) != 0)
   {
     g_print (_("Wrong number of arguments\n"));
@@ -380,11 +375,11 @@ static void MainExit (gint sig)
   e->event = Event_Exit;
   e->data = NULL;
   InsertEvent (e);
-  
+
   pthread_mutex_lock (&db_monitorMutex);
   db_monitor = FALSE;
   pthread_mutex_unlock (&db_monitorMutex);
-  
+
   pthread_join (monitor_th, NULL);
   pthread_join (db_monitor_th, NULL);
   (*DB_Bye) ();
@@ -436,6 +431,27 @@ static void ReadSMS (gpointer d, gpointer userData)
 
   if (data->type == GN_SMS_MT_Deliver || data->type == GN_SMS_MT_StatusReport)
   {
+    /* Plugins expect delivery status as a text message */
+    if (data->user_data[0].type == GN_SMS_DATA_DRStatus) {
+      switch (data->user_data[0].u.dr_status) {
+      case GN_SMS_DR_Status_None:
+        strncpy(data->user_data[0].u.text, _("None"), sizeof(data->user_data[0].u.text));
+        break;
+      case GN_SMS_DR_Status_Invalid:
+        strncpy(data->user_data[0].u.text, _("Unknown"), sizeof(data->user_data[0].u.text));
+	break;
+      case GN_SMS_DR_Status_Delivered:
+        strncpy(data->user_data[0].u.text, _("Delivered"), sizeof(data->user_data[0].u.text));
+	break;
+      case GN_SMS_DR_Status_Pending:
+        strncpy(data->user_data[0].u.text, _("Pending"), sizeof(data->user_data[0].u.text));
+	break;
+      case GN_SMS_DR_Status_Failed_Temporary:
+      case GN_SMS_DR_Status_Failed_Permanent:
+        strncpy(data->user_data[0].u.text, _("Failed"), sizeof(data->user_data[0].u.text));
+        break;
+      }
+    }
     gn_log_xdebug ("%d. %s   ", data->number, data->remote.number);
     gn_log_xdebug ("%02d-%02d-%02d %02d:%02d:%02d+%02d %s\n", data->smsc_time.year,
                     data->smsc_time.month, data->smsc_time.day, data->smsc_time.hour,
@@ -443,7 +459,7 @@ static void ReadSMS (gpointer d, gpointer userData)
                     data->user_data[0].u.text);
     error = (*DB_InsertSMS) (data, smsdConfig.phone);
 
-    switch (error) 
+    switch (error)
     {
       case SMSD_OK:
         if (smsdConfig.logFile)
@@ -454,7 +470,7 @@ static void ReadSMS (gpointer d, gpointer userData)
         e->data = data;
         InsertEvent (e);
         break;
-        
+
       case SMSD_DUPLICATE:
         if (smsdConfig.logFile)
           LogFile (_("Duplicated sms from %s.\n"), data->remote.number);
@@ -474,7 +490,7 @@ static void ReadSMS (gpointer d, gpointer userData)
         e->data = data;
         InsertEvent (e);
         break;
-        
+
       default:
         if (smsdConfig.logFile)
           LogFile (_("Inserting sms from %s unsuccessful.\nDate: %02d-%02d-%02d %02d:%02d:%02d+%02d\nText: %s\n\nExiting.\n"),
@@ -520,11 +536,11 @@ static void Run (void)
     /* Windows doesn't support signaling */
 #ifndef WIN32
   struct sigaction act;
-  
+
   act.sa_flags = 0;
   act.sa_handler = MainExit;
   sigemptyset (&(act.sa_mask));
-  
+
   sigaction (SIGQUIT, &act, NULL);
   sigaction (SIGTERM, &act, NULL);
   sigaction (SIGINT, &act, NULL);

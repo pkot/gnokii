@@ -22,13 +22,11 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#include <stdio.h>
-#include <signal.h>
-#ifdef HAVE_SYS_STAT_H
-#  include <sys/stat.h>
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
 #endif
 
 #include "gnokii-app.h"
@@ -108,6 +106,20 @@ out:
 	return retval;
 }
 
+/*
+ * isatty() is not reliable on native Windows, any character device (e.g. NUL)
+ * is a tty, so use the console API there.
+ */
+static int input_is_interactive(void)
+{
+#if defined(WIN32) && !defined(__CYGWIN__)
+	DWORD mode;
+	return GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &mode) != 0;
+#else
+	return isatty(0);
+#endif
+}
+
 gn_error readtext(gn_sms_user_data *udata)
 {
 	/* The maximum length of an uncompressed concatenated short message is
@@ -115,9 +127,7 @@ gn_error readtext(gn_sms_user_data *udata)
 	char message_buffer[255 * GN_SMS_MAX_LENGTH];
 	size_t chars_read;
 
-#ifndef	WIN32
-	if (isatty(0))
-#endif
+	if (input_is_interactive())
 		fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:\n"));
 
 	/* Get message text from stdin. */
@@ -159,7 +169,7 @@ gn_error loadbitmap(gn_bmp *bitmap, char *s, int type, struct gn_statemachine *s
 	return GN_ERR_NONE;
 }
 
-/* 
+/*
  * Does almost the same as atoi().
  * Returns error in case when the string is not numerical or when strtol returns an error.
  * Modifies errno variable.

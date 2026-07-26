@@ -22,10 +22,9 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#include <stdio.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
@@ -251,7 +250,7 @@ gn_error writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_stat
 		fclose(f);
 		return writecalendarnote_usage(stderr, -1);
 	}
-	
+
 	for (i = first_location; i <= last_location; i++) {
 
 		memset(&calnote, 0, sizeof(calnote));
@@ -286,7 +285,7 @@ gn_error writecalendarnote(int argc, char *argv[], gn_data *data, struct gn_stat
 			fclose(f);
 			return error;
 		}
-	
+
 		error = gn_sm_functions(GN_OP_WriteCalendarNote, data, state);
 
 		if (error == GN_ERR_NONE)

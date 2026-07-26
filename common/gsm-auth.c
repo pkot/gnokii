@@ -13,9 +13,7 @@
 */
 
 #include "config.h"
-
-#include <stdlib.h>
-#include <stdio.h>
+#include "compat.h"
 
 #include "gnokii-internal.h"
 #include "gnokii.h"

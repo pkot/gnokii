@@ -14,12 +14,6 @@
 
  */
 
-#include "config.h"
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "compat.h"
 #include "gnokii.h"
 #include "gnokii-internal.h"
@@ -208,7 +202,7 @@ GNOKII_API int gn_ldif2phonebook(FILE *f, gn_phonebook_entry *entry)
 		STORENUM_BASE64("workPhone:: ", GN_PHONEBOOK_NUMBER_Work);
 		STORENUM("telephoneNumber: ", GN_PHONEBOOK_NUMBER_General);
 		STORENUM_BASE64("telephoneNumber:: ", GN_PHONEBOOK_NUMBER_General);
-		
+
 		STOREINT("businessCategory: ", entry->caller_group);
 
 		if (BEGINS("\n"))

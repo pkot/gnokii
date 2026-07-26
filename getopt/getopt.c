@@ -137,8 +137,16 @@ static struct _getopt_data getopt_data;
 /* Avoid depending on library functions or files
    whose names are inconsistent.  */
 
-#ifndef getenv
-extern char *getenv ();
+#if HAVE_STDLIB_H && HAVE_DECL_GETENV
+#  include <stdlib.h>
+#elif !defined(getenv)
+#  ifdef __cplusplus
+extern "C" {
+#  endif /* __cplusplus */
+extern char *getenv (const char *);
+#  ifdef __cplusplus
+}
+#  endif /* __cplusplus */
 #endif
 
 #endif /* not __GNU_LIBRARY__ */

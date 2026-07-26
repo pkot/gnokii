@@ -22,23 +22,28 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#if defined(WIN32) && !defined(CYGWIN)
+#if defined(WIN32) && !defined(__CYGWIN__)
+#  include <fcntl.h>
+#  include <io.h>
 #  include <process.h>
 #  define getpid _getpid
 #endif
 
-#include <stdio.h>
-#include <sys/stat.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
 #include <getopt.h>
-#include <time.h>
-#include <signal.h>
-#include <errno.h>
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
+#ifdef HAVE_ERRNO_H
+#  include <errno.h>
+#else
+#  define errno 0
+#endif
 
 #include "gnokii-app.h"
 #include "gnokii.h"
@@ -321,6 +326,11 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
 
 	if (curpos != -1) {
+#if defined(WIN32) && !defined(__CYGWIN__)
+		/* Do not let Windows text-mode C runtime mangle 0x1a input bytes */
+		if (sms.dcs.u.general.alphabet == GN_SMS_DCS_8bit)
+			_setmode(_fileno(stdin), _O_BINARY);
+#endif
 		error = readtext(&sms.user_data[curpos]);
 		if (error != GN_ERR_NONE)
 			return error;
@@ -758,7 +768,29 @@ parsefile:
 				fprintf(stdout, "\n");
 				fprintf(stdout, _("Recipient: %s Msg Center: %s\n"), message.remote.number, message.smsc.number);
 				fprintf(stdout, _("Text:\n"));
-				message_text = message.user_data[0].u.text;
+				if (message.user_data[0].type == GN_SMS_DATA_DRStatus) {
+					switch (message.user_data[0].u.dr_status) {
+					case GN_SMS_DR_Status_None:
+						fprintf(stdout, _("None"));
+						break;
+					case GN_SMS_DR_Status_Invalid:
+						fprintf(stdout, _("Unknown"));
+						break;
+					case GN_SMS_DR_Status_Delivered:
+						fprintf(stdout, _("Delivered"));
+						break;
+					case GN_SMS_DR_Status_Pending:
+						fprintf(stdout, _("Pending"));
+						break;
+					case GN_SMS_DR_Status_Failed_Temporary:
+					case GN_SMS_DR_Status_Failed_Permanent:
+						fprintf(stdout, _("Failed"));
+						break;
+					}
+					fprintf(stdout, "\n");
+				} else {
+					dprintf("Unexpected data type\n");
+				}
 				break;
 			case GN_SMS_MT_Picture:
 			case GN_SMS_MT_PictureTemplate:

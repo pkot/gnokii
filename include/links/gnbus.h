@@ -20,20 +20,15 @@
 #ifndef _gnokii_links_gnbus_h
 #define _gnokii_links_gnbus_h
 
-#include <time.h>
 #include "compat.h"
 
 #include "gnokii.h"
-
-#ifdef WIN32
-#  include <sys/types.h>
-#endif
 
 #define GNBUS_MAGIC_BYTE	0x5a
 
 enum gnbus_rx_state {
 	GNBUS_RX_Discarding,
-    	GNBUS_RX_Sync,
+	GNBUS_RX_Sync,
 	GNBUS_RX_GetSequence,
 	GNBUS_RX_GetLength1,
 	GNBUS_RX_GetLength2,

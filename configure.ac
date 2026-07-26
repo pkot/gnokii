@@ -1,5 +1,5 @@
 dnl
-dnl Makefile for the GNOKII tool suite.
+dnl  Process this file with autoconf to produce a configure script.
 dnl
 dnl  Copyright (C) 1999 Hugh Blemings & Pavel Janik ml.
 dnl                2000 Karel Zak, Pawel Kot
@@ -11,6 +11,7 @@ dnl IMPORTANT NOTE
 dnl The first PKG_CHECK_MODULES call must not be conditional
 dnl
 
+AC_PREREQ([2.69])
 AC_INIT([gnokii],
 	[0.6.32git],
 	[gnokii-users@nongnu.org],
@@ -37,8 +38,8 @@ XVERSION=1.0
 dnl smsd version
 SVERSION=1.5.3
 
-AC_CANONICAL_SYSTEM
-AC_GNU_SOURCE
+AC_CANONICAL_TARGET
+AC_USE_SYSTEM_EXTENSIONS
 
 AC_CONFIG_SRCDIR([gnokii/gnokii.c])
 dnl gettext doesn't like the config.status being somewhere else :(
@@ -49,11 +50,13 @@ AM_INIT_AUTOMAKE([1.8 dist-bzip2])
 
 AC_PREFIX_DEFAULT("/usr/local")
 
+LIBGNOKII_DEFS=-DLIBGNOKII_DLL_EXPORT
+AC_SUBST(LIBGNOKII_DEFS)
+
 dnl ======================== Checks for programs.
 AC_PROG_CC
-AM_PROG_CC_C_O
 AC_PROG_CPP
-AC_PROG_LEX
+AC_PROG_LEX(noyywrap)
 AC_PROG_OBJC
 # If there's no flex/lex utility and there's no generated common/gnvcal.c file, we won't be able to compile
 if test "x$LEX" = "x:" && test ! -f common/gnvcal.c; then
@@ -63,54 +66,38 @@ if test "x$LEX" = "x:" && test ! -f common/gnvcal.c; then
 	exit 1
 fi
 
-AC_PATH_PROG(RM, rm, no)
-AC_PATH_PROG(FIND, find, no)
 AC_CHECK_PROGS(MAKE, gmake make)
 AC_CHECK_PROGS(AR, ar)
 AC_PROG_INSTALL
 
 dnl ======================= Localisation and i18n
 
-IT_PROG_INTLTOOL([0.35.0])
 AM_LANGINFO_CODESET
+AM_GNU_GETTEXT_VERSION([0.21])
+AM_GNU_GETTEXT([external])
 
 dnl Add the languages which your application supports to po/LINGUAS
 GETTEXT_PACKAGE=gnokii
 AC_DEFINE_UNQUOTED(GETTEXT_PACKAGE, ["$GETTEXT_PACKAGE"], [Define to the Gettext package name])
 AC_SUBST(GETTEXT_PACKAGE)
-AM_GLIB_GNU_GETTEXT
 AM_ICONV
 
-dnl -----------------------------
-dnl Checks for FreeBSD Build
-dnl -----------------------------
-AC_MSG_CHECKING(if building on FreeBSD)
 
-if test `uname -s` = "FreeBSD" ; then
-	AC_MSG_RESULT(yes)
+case x"$host_os" in
+xfreebsd)
 	CPPFLAGS="$CFLAGS -I/usr/local/include"
 	LDFLAGS="$LDFLAGS -L/usr/local/lib"
-else
-	AC_MSG_RESULT(no)
-fi
-
-dnl -----------------------------
-dnl Checks for NetBSD Build
-dnl -----------------------------
-AC_MSG_CHECKING(if building on NetBSD)
-
-if test `uname -s` = "NetBSD" ; then
-        AC_MSG_RESULT(yes)
-        CPPFLAGS="$CFLAGS -I/usr/pkg/include/"
-        LDFLAGS="$LDFLAGS -L/usr/pkg/lib/"
-else
-        AC_MSG_RESULT(no)
-fi
+	;;
+xnetbsd*)
+	CPPFLAGS="$CFLAGS -I/usr/pkg/include/"
+	LDFLAGS="$LDFLAGS -L/usr/pkg/lib/"
+	;;
+esac
 
 dnl ======================== Libtool versioning
-AC_LIBTOOL_WIN32_DLL
+_LT_SET_OPTION([LT_INIT],[win32-dll])
 define([AC_PROVIDE_AC_LIBTOOL_WIN32_DLL])
-AC_PROG_LIBTOOL
+LT_INIT
 
 #
 # Make libtool use --silent when --silent is passed to make
@@ -139,20 +126,30 @@ dnl ======================== Default setting
 dnl Let us have $prefix variable available here
 test x"$prefix" = xNONE && prefix="$ac_default_prefix"
 
+dnl Set gcc CFLAGS if we use gcc
+if test "x$GCC" = "xyes"; then
+   AX_APPEND_COMPILE_FLAGS([-Wall])
+dnl Set some gcc CFLAGS to reduce build warnings
+   AX_APPEND_COMPILE_FLAGS([-Wno-pointer-sign -fvisibility=hidden -fno-strict-aliasing])
+dnl Since gcc-15 Werror=incompatible-pointer-types is the default,
+dnl which troubles gtk-2 code, so disable it
+   AX_APPEND_COMPILE_FLAGS([-Wno-error=incompatible-pointer-types])
+fi
+
 debug="yes"
 xdebug="yes"
 rlpdebug="yes"
 
-AC_ARG_ENABLE(fulldebug, 
+AC_ARG_ENABLE(fulldebug,
 	[  --enable-fulldebug      compile with full debugging support],
 	[ if test x$enable_fulldebug = xyes; then
 		if test "x$GCC" = "xyes"; then
-			CFLAGS="$CFLAGS -ggdb3 -Wall"
+			AX_APPEND_COMPILE_FLAGS([-ggdb3])
 		fi
 	  fi ]
 )
 
-dnl AC_ARG_ENABLE(debug, 
+dnl AC_ARG_ENABLE(debug,
 dnl	[  --enable-debug          compile with debug code],
 dnl	[ if test x$enable_debug = xno; then debug="no"; fi ],
 dnl	[ debug="yes" ]
@@ -181,49 +178,6 @@ if test $rlpdebug = "yes"; then
 	AC_DEFINE(RLP_DEBUG, 1, [Whether rlpdebug is turned on])
 fi
 
-dnl ======================== Set gcc CFLAGS if we use gcc
-if test "x$GCC" = "xyes"; then
-	CFLAGS="$CFLAGS -Wall"
-fi
-
-dnl ======================== Set some gcc CFLAGS to reduce build warnings
-if test "x$GCC" = "xyes"; then
-  OLD_CFLAGS="$CFLAGS"
-
-  CFLAGS="-Wno-pointer-sign"
-  AC_MSG_CHECKING(if gcc supports $CFLAGS compiler option)
-  AC_TRY_COMPILE( [], [ int main() { return 0; } ],
-		ac_cv_have_no_pointer_sign=yes,
-		ac_cv_have_no_pointer_sign=no)
-  AC_MSG_RESULT($ac_cv_have_no_pointer_sign)
-  CFLAGS="-fvisibility=hidden"
-  AC_MSG_CHECKING(if gcc supports $CFLAGS compiler option)
-  AC_TRY_COMPILE( [], [ int main() { return 0; } ],
-		ac_cv_have_hidden_visibility=yes,
-		ac_cv_have_hidden_visibility=no)
-  AC_MSG_RESULT($ac_cv_have_hidden_visibility)
-  CFLAGS="-fno-strict-aliasing"
-  AC_MSG_CHECKING(if gcc supports $CFLAGS compiler option)
-  AC_TRY_COMPILE( [], [ int main() { return 0; } ],
-		ac_cv_have_strict_aliasing=yes,
-		ac_cv_have_strict_aliasing=no)
-  AC_MSG_RESULT($ac_cv_have_strict_aliasing)
-
-  CFLAGS="$OLD_CFLAGS"
-  if test $ac_cv_have_no_pointer_sign = yes; then
-    CFLAGS="$CFLAGS -Wno-pointer-sign"
-  fi
-  if test $ac_cv_have_hidden_visibility = yes; then
-    CFLAGS="$CFLAGS -fvisibility=hidden"
-  fi
-  if test $ac_cv_have_strict_aliasing = yes; then
-    CFLAGS="$CFLAGS -fno-strict-aliasing"
-  fi
-fi
-
-dnl ======================== avoid deprecated warnings here
-# CFLAGS="$CFLAGS -DGNOKII_DEPRECATED=''"
-
 dnl ======================== Checks for libraries.
 
 AC_ARG_WITH(libpthread,
@@ -251,19 +205,19 @@ if test "x$PTHREAD_LIBS" = xerror; then
 fi
 
 AC_CACHE_CHECK(for tm_gmtoff in struct tm, ac_cv_have_tm_gmtoff,
-	[AC_TRY_COMPILE([#include <time.h>],
-		[struct tm t; t.tm_gmtoff = 0],
-		ac_cv_have_tm_gmtoff=yes,
-		ac_cv_have_tm_gmtoff=no)])
+	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <time.h>]],
+				[[struct tm t; t.tm_gmtoff = 0]])],
+				[ac_cv_have_tm_gmtoff=yes],
+				[ac_cv_have_tm_gmtoff=no])])
 if test $ac_cv_have_tm_gmtoff = yes; then
 	AC_DEFINE(HAVE_TM_GMTON, 1, [Whether tm_gmtoff is available])
 fi
 
 AC_CACHE_CHECK(for timer operations, ac_cv_have_timeops,
-	[AC_TRY_LINK([#include <sys/time.h>],
-		[struct timeval tv; timerisset(&tv); timerclear(&tv); timercmp(&tv, &tv, <); timeradd(&tv, &tv, &tv); timersub(&tv, &tv, &tv); ],
-		ac_cv_have_timeops=yes,
-		ac_cv_have_timeops=no)])
+	[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <sys/time.h>]],
+				[[struct timeval tv; timerisset(&tv); timerclear(&tv); timercmp(&tv, &tv, <); timeradd(&tv, &tv, &tv); timersub(&tv, &tv, &tv); ]])],
+				[ac_cv_have_timeops=yes],
+				[ac_cv_have_timeops=no])])
 if test $ac_cv_have_timeops = yes; then
         AC_DEFINE(HAVE_TIMEOPS, 1, [Whether timer operations are available])
 fi
@@ -271,10 +225,10 @@ fi
 have_termios="no"
 dnl Checking for setspeed in termios.h
 AC_CACHE_CHECK(for cfsetspeed in termios.h, ac_cv_have_cfsetspeed,
-	[AC_TRY_LINK([#include <termios.h>],
-		[struct termios t; cfsetspeed(&t, B9600);],
-		ac_cv_have_cfsetspeed=yes,
-		ac_cv_have_cfsetspeed=no)])
+	[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <termios.h>]],
+				[[struct termios t; cfsetspeed(&t, B9600);]])],
+				[ac_cv_have_cfsetspeed=yes],
+				[ac_cv_have_cfsetspeed=no])])
 if test $ac_cv_have_cfsetspeed = yes; then
         AC_DEFINE(HAVE_CFSETSPEED, 1, [Whether cfsetspeed is available])
         have_termios="yes"
@@ -282,10 +236,10 @@ fi
 
 if test $have_termios = "no"; then
 	AC_CACHE_CHECK(for cfsetispeed and cfsetospeed in termios.h, ac_cv_have_cfsetiospeed,
-		[AC_TRY_LINK([#include <termios.h>],
-			[struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);],
-			ac_cv_have_cfsetiospeed=yes,
-			ac_cv_have_cfsetiospeed=no)])
+		[AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <termios.h>]],
+				[[struct termios t; cfsetispeed(&t, B9600);  cfsetospeed(&t, B9600);]])],
+				[ac_cv_have_cfsetiospeed=yes],
+				[ac_cv_have_cfsetiospeed=no])])
 	if test $ac_cv_have_cfsetiospeed = yes; then
 		AC_DEFINE(HAVE_CFSETISPEED, 1, [Whether cfsetispeed is available])
 		AC_DEFINE(HAVE_CFSETOSPEED, 1, [Whether cfsetospeed is available])
@@ -295,10 +249,10 @@ fi
 
 if test $have_termios = "no"; then
 	AC_CACHE_CHECK(for c_ispeed and c_ospeed in struct termios, ac_cv_have_c_iospeed,
-		[AC_TRY_COMPILE([#include <termios.h>],
-			[struct termios t; t.c_iflag = B9600; t.c_oflag = B9600;],
-			ac_cv_have_c_iospeed=yes,
-			ac_cv_have_c_iospeed=yes)])
+		[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <termios.h>]],
+				[[struct termios t; t.c_iflag = B9600; t.c_oflag = B9600;]])],
+				[ac_cv_have_c_iospeed=yes],
+				[ac_cv_have_c_iospeed=yes])])
 	if test ac_cv_have_c_iospeed = yes; then
 		AC_DEFINE(HAVE_TERMIOS_CSPEED, 1, [Whether c_ispeed and c_ospeed are available])
 	fi
@@ -370,6 +324,26 @@ AC_ARG_WITH(readline,
 AC_SUBST(TERMLIBS)
 AC_SUBST(TERMLDFLAGS)
 
+dnl ======================== Checks for gethostbyname support
+AC_CHECK_FUNC(gethostbyname, ,
+	AC_CHECK_LIB(nsl, gethostbyname, TCP_LIBS="-lnsl"
+		     AC_SUBST(TCP_LIBS)))
+dnl Haiku requires -lnetwork for socket functions
+AC_CHECK_FUNC(gethostbyname, ,
+	AC_CHECK_LIB(network, gethostbyname, TCP_LIBS="-lnetwork"
+		     AC_SUBST(TCP_LIBS)))
+
+dnl ======================== Defines location for gettext
+AC_ARG_WITH(gettext,
+	[  --with-gettext=DIR      specifies the base gettext],
+	[ if test x$withval = xyes; then
+		AC_MSG_WARN(Usage is: --with-gettext=DIR)
+	  else
+		CFLAGS="$CFLAGS -I$withval"
+	  fi
+	]
+)
+
 dnl ======================== Check for libical
 AC_ARG_WITH(libical,
    [  --with-libical=DIR      specifies the base libical],
@@ -385,10 +359,8 @@ AC_ARG_WITH(libical,
 
 USE_LIBICAL="no"
 AC_ARG_ENABLE(libical,
-       	      AC_HELP_STRING([--disable-libical],
-               	             [disable libical support (default is autodetected)]
-                            ),,
-       	      [enable_libical=yes])
+              AS_HELP_STRING([--disable-libical], [disable libical support (default is autodetected)]),,
+              [enable_libical=yes])
 
 if test "$enable_libical" = "yes"; then
 	ICAL_LIBS="$ICAL_LIBS -lpthread -lical"
@@ -397,9 +369,9 @@ if test "$enable_libical" = "yes"; then
 	LIBS="$LIBS $ICAL_LIBS"
 	CFLAGS="$CFLAGS $ICAL_CFLAGS"
 	AC_MSG_CHECKING(whether libical is installed)
-	AC_TRY_LINK([
+	AC_LINK_IFELSE([AC_LANG_PROGRAM([[
 	   #include <libical/ical.h>
-	   ],[
+	   ]], [[
 	   int priority;
 	   icalcomponent *pIcal=NULL;
 	   struct icaltimetype atime = icaltime_from_string("20031231T223000");
@@ -412,19 +384,16 @@ if test "$enable_libical" = "yes"; then
 	   );
 	   atime.is_daylight = 1;
 	   priority = icalproperty_get_priority(icalcomponent_get_first_property(pIcal, ICAL_PRIORITY_PROPERTY));
-	   ],
-	   [
+	   ]])],[
 	      AC_MSG_RESULT(yes)
 	      USE_LIBICAL="yes"
 	      AC_DEFINE([HAVE_LIBICAL],[1],[Use libical])
 	      AC_SUBST(ICAL_LIBS)
 	      AC_SUBST(ICAL_CFLAGS)
-	   ],
-	   [
+	   ],[
 	      AC_MSG_RESULT(no)
 	      ICAL_LIBS=""
-	   ]
-	)
+	])
 	LIBS="$OLD_LIBS"
 	CFLAGS="$OLD_CFLAGS"
 fi
@@ -432,79 +401,41 @@ fi
 dnl ======================== Check for libusb
 USE_LIBUSB="no"
 AC_ARG_ENABLE(libusb,
-              AC_HELP_STRING([--disable-libusb],
-                             [disable libusb support (default is autodetected)]
-                            ),,
+              AS_HELP_STRING([--disable-libusb],
+                             [disable libusb support (default is autodetected)]),,
               [enable_libusb=yes])
 if test "$enable_libusb" = "yes"; then
 	AC_MSG_CHECKING(whether libusb is installed)
-	AC_TRY_COMPILE([#include <usb.h>],
-		[struct usb_dev_handle *dev;],
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <usb.h>]],
+		[[struct usb_dev_handle *dev;]])],
 		[
 			AC_MSG_RESULT(yes)
 			AC_DEFINE([HAVE_LIBUSB],[1],[Use libusb])
 			USE_LIBUSB="yes"
 			USB_LIBS="-lusb"
 			AC_SUBST(USB_LIBS)
-		],
-		[
+		],[
 			AC_MSG_RESULT(no)
 		]
 	)
 fi
+AM_CONDITIONAL([LIBUSB], [test $USE_LIBUSB = yes])
 
-dnl ======================== Checks for Linux Phonet support
+dnl ======================== Phonet switch
 USE_SOCKETPHONET="no"
 AC_ARG_ENABLE(phonet,
-              AC_HELP_STRING([--disable-phonet],
-                             [disable phonet support (default is autodetected)]
-                            ),,
+              AS_HELP_STRING([--disable-phonet],
+                             [disable phonet support (default is autodetected)]),,
               [enable_phonet=yes])
-if test "$enable_phonet" = "yes"; then
-	AC_CHECK_HEADER(linux/phonet.h,
-		[AC_DEFINE(HAVE_SOCKETPHONET, 1, [Whether Phonet is available])
-		 USE_SOCKETPHONET="yes"],,
-		[#include <sys/socket.h>
-		 #include <linux/phonet.h>])
-fi
 
-dnl ======================== Checks for gethostbyname support
-AC_CHECK_FUNC(gethostbyname, ,
-	AC_CHECK_LIB(nsl, gethostbyname, TCP_LIBS="-lnsl"
-		     AC_SUBST(TCP_LIBS)))
-dnl Haiku requires -lnetwork for socket functions
-AC_CHECK_FUNC(gethostbyname, ,
-	AC_CHECK_LIB(network, gethostbyname, TCP_LIBS="-lnetwork"
-		     AC_SUBST(TCP_LIBS)))
-
-dnl ======================== Checks for Linux IrDA support
+dnl ======================== IrDA switch
 USE_IRDA="no"
 AC_ARG_ENABLE(irda,
-              AC_HELP_STRING([--disable-irda],
-                             [disable irda support (default is autodetected)]
-                            ),,
+              AS_HELP_STRING([--disable-irda],
+                             [disable irda support (default is autodetected)]),,
               [enable_irda=yes])
-if test "$enable_irda" = "yes"; then
-	AC_CHECK_HEADER(linux/irda.h,
-		[AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available])
-		 USE_IRDA="yes"],,
-		[#include <sys/socket.h>
-		 #include <sys/ioctl.h>
-		 #include <linux/types.h>])
-fi
 
-dnl ======================== Defines location for gettext
-AC_ARG_WITH(gettext,
-	[  --with-gettext=DIR      specifies the base gettext],
-	[ if test x$withval = xyes; then
-		AC_MSG_WARN(Usage is: --with-gettext=DIR)
-	  else
-		CFLAGS="$CFLAGS -I$withval"
-	  fi
-	]
-)
-
-dnl ======================== Checks for Bluetooth support
+dnl ======================== Bluetooth switch
 USE_BLUETOOTH="no"
 AC_ARG_WITH(bluetooth,
 	[  --with-bluetooth=DIR    specifies the base libbluetooth],
@@ -517,75 +448,90 @@ AC_ARG_WITH(bluetooth,
 	]
 )
 AC_ARG_ENABLE(bluetooth,
-              AC_HELP_STRING([--disable-bluetooth],
-                             [disable Bluetooth support (default is autodetected)]
-                            ),,
+              AS_HELP_STRING([--disable-bluetooth],
+                             [disable Bluetooth support (default is autodetected)]),,
               [enable_bluetooth=yes])
 
+case "$host_os" in
 dnl ======================== Checks for Linux Bluetooth support
-if test `uname -s` = "Linux" ; then
-	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
-		AC_MSG_NOTICE([checking for the Linux Bluetooth support])
-		AC_CACHE_CHECK(for the struct sockaddr_rc in <bluetooth/rfcomm.h>, ac_cv_have_sockaddr_rc,
-			[AC_TRY_COMPILE([#include <sys/socket.h>
+linux*)
+	if test "$enable_bluetooth" = "yes"; then
+		AC_CACHE_CHECK(for the Linux Bluetooth support (struct sockaddr_rc in <bluetooth/rfcomm.h>),
+			ac_cv_have_sockaddr_rc,
+			[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <sys/socket.h>
 					#include <bluetooth/bluetooth.h>
-					#include <bluetooth/rfcomm.h>],
-				[struct sockaddr_rc rc;],
-				ac_cv_have_sockaddr_rc=yes,
-				ac_cv_have_sockaddr_rc=no)])
+					#include <bluetooth/rfcomm.h>]],
+					[[struct sockaddr_rc rc;]])],
+					[ac_cv_have_sockaddr_rc=yes],
+					[ac_cv_have_sockaddr_rc=no])])
 		if test $ac_cv_have_sockaddr_rc = yes; then
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 			AC_DEFINE(HAVE_BLUETOOTH_BLUEZ,[],[Compile on Linux])
 			USE_BLUETOOTH="yes"
+			UNIX_BLUETOOTH="true"
 			BLUETOOTH_LIBS="-lbluetooth"
 			AC_SUBST(BLUETOOTH_LIBS)
 		fi
 	fi
-fi
-
+	if test "$enable_irda" = "yes"; then
+		AC_CHECK_HEADER(linux/irda.h,
+			[AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available])
+			[USE_IRDA="yes" UNIX_IRDA="true"]],,
+			[#include <sys/socket.h>
+			 #include <sys/ioctl.h>
+			 #include <linux/types.h>])
+	fi
+	if test "$enable_phonet" = "yes"; then
+		AC_CHECK_HEADER(linux/phonet.h,
+			[AC_DEFINE(HAVE_SOCKETPHONET, 1, [Whether Phonet is available])
+			 USE_SOCKETPHONET="yes"],,
+			[#include <sys/socket.h>
+			 #include <linux/phonet.h>])
+	fi
+	;;
 dnl ======================== Checks for MacOSX Bluetooth support
-if test `uname -s` = "Darwin" ; then
-	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
+darwin*)
+	if test "$enable_bluetooth" = "yes"; then
 		AC_LANG_PUSH([Objective C])
 		AC_CHECK_HEADERS(IOBluetooth/objc/IOBluetoothRFCOMMChannel.h)
 		AC_CHECK_HEADERS(IOBluetooth/objc/IOBluetoothDevice.h)
-		AC_MSG_CHECKING([for MacOS X Bluetooth support])
-		AC_TRY_COMPILE([#include <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
-		#include <IOBluetooth/objc/IOBluetoothDevice.h>],
-				[
-				IOBluetoothDevice* btDevice = [[IOBluetoothDevice deviceWithAddressString:@"00:00:00:00:00:00"] autorelease];
-			    ],
-			AC_MSG_RESULT(yes)
-			ac_cv_have_iobluetooth=yes,
-			AC_MSG_RESULT(no)
-			ac_cv_have_iobluetooth=no)
+		AC_MSG_CHECKING(for MacOS X Bluetooth support)
+		AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <IOBluetooth/objc/IOBluetoothRFCOMMChannel.h>
+				#include <IOBluetooth/objc/IOBluetoothDevice.h>]],
+				[[IOBluetoothDevice* btDevice = [[IOBluetoothDevice deviceWithAddressString:@"00:00:00:00:00:00"] autorelease];]])],
+				[AC_MSG_RESULT(yes)
+					ac_cv_have_iobluetooth=yes],
+				[AC_MSG_RESULT(no)
+					ac_cv_have_iobluetooth=no])
 		AC_LANG_POP([Objective C])
 
 		if test $ac_cv_have_iobluetooth = yes; then
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 			AC_DEFINE(HAVE_BLUETOOTH_MACOSX,[],[Compile on Darwin / Mac OSX])
 			USE_BLUETOOTH="yes"
+			OSX_BLUETOOTH="true"
 			BLUETOOTH_LIBS="$PTHREAD_LIBS -Wl,-framework,CoreFoundation -Wl,-framework,IOBluetooth -Wl,-framework,Foundation"
 			AC_SUBST(BLUETOOTH_LIBS)
 		fi
 	fi
-fi
-AM_CONDITIONAL([FOR_MAC], [test x$ac_cv_have_iobluetooth = xyes])
+	FOR_MAC=1
+	;;
 
 dnl ======================== Checks for FreeBSD/netgraph Bluetooth support
-if test `uname -s` = "FreeBSD" ; then
-	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
-		AC_MSG_NOTICE([checking for the FreeBSD/netgraph Bluetooth support])
-		AC_CACHE_CHECK(for the struct sockaddr_rfcomm from <bluetooth.h>, ac_cv_have_sockaddr_rfcomm,
-			[AC_TRY_COMPILE([#include <bluetooth.h>],
-				[struct sockaddr_rfcomm rc;],
-				ac_cv_have_sockaddr_rfcomm=yes,
-				ac_cv_have_sockaddr_rfcomm=no)])
+freebsd)
+	if test "$enable_bluetooth" = "yes"; then
+		AC_CACHE_CHECK(for the FreeBSD/netgraph Bluetooth support (struct sockaddr_rfcomm in <bluetooth.h>),
+			ac_cv_have_sockaddr_rfcomm,
+			[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <bluetooth.h>]],
+							[[struct sockaddr_rfcomm rc;]])],
+							[ac_cv_have_sockaddr_rfcomm=yes],
+							[ac_cv_have_sockaddr_rfcomm=no])])
 
 		if test $ac_cv_have_sockaddr_rfcomm = yes; then
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 			AC_DEFINE(HAVE_BLUETOOTH_NETGRAPH, [], [Compile on FreeBSD])
 			USE_BLUETOOTH="yes"
+			UNIX_BLUETOOTH="true"
 			AC_CHECK_LIB(bluetooth, bt_aton,
 				[BLUETOOTH_LIBS="-lbluetooth" ac_cv_have_bt_lib=yes],
 				ac_cv_have_bt_lib=no)
@@ -596,22 +542,23 @@ if test `uname -s` = "FreeBSD" ; then
 			fi
 		fi
 	fi
-fi
+	;;
 
 dnl ======================== Checks for NetBSD/netbt Bluetooth support
-if test `uname -s` = "NetBSD" ; then
-	if test "$enable_bluetooth" = "yes" -a "$USE_BLUETOOTH" = "no"; then
-		AC_MSG_NOTICE([checking for the NetBSD/netbt Bluetooth support])
-		AC_CACHE_CHECK(for the struct sockaddr_bt from <bluetooth.h>, ac_cv_have_sockaddr_bt,
-			[AC_TRY_COMPILE([#include <bluetooth.h>],
-				[struct sockaddr_bt rc;],
-				ac_cv_have_sockaddr_bt=yes,
-				ac_cv_have_sockaddr_bt=no)])
+netbsd*)
+	if test "$enable_bluetooth" = "yes"; then
+		AC_CACHE_CHECK(for the NetBSD/netbt Bluetooth support (struct sockaddr_bt in <bluetooth.h>),
+			ac_cv_have_sockaddr_bt,
+			[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <bluetooth.h>]],
+							[[struct sockaddr_bt rc;]])],
+							[ac_cv_have_sockaddr_bt=yes],
+							[ac_cv_have_sockaddr_bt=no])])
 
 		if test $ac_cv_have_sockaddr_bt = yes; then
 			AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available])
 			AC_DEFINE(HAVE_BLUETOOTH_NETBT, [], [Compile on NetBSD])
 			USE_BLUETOOTH="yes"
+			UNIX_BLUETOOTH="true"
 			CFLAGS="$CFLAGS -DCOMPAT_BLUEZ"
 			AC_CHECK_LIB(bluetooth, bt_aton,
 				[BLUETOOTH_LIBS="-lbluetooth" ac_cv_have_bt_lib=yes],
@@ -623,7 +570,39 @@ if test `uname -s` = "NetBSD" ; then
 			fi
 		fi
 	fi
-fi
+	;;
+
+dnl ======================== Checks for Windows devices
+cygwin32|cygwin|mingw32|mingw32msvc)
+	if test "$enable_bluetooth" = "yes"; then
+		AC_CHECK_HEADER(ws2bth.h,
+				[AC_DEFINE(HAVE_BLUETOOTH, 1, [Whether Bluetooth is available]) USE_BLUETOOTH="yes" WIN32_BLUETOOTH="true"],,
+				[#include <windows.h>])
+	fi
+	if test "$enable_irda" = "yes"; then
+		AC_CHECK_HEADER(af_irda.h,
+				[AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available]) USE_IRDA="yes" WIN32_IRDA="true"],,
+				[#include <windows.h>])
+	fi
+	BLUETOOTH_LIBS=""
+	if test x"$USE_IRDA" = "xyes" -o x"$USE_BLUETOOTH" = "xyes"; then
+		BLUETOOTH_LIBS="-lws2_32"
+	fi
+	if test x"$USE_IRDA" = "xyes"; then
+		BLUETOOTH_LIBS="$BLUETOOTH_LIBS -lwinmm"
+	fi
+	AC_SUBST(BLUETOOTH_LIBS)
+	WIN32=1
+	;;
+esac
+
+AM_CONDITIONAL([WIN32], [test "x$WIN32" = "x1"])
+AM_CONDITIONAL([SOCKETPHONET], [test "x$USE_SOCKETPHONET" = "xyes"])
+AM_CONDITIONAL([OSXBLUETOOTH], [test "x$OSX_BLUETOOTH" = "xtrue"])
+AM_CONDITIONAL([UNIXBLUETOOTH], [test "x$UNIX_BLUETOOTH" = "xtrue"])
+AM_CONDITIONAL([UNIXIRDA], [test "x$UNIX_IRDA" = "xtrue"])
+AM_CONDITIONAL([WINBLUETOOTH], [test "x$WIN32_BLUETOOTH" = "xtrue"])
+AM_CONDITIONAL([WINIRDA], [test "x$WIN32_IRDA" = "xtrue"])
 
 dnl ======================== Checks for X base support
 
@@ -690,7 +669,7 @@ AM_CONDITIONAL(XGNOKII, test "x$x_support" = "xyes")
 dnl ======================== Check for libsocket
 AC_CHECK_LIB(socket, socket)
 
-dnl ======================== Checks for glib support for libgnokii and smsd
+dnl ======================== Checks for glib support
 PKG_CHECK_MODULES(GLIB, glib-2.0)
 
 dnl ======================== Checks for gmodule support for smsd
@@ -698,7 +677,7 @@ PKG_CHECK_MODULES(GMODULE, gmodule-2.0, found_gmodule=yes, found_gmodule=no)
 
 dnl ======================== Autodetect for possibilities to compile smsd
 AC_ARG_ENABLE(smsd,
-	AC_HELP_STRING([--disable-smsd],
+	AS_HELP_STRING([--disable-smsd],
 		[disable smsd support (default is autodetected)]),,
 	[enable_smsd=yes])
 
@@ -716,8 +695,8 @@ dnl ======================== Checks for databases support for smsd
 
 dnl === PostgreSQL
 AC_ARG_ENABLE(postgres,
-	AC_HELP_STRING([--disable-postgres],
-	[disable PostgreSQL support (default is autodetected)]),
+	AS_HELP_STRING([--disable-postgres],
+		[disable PostgreSQL support (default is autodetected)]),
 	[enable_postgres=$enableval],
 	[enable_postgres=yes])
 have_postgres=no
@@ -736,8 +715,8 @@ AM_CONDITIONAL(HAVE_POSTGRES, test "x$have_postgres" = "xyes")
 
 dnl === SQLite
 AC_ARG_ENABLE(sqlite,
-	AC_HELP_STRING([--disable-sqlite],
-	[disable SQLite support (default is autodetected)]),
+	AS_HELP_STRING([--disable-sqlite],
+				[disable SQLite support (default is autodetected)]),
 	[enable_sqlite=$enableval],
 	[enable_sqlite=yes])
 have_sqlite=no
@@ -752,8 +731,8 @@ AM_CONDITIONAL(HAVE_SQLITE, test "x$have_sqlite" = "xyes")
 
 dnl === MySQL
 AC_ARG_ENABLE(mysql,
-	AC_HELP_STRING([--disable-mysql],
-	[disable MySQL support (default is autodetected)]),
+	AS_HELP_STRING([--disable-mysql],
+				[disable MySQL support (default is autodetected)]),
 	[enable_mysql=$enableval],
 	[enable_mysql=yes])
 have_mysql=no
@@ -779,9 +758,8 @@ dnl ======================== Additional switches
 dnl ======================== Checks for libpcsclite
 USE_LIBPCSCLITE="no"
 AC_ARG_ENABLE(libpcsclite,
-              AC_HELP_STRING([--disable-libpcsclite],
-                             [disable libpcsclite support (default is autodetected)]
-                            ),,
+              AS_HELP_STRING([--disable-libpcsclite],[disable libpcsclite support (default is autodetected)
+                            ]),,
               [enable_libpcsclite=yes])
 if test "$enable_libpcsclite" = "yes"; then
 	PKG_CHECK_MODULES(LIBPCSCLITE, libpcsclite >= 1.3.1, USE_LIBPCSCLITE=yes, USE_LIBPCSCLITE=no)
@@ -790,33 +768,12 @@ if test "$enable_libpcsclite" = "yes"; then
 		OLD_CFLAGS="$CFLAGS"
 		CFLAGS="$LIBPCSCLITE_CFLAGS $OLD_CFLAGS"
 		AC_CHECK_TYPE([LPCSTR],
-		    [AC_DEFINE([HAVE_LPCSTR], 1, 
+		    [AC_DEFINE([HAVE_LPCSTR], 1,
 		       [Define to 1 if libpcsclite defines the type 'LPCSTR'.])],
 		    [], [#include <PCSC/wintypes.h>])
 		CFLAGS="$OLD_CFLAGS"
 	fi
 fi
-
-AC_ARG_ENABLE(win,
-   [  --enable-win            if you want Windows support ],
-   [ if test x$enable_win32 = xyes; then
-	AC_DEFINE(WIN32, 1, [Whether compiling on Windows])
-	WIN32=1
-	if test x$cross_compiling = xyes; then
-		AC_DEFINE(WIN32_CROSS, 1, [Define if you cross compile Windows.])
-		WIN32_CROSS=1
-		win32="cross"
-	else
- 		win32="yes"
-	fi
-	AC_CHECK_HEADER(af_irda.h, [AC_DEFINE(HAVE_IRDA, 1, [Whether IrDA is available]) USE_IRDA="yes"])
-     else
-	win32="no"
-     fi ],
-   [ win32="no"]
-)
-
-AM_CONDITIONAL(WIN32, test "x$WIN32" = "x1")
 
 AC_ARG_ENABLE(unix98test,
    [  --enable-unix98test     if you want to disable UNIX98 test and assume to
@@ -832,7 +789,7 @@ AC_ARG_ENABLE(unix98test,
 if test x$unix98test = xyes; then
 
 AC_CHECK_FUNC(grantpt,
-   [ AC_TRY_RUN([
+   [ AC_RUN_IFELSE([AC_LANG_SOURCE([[
 #define  _XOPEN_SOURCE 500
 
 #include <stdlib.h>
@@ -861,10 +818,10 @@ int main()
 	close(master);
 	exit(0);
 }
-                ],
-                have_unix98=yes,
-                AC_MSG_WARN("No unix98ptys"),
-		have_unix98=yes)
+                ]])],
+				[have_unix98=yes],
+				[AC_MSG_WARN("No unix98ptys")],
+				[have_unix98=yes])
    ]
 )
 
@@ -874,32 +831,60 @@ if test x$have_unix98 = xyes; then
 	AC_DEFINE(USE_UNIX98PTYS, 1, [Whether Unix98 support is available])
 fi
 
-AC_TRY_COMPILE( [#define _XOPEN_SOURCE 500
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#define _XOPEN_SOURCE 500
 		 #include <sys/types.h>
-		 #include <sys/socket.h>],
-		[struct msghdr msg; msg.msg_control;],
-		AC_DEFINE(HAVE_MSGHDR_MSG_CONTROL, 1, [Whether struct msghdr has a msg_control member])
+		 #include <sys/socket.h>]],
+		 [[struct msghdr msg; msg.msg_control;]])],
+		 [AC_DEFINE(HAVE_MSGHDR_MSG_CONTROL, 1, Whether struct msghdr has a msg_control member)],
+		 []
 )
 
+AC_PROG_EGREP
+
 dnl ======================== Checks for header files.
-AC_HEADER_STDC
 AC_HEADER_STDBOOL
 AC_HEADER_SYS_WAIT
-AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h unistd.h sys/file.h)
-AC_CHECK_HEADERS(string.h strings.h ctype.h stdlib.h stdarg.h stdint.h)
-AC_CHECK_HEADERS(stddef.h sys/socket.h sys/modem.h termios.h sys/filio.h)
-AC_CHECK_HEADERS(inttypes.h wchar.h direct.h sys/param.h dirent.h sys/types.h)
+AC_CHECK_HEADERS(fcntl.h sys/ioctl.h sys/time.h sys/file.h)
+AC_CHECK_HEADERS(basetsd.h ctype.h stddef.h stdarg.h error.h errno.h signal.h)
+AC_CHECK_HEADERS(sys/socket.h sys/modem.h termios.h sys/filio.h)
+AC_CHECK_HEADERS(wchar.h direct.h sys/param.h dirent.h sys/types.h)
 
 dnl ======================== Checks for typedefs, structures, and compiler characteristics.
 AC_C_CONST
 AC_C_INLINE
+AC_TYPE_INT8_T
+AC_TYPE_INT16_T
+AC_TYPE_INT32_T
+AC_TYPE_UINT8_T
+AC_TYPE_UINT16_T
+AC_TYPE_UINT32_T
 AC_TYPE_PID_T
 AC_TYPE_SIZE_T
-AC_HEADER_TIME
+AC_TYPE_SSIZE_T
 AC_STRUCT_TM
-AC_CHECK_TYPE([u_int8_t],
-    [AC_DEFINE([HAVE_U_INT8_T], 1, 
-       [Define to 1 if the system has the type 'u_int8_t'.])])
+
+dnl autoheader does not define them, so do it manually
+if test "$ac_cv_c_int8_t" = "yes"; then
+	AC_DEFINE(HAVE_INT8_T, 1, [Whether int8_t is available])
+fi
+if test "$ac_cv_c_int16_t" = "yes"; then
+	AC_DEFINE(HAVE_INT16_T, 1, [Whether int16_t is available])
+fi
+if test "$ac_cv_c_int32_t" = "yes"; then
+	AC_DEFINE(HAVE_INT32_T, 1, [Whether int32_t is available])
+fi
+if test "$ac_cv_c_uint8_t" = "yes"; then
+	AC_DEFINE(HAVE_UINT8_T, 1, [Whether uint8_t is available])
+fi
+if test "$ac_cv_c_uint16_t" = "yes"; then
+	AC_DEFINE(HAVE_UINT16_T, 1, [Whether uint16_t is available])
+fi
+if test "$ac_cv_c_uint32_t" = "yes"; then
+	AC_DEFINE(HAVE_UINT32_T, 1, [Whether uint32_t is available])
+fi
+if test "$ac_cv_type_ssize_t" = "yes"; then
+	AC_DEFINE(HAVE_SSIZE_T, 1, [Whether ssize_t is available])
+fi
 
 dnl we don't check for long double and long long int, only
 dnl ancient platforms don't have them
@@ -907,24 +892,33 @@ AC_DEFINE(HAVE_LONG_LONG, 1, [Whether the platform has a long long int type])
 AC_DEFINE(HAVE_LONG_DOUBLE, 1, [Whether the platform has a long double type])
 
 AC_CACHE_CHECK(for __ptr_t, ac_cv_c___ptr_t,
-	[AC_TRY_COMPILE([#include <stdio.h>],
-		[__ptr_t foo = NULL;],
-		ac_cv_c___ptr_t=yes, ac_cv_c___ptr_t=no)])
+	[AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[#include <stdio.h>]],
+					[[__ptr_t foo = NULL;]])],
+					[ac_cv_c___ptr_t=yes],
+					[ac_cv_c___ptr_t=no])])
 if test $ac_cv_c___ptr_t = yes; then
 	AC_DEFINE(HAVE_PTR_T, 1, [Whether __ptr_t is available])
 fi
 
 dnl ======================== Checks for library functions.
-AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
-AC_TYPE_SIGNAL
 AC_FUNC_STRFTIME
+AC_FUNC_MKDIR
+AC_CHECK_DECLS([getenv, getopt])
 AC_CHECK_FUNCS(mktime timegm gettimeofday select poll wcrtomb)
 AC_CHECK_FUNCS(strchr strdup strndup strstr strtol strtok strsep)
 AC_CHECK_FUNCS(asprintf vasprintf snprintf vsnprintf getpass setenv)
+AC_CHECK_FUNCS(isatty)
+AC_CHECK_FUNCS(geteuid getegid)
 AC_CHECK_FUNCS(getaddrinfo)
+AC_CHECK_FUNCS(posix_spawn fork waitpid)
+AM_CONDITIONAL([HAVE_POSIX_SPAWN], [test "x$ac_cv_func_posix_spawn" = xyes])
+AM_CONDITIONAL([HAVE_FORK], [test "x$ac_cv_func_fork" = xyes && test "x$ac_cv_func_waitpid" = xyes])
+AC_CHECK_HEADERS([locale.h])
+AC_CHECK_FUNCS([setlocale], [], [AC_MSG_WARN([charset conversion may not work])])
 AC_CACHE_CHECK(for ISO C99 compliant snprintf,ac_cv_func_snprintf_c99,
-	[AC_TRY_RUN([
+	[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdlib.h>
 #include <stdio.h>
 
 int main()
@@ -933,12 +927,16 @@ int main()
 
 	snprintf(buf, 3, "ABC");
 	exit ((buf[2] != 0) || (snprintf(NULL, 0, "%d", 100) != 3));
-}],ac_cv_func_snprintf_c99=yes,ac_cv_func_snprintf_c99=no,ac_cv_func_snprintf_c99=no)])
+}]])],
+				[ac_cv_func_snprintf_c99=yes],
+				[ac_cv_func_snprintf_c99=no],
+				[ac_cv_func_snprintf_c99=no])])
 if test $ac_cv_func_snprintf_c99 = yes; then
 	AC_DEFINE(HAVE_C99_SNPRINTF, 1, [Whether snprintf is available])
 fi
 AC_CACHE_CHECK(for ISO C99 compliant vsnprintf,ac_cv_func_vsnprintf_c99,
-	[AC_TRY_RUN([
+	[AC_RUN_IFELSE([AC_LANG_SOURCE([[
+#include <stdlib.h>
 #include <stdio.h>
 #include <stdarg.h>
 
@@ -960,7 +958,10 @@ int main()
 
 	doit(buf, 3, "ABC");
 	exit ((buf[2] != 0) || (doit(NULL, 0, "%d", 100) != 3));
-}],ac_cv_func_vsnprintf_c99=yes,ac_cv_func_vsnprintf_c99=no,ac_cv_func_vsnprintf_c99=no)])
+}]])],
+			[ac_cv_func_vsnprintf_c99=yes],
+			[ac_cv_func_vsnprintf_c99=no],
+			[ac_cv_func_vsnprintf_c99=no])])
 if test $ac_cv_func_vsnprintf_c99 = yes; then
 	AC_DEFINE(HAVE_C99_VSNPRINTF, 1, [Whether vsnprintf is available])
 fi
@@ -1031,8 +1032,7 @@ AC_SUBST(HAVE_LIBICAL)
 AC_SUBST(HAVE_LIBUSB)
 AC_SUBST(HAVE_SOCKETPHONET)
 
-AC_OUTPUT(
-	  Makefile
+AC_CONFIG_FILES([Makefile
 	  getopt/Makefile
 	  Docs/Makefile
 	  Docs/man/Makefile
@@ -1058,6 +1058,7 @@ AC_OUTPUT(
 	  gnokii/Makefile
 	  gnokiid/Makefile
 	  smsd/Makefile
+	  snprintf/Makefile
 	  utils/Makefile
 	  xgnokii/xgnokii.pc
 	  xgnokii/Makefile
@@ -1066,7 +1067,8 @@ AC_OUTPUT(
 	  testsuite/Makefile
 	  testsuite/data/Makefile
 	  Windows/Makefile
-  )
+  ])
+AC_OUTPUT
 
 dnl ======================== Final report
 
@@ -1107,7 +1109,6 @@ echo "
     readline support:   $USE_READLINE
     Build Shared Lib:   $enable_shared
     Build Static Lib:   $enable_static
-    Windows:            $win32 
     Prefix:             $prefix
 
   Type '${MAKE}' for compilation and then '${MAKE} install', to

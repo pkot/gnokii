@@ -18,9 +18,7 @@
 #ifndef _gnokii_misc_h
 #define _gnokii_misc_h
 
-#include <stdio.h>
-#include <sys/types.h>
-
+#include "config.h"
 #include "compat.h"
 
 /* Some general defines. */

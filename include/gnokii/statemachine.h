@@ -16,6 +16,7 @@
 #ifndef _gnokii_statemachine_h
 #define _gnokii_statemachine_h
 
+#include <gnokii/apidecl.h>
 #include <gnokii/error.h>
 #include <gnokii/data.h>
 

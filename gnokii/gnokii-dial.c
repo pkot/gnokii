@@ -24,7 +24,6 @@
 #include "config.h"
 #include "compat.h"
 
-#include <stdio.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
@@ -198,11 +197,11 @@ gn_error answercall(char *callid, gn_data *data, struct gn_statemachine *state)
 	data->call_info = &callinfo;
 
 	error = gn_sm_functions(GN_OP_AnswerCall, data, state);
-	
+
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 	}
-	
+
 	return error;
 }
 
@@ -233,7 +232,7 @@ gn_error hangup(char *callid, gn_data *data, struct gn_statemachine *state)
 	if (error != GN_ERR_NONE) {
 		fprintf(stderr, _("Error: %s\n"), gn_error_print(error));
 	}
-	
+
 	return error;
 }
 

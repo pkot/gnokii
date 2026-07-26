@@ -17,16 +17,6 @@
 
 */
 
-#include "config.h"
-
-/* System header files */
-
-#include <stdio.h>
-#include <string.h>
-#include <stdlib.h>
-
-/* Various header file */
-
 #include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
@@ -287,7 +277,7 @@ gn_error gnbus_initialise(struct gn_statemachine *state)
 	else
 		conn_type = state->config.connection_type;
 
-	if (!device_open(state->config.port_device, false, false, false, conn_type, state)) {
+	if (!device_open(false, false, conn_type, state)) {
 		perror(_("Couldn't open GNBUS device"));
 		free(GNBUSINST(state));
 		GNBUSINST(state) = NULL;

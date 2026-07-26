@@ -22,10 +22,9 @@
 */
 
 #include "config.h"
-#include "misc.h"
 #include "compat.h"
+#include "misc.h"
 
-#include <stdio.h>
 #ifndef _GNU_SOURCE
 #  define _GNU_SOURCE 1
 #endif
@@ -175,7 +174,7 @@ gn_error getfileid(char *filename, gn_data *data, struct gn_statemachine *state)
 	data->file = &fi;
 
 	if ((error = gn_sm_functions(GN_OP_GetFileId, data, state)) != GN_ERR_NONE)
-		fprintf(stderr, _("Failed to get info for %s: %s\n"),filename, gn_error_print(error));
+		fprintf(stderr, _("Failed to get info for %s: %s\n"), filename, gn_error_print(error));
 	else {
 		fprintf(stdout, _("Fileid for file %s is %02x %02x %02x %02x %02x %02x\n"), filename, fi.id[0], fi.id[1], fi.id[2], fi.id[3], fi.id[4], fi.id[5]);
 	}
@@ -385,7 +384,7 @@ gn_error getallfiles(char *path, gn_data *data, struct gn_statemachine *state)
 				if (fwrite(data->file->file, 1, data->file->file_length, f) < data->file->file_length) {
 					fprintf(stderr, _("Failed to write to file %s.\n"), filename2);
 					fclose(f);
-					return GN_ERR_FAILED; 
+					return GN_ERR_FAILED;
 				}
 				fclose(f);
 				free(data->file->file);
@@ -421,7 +420,7 @@ gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	f = fopen(optarg, "rb");
 	if (!f || fseek(f, 0, SEEK_END)) {
 		fprintf(stderr, _("Can't open file %s for reading!\n"), optarg);
- 		goto err;
+		goto err;
 	}
 	fi.file_length = ftell(f);
 	rewind(f);

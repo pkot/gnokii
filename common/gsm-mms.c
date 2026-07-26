@@ -13,12 +13,7 @@
 */
 
 #include "config.h"
-#include <time.h> /* for ctime() */
-
-#ifdef ENABLE_NLS
-#  include <locale.h>
-#endif
-
+#include "compat.h"
 #include "gnokii-internal.h"
 
 /**
@@ -173,47 +168,62 @@ gn_error gn_mms_dec_uintvar(const unsigned char *source, size_t source_len, unsi
 	return GN_ERR_WRONGDATAFORMAT;
 }
 
-#define APPEND(buf, fmt, ...) \
+static unsigned char *printf_append(unsigned char *buf, size_t *len, char *fmt, ...)
+{
+	size_t count, newsize;
+	char *str;
+	va_list ap;
+
+	va_start(ap, fmt);
+	count = vasprintf(&str, fmt, ap);
+	if (count < 0) {
+		free(buf);
+		return NULL;
+	}
+	newsize = *len + count;
+	buf = realloc(buf, newsize + 1);
+	if (!buf) {
+		free(str);
+		return NULL;
+	}
+	memcpy(buf + *len, str, count + 1);
+	free(str);
+	*len = newsize;
+
+	return buf;
+}
+
+#define BUFP	*dest_buffer, dest_length
+
+#define APPEND(args) \
 do { \
-	size_t count, newsize; \
-	char *astring, *nbuf; \
-	count = asprintf(&astring, fmt, __VA_ARGS__); \
-	if (!astring) \
-		return GN_ERR_MEMORYFULL; \
-	newsize = *dest_length + count; \
-	nbuf = realloc(buf, newsize + 1); \
-	if (!nbuf) { \
-		free(buf); \
-		free(astring); \
-		return GN_ERR_MEMORYFULL; \
-	} \
-	buf = nbuf; \
-	strcat(buf + *dest_length, astring); \
-	free(astring); \
-	*dest_length = newsize; \
+	unsigned char *res = printf_append args; \
+	if (!res) \
+		return GN_ERR_INTERNALERROR; \
+	*dest_buffer = res; \
 } while (0)
 
-#define DUMP(buf, memory, length) \
+#define DUMP(memory, length) \
 do { \
 	int j, n; \
 	size_t len = length; \
 	const unsigned char *source = memory; \
 	while (len > 0) { \
-		APPEND(buf, "%s", " "); \
+		APPEND((*dest_buffer, dest_length, " ")); \
 		if (len >= 35) \
 			n = 35; \
 		else \
 			n = len; \
 		for (j = 0; j < n; j++) { \
-			APPEND(buf, "%02x", *source); \
+			APPEND((*dest_buffer, dest_length, "%02x", *source)); \
 			source++; \
 		} \
 		len -= n; \
-		APPEND(buf, "%s", "\n"); \
+		APPEND((*dest_buffer, dest_length, "\n")); \
 	} \
 } while (0)
 
-#define DUMP64(buf, memory, length)  \
+#define DUMP64(memory, length)  \
 do { \
 	int n; \
 	size_t len = length; \
@@ -225,10 +235,10 @@ do { \
 		else \
 			n = len; \
 		base64_encode(outstring, sizeof(outstring), source, n); \
-		APPEND(buf, "%s", outstring); \
+		APPEND((*dest_buffer, dest_length, "%s", outstring)); \
 		source += n; \
 		len -= n; \
-		APPEND(buf, "%s", "\n"); \
+		APPEND((*dest_buffer, dest_length, "\n")); \
 	} \
 } while (0)
 
@@ -324,14 +334,14 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 	*dest_length = 0;
 	*dest_buffer = calloc(1, *dest_length + 1);
 	if (!*dest_buffer)
-		return GN_ERR_MEMORYFULL;
+		return GN_ERR_INTERNALERROR;
 	for (i = 0; i < *length; i++) {
 		if ((buffer[i] & 0x80) == 0x80) {
 			field = gn_mms_field_lookup(buffer[i]);
 			/* TODO check if decoding of each field overrides the input buffer */
 			if (field) {
 				if (mime && field->x)
-					APPEND(*dest_buffer, "%s", "X-");
+					APPEND((BUFP, "%s", "X-"));
 				/*
 				 * Decode according to WAP-230-WSP-20010705-a, Approved Version 5 July 2001 8.4.2.1 Basic rules
 				 */
@@ -341,7 +351,7 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 					/*
 					 * Decode a Short-Integer - could use gn_mms_dec_uintvar() but it's easier this way
 					 */
-					APPEND(*dest_buffer, "%s: 0x%02x\n", field->header, buffer[i] & 0x7f);
+					APPEND((BUFP, "%s: 0x%02x\n", field->header, buffer[i] & 0x7f));
 					break;
 				case GN_MMS_FIELD_IS_LONG:
 					/* FALL THROUGH */
@@ -357,9 +367,9 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 					}
 					if (field->type == GN_MMS_FIELD_IS_DATE) {
 						/* ctime() adds a trailing \n */
-						APPEND(*dest_buffer, "%s: %s", field->header, ctime((time_t *) &number));
+						APPEND((BUFP, "%s: %s", field->header, ctime((time_t *) &number)));
 					} else {
-						APPEND(*dest_buffer, "%s: %u\n", field->header, number);
+						APPEND((BUFP, "%s: %u\n", field->header, number));
 					}
 					decoded_len--;
 					i += decoded_len;
@@ -371,7 +381,7 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 					error = gn_mms_dec_miscstring(&buffer[i], *length - i, &string, &string_len, &decoded_len);
 					if (error)
 						return error;
-					APPEND(*dest_buffer, "%s: %s\n", field->header, string);
+					APPEND((BUFP, "%s: %s\n", field->header, string));
 					free(string);
 					i += decoded_len;
 					break;
@@ -391,17 +401,17 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 							/* Short-integer */
 							type = gn_mms_content_type_lookup(buffer[i]);
 							if (type) {
-								APPEND(*dest_buffer, "%s: %s\n", field->header, type->name);
+								APPEND((BUFP, "%s: %s\n", field->header, type->name));
 							} else {
-								APPEND(*dest_buffer, "%s: 0x%02x\n", field->header, buffer[i]);
+								APPEND((BUFP, "%s: 0x%02x\n", field->header, buffer[i]));
 							}
 							i++;
 						} else {
 							/* Extension-media */
 							decoded_len = buffer[i];
 							i++;
-							APPEND(*dest_buffer, "%s:", field->header);
-							DUMP(*dest_buffer, &buffer[i], decoded_len);
+							APPEND((BUFP, "%s:", field->header));
+							DUMP(&buffer[i], decoded_len);
 							i += decoded_len;
 						}
 						/* Docs say to ignore the nEntries field because entries can simply be iterated */
@@ -419,20 +429,20 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 							dprintf("DataLen %d at 0x%x\n", data_len, i + 0xb0);
 							i += decoded_len;
 							if (mime) {
-								APPEND(*dest_buffer, "Headers length: %d\n", headers_len);
-								DUMP(*dest_buffer, &buffer[i], headers_len);
+								APPEND((BUFP, "Headers length: %d\n", headers_len));
+								DUMP(&buffer[i], headers_len);
 								i += headers_len;
 								/* Data */
-								APPEND(*dest_buffer, "Data length: %d\n", data_len);
-								DUMP64(*dest_buffer, &buffer[i], data_len);
+								APPEND((BUFP, "Data length: %d\n", data_len));
+								DUMP64(&buffer[i], data_len);
 								i += data_len;
 							} else {
 								/* Headers */
-								APPEND(*dest_buffer, "Headers length: %d\n", headers_len);
-								DUMP(*dest_buffer, &buffer[i], headers_len);
+								APPEND((BUFP, "Headers length: %d\n", headers_len));
+								DUMP(&buffer[i], headers_len);
 								i += headers_len;
 								/* Data */
-								APPEND(*dest_buffer, "Data length: %d\n", data_len);
+								APPEND((BUFP, "Data length: %d\n", data_len));
 								i += data_len;
 							}
 						}
@@ -440,8 +450,8 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 					break;
 				case GN_MMS_FIELD_IS_EXPIRY:
 					decoded_len = buffer[i];
-					APPEND(*dest_buffer, "%s:", field->header);
-					DUMP(*dest_buffer, &buffer[i + 1], decoded_len);
+					APPEND((BUFP, "%s:", field->header));
+					DUMP(&buffer[i + 1], decoded_len);
 					i += decoded_len;
 					break;
 				default:
@@ -468,6 +478,7 @@ static gn_error gn_mms_pdu2txtmime(unsigned const char *buffer, size_t *length, 
 #undef DUMP64
 #undef DUMP
 #undef APPEND
+#undef BUFP
 
 /**
  * gn_mms_pdu2txt - convert an MMS from PDU to human readable format
@@ -536,7 +547,7 @@ gn_error gn_mms_nokia2pdu(const unsigned char *source_buffer, size_t *source_len
 
 	*dest_buffer = malloc(mms_length);
 	if (!*dest_buffer)
-		return GN_ERR_MEMORYFULL;
+		return GN_ERR_INTERNALERROR;
 	*dest_length = mms_length;
 
 	memcpy(*dest_buffer, pdu_start, mms_length);
@@ -682,7 +693,7 @@ GNOKII_API gn_error gn_mms_convert(const gn_mms *source_mms, gn_mms *dest_mms)
 			if (dest_mms->buffer) {
 				memcpy(dest_mms->buffer, source_mms->buffer, source_length);
 			} else {
-				error = GN_ERR_MEMORYFULL;
+				error = GN_ERR_INTERNALERROR;
 			}
 			return error;
 		}
@@ -817,8 +828,5 @@ GNOKII_API gn_error gn_mms_alloc(gn_mms **mms)
 {
 	*mms = calloc(1, sizeof(gn_mms));
 
-	if (*mms)
-		return GN_ERR_NONE;
-
-	return GN_ERR_MEMORYFULL;
+	return (*mms) ? GN_ERR_NONE : GN_ERR_INTERNALERROR;
 }

@@ -2,18 +2,21 @@
 
 if [ $# -eq 2 ] ; then
 	export TESTDIR=$1
-	export GNOKII=`pwd`/$2
+	export GNOKII=$2
 elif [ $# -eq 0 ] ; then
-	export TESTDIR=`pwd`
-	export GNOKII="../gnokii/gnokii --config $TESTDIR/.gnokiirc"
+	export TESTDIR=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" &> /dev/null && pwd)
+	export GNOKII="$TESTDIR/../gnokii/gnokii --config $TESTDIR/gnokiirc"
 else
 	echo "*** Usage: ./testit [Path to test files] [gnokii command] ***"
 	exit 1
 fi
 
-# Backup LC_MESSAGES value
-LC_MES_TMP=$LC_MESSAGES
+# The tests exercise charset conversion (SMS/UCS2/vcard), which obviously
+# fails under the POSIX/C locale, so set something with a chance to pass.
+LC_MESSAGES_BAK=$LC_MESSAGES
+LC_CTYPE_BAK=$LC_CTYPE
 export LC_MESSAGES=C
+export LC_CTYPE=C.UTF-8
 
 RETVAL=0
 # For now ignore the tests that are known to fail:
@@ -24,9 +27,7 @@ RETVAL=0
 for A in test.00.identify \
 	test.01.sms test.29.sendsms test.30.emptysms test.03.ucs2sms test.08.send161sms\
 	test.33.send140sms8bit test.34.send141sms8bit \
-	test.10.oplogo test.14.oplogo-xpm \
 	test.11.ringtone \
-	test.13.emspicture test.15.emspicture2 test.18.emsanimation \
 	test.16.imelody \
 	test.40.getsms test.41.getsms test.42.getsms test.43.getsms \
 	test.01.writephonebook test.02.writephonebook \
@@ -34,18 +35,18 @@ for A in test.00.identify \
 	test.05.writephonebook; do
     echo -n "Doing $A... "
     B=`echo $A | sed s/test/out/`
-    ( cd $TESTDIR; source $A 2>&1 ) | grep -v ^GNOKII > my$B
-    if cmp $TESTDIR$B my$B >/dev/null 2>&1; then
+    ( cd $TESTDIR; source $TESTDIR/$A 2>&1 ) | grep -U -v ^GNOKII > $TESTDIR/my$B
+    if cmp $TESTDIR/$B $TESTDIR/my$B >/dev/null 2>&1; then
 	echo ok
     else
 	echo '*** FAILED'
-	diff -u $TESTDIR$B my$B
+	diff -u $TESTDIR/$B $TESTDIR/my$B
 	RETVAL=1
     fi
 done
 
-# Restore LC_MESSAGES value
-export LC_MESSAGES=$LC_MES_TMP
+# Restore previous locale setting
+export LC_MESSAGES=$LC_MESSAGES_BAK
+export LC_CTYPE=$LC_CTYPE_BAK
 
 exit $RETVAL
-

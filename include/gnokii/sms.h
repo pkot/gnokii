@@ -18,6 +18,7 @@
 #ifndef _gnokii_sms_h
 #define _gnokii_sms_h
 
+#include <gnokii/apidecl.h>
 #include <gnokii/error.h>
 #include <gnokii/common.h>
 #include <gnokii/bitmaps.h>
@@ -323,7 +324,8 @@ typedef enum {
 	GN_SMS_DATA_Animation = 0x07,
 	GN_SMS_DATA_Concat    = 0x08,
 	GN_SMS_DATA_WAPPush   = 0x09,
-	GN_SMS_DATA_Other     = 0x0a
+	GN_SMS_DATA_Other     = 0x0a,
+	GN_SMS_DATA_DRStatus  = 0x0b
 } gn_sms_data_type;
 
 /*** FOLDER INFO ***/
@@ -371,12 +373,8 @@ typedef struct {
 		gn_ringtone ringtone;
 		gn_bmp animation[4];
 		gn_sms_concat concat;
+		gn_sms_delivery_report_status dr_status;
 	} u;
-	/* That should be in the union, but for delivery reports we already
-	 * set text there. Currently we don't want to break API, so I put it here
-	 * Pawel Kot, 2007-11-21
-	 */
-	gn_sms_delivery_report_status dr_status;
 } gn_sms_user_data;
 
 /* Define datatype for SMS messages exported to the user applications. */
@@ -489,16 +487,16 @@ typedef struct {
 	unsigned char wsp_hlen;
 	unsigned char wsp_content_type;
 
-    	unsigned char version; /* wbxml version */
-    	unsigned char public_id;
-    	unsigned char charset; /* default 106 = UTF-8 */
-    	unsigned char stl;
+	unsigned char version; /* wbxml version */
+	unsigned char public_id;
+	unsigned char charset; /* default 106 = UTF-8 */
+	unsigned char stl;
 } gn_wap_push_header;
 
 typedef struct {
 	gn_wap_push_header header;
 	char *url;
-    	char *text;
+	char *text;
 	char *data;
 	int data_len;
 } gn_wap_push;

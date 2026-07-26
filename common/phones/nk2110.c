@@ -19,23 +19,17 @@
 
 #ifndef WIN32
 
-#include <termios.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <fcntl.h>
-#include <ctype.h>
-#include <signal.h>
-#include <sys/types.h>
-#include <sys/time.h>
-#include <sys/ioctl.h>
-#include <string.h>
+#include "compat.h"
+#ifdef HAVE_SIGNAL_H
+#  include <signal.h>
+#endif
+#ifdef HAVE_SYS_IOCTL_H
+#  include <sys/ioctl.h>
+#endif
 #include <pthread.h>
-#include <errno.h>
-#include <string.h>
 
 #undef DEBUG
 
-#include "compat.h"
 #include "misc.h"
 #include "gnokii.h"
 #include "device.h"
@@ -799,13 +793,9 @@ bool OpenSerial(void)
 
 	ddprintf("Setting MBUS communication with 2110...\n");
 
-	result = device_open(PortDevice, true, false, false, GCT_Serial);
-	if (!result) {
-		dprintf( "Failed to open %s ...\n", PortDevice);
+	result = device_open(true, false, GCT_Serial);
+	if (!result)
 		return false;
-	}
-
-	ddprintf("%s opened...\n", PortDevice);
 
 	device_changespeed(9600);
 	device_setdtrrts(1, 1);
