@@ -25,7 +25,9 @@
 #include "compat.h"
 #include "misc.h"
 
-#if defined(WIN32) && !defined(CYGWIN)
+#if defined(WIN32) && !defined(__CYGWIN__)
+#  include <fcntl.h>
+#  include <io.h>
 #  include <process.h>
 #  define getpid _getpid
 #endif
@@ -324,6 +326,11 @@ gn_error sendsms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	if (!sms.smsc.type) sms.smsc.type = GN_GSM_NUMBER_Unknown;
 
 	if (curpos != -1) {
+#if defined(WIN32) && !defined(__CYGWIN__)
+		/* Do not let Windows text-mode C runtime mangle 0x1a input bytes */
+		if (sms.dcs.u.general.alphabet == GN_SMS_DCS_8bit)
+			_setmode(_fileno(stdin), _O_BINARY);
+#endif
 		error = readtext(&sms.user_data[curpos]);
 		if (error != GN_ERR_NONE)
 			return error;
