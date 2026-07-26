@@ -106,6 +106,20 @@ out:
 	return retval;
 }
 
+/*
+ * isatty() is not reliable on native Windows, any character device (e.g. NUL)
+ * is a tty, so use the console API there.
+ */
+static int input_is_interactive(void)
+{
+#if defined(WIN32) && !defined(__CYGWIN__)
+	DWORD mode;
+	return GetConsoleMode(GetStdHandle(STD_INPUT_HANDLE), &mode) != 0;
+#else
+	return isatty(0);
+#endif
+}
+
 gn_error readtext(gn_sms_user_data *udata)
 {
 	/* The maximum length of an uncompressed concatenated short message is
@@ -113,7 +127,7 @@ gn_error readtext(gn_sms_user_data *udata)
 	char message_buffer[255 * GN_SMS_MAX_LENGTH];
 	size_t chars_read;
 
-	if (isatty(0))
+	if (input_is_interactive())
 		fprintf(stderr, _("Please enter SMS text. End your input with <cr><control-D>:\n"));
 
 	/* Get message text from stdin. */
