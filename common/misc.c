@@ -473,12 +473,7 @@ GNOKII_API char *gn_device_lock(const char* port)
 		fprintf(stderr, _("Out of memory error while locking device.\n"));
 		return NULL;
 	}
-	/*
-	 * I think we don't need to use strncpy, as we should have enough
-	 * buffer due to strlen results, but it's safer to do so...
-	 */
-	strncpy(lock_file, lock_path, len);
-	strncat(lock_file, aux, len - strlen(lock_file));
+	snprintf(lock_file, len + 1, "%s%s", lock_path, aux);
 
 	/* Check for the stale lockfile.
 	 * The code taken from minicom by Miquel van Smoorenburg */
