@@ -320,6 +320,7 @@ static gn_phone_model models[] = {
 	{"RPM-1", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"C1-01", "RM-607",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
 	{"C1-02", "RM-643",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
+	{"C2-00", "RM-704",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
 	{"C2-03", "RM-702",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition feature pack 1 */
 	{"Card Phone 1.0", "RPE-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"Card Phone 2.0", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
