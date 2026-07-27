@@ -396,7 +396,6 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	gn_sms sms;
 	gn_error error = GN_ERR_INTERNALERROR;
 	int i;
-	char tmp[3];
 #if 0
 	int confirm = -1;
 	int interactive = 0;
@@ -501,18 +500,12 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 					fprintf(stderr, _("Invalid datetime format: %s (should be YYMMDDHHMISS, all digits)!\n"), optarg);
 					return GN_ERR_WRONGDATAFORMAT;
 				}
-			snprintf(tmp, sizeof(tmp), "%s", optarg);
-			sms.smsc_time.year	= atoi(tmp) + 1900;
-			snprintf(tmp, sizeof(tmp), "%s", optarg+2);
-			sms.smsc_time.month	= atoi(tmp);
-			snprintf(tmp, sizeof(tmp), "%s", optarg+4);
-			sms.smsc_time.day	= atoi(tmp);
-			snprintf(tmp, sizeof(tmp), "%s", optarg+6);
-			sms.smsc_time.hour	= atoi(tmp);
-			snprintf(tmp, sizeof(tmp), "%s", optarg+8);
-			sms.smsc_time.minute	= atoi(tmp);
-			snprintf(tmp, sizeof(tmp), "%s", optarg+10);
-			sms.smsc_time.second	= atoi(tmp);
+			sms.smsc_time.year   = 10 * (optarg[0] - '0') + (optarg[1] - '0') + 1900;
+			sms.smsc_time.month  = 10 * (optarg[2] - '0') + (optarg[3] - '0');
+			sms.smsc_time.day    = 10 * (optarg[4] - '0') + (optarg[5] - '0');
+			sms.smsc_time.hour   = 10 * (optarg[6] - '0') + (optarg[7] - '0');
+			sms.smsc_time.minute = 10 * (optarg[8] - '0') + (optarg[9] - '0');
+			sms.smsc_time.second = 10 * (optarg[10] - '0') + (optarg[11] - '0');
 			if (!gn_timestamp_isvalid(sms.smsc_time)) {
 				fprintf(stderr, _("Invalid datetime: %s.\n"), optarg);
 				return GN_ERR_WRONGDATAFORMAT;
