@@ -1969,11 +1969,12 @@ static gn_error NK7110_GetCalendarNote(gn_data *data, struct gn_statemachine *st
 
 static gn_error NK7110_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
+	gn_calnote_list list;
+	gn_error error = GN_ERR_NONE;
+	bool own_list = true;
 	unsigned char req[] = { FBUS_FRAME_HEADER,
 				0x0b,      /* delete calendar note */
 				0x00, 0x00}; /*location */
-	gn_calnote_list list;
-	bool own_list = true;
 
 	if (data->calnote_list)
 		own_list = false;
@@ -1983,17 +1984,23 @@ static gn_error NK7110_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 	}
 
 	if (data->calnote_list->number == 0)
-		NK7110_GetCalendarNotesInfo(data, state);
+		error = NK7110_GetCalendarNotesInfo(data, state);
 
-	if (data->calnote->location < data->calnote_list->number + 1 &&
-	    data->calnote->location > 0) {
-		req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
-		req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
-	} else {
-		return GN_ERR_INVALIDLOCATION;
+	if (error == GN_ERR_NONE) {
+		if (data->calnote->location < data->calnote_list->number + 1 &&
+		    data->calnote->location > 0) {
+			req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+			req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+		} else {
+			error = GN_ERR_INVALIDLOCATION;
+		}
 	}
+	if (own_list)
+		data->calnote_list = NULL;
 
-	if (own_list) data->calnote_list = NULL;
+	if (error != GN_ERR_NONE)
+		return error;
+
 	SEND_MESSAGE_BLOCK(NK7110_MSG_CALENDAR, 6);
 }
 
