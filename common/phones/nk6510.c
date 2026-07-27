@@ -4267,6 +4267,7 @@ static gn_error NK6510_DeleteCalTodo_S40_30(gn_data *data, struct gn_statemachin
 				0x00, 0x00, 0x00,
 				0x00, 0x00}; /*location */
 	gn_calnote_list list;
+	gn_error error = GN_ERR_NONE;
 	bool own_list = true;
 
 	if (type != 0x00 && type != 0x01 && type != 0x02)
@@ -4282,19 +4283,26 @@ static gn_error NK6510_DeleteCalTodo_S40_30(gn_data *data, struct gn_statemachin
 	}
 
 	if (data->calnote_list->number == 0)
-		NK6510_GetCalendarNotesInfo(data, state, type);
+		error = NK6510_GetCalendarNotesInfo(data, state, type);
 
-	if (data->calnote->location < data->calnote_list->number + 1 &&
-	    data->calnote->location > 0) {
-		req[8] = data->calnote_list->location[data->calnote->location - 1] >> 8;
-		req[9] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
-	} else {
-		return GN_ERR_INVALIDLOCATION;
+	if (error == GN_ERR_NONE) {
+		if (data->calnote->location < data->calnote_list->number + 1 &&
+		    data->calnote->location > 0) {
+			req[8] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+			req[9] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+		} else {
+			error = GN_ERR_INVALIDLOCATION;
+		}
 	}
 
 	if (own_list)
 		data->calnote_list = NULL;
+
 	map_del(&location_map, "calendar");
+
+	if (error != GN_ERR_NONE)
+		return error;
+
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 10);
 }
 
@@ -4305,7 +4313,7 @@ static gn_error NK6510_DeleteCalendarNote_S40_30(gn_data *data, struct gn_statem
 
 static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 	unsigned char req[] = { FBUS_FRAME_HEADER,
 				0x0b,      /* delete calendar note */
 				0x00, 0x00}; /*location */
@@ -4323,18 +4331,23 @@ static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 	}
 
 	if (data->calnote_list->number == 0)
-		NK6510_GetCalendarNotesInfo(data, state, 0x00);
+		error = NK6510_GetCalendarNotesInfo(data, state, 0x00);
 
-	if (data->calnote->location < data->calnote_list->number + 1 &&
-	    data->calnote->location > 0) {
-		req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
-		req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
-	} else {
-		return GN_ERR_INVALIDLOCATION;
+	if (error == GN_ERR_NONE) {
+		if (data->calnote->location < data->calnote_list->number + 1 &&
+		    data->calnote->location > 0) {
+			req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+			req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+		} else {
+			error = GN_ERR_INVALIDLOCATION;
+		}
 	}
 
 	if (own_list)
 		data->calnote_list = NULL;
+
+	if (error != GN_ERR_NONE)
+		return error;
 
 	if (sm_message_send(8, NK6510_MSG_CALENDAR, req, state))
 		return GN_ERR_NOTREADY;
