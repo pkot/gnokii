@@ -325,7 +325,7 @@ static int gopen(const char *command)
    to be /dev/gnokii etc. ) */
 static int VM_PtySetup(const char *bindir)
 {
-	char mgnokiidev[200];
+	char mgnokiidev[256];
 
 	if (UseSTDIO) {
 		PtyRDFD = STDIN_FILENO;
@@ -333,14 +333,8 @@ static int VM_PtySetup(const char *bindir)
 		return (0);
 	}
 
-	if (bindir) {
-		strncpy(mgnokiidev, bindir, sizeof(mgnokiidev));
-		strncat(mgnokiidev, "/", sizeof(mgnokiidev) - strlen(mgnokiidev) - 1);
-	} else {
-		mgnokiidev[0] = 0;
-	}
-
-	strncat(mgnokiidev, "mgnokiidev", sizeof(mgnokiidev) - strlen(mgnokiidev) - 1);
+	snprintf(mgnokiidev, sizeof(mgnokiidev), "%s%smgnokiidev",
+		 bindir ? bindir : "", bindir ? "/" : "");
 
 	if (access(mgnokiidev, X_OK) != 0) {
 		fprintf(stderr, _("Cannot access %s, check the bindir in your config file!\n"), mgnokiidev);
