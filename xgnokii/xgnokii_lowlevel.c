@@ -1281,7 +1281,8 @@ void *GUI_Connect(void *a)
 			} else {
 				pthread_mutex_lock (&callMutex);
 				phoneMonitor.call.callInProgress = CS_Waiting;
-				strncpy (phoneMonitor.call.callNum, call->remote_number, INCALL_NUMBER_LENGTH);
+				strncpy (phoneMonitor.call.callNum, call->remote_number, INCALL_NUMBER_LENGTH - 1);
+				phoneMonitor.call.callNum[INCALL_NUMBER_LENGTH - 1] = 0;
 				pthread_mutex_unlock (&callMutex);
 			}
 		} else {
