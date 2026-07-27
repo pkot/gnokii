@@ -1831,7 +1831,7 @@ static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
 			  "It may have to be sent to Nokia Service if something fails!\n"
 			  "Do you really want to continue? "));
 	fprintf(stdout, _("(yes/no) "));
-	gn_line_get(stdin, ans, 4);
+	gn_line_get(stdin, ans, sizeof(ans));
 	if (strcmp(ans, _("yes"))) return GN_ERR_USERCANCELED;
 
 	if (sm_message_send(len, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;

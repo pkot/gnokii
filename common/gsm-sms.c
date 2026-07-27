@@ -146,7 +146,7 @@ static char *sms_timestamp_print(uint8_t *number)
 			c = ' ';
 			break;
 		}
-		snprintf(buf2, 4, "%d%d%c", number[i] & 0x0f, number[i] >> 4, c);
+		snprintf(buf2, sizeof(buf2), "%d%d%c", number[i] & 0x0f, number[i] >> 4, c);
 		strncat(buffer, buf2, sizeof(buffer) - strlen(buffer) - 1);
 	}
 
@@ -1641,7 +1641,7 @@ static void sms_dump_raw(gn_sms_raw *rawsms)
 #ifdef DEBUG
 	char buf[10240];
 
-	memset(buf, 0, 10240);
+	memset(buf, 0, sizeof(buf));
 
 	dprintf("dcs: 0x%02x\n", rawsms->dcs);
 	dprintf("Length: 0x%02x\n", rawsms->length);
@@ -2276,7 +2276,7 @@ GNOKII_API char *gn_sms2mbox(gn_sms *sms, char *from)
 	APPEND((BUFP, "X-GSM-Memory: %s\n", gn_memory_type2str(sms->memory_type)));
 
 	/* assuming location will never have more than 15 digits */
-	snprintf(str, 15, "%d", sms->number);
+	snprintf(str, sizeof(str), "%d", sms->number);
 	APPEND((BUFP, "X-GSM-Location: %s\n", str));
 
 	if (strlen(sms->user_data[0].u.text) < MAX_SUBJECT_LENGTH) {
