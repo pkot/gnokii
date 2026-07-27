@@ -481,7 +481,7 @@ gn_error savesms(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			break;
 #endif
 		case 'f': /* Specify the folder where to save the message */
-			snprintf(memory_type, 19, "%s", optarg);
+			snprintf(memory_type, sizeof(memory_type), "%s", optarg);
 			if (gn_str2memory_type(memory_type) == GN_MT_XX) {
 				fprintf(stderr, _("Unknown memory type %s (use ME, SM, IN, OU, ...)!\n"), optarg);
 				fprintf(stderr, _("Run gnokii --showsmsfolderstatus for a list of supported memory types.\n"));
@@ -849,7 +849,7 @@ parsefile:
 						if (mode == GNOKII_APP_MODE_Ask && (stat(filename, &buf) == 0)) {
 							fprintf(stdout, _("File %s exists.\n"), filename);
 							fprintf(stdout, _("Overwrite? (yes/no) "));
-							gn_line_get(stdin, ans, 4);
+							gn_line_get(stdin, ans, sizeof(ans));
 							if (!strcmp(ans, _("yes"))) {
 								error = gn_file_bitmap_save(filename, &bitmap, phone);
 							}
@@ -885,7 +885,7 @@ parsefile:
 				if ((mode != GNOKII_APP_MODE_Cancel) && *filename) {
 					char buf[1024];
 					char *mbox = gn_sms2mbox(&message, "gnokii");
-					snprintf(buf, 1023, "%s", filename);
+					snprintf(buf, sizeof(buf), "%s", filename);
 					mode = writefile(buf, mbox, mode);
 					free(mbox);
 				}
