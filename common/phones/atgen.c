@@ -933,7 +933,7 @@ static gn_error AT_GetBattery(gn_data *data, struct gn_statemachine *state)
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	char key[4];
 
-	snprintf(key, 4, "CBC");
+	snprintf(key, sizeof(key), "CBC");
 	if (map_get(&drvinst->cached_capabilities, key, 1))
 		return Parse_ReplyGetBattery(data, state);
 	else if (sm_message_send(7, GN_OP_GetBatteryLevel, "AT+CBC\r", state))
@@ -966,7 +966,7 @@ static gn_error AT_GetMemoryRange(gn_data *data, struct gn_statemachine *state)
 	gn_error ret;
 	char key[7];
 
-	snprintf(key, 7, "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
+	snprintf(key, sizeof(key), "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
 	if (map_get(&drvinst->cached_capabilities, key, 0)) {
 		ret = Parse_ReplyMemoryRange(data, state);
 	} else {
@@ -1563,7 +1563,7 @@ static gn_error AT_EnterSecurityCode(gn_data *data, struct gn_statemachine *stat
 
 static gn_error AT_DialVoice(gn_data *data, struct gn_statemachine *state)
 {
-	unsigned char req[32];
+	unsigned char req[GN_PHONEBOOK_NUMBER_MAX_LENGTH + 8]; /* "ATD" + number + ";\r" + \0 */
 
 	if (!data->call_info)
 		return GN_ERR_INTERNALERROR;
@@ -1949,9 +1949,8 @@ static gn_error ReplyReadPhonebookExt(int messagetype, unsigned char *buffer, in
 {
 	at_driver_instance *drvinst = AT_DRVINST(state);
 	at_line_buffer buf;
-	char *pos, *first_name, *last_name, *tmp;
+	char *pos, *first_name, *last_name;
 	gn_error error;
-	size_t len = 0;
 
 	if ((error = at_error_get(buffer, state)) != GN_ERR_NONE)
 		return (error == GN_ERR_UNKNOWN) ? GN_ERR_INVALIDLOCATION : error;
@@ -2001,32 +2000,11 @@ static gn_error ReplyReadPhonebookExt(int messagetype, unsigned char *buffer, in
 		/* compile a name out of first name + last name */
 		first_name = extpb_find_subentry(entry, GN_PHONEBOOK_ENTRY_FirstName);
 		last_name = extpb_find_subentry(entry, GN_PHONEBOOK_ENTRY_LastName);
-		if (first_name || last_name) {
-			if (first_name)
-				len += strlen(first_name);
-			if (last_name)
-				len += strlen(last_name);
-			if (!(tmp = (char *)malloc(len + 2))) /* +2 for \0 and space */
-				return GN_ERR_INTERNALERROR;
-			tmp[0] = 0;
-			if (first_name) {
-				if (strlen(first_name) + strlen(entry->name) + 1 > sizeof(entry->name)) {
-					free(tmp);
-					return GN_ERR_FAILED;
-				}
-				strncat(entry->name, first_name, strlen(first_name));
-				if (last_name)
-					strncat(entry->name, " ", strlen(" "));
-			}
-			if (last_name) {
-				if (strlen(last_name) + strlen(entry->name) + 1 > sizeof(entry->name)) {
-					free(tmp);
-					return GN_ERR_FAILED;
-				}
-				strncat(entry->name, last_name, strlen (last_name));
-			}
-			free(tmp);
-		}
+		if (snprintf(entry->name, sizeof(entry->name), "%s%s%s",
+			     first_name ? first_name : "",
+			     first_name && last_name ? " " : "",
+			     last_name ? last_name : "") >= (int)sizeof(entry->name))
+			return GN_ERR_FAILED;
 	}
 	return GN_ERR_NONE;
 }
@@ -2115,7 +2093,7 @@ static gn_error Parse_ReplyMemoryRange(gn_data *data, struct gn_statemachine *st
 	char *r, *s, *t, *pos;
 	char key[7];
 
-	snprintf(key, 7, "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
+	snprintf(key, sizeof(key), "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
 	r = strdup(map_get(&drvinst->cached_capabilities, key, 0));
 	s = r + 7;
 	pos = strchr(s, ',');
@@ -2163,7 +2141,7 @@ static gn_error ReplyMemoryRange(int messagetype, unsigned char *buffer, int len
 
 	if (strncmp(buf.line2, "+CPBR: ", 7) == 0) {
 		char key[7];
-		snprintf(key, 7, "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
+		snprintf(key, sizeof(key), "%s%s", "CPBR", gn_memory_type2str(drvinst->memorytype));
 		map_add(&drvinst->cached_capabilities, strdup(key), strdup(buf.line2));
 		Parse_ReplyMemoryRange(data, state);
 	}
@@ -2182,7 +2160,7 @@ static gn_error Parse_ReplyGetBattery(gn_data *data, struct gn_statemachine *sta
 	const char *line, *pos;
 	char key[4];
 
-	snprintf(key, 4, "CBC");
+	snprintf(key, sizeof(key), "CBC");
 	line = map_get(&drvinst->cached_capabilities, key, 1);
 	if (data->battery_level) {
 		if (data->battery_unit)
@@ -2237,7 +2215,7 @@ static gn_error ReplyGetBattery(int messagetype, unsigned char *buffer, int leng
 
 	if (!strncmp(buf.line1, "AT+CBC", 6) && !strncmp(buf.line2, "+CBC: ", 6)) {
 		char key[4];
-		snprintf(key, 4, "CBC");
+		snprintf(key, sizeof(key), "CBC");
 		map_add(&drvinst->cached_capabilities, strdup(key), strdup(buf.line2));
 		Parse_ReplyGetBattery(data, state);
 	}
@@ -2696,7 +2674,7 @@ static gn_error ReplyRing(int messagetype, unsigned char *buffer, int length, gn
 			}
 		}
 
-		if (cinfo.name == NULL)
+		if (cinfo.name[0] == '\0')
 			snprintf(cinfo.name, GN_PHONEBOOK_NAME_MAX_LENGTH, _("Unknown"));
 		cinfo.type = drvinst->last_call_type;
 		drvinst->call_notification(drvinst->last_call_status, &cinfo, state, drvinst->call_callback_data);
@@ -3089,7 +3067,7 @@ static gn_error ReplyGetDateTime(int messagetype, unsigned char *buffer, int len
 	splitlines(&buf);
 
 	dt = data->datetime;
-	memset(timezone, 0, 6);
+	memset(timezone, 0, sizeof(timezone));
 	/* Use strip_quotes() since some phones do not use quotes. Add 7 to skip "+CCLK: " */
 	cnt = sscanf(strip_quotes(buf.line2 + 7), "%d/%d/%d,%d:%d:%d%[+-1234567890]",
 		     &dt->year, &dt->month, &dt->day,
