@@ -133,7 +133,7 @@ static void RefreshEntryRow(PhonebookEntry *newPbEntry, gint row)
 	gtk_clist_set_text(GTK_CLIST(clist), row, 0, newPbEntry->entry.name);
 
 	if (newPbEntry->entry.subentries_count > 0) {
-		snprintf(string, 100, "%s *", newPbEntry->entry.number);
+		snprintf(string, sizeof(string), "%s *", newPbEntry->entry.number);
 		gtk_clist_set_text(GTK_CLIST(clist), row, 1, string);
 	} else
 		gtk_clist_set_text(GTK_CLIST(clist), row, 1, newPbEntry->entry.number);
@@ -2609,7 +2609,7 @@ static void OkExportDialog(GtkWidget * w, GtkFileSelection * fs)
 			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesExportDialog, (GtkSignalFunc) CancelDialog,
 					  GUI_ContactsWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
-			g_snprintf(err, 255, _("File %s already exists.\nOverwrite?"),
+			g_snprintf(err, sizeof(err), _("File %s already exists.\nOverwrite?"),
 				   exportDialogData.fileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
 		}
@@ -2967,7 +2967,7 @@ SelectContactData *GUI_SelectContactDialog(void)
 			row[0] = pbEntry->entry.name;
 
 			if (pbEntry->entry.subentries_count > 0) {
-				snprintf(string, 100, "%s *", pbEntry->entry.number);
+				snprintf(string, sizeof(string), "%s *", pbEntry->entry.number);
 				row[1] = string;
 			} else
 				row[1] = pbEntry->entry.number;

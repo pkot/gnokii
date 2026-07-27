@@ -615,7 +615,7 @@ static void SaveToMailbox(gchar *mailbox_name)
 
 
 	if ((f = fopen(mailbox_name, "a")) == NULL) {
-		snprintf(buf, 255, _("Cannot open mailbox %s for appending!"),
+		snprintf(buf, sizeof(buf), _("Cannot open mailbox %s for appending!"),
 			 mailbox_name);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
@@ -629,7 +629,7 @@ static void SaveToMailbox(gchar *mailbox_name)
 	lock.l_len = 0;
 
 	if (fcntl(fd, F_GETLK, &lock) != -1 && lock.l_type != F_UNLCK) {
-		snprintf(buf, 255, _("Cannot save to mailbox %s.\n\%s is locked for process %d!"),
+		snprintf(buf, sizeof(buf), _("Cannot save to mailbox %s.\n\%s is locked for process %d!"),
 			mailbox_name, mailbox_name, lock.l_pid);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
@@ -642,7 +642,7 @@ static void SaveToMailbox(gchar *mailbox_name)
 	lock.l_start = 0;
 	lock.l_len = 0;
 	if (fcntl(fd, F_SETLK, &lock) == -1) {
-		snprintf(buf, 255, _("Cannot lock mailbox %s!"), mailbox_name);
+		snprintf(buf, sizeof(buf), _("Cannot lock mailbox %s!"), mailbox_name);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		fclose(f);
@@ -697,7 +697,7 @@ static void SaveToMailbox(gchar *mailbox_name)
 	lock.l_start = 0;
 	lock.l_len = 0;
 	if (fcntl(fd, F_SETLK, &lock) == -1) {
-		snprintf(buf, 255, _("Cannot unlock mailbox %s!"), mailbox_name);
+		snprintf(buf, sizeof(buf), _("Cannot unlock mailbox %s!"), mailbox_name);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 	}
@@ -1176,7 +1176,7 @@ static void DoSendSMS(void)
 					nr_msg = 99;
 				for (j = 0; j < nr_msg; j++) {
 					gchar header[8];
-					g_snprintf(header, 8, "%2d/%-2d: ", j + 1, nr_msg);
+					g_snprintf(header, sizeof(header), "%2d/%-2d: ", j + 1, nr_msg);
 					header[7] = '\0';
 
 					strcpy(sms.user_data[0].u.text, header);
