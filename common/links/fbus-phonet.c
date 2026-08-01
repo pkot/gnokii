@@ -139,10 +139,8 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		i->message_source = rx_byte;
 		i->state = FBUS_RX_GetType;
 
-		if (rx_byte != FBUS_DEVICE_PHONE) {
-			i->state = FBUS_RX_Sync;
-			dprintf("The fbus stream is out of sync - expected 0x00, got 0x%02x\n", rx_byte);
-		}
+		if (rx_byte != FBUS_DEVICE_PHONE)
+			dprintf("Non-standard source device 0x%02x\n", rx_byte);
 
 		break;
 
@@ -159,7 +157,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 		break;
 
 	case FBUS_RX_GetLength2:
-		i->message_length = i->message_length + rx_byte;
+		i->message_length |= rx_byte;
 		i->state = FBUS_RX_GetMessage;
 		i->buffer_count = 0;
 		if (!verify_max_message_len(i->message_length, i)) {
@@ -180,8 +178,7 @@ static void phonet_rx_statemachine(unsigned char rx_byte, struct gn_statemachine
 			i->buffer_count++;
 		}
 
-		i->message_buffer[i->buffer_count] = rx_byte;
-		i->buffer_count++;
+		i->message_buffer[i->buffer_count++] = rx_byte;
 
 		/* Is that it? */
 		if (i->buffer_count == i->message_length) {
