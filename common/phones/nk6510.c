@@ -1975,6 +1975,11 @@ err:
 		break;
 
 	case NK6510_SUBSMS_SMS_SEND_STATUS: /* 0x03 */
+		if (length <= 10) {
+			dprintf("SMS sending failed (submit rejected, idx 0x%02x)\n", message[6]);
+			e = GN_ERR_FAILED;
+			break;
+		}
 		switch (message[8]) {
 		case NK6510_SUBSMS_SMS_SEND_OK: /* 0x00 */
 			dprintf("SMS sent (reference: %d)\n", message[10]);
