@@ -1406,7 +1406,7 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 {
 	unsigned char req[10240], req2[5120];
 	gn_error error;
-	unsigned int length, tmp, offset = 0;
+	int length = sizeof(req2);
 	at_driver_instance *drvinst = AT_DRVINST(state);
 
 	if (!data->raw_sms)
@@ -1420,50 +1420,17 @@ static gn_error AT_WriteSMS(gn_data *data, struct gn_statemachine *state,
 	}
 	dprintf("PDU mode set\n");
 
-	/* Prepare the message and count the size */
-	if (drvinst->no_smsc) {
-		/* not even a length byte included */
-		offset--;
-	} else {
-		memcpy(req2, data->raw_sms->message_center,
-		       data->raw_sms->message_center[0] + 1);
-		offset += data->raw_sms->message_center[0];
-	}
-	/* Validity period in relative format */
-	req2[offset + 1] = 0x01 | 0x10;
-	if (data->raw_sms->reject_duplicates)
-		req2[offset + 1] |= 0x04;
-	if (data->raw_sms->report)
-		req2[offset + 1] |= 0x20;
-	if (data->raw_sms->udh_indicator)
-		req2[offset + 1] |= 0x40;
-	if (data->raw_sms->reply_via_same_smsc)
-		req2[offset + 1] |= 0x80;
-	req2[offset + 2] = 0x00; /* Message Reference */
-
-	tmp = data->raw_sms->remote_number[0];
-	if (tmp % 2)
-		tmp++;
-	tmp /= 2;
-	memcpy(req2 + offset + 3, data->raw_sms->remote_number, tmp + 2);
-	offset += tmp + 1;
-
-	req2[offset + 4] = data->raw_sms->pid;
-	req2[offset + 5] = data->raw_sms->dcs;
-	req2[offset + 6] = data->raw_sms->validity[0]; /* Validity period in relative format takes 1 octect */
-	req2[offset + 7] = data->raw_sms->length;
-	memcpy(req2 + offset + 8, data->raw_sms->user_data,
-	       data->raw_sms->user_data_length);
-
-	length = data->raw_sms->user_data_length + offset + 8;
+	/* Prepare the message; omit the SMSC prefix if the phone wants none */
+	error = gn_sms_raw2pdu(req2, &length, data->raw_sms,
+			       drvinst->no_smsc ? GN_SMS_PDU_NOSMSC : 0);
+	if (error)
+		return error;
 
 	/* Length in AT mode is the length of the full message minus
 	 * SMSC field length */
-	if (drvinst->no_smsc) {
-		snprintf(req, sizeof(req), "AT+%s=%d\r", cmd, length);
-	} else {
-		snprintf(req, sizeof(req), "AT+%s=%d\r", cmd, length - data->raw_sms->message_center[0] - 1);
-	}
+	snprintf(req, sizeof(req), "AT+%s=%d\r", cmd, drvinst->no_smsc ?
+		length : length - data->raw_sms->message_center[0] - 1);
+
 	dprintf("Sending initial sequence\n");
 	if (sm_message_send(strlen(req), GN_OP_AT_Prompt, req, state))
 		return GN_ERR_NOTREADY;
