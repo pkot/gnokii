@@ -2044,6 +2044,89 @@ static gn_error NK6510_GetSMSCenter(gn_data *data, struct gn_statemachine *state
 	SEND_MESSAGE_BLOCK(NK6510_MSG_SMS, 6);
 }
 
+/*
+ * Series 40 6th edition messaging (e.g. C2-00/RM-704).
+ *
+ * These phones reject the native FBUS SMS submit (0x02). Instead PC Suite drops
+ * the SMS-SUBMIT TPDU into the message store's "exchange" pseudo-folder and then
+ * issues a "send" command, which makes the phone transmit it.
+ * Do the same here, write the TPDU to C:\predefmessages\exchange\<handle>
+ * with NK6510_PutFile, then trigger the send.
+ *
+ * NB the exchange write only *queues* the message in the Outbox; without the
+ * trigger it sits there until the phone reboots.
+ */
+
+/*
+ * Ask the phone to transmit pending/queued messages. This is the PC-Suite
+ * messaging "send" command (phonet message type 0xaa, sub-command 0x18). It is
+ * independent of how the message was queued, so it is shared by every send
+ * path. The phone acknowledges with sub-command 0x19.
+ */
+static gn_error NK6510_SendMessageTrigger(struct gn_statemachine *state)
+{
+	static const unsigned char trigger[] = { 0x00, 0x01, 0x01, 0x18, 0x00, 0x00 };
+
+	if (sm_message_send(sizeof(trigger), 0xaa, (void *) trigger, state))
+		return GN_ERR_NOTREADY;
+	gn_sm_loop(10, state);
+	return GN_ERR_NONE;
+}
+
+/* Submit an SMS by writing its TPDU to the exchange folder, then triggering. */
+static gn_error NK6510_SendSMS_File(gn_data *data, struct gn_statemachine *state)
+{
+	gn_sms_raw *raw = data->raw_sms;
+	unsigned char tpdu[256];
+	char number[GN_SMS_NUMBER_MAX_LENGTH], handle[96];
+	gn_file file, *saved;
+	gn_error error;
+	int tpdu_len = sizeof(tpdu);
+	unsigned int i, ndigits, off = 0;
+
+	if (!raw)
+		return GN_ERR_INTERNALERROR;
+
+	/* SMS-SUBMIT TPDU without SMSC - the phone supplies its own */
+	error = gn_sms_raw2pdu(tpdu, &tpdu_len, raw, GN_SMS_PDU_NOSMSC);
+	if (error != GN_ERR_NONE)
+		return error;
+
+	/* Destination number as plain digits optionally prefixed with
+	 * international '+' for the file handle */
+	if (raw->remote_number[1] == GN_GSM_NUMBER_International)
+		number[off++] = '+';
+	ndigits = raw->remote_number[0];
+	if (ndigits > sizeof(number) - off - 1)
+		ndigits = sizeof(number) - off - 1;
+	for (i = 0; i < ndigits; i++) {
+		unsigned char b = raw->remote_number[2 + i / 2];
+		number[off + i] = ((i & 1) ? (b >> 4) : (b & 0x0f)) + '0';
+	}
+	number[off + ndigits] = '\0';
+
+	snprintf(handle, sizeof(handle),
+		 "00000002%08x000021000700000001010000%02u%s",
+		 (unsigned) time(NULL), (unsigned) strlen(number), number);
+
+	memset(&file, 0, sizeof(file));
+	snprintf(file.name, sizeof(file.name),
+		 "C:\\predefmessages\\exchange\\%s", handle);
+	file.file = tpdu;
+	file.file_length = tpdu_len;
+
+	saved = data->file;
+	data->file = &file;
+	error = NK6510_PutFile(data, state);
+	data->file = saved;
+	if (error != GN_ERR_NONE) {
+		dprintf("SMS exchange write failed: %s\n", gn_error_print(error));
+		return error;
+	}
+	dprintf("SMS queued; triggering send\n");
+	return NK6510_SendMessageTrigger(state);
+}
+
 /**
  * NK6510_SendSMS - low level SMS sending function for 6310/6510 phones
  * @data: gsm data
@@ -2054,13 +2137,15 @@ static gn_error NK6510_GetSMSCenter(gn_data *data, struct gn_statemachine *state
  * soon.
  * 10.07.2002: Almost all frames should be known know :-) (Markus)
  */
-
 static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
 				  0x00, 0x00, 0x00, 0x55, 0x55}; /* What's this? */
 	gn_error error;
 	unsigned int pos;
+
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
+		return NK6510_SendSMS_File(data, state);
 
 	memset(req + 9, 0, 244);
 	pos = sms_encode(data, state, req + 9);
@@ -2070,6 +2155,7 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 	do {
 		error = sm_block_no_retry_timeout(NK6510_MSG_SMS, state->config.smsc_timeout, data, state);
 	} while (!state->config.smsc_timeout && error == GN_ERR_TIMEOUT);
+
 	return error;
 }
 
