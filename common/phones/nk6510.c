@@ -4507,6 +4507,14 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 	case 0x26:
 		dprintf("Op Logo Set OK\n");
 		break;
+	case 0xb6:
+		/* Series 40 6th edition, RF level at message[4] */
+		dprintf("Network/cell info broadcast (RF level %d)\n", message[4]);
+		if (data->rf_level) {
+			*(data->rf_unit) = GN_RF_Percentage;
+			*(data->rf_level) = message[4];
+		}
+		break;
 	default:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
