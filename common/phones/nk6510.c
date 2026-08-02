@@ -330,6 +330,8 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 
 static gn_error NK6510_IncomingPassthrough(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
+static gn_error NK6510_IncomingMsgStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+
 static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
 static int get_memory_type(gn_memory_type memory_type);
 static gn_memory_type get_gn_memory_type_sms(int memory_type);
@@ -359,6 +361,7 @@ static gn_incoming_function_type nk6510_incoming_functions[] = {
 	{ NK6510_MSG_SOUND,	NK6510_IncomingSound },
 	{ NK6510_MSG_RADIO,	NK6510_IncomingRadio },
 	{ NK6510_MSG_FILE,	NK6510_IncomingFile },
+	{ NK6510_MSG_MSGSTATUS,	NK6510_IncomingMsgStatus },
 	{ 0, NULL }
 };
 
@@ -2021,6 +2024,13 @@ err:
 			dprintf("Warning: no data->raw_sms allocated and got response for send_sms()\n");
 		e = GN_ERR_ASYNC;
 		break;
+
+	case 0x48: /* Series 40 exchange path: async send report */
+	case 0x4b: /* Series 40 exchange path: async message info */
+		dprintf("SMS async send notification (subtype 0x%02x), skipping\n", message[3]);
+		e = GN_ERR_UNSOLICITED;
+		break;
+
 	case NK6510_SUBSMS_SMS_RCVD: /* 0x10 */
 	case NK6510_SUBSMS_CELLBRD_OK: /* 0x21 */
 	case NK6510_SUBSMS_READ_CELLBRD: /* 0x23 */
@@ -2033,6 +2043,64 @@ err:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
 	}
+	return e;
+}
+
+/*
+ * Decode per-message send-progress status frames (subtype 0x60). These are
+ * pushed unsolicited once the 0xaa channel is subscribed, so they cannot be
+ * waited on with sm_block; instead, when one reports 0x05 for the handle
+ * NK6510_SendSMS_File is watching (DRVINSTANCE->sms_send_handle), we set
+ * the sms_send_done flag it polls. These frames stay GN_ERR_UNSOLICITED.
+ */
+static gn_error NK6510_IncomingMsgStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	char hex[3 * 64 + 1];
+	gn_error e = GN_ERR_UNSOLICITED;
+	int i, n = 0;
+
+	if (length < 4)
+		return GN_ERR_UNSOLICITED;
+
+	switch (message[3]) {
+	case 0x60: /* per-message send-progress status */
+		if (length >= 42) {
+			unsigned long handle = ((unsigned long) message[38] << 24) |
+					       (message[39] << 16) | (message[40] << 8) | message[41];
+			dprintf("MsgStatus: handle=%08lx slot=0x%02x state[5]=0x%02x state[18]=0x%02x (len %d)\n",
+				handle, message[37], message[5], message[18], length);
+			/* state[5]==0x05 ("stored/sent") on the handle we are watching
+			   means the message was submitted to the network. */
+			if (DRVINSTANCE(state)->sms_send_handle &&
+			    DRVINSTANCE(state)->sms_send_handle == handle && message[5] == 0x05) {
+				dprintf("MsgStatus: message %08lx sent to network\n", handle);
+				DRVINSTANCE(state)->sms_send_done = 1;
+			}
+		} else {
+			dprintf("MsgStatus: short 0x60 status frame (len %d)\n", length);
+		}
+		break;
+	case 0x18: /* send trigger (our own request, echoed) */
+		dprintf("MsgStatus: send trigger (0x18)\n");
+		break;
+	case 0x19: /* ack of the send trigger */
+		if (length >= 6 && (message[4] || message[5])) {
+			dprintf("MsgStatus: send trigger rejected (status 0x%02x%02x)\n", message[4], message[5]);
+			e = GN_ERR_FAILED;
+		} else {
+			dprintf("MsgStatus: send trigger accepted (0x19)\n");
+			e = GN_ERR_NONE;
+		}
+		break;
+	default:
+		dprintf("MsgStatus: subtype 0x%02x (len %d)\n", message[3], length);
+		break;
+	}
+
+	for (i = 0; i < length && i < 64; i++)
+		n += snprintf(hex + n, sizeof(hex) - n, "%02x ", message[i]);
+	dprintf("MsgStatus raw: %s\n", hex);
+
 	return e;
 }
 
@@ -2063,14 +2131,33 @@ static gn_error NK6510_GetSMSCenter(gn_data *data, struct gn_statemachine *state
  * independent of how the message was queued, so it is shared by every send
  * path. The phone acknowledges with sub-command 0x19.
  */
-static gn_error NK6510_SendMessageTrigger(struct gn_statemachine *state)
+static gn_error NK6510_SendMessageTrigger(gn_data *data, struct gn_statemachine *state)
 {
 	static const unsigned char trigger[] = { 0x00, 0x01, 0x01, 0x18, 0x00, 0x00 };
 
-	if (sm_message_send(sizeof(trigger), 0xaa, (void *) trigger, state))
+	if (sm_message_send(sizeof(trigger), NK6510_MSG_MSGSTATUS, (void *) trigger, state))
 		return GN_ERR_NOTREADY;
-	gn_sm_loop(10, state);
-	return GN_ERR_NONE;
+	/* Wait for the 0x19 ack (NK6510_IncomingMsgStatus resolves it). */
+	return sm_block_no_retry_timeout(NK6510_MSG_MSGSTATUS, 10, data, state);
+}
+
+/*
+ * Subscribe to the messaging-status channel (0xaa) so the phone pushes the
+ * async 0x60 send-progress notifications - a bare session gets only the trigger
+ * ack and no status at all.
+ */
+static gn_error NK6510_SubscribeMsgStatus(struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x07,
+			       NK6510_MSG_COMMSTATUS, NK6510_MSG_SMS,
+			       NK6510_MSG_NETSTATUS, NK6510_MSG_FOLDER,
+			       NK6510_MSG_RESET, NK6510_MSG_BATTERY,
+			       NK6510_MSG_MSGSTATUS};
+
+	dprintf("Subscribing to the messaging-status channel (0xaa)\n");
+	if (sm_message_send(sizeof(req), NK6510_MSG_SUBSCRIBE, req, state))
+		return GN_ERR_NOTREADY;
+	return sm_block_ack(state);
 }
 
 /* Submit an SMS by writing its TPDU to the exchange folder, then triggering. */
@@ -2083,6 +2170,7 @@ static gn_error NK6510_SendSMS_File(gn_data *data, struct gn_statemachine *state
 	gn_error error;
 	int tpdu_len = sizeof(tpdu);
 	unsigned int i, ndigits, off = 0;
+	unsigned msgid = (unsigned) time(NULL);
 
 	if (!raw)
 		return GN_ERR_INTERNALERROR;
@@ -2107,7 +2195,7 @@ static gn_error NK6510_SendSMS_File(gn_data *data, struct gn_statemachine *state
 
 	snprintf(handle, sizeof(handle),
 		 "00000002%08x000021000700000001010000%02u%s",
-		 (unsigned) time(NULL), (unsigned) strlen(number), number);
+		 msgid, (unsigned) strlen(number), number);
 
 	memset(&file, 0, sizeof(file));
 	snprintf(file.name, sizeof(file.name),
@@ -2123,8 +2211,35 @@ static gn_error NK6510_SendSMS_File(gn_data *data, struct gn_statemachine *state
 		dprintf("SMS exchange write failed: %s\n", gn_error_print(error));
 		return error;
 	}
-	dprintf("SMS queued; triggering send\n");
-	return NK6510_SendMessageTrigger(state);
+	dprintf("SMS queued (handle msgid=%08x); sudscribing and triggering send\n", msgid);
+
+	/* Subscribe so the phone pushes the 0x60 send-progress status */
+	if (NK6510_SubscribeMsgStatus(state) != GN_ERR_NONE)
+		dprintf("SMS status subscription failed\n");
+
+	error = NK6510_SendMessageTrigger(data, state);
+	if (error != GN_ERR_NONE)
+		return error;
+
+	/*
+	 * The 0x60 status is pushed unsolicited, so it cannot be waited on
+	 * with sm_block (which needs a preceding request). Pump the link
+	 * instead and let NK6510_IncomingMsgStatus flag when our handle
+	 * reaches "sent" (0x05). Reaching 0x05 means submitted to the
+	 * network. If it does not arrive in time, report ASYNC (queued).
+	 */
+	DRVINSTANCE(state)->sms_send_handle = msgid;
+	DRVINSTANCE(state)->sms_send_done = 0;
+	for (i = 0; i < 150 && !DRVINSTANCE(state)->sms_send_done; i++)
+		gn_sm_loop(1, state);
+	DRVINSTANCE(state)->sms_send_handle = 0;
+
+	if (DRVINSTANCE(state)->sms_send_done) {
+		dprintf("SMS sent to network\n");
+		return GN_ERR_NONE;
+	}
+	dprintf("SMS queued but send not confirmed within timeout\n");
+	return GN_ERR_ASYNC;
 }
 
 /**
