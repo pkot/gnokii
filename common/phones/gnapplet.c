@@ -165,119 +165,6 @@ static unsigned char gnapplet_get_semi(const unsigned char *addr)
 }
 
 
-static gn_error gnapplet_sms_pdu_decode(gn_sms_raw *rawsms, const unsigned char *buf, int len)
-{
-	const unsigned char *pos;
-	unsigned char first_octet;
-	int *pdu_format;
-	int i, l;
-
-	pos = buf;
-
-	/* smsc address */
-	l = gnapplet_get_addrlen(pos);
-	assert(l >= 0 && l < sizeof(rawsms->message_center));
-	rawsms->message_center[0] = l;
-	memcpy(rawsms->message_center + 1, pos + 1, l);
-	pos += l + 1;
-
-	/* first octet */
-	first_octet = *pos++;
-	rawsms->type = (first_octet & 0x03) << 1;
-	switch (rawsms->type) {
-	case GN_SMS_MT_Deliver: pdu_format = pdu_deliver; break;
-	case GN_SMS_MT_Submit: pdu_format = pdu_submit; break;
-	case GN_SMS_MT_StatusReport: pdu_format = pdu_status_report; break;
-	default: return GN_ERR_FAILED;
-	}
-
-	for (i = 0; pdu_format[i] > 0; i++) {
-		switch (pdu_format[i]) {
-		case 2: /* TP-MMS */
-			rawsms->more_messages = ((first_octet & 0x04) != 0);
-			break;
-		case 3: /* TP-VPF */
-			rawsms->validity_indicator = (first_octet & 0x18) >> 3;
-			break;
-		case 4: /* TP-SRI */
-		case 5: /* TP-SRR */
-		case 26:/* TP-SRQ */
-			rawsms->report = ((first_octet & 0x20) != 0);
-			break;
-		case 6: /* TP-MR */
-			rawsms->reference = *pos++;
-			break;
-		case 7: /* TP-OA */
-		case 8: /* TP-DA */
-		case 14:/* TP-RA */
-			l = gnapplet_get_addrlen(pos) + 1;
-			assert(l > 0 && l <= sizeof(rawsms->remote_number));
-			memcpy(rawsms->remote_number, pos, l);
-			pos += l;
-			break;
-		case 9: /* TP-PID */
-			rawsms->pid = *pos++;
-			break;
-		case 10:/* TP-DCS */
-			rawsms->dcs = *pos++;
-			break;
-		case 11:/* TP-SCTS */
-			memcpy(rawsms->smsc_time, pos, 7);
-			pos += 7;
-			break;
-		case 12:/* TP-VP */
-			switch (rawsms->validity_indicator) {
-			case GN_SMS_VP_None: l = 0; break;
-			case GN_SMS_VP_RelativeFormat: l = 1; break;
-			default: l = 7; break;
-			}
-			memcpy(rawsms->validity, pos, l);
-			pos += l;
-			break;
-		case 13:/* TP-DT */
-			memcpy(rawsms->time, pos, 7);
-			pos += 7;
-			break;
-		case 15:/* TP-ST */
-		case 22:/* TP-FCS */
-			rawsms->report_status = *pos++;
-			break;
-		case 16:/* TP-UDL */
-		case 20:/* TP-CDL */
-			rawsms->length = *pos++;
-			break;
-		case 17:/* TP-RP */
-			rawsms->reply_via_same_smsc = ((first_octet & 0x80) != 0);
-			break;
-		case 18:/* TP-MN */
-			rawsms->number = *pos++;
-			break;
-		case 19:/* TP-CT */
-			pos++; /* unused */
-			break;
-		case 21:/* TP-CD */
-		case 24:/* TP-UD */
-			rawsms->user_data_length = len - (pos - buf);
-			assert(rawsms->user_data_length >= 0 && rawsms->user_data_length < sizeof(rawsms->user_data));
-			memcpy(rawsms->user_data, pos, rawsms->user_data_length);
-			pos += rawsms->user_data_length;
-			break;
-		case 23:/* TP-UDHI */
-			rawsms->udh_indicator = (first_octet & 0x40);
-			break;
-		case 25:/* TP-RD */
-			rawsms->reject_duplicates = ((first_octet & 0x04) != 0);
-			break;
-		case 27:/* TP-PI */
-			pos++; /* unused */
-			break;
-		}
-	}
-
-	return GN_ERR_NONE;
-}
-
-
 static gn_error gnapplet_sms_pdu_encode(unsigned char *buf, int *len, const gn_sms_raw *rawsms)
 {
 	unsigned char *pos, *fpos, first_octet;
@@ -1189,7 +1076,8 @@ static gn_error gnapplet_incoming_sms(int messagetype, unsigned char *message, i
 		i = pkt_get_bytes(buf, sizeof(buf), &pkt);
 		//rawsms->memory_type = pkt_get_uint16(&pkt);
 		rawsms->status = pkt_get_uint8(&pkt);
-		if ((error = gnapplet_sms_pdu_decode(rawsms, buf, i)) != GN_ERR_NONE)
+		/* the applet sends plain GSM 03.40 PDUs (via the Symbian SMS stack) */
+		if ((error = gn_sms_pdu2raw(rawsms, buf, i, GN_SMS_PDU_DEFAULT)) != GN_ERR_NONE)
 			return error;
 		break;
 
