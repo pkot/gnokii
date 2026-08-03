@@ -1903,6 +1903,75 @@ err:
 			free(data->sms);
 		break;
 	}
+	case 0x43: { /* Series 40 6th ed. (C2-00/RM-704): pushed incoming SMS-DELIVER */
+		/*
+		 * The message arrives in length-prefixed sub-blocks
+		 * (<type> <len16 BE> <data>): 0x82 carries the SMSC, 0x1c the message.
+		 * Past a 2-byte inner length the 0x1c block is a standard SMS-DELIVER
+		 * TPDU (first octet, TP-OA, PID, DCS, SCTS, UDL, UD). Reassemble the
+		 * [SMSC][TPDU] PDU, decode it with the shared decoder and hand the
+		 * result to the on_sms callback (used by --smsreader).
+		 */
+		unsigned char pdu[512], *smsc = NULL, *tpdu = NULL;
+		int smsclen = 0, tpdulen = 0, freerawsms = 0, freesms = 0;
+		unsigned int o;
+
+		if (!data->raw_sms) { freerawsms = 1; data->raw_sms = calloc(1, sizeof(gn_sms_raw)); }
+		if (!data->sms)     { freesms = 1;    data->sms = calloc(1, sizeof(gn_sms)); }
+		if (!data->raw_sms || !data->sms) { e = GN_ERR_INTERNALERROR; goto err43; }
+
+		o = 7;
+		while (o + 5 <= (unsigned) length) {
+			unsigned int blen = (message[o + 1] << 8) | message[o + 2];
+
+			if (blen < 6)
+				break;
+			if (o + blen > (unsigned) length)	/* tolerate a short final block */
+				blen = length - o;
+			if (message[o] == 0x82) {		/* SMSC (octet-length-prefixed) */
+				smsc = message + o + 5;
+				smsclen = smsc[0] + 1;
+			} else if (message[o] == 0x1c) {	/* the delivered message TPDU */
+				tpdu = message + o + 5;
+				tpdulen = blen - 5;
+			}
+			o += blen;
+		}
+
+		/* Trim the 0x1c block's trailing padding to the exact TPDU length. */
+		if (tpdu && tpdulen >= 13) {
+			unsigned int p = 3 + (tpdu[1] + 1) / 2;		/* index past TP-OA */
+
+			if ((int) (p + 10) <= tpdulen) {
+				unsigned int udl = tpdu[p + 9];
+				unsigned int ud = ((tpdu[p + 1] & 0x0c) == 0) ? (udl * 7 + 7) / 8 : udl;
+
+				if ((int) (p + 10 + ud) <= tpdulen)
+					tpdulen = p + 10 + ud;
+			}
+		}
+
+		if (!smsc || !tpdu || smsclen < 2 || tpdulen < 1 ||
+		    smsclen + tpdulen > (int) sizeof(pdu)) {
+			dprintf("Incoming SMS (0x43): SMSC/TPDU sub-blocks not found\n");
+			e = GN_ERR_FAILED;
+			goto err43;
+		}
+
+		memcpy(pdu, smsc, smsclen);
+		memcpy(pdu + smsclen, tpdu, tpdulen);
+
+		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
+		e = gn_sms_pdu2raw(data->raw_sms, pdu, smsclen + tpdulen, GN_SMS_PDU_DEFAULT);
+		if (e == GN_ERR_NONE)
+			e = gn_sms_parse(data);
+		if ((e == GN_ERR_NONE) && DRVINSTANCE(state)->on_sms)
+			e = DRVINSTANCE(state)->on_sms(data->sms, state, DRVINSTANCE(state)->sms_callback_data);
+err43:
+		if (freerawsms && data->raw_sms) { free(data->raw_sms); data->raw_sms = NULL; }
+		if (freesms && data->sms)         { free(data->sms); data->sms = NULL; }
+		break;
+	}
 	case NK6510_SUBSMS_SMSC_RCV: /* 0x15 */
 		switch (message[4]) {
 		case 0x00:
