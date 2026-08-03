@@ -4785,6 +4785,23 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 			*(data->rf_level) = message[4];
 		}
 		break;
+	/*
+	 * Series 40 6th edition streams unsolicited network-state broadcasts on
+	 * this channel once it is subscribed (cell reselection/registration and
+	 * operator-name updates). gnokii does not consume them; skip them quietly
+	 * instead of logging each as an unhandled frame.
+	 */
+	case 0x35:
+	case 0x42:
+	case 0x49:
+	case 0xb4:
+	case 0xb7:
+	case 0xb8:
+	case 0xb9:
+	case 0xba:
+	case 0xe2:
+		dprintf("Network-state broadcast (subtype 0x%02x), skipping\n", message[3]);
+		return GN_ERR_UNSOLICITED;
 	default:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;
