@@ -825,6 +825,153 @@ gn_error gn_sms_parse(gn_data *data)
 	return sms_pdu_decode(data->raw_sms, data->sms);
 }
 
+/*
+ * TP field layout for each message type (order of the TP elements), driving the
+ * PDU encoder gn_sms_raw2pdu(). The numbers are the TP-* field ids handled in
+ * its switch statement.
+ */
+static const int sms_pdu_deliver[]       = {2, 17, 23, 4, 7, 9, 10, 11, 16, 24, -1};
+static const int sms_pdu_submit[]        = {25, 3, 17, 23, 5, 6, 8, 9, 10, 12, 16, 24, -1};
+static const int sms_pdu_status_report[] = {23, 2, 26, 6, 14, 11, 13, 15, 27, 9, 10, 16, 24, -1};
+
+/* number of bytes an address field occupies (type byte + packed digits) */
+static unsigned char sms_pdu_address_length(const unsigned char *addr)
+{
+	if (!addr[0])
+		return 0;
+	return (addr[0] + 1) / 2 + 1;
+}
+
+/**
+ * gn_sms_raw2pdu - Encode a gn_sms_raw structure into a PDU
+ * @buf: output buffer (must hold *len bytes)
+ * @len: in: buffer size; out: encoded PDU length
+ * @rawsms: the raw SMS to encode
+ * @flags: GN_SMS_PDU_* flags; GN_SMS_PDU_NOSMSC omits the SMSC prefix
+ *
+ * The counterpart of gn_sms_pdu2raw(): builds an SMS PDU from the raw values,
+ * driven by the per-type field-layout tables above.
+ */
+gn_error gn_sms_raw2pdu(unsigned char *buf, int *len, const gn_sms_raw *rawsms, int flags)
+{
+	unsigned char *pos, *fpos, first_octet;
+	const int *pdu_format;
+	int i, l;
+
+	memset(buf, 0, *len);
+	pos = buf;
+
+	/* SMSC address, unless the caller wants a bare TPDU. The stored
+	   message_center is already an octet-length-prefixed field, which is
+	   exactly the standard PDU representation. */
+	if (!(flags & GN_SMS_PDU_NOSMSC)) {
+		int l = rawsms->message_center[0] + 1;
+
+		if (l > *len)
+			return GN_ERR_FAILED;
+		memcpy(pos, rawsms->message_center, l);
+		pos += l;
+	}
+
+	/* first octet (filled in once all flag-bearing fields are seen) */
+	fpos = pos++;
+	first_octet = rawsms->type >> 1;
+	switch (rawsms->type) {
+	case GN_SMS_MT_Deliver:      pdu_format = sms_pdu_deliver; break;
+	case GN_SMS_MT_Submit:       pdu_format = sms_pdu_submit; break;
+	case GN_SMS_MT_StatusReport: pdu_format = sms_pdu_status_report; break;
+	default: return GN_ERR_FAILED;
+	}
+
+	for (i = 0; pdu_format[i] > 0; i++) {
+		switch (pdu_format[i]) {
+		case 2: /* TP-MMS */
+			if (rawsms->more_messages) first_octet |= 0x04;
+			break;
+		case 3: /* TP-VPF */
+			first_octet |= rawsms->validity_indicator << 3;
+			break;
+		case 4: /* TP-SRI */
+		case 5: /* TP-SRR */
+		case 26:/* TP-SRQ */
+			if (rawsms->report) first_octet |= 0x20;
+			break;
+		case 6: /* TP-MR */
+			*pos++ = rawsms->reference;
+			break;
+		case 7: /* TP-OA */
+		case 8: /* TP-DA */
+		case 14:/* TP-RA */
+			l = sms_pdu_address_length(rawsms->remote_number) + 1;
+			if (l <= 0 || (size_t)l > sizeof(rawsms->remote_number))
+				return GN_ERR_FAILED;
+			memcpy(pos, rawsms->remote_number, l);
+			pos += l;
+			break;
+		case 9: /* TP-PID */
+			*pos++ = rawsms->pid;
+			break;
+		case 10:/* TP-DCS */
+			*pos++ = rawsms->dcs;
+			break;
+		case 11:/* TP-SCTS */
+			memcpy(pos, rawsms->smsc_time, 7);
+			pos += 7;
+			break;
+		case 12:/* TP-VP */
+			switch (rawsms->validity_indicator) {
+			case GN_SMS_VP_None: l = 0; break;
+			case GN_SMS_VP_RelativeFormat: l = 1; break;
+			default: l = 7; break;
+			}
+			memcpy(pos, rawsms->validity, l);
+			pos += l;
+			break;
+		case 13:/* TP-DT */
+			memcpy(pos, rawsms->time, 7);
+			pos += 7;
+			break;
+		case 15:/* TP-ST */
+		case 22:/* TP-FCS */
+			*pos++ = rawsms->report_status;
+			break;
+		case 16:/* TP-UDL */
+		case 20:/* TP-CDL */
+			*pos++ = rawsms->length;
+			break;
+		case 17:/* TP-RP */
+			if (rawsms->reply_via_same_smsc) first_octet |= 0x80;
+			break;
+		case 18:/* TP-MN */
+			*pos++ = rawsms->number;
+			break;
+		case 19:/* TP-CT */
+			pos++; /* unused */
+			break;
+		case 21:/* TP-CD */
+		case 24:/* TP-UD */
+			if ((int) rawsms->user_data_length > *len - (int)(pos - buf))
+				return GN_ERR_FAILED;
+			memcpy(pos, rawsms->user_data, rawsms->user_data_length);
+			pos += rawsms->user_data_length;
+			break;
+		case 23:/* TP-UDHI */
+			if (rawsms->udh_indicator) first_octet |= 0x40;
+			break;
+		case 25:/* TP-RD */
+			if (rawsms->reject_duplicates) first_octet |= 0x04;
+			break;
+		case 27:/* TP-PI */
+			pos++; /* unused */
+			break;
+		}
+	}
+	*fpos = first_octet;
+	*len = pos - buf;
+
+	return GN_ERR_NONE;
+}
+
 /**
  * gn_sms_pdu2raw - Copy PDU data into gn_sms_raw structure
  * @rawsms: gn_sms_raw structure to be filled
