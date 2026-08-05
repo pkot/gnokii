@@ -2177,6 +2177,9 @@ static gn_error NK6510_GetSMSCenter(gn_data *data, struct gn_statemachine *state
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, NK6510_SUBSMS_GET_SMSC, 0x01, 0x00};
 
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
+		return GN_ERR_NOTSUPPORTED;
+
 	req[4] = data->message_center->id;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_SMS, 6);
 }
