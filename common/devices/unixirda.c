@@ -159,6 +159,11 @@ void irda_close(void *instance)
 	close(fd);
 }
 
+int irda_getfd(void *instance)
+{
+	return *(int *)instance;
+}
+
 size_t irda_write(void *instance, const __ptr_t bytes, size_t size)
 {
 	return send(*(int *)instance, bytes, size, 0);

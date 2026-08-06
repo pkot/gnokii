@@ -528,6 +528,11 @@ void bluetooth_close(void *instance)
 	close(*(int *)instance);
 }
 
+int bluetooth_getfd(void *instance)
+{
+	return *(int *)instance;
+}
+
 size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size)
 {
 	return write(*(int *)instance, bytes, size);

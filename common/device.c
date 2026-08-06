@@ -28,6 +28,7 @@ const static gn_device_ops _bluetooth_ops = {
 	bluetooth_select,
 	bluetooth_read,
 	bluetooth_write,
+	bluetooth_getfd,
 };
 #  define bluetooth_ops	&_bluetooth_ops
 #else
@@ -56,6 +57,7 @@ const static gn_device_ops _irda_ops = {
 	irda_select,
 	irda_read,
 	irda_write,
+	irda_getfd,
 };
 #  define irda_ops	&_irda_ops
 #else
@@ -69,6 +71,7 @@ const static gn_device_ops _serial_ops = {
 	serial_select,
 	serial_read,
 	serial_write,
+	serial_getfd,
 	serial_nreceived,
 	serial_flush,
 	serial_changespeed,
@@ -84,6 +87,7 @@ const static gn_device_ops _phonet_ops = {
 	socketphonet_select,
 	socketphonet_read,
 	socketphonet_write,
+	socketphonet_getfd,
 };
 #  define phonet_ops	&_phonet_ops
 #else
@@ -98,6 +102,7 @@ const static gn_device_ops _tcp_ops = {
 	tcp_select,
 	tcp_read,
 	tcp_write,
+	tcp_getfd,
 };
 #  define tcp_ops	&_tcp_ops
 #else
@@ -111,6 +116,7 @@ const static gn_device_ops _tekram_ops = {
 	tekram_select,
 	tekram_read,
 	tekram_write,
+	tekram_getfd,
 	NULL,
 	NULL,
 	tekram_changespeed,
@@ -120,7 +126,12 @@ const static gn_device_ops _tekram_ops = {
 
 GNOKII_API int device_getfd(struct gn_statemachine *state)
 {
-	return state->device.fd;
+	gn_device *device = &state->device;
+
+	if (device->ops->getfd && device->instance)
+		return device->ops->getfd(device->instance);
+
+	return -1;
 }
 
 int device_open(int with_odd_parity, int with_async,
@@ -175,12 +186,11 @@ int device_open(int with_odd_parity, int with_async,
 		return 0;
 
 	device->type = device_type;
-	device->fd = *(int *)(device->instance);
 
 	/*
 	 * handle config file connect_script:
 	 */
-	if (device_script(device->fd, 1, state)) {
+	if (device_script(device_getfd(state), 1, state)) {
 		dprintf("gnokii open device: connect_script failure\n");
 		device_close(state);
 		return 0;
@@ -201,14 +211,13 @@ void device_close(struct gn_statemachine *state)
 	/*
 	 * handle config file disconnect_script:
 	 */
-	if (device_script(device->fd, 0, state))
+	if (device_script(device_getfd(state), 0, state))
 		dprintf("gnokii device close: disconnect_script failure\n");
 
 	device->ops->close(device->instance);
 	free(device->instance);
 	device->instance = NULL;
 	device->type = GN_CT_NONE;
-	device->fd = -1;
 }
 
 void device_setdtrrts(int dtr, int rts, struct gn_statemachine *state)

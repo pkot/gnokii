@@ -87,6 +87,11 @@ void socketphonet_close(void *instance)
 	close(*(int *)instance);
 }
 
+int socketphonet_getfd(void *instance)
+{
+	return *(int *)instance;
+}
+
 
 size_t socketphonet_read(void *instance, __ptr_t buf, size_t nbytes)
 {

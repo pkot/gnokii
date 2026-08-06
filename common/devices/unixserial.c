@@ -224,6 +224,11 @@ void serial_close(void *instance)
 	close(THIS(fd));
 }
 
+int serial_getfd(void *instance)
+{
+	return THIS(fd);
+}
+
 /* Set the DTR and RTS bit of the serial device. */
 void serial_setdtrrts(void *instance, int dtr, int rts)
 {

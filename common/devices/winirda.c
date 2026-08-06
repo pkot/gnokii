@@ -146,6 +146,11 @@ void irda_close(void *instance)
 	WSACleanup();
 }
 
+int irda_getfd(void *instance)
+{
+	return (int)*(SOCKET *)instance;
+}
+
 size_t irda_write(void *instance, const __ptr_t bytes, size_t size)
 {
 	return send(*(SOCKET *)instance, bytes, size, 0);

@@ -197,6 +197,7 @@ typedef struct {
 	int (*select)(void *instance, struct timeval *timeout);
 	size_t (*read)(void *instance, __ptr_t buf, size_t nbytes);
 	size_t (*write)(void *instance, const __ptr_t buf, size_t n);
+	int (*getfd)(void *instance);
 	gn_error (*nreceived)(void *instance, int *n);
 	gn_error (*flush)(void *instance);
 	gn_error (*changespeed)(void *instance, int speed);
@@ -204,7 +205,6 @@ typedef struct {
 } gn_device_ops;
 
 typedef struct {
-	int fd;
 	gn_connection_type type;
 	const gn_device_ops *ops;
 	void *instance;
