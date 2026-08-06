@@ -99,14 +99,13 @@ void* irda_open(gn_config *cfg, int with_odd_parity, int with_async)
 	if ((fd = socket(AF_IRDA, SOCK_STREAM, 0)) < 0) {
 		perror("socket");
 		dprintf("Failed to create an irda socket.\n");
-		return NULL;
+		goto bail_wsa;
 	}
 	/* Discover devices */
 	daddr = irda_discover_device(cfg->irda_string, fd); /* discover the devices */
 	if (daddr == INVALID_DADDR) {
 		dprintf("Failed to discover any irda device.\n");
-		closesocket(fd);
-		return NULL;
+		goto bail_socket;
 	}
 	/* Prepare socket structure for irda socket */
 	peer.irdaAddressFamily = AF_IRDA;
@@ -116,8 +115,7 @@ void* irda_open(gn_config *cfg, int with_odd_parity, int with_async)
 		if (setsockopt(fd, SOL_IRLMP, IRLMP_9WIRE_MODE, (char *)&x, sizeof(x)) == SOCKET_ERROR) {
 			perror("setsockopt");
 			dprintf("Failed to set irda socket options.\n");
-			closesocket(fd);
-			return NULL;
+			goto bail_socket;
 		}
 	} else
 		snprintf(peer.irdaServiceName, sizeof(peer.irdaServiceName), "Nokia:PhoNet");
@@ -125,17 +123,20 @@ void* irda_open(gn_config *cfg, int with_odd_parity, int with_async)
 	if (connect(fd, (struct sockaddr *)&peer, sizeof(peer))) {	/* Connect to service "Nokia:PhoNet" */
 		perror("connect");
 		dprintf("Failed to connect to irda socket\n");
-		closesocket(fd);
-		return NULL;
+		goto bail_socket;
 	}
 	data = malloc(sizeof(SOCKET));
-	if (data == NULL) {
-		closesocket(fd);
-		return NULL;
-	}
+	if (data == NULL)
+		goto bail_socket;
 	*data = fd;
 
 	return data;
+
+bail_socket:
+	closesocket(fd);
+bail_wsa:
+	WSACleanup();
+	return NULL;
 }
 
 void irda_close(void *instance)
@@ -143,6 +144,11 @@ void irda_close(void *instance)
 	shutdown(*(SOCKET *)instance, 0);
 	closesocket(*(SOCKET *)instance);
 	WSACleanup();
+}
+
+int irda_getfd(void *instance)
+{
+	return (int)*(SOCKET *)instance;
 }
 
 size_t irda_write(void *instance, const __ptr_t bytes, size_t size)

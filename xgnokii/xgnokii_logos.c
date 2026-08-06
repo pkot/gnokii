@@ -977,7 +977,7 @@ void GetLogoEvent(GtkWidget * widget)
 
 	/* prepare data for event */
 	sscanf(netcou, "%s (%[^)])", network, country);
-	strncpy(bitmap.netcode, gn_network_code_find(network, country), sizeof(bitmap.netcode));
+	snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", gn_network_code_find(network, country));
 	data->bitmap = &bitmap;
 	e->event = Event_GetBitmap;
 	e->data = data;
@@ -1019,7 +1019,7 @@ void SetLogoEvent(GtkWidget * widget)
 
 	/* prepare data */
 	sscanf(netcou, "%s (%[^)])", network, country);
-	strncpy(bitmap.netcode, gn_network_code_find(network, country), sizeof(bitmap.netcode));
+	snprintf(bitmap.netcode, sizeof(bitmap.netcode), "%s", gn_network_code_find(network, country));
 
 	if (bitmap.type == GN_BMP_CallerLogo) {
 		/* above condition must be there, because if you launch logos before
@@ -1299,7 +1299,7 @@ void ExportLogoFileMain(gchar * name)
 
 	tbitmap = bitmap;
 
-	strncpy(tbitmap.netcode, gn_network_code_get(networkInfo.network_code), sizeof(tbitmap.netcode));
+	snprintf(tbitmap.netcode, sizeof(tbitmap.netcode), "%s", gn_network_code_get(networkInfo.network_code));
 
 	error = gn_file_bitmap_save(name, &tbitmap, &statemachine->driver.phone);
 	if (error != GN_ERR_NONE) {
@@ -1331,7 +1331,7 @@ static void ExportFileSelected(GtkWidget * w, GtkFileSelection * fs)
 			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesLogoFileExportDialog, (GtkSignalFunc) CancelDialog,
 					  GUI_LogosWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
-			g_snprintf(err, 255, _("File %s already exists.\nOverwrite?"),
+			g_snprintf(err, sizeof(err), _("File %s already exists.\nOverwrite?"),
 				   exportDialogData.fileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
 		}

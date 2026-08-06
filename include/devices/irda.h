@@ -17,8 +17,9 @@
 
 void* irda_open(gn_config *cfg, int with_odd_parity, int with_async);
 void irda_close(void *instance);
-size_t irda_write(void *instance, const __ptr_t bytes, size_t size);
-size_t irda_read(void *instance, __ptr_t bytes, size_t size);
 int irda_select(void *instance, struct timeval *timeout);
+size_t irda_read(void *instance, __ptr_t bytes, size_t size);
+size_t irda_write(void *instance, const __ptr_t bytes, size_t size);
+int irda_getfd(void *instance);
 
 #endif /* __gnokii_irda_h_ */

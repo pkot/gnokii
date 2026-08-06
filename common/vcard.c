@@ -339,7 +339,7 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	memset(&str, 0, sizeof(str));
 
 	while (1) {
-		if (!fgets(buf, 1024, f))
+		if (!fgets(buf, sizeof(buf), f))
 			return -1;
 		if (BEGINS("BEGIN:VCARD"))
 			break;
@@ -347,7 +347,7 @@ GNOKII_API int gn_vcard2phonebook(FILE *f, gn_phonebook_entry *entry)
 	str_append_printf(&str, buf);
 
 	retval = -1;
-	while (fgets(buf, 1024, f)) {
+	while (fgets(buf, sizeof(buf), f)) {
 		str_append_printf(&str, buf);
 		if (BEGINS("END:VCARD")) {
 			retval = gn_vcardstr2phonebook(str.str, entry);

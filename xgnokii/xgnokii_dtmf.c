@@ -73,14 +73,14 @@ static void OkLoadDialog(GtkWidget * w, GtkFileSelection * fs)
 	gtk_widget_hide(GTK_WIDGET(fs));
 
 	if ((f = fopen(fileName, "r")) == NULL) {
-		g_snprintf(buf, 80, _("Can't open file %s for reading!\n"), fileName);
+		g_snprintf(buf, sizeof(buf), _("Can't open file %s for reading!\n"), fileName);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		return;
 	}
 
 	if (fgets(line, MAX_DTMF_LENGTH + 1, f) == NULL) {
-		g_snprintf(buf, 80, _("Error reading file!"));
+		g_snprintf(buf, sizeof(buf), _("Error reading file!"));
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 	} else {
@@ -115,7 +115,7 @@ static void SaveDTMF()
 	gchar buf[80];
 
 	if ((f = fopen(saveFileName, "w")) == NULL) {
-		g_snprintf(buf, 80, _("Can't open file %s for writing!\n"), saveFileName);
+		g_snprintf(buf, sizeof(buf), _("Can't open file %s for writing!\n"), saveFileName);
 		gtk_label_set_text(GTK_LABEL(errorDialog.text), buf);
 		gtk_widget_show(errorDialog.dialog);
 		return;
@@ -147,7 +147,7 @@ static void OkSaveDialog(GtkWidget * w, GtkFileSelection * fs)
 		if (dialog.dialog == NULL) {
 			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesSaveDialog, (GtkSignalFunc) CancelDialog, GUI_DTMFWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
-			g_snprintf(err, 255, _("File %s already exists.\nOverwrite?"), saveFileName);
+			g_snprintf(err, sizeof(err), _("File %s already exists.\nOverwrite?"), saveFileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
 		}
 		gtk_widget_show(dialog.dialog);
@@ -269,7 +269,7 @@ void GUI_CreateDTMFWindow()
 
 	for (i = 0; i < 3; i++)
 		for (j = 0; j < 3; j++) {
-			g_snprintf(buf, 2, "%d", j * 3 + i + 1);
+			g_snprintf(buf, sizeof(buf), "%d", j * 3 + i + 1);
 			button = gtk_button_new_with_label(buf);
 			gtk_signal_connect(GTK_OBJECT(button), "clicked",
 					   GTK_SIGNAL_FUNC(ButtonCB), (gpointer) ((gint) * buf));

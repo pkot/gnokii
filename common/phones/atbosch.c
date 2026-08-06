@@ -72,11 +72,11 @@ static gn_error ReplyGetSMS(int type, unsigned char *buffer, int length,
 	/* Do we need one more digit? */
 	if (len / 10 < (len + 2) / 10)
 		memmove(lenpos + 1, lenpos, lenpos - (char*)buffer);
-	ofs = snprintf(tmp, 8, "%d", len + 2);
+	ofs = snprintf(tmp, sizeof(tmp), "%d", len + 2);
 	if (ofs < 1)
 		return GN_ERR_INTERNALERROR; /* something went very wrong */
 	memcpy(lenpos, tmp, ofs);
-	
+
 	/* Insert zero length SMSC field */
 	ofs = pos - (char*)buffer;
 	memmove(pos + 2, pos, length - ofs);

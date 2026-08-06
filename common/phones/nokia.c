@@ -479,10 +479,10 @@ gn_error pnok_security_incoming(int messagetype, unsigned char *message, int len
 
 		bin2hex(tmp, message + 9, 12);
 
-		strncpy(data->locks_info[0].data, tmp, 5);
-		strncpy(data->locks_info[1].data, tmp + 16, 4);
-		strncpy(data->locks_info[2].data, tmp + 20, 4);
-		strncpy(data->locks_info[3].data, tmp + 5, 10);
+		memcpy(data->locks_info[0].data, tmp, 5);
+		memcpy(data->locks_info[1].data, tmp + 16, 4);
+		memcpy(data->locks_info[2].data, tmp + 20, 4);
+		memcpy(data->locks_info[3].data, tmp + 5, 10);
 
 		data->locks_info[0].counter = message[21];
 		data->locks_info[1].counter = message[22];

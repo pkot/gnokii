@@ -400,7 +400,7 @@ gn_error writephonebook(int argc, char *argv[], gn_data *data, struct gn_statema
 					confirm = -1;
 					while (confirm < 0) {
 						fprintf(stdout, _("Overwrite? (yes/no) "));
-						gn_line_get(stdin, ans, 7);
+						gn_line_get(stdin, ans, sizeof(ans));
 						if (!strcmp(ans, _("yes")))
 							confirm = 1;
 						else if (!strcmp(ans, _("no")))
