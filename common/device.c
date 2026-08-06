@@ -111,6 +111,10 @@ const static gn_device_ops _tekram_ops = {
 	tekram_select,
 	tekram_read,
 	tekram_write,
+	NULL,
+	NULL,
+	tekram_changespeed,
+	tekram_setdtrrts,
 };
 #define tekram_ops	&_tekram_ops
 

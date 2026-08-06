@@ -26,12 +26,13 @@
 void* tekram_open(gn_config *cfg, int with_odd_parity, int with_async);
 void tekram_close(void *instance);
 
-void tekram_setdtrrts(void *instance, int dtr, int rts);
-void tekram_changespeed(void *instance, int speed);
-
+int tekram_select(void *instance, struct timeval *timeout);
 size_t tekram_read(void *instance, __ptr_t buf, size_t nbytes);
 size_t tekram_write(void *instance, const __ptr_t buf, size_t n);
 
-int tekram_select(void *instance, struct timeval *timeout);
+int tekram_getfd(void *instance);
+
+gn_error tekram_changespeed(void *instance, int speed);
+void tekram_setdtrrts(void *instance, int dtr, int rts);
 
 #endif  /* __devices_tekram_h */
