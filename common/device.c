@@ -193,6 +193,9 @@ void device_close(struct gn_statemachine *state)
 {
 	gn_device *device = &state->device;
 
+	if (!device->instance)
+		return;
+
 	dprintf("device: closing device\n");
 
 	/*
