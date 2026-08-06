@@ -305,6 +305,12 @@ size_t serial_write(void *instance, __ptr_t buf, size_t n)
 	return n;
 }
 
+int serial_getfd(void *instance)
+{
+	/* the device is a HANDLE, but this is close enough */
+	return (int)*(HANDLE *)instance;
+}
+
 gn_error serial_nreceived(void *instance, int *n)
 {
 	return GN_ERR_NONE;

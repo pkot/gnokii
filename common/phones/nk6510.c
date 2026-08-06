@@ -330,6 +330,8 @@ static gn_error NK6510_IncomingSecurity(int messagetype, unsigned char *message,
 
 static gn_error NK6510_IncomingPassthrough(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
 
+static gn_error NK6510_IncomingMsgStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state);
+
 static int sms_encode(gn_data *data, struct gn_statemachine *state, unsigned char *req);
 static int get_memory_type(gn_memory_type memory_type);
 static gn_memory_type get_gn_memory_type_sms(int memory_type);
@@ -359,6 +361,7 @@ static gn_incoming_function_type nk6510_incoming_functions[] = {
 	{ NK6510_MSG_SOUND,	NK6510_IncomingSound },
 	{ NK6510_MSG_RADIO,	NK6510_IncomingRadio },
 	{ NK6510_MSG_FILE,	NK6510_IncomingFile },
+	{ NK6510_MSG_MSGSTATUS,	NK6510_IncomingMsgStatus },
 	{ 0, NULL }
 };
 
@@ -1831,7 +1834,7 @@ static gn_error NK6510_SaveSMS(gn_data *data, struct gn_statemachine *state)
 			  "It may have to be sent to Nokia Service if something fails!\n"
 			  "Do you really want to continue? "));
 	fprintf(stdout, _("(yes/no) "));
-	gn_line_get(stdin, ans, 4);
+	gn_line_get(stdin, ans, sizeof(ans));
 	if (strcmp(ans, _("yes"))) return GN_ERR_USERCANCELED;
 
 	if (sm_message_send(len, NK6510_MSG_FOLDER, req, state)) return GN_ERR_NOTREADY;
@@ -1898,6 +1901,75 @@ err:
 			free(data->raw_sms);
 		if (freesms && data->sms)
 			free(data->sms);
+		break;
+	}
+	case 0x43: { /* Series 40 6th ed. (C2-00/RM-704): pushed incoming SMS-DELIVER */
+		/*
+		 * The message arrives in length-prefixed sub-blocks
+		 * (<type> <len16 BE> <data>): 0x82 carries the SMSC, 0x1c the message.
+		 * Past a 2-byte inner length the 0x1c block is a standard SMS-DELIVER
+		 * TPDU (first octet, TP-OA, PID, DCS, SCTS, UDL, UD). Reassemble the
+		 * [SMSC][TPDU] PDU, decode it with the shared decoder and hand the
+		 * result to the on_sms callback (used by --smsreader).
+		 */
+		unsigned char pdu[512], *smsc = NULL, *tpdu = NULL;
+		int smsclen = 0, tpdulen = 0, freerawsms = 0, freesms = 0;
+		unsigned int o;
+
+		if (!data->raw_sms) { freerawsms = 1; data->raw_sms = calloc(1, sizeof(gn_sms_raw)); }
+		if (!data->sms)     { freesms = 1;    data->sms = calloc(1, sizeof(gn_sms)); }
+		if (!data->raw_sms || !data->sms) { e = GN_ERR_INTERNALERROR; goto err43; }
+
+		o = 7;
+		while (o + 5 <= (unsigned) length) {
+			unsigned int blen = (message[o + 1] << 8) | message[o + 2];
+
+			if (blen < 6)
+				break;
+			if (o + blen > (unsigned) length)	/* tolerate a short final block */
+				blen = length - o;
+			if (message[o] == 0x82) {		/* SMSC (octet-length-prefixed) */
+				smsc = message + o + 5;
+				smsclen = smsc[0] + 1;
+			} else if (message[o] == 0x1c) {	/* the delivered message TPDU */
+				tpdu = message + o + 5;
+				tpdulen = blen - 5;
+			}
+			o += blen;
+		}
+
+		/* Trim the 0x1c block's trailing padding to the exact TPDU length. */
+		if (tpdu && tpdulen >= 13) {
+			unsigned int p = 3 + (tpdu[1] + 1) / 2;		/* index past TP-OA */
+
+			if ((int) (p + 10) <= tpdulen) {
+				unsigned int udl = tpdu[p + 9];
+				unsigned int ud = ((tpdu[p + 1] & 0x0c) == 0) ? (udl * 7 + 7) / 8 : udl;
+
+				if ((int) (p + 10 + ud) <= tpdulen)
+					tpdulen = p + 10 + ud;
+			}
+		}
+
+		if (!smsc || !tpdu || smsclen < 2 || tpdulen < 1 ||
+		    smsclen + tpdulen > (int) sizeof(pdu)) {
+			dprintf("Incoming SMS (0x43): SMSC/TPDU sub-blocks not found\n");
+			e = GN_ERR_FAILED;
+			goto err43;
+		}
+
+		memcpy(pdu, smsc, smsclen);
+		memcpy(pdu + smsclen, tpdu, tpdulen);
+
+		memset(data->raw_sms, 0, sizeof(gn_sms_raw));
+		e = gn_sms_pdu2raw(data->raw_sms, pdu, smsclen + tpdulen, GN_SMS_PDU_DEFAULT);
+		if (e == GN_ERR_NONE)
+			e = gn_sms_parse(data);
+		if ((e == GN_ERR_NONE) && DRVINSTANCE(state)->on_sms)
+			e = DRVINSTANCE(state)->on_sms(data->sms, state, DRVINSTANCE(state)->sms_callback_data);
+err43:
+		if (freerawsms && data->raw_sms) { free(data->raw_sms); data->raw_sms = NULL; }
+		if (freesms && data->sms)         { free(data->sms); data->sms = NULL; }
 		break;
 	}
 	case NK6510_SUBSMS_SMSC_RCV: /* 0x15 */
@@ -1975,6 +2047,11 @@ err:
 		break;
 
 	case NK6510_SUBSMS_SMS_SEND_STATUS: /* 0x03 */
+		if (length <= 10) {
+			dprintf("SMS sending failed (submit rejected, idx 0x%02x)\n", message[6]);
+			e = GN_ERR_FAILED;
+			break;
+		}
 		switch (message[8]) {
 		case NK6510_SUBSMS_SMS_SEND_OK: /* 0x00 */
 			dprintf("SMS sent (reference: %d)\n", message[10]);
@@ -2016,6 +2093,13 @@ err:
 			dprintf("Warning: no data->raw_sms allocated and got response for send_sms()\n");
 		e = GN_ERR_ASYNC;
 		break;
+
+	case 0x48: /* Series 40 exchange path: async send report */
+	case 0x4b: /* Series 40 exchange path: async message info */
+		dprintf("SMS async send notification (subtype 0x%02x), skipping\n", message[3]);
+		e = GN_ERR_UNSOLICITED;
+		break;
+
 	case NK6510_SUBSMS_SMS_RCVD: /* 0x10 */
 	case NK6510_SUBSMS_CELLBRD_OK: /* 0x21 */
 	case NK6510_SUBSMS_READ_CELLBRD: /* 0x23 */
@@ -2031,12 +2115,203 @@ err:
 	return e;
 }
 
+/*
+ * Decode per-message send-progress status frames (subtype 0x60). These are
+ * pushed unsolicited once the 0xaa channel is subscribed, so they cannot be
+ * waited on with sm_block; instead, when one reports 0x05 for the handle
+ * NK6510_SendSMS_File is watching (DRVINSTANCE->sms_send_handle), we set
+ * the sms_send_done flag it polls. These frames stay GN_ERR_UNSOLICITED.
+ */
+static gn_error NK6510_IncomingMsgStatus(int messagetype, unsigned char *message, int length, gn_data *data, struct gn_statemachine *state)
+{
+	char hex[3 * 64 + 1];
+	gn_error e = GN_ERR_UNSOLICITED;
+	int i, n = 0;
+
+	if (length < 4)
+		return GN_ERR_UNSOLICITED;
+
+	switch (message[3]) {
+	case 0x60: /* per-message send-progress status */
+		if (length >= 42) {
+			unsigned long handle = ((unsigned long) message[38] << 24) |
+					       (message[39] << 16) | (message[40] << 8) | message[41];
+			dprintf("MsgStatus: handle=%08lx slot=0x%02x state[5]=0x%02x state[18]=0x%02x (len %d)\n",
+				handle, message[37], message[5], message[18], length);
+			/* state[5]==0x05 ("stored/sent") on the handle we are watching
+			   means the message was submitted to the network. */
+			if (DRVINSTANCE(state)->sms_send_handle &&
+			    DRVINSTANCE(state)->sms_send_handle == handle && message[5] == 0x05) {
+				dprintf("MsgStatus: message %08lx sent to network\n", handle);
+				DRVINSTANCE(state)->sms_send_done = 1;
+			}
+		} else {
+			dprintf("MsgStatus: short 0x60 status frame (len %d)\n", length);
+		}
+		break;
+	case 0x18: /* send trigger (our own request, echoed) */
+		dprintf("MsgStatus: send trigger (0x18)\n");
+		break;
+	case 0x19: /* ack of the send trigger */
+		if (length >= 6 && (message[4] || message[5])) {
+			dprintf("MsgStatus: send trigger rejected (status 0x%02x%02x)\n", message[4], message[5]);
+			e = GN_ERR_FAILED;
+		} else {
+			dprintf("MsgStatus: send trigger accepted (0x19)\n");
+			e = GN_ERR_NONE;
+		}
+		break;
+	default:
+		dprintf("MsgStatus: subtype 0x%02x (len %d)\n", message[3], length);
+		break;
+	}
+
+	for (i = 0; i < length && i < 64; i++)
+		n += snprintf(hex + n, sizeof(hex) - n, "%02x ", message[i]);
+	dprintf("MsgStatus raw: %s\n", hex);
+
+	return e;
+}
+
 static gn_error NK6510_GetSMSCenter(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[] = {FBUS_FRAME_HEADER, NK6510_SUBSMS_GET_SMSC, 0x01, 0x00};
 
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
+		return GN_ERR_NOTSUPPORTED;
+
 	req[4] = data->message_center->id;
 	SEND_MESSAGE_BLOCK(NK6510_MSG_SMS, 6);
+}
+
+/*
+ * Series 40 6th edition messaging (e.g. C2-00/RM-704).
+ *
+ * These phones reject the native FBUS SMS submit (0x02). Instead PC Suite drops
+ * the SMS-SUBMIT TPDU into the message store's "exchange" pseudo-folder and then
+ * issues a "send" command, which makes the phone transmit it.
+ * Do the same here, write the TPDU to C:\predefmessages\exchange\<handle>
+ * with NK6510_PutFile, then trigger the send.
+ *
+ * NB the exchange write only *queues* the message in the Outbox; without the
+ * trigger it sits there until the phone reboots.
+ */
+
+/*
+ * Ask the phone to transmit pending/queued messages. This is the PC-Suite
+ * messaging "send" command (phonet message type 0xaa, sub-command 0x18). It is
+ * independent of how the message was queued, so it is shared by every send
+ * path. The phone acknowledges with sub-command 0x19.
+ */
+static gn_error NK6510_SendMessageTrigger(gn_data *data, struct gn_statemachine *state)
+{
+	static const unsigned char trigger[] = { 0x00, 0x01, 0x01, 0x18, 0x00, 0x00 };
+
+	if (sm_message_send(sizeof(trigger), NK6510_MSG_MSGSTATUS, (void *) trigger, state))
+		return GN_ERR_NOTREADY;
+	/* Wait for the 0x19 ack (NK6510_IncomingMsgStatus resolves it). */
+	return sm_block_no_retry_timeout(NK6510_MSG_MSGSTATUS, 10, data, state);
+}
+
+/*
+ * Subscribe to the messaging-status channel (0xaa) so the phone pushes the
+ * async 0x60 send-progress notifications - a bare session gets only the trigger
+ * ack and no status at all.
+ */
+static gn_error NK6510_SubscribeMsgStatus(struct gn_statemachine *state)
+{
+	unsigned char req[] = {FBUS_FRAME_HEADER, 0x10, 0x07,
+			       NK6510_MSG_COMMSTATUS, NK6510_MSG_SMS,
+			       NK6510_MSG_NETSTATUS, NK6510_MSG_FOLDER,
+			       NK6510_MSG_RESET, NK6510_MSG_BATTERY,
+			       NK6510_MSG_MSGSTATUS};
+
+	dprintf("Subscribing to the messaging-status channel (0xaa)\n");
+	if (sm_message_send(sizeof(req), NK6510_MSG_SUBSCRIBE, req, state))
+		return GN_ERR_NOTREADY;
+	return sm_block_ack(state);
+}
+
+/* Submit an SMS by writing its TPDU to the exchange folder, then triggering. */
+static gn_error NK6510_SendSMS_File(gn_data *data, struct gn_statemachine *state)
+{
+	gn_sms_raw *raw = data->raw_sms;
+	unsigned char tpdu[256];
+	char number[GN_SMS_NUMBER_MAX_LENGTH], handle[96];
+	gn_file file, *saved;
+	gn_error error;
+	int tpdu_len = sizeof(tpdu);
+	unsigned int i, ndigits, off = 0;
+	unsigned msgid = (unsigned) time(NULL);
+
+	if (!raw)
+		return GN_ERR_INTERNALERROR;
+
+	/* SMS-SUBMIT TPDU without SMSC - the phone supplies its own */
+	error = gn_sms_raw2pdu(tpdu, &tpdu_len, raw, GN_SMS_PDU_NOSMSC);
+	if (error != GN_ERR_NONE)
+		return error;
+
+	/* Destination number as plain digits optionally prefixed with
+	 * international '+' for the file handle */
+	if (raw->remote_number[1] == GN_GSM_NUMBER_International)
+		number[off++] = '+';
+	ndigits = raw->remote_number[0];
+	if (ndigits > sizeof(number) - off - 1)
+		ndigits = sizeof(number) - off - 1;
+	for (i = 0; i < ndigits; i++) {
+		unsigned char b = raw->remote_number[2 + i / 2];
+		number[off + i] = ((i & 1) ? (b >> 4) : (b & 0x0f)) + '0';
+	}
+	number[off + ndigits] = '\0';
+
+	snprintf(handle, sizeof(handle),
+		 "00000002%08x000021000700000001010000%02u%s",
+		 msgid, (unsigned) strlen(number), number);
+
+	memset(&file, 0, sizeof(file));
+	snprintf(file.name, sizeof(file.name),
+		 "C:\\predefmessages\\exchange\\%s", handle);
+	file.file = tpdu;
+	file.file_length = tpdu_len;
+
+	saved = data->file;
+	data->file = &file;
+	error = NK6510_PutFile(data, state);
+	data->file = saved;
+	if (error != GN_ERR_NONE) {
+		dprintf("SMS exchange write failed: %s\n", gn_error_print(error));
+		return error;
+	}
+	dprintf("SMS queued (handle msgid=%08x); sudscribing and triggering send\n", msgid);
+
+	/* Subscribe so the phone pushes the 0x60 send-progress status */
+	if (NK6510_SubscribeMsgStatus(state) != GN_ERR_NONE)
+		dprintf("SMS status subscription failed\n");
+
+	error = NK6510_SendMessageTrigger(data, state);
+	if (error != GN_ERR_NONE)
+		return error;
+
+	/*
+	 * The 0x60 status is pushed unsolicited, so it cannot be waited on
+	 * with sm_block (which needs a preceding request). Pump the link
+	 * instead and let NK6510_IncomingMsgStatus flag when our handle
+	 * reaches "sent" (0x05). Reaching 0x05 means submitted to the
+	 * network. If it does not arrive in time, report ASYNC (queued).
+	 */
+	DRVINSTANCE(state)->sms_send_handle = msgid;
+	DRVINSTANCE(state)->sms_send_done = 0;
+	for (i = 0; i < 150 && !DRVINSTANCE(state)->sms_send_done; i++)
+		gn_sm_loop(1, state);
+	DRVINSTANCE(state)->sms_send_handle = 0;
+
+	if (DRVINSTANCE(state)->sms_send_done) {
+		dprintf("SMS sent to network\n");
+		return GN_ERR_NONE;
+	}
+	dprintf("SMS queued but send not confirmed within timeout\n");
+	return GN_ERR_ASYNC;
 }
 
 /**
@@ -2049,13 +2324,15 @@ static gn_error NK6510_GetSMSCenter(gn_data *data, struct gn_statemachine *state
  * soon.
  * 10.07.2002: Almost all frames should be known know :-) (Markus)
  */
-
 static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 {
 	unsigned char req[256] = {FBUS_FRAME_HEADER, 0x02,
 				  0x00, 0x00, 0x00, 0x55, 0x55}; /* What's this? */
 	gn_error error;
 	unsigned int pos;
+
+	if (DRVINSTANCE(state)->pm->flags & PM_SMSFILE)
+		return NK6510_SendSMS_File(data, state);
 
 	memset(req + 9, 0, 244);
 	pos = sms_encode(data, state, req + 9);
@@ -2065,6 +2342,7 @@ static gn_error NK6510_SendSMS(gn_data *data, struct gn_statemachine *state)
 	do {
 		error = sm_block_no_retry_timeout(NK6510_MSG_SMS, state->config.smsc_timeout, data, state);
 	} while (!state->config.smsc_timeout && error == GN_ERR_TIMEOUT);
+
 	return error;
 }
 
@@ -4267,6 +4545,7 @@ static gn_error NK6510_DeleteCalTodo_S40_30(gn_data *data, struct gn_statemachin
 				0x00, 0x00, 0x00,
 				0x00, 0x00}; /*location */
 	gn_calnote_list list;
+	gn_error error = GN_ERR_NONE;
 	bool own_list = true;
 
 	if (type != 0x00 && type != 0x01 && type != 0x02)
@@ -4282,19 +4561,26 @@ static gn_error NK6510_DeleteCalTodo_S40_30(gn_data *data, struct gn_statemachin
 	}
 
 	if (data->calnote_list->number == 0)
-		NK6510_GetCalendarNotesInfo(data, state, type);
+		error = NK6510_GetCalendarNotesInfo(data, state, type);
 
-	if (data->calnote->location < data->calnote_list->number + 1 &&
-	    data->calnote->location > 0) {
-		req[8] = data->calnote_list->location[data->calnote->location - 1] >> 8;
-		req[9] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
-	} else {
-		return GN_ERR_INVALIDLOCATION;
+	if (error == GN_ERR_NONE) {
+		if (data->calnote->location < data->calnote_list->number + 1 &&
+		    data->calnote->location > 0) {
+			req[8] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+			req[9] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+		} else {
+			error = GN_ERR_INVALIDLOCATION;
+		}
 	}
 
 	if (own_list)
 		data->calnote_list = NULL;
+
 	map_del(&location_map, "calendar");
+
+	if (error != GN_ERR_NONE)
+		return error;
+
 	SEND_MESSAGE_BLOCK(NK6510_MSG_CALENDAR, 10);
 }
 
@@ -4305,7 +4591,7 @@ static gn_error NK6510_DeleteCalendarNote_S40_30(gn_data *data, struct gn_statem
 
 static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine *state)
 {
-	gn_error error;
+	gn_error error = GN_ERR_NONE;
 	unsigned char req[] = { FBUS_FRAME_HEADER,
 				0x0b,      /* delete calendar note */
 				0x00, 0x00}; /*location */
@@ -4323,18 +4609,23 @@ static gn_error NK6510_DeleteCalendarNote(gn_data *data, struct gn_statemachine 
 	}
 
 	if (data->calnote_list->number == 0)
-		NK6510_GetCalendarNotesInfo(data, state, 0x00);
+		error = NK6510_GetCalendarNotesInfo(data, state, 0x00);
 
-	if (data->calnote->location < data->calnote_list->number + 1 &&
-	    data->calnote->location > 0) {
-		req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
-		req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
-	} else {
-		return GN_ERR_INVALIDLOCATION;
+	if (error == GN_ERR_NONE) {
+		if (data->calnote->location < data->calnote_list->number + 1 &&
+		    data->calnote->location > 0) {
+			req[4] = data->calnote_list->location[data->calnote->location - 1] >> 8;
+			req[5] = data->calnote_list->location[data->calnote->location - 1] & 0xff;
+		} else {
+			error = GN_ERR_INVALIDLOCATION;
+		}
 	}
 
 	if (own_list)
 		data->calnote_list = NULL;
+
+	if (error != GN_ERR_NONE)
+		return error;
 
 	if (sm_message_send(8, NK6510_MSG_CALENDAR, req, state))
 		return GN_ERR_NOTREADY;
@@ -4489,6 +4780,31 @@ static gn_error NK6510_IncomingNetwork(int messagetype, unsigned char *message, 
 	case 0x26:
 		dprintf("Op Logo Set OK\n");
 		break;
+	case 0xb6:
+		/* Series 40 6th edition, RF level at message[4] */
+		dprintf("Network/cell info broadcast (RF level %d)\n", message[4]);
+		if (data->rf_level) {
+			*(data->rf_unit) = GN_RF_Percentage;
+			*(data->rf_level) = message[4];
+		}
+		break;
+	/*
+	 * Series 40 6th edition streams unsolicited network-state broadcasts on
+	 * this channel once it is subscribed (cell reselection/registration and
+	 * operator-name updates). gnokii does not consume them; skip them quietly
+	 * instead of logging each as an unhandled frame.
+	 */
+	case 0x35:
+	case 0x42:
+	case 0x49:
+	case 0xb4:
+	case 0xb7:
+	case 0xb8:
+	case 0xb9:
+	case 0xba:
+	case 0xe2:
+		dprintf("Network-state broadcast (subtype 0x%02x), skipping\n", message[3]);
+		return GN_ERR_UNSOLICITED;
 	default:
 		dprintf("%s: Unknown subtype 0x%02x\n", __FUNCTION__, message[3]);
 		return GN_ERR_UNHANDLEDFRAME;

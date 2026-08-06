@@ -93,6 +93,11 @@ void bluetooth_close(void *instance)
 	WSACleanup();
 }
 
+int bluetooth_getfd(void *instance)
+{
+	return (int)*(SOCKET *)instance;
+}
+
 size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size)
 {
 	return send(*(SOCKET *)instance, bytes, size, 0);

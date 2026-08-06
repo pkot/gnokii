@@ -185,6 +185,11 @@ void tcp_close(void *instance)
 	close(*(int *)instance);
 }
 
+int tcp_getfd(void *instance)
+{
+	return *(int *)instance;
+}
+
 extern int unix_select(int fd, struct timeval *timeout);
 
 int tcp_select(void *instance, struct timeval *timeout)

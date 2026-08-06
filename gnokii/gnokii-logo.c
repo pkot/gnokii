@@ -160,7 +160,7 @@ static gn_error SaveBitmapFileDialog(char *FileName, gn_bmp *bitmap, gn_phone *i
 		confirm = 0;
 		while (!confirm) {
 			fprintf(stderr, _("Saving logo. File \"%s\" exists. (O)verwrite, create (n)ew or (s)kip ? "), FileName);
-			gn_line_get(stdin, ans, 4);
+			gn_line_get(stdin, ans, sizeof(ans));
 			if (!strcmp(ans, _("O")) || !strcmp(ans, _("o"))) confirm = 1;
 			if (!strcmp(ans, _("N")) || !strcmp(ans, _("n"))) confirm = 2;
 			if (!strcmp(ans, _("S")) || !strcmp(ans, _("s"))) return GN_ERR_USERCANCELED;

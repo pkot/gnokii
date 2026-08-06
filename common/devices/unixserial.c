@@ -159,15 +159,13 @@ void* serial_open(gn_config *cfg, int with_odd_parity, int with_async)
 	ret = tcflush(data->fd, TCIFLUSH);
 	if (ret == -1) {
 		perror("Gnokii serial_opendevice: tcflush");
-		serial_close(data);
-		return NULL;
+		goto bail;
 	}
 
 	ret = tcsetattr(data->fd, TCSANOW, &tp);
 	if (ret == -1) {
 		perror("Gnokii serial_opendevice: tcsetattr");
-		serial_close(data);
-		return NULL;
+		goto bail;
 	}
 
 	if (serial_changespeed(data, cfg->serial_baudrate) != GN_ERR_NONE)
@@ -178,8 +176,7 @@ void* serial_open(gn_config *cfg, int with_odd_parity, int with_async)
 	ret = fcntl(data->fd, F_SETOWN, getpid());
 	if (ret == -1) {
 		perror("Gnokii serial_opendevice: fcntl(F_SETOWN)");
-		serial_close(data);
-		return NULL;
+		goto bail;
 	}
 #endif
 
@@ -202,14 +199,17 @@ void* serial_open(gn_config *cfg, int with_odd_parity, int with_async)
 #endif
 		if (ret == -1) {
 			perror("Gnokii serial_opendevice: fcntl(F_SETFL)");
-			serial_close(data);
-			return NULL;
+			goto bail;
 		}
 	}
 	data->write_usleep = cfg->serial_write_usleep;
 	data->require_dcd = cfg->require_dcd;
 
 	return data;
+bail:
+	serial_close(data);
+	free(data);
+	return NULL;
 }
 
 
@@ -222,6 +222,11 @@ void serial_close(void *instance)
 	THIS(ti).c_cflag |= HUPCL;	/* production == 1 */
 	tcsetattr(THIS(fd), TCSANOW, &THIS(ti));
 	close(THIS(fd));
+}
+
+int serial_getfd(void *instance)
+{
+	return THIS(fd);
 }
 
 /* Set the DTR and RTS bit of the serial device. */

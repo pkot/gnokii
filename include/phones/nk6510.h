@@ -46,6 +46,7 @@
 #define NK6510_MSG_TODO		0x55	/* ToDo */
 #define NK6510_MSG_FILE	        0x6d	/* File Handling */
 #define NK6510_MSG_STLOGO	0x7a	/* Startup logo */
+#define NK6510_MSG_MSGSTATUS	0xaa	/* Messaging server: send trigger + async status */
 
 /* SMS handling message subtypes (send) */
 #define NK6510_SUBSMS_SEND_SMS		0x01	/* Send SMS */
@@ -255,6 +256,10 @@ typedef struct {
 
 	/* phone model capabilities */
 	gn_phone_model *pm;
+
+	/* S40 exchange-path async send tracking */
+	unsigned sms_send_handle;
+	int sms_send_done;
 
 	/* callback local data */
 	void *cb_callback_data;		/* to be passed as callback_data to on_cell_broadcast */

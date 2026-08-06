@@ -480,8 +480,7 @@ void* fbusdku2usb_open(gn_config *cfg, int with_odd_parity, int with_async)
 	if (iface) {
 		if (usbfbus_connect_request(iface))
 			return iface;
-		else
-			free(iface);
+		usbfbus_free_interfaces(iface);
 	}
 
 	return NULL;

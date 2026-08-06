@@ -442,9 +442,9 @@ static gint Update(gpointer data)
 		(void) gmtime_r(&t, &stm);
 		strftime(timeBuf, 10, "%T", &stm);
 		if (outgoing)
-			g_snprintf(callBuf, 80, _("Outgoing call in progress:\nTime: %s"), timeBuf);
+			g_snprintf(callBuf, sizeof(callBuf), _("Outgoing call in progress:\nTime: %s"), timeBuf);
 		else
-			g_snprintf(callBuf, 80, _("Incoming call from: %s\nTime: %s"), name,
+			g_snprintf(callBuf, sizeof(callBuf), _("Incoming call from: %s\nTime: %s"), name,
 				   timeBuf);
 
 		gtk_label_set_text(GTK_LABEL(inCallDialog.label), callBuf);
@@ -589,7 +589,7 @@ static void RefreshUserStatus(void)
 		configDialogData.user.max -= 4;
 	if (GTK_ENTRY(configDialogData.user.fax)->text_length > 0)
 		configDialogData.user.max -= 4;
-	g_snprintf(buf, 8, "%d/%d", configDialogData.user.used, configDialogData.user.max);
+	g_snprintf(buf, sizeof(buf), "%d/%d", configDialogData.user.used, configDialogData.user.max);
 	gtk_label_set_text(GTK_LABEL(configDialogData.user.status), buf);
 }
 
@@ -1169,7 +1169,7 @@ static GtkWidget *CreateAboutDialog(void)
 	gtk_container_add(GTK_CONTAINER(GTK_DIALOG(dialog)->vbox), hbox);
 	gtk_widget_show(hbox);
 
-	g_snprintf(buf, 2000, _("xgnokii version: %s\ngnokii version: %s\n\n\
+	g_snprintf(buf, sizeof(buf), _("xgnokii version: %s\ngnokii version: %s\n\n\
 Copyright (C) 1999-2004 Pavel Janik ml.,\nHugh Blemings, Jan Derfinak,\n\
 Pawel Kot and others\n\
 xgnokii is free software, covered by the GNU General Public License,\n\
@@ -2072,7 +2072,7 @@ static GtkWidget *CreateOptionsDialog(void)
 		gtk_box_pack_start(GTK_BOX(vbox), hbox, TRUE, TRUE, 3);
 		gtk_widget_show(hbox);
 
-		g_snprintf(labelBuffer, 10, _("Group %d:"), i + 1);
+		g_snprintf(labelBuffer, sizeof(labelBuffer), _("Group %d:"), i + 1);
 		label = gtk_label_new(labelBuffer);
 		gtk_box_pack_start(GTK_BOX(hbox), label, FALSE, FALSE, 2);
 		gtk_widget_show(label);

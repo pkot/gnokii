@@ -419,7 +419,7 @@ static void OkExportDialog(GtkWidget * w, GtkFileSelection * fs)
 			CreateYesNoDialog(&dialog, (GtkSignalFunc) YesExportDialog, (GtkSignalFunc) CancelDialog,
 					  GUI_SpeedDialWindow);
 			gtk_window_set_title(GTK_WINDOW(dialog.dialog), _("Overwrite file?"));
-			g_snprintf(err, 255, _("File %s already exists.\nOverwrite?"),
+			g_snprintf(err, sizeof(err), _("File %s already exists.\nOverwrite?"),
 				   exportDialogData.fileName);
 			gtk_label_set_text(GTK_LABEL(dialog.text), err);
 		}

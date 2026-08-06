@@ -19,8 +19,9 @@
 
 void* bluetooth_open(gn_config *cfg, int with_odd_parity, int with_async);
 void bluetooth_close(void *instance);
-size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size);
-size_t bluetooth_read(void *instance, __ptr_t bytes, size_t size);
 int bluetooth_select(void *instance, struct timeval *timeout);
+size_t bluetooth_read(void *instance, __ptr_t bytes, size_t size);
+size_t bluetooth_write(void *instance, const __ptr_t bytes, size_t size);
+int bluetooth_getfd(void *instance);
 
 #endif /* _gnokii_bluetooth_h */

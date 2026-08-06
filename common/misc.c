@@ -320,7 +320,8 @@ static gn_phone_model models[] = {
 	{"RPM-1", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"C1-01", "RM-607",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
 	{"C1-02", "RM-643",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
-	{"C2-03", "RM-70",	PM_DEFAULT_S40_3RD },
+	{"C2-00", "RM-704",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition Lite */
+	{"C2-03", "RM-702",	PM_DEFAULT_S40_3RD },  /* Series 40 6th Edition feature pack 1 */
 	{"Card Phone 1.0", "RPE-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"Card Phone 2.0", "RPM-1",	PM_OLD_DEFAULT | PM_DATA },
 	{"C110 Wireless LAN Card", "DTN-10",	PM_OLD_DEFAULT },
@@ -473,12 +474,7 @@ GNOKII_API char *gn_device_lock(const char* port)
 		fprintf(stderr, _("Out of memory error while locking device.\n"));
 		return NULL;
 	}
-	/*
-	 * I think we don't need to use strncpy, as we should have enough
-	 * buffer due to strlen results, but it's safer to do so...
-	 */
-	strncpy(lock_file, lock_path, len);
-	strncat(lock_file, aux, len - strlen(lock_file));
+	snprintf(lock_file, len + 1, "%s%s", lock_path, aux);
 
 	/* Check for the stale lockfile.
 	 * The code taken from minicom by Miquel van Smoorenburg */

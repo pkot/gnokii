@@ -168,7 +168,7 @@ gn_error getfileid(char *filename, gn_data *data, struct gn_statemachine *state)
 	gn_error error;
 
 	memset(&fi, 0, sizeof(fi));
-	snprintf(fi.name, 512, "%s", filename);
+	snprintf(fi.name, sizeof(fi.name), "%s", filename);
 
 	gn_data_clear(data);
 	data->file = &fi;
@@ -188,7 +188,7 @@ gn_error deletefile(char *filename, gn_data *data, struct gn_statemachine *state
 	gn_error error;
 
 	memset(&fi, 0, sizeof(fi));
-	snprintf(fi.name, 512, "%s", filename);
+	snprintf(fi.name, sizeof(fi.name), "%s", filename);
 
 	gn_data_clear(data);
 	data->file = &fi;
@@ -238,9 +238,9 @@ gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 	if (argc < optind)
 		return getfile_usage(stderr, -1);
 
-	memset(filename2, 0, 512);
+	memset(filename2, 0, sizeof(filename2));
 	memset(&fi, 0, sizeof(fi));
-	snprintf(fi.name, 512, "%s", optarg);
+	snprintf(fi.name, sizeof(fi.name), "%s", optarg);
 
 	gn_data_clear(data);
 	data->file = &fi;
@@ -258,7 +258,7 @@ gn_error getfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 			else
 				snprintf(filename2, sizeof(filename2), "default.dat");
 			fprintf(stdout, _("Got file %s.  Save to [%s]: "), optarg, filename2);
-			gn_line_get(stdin, filename2, 512);
+			gn_line_get(stdin, filename2, sizeof(filename2));
 			if (filename2[0] == 0) {
 				if (strrchr(optarg, '/'))
 					snprintf(filename2, sizeof(filename2), "%s", strrchr(optarg, '/') + 1);
@@ -303,7 +303,7 @@ gn_error getfilebyid(int argc, char *argv[], gn_data *data, struct gn_statemachi
 	if (argc < optind)
 		return getfilebyid_usage(stderr, -1);
 
-	memset(filename2, 0, 512);
+	memset(filename2, 0, sizeof(filename2));
 	memset(&fi, 0, sizeof(fi));
 	set_fileid(&fi, optarg);
 
@@ -412,7 +412,7 @@ gn_error putfile(int argc, char *argv[], gn_data *data, struct gn_statemachine *
 		return putfile_usage(stderr, -1);
 
 	memset(&fi, 0, sizeof(fi));
-	snprintf(fi.name, 512, "%s", argv[optind]);
+	snprintf(fi.name, sizeof(fi.name), "%s", argv[optind]);
 
 	gn_data_clear(data);
 	data->file = &fi;

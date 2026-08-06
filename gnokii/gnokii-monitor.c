@@ -411,14 +411,6 @@ gn_error displayoutput(gn_data *data, struct gn_statemachine *state)
 		/* Loop here indefinitely - allows you to read texts from phone's
 		   display. The loops ends after pressing the Ctrl+C. */
 		while (!bshutdown) {
-			char buf[105];
-			memset(&buf[0], 0, 102);
-/*			while (read(0, buf, 100) > 0) {
-				fprintf(stderr, _("handling keys (%d).\n"), strlen(buf));
-				if (GSM && GSM->HandleString && GSM->HandleString(buf) != GN_ERR_NONE)
-					fprintf(stderr, _("Key press simulation failed.\n"));
-				memset(buf, 0, 102);
-			}*/
 			gn_sm_loop(1, state);
 			gn_sm_functions(GN_OP_PollDisplay, data, state);
 		}
